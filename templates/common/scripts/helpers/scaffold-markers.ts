@@ -103,18 +103,18 @@
  * - test-scaffold-delivery-parity.ts / unit tests — derivations + diff
  */
 
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { join, basename } from 'node:path';
-import { includeScriptInL3, parseScriptLayers } from './layer-filter.ts';
-import { PLATFORM_SKILL_BASES } from '../lib/platforms.ts';
+import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { join, basename } from "node:path";
+import { includeScriptInL3, parseScriptLayers } from "./layer-filter.ts";
+import { PLATFORM_SKILL_BASES } from "../lib/platforms.ts";
 
 // ============================================================================
 // 1. Scaffold marker constants (T-20260915-002 / C3)
 // ============================================================================
 
 /** COMMON-AGENTS Language Policy block — searched in templates/common/AGENTS.md. */
-export const COMMON_AGENTS_START = '<!-- COMMON-AGENTS:START -->';
-export const COMMON_AGENTS_END = '<!-- COMMON-AGENTS:END -->';
+export const COMMON_AGENTS_START = "<!-- COMMON-AGENTS:START -->";
+export const COMMON_AGENTS_END = "<!-- COMMON-AGENTS:END -->";
 
 /**
  * Base names of the VARIANT-* injection markers the L3 scaffold emits into the
@@ -124,12 +124,12 @@ export const COMMON_AGENTS_END = '<!-- COMMON-AGENTS:END -->';
  * fresh scaffold.
  */
 export const VARIANT_SCAFFOLD_MARKER_NAMES = [
-  'VARIANT-AGENTS',
-  'VARIANT-AGENT-DETAILS',
-  'VARIANT-DISPATCH-TRIGGERS',
-  'VARIANT-PHASE-GATE',
-  'VARIANT-SUBAGENT-ROSTER',
-  'VARIANT-ROLE-BOUNDARY',
+  "VARIANT-AGENTS",
+  "VARIANT-AGENT-DETAILS",
+  "VARIANT-DISPATCH-TRIGGERS",
+  "VARIANT-PHASE-GATE",
+  "VARIANT-SUBAGENT-ROSTER",
+  "VARIANT-ROLE-BOUNDARY",
 ] as const;
 
 // ============================================================================
@@ -153,19 +153,20 @@ export interface ScaffoldMarkerSource {
 export const SCAFFOLD_MARKER_SOURCES: readonly ScaffoldMarkerSource[] = [
   {
     marker: COMMON_AGENTS_START,
-    purpose: 'create-l3-scaffold extracts the COMMON-AGENTS Language Policy block from this file',
-    sources: ['templates/common/AGENTS.md'],
+    purpose: "create-l3-scaffold extracts the COMMON-AGENTS Language Policy block from this file",
+    sources: ["templates/common/AGENTS.md"],
   },
   {
     marker: COMMON_AGENTS_END,
-    purpose: 'create-l3-scaffold extracts the COMMON-AGENTS Language Policy block from this file',
-    sources: ['templates/common/AGENTS.md'],
+    purpose: "create-l3-scaffold extracts the COMMON-AGENTS Language Policy block from this file",
+    sources: ["templates/common/AGENTS.md"],
   },
   ...VARIANT_SCAFFOLD_MARKER_NAMES.map(
     (name): ScaffoldMarkerSource => ({
       marker: `<!-- ${name}-START -->`,
-      purpose: 'create-l3-scaffold emits this marker pair into the scaffolded AGENTS.md; the L1 baseline carries the same structure',
-      sources: ['templates/common/AGENTS.md'],
+      purpose:
+        "create-l3-scaffold emits this marker pair into the scaffolded AGENTS.md; the L1 baseline carries the same structure",
+      sources: ["templates/common/AGENTS.md"],
     }),
   ),
 ];
@@ -183,16 +184,16 @@ export const SCAFFOLD_MARKER_SOURCES: readonly ScaffoldMarkerSource[] = [
 // delivery paths and the validators cannot drift.
 
 /** Project-relative path of the generated manifest. */
-export const VERSION_MANIFEST_RELPATH = 'docs/VERSION_MANIFEST.md';
+export const VERSION_MANIFEST_RELPATH = "docs/VERSION_MANIFEST.md";
 
 /** Project-relative path of the generator the project itself ships. */
-export const VERSION_MANIFEST_GENERATOR_RELPATH = 'scripts/generate-version-manifest.ts';
+export const VERSION_MANIFEST_GENERATOR_RELPATH = "scripts/generate-version-manifest.ts";
 
 /** The decision new-project §7.8 / upgrade-project regeneration implement. */
 export type ManifestGenerationDecision =
-  | { action: 'generate' }
-  | { action: 'skip-missing-generator' }
-  | { action: 'skip-no-bun' };
+  | { action: "generate" }
+  | { action: "skip-missing-generator" }
+  | { action: "skip-no-bun" };
 
 /**
  * Pure invoke semantics for the post-delivery manifest generation. The
@@ -201,13 +202,10 @@ export type ManifestGenerationDecision =
  * the step is warn-and-continue, because the post-scaffold audit's
  * VERSION_MANIFEST gates catch a missing/stale manifest either way.
  */
-export function decideManifestGeneration(
-  generatorExists: boolean,
-  bunAvailable: boolean,
-): ManifestGenerationDecision {
-  if (!generatorExists) return { action: 'skip-missing-generator' };
-  if (!bunAvailable) return { action: 'skip-no-bun' };
-  return { action: 'generate' };
+export function decideManifestGeneration(generatorExists: boolean, bunAvailable: boolean): ManifestGenerationDecision {
+  if (!generatorExists) return { action: "skip-missing-generator" };
+  if (!bunAvailable) return { action: "skip-no-bun" };
+  return { action: "generate" };
 }
 
 // ============================================================================
@@ -223,7 +221,7 @@ export function decideManifestGeneration(
 export function canonicalPmStubBody(variantSlug: string): string {
   return (
     `This ${variantSlug} PM override inherits the common PM body and ` +
-    'supplies only variant-specific governance, roster, and dispatch deltas.'
+    "supplies only variant-specific governance, roster, and dispatch deltas."
   );
 }
 
@@ -235,7 +233,7 @@ export function canonicalPmStubBody(variantSlug: string): string {
  */
 export function isCanonicalPmStubBody(body: string, variantSlug: string): boolean {
   const trimmed = body.trim();
-  if (trimmed === '') return true;
+  if (trimmed === "") return true;
   return trimmed === canonicalPmStubBody(variantSlug);
 }
 
@@ -256,17 +254,35 @@ export function isCanonicalPmStubBody(body: string, variantSlug: string): boolea
  * must stay Phase-A-specific stubs — README/AGENTS/SECURITY).
  */
 export const L3_COMMON_OVERLAY_EXCLUDE: readonly string[] = [
-  '.agents', '.gateguard-state', '.DS_Store', 'node_modules', 'bun.lock', 'propagation-map.json',
-  'docs', 'agents', 'scripts', 'skills', 'memory', 'package.json',
-  'README.md', 'README_ko.md', 'AGENTS.md', 'SECURITY.md',
+  ".agents",
+  ".gateguard-state",
+  ".DS_Store",
+  "node_modules",
+  "bun.lock",
+  "propagation-map.json",
+  "docs",
+  "agents",
+  "scripts",
+  "skills",
+  "memory",
+  "package.json",
+  "README.md",
+  "README_ko.md",
+  "AGENTS.md",
+  "SECURITY.md",
 ];
 
 /** Entries new-project's copyDir skips at every level (plus .DS_Store by name). */
-export const NEW_PROJECT_COPY_SKIP_ENTRIES: readonly string[] = ['node_modules', '.gateguard-state'];
+export const NEW_PROJECT_COPY_SKIP_ENTRIES: readonly string[] = ["node_modules", ".gateguard-state"];
 
 /** Workspace-only files new-project removes after the common copy. */
 export const NEW_PROJECT_WORKSPACE_ONLY_FILES: readonly string[] = [
-  'package.json', 'scripts/package.json', 'package-lock.json', 'bun.lock', 'bun.lockb', 'variant.json',
+  "package.json",
+  "scripts/package.json",
+  "package-lock.json",
+  "bun.lock",
+  "bun.lockb",
+  "variant.json",
 ];
 
 /** L1-only agent files new-project removes (workspace governance machinery).
@@ -276,9 +292,7 @@ export const NEW_PROJECT_WORKSPACE_ONLY_FILES: readonly string[] = [
  *  templates) and `agents/pm.md.backup` (never present in templates/common)
  *  were dropped; only `agents/_COMMON.md` — the shared-sections include file
  *  that copies but must not ship — remains. */
-export const NEW_PROJECT_L1_ONLY_AGENTS: readonly string[] = [
-  'agents/_COMMON.md',
-];
+export const NEW_PROJECT_L1_ONLY_AGENTS: readonly string[] = ["agents/_COMMON.md"];
 
 /**
  * L1-only docs/ directories new-project removes — once after the common copy
@@ -286,21 +300,26 @@ export const NEW_PROJECT_L1_ONLY_AGENTS: readonly string[] = [
  * the variant may re-add them). Same list, two passes.
  */
 export const NEW_PROJECT_L1_ONLY_DIRS: readonly string[] = [
-  'docs/_templates', 'docs/_examples', 'docs/adr', 'docs/variants',
+  "docs/_templates",
+  "docs/_examples",
+  "docs/adr",
+  "docs/variants",
 ];
 
 /** Workspace-only files new-project's final cleanup removes. */
 export const NEW_PROJECT_CLEANUP_FILES: readonly string[] = [
-  'scripts/propagation-map.json', 'variant.json', 'agents/pm.md.backup',
-  'docs/variant.context.template.md',
+  "scripts/propagation-map.json",
+  "variant.json",
+  "agents/pm.md.backup",
+  "docs/variant.context.template.md",
   // Rendered into docs/project.md at scaffold time (§5.2), then the raw copy is
   // removed — same copy-then-remove lifecycle as docs/variant.context.template.md.
   // (spec 2026-09-24-scaffold-identity-overview-design)
-  'docs/project.template.md',
+  "docs/project.template.md",
 ];
 
 /** Legacy hardcoded L0-only skills new-project removes as a safety net. */
-export const NEW_PROJECT_LEGACY_L0_SKILLS: readonly string[] = ['simulate-project-creation'];
+export const NEW_PROJECT_LEGACY_L0_SKILLS: readonly string[] = ["simulate-project-creation"];
 
 /**
  * templates/common/ relpaths create-l3-scaffold delivers through dedicated
@@ -309,11 +328,18 @@ export const NEW_PROJECT_LEGACY_L0_SKILLS: readonly string[] = ['simulate-projec
  * these so set comparisons see them as delivered.
  */
 export const L3_DEDICATED_STEP_DELIVERIES: readonly string[] = [
-  'AGENTS.md', 'README.md', 'README_ko.md', 'SECURITY.md', 'package.json',
-  'agents/pm.md', 'memory/MEMORY.md', 'docs/lifecycle/agents/pm.md', 'docs/context.md',
+  "AGENTS.md",
+  "README.md",
+  "README_ko.md",
+  "SECURITY.md",
+  "package.json",
+  "agents/pm.md",
+  "memory/MEMORY.md",
+  "docs/lifecycle/agents/pm.md",
+  "docs/context.md",
   // Copied explicitly alongside docs/context.md (2026-09-21 review M-22): keeps the
   // project-side language validator out of its degraded ko-only locale mode.
-  'docs/workspace-schema.json',
+  "docs/workspace-schema.json",
 ];
 
 // ============================================================================
@@ -344,96 +370,109 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
   // dropped in the same commit as the L1 `git rm` of the file (a stale exact
   // rule fails Check 2 once no gap remains).
   {
-    path: 'docs/governance/agents/workflows.md',
-    reason: 'L1-authored hand-maintained rewrite (DEC-20261028-01, excluded from the agents-governance-docs propagation domain) — L3 drafts are variant seeds and do not carry it; new-project delivers it from templates/common/docs/governance/agents/',
+    path: "docs/governance/agents/workflows.md",
+    reason:
+      "L1-authored hand-maintained rewrite (DEC-20261028-01, excluded from the agents-governance-docs propagation domain) — L3 drafts are variant seeds and do not carry it; new-project delivers it from templates/common/docs/governance/agents/",
   },
   {
-    path: 'docs/governance/agents/execution-plan-templates.md',
-    reason: 'forked as L1-authored hand-maintained (2026-10-28-l0-only-governance-doc-cleanup, DEC-20261028-05) — project-applicable plan-format reference delivered at the same path; L3 drafts are variant seeds and do not carry it; new-project delivers it from templates/common/docs/governance/agents/',
+    path: "docs/governance/agents/execution-plan-templates.md",
+    reason:
+      "forked as L1-authored hand-maintained (2026-10-28-l0-only-governance-doc-cleanup, DEC-20261028-05) — project-applicable plan-format reference delivered at the same path; L3 drafts are variant seeds and do not carry it; new-project delivers it from templates/common/docs/governance/agents/",
   },
   {
-    path: '.agents/',
-    reason: 'L0-only platform skill mirror; re-synced by scripts/sync-skills.ts (COMMON_OVERLAY_EXCLUDE: synced by a separate mechanism)',
+    path: ".agents/",
+    reason:
+      "L0-only platform skill mirror; re-synced by scripts/sync-skills.ts (COMMON_OVERLAY_EXCLUDE: synced by a separate mechanism)",
   },
   {
-    path: 'agents/i18n-specialist.md',
-    reason: 'agents/ is stub-generated for L3 drafts (dedicated step); fleet agents reach real projects via the common copy at new-project instantiation',
+    path: "agents/i18n-specialist.md",
+    reason:
+      "agents/ is stub-generated for L3 drafts (dedicated step); fleet agents reach real projects via the common copy at new-project instantiation",
   },
   {
-    path: 'docs/README.template.md',
-    reason: 'consumed by the L3 README renderer (generate-variant.ts), not delivered as a file',
+    path: "docs/README.template.md",
+    reason: "consumed by the L3 README renderer (generate-variant.ts), not delivered as a file",
   },
   {
-    path: 'docs/README_ko.template.md',
-    reason: 'consumed by the L3 README renderer (generate-variant.ts), not delivered as a file',
+    path: "docs/README_ko.template.md",
+    reason: "consumed by the L3 README renderer (generate-variant.ts), not delivered as a file",
   },
   {
-    path: 'docs/country-profiles.md',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+    path: "docs/country-profiles.md",
+    reason: "top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)",
   },
   {
-    path: 'docs/components.template.md',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+    path: "docs/components.template.md",
+    reason: "top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)",
   },
   {
-    path: 'docs/design-foundation.md',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+    path: "docs/design-foundation.md",
+    reason: "top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)",
   },
   {
-    path: 'docs/design-tokens.template.css',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+    path: "docs/design-tokens.template.css",
+    reason: "top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)",
   },
   {
-    path: 'docs/phase-definitions.md',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+    path: "docs/phase-definitions.md",
+    reason: "top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)",
   },
   {
-    path: 'docs/procedure-schema-spec.md',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+    path: "docs/procedure-schema-spec.md",
+    reason: "top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)",
   },
   {
-    path: 'docs/screen-patterns.template.md',
-    reason: 'top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)',
+    path: "docs/screen-patterns.template.md",
+    reason: "top-level docs/ beyond _common excluded by COMMON_OVERLAY_EXCLUDE (H13 reviewed gap)",
   },
   {
-    path: 'docs/skill-graph.json',
-    reason: 'regenerated on first /sync (dev-sync step 4.65); a stale common copy would be overwritten at first generation',
+    path: "docs/skill-graph.json",
+    reason:
+      "regenerated on first /sync (dev-sync step 4.65); a stale common copy would be overwritten at first generation",
   },
   {
-    path: 'docs/skill-graph.overrides.json',
-    reason: 'companion of docs/skill-graph.json; regenerated/managed on first /sync',
+    path: "docs/skill-graph.overrides.json",
+    reason: "companion of docs/skill-graph.json; regenerated/managed on first /sync",
   },
   {
-    path: 'docs/lifecycle/skills/i18n-audit.md',
-    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+    path: "docs/lifecycle/skills/i18n-audit.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)",
   },
   {
-    path: 'docs/lifecycle/skills/decision-record.md',
-    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+    path: "docs/lifecycle/skills/decision-record.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)",
   },
   {
-    path: 'docs/lifecycle/skills/evidence-ledger.md',
-    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+    path: "docs/lifecycle/skills/evidence-ledger.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)",
   },
   {
-    path: 'docs/lifecycle/skills/handbook.md',
-    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+    path: "docs/lifecycle/skills/handbook.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)",
   },
   {
-    path: 'docs/lifecycle/skills/i18n-formatting.md',
-    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+    path: "docs/lifecycle/skills/i18n-formatting.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)",
   },
   {
-    path: 'docs/lifecycle/skills/i18n-layout.md',
-    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+    path: "docs/lifecycle/skills/i18n-layout.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)",
   },
   {
-    path: 'docs/lifecycle/skills/i18n-locale-config.md',
-    reason: 'L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)',
+    path: "docs/lifecycle/skills/i18n-locale-config.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the rest of docs/lifecycle/ is not copied (H13 reviewed gap)",
   },
   {
-    path: 'docs/specs/registry.json',
-    reason: 'the L3 draft seeds docs/specs/ via scripts/spec-register.ts at first spec activity, not from a copied tree',
+    path: "docs/specs/registry.json",
+    reason:
+      "the L3 draft seeds docs/specs/ via scripts/spec-register.ts at first spec activity, not from a copied tree",
   },
 ];
 
@@ -441,7 +480,7 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
 // 6. Delivery-tree derivation (T-20260915-003 / H13)
 // ============================================================================
 
-export type PlatformProfile = 'claude' | 'antigravity' | 'all' | 'codex' | 'hermes';
+export type PlatformProfile = "claude" | "antigravity" | "all" | "codex" | "hermes";
 
 /**
  * Relpaths (forward slashes) of files under templates/common/ that are NOT
@@ -454,8 +493,8 @@ export type PlatformProfile = 'claude' | 'antigravity' | 'all' | 'codex' | 'herm
  * derivation universe — spec 2026-09-24-scaffold-identity-overview-design).
  */
 export const POST_DELIVERY_ARTIFACTS: { exact: readonly string[]; prefixes: readonly string[] } = {
-  exact: ['bun.lock', 'bun.lockb', 'package-lock.json', 'docs/project.md'],
-  prefixes: ['node_modules/', '.git/', 'graft/'],
+  exact: ["bun.lock", "bun.lockb", "package-lock.json", "docs/project.md"],
+  prefixes: ["node_modules/", ".git/", "graft/"],
 };
 
 /** Walk all files under a directory as forward-slash relpaths from that directory. */
@@ -464,12 +503,12 @@ export function walkRelFiles(dir: string): string[] {
   if (!existsSync(dir)) return out;
   const visit = (abs: string, rel: string): void => {
     for (const entry of readdirSync(abs, { withFileTypes: true })) {
-      const childRel = rel === '' ? entry.name : `${rel}/${entry.name}`;
+      const childRel = rel === "" ? entry.name : `${rel}/${entry.name}`;
       if (entry.isDirectory()) visit(join(abs, entry.name), childRel);
       else out.push(childRel);
     }
   };
-  visit(dir, '');
+  visit(dir, "");
   return out;
 }
 
@@ -479,7 +518,7 @@ export function walkRelFiles(dir: string): string[] {
  * docs/_common content into docs/ the same way (Step 6). Identity otherwise.
  */
 export function flattenCommonRelPath(rel: string): string {
-  if (rel.startsWith('docs/_common/')) return `docs/${rel.slice('docs/_common/'.length)}`;
+  if (rel.startsWith("docs/_common/")) return `docs/${rel.slice("docs/_common/".length)}`;
   return rel;
 }
 
@@ -500,11 +539,11 @@ interface CountryScopedAssets {
  * whole asset dirs scoped to a country other than "none" are removed.
  */
 function pruneRegionNeutral(rels: Set<string>, workspaceRoot: string): void {
-  const schemaPath = join(workspaceRoot, 'docs', 'workspace-schema.json');
+  const schemaPath = join(workspaceRoot, "docs", "workspace-schema.json");
   if (!existsSync(schemaPath)) return;
   let scoped: CountryScopedAssets | undefined;
   try {
-    const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as { country_scoped_assets?: CountryScopedAssets };
+    const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as { country_scoped_assets?: CountryScopedAssets };
     scoped = schema?.country_scoped_assets;
   } catch {
     return; // unparseable schema — model nothing (the prune helper fails loud at runtime)
@@ -551,49 +590,48 @@ export function deriveNewProjectDelivery(
   commonDir: string,
   opts: { platform?: PlatformProfile; workspaceRoot?: string } = {},
 ): Set<string> {
-  const platform: PlatformProfile = opts.platform ?? 'all';
-  const workspaceRoot = opts.workspaceRoot ?? join(commonDir, '..', '..');
-  const l0OnlyScripts = new Set(
-    [...parseScriptLayers().entries()].filter(([, v]) => v === 'L0').map(([k]) => k),
-  );
+  const platform: PlatformProfile = opts.platform ?? "all";
+  const workspaceRoot = opts.workspaceRoot ?? join(commonDir, "..", "..");
+  const l0OnlyScripts = new Set([...parseScriptLayers().entries()].filter(([, v]) => v === "L0").map(([k]) => k));
   const l2PropagateFalseSkills = collectL2PropagateFalseSkills(commonDir);
   const out = new Set<string>();
 
   for (const rawRel of walkRelFiles(commonDir)) {
     const rel = flattenCommonRelPath(rawRel);
-    const top = rel.split('/')[0];
+    const top = rel.split("/")[0];
     if (NEW_PROJECT_COPY_SKIP_ENTRIES.includes(top)) continue;
-    if (basename(rel) === '.DS_Store') continue;
+    if (basename(rel) === ".DS_Store") continue;
     if (NEW_PROJECT_WORKSPACE_ONLY_FILES.includes(rel)) continue;
     if (NEW_PROJECT_L1_ONLY_AGENTS.includes(rel)) continue;
     if (isUnderAny(rel, NEW_PROJECT_L1_ONLY_DIRS)) continue;
     if (NEW_PROJECT_CLEANUP_FILES.includes(rel)) continue;
-    if (top === 'memory' && rel.endsWith('.md')) continue; // §memory clear
-    if (basename(rel) === '.gitkeep') continue;
-    if (platform !== 'codex' && platform !== 'all' && (rel === 'CODEX.md' || rel.startsWith('.codex/'))) continue;
-    if (platform !== 'hermes' && platform !== 'all' && rel.startsWith('.hermes/')) continue;
-    if (platform === 'claude' && rel === 'GEMINI.md') continue;
-    if (platform === 'antigravity' && rel === 'CLAUDE.md') continue;
-    if (platform === 'hermes' && (rel === 'CLAUDE.md' || rel === 'GEMINI.md')) continue;
+    if (top === "memory" && rel.endsWith(".md")) continue; // §memory clear
+    if (basename(rel) === ".gitkeep") continue;
+    if (platform !== "codex" && platform !== "all" && (rel === "CODEX.md" || rel.startsWith(".codex/"))) continue;
+    if (platform !== "hermes" && platform !== "all" && rel.startsWith(".hermes/")) continue;
+    if (platform === "claude" && rel === "GEMINI.md") continue;
+    if (platform === "antigravity" && rel === "CLAUDE.md") continue;
+    if (platform === "hermes" && (rel === "CLAUDE.md" || rel === "GEMINI.md")) continue;
     if (isL2PropagateFalseSkillRel(rel, l2PropagateFalseSkills)) continue;
     if (isLegacyL0SkillRel(rel)) continue;
     // §L0-only script removal: the script shells out to layer-filter
     // --scripts-l0-only, whose list keys are SCRIPTS.md registry names
     // (sub-path keys included) removed via join(scripts, name).
-    if (l0OnlyScripts.has(rel.slice('scripts/'.length)) && rel.startsWith('scripts/')) continue;
-    if (rel.startsWith('scripts/') && rel.endsWith('.ts') && hasL2PropagateFalseHeader(join(commonDir, rawRel))) continue;
+    if (l0OnlyScripts.has(rel.slice("scripts/".length)) && rel.startsWith("scripts/")) continue;
+    if (rel.startsWith("scripts/") && rel.endsWith(".ts") && hasL2PropagateFalseHeader(join(commonDir, rawRel)))
+      continue;
     out.add(rel);
   }
 
   // package.json: the workspace-only copy is removed (WORKSPACE_ONLY_FILES)
   // but §2.5c regenerates a root package.json at the SAME relpath — the file
   // exists in the final tree, so the delivery set models it as present.
-  if (existsSync(join(commonDir, 'package.json'))) out.add('package.json');
+  if (existsSync(join(commonDir, "package.json"))) out.add("package.json");
 
   // memory/MEMORY.md: the §memory clear removes every memory/*.md, then the
   // M-13 seed step writes the canonical empty index at that relpath — model
   // it as present (2026-09-21 review M-13, mirrors create-l3-scaffold).
-  out.add('memory/MEMORY.md');
+  out.add("memory/MEMORY.md");
 
   pruneRegionNeutral(out, workspaceRoot);
   return out;
@@ -608,16 +646,13 @@ export function deriveNewProjectDelivery(
  * deliveries that collide with common relpaths, and the region-neutral
  * country-scoped prune.
  */
-export function deriveL3ScaffoldDelivery(
-  commonDir: string,
-  opts: { workspaceRoot?: string } = {},
-): Set<string> {
-  const workspaceRoot = opts.workspaceRoot ?? join(commonDir, '..', '..');
+export function deriveL3ScaffoldDelivery(commonDir: string, opts: { workspaceRoot?: string } = {}): Set<string> {
+  const workspaceRoot = opts.workspaceRoot ?? join(commonDir, "..", "..");
   const out = new Set<string>();
 
   const addTree = (absDir: string, relPrefix: string): void => {
     for (const rel of walkRelFiles(absDir)) {
-      if (basename(rel) === '.DS_Store') continue;
+      if (basename(rel) === ".DS_Store") continue;
       out.add(`${relPrefix}/${rel}`);
     }
   };
@@ -625,16 +660,16 @@ export function deriveL3ScaffoldDelivery(
   // Overlay: top-level entries not excluded (mirrors copyCommonOverlay).
   for (const entry of readdirSync(commonDir, { withFileTypes: true })) {
     if (L3_COMMON_OVERLAY_EXCLUDE.includes(entry.name)) continue;
-    if (basename(entry.name) === '.DS_Store') continue;
+    if (basename(entry.name) === ".DS_Store") continue;
     if (entry.isDirectory()) addTree(join(commonDir, entry.name), entry.name);
     else out.add(entry.name);
   }
 
   // Step 4: full skills/ copy.
-  if (existsSync(join(commonDir, 'skills'))) addTree(join(commonDir, 'skills'), 'skills');
+  if (existsSync(join(commonDir, "skills"))) addTree(join(commonDir, "skills"), "skills");
 
   // Step 3 dedicated scripts/ loop: L3-filtered top-level entries.
-  const scriptsDir = join(commonDir, 'scripts');
+  const scriptsDir = join(commonDir, "scripts");
   if (existsSync(scriptsDir)) {
     for (const entry of readdirSync(scriptsDir, { withFileTypes: true })) {
       if (!includeScriptInL3(entry.name)) continue;
@@ -644,13 +679,13 @@ export function deriveL3ScaffoldDelivery(
   }
 
   // Step 6: docs/_common flatten + docs/context.md.
-  const commonDocs = join(commonDir, 'docs', '_common');
-  if (existsSync(commonDocs)) addTree(commonDocs, 'docs');
+  const commonDocs = join(commonDir, "docs", "_common");
+  if (existsSync(commonDocs)) addTree(commonDocs, "docs");
 
   // Step 6.5: docs/standards/ — governed doctrine shipped with every project
   // (create-l3-scaffold v1.18.0, spec 2026-10-04-llm-interaction-standard-design).
-  const standardsDir = join(commonDir, 'docs', 'standards');
-  if (existsSync(standardsDir)) addTree(standardsDir, 'docs/standards');
+  const standardsDir = join(commonDir, "docs", "standards");
+  if (existsSync(standardsDir)) addTree(standardsDir, "docs/standards");
 
   // Dedicated-step deliveries (stubs / governance record) that collide with
   // common relpaths.
@@ -686,7 +721,7 @@ export function matchReviewedExclusion(
   rules: readonly ReviewedDeliveryExclusion[] = REVIEWED_DELIVERY_EXCLUSIONS,
 ): ReviewedDeliveryExclusion | null {
   for (const rule of rules) {
-    if (rule.path.endsWith('/')) {
+    if (rule.path.endsWith("/")) {
       if (rel.startsWith(rule.path)) return rule;
     } else if (rule.path === rel) {
       return rule;
@@ -713,11 +748,9 @@ export function reviewedExclusionCoverage(
   const staleExact: string[] = [];
   const stalePrefix: string[] = [];
   for (const rule of rules) {
-    const hits = [...gapSet].filter((rel) =>
-      rule.path.endsWith('/') ? rel.startsWith(rule.path) : rel === rule.path,
-    );
+    const hits = [...gapSet].filter((rel) => (rule.path.endsWith("/") ? rel.startsWith(rule.path) : rel === rule.path));
     if (hits.length === 0) {
-      if (rule.path.endsWith('/')) stalePrefix.push(rule.path);
+      if (rule.path.endsWith("/")) stalePrefix.push(rule.path);
       else staleExact.push(rule.path);
     }
   }
@@ -744,7 +777,7 @@ export interface ActualTreeVerdict {
  * drift from the scripts' actual behavior.
  */
 export function verifyActualTreeMatchesDerivation(opts: {
-  which: 'new-project' | 'l3-scaffold';
+  which: "new-project" | "l3-scaffold";
   actualRoot: string;
   commonDir: string;
   platform?: PlatformProfile;
@@ -756,7 +789,7 @@ export function verifyActualTreeMatchesDerivation(opts: {
     universe,
   );
   const derived =
-    opts.which === 'new-project'
+    opts.which === "new-project"
       ? deriveNewProjectDelivery(opts.commonDir, { platform: opts.platform, workspaceRoot: opts.workspaceRoot })
       : deriveL3ScaffoldDelivery(opts.commonDir, { workspaceRoot: opts.workspaceRoot });
   const missing = sorted(new Set([...derived].filter((rel) => !actual.has(rel))));
@@ -777,11 +810,11 @@ export function verifyActualTreeMatchesDerivation(opts: {
 
 /** Directory-name prefixes owned by templates/-staging E2E fixtures. */
 export const TRANSIENT_TEST_FIXTURE_PREFIXES: readonly string[] = [
-  'test-l3promo-', // l3-to-variant-promotion E2E: scaffold variant + agentsmd stage
-  'co-e2eguard-', // l3-to-variant-promotion E2E: overlay-guard variant.json-only slots
-  'co-e2p2b-', // l3-to-variant-promotion E2E: p2v guard fixture (beta)
-  'co-e2p2s-', // l3-to-variant-promotion E2E: p2v guard fixture (stable)
-  'co-e2p2c-', // l3-to-variant-promotion E2E: p2v guard fixture (corrupt)
+  "test-l3promo-", // l3-to-variant-promotion E2E: scaffold variant + agentsmd stage
+  "co-e2eguard-", // l3-to-variant-promotion E2E: overlay-guard variant.json-only slots
+  "co-e2p2b-", // l3-to-variant-promotion E2E: p2v guard fixture (beta)
+  "co-e2p2s-", // l3-to-variant-promotion E2E: p2v guard fixture (stable)
+  "co-e2p2c-", // l3-to-variant-promotion E2E: p2v guard fixture (corrupt)
 ];
 
 /**
@@ -813,10 +846,10 @@ function collectL2PropagateFalseSkills(commonDir: string): Map<string, Set<strin
     if (existsSync(baseDir)) {
       for (const entry of readdirSync(baseDir, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue;
-        const skillMd = join(baseDir, entry.name, 'SKILL.md');
+        const skillMd = join(baseDir, entry.name, "SKILL.md");
         if (!existsSync(skillMd)) continue;
         try {
-          if (/^l2_propagate:\s*false\b/m.test(readFileSync(skillMd, 'utf-8'))) names.add(entry.name);
+          if (/^l2_propagate:\s*false\b/m.test(readFileSync(skillMd, "utf-8"))) names.add(entry.name);
         } catch {
           /* unreadable — treat as not-flagged (the runtime safety net would still sweep it) */
         }
@@ -827,15 +860,12 @@ function collectL2PropagateFalseSkills(commonDir: string): Map<string, Set<strin
   return result;
 }
 
-function isL2PropagateFalseSkillRel(
-  rel: string,
-  flagged: Map<string, Set<string>>,
-): boolean {
+function isL2PropagateFalseSkillRel(rel: string, flagged: Map<string, Set<string>>): boolean {
   for (const [base, names] of flagged) {
     if (names.size === 0) continue;
     if (rel.startsWith(`${base}/`)) {
       const rest = rel.slice(base.length + 1);
-      const skillName = rest.split('/')[0];
+      const skillName = rest.split("/")[0];
       if (names.has(skillName)) return true;
     }
   }
@@ -846,7 +876,7 @@ function isLegacyL0SkillRel(rel: string): boolean {
   const bases = PLATFORM_SKILL_BASES;
   for (const base of bases) {
     if (rel.startsWith(`${base}/`)) {
-      const skillName = rel.slice(base.length + 1).split('/')[0];
+      const skillName = rel.slice(base.length + 1).split("/")[0];
       if (NEW_PROJECT_LEGACY_L0_SKILLS.includes(skillName)) return true;
     }
   }
@@ -856,7 +886,7 @@ function isLegacyL0SkillRel(rel: string): boolean {
 /** The @l2-propagate:false script header new-project's safety net sweeps. */
 function hasL2PropagateFalseHeader(absPath: string): boolean {
   try {
-    return /^\/\/ @l2-propagate:\s*false\b/m.test(readFileSync(absPath, 'utf-8'));
+    return /^\/\/ @l2-propagate:\s*false\b/m.test(readFileSync(absPath, "utf-8"));
   } catch {
     return false;
   }

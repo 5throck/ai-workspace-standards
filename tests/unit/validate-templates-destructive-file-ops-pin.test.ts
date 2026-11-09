@@ -90,8 +90,8 @@ describe('validate-templates-destructive-file-ops-pin (design 2026-11-04-project
   test('validate-templates.ts declares the WARN arm agents-md-destructive-file-ops-pin', () => {
     const content = readFileSync(join(ROOT, 'scripts', 'validate-templates.ts'), 'utf-8');
     expect(content).toContain('checkAgentsMdDestructiveFileOpsPin');
-    expect(content).toContain("'agents-md-destructive-file-ops-pin'");
-    expect(content).toContain(`'${MARKER}'`);
+    expect(content).toContain('"agents-md-destructive-file-ops-pin"');
+    expect(content).toContain(`"${MARKER}"`);
     // the arm warns (never fails) — severity is WARN per design
     const fn = content.match(/function checkAgentsMdDestructiveFileOpsPin\(\): void \{([\s\S]*?)\n\}\n/);
     expect(fn).toBeTruthy();

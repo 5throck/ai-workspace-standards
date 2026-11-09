@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+- **[2026-11-10]**: feat(scripts): **delivered-scripts strict biome/tsconfig profile — Option A compliance sweep (U-20261108-001; design `docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md`, DEC-20261109-01 ruling 2).**
+  - **Defect fix 1** (`scripts/audit.ts` v2.65.0): the nul-redirect lint's same-line `// nul-lint-ignore` invariant is deleted, not hardened — a constructed `NUL_REDIRECT_DISPLAY` (`[">", "nul"].join(" ")`) removes any matchable literal from source, so formatter reflow can no longer silently break the self-ignore; unit proof in `tests/unit/nul-lint-invariant.test.ts`.
+  - **Defect fix 2** (`scripts/generate-version-manifest.ts` v1.12.0): `extractScriptDependencies` rewritten quote-agnostic and shape-complete (namespace/default/named imports; `node:` protocol → builtin name mapping; bare builtins not external) so the import-protocol sweep cannot drift VERSION_MANIFEST into "N/A".
+  - **Profile adoption**: `biome.json` (Biome 2.6.6 — double quotes, 2-space, lineWidth 120; `useNodejsImportProtocol`/`noAssignInExpressions`/`noImplicitAnyLet` at error; hygiene overrides) + `lint:scripts`/`format:scripts` package scripts; `tsc --strict` now clean over `templates/common/scripts/**` (183 files) incl. the handbook subtree.
+  - **Sweep**: ~440 scripts reformatted/rewritten (token-level semantic audit: format-class changes only); ~14 `while ((m = re.exec(...)))` loops rewritten to the typed-let precedent; delivered mirrors regenerated (183 registry rows unchanged, 277/277 verify).
+  - **Gate arm**: audit.ts gains the Biome profile gate with the `[SKIP]`-convention degrade (planted-violation FAIL verified live).
+  - **Sweep-fallout repair**: `validate-surface-registry.ts` v1.1.2 — double-quote conversion broke its single-quote-only config parser; quote-agnostic + bare-key parse fix.
 - **[2026-11-09]**: feat(repo-integrity): **corruption mode-1 detector — rogue-commit scan, worktree config snapshot, and fixture git identity probes (T-20261109-002; design `docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md`, DEC-20261109-01).**
   - **Rogue-commit detector** (`scripts/lib/repo-integrity.ts` v1.1.0): fixture identity email blocklist (seed `test@example.com`, author + committer, case-insensitive) matched by one `git log base..HEAD` spawn under a clean env; base resolves upstream → `origin/main` → fail-closed refusal. Wired as Arm 2 of the dev-sync step 4.88 spawned-child integrity gate and as a pre-push scan over the exact pushed range, before gitleaks. Any hit is FATAL with manual-repair remedy; no env skip path.
   - **Worktree config snapshot**: `snapshotRepoConfig` gains a probe-gated (`extensions.worktreeConfig`) worktree-scope section diffed as `wt:` rows, closing the per-worktree `config.worktree` blind spot of the mode-2 guard.
@@ -1950,8 +1957,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-11-09*
-*Last Updated: 2026-11-09*
+*Last Updated: 2026-11-10*
+*Last Updated: 2026-11-10*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency

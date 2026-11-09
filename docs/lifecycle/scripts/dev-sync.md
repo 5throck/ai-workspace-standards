@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.46.0
+- **Version**: 1.46.1
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-09
+- **Last Updated**: 2026-11-10
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-10 | production | production | v1.46.1 (design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md §4.3, U-20261108-001 / DEC-20261109-01): strict-profile compliance sweep — formatting reflow (double quotes, 2-space, lineWidth 120) and the enumerated while-((match=re.exec())) loop rewrites (noAssignInExpressions/noImplicitAnyLet). Behavior unchanged — version-only bump for the format-class sweep; no step numbers added or reordered. | automation-engineer |
 | 2026-11-09 | production | production | v1.46.0 (spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3.3-§3.4, T-20261109-002): step 4.88 becomes the spawned-child integrity gate — Arm 1 (config snapshot/compare, semantics unchanged) also diffs the per-worktree scope (`wt: ` rows); Arm 2 (new, corruption MODE 1) scans one `git log <base>..HEAD` spawn for fixture-identity commits (author AND committer, case-insensitive): base resolves upstream → origin/main → fail-closed refusal, any hit is FATAL with SHA + identity + subject + manual-repair guidance, no env skip path. Primitives: lib/repo-integrity.ts v1.1.0; placement + no-skip-path pinned by tests/unit/repo-integrity.test.ts v1.2.0. | automation-engineer |
 | 2026-11-09 | production | production | v1.45.0 (spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §11): repository-config integrity guard — the SECOND corruption mode of the 2026-11-09 incident. (a) Start-of-run invariant immediately after the CWD guard: `assertWorkTreeHealthy()` returns one line naming the repair (`git config --local core.bare false`) instead of letting git's "fatal: this operation must be run in a work tree" surface several steps later; FATAL. (b) New BLOCKING step 4.88 between the last test-executing step (4.85) and the 4.9 audit gate: the local git config is snapshotted at run start and re-read here — ANY delta is FATAL and lists added/removed/changed keys, because a spawned test mutated the REPOSITORY config and worktrees share the main `.git/config`, making the damage repo-wide. No key excluded (verified 2026-11-09 that no sanctioned script writes this repository's local config during a run). Primitives: lib/repo-integrity.ts v1.0.0; placement pinned by tests/unit/repo-integrity.test.ts. | automation-engineer |
 | 2026-11-09 | production | production | v1.44.2 (2026-11-09, P0 correctness fix): the two test spawns now run under `.env(gitCleanEnvForShell())` — a full process.env copy minus the GIT_REDIRECT_ENV_KEYS — not the deleted `gitEnvUnset()`. Bun Shell's `.env(obj)` REPLACES the child environment (verified on Bun 1.4.4), so the v1.44.1 unset map ran step 4.85's `bun run test:unit` with no PATH: 26 of 268 unit files failed with `Executable not found in $PATH: "git"`. Mechanism + proof recorded in scripts/lib/git-env.ts v1.2.0. | pm |

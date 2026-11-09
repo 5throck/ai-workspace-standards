@@ -13,11 +13,7 @@
  *   3. Deliverable template mention (INFO) — deliverable template documentation
  */
 
-import type {
-  VariantPlugin,
-  ValidationContext,
-  ValidationIssue,
-} from './variant-plugin.ts';
+import type { VariantPlugin, ValidationContext, ValidationIssue } from "./variant-plugin.ts";
 
 /**
  * Plugin for the 'consulting' variant type.
@@ -40,7 +36,7 @@ import type {
  */
 export class ConsultingPlugin implements VariantPlugin {
   /** The variant type this plugin handles. */
-  readonly type = 'consulting' as const;
+  readonly type = "consulting" as const;
 
   /**
    * Validates a consulting variant against consulting-specific requirements.
@@ -66,20 +62,13 @@ export class ConsultingPlugin implements VariantPlugin {
     // Verify that agents collectively cover client-engagement, analysis,
     // reporting, and presentation.
     // These are hard functional requirements — consulting variants cannot function without them.
-    const agentCapabilities = new Set(
-      ctx.agentFrontmatters.flatMap((a) => a.capabilities),
-    );
-    const expectedCapabilities = [
-      'client-engagement',
-      'analysis',
-      'reporting',
-      'presentation',
-    ];
+    const agentCapabilities = new Set(ctx.agentFrontmatters.flatMap((a) => a.capabilities));
+    const expectedCapabilities = ["client-engagement", "analysis", "reporting", "presentation"];
     for (const cap of expectedCapabilities) {
       if (!agentCapabilities.has(cap)) {
         issues.push({
-          severity: 'error',
-          category: 'capability-coverage',
+          severity: "error",
+          category: "capability-coverage",
           message: `Missing consulting capability: ${cap}`,
           capability: cap,
         });
@@ -95,28 +84,22 @@ export class ConsultingPlugin implements VariantPlugin {
       engagement_methodology?: unknown;
       deliverable_template?: unknown;
     };
-    if (
-      !variantJson.engagement_methodology
-    ) {
+    if (!variantJson.engagement_methodology) {
       issues.push({
-        severity: 'warning',
-        category: 'engagement-methodology',
-        message:
-          'Consulting variant should declare engagement_methodology in variant.json',
+        severity: "warning",
+        category: "engagement-methodology",
+        message: "Consulting variant should declare engagement_methodology in variant.json",
       });
     }
 
     // --- Check 3: Deliverable template field ---
     // Standard deliverable template documentation for consulting contexts.
     // This is informational; not all consulting contexts require explicit deliverable template docs.
-    if (
-      !variantJson.deliverable_template
-    ) {
+    if (!variantJson.deliverable_template) {
       issues.push({
-        severity: 'info',
-        category: 'deliverable-template',
-        message:
-          'Consider documenting deliverable_template in variant.json',
+        severity: "info",
+        category: "deliverable-template",
+        message: "Consider documenting deliverable_template in variant.json",
       });
     }
 

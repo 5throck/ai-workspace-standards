@@ -13,11 +13,11 @@
  *   4. Report file_size_exceeded as WARNING
  */
 
-import { join, basename } from 'path';
-import { existsSync, readFileSync } from 'fs';
-import * as yaml from 'js-yaml';
-import { safeValidateExtends, type ExtendsValidationResult } from '../helpers/extends-validator.ts';
-import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from './types.ts';
+import { join, basename } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import * as yaml from "js-yaml";
+import { safeValidateExtends, type ExtendsValidationResult } from "../helpers/extends-validator.ts";
+import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from "./types.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -43,26 +43,26 @@ function parseFrontmatter(content: string): Record<string, any> {
  * README.md and tiny pm.md files are not meaningful for extends validation.
  */
 function shouldSkipFile(filename: string, content: string): boolean {
-  if (filename === 'README.md') return true;
-  if (filename === 'pm.md' && content.length < 200) return true;
+  if (filename === "README.md") return true;
+  if (filename === "pm.md" && content.length < 200) return true;
   return false;
 }
 
 /**
  * Map an extends-validator error_type to our ValidationIssue severity.
  */
-function errorTypeToSeverity(errorType: string): ValidationIssue['severity'] {
+function errorTypeToSeverity(errorType: string): ValidationIssue["severity"] {
   switch (errorType) {
-    case 'file_size_exceeded':
-      return 'warning';
-    case 'circular_reference':
-    case 'depth_exceeded':
-    case 'file_not_found':
-    case 'security_violation':
-    case 'parse_timeout':
-      return 'error';
+    case "file_size_exceeded":
+      return "warning";
+    case "circular_reference":
+    case "depth_exceeded":
+    case "file_not_found":
+    case "security_violation":
+    case "parse_timeout":
+      return "error";
     default:
-      return 'error';
+      return "error";
   }
 }
 
@@ -75,22 +75,22 @@ function errorTypeToSeverity(errorType: string): ValidationIssue['severity'] {
  * Wraps the existing safeValidateExtends() and reports issues in standard format.
  */
 export const extendsValidatorWrapper: ValidatorDefinition = {
-  name: 'extends',
-  description: 'Validates extends chains in agent files for circular references and depth limits',
-  prerequisites: ['variant-json'],
+  name: "extends",
+  description: "Validates extends chains in agent files for circular references and depth limits",
+  prerequisites: ["variant-json"],
 
   validate(ctx: ValidatorContext): ValidatorResult {
     const start = performance.now();
     const issues: ValidationIssue[] = [];
     let checks = 0;
 
-    const agentsDir = join(ctx.variantDir, 'agents');
+    const agentsDir = join(ctx.variantDir, "agents");
 
     for (const agentFile of ctx.agentFiles) {
       const agentPath = join(agentsDir, agentFile);
 
       // Read and check skippability
-      const content = existsSync(agentPath) ? readFileSync(agentPath, 'utf-8') : '';
+      const content = existsSync(agentPath) ? readFileSync(agentPath, "utf-8") : "";
       if (shouldSkipFile(agentFile, content)) continue;
 
       checks++;
@@ -109,13 +109,13 @@ export const extendsValidatorWrapper: ValidatorDefinition = {
           category: result.error_type,
           message: `extends validation failed for ${agentFile}: ${result.message}`,
           file: agentFile,
-          agentName: basename(agentFile, '.md'),
+          agentName: basename(agentFile, ".md"),
         });
       }
     }
 
     return {
-      validator: 'extends',
+      validator: "extends",
       duration_ms: performance.now() - start,
       checks,
       issues,

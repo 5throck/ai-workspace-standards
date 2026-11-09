@@ -538,34 +538,42 @@
  *          call site, so the module is import-safe.
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
+import { execFileSync } from "node:child_process";
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
   try {
-    const out = execFileSync('git', ['ls-files', '--cached', '--', 'templates/'], { encoding: 'utf-8' }).trim();
+    const out = execFileSync("git", ["ls-files", "--cached", "--", "templates/"], { encoding: "utf-8" }).trim();
     const dirs = new Set<string>();
     if (!out) return dirs;
-    for (const line of out.split('\n')) {
+    for (const line of out.split("\n")) {
       const m = line.match(/^templates\/(co-[^/]+)\//);
       if (m) dirs.add(m[1]);
     }
     return dirs;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 })();
 
 function isCoVariantTracked(name: string): boolean {
   if (!_TRACKED_CO_VARIANTS) return true;
   return _TRACKED_CO_VARIANTS.has(name);
 }
-import { join, dirname, resolve, basename, relative, isAbsolute } from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { load } from 'js-yaml';
-import { parseSkillRegistryRows, collectWorkspaceRegistryFindings } from './helpers/skills-registry.ts';
-import { getScriptLayer, getSkillLayer, includeScriptInL1, parseScriptLayers, parseSkillLayers } from './helpers/layer-filter.ts';
-import { isTransientTestFixture } from './helpers/scaffold-markers.ts';
-import { scanMirrorHygiene } from './helpers/mirror-hygiene.ts';
+import { join, dirname, resolve, basename, relative, isAbsolute } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
+import { parseSkillRegistryRows, collectWorkspaceRegistryFindings } from "./helpers/skills-registry.ts";
+import {
+  getScriptLayer,
+  getSkillLayer,
+  includeScriptInL1,
+  parseScriptLayers,
+  parseSkillLayers,
+} from "./helpers/layer-filter.ts";
+import { isTransientTestFixture } from "./helpers/scaffold-markers.ts";
+import { scanMirrorHygiene } from "./helpers/mirror-hygiene.ts";
 import {
   loadHubTopology,
   validateHubTopologyShape,
@@ -574,37 +582,48 @@ import {
   checkVariantIdentity,
   checkConsumerMinimumVersions,
   loadConsumingVariants,
-} from './helpers/hub-topology.ts';
-import { agentBodyCompletenessFinding } from './validate-agents.ts';
-import { collectMirrorFreshnessDrift, PLATFORM_MIRROR_DIRS } from './lib/platform-mirror-freshness.ts';
+} from "./helpers/hub-topology.ts";
+import { agentBodyCompletenessFinding } from "./validate-agents.ts";
+import { collectMirrorFreshnessDrift, PLATFORM_MIRROR_DIRS } from "./lib/platform-mirror-freshness.ts";
 import {
   validatePropagationMap,
   deriveCoVariantDirs,
   markerInjectTargetScope,
   auditVariantScopedTargets,
   auditFixedTargets,
-} from './lib/propagation-map-schema.ts';
-import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
-import { PLATFORMS } from './validate-model-registry.ts';
-import { PLATFORM_AGENT_ADAPTERS } from './sync-agent-mirrors.ts';
-import { loadSkillGraph, findCapabilityDivergence } from './lib/skill-graph-compat.ts';
-import { listFleetProjects } from './lib/fleet.ts';
-import { evaluateScaffoldPackageContract } from './lib/package-merge.ts';
-import { parseGeneratorManifest, validateManifestAgainstRoot } from './lib/generator-manifest.ts';
-import { extractInstallDirsLoose, findVendoredInstallDirs, parseExternalDepsManifest, evaluateLicensePolicy, evaluateInstallDirConvention, scanExcludedComponents } from './lib/external-deps.ts';
-import { extractKeyedBlocks, compareKeyedBlocks, isExtendsStub, extractCommonAgentsBlock, compareCommonAgentsBlock } from './lib/managed-block-parity.ts';
-import { extractTrailBlock, compareTrailBlock } from './lib/trail-block-parity.ts';
-import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from './lib/platform-skeleton-merge.ts';
-import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
+} from "./lib/propagation-map-schema.ts";
+import { scrubConstitutionRefs } from "./lib/constitution-scrub.ts";
+import { PLATFORMS } from "./validate-model-registry.ts";
+import { PLATFORM_AGENT_ADAPTERS } from "./sync-agent-mirrors.ts";
+import { loadSkillGraph, findCapabilityDivergence } from "./lib/skill-graph-compat.ts";
+import { listFleetProjects } from "./lib/fleet.ts";
+import { evaluateScaffoldPackageContract } from "./lib/package-merge.ts";
+import { parseGeneratorManifest, validateManifestAgainstRoot } from "./lib/generator-manifest.ts";
 import {
-  SCAFFOLD_MARKER_SOURCES,
-  isCanonicalPmStubBody,
-} from './helpers/scaffold-markers.ts';
+  extractInstallDirsLoose,
+  findVendoredInstallDirs,
+  parseExternalDepsManifest,
+  evaluateLicensePolicy,
+  evaluateInstallDirConvention,
+  scanExcludedComponents,
+  type ExternalDepsManifest,
+} from "./lib/external-deps.ts";
+import {
+  extractKeyedBlocks,
+  compareKeyedBlocks,
+  isExtendsStub,
+  extractCommonAgentsBlock,
+  compareCommonAgentsBlock,
+} from "./lib/managed-block-parity.ts";
+import { extractTrailBlock, compareTrailBlock } from "./lib/trail-block-parity.ts";
+import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from "./lib/platform-skeleton-merge.ts";
+import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from "./lib/upgrade-policy.ts";
+import { SCAFFOLD_MARKER_SOURCES, isCanonicalPmStubBody } from "./helpers/scaffold-markers.ts";
 
 interface VariantManifest {
   name: string;
   description: string;
-  status: 'stable' | 'planned' | 'deprecated' | 'draft' | 'beta';
+  status: "stable" | "planned" | "deprecated" | "draft" | "beta";
   version?: string;
 }
 
@@ -616,7 +635,7 @@ interface VariantContract {
 }
 
 interface ValidationIssue {
-  level: 'error' | 'warning';
+  level: "error" | "warning";
   variant: string;
   check: string;
   message: string;
@@ -631,17 +650,17 @@ interface ValidationResult {
 }
 
 const colors = {
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  green: '\x1b[32m',
-  cyan: '\x1b[36m',
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
 };
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, '..');
-const TEMPLATES_DIR = join(ROOT, 'templates');
+const ROOT = resolve(__dirname, "..");
+const TEMPLATES_DIR = join(ROOT, "templates");
 
 if (!existsSync(TEMPLATES_DIR)) {
   console.error(`\x1b[31m[ERROR] templates/ directory not found at: ${TEMPLATES_DIR}\x1b[0m`);
@@ -651,10 +670,10 @@ if (!existsSync(TEMPLATES_DIR)) {
 }
 
 const args = process.argv.slice(2);
-const JSON_MODE = args.includes('--json');
+const JSON_MODE = args.includes("--json");
 const variantArg = (() => {
-  const idx = args.indexOf('--variant');
-  return idx !== -1 ? args[idx + 1] : 'all';
+  const idx = args.indexOf("--variant");
+  return idx !== -1 ? args[idx + 1] : "all";
 })();
 
 const issues: ValidationIssue[] = [];
@@ -663,17 +682,19 @@ const issues: ValidationIssue[] = [];
  * carries ZERO graft-era registrations — pins the 2026-11-08 mcpServers flip
  * (PR #1927). Renaming-documentation prose is not scanned. */
 function checkGraftMcpSurfaces(): void {
-  const GRAFT_PATTERNS = [
-    /"graft"\s*:/,
-    /\[mcp_servers\.graft\]/,
-    /"command"\s*:\s*"graft"/,
-    /@nanonets\/graft/,
+  const GRAFT_PATTERNS = [/"graft"\s*:/, /\[mcp_servers\.graft\]/, /"command"\s*:\s*"graft"/, /@nanonets\/graft/];
+  const SURFACES = [
+    ".gemini/settings.json",
+    ".codex/config.toml",
+    "opencode.json",
+    ".mcp.json",
+    ".claude/settings.json",
   ];
-  const SURFACES = ['.gemini/settings.json', '.codex/config.toml', 'opencode.json', '.mcp.json', '.claude/settings.json'];
-  const dirs = [{ label: 'common', dir: join(TEMPLATES_DIR, 'common') }];
+  const dirs = [{ label: "common", dir: join(TEMPLATES_DIR, "common") }];
   if (existsSync(TEMPLATES_DIR)) {
     for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-      if (entry.isDirectory() && entry.name.startsWith('co-')) dirs.push({ label: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+      if (entry.isDirectory() && entry.name.startsWith("co-"))
+        dirs.push({ label: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
     }
   }
   let scanned = 0;
@@ -682,17 +703,21 @@ function checkGraftMcpSurfaces(): void {
       const abs = join(dir, surf);
       if (!existsSync(abs)) continue;
       scanned++;
-      const text = readFileSync(abs, 'utf-8');
+      const text = readFileSync(abs, "utf-8");
       const hit = GRAFT_PATTERNS.find((re) => re.test(text));
       if (hit) {
-        fail(label, 'graft-mcp-surfaces',
+        fail(
+          label,
+          "graft-mcp-surfaces",
           `${abs} carries a graft-era MCP registration (matched ${hit}) — the mcpServers flip (PR #1927, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md) requires trail-era entries only`,
-          'Remove the graft server entry / block and ensure the trail entry (command "trail", args ["mcp"]) — see the corrective-pass design R1');
+          'Remove the graft server entry / block and ensure the trail entry (command "trail", args ["mcp"]) — see the corrective-pass design R1',
+        );
       }
     }
   }
-  if (scanned === 0) pass('graft-mcp-surfaces: no template MCP surfaces found — vacuous pass');
-  else if (!JSON_MODE) pass(`graft-mcp-surfaces: ${scanned} template MCP surface(s) carry zero graft-era registrations`);
+  if (scanned === 0) pass("graft-mcp-surfaces: no template MCP surfaces found — vacuous pass");
+  else if (!JSON_MODE)
+    pass(`graft-mcp-surfaces: ${scanned} template MCP surface(s) carry zero graft-era registrations`);
 }
 
 function pass(msg: string) {
@@ -700,7 +725,7 @@ function pass(msg: string) {
 }
 
 function fail(variant: string, check: string, msg: string, fix?: string) {
-  issues.push({ level: 'error', variant, check, message: msg, fix });
+  issues.push({ level: "error", variant, check, message: msg, fix });
   if (!JSON_MODE) {
     console.log(`${colors.red}[FAIL]${colors.reset} ${msg}`);
     if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
@@ -719,15 +744,26 @@ function checkVariantPackageContract(variant: string): void {
   if (!packageContractCommonChecked) {
     packageContractCommonChecked = true;
     try {
-      const parsed = JSON.parse(readFileSync(join('templates', 'common', 'package.json'), 'utf8')) as { scripts?: unknown };
+      const parsed = JSON.parse(readFileSync(join("templates", "common", "package.json"), "utf8")) as {
+        scripts?: unknown;
+      };
       const commonVerdict = evaluateScaffoldPackageContract(parsed, null);
       packageContractCommon = parsed;
       if (!commonVerdict.ok) {
-        fail('common', 'scaffold-package-contract', `scaffold package contract violated: ${commonVerdict.reason}`, 'Restore the Tier 2 scripts — templates/common/package.json is the SSOT every project package.json is generated from');
+        fail(
+          "common",
+          "scaffold-package-contract",
+          `scaffold package contract violated: ${commonVerdict.reason}`,
+          "Restore the Tier 2 scripts — templates/common/package.json is the SSOT every project package.json is generated from",
+        );
       }
     } catch (err) {
       packageContractCommon = null;
-      fail('common', 'scaffold-package-contract', `templates/common/package.json unparseable: ${err instanceof Error ? err.message : String(err)}`);
+      fail(
+        "common",
+        "scaffold-package-contract",
+        `templates/common/package.json unparseable: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
   // T-20261011-002: when the common parse already failed, the 'common' fail is
@@ -736,24 +772,34 @@ function checkVariantPackageContract(variant: string): void {
   // variant — SyntaxError crashed the whole validator, destroying triage.
   if (packageContractCommon === null) return;
   const commonPkg = packageContractCommon;
-  const variantPkgPath = join('templates', variant, 'package.json');
+  const variantPkgPath = join("templates", variant, "package.json");
   let variantPkg: { scripts?: unknown } | null = null;
   if (existsSync(variantPkgPath)) {
     try {
-      variantPkg = JSON.parse(readFileSync(variantPkgPath, 'utf8'));
+      variantPkg = JSON.parse(readFileSync(variantPkgPath, "utf8"));
     } catch (err) {
-      fail(variant, 'scaffold-package-contract', `templates/${variant}/package.json is not valid JSON: ${err instanceof Error ? err.message : String(err)}`, 'Fix or remove the variant package.json — scaffolds merge it over the generated one (variant wins per key)');
+      fail(
+        variant,
+        "scaffold-package-contract",
+        `templates/${variant}/package.json is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+        "Fix or remove the variant package.json — scaffolds merge it over the generated one (variant wins per key)",
+      );
       return;
     }
   }
   const verdict = evaluateScaffoldPackageContract(commonPkg, variantPkg);
   if (!verdict.ok) {
-    fail(variant, 'scaffold-package-contract', `scaffold package contract violated: ${verdict.reason}`, 'See design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D2 — the scaffold merges common ∪ variant (variant wins per key)');
+    fail(
+      variant,
+      "scaffold-package-contract",
+      `scaffold package contract violated: ${verdict.reason}`,
+      "See design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D2 — the scaffold merges common ∪ variant (variant wins per key)",
+    );
   }
 }
 
 function warn(variant: string, check: string, msg: string, fix?: string) {
-  issues.push({ level: 'warning', variant, check, message: msg, fix });
+  issues.push({ level: "warning", variant, check, message: msg, fix });
   if (!JSON_MODE) {
     console.log(`${colors.yellow}[WARN]${colors.reset} ${msg}`);
     if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
@@ -782,10 +828,10 @@ interface GovernancePolicy {
 
 let governance: GovernancePolicy | null = null;
 function loadGovernance(): void {
-  const govPath = join(ROOT, 'docs', 'templates', 'lifecycle-governance.json');
+  const govPath = join(ROOT, "docs", "templates", "lifecycle-governance.json");
   if (!existsSync(govPath)) return;
   try {
-    governance = JSON.parse(readFileSync(govPath, 'utf-8')) as GovernancePolicy;
+    governance = JSON.parse(readFileSync(govPath, "utf-8")) as GovernancePolicy;
   } catch {
     // governance stays null — checks will proceed without policy enforcement
   }
@@ -793,7 +839,7 @@ function loadGovernance(): void {
 
 function isMandatory(domain: string): boolean {
   if (!governance) return true; // default to mandatory if governance file missing
-  const variantLayer = governance.layers['templates-variants'];
+  const variantLayer = governance.layers["templates-variants"];
   if (!variantLayer) return true;
   const d = variantLayer.domains[domain];
   if (!d || !d.applicable) return false;
@@ -802,113 +848,146 @@ function isMandatory(domain: string): boolean {
 
 // Check D-04: Governance policy + common.lifecycle.json
 function checkGovernance(): void {
-  if (!JSON_MODE) console.log('\n=== Check D-04: Lifecycle governance ===');
-  const govPath = join(ROOT, 'docs', 'templates', 'lifecycle-governance.json');
+  if (!JSON_MODE) console.log("\n=== Check D-04: Lifecycle governance ===");
+  const govPath = join(ROOT, "docs", "templates", "lifecycle-governance.json");
   if (!existsSync(govPath)) {
-    warn('common', 'governance-missing', 'docs/templates/lifecycle-governance.json not found', 'Create lifecycle-governance.json per D-01 action item');
+    warn(
+      "common",
+      "governance-missing",
+      "docs/templates/lifecycle-governance.json not found",
+      "Create lifecycle-governance.json per D-01 action item",
+    );
     return;
   }
-  pass('docs/templates/lifecycle-governance.json: present');
+  pass("docs/templates/lifecycle-governance.json: present");
 
-  const commonLcPath = join(ROOT, 'docs', 'templates', 'common.lifecycle.json');
+  const commonLcPath = join(ROOT, "docs", "templates", "common.lifecycle.json");
   if (!existsSync(commonLcPath)) {
-    warn('common', 'common-lifecycle-missing', 'docs/templates/common.lifecycle.json not found', 'Create common.lifecycle.json per D-03 action item');
+    warn(
+      "common",
+      "common-lifecycle-missing",
+      "docs/templates/common.lifecycle.json not found",
+      "Create common.lifecycle.json per D-03 action item",
+    );
   } else {
     try {
-      const lc = JSON.parse(readFileSync(commonLcPath, 'utf-8')) as Record<string, unknown>;
+      const lc = JSON.parse(readFileSync(commonLcPath, "utf-8")) as Record<string, unknown>;
       if (!lc.version || !lc.status || !lc.propagatedTo) {
-        warn('common', 'common-lifecycle-schema', 'common.lifecycle.json missing required fields: version, status, propagatedTo');
+        warn(
+          "common",
+          "common-lifecycle-schema",
+          "common.lifecycle.json missing required fields: version, status, propagatedTo",
+        );
       } else {
-        pass(`docs/templates/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`);
+        pass(
+          `docs/templates/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`,
+        );
       }
     } catch {
-      fail('common', 'common-lifecycle-invalid', 'docs/templates/common.lifecycle.json is not valid JSON');
+      fail("common", "common-lifecycle-invalid", "docs/templates/common.lifecycle.json is not valid JSON");
     }
   }
 
   if (governance && !JSON_MODE) {
     const policy = governance.variantValidationPolicy;
-    console.log(`       ${colors.dim}Mandatory domains: ${policy.mandatoryBeforeProjectCreation.join(', ')}${colors.reset}`);
-    console.log(`       ${colors.dim}Warning-only domains: ${policy.warningOnly.join(', ')}${colors.reset}`);
+    console.log(
+      `       ${colors.dim}Mandatory domains: ${policy.mandatoryBeforeProjectCreation.join(", ")}${colors.reset}`,
+    );
+    console.log(`       ${colors.dim}Warning-only domains: ${policy.warningOnly.join(", ")}${colors.reset}`);
   }
 }
 
 // Check 0: templates/common/
 function checkCommon(): void {
-  if (!JSON_MODE) console.log('\n=== Check 0: templates/common/ ===');
-  const commonDir = join(TEMPLATES_DIR, 'common');
+  if (!JSON_MODE) console.log("\n=== Check 0: templates/common/ ===");
+  const commonDir = join(TEMPLATES_DIR, "common");
   if (!existsSync(commonDir)) {
-    fail('root', 'common-dir', 'templates/common/ directory not found', 'Create templates/common/ with shared infrastructure');
+    fail(
+      "root",
+      "common-dir",
+      "templates/common/ directory not found",
+      "Create templates/common/ with shared infrastructure",
+    );
     return;
   }
 
   // Check required subdirectories
-  const requiredDirs = ['.githooks', '.github', 'scripts', 'docs', 'memory', 'skills'];
+  const requiredDirs = [".githooks", ".github", "scripts", "docs", "memory", "skills"];
   for (const dir of requiredDirs) {
     const dirPath = join(commonDir, dir);
     if (!existsSync(dirPath)) {
-      fail('common', 'common-structure', `templates/common/${dir}/ not found`, `Create templates/common/${dir}/ directory`);
+      fail(
+        "common",
+        "common-structure",
+        `templates/common/${dir}/ not found`,
+        `Create templates/common/${dir}/ directory`,
+      );
     }
   }
 
-  pass('templates/common/ exists with required subdirectories');
+  pass("templates/common/ exists with required subdirectories");
 
   // Check forbidden files — files that must NOT exist in templates/common/
-  const forbiddenFiles = ['CONSTITUTION.md', 'node_modules', '.venv', '.bun', 'dist', 'build'];
-  const presentForbidden = forbiddenFiles.filter(f => existsSync(join(commonDir, f)));
+  const forbiddenFiles = ["CONSTITUTION.md", "node_modules", ".venv", ".bun", "dist", "build"];
+  const presentForbidden = forbiddenFiles.filter((f) => existsSync(join(commonDir, f)));
   if (presentForbidden.length > 0) {
     for (const f of presentForbidden) {
-      fail('common', 'forbidden-file', `templates/common/${f} must not exist — workspace-level file must not be copied to L2 projects. Delete it from templates/common/.`);
+      fail(
+        "common",
+        "forbidden-file",
+        `templates/common/${f} must not exist — workspace-level file must not be copied to L2 projects. Delete it from templates/common/.`,
+      );
     }
   } else {
-    pass('templates/common/ blocklist: no forbidden files present');
+    pass("templates/common/ blocklist: no forbidden files present");
   }
 
   // Check A-13: removed because it contradicts AGENTS.md rule that owner does not need to exist in the current project.
-  const commonSkillsDir = join(commonDir, 'skills');
+  const commonSkillsDir = join(commonDir, "skills");
 
   // Check B-07: workspace-only skills (scope: workspace in SKILL.md) must not exist in templates/common/skills/
-  const l0SkillsDir = join(dirname(import.meta.path), '..', 'skills');
+  const l0SkillsDir = join(dirname(import.meta.path), "..", "skills");
   const SKILLS_FORBIDDEN_IN_COMMON: string[] = [];
   if (existsSync(l0SkillsDir)) {
     for (const skillName of readdirSync(l0SkillsDir)) {
-      const skillMd = join(l0SkillsDir, skillName, 'SKILL.md');
+      const skillMd = join(l0SkillsDir, skillName, "SKILL.md");
       if (existsSync(skillMd)) {
-        const content = readFileSync(skillMd, 'utf-8');
+        const content = readFileSync(skillMd, "utf-8");
         const scopeMatch = content.match(/^scope:\s*(\S+)/m);
-        if (scopeMatch?.[1] === 'workspace') {
+        if (scopeMatch?.[1] === "workspace") {
           SKILLS_FORBIDDEN_IN_COMMON.push(skillName);
         }
       }
     }
   }
   if (existsSync(commonSkillsDir)) {
-    const presentForbiddenSkills = SKILLS_FORBIDDEN_IN_COMMON.filter(s =>
-      existsSync(join(commonSkillsDir, s))
-    );
+    const presentForbiddenSkills = SKILLS_FORBIDDEN_IN_COMMON.filter((s) => existsSync(join(commonSkillsDir, s)));
     if (presentForbiddenSkills.length > 0) {
       for (const s of presentForbiddenSkills) {
-        fail('common', 'forbidden-skill-in-common',
+        fail(
+          "common",
+          "forbidden-skill-in-common",
           `templates/common/skills/${s} must not exist — workspace-only skill (scope: workspace) must not be copied to L2 projects`,
-          `Delete templates/common/skills/${s}/`);
+          `Delete templates/common/skills/${s}/`,
+        );
       }
     } else {
-      pass('templates/common/ skills blocklist: no forbidden workspace-only skills present');
+      pass("templates/common/ skills blocklist: no forbidden workspace-only skills present");
     }
   }
 }
 
 // Check 1: templates/VERSION
 function checkVersion(): void {
-  if (!JSON_MODE) console.log('\n=== Check 1: templates/VERSION ===');
-  const versionFile = join(TEMPLATES_DIR, 'VERSION');
+  if (!JSON_MODE) console.log("\n=== Check 1: templates/VERSION ===");
+  const versionFile = join(TEMPLATES_DIR, "VERSION");
   if (!existsSync(versionFile)) {
-    fail('root', 'VERSION', 'templates/VERSION file missing', 'Create templates/VERSION with semver (e.g. 0.4.0)');
+    fail("root", "VERSION", "templates/VERSION file missing", "Create templates/VERSION with semver (e.g. 0.4.0)");
     return;
   }
-  const version = readFileSync(versionFile, 'utf-8').trim();
+  const version = readFileSync(versionFile, "utf-8").trim();
   if (!/^\d+\.\d+\.\d+$/.test(version)) {
-    fail('root', 'VERSION', `templates/VERSION has invalid semver: "${version}"`, 'Use format X.Y.Z');
+    fail("root", "VERSION", `templates/VERSION has invalid semver: "${version}"`, "Use format X.Y.Z");
     return;
   }
   pass(`templates/VERSION: ${version}`);
@@ -920,16 +999,20 @@ const countryProfileVerified = new Map<string, Array<{ variant: string; date: st
 // B-05 addendum: cross-variant country-profile freshness — same <CC>.md diverging
 // across variants means one template's profile drifted ahead of the others.
 function checkCountryProfileDivergence(): void {
-  if (!JSON_MODE) console.log('\n=== Check B-05: cross-variant country-profile freshness ===');
+  if (!JSON_MODE) console.log("\n=== Check B-05: cross-variant country-profile freshness ===");
   for (const [code, entries] of countryProfileVerified) {
-    const distinctDates = new Set(entries.map(e => e.date));
+    const distinctDates = new Set(entries.map((e) => e.date));
     if (entries.length > 1 && distinctDates.size > 1) {
       const detail = entries
         .slice()
         .sort((a, b) => (a.date === b.date ? a.variant.localeCompare(b.variant) : a.date < b.date ? 1 : -1))
-        .map(e => `${e.variant} ${e.date}`)
-        .join(', ');
-      warn('common', 'country-config', `${code}.md last_verified diverges across ${entries.length} variants: ${detail}. Realign during the next freshness pass.`);
+        .map((e) => `${e.variant} ${e.date}`)
+        .join(", ");
+      warn(
+        "common",
+        "country-config",
+        `${code}.md last_verified diverges across ${entries.length} variants: ${detail}. Realign during the next freshness pass.`,
+      );
     }
   }
 }
@@ -952,14 +1035,14 @@ const SCRIPT_FILE_RE = /\.(ts|mjs|cjs|js|sh|ps1)$/;
  */
 export function findUndeclaredScripts(variantDir: string, declaredPaths: string[]): string[] {
   const variantName = basename(variantDir);
-  const nsDir = join(variantDir, 'scripts', variantName);
+  const nsDir = join(variantDir, "scripts", variantName);
   if (!existsSync(nsDir)) return [];
-  const declared = new Set(declaredPaths.map(p => p.replace(/\\/g, '/')));
+  const declared = new Set(declaredPaths.map((p) => p.replace(/\\/g, "/")));
   const undeclared: string[] = [];
   for (const f of readdirSync(nsDir)) {
     const full = join(nsDir, f);
     if (!statSync(full).isFile()) continue;
-    if (f === 'SCRIPTS.md' || !SCRIPT_FILE_RE.test(f)) continue;
+    if (f === "SCRIPTS.md" || !SCRIPT_FILE_RE.test(f)) continue;
     const rel = `scripts/${variantName}/${f}`;
     if (!declared.has(rel)) undeclared.push(rel);
   }
@@ -974,16 +1057,16 @@ export function findUndeclaredScripts(variantDir: string, declaredPaths: string[
  * resolve-variants.ts scans the same top level).
  */
 export function findUndeclaredAgents(variantDir: string, declared: Array<{ name?: string; file?: string }>): string[] {
-  const agentsDir = join(variantDir, 'agents');
+  const agentsDir = join(variantDir, "agents");
   if (!existsSync(agentsDir)) return [];
-  const declaredNames = new Set(declared.map(a => (a.name ?? '').replace(/\\/g, '/').toLowerCase()));
-  const declaredFiles = new Set(declared.map(a => (a.file ?? '').replace(/\\/g, '/').toLowerCase()));
+  const declaredNames = new Set(declared.map((a) => (a.name ?? "").replace(/\\/g, "/").toLowerCase()));
+  const declaredFiles = new Set(declared.map((a) => (a.file ?? "").replace(/\\/g, "/").toLowerCase()));
   const undeclared: string[] = [];
   for (const f of readdirSync(agentsDir)) {
     const full = join(agentsDir, f);
-    if (!statSync(full).isFile() || !f.endsWith('.md')) continue;
-    if (f.startsWith('README')) continue;
-    const name = f.replace(/\.md$/, '');
+    if (!statSync(full).isFile() || !f.endsWith(".md")) continue;
+    if (f.startsWith("README")) continue;
+    const name = f.replace(/\.md$/, "");
     if (declaredNames.has(name.toLowerCase()) || declaredFiles.has(`agents/${f}`.toLowerCase())) continue;
     undeclared.push(`agents/${f}`);
   }
@@ -992,62 +1075,86 @@ export function findUndeclaredAgents(variantDir: string, declared: Array<{ name?
 
 // Check 2: variant.json in each variant dir
 function checkVariantManifests(): Map<string, VariantManifest> {
-  if (!JSON_MODE) console.log('\n=== Check 2: variant.json manifests ===');
+  if (!JSON_MODE) console.log("\n=== Check 2: variant.json manifests ===");
   const manifests = new Map<string, VariantManifest>();
 
   if (!existsSync(TEMPLATES_DIR)) {
-    fail('root', 'variant-dirs', 'templates/ directory not found');
+    fail("root", "variant-dirs", "templates/ directory not found");
     return manifests;
   }
 
   const entries = readdirSync(TEMPLATES_DIR);
-  const variantDirs = entries.filter(e => {
+  const variantDirs = entries.filter((e) => {
     if (isTransientTestFixture(e)) return false; // E2E staging dirs under templates/ (T-20260916-001)
     const fullPath = join(TEMPLATES_DIR, e);
-    return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common'
-      && (e.startsWith('co-') ? isCoVariantTracked(e) : true);
+    return (
+      statSync(fullPath).isDirectory() &&
+      !e.startsWith(".") &&
+      e !== "common" &&
+      (e.startsWith("co-") ? isCoVariantTracked(e) : true)
+    );
   });
 
   if (variantDirs.length === 0) {
-    fail('root', 'variant-dirs', 'No variant directories found in templates/');
+    fail("root", "variant-dirs", "No variant directories found in templates/");
     return manifests;
   }
 
   for (const dir of variantDirs) {
-    if (variantArg !== 'all' && dir !== variantArg) continue;
+    if (variantArg !== "all" && dir !== variantArg) continue;
 
-    const manifestPath = join(TEMPLATES_DIR, dir, 'variant.json');
+    const manifestPath = join(TEMPLATES_DIR, dir, "variant.json");
     if (!existsSync(manifestPath)) {
-      fail(dir, 'variant-json', `templates/${dir}/variant.json missing`, `Create variant.json with name, description, status fields`);
+      fail(
+        dir,
+        "variant-json",
+        `templates/${dir}/variant.json missing`,
+        `Create variant.json with name, description, status fields`,
+      );
       continue;
     }
 
     try {
-      const raw = JSON.parse(readFileSync(manifestPath, 'utf-8')) as Record<string, unknown>;
-      const requiredFields = ['name', 'description', 'status'];
-      const missing = requiredFields.filter(f => !(f in raw));
+      const raw = JSON.parse(readFileSync(manifestPath, "utf-8")) as Record<string, unknown>;
+      const requiredFields = ["name", "description", "status"];
+      const missing = requiredFields.filter((f) => !(f in raw));
 
       if (missing.length > 0) {
-        fail(dir, 'variant-json', `templates/${dir}/variant.json missing fields: ${missing.join(', ')}`);
+        fail(dir, "variant-json", `templates/${dir}/variant.json missing fields: ${missing.join(", ")}`);
         continue;
       }
 
-      const validStatuses = ['stable', 'planned', 'deprecated', 'draft', 'beta'];
+      const validStatuses = ["stable", "planned", "deprecated", "draft", "beta"];
       if (!validStatuses.includes(raw.status as string)) {
-        fail(dir, 'variant-json', `templates/${dir}/variant.json has invalid status: "${raw.status}"`, `Use: stable | planned | deprecated | draft | beta`);
+        fail(
+          dir,
+          "variant-json",
+          `templates/${dir}/variant.json has invalid status: "${raw.status}"`,
+          `Use: stable | planned | deprecated | draft | beta`,
+        );
         continue;
       }
 
       // B-02: Lifecycle field validation
       const lifecycle = raw.lifecycle as Record<string, unknown> | undefined;
       if (!lifecycle) {
-        fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json missing 'lifecycle' object`);
+        fail(dir, "variant-lifecycle", `templates/${dir}/variant.json missing 'lifecycle' object`);
       } else {
         if (!lifecycle.statusSince) {
-          fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json lifecycle.statusSince is missing`, `Add "statusSince": "YYYY-MM-DD" to lifecycle object`);
+          fail(
+            dir,
+            "variant-lifecycle",
+            `templates/${dir}/variant.json lifecycle.statusSince is missing`,
+            `Add "statusSince": "YYYY-MM-DD" to lifecycle object`,
+          );
         }
         if (!lifecycle.lastTransition) {
-          fail(dir, 'variant-lifecycle', `templates/${dir}/variant.json lifecycle.lastTransition is missing`, `Add "lastTransition": "... → ... on YYYY-MM-DD" to lifecycle object`);
+          fail(
+            dir,
+            "variant-lifecycle",
+            `templates/${dir}/variant.json lifecycle.lastTransition is missing`,
+            `Add "lastTransition": "... → ... on YYYY-MM-DD" to lifecycle object`,
+          );
         }
         if (lifecycle.statusSince && lifecycle.lastTransition) {
           pass(`templates/${dir}/variant.json lifecycle fields OK (statusSince, lastTransition)`);
@@ -1059,23 +1166,34 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       // ({ profiles_dir: "docs/countries", supported: [], default: null } for
       // non-adopting variants); divergence by omission is eliminated.
       const cc = raw.country_config as Record<string, unknown> | undefined;
-      if (!cc || typeof cc !== 'object' || Array.isArray(cc)) {
-        fail(dir, 'country-config',
+      if (!cc || typeof cc !== "object" || Array.isArray(cc)) {
+        fail(
+          dir,
+          "country-config",
           `templates/${dir}/variant.json missing 'country_config' (ADR-0091 R3 uniform declaration)`,
-          `Add "country_config": { "profiles_dir": "docs/countries", "supported": [], "default": null } (empty supported = non-adopting)`);
+          `Add "country_config": { "profiles_dir": "docs/countries", "supported": [], "default": null } (empty supported = non-adopting)`,
+        );
       } else {
         let ccOk = true;
-        if (cc.profiles_dir !== 'docs/countries') {
-          fail(dir, 'country-config', `country_config.profiles_dir must be "docs/countries", got ${JSON.stringify(cc.profiles_dir)}`);
+        if (cc.profiles_dir !== "docs/countries") {
+          fail(
+            dir,
+            "country-config",
+            `country_config.profiles_dir must be "docs/countries", got ${JSON.stringify(cc.profiles_dir)}`,
+          );
           ccOk = false;
         }
         if (!Array.isArray(cc.supported)) {
-          fail(dir, 'country-config', `country_config.supported must be an array (empty for non-adopting variants)`);
+          fail(dir, "country-config", `country_config.supported must be an array (empty for non-adopting variants)`);
           ccOk = false;
         }
         if (cc.default !== null) {
-          fail(dir, 'country-config', `country_config.default must be null (country-profiles rule; ADR-0091 R2)`,
-            `Set "default": null — the active country is selected per-project via docs/countries/ACTIVE.md`);
+          fail(
+            dir,
+            "country-config",
+            `country_config.default must be null (country-profiles rule; ADR-0091 R2)`,
+            `Set "default": null — the active country is selected per-project via docs/countries/ACTIVE.md`,
+          );
           ccOk = false;
         }
         if (ccOk) pass(`templates/${dir}/variant.json country_config declaration OK (ADR-0091 R3)`);
@@ -1088,18 +1206,33 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       const designLint = raw.designLint;
       if (designLint !== undefined) {
         let dlOk = true;
-        if (designLint === null || typeof designLint !== 'object' || Array.isArray(designLint)) {
-          fail(dir, 'variant-designlint', `templates/${dir}/variant.json designLint must be an object with a required boolean "enabled" (got ${designLint === null ? 'null' : Array.isArray(designLint) ? 'array' : typeof designLint})`);
+        if (designLint === null || typeof designLint !== "object" || Array.isArray(designLint)) {
+          fail(
+            dir,
+            "variant-designlint",
+            `templates/${dir}/variant.json designLint must be an object with a required boolean "enabled" (got ${designLint === null ? "null" : Array.isArray(designLint) ? "array" : typeof designLint})`,
+          );
           dlOk = false;
         } else {
           const dl = designLint as Record<string, unknown>;
-          if (typeof dl.enabled !== 'boolean') {
-            fail(dir, 'variant-designlint', `templates/${dir}/variant.json designLint.enabled must be a boolean (got ${JSON.stringify(dl.enabled ?? null)})`);
+          if (typeof dl.enabled !== "boolean") {
+            fail(
+              dir,
+              "variant-designlint",
+              `templates/${dir}/variant.json designLint.enabled must be a boolean (got ${JSON.stringify(dl.enabled ?? null)})`,
+            );
             dlOk = false;
           }
-          for (const key of ['scanRoots', 'allowlist'] as const) {
-            if (dl[key] !== undefined && (!Array.isArray(dl[key]) || !(dl[key] as unknown[]).every(x => typeof x === 'string'))) {
-              fail(dir, 'variant-designlint', `templates/${dir}/variant.json designLint.${key} must be an array of strings (got ${JSON.stringify(dl[key])})`);
+          for (const key of ["scanRoots", "allowlist"] as const) {
+            if (
+              dl[key] !== undefined &&
+              (!Array.isArray(dl[key]) || !(dl[key] as unknown[]).every((x) => typeof x === "string"))
+            ) {
+              fail(
+                dir,
+                "variant-designlint",
+                `templates/${dir}/variant.json designLint.${key} must be an array of strings (got ${JSON.stringify(dl[key])})`,
+              );
               dlOk = false;
             }
           }
@@ -1113,7 +1246,12 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         for (const entry of scriptManifest.local) {
           const scriptPath = join(TEMPLATES_DIR, dir, entry.path);
           if (!existsSync(scriptPath)) {
-            fail(dir, 'script-manifest', `script_manifest.local "${entry.name}": path not found: ${entry.path}`, `Create the script at templates/${dir}/${entry.path} or remove the entry from variant.json`);
+            fail(
+              dir,
+              "script-manifest",
+              `script_manifest.local "${entry.name}": path not found: ${entry.path}`,
+              `Create the script at templates/${dir}/${entry.path} or remove the entry from variant.json`,
+            );
           } else {
             pass(`templates/${dir}/variant.json script_manifest.local["${entry.name}"] → ${entry.path} ✓`);
           }
@@ -1124,9 +1262,17 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       // A script dropped into the variant's own scripts/<variant>/ namespace must
       // be declared in script_manifest.local, or downstream consumers (Check V
       // version tracking, scaffolding injection) silently miss it.
-      const undeclaredScripts = findUndeclaredScripts(join(TEMPLATES_DIR, dir), (scriptManifest?.local ?? []).map(e => e.path));
+      const undeclaredScripts = findUndeclaredScripts(
+        join(TEMPLATES_DIR, dir),
+        (scriptManifest?.local ?? []).map((e) => e.path),
+      );
       for (const rel of undeclaredScripts) {
-        warn(dir, 'script-manifest-reverse', `templates/${dir}/${rel} exists but is not declared in variant.json script_manifest.local`, `Add {"name": "${basename(rel).replace(/\.[^.]+$/, '')}", "path": "${rel}"} to script_manifest.local — grace window: WARN now, promotion to FAIL is a pending follow-up decision`);
+        warn(
+          dir,
+          "script-manifest-reverse",
+          `templates/${dir}/${rel} exists but is not declared in variant.json script_manifest.local`,
+          `Add {"name": "${basename(rel).replace(/\.[^.]+$/, "")}", "path": "${rel}"} to script_manifest.local — grace window: WARN now, promotion to FAIL is a pending follow-up decision`,
+        );
       }
 
       // B-03a: agents exists→declared reverse reconciliation (T-20260912-014).
@@ -1138,7 +1284,12 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       const declaredAgents = (raw.agents as Array<{ name?: string; file?: string }> | undefined) ?? [];
       const undeclaredAgents = findUndeclaredAgents(join(TEMPLATES_DIR, dir), declaredAgents);
       for (const rel of undeclaredAgents) {
-        warn(dir, 'agent-manifest-reverse', `templates/${dir}/${rel} exists but is not declared in variant.json agents[]`, `Add {"name": "${basename(rel).replace(/\.md$/, '')}", "file": "${rel}"} to agents — top-level roster only (domains/_shared trees are indexed via AGENTS.md); grace window: WARN now, promotion to FAIL is a pending follow-up decision`);
+        warn(
+          dir,
+          "agent-manifest-reverse",
+          `templates/${dir}/${rel} exists but is not declared in variant.json agents[]`,
+          `Add {"name": "${basename(rel).replace(/\.md$/, "")}", "file": "${rel}"} to agents — top-level roster only (domains/_shared trees are indexed via AGENTS.md); grace window: WARN now, promotion to FAIL is a pending follow-up decision`,
+        );
       }
 
       // B-04: theme_manifest CSS file existence check
@@ -1147,20 +1298,27 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       // OR the migrated shape (themes[]/styles[]/default_theme/default_style).
       // Both are checked for on-disk CSS; a manifest may not mix the two
       // lists' semantics (available[] holds styles, themes[] holds themes).
-      const themeManifest = raw.theme_manifest as {
-        base_css?: string;
-        themes_dir?: string;
-        styles_dir?: string;
-        overrides_dir?: string;
-        available?: string[];
-        themes?: string[];
-        styles?: string[];
-      } | undefined;
+      const themeManifest = raw.theme_manifest as
+        | {
+            base_css?: string;
+            themes_dir?: string;
+            styles_dir?: string;
+            overrides_dir?: string;
+            available?: string[];
+            themes?: string[];
+            styles?: string[];
+          }
+        | undefined;
       if (themeManifest) {
         if (themeManifest.base_css) {
           const baseCssPath = join(TEMPLATES_DIR, dir, themeManifest.base_css);
           if (!existsSync(baseCssPath)) {
-            fail(dir, 'theme-manifest', `theme_manifest.base_css not found: ${themeManifest.base_css}`, `Create the file at templates/${dir}/${themeManifest.base_css}`);
+            fail(
+              dir,
+              "theme-manifest",
+              `theme_manifest.base_css not found: ${themeManifest.base_css}`,
+              `Create the file at templates/${dir}/${themeManifest.base_css}`,
+            );
           } else {
             pass(`templates/${dir}/variant.json theme_manifest.base_css → ${themeManifest.base_css} ✓`);
           }
@@ -1173,13 +1331,18 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             const flatRelPath = `${themeManifest.overrides_dir}/${theme}.css`;
             const nestedRelPath = `${themeManifest.overrides_dir}/${theme}/style.css`;
             const flatCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, `${theme}.css`);
-            const nestedCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, theme, 'style.css');
+            const nestedCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, theme, "style.css");
             if (existsSync(flatCssPath)) {
               pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${flatRelPath} ✓`);
             } else if (existsSync(nestedCssPath)) {
               pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${nestedRelPath} ✓`);
             } else {
-              fail(dir, 'theme-manifest', `theme_manifest theme "${theme}": CSS not found: ${flatRelPath} or ${nestedRelPath}`, `Create the file at templates/${dir}/${flatRelPath} (flat layout) or templates/${dir}/${nestedRelPath} (nested layout)`);
+              fail(
+                dir,
+                "theme-manifest",
+                `theme_manifest theme "${theme}": CSS not found: ${flatRelPath} or ${nestedRelPath}`,
+                `Create the file at templates/${dir}/${flatRelPath} (flat layout) or templates/${dir}/${nestedRelPath} (nested layout)`,
+              );
             }
           }
         }
@@ -1192,7 +1355,7 @@ function checkVariantManifests(): Map<string, VariantManifest> {
         if (Array.isArray(themeManifest.themes)) {
           const base = themeManifest.themes_dir ?? themeManifest.overrides_dir;
           for (const theme of themeManifest.themes) {
-            if (typeof theme !== 'string' || !base) continue;
+            if (typeof theme !== "string" || !base) continue;
             const candidates = [
               `${base}/themes/${theme}/theme.css`,
               `${base}/${theme}/theme.css`,
@@ -1202,14 +1365,19 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             if (hit) {
               pass(`templates/${dir}/variant.json theme_manifest.themes["${theme}"] → ${hit} ✓`);
             } else {
-              fail(dir, 'theme-manifest', `theme_manifest.themes "${theme}": CSS not found (${candidates.join(' | ')})`, `Create theme.css at one of templates/${dir}/${candidates.join(' or templates/' + dir + '/')}`);
+              fail(
+                dir,
+                "theme-manifest",
+                `theme_manifest.themes "${theme}": CSS not found (${candidates.join(" | ")})`,
+                `Create theme.css at one of templates/${dir}/${candidates.join(" or templates/" + dir + "/")}`,
+              );
             }
           }
         }
         if (Array.isArray(themeManifest.styles)) {
           const base = themeManifest.styles_dir ?? themeManifest.overrides_dir;
           for (const style of themeManifest.styles) {
-            if (typeof style !== 'string' || !base) continue;
+            if (typeof style !== "string" || !base) continue;
             const candidates = [
               `${base}/${style}/style.css`,
               `${base}/styles/${style}/style.css`,
@@ -1219,35 +1387,50 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             if (hit) {
               pass(`templates/${dir}/variant.json theme_manifest.styles["${style}"] → ${hit} ✓`);
             } else {
-              fail(dir, 'theme-manifest', `theme_manifest.styles "${style}": CSS not found (${candidates.join(' | ')})`, `Create style.css at one of templates/${dir}/${candidates.join(' or templates/' + dir + '/')}`);
+              fail(
+                dir,
+                "theme-manifest",
+                `theme_manifest.styles "${style}": CSS not found (${candidates.join(" | ")})`,
+                `Create style.css at one of templates/${dir}/${candidates.join(" or templates/" + dir + "/")}`,
+              );
             }
           }
         }
       }
 
       // B-05: country_config validation
-      const countryConfig = raw.country_config as {
-        profiles_dir?: string;
-        supported?: string[];
-        default?: string | null;
-      } | undefined;
+      const countryConfig = raw.country_config as
+        | {
+            profiles_dir?: string;
+            supported?: string[];
+            default?: string | null;
+          }
+        | undefined;
 
       if (countryConfig) {
         // Check required fields
-        if (!countryConfig.profiles_dir || countryConfig.profiles_dir.trim() === '') {
-          fail(dir, 'country-config', `templates/${dir}/variant.json country_config.profiles_dir is missing or empty`);
+        if (!countryConfig.profiles_dir || countryConfig.profiles_dir.trim() === "") {
+          fail(dir, "country-config", `templates/${dir}/variant.json country_config.profiles_dir is missing or empty`);
         }
         // T-20260927-002 (ADR-0091 R3): an EMPTY supported array is now the
         // canonical non-adopting declaration — divergence by omission is what
         // B-04 above eliminates. Only a MALFORMED value fails here; the
         // adopting-path profile-file checks run for each declared code.
         if (!countryConfig.supported || !Array.isArray(countryConfig.supported)) {
-          fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported is missing or not an array (use [] for non-adopting variants)`);
+          fail(
+            dir,
+            "country-config",
+            `templates/${dir}/variant.json country_config.supported is missing or not an array (use [] for non-adopting variants)`,
+          );
         } else {
           // Check each supported code has a profile file
           for (const code of countryConfig.supported) {
             if (!/^[A-Z]{2,4}$/.test(code)) {
-              fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported contains invalid code: '${code}'. Pattern: ^[A-Z]{2,4}$`);
+              fail(
+                dir,
+                "country-config",
+                `templates/${dir}/variant.json country_config.supported contains invalid code: '${code}'. Pattern: ^[A-Z]{2,4}$`,
+              );
               continue;
             }
             // fail() above is not a `never` guard, so profiles_dir may still be undefined
@@ -1255,26 +1438,42 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             // changing that behavior.
             const profilePath = join(TEMPLATES_DIR, dir, countryConfig.profiles_dir as string, `${code}.md`);
             if (!existsSync(profilePath)) {
-              fail(dir, 'country-config', `templates/${dir}/variant.json country_config.supported includes '${code}' but profile file missing: ${countryConfig.profiles_dir}/${code}.md`);
+              fail(
+                dir,
+                "country-config",
+                `templates/${dir}/variant.json country_config.supported includes '${code}' but profile file missing: ${countryConfig.profiles_dir}/${code}.md`,
+              );
             } else {
               // Validate profile frontmatter
               try {
-                const profileContent = readFileSync(profilePath, 'utf-8');
+                const profileContent = readFileSync(profilePath, "utf-8");
                 const frontmatter = parseFrontmatter(profileContent);
-                const requiredFields = ['code', 'name', 'status', 'last_verified'];
-                const missing = requiredFields.filter(f => !frontmatter[f]);
+                const requiredFields = ["code", "name", "status", "last_verified"];
+                const missing = requiredFields.filter((f) => !frontmatter[f]);
                 if (missing.length > 0) {
-                  fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md missing frontmatter fields: ${missing.join(', ')}`);
+                  fail(
+                    dir,
+                    "country-config",
+                    `templates/${dir}/${countryConfig.profiles_dir}/${code}.md missing frontmatter fields: ${missing.join(", ")}`,
+                  );
                 } else {
                   // Check code matches filename
                   const codeMatch = profileContent.match(/^code:\s*([A-Z]{2,4})/m);
                   if (!codeMatch || codeMatch[1] !== code) {
-                    fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md frontmatter code doesn't match filename`);
+                    fail(
+                      dir,
+                      "country-config",
+                      `templates/${dir}/${countryConfig.profiles_dir}/${code}.md frontmatter code doesn't match filename`,
+                    );
                   }
                   // Check status value (must be one of: active, draft, stale)
                   const statusMatch = profileContent.match(/^status:\s*(\S+)/m);
-                  if (!statusMatch || !['active', 'draft', 'stale'].includes(statusMatch[1])) {
-                    fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status must be one of: active, draft, stale (found: '${statusMatch ? statusMatch[1] : 'missing'}')`);
+                  if (!statusMatch || !["active", "draft", "stale"].includes(statusMatch[1])) {
+                    fail(
+                      dir,
+                      "country-config",
+                      `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status must be one of: active, draft, stale (found: '${statusMatch ? statusMatch[1] : "missing"}')`,
+                    );
                   }
                   // Check last_verified age (WARN if > 12 months)
                   const lastVerifiedMatch = profileContent.match(/^last_verified:\s*(\d{4}-\d{2}-\d{2})/m);
@@ -1282,10 +1481,18 @@ function checkVariantManifests(): Map<string, VariantManifest> {
                     const lastVerified = new Date(lastVerifiedMatch[1]);
                     const monthsSince = (Date.now() - lastVerified.getTime()) / (30 * 24 * 60 * 60 * 1000);
                     if (monthsSince > 12) {
-                      warn(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md last_verified is older than 12 months (${lastVerifiedMatch[1]}). Consider reviewing.`);
+                      warn(
+                        dir,
+                        "country-config",
+                        `templates/${dir}/${countryConfig.profiles_dir}/${code}.md last_verified is older than 12 months (${lastVerifiedMatch[1]}). Consider reviewing.`,
+                      );
                       // Auto-stale: an 'active' profile past the 12-month line should move to 'stale'
-                      if (statusMatch?.[1] === 'active') {
-                        warn(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status is 'active' but last_verified (${lastVerifiedMatch[1]}) is older than 12 months. Set status: stale until re-verified (stale profiles stay loadable and are flagged at Phase 0 intake).`);
+                      if (statusMatch?.[1] === "active") {
+                        warn(
+                          dir,
+                          "country-config",
+                          `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status is 'active' but last_verified (${lastVerifiedMatch[1]}) is older than 12 months. Set status: stale until re-verified (stale profiles stay loadable and are flagged at Phase 0 intake).`,
+                        );
                       }
                     }
                     // Collect for the cross-variant divergence check
@@ -1295,23 +1502,35 @@ function checkVariantManifests(): Map<string, VariantManifest> {
                   }
                 }
               } catch (e) {
-                fail(dir, 'country-config', `templates/${dir}/${countryConfig.profiles_dir}/${code}.md has unparseable frontmatter`);
+                fail(
+                  dir,
+                  "country-config",
+                  `templates/${dir}/${countryConfig.profiles_dir}/${code}.md has unparseable frontmatter`,
+                );
               }
             }
           }
         }
         // Check default is null (region-neutral is required)
         if (countryConfig.default !== null && countryConfig.default !== undefined) {
-          warn(dir, 'country-config', `templates/${dir}/variant.json country_config.default is '${countryConfig.default}'. Policy requires region-neutral (null).`);
+          warn(
+            dir,
+            "country-config",
+            `templates/${dir}/variant.json country_config.default is '${countryConfig.default}'. Policy requires region-neutral (null).`,
+          );
         }
       }
 
       // Check if docs/countries/*.md exists but no country_config declared
-      const countriesDir = join(TEMPLATES_DIR, dir, 'docs', 'countries');
+      const countriesDir = join(TEMPLATES_DIR, dir, "docs", "countries");
       if (!countryConfig && existsSync(countriesDir)) {
-        const profiles = readdirSync(countriesDir).filter(f => f.endsWith('.md') && f !== 'ACTIVE.md');
+        const profiles = readdirSync(countriesDir).filter((f) => f.endsWith(".md") && f !== "ACTIVE.md");
         if (profiles.length > 0) {
-          warn(dir, 'country-config', `templates/${dir}/docs/countries/ contains ${profiles.length} profile(s) but variant.json has no country_config declared.`);
+          warn(
+            dir,
+            "country-config",
+            `templates/${dir}/docs/countries/ contains ${profiles.length} profile(s) but variant.json has no country_config declared.`,
+          );
         }
       }
 
@@ -1319,46 +1538,64 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       if (countryConfig && raw.description) {
         const jurisdictionTerms = /korea|korean|한국|대한민국/i;
         if (jurisdictionTerms.test(String(raw.description))) {
-          warn(dir, 'country-config', `templates/${dir}/variant.json description appears jurisdiction-anchored (contains Korea/Korean/한국/대한민국). Consider region-neutral description with country-specific details in profiles.`);
+          warn(
+            dir,
+            "country-config",
+            `templates/${dir}/variant.json description appears jurisdiction-anchored (contains Korea/Korean/한국/대한민국). Consider region-neutral description with country-specific details in profiles.`,
+          );
         }
       }
 
       // Registry integrity: check country_scoped_assets skills exist in common
-      const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+      const schemaPath = join(ROOT, "docs", "workspace-schema.json");
       if (existsSync(schemaPath)) {
         try {
-          const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
-          const countryScoped = schema.country_scoped_assets as {
-            skills?: Record<string, string>;
-            scripts?: Record<string, string>;
-          } | undefined;
+          const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, unknown>;
+          const countryScoped = schema.country_scoped_assets as
+            | {
+                skills?: Record<string, string>;
+                scripts?: Record<string, string>;
+              }
+            | undefined;
 
           if (countryScoped?.skills) {
             for (const [skillName, scopedCountry] of Object.entries(countryScoped.skills)) {
-              const commonSkillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName);
+              const commonSkillPath = join(TEMPLATES_DIR, "common", "skills", skillName);
               if (!existsSync(commonSkillPath)) {
-                fail('root', 'country-scoped-assets', `Registry lists skill '${skillName}' as ${scopedCountry}-scoped but it's missing from templates/common/skills/`);
+                fail(
+                  "root",
+                  "country-scoped-assets",
+                  `Registry lists skill '${skillName}' as ${scopedCountry}-scoped but it's missing from templates/common/skills/`,
+                );
               }
             }
           }
 
           // For variants without KR in country_config.supported, warn if agents reference scoped skills
-          if (countryConfig?.supported && !countryConfig.supported.includes('KR')) {
-            const agentsDir = join(TEMPLATES_DIR, dir, 'agents');
+          if (countryConfig?.supported && !countryConfig.supported.includes("KR")) {
+            const agentsDir = join(TEMPLATES_DIR, dir, "agents");
             if (existsSync(agentsDir)) {
               for (const agentFile of readdirSync(agentsDir)) {
-                if (agentFile.endsWith('.md')) {
+                if (agentFile.endsWith(".md")) {
                   const agentPath = join(agentsDir, agentFile);
-                  const agentContent = readFileSync(agentPath, 'utf-8');
+                  const agentContent = readFileSync(agentPath, "utf-8");
                   const agentFrontmatter = parseFrontmatter(agentContent);
                   if (agentFrontmatter.required_skills) {
                     const requiredSkillsMatch = agentContent.match(/^required_skills:\s*\[(.*?)\]/m);
                     if (requiredSkillsMatch) {
-                      const requiredSkills = requiredSkillsMatch[1].split(',').map(s => s.trim().replace(/['"]/g, ''));
+                      const requiredSkills = requiredSkillsMatch[1]
+                        .split(",")
+                        .map((s) => s.trim().replace(/['"]/g, ""));
                       for (const skill of requiredSkills) {
                         if (Object.keys(countryScoped?.skills || {}).includes(skill)) {
-                          const scopedCountry = countryScoped?.skills?.[skill] || 'unknown';
-                          warn(dir, 'country-config', `templates/${dir}/agents/${agentFile} required_skills includes scoped skill '${skill}' but variant does not support ` + scopedCountry + `. Reference will be dangling after prune.`);
+                          const scopedCountry = countryScoped?.skills?.[skill] || "unknown";
+                          warn(
+                            dir,
+                            "country-config",
+                            `templates/${dir}/agents/${agentFile} required_skills includes scoped skill '${skill}' but variant does not support ` +
+                              scopedCountry +
+                              `. Reference will be dangling after prune.`,
+                          );
                         }
                       }
                     }
@@ -1382,31 +1619,41 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       // (no scaffolded project carries that file, §7.5 non-propagation) and
       // carries the _notes.root_allowlist_divergence record. The comparison
       // normalizes that sanctioned delta; ANY other divergence still fails.
-      const l1SchemaPath = join(TEMPLATES_DIR, 'common', 'docs', 'workspace-schema.json');
+      const l1SchemaPath = join(TEMPLATES_DIR, "common", "docs", "workspace-schema.json");
       if (existsSync(schemaPath) && existsSync(l1SchemaPath)) {
         try {
-          const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, 'utf-8'), 'root');
-          const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, 'utf-8'), 'l1');
+          const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, "utf-8"), "root");
+          const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, "utf-8"), "l1");
           if (rootCanon !== l1Canon) {
-            fail('root', 'schema-hash-parity', `docs/workspace-schema.json and templates/common/docs/workspace-schema.json diverge beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) — reconcile the hand-maintained pair deliberately, do not blind-copy.`);
+            fail(
+              "root",
+              "schema-hash-parity",
+              `docs/workspace-schema.json and templates/common/docs/workspace-schema.json diverge beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) — reconcile the hand-maintained pair deliberately, do not blind-copy.`,
+            );
           }
         } catch {
-          fail('root', 'schema-hash-parity', `docs/workspace-schema.json or templates/common/docs/workspace-schema.json is not valid JSON.`);
+          fail(
+            "root",
+            "schema-hash-parity",
+            `docs/workspace-schema.json or templates/common/docs/workspace-schema.json is not valid JSON.`,
+          );
         }
       }
 
       // B-06: env registry integrity checks against templates/common/.env.sample
-      const envSamplePath = join(TEMPLATES_DIR, 'common', '.env.sample');
+      const envSamplePath = join(TEMPLATES_DIR, "common", ".env.sample");
       if (existsSync(schemaPath) && existsSync(envSamplePath)) {
         try {
-          const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
-          const countryScoped = schema.country_scoped_assets as {
-            env?: Record<string, string>;
-          } | undefined;
+          const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, unknown>;
+          const countryScoped = schema.country_scoped_assets as
+            | {
+                env?: Record<string, string>;
+              }
+            | undefined;
 
           if (countryScoped?.env) {
-            const envContent = readFileSync(envSamplePath, 'utf-8');
-            const lines = envContent.split('\n');
+            const envContent = readFileSync(envSamplePath, "utf-8");
+            const lines = envContent.split("\n");
 
             // Track state for parsing marker blocks
             const openMarkers = new Map<number, string>(); // line number -> CODE
@@ -1424,16 +1671,28 @@ function checkVariantManifests(): Map<string, VariantManifest> {
                 const code = openMatch[1];
                 openMarkers.set(i, code);
                 if (currentBlock !== null) {
-                  fail('root', 'env-integrity', `templates/common/.env.sample has nested opening marker at line ${i + 1} without closing previous block at line ${currentBlock.startLine + 1}.`);
+                  fail(
+                    "root",
+                    "env-integrity",
+                    `templates/common/.env.sample has nested opening marker at line ${i + 1} without closing previous block at line ${currentBlock.startLine + 1}.`,
+                  );
                 }
                 currentBlock = { startLine: i, code };
               } else if (closeMatch) {
                 const code = closeMatch[1];
                 closeMarkers.set(i, code);
                 if (currentBlock === null) {
-                  fail('root', 'env-integrity', `templates/common/.env.sample has closing marker at line ${i + 1} without matching opening marker.`);
+                  fail(
+                    "root",
+                    "env-integrity",
+                    `templates/common/.env.sample has closing marker at line ${i + 1} without matching opening marker.`,
+                  );
                 } else if (currentBlock.code !== code) {
-                  fail('root', 'env-integrity', `templates/common/.env.sample marker mismatch: block opened with '${currentBlock.code}' at line ${currentBlock.startLine + 1} but closed with '${code}' at line ${i + 1}.`);
+                  fail(
+                    "root",
+                    "env-integrity",
+                    `templates/common/.env.sample marker mismatch: block opened with '${currentBlock.code}' at line ${currentBlock.startLine + 1} but closed with '${code}' at line ${i + 1}.`,
+                  );
                 } else {
                   blocks.push({ startLine: currentBlock.startLine, endLine: i, code: currentBlock.code });
                   currentBlock = null;
@@ -1443,12 +1702,20 @@ function checkVariantManifests(): Map<string, VariantManifest> {
 
             // Check for unclosed block
             if (currentBlock !== null) {
-              fail('root', 'env-integrity', `templates/common/.env.sample has unclosed block starting at line ${currentBlock.startLine + 1} with code '${currentBlock.code}'. Missing closing marker.`);
+              fail(
+                "root",
+                "env-integrity",
+                `templates/common/.env.sample has unclosed block starting at line ${currentBlock.startLine + 1} with code '${currentBlock.code}'. Missing closing marker.`,
+              );
             }
 
             // E2: validate balanced markers
             if (openMarkers.size !== closeMarkers.size) {
-              fail('root', 'env-integrity', `templates/common/.env.sample has ${openMarkers.size} opening markers but ${closeMarkers.size} closing markers. Each opening must have a matching closing marker.`);
+              fail(
+                "root",
+                "env-integrity",
+                `templates/common/.env.sample has ${openMarkers.size} opening markers but ${closeMarkers.size} closing markers. Each opening must have a matching closing marker.`,
+              );
             }
 
             // E1: check every registered env key appears in a matching block
@@ -1458,23 +1725,31 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             for (const block of blocks) {
               const blockCode = block.code;
               const blockLines = lines.slice(block.startLine, block.endLine + 1);
-              const blockText = blockLines.join('\n');
+              const blockText = blockLines.join("\n");
 
               // Find KEY= patterns in this block
               const keyMatches = blockText.match(/^([A-Z_]+)=/gm);
               if (keyMatches) {
                 for (const match of keyMatches) {
-                  const key = match.replace('=', '');
+                  const key = match.replace("=", "");
                   foundKeys.add(key);
 
                   // E3: check key is registered
                   if (!registeredKeys.has(key)) {
-                    fail('root', 'env-integrity', `templates/common/.env.sample contains unregistered env key '${key}' in ${blockCode}-scoped block (lines ${block.startLine + 1}-${block.endLine + 1}). Register it in workspace-schema.json country_scoped_assets.env.`);
+                    fail(
+                      "root",
+                      "env-integrity",
+                      `templates/common/.env.sample contains unregistered env key '${key}' in ${blockCode}-scoped block (lines ${block.startLine + 1}-${block.endLine + 1}). Register it in workspace-schema.json country_scoped_assets.env.`,
+                    );
                   } else {
                     // E3: check block code matches registered country
                     const registeredCountry = countryScoped.env![key];
                     if (registeredCountry !== blockCode) {
-                      fail('root', 'env-integrity', `templates/common/.env.sample key '${key}' is in ${blockCode}-scoped block but registered as ${registeredCountry}-scoped in workspace-schema.json. Mismatch at lines ${block.startLine + 1}-${block.endLine + 1}.`);
+                      fail(
+                        "root",
+                        "env-integrity",
+                        `templates/common/.env.sample key '${key}' is in ${blockCode}-scoped block but registered as ${registeredCountry}-scoped in workspace-schema.json. Mismatch at lines ${block.startLine + 1}-${block.endLine + 1}.`,
+                      );
                     }
                   }
                 }
@@ -1484,7 +1759,11 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             // E1: check every registered key was found
             for (const key of registeredKeys) {
               if (!foundKeys.has(key)) {
-                fail('root', 'env-integrity', `Registry env key '${key}' (registered as ${countryScoped.env![key]}) does not appear in templates/common/.env.sample. Add ${key}= inside a # >>> country-scoped:${countryScoped.env![key]} marker block.`);
+                fail(
+                  "root",
+                  "env-integrity",
+                  `Registry env key '${key}' (registered as ${countryScoped.env![key]}) does not appear in templates/common/.env.sample. Add ${key}= inside a # >>> country-scoped:${countryScoped.env![key]} marker block.`,
+                );
               }
             }
           }
@@ -1496,7 +1775,7 @@ function checkVariantManifests(): Map<string, VariantManifest> {
       manifests.set(dir, raw as unknown as VariantManifest);
       pass(`templates/${dir}/variant.json: status=${raw.status}`);
     } catch (e) {
-      fail(dir, 'variant-json', `templates/${dir}/variant.json is not valid JSON`);
+      fail(dir, "variant-json", `templates/${dir}/variant.json is not valid JSON`);
     }
   }
 
@@ -1505,23 +1784,26 @@ function checkVariantManifests(): Map<string, VariantManifest> {
 
 // Normalize content: strip BOM and normalize line endings
 function normalizeContent(raw: string): string {
-  return raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return raw
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
 }
 
 // Parse frontmatter fields from markdown (handles BOM, CRLF, multi-line values, YAML blocks, @resolved-from: header)
 function parseFrontmatter(rawContent: string): Record<string, true> {
   // Strip @resolved-from: comment line (L1-B Phase marker) before parsing
-  const strippedContent = rawContent.replace(/^# @resolved-from:.*\n/, '');
+  const strippedContent = rawContent.replace(/^# @resolved-from:.*\n/, "");
   const content = normalizeContent(strippedContent);
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   const fields: Record<string, true> = {};
-  for (const line of match[1].split('\n')) {
-    const colonIdx = line.indexOf(':');
+  for (const line of match[1].split("\n")) {
+    const colonIdx = line.indexOf(":");
     if (colonIdx === -1) continue;
     const key = line.slice(0, colonIdx).trim();
     // Only top-level keys (no leading spaces, no list items)
-    if (key && !key.startsWith(' ') && !key.startsWith('-')) fields[key] = true;
+    if (key && !key.startsWith(" ") && !key.startsWith("-")) fields[key] = true;
   }
   return fields;
 }
@@ -1535,10 +1817,10 @@ function parseFrontmatter(rawContent: string): Record<string, true> {
  */
 
 function getResolvedContent(filePath: string): string {
-  const rawContent = readFileSync(filePath, 'utf-8');
+  const rawContent = readFileSync(filePath, "utf-8");
   let fullContent = rawContent;
   // Strip @resolved-from: comment line before matching frontmatter
-  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, '');
+  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, "");
   const match = stripped.match(/^---\n([\s\S]*?)\n---/);
   if (match) {
     try {
@@ -1557,9 +1839,9 @@ function getResolvedContent(filePath: string): string {
 }
 
 function getResolvedYaml(filePath: string): Record<string, unknown> {
-  const rawContent = readFileSync(filePath, 'utf-8');
+  const rawContent = readFileSync(filePath, "utf-8");
   // Strip @resolved-from: comment line before matching frontmatter
-  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, '');
+  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, "");
   const match = stripped.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   try {
@@ -1583,7 +1865,7 @@ function resolveExtends(filePath: string, frontmatter: Record<string, true>): Re
   }
 
   // Extract the extends path from the raw content (we need the actual path string, not just 'true')
-  const rawContent = readFileSync(filePath, 'utf-8');
+  const rawContent = readFileSync(filePath, "utf-8");
   const content = normalizeContent(rawContent);
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return frontmatter;
@@ -1608,7 +1890,7 @@ function resolveExtends(filePath: string, frontmatter: Record<string, true>): Re
       return frontmatter;
     }
 
-    const skeletonContent = readFileSync(skeletonPath, 'utf-8');
+    const skeletonContent = readFileSync(skeletonPath, "utf-8");
     const skeletonMatch = skeletonContent.match(/^---\n([\s\S]*?)\n---/);
 
     if (!skeletonMatch) {
@@ -1624,7 +1906,7 @@ function resolveExtends(filePath: string, frontmatter: Record<string, true>): Re
     // Merge: skeleton base + variant overrides (variant takes precedence)
     const merged = { ...resolvedSkeleton };
     for (const key of Object.keys(frontmatter)) {
-      if (key !== 'extends') {
+      if (key !== "extends") {
         merged[key] = frontmatter[key];
       }
     }
@@ -1639,43 +1921,45 @@ function resolveExtends(filePath: string, frontmatter: Record<string, true>): Re
 // Check 3 & 4: Agent frontmatter and required sections
 function checkAgents(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 3-4: Agent files in ${variant} ===`);
-  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
   if (!existsSync(agentsDir)) {
-    warn(variant, 'agents-dir', `templates/${variant}/agents/ directory not found`);
+    warn(variant, "agents-dir", `templates/${variant}/agents/ directory not found`);
     return;
   }
 
-  const agentFiles = readdirSync(agentsDir).filter(f => f.endsWith('.md'));
+  const agentFiles = readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
   if (agentFiles.length === 0) {
-    warn(variant, 'agents-empty', `No agent .md files found in templates/${variant}/agents/`);
+    warn(variant, "agents-empty", `No agent .md files found in templates/${variant}/agents/`);
     return;
   }
 
   // Check for required agents/README.md and agents/README_ko.md (per VARIANT_CONTRACT.md)
-  for (const readmeFile of ['README.md', 'README_ko.md']) {
+  for (const readmeFile of ["README.md", "README_ko.md"]) {
     const readmePath = join(agentsDir, readmeFile);
     if (!existsSync(readmePath)) {
-      fail(variant, `agents-readme-missing`, `templates/${variant}/agents/${readmeFile} not found`,
-        `Create agents/${readmeFile} with agent roster table`);
+      fail(
+        variant,
+        `agents-readme-missing`,
+        `templates/${variant}/agents/${readmeFile} not found`,
+        `Create agents/${readmeFile} with agent roster table`,
+      );
     } else {
       pass(`${variant}/agents/${readmeFile}: present`);
     }
   }
 
-  const requiredFrontmatter = ['name', 'status', 'tier', 'description', 'examples'];
-  const validAgentStatuses = ['active', 'deprecated', 'experimental'];
+  const requiredFrontmatter = ["name", "status", "tier", "description", "examples"];
+  const validAgentStatuses = ["active", "deprecated", "experimental"];
   // PM uses "Meeting Facilitation" (facilitator role); all others use "Meeting Participation"
-  const MEETING_SECTIONS = ['## Meeting Participation', '## Meeting Facilitation'];
-  const DISPATCH_SECTION = '## Dispatch Protocol';
+  const MEETING_SECTIONS = ["## Meeting Participation", "## Meeting Facilitation"];
+  const DISPATCH_SECTION = "## Dispatch Protocol";
 
   // Only check actual agent definition files (skip README, handoff-spec, and similar docs)
-  const agentDefinitionFiles = agentFiles.filter(f =>
-    !f.startsWith('README') && !f.startsWith('handoff-spec')
-  );
+  const agentDefinitionFiles = agentFiles.filter((f) => !f.startsWith("README") && !f.startsWith("handoff-spec"));
 
   for (const file of agentDefinitionFiles) {
     const filePath = join(agentsDir, file);
-    const rawContent = readFileSync(filePath, 'utf-8');
+    const rawContent = readFileSync(filePath, "utf-8");
     const content = normalizeContent(rawContent);
     const fields = parseFrontmatter(rawContent);
 
@@ -1683,20 +1967,27 @@ function checkAgents(variant: string): void {
     const resolvedFields = resolveExtends(filePath, fields);
 
     // Check frontmatter (field must exist as a key, value can be empty/block)
-    const missingFields = requiredFrontmatter.filter(f => !(f in resolvedFields));
+    const missingFields = requiredFrontmatter.filter((f) => !(f in resolvedFields));
     if (missingFields.length > 0) {
-      fail(variant, 'agent-frontmatter', `agents/${file}: missing frontmatter: ${missingFields.join(', ')}`,
-        `Add missing fields to YAML frontmatter. Required: ${requiredFrontmatter.join(', ')}`);
+      fail(
+        variant,
+        "agent-frontmatter",
+        `agents/${file}: missing frontmatter: ${missingFields.join(", ")}`,
+        `Add missing fields to YAML frontmatter. Required: ${requiredFrontmatter.join(", ")}`,
+      );
     } else {
       // Validate status enum value (extract actual value from resolved content)
-      let statusVal = '';
+      let statusVal = "";
       const resolvedYaml = getResolvedYaml(filePath);
-      statusVal = (resolvedYaml.status as string) ?? '';
+      statusVal = (resolvedYaml.status as string) ?? "";
 
       if (!validAgentStatuses.includes(statusVal)) {
-        fail(variant, 'agent-status-invalid',
-          `agents/${file}: invalid status value '${statusVal}' (allowed: ${validAgentStatuses.join(' | ')})`,
-          `Set status to one of: ${validAgentStatuses.join(', ')}`);
+        fail(
+          variant,
+          "agent-status-invalid",
+          `agents/${file}: invalid status value '${statusVal}' (allowed: ${validAgentStatuses.join(" | ")})`,
+          `Set status to one of: ${validAgentStatuses.join(", ")}`,
+        );
       } else {
         pass(`agents/${file}: frontmatter OK`);
       }
@@ -1704,41 +1995,53 @@ function checkAgents(variant: string): void {
 
     // Check required sections
     // For additive overrides, invariant sections may be missing from variant file (provided by skeleton)
-    const agentName = file.replace('.md', '');
-    const variantJsonForAgent = join(TEMPLATES_DIR, variant, 'variant.json');
-    let agentOverrideType = 'replacement';
+    const agentName = file.replace(".md", "");
+    const variantJsonForAgent = join(TEMPLATES_DIR, variant, "variant.json");
+    let agentOverrideType = "replacement";
     if (existsSync(variantJsonForAgent)) {
       try {
-        const vj = JSON.parse(readFileSync(variantJsonForAgent, 'utf-8'));
-        agentOverrideType = vj.agent_overrides?.[agentName]?.type ?? 'replacement';
-      } catch { /* keep default */ }
+        const vj = JSON.parse(readFileSync(variantJsonForAgent, "utf-8"));
+        agentOverrideType = vj.agent_overrides?.[agentName]?.type ?? "replacement";
+      } catch {
+        /* keep default */
+      }
     }
-    const commonAgentPath = join(TEMPLATES_DIR, 'common', 'agents', file);
+    const commonAgentPath = join(TEMPLATES_DIR, "common", "agents", file);
     const commonAgentContent = existsSync(commonAgentPath)
-      ? normalizeContent(readFileSync(commonAgentPath, 'utf-8'))
-      : '';
+      ? normalizeContent(readFileSync(commonAgentPath, "utf-8"))
+      : "";
 
     const fullResolvedContent = getResolvedContent(filePath);
 
     // Detect pure YAML-skeleton pm.md (extends: pattern, no body content — ADR-0033)
     // In this pattern, Dispatch Protocol lives in AGENTS.md §3, so section checks are exempt.
-    const isYamlSkeletonPm = file === 'pm.md' && rawContent.trim().match(/^---[\s\S]*?---\s*$/) !== null;
+    const isYamlSkeletonPm = file === "pm.md" && rawContent.trim().match(/^---[\s\S]*?---\s*$/) !== null;
     // Detect resolved pm.md (pre-resolved by resolve-variants.ts L1-B Phase)
     // Resolved files also have Dispatch Protocol in AGENTS.md §3, so section checks are exempt.
-    const isResolvedPm = file === 'pm.md' && rawContent.startsWith('# @resolved-from:');
+    const isResolvedPm = file === "pm.md" && rawContent.startsWith("# @resolved-from:");
 
     // Section is "present" if in variant file OR (additive override AND in skeleton) OR recursively inherited via extends
-    const hasMeetingSection = isYamlSkeletonPm || isResolvedPm || MEETING_SECTIONS.some(s =>
-      content.includes(s) || (agentOverrideType === 'additive' && commonAgentContent.includes(s)) || fullResolvedContent.includes(s)
-    );
-    const hasDispatchSection = isYamlSkeletonPm || isResolvedPm || content.includes(DISPATCH_SECTION) ||
-      (agentOverrideType === 'additive' && commonAgentContent.includes(DISPATCH_SECTION)) || fullResolvedContent.includes(DISPATCH_SECTION);
+    const hasMeetingSection =
+      isYamlSkeletonPm ||
+      isResolvedPm ||
+      MEETING_SECTIONS.some(
+        (s) =>
+          content.includes(s) ||
+          (agentOverrideType === "additive" && commonAgentContent.includes(s)) ||
+          fullResolvedContent.includes(s),
+      );
+    const hasDispatchSection =
+      isYamlSkeletonPm ||
+      isResolvedPm ||
+      content.includes(DISPATCH_SECTION) ||
+      (agentOverrideType === "additive" && commonAgentContent.includes(DISPATCH_SECTION)) ||
+      fullResolvedContent.includes(DISPATCH_SECTION);
     const missingSections: string[] = [];
-    if (!hasMeetingSection) missingSections.push('## Meeting Participation (or ## Meeting Facilitation)');
+    if (!hasMeetingSection) missingSections.push("## Meeting Participation (or ## Meeting Facilitation)");
     if (!hasDispatchSection) missingSections.push(DISPATCH_SECTION);
 
     if (missingSections.length > 0) {
-      fail(variant, 'agent-sections', `agents/${file}: missing sections: ${missingSections.join(', ')}`);
+      fail(variant, "agent-sections", `agents/${file}: missing sections: ${missingSections.join(", ")}`);
     } else {
       pass(`agents/${file}: required sections OK`);
     }
@@ -1748,41 +2051,53 @@ function checkAgents(variant: string): void {
 // Check 5: AGENTS.md roster vs actual files
 function checkAgentsRoster(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 5: AGENTS.md roster in ${variant} ===`);
-  const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
-  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
 
   if (!existsSync(agentsMdPath)) {
-    fail(variant, 'agents-roster', `templates/${variant}/AGENTS.md not found`);
+    fail(variant, "agents-roster", `templates/${variant}/AGENTS.md not found`);
     return;
   }
   if (!existsSync(agentsDir)) return;
 
-  const agentsMd = readFileSync(agentsMdPath, 'utf-8');
+  const agentsMd = readFileSync(agentsMdPath, "utf-8");
   const registeredFiles = new Set<string>();
   for (const match of agentsMd.matchAll(/\[([^\]]+)\]\(agents\/([^)]+)\.md\)/g)) {
     registeredFiles.add(`${match[2]}.md`);
   }
 
   // Exclude documentation files (README, handoff-spec) from roster check
-  const actualFiles = new Set(readdirSync(agentsDir).filter(f =>
-    f.endsWith('.md') && !f.startsWith('README') && !f.startsWith('handoff-spec')
-  ));
+  const actualFiles = new Set(
+    readdirSync(agentsDir).filter((f) => f.endsWith(".md") && !f.startsWith("README") && !f.startsWith("handoff-spec")),
+  );
 
   // Also consider agents inherited from templates/common/agents/ as "present"
-  const commonAgentsDir = join(TEMPLATES_DIR, 'common', 'agents');
+  const commonAgentsDir = join(TEMPLATES_DIR, "common", "agents");
   const commonAgentFiles = existsSync(commonAgentsDir)
-    ? new Set(readdirSync(commonAgentsDir).filter(f => f.endsWith('.md') && !f.startsWith('_') && !f.startsWith('README')))
+    ? new Set(
+        readdirSync(commonAgentsDir).filter((f) => f.endsWith(".md") && !f.startsWith("_") && !f.startsWith("README")),
+      )
     : new Set<string>();
   const allAvailableFiles = new Set([...actualFiles, ...commonAgentFiles]);
 
-  const orphaned = [...actualFiles].filter(f => !registeredFiles.has(f));
-  const missing = [...registeredFiles].filter(f => !allAvailableFiles.has(f));
+  const orphaned = [...actualFiles].filter((f) => !registeredFiles.has(f));
+  const missing = [...registeredFiles].filter((f) => !allAvailableFiles.has(f));
 
   if (orphaned.length > 0) {
-    warn(variant, 'agents-roster', `Orphaned agent files (not in AGENTS.md): ${orphaned.join(', ')}`, 'Add to AGENTS.md roster table');
+    warn(
+      variant,
+      "agents-roster",
+      `Orphaned agent files (not in AGENTS.md): ${orphaned.join(", ")}`,
+      "Add to AGENTS.md roster table",
+    );
   }
   if (missing.length > 0) {
-    warn(variant, 'agents-roster', `AGENTS.md references missing files: ${missing.join(', ')}`, 'Create the agent file or remove from AGENTS.md');
+    warn(
+      variant,
+      "agents-roster",
+      `AGENTS.md references missing files: ${missing.join(", ")}`,
+      "Create the agent file or remove from AGENTS.md",
+    );
   }
   if (orphaned.length === 0 && missing.length === 0) {
     pass(`${variant}/AGENTS.md roster matches filesystem (${actualFiles.size} agents)`);
@@ -1798,24 +2113,32 @@ function checkAgentsRoster(variant: string): void {
 // docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
 // T-20260925-003); recorded exclusion, not a silent skip.
 const COMMAND_SURFACES: ReadonlyArray<readonly [string, string]> = [
-  ['.claude', 'commands'],
-  ['.gemini', 'commands'],
-  ['.codex', 'prompts'],
+  [".claude", "commands"],
+  [".gemini", "commands"],
+  [".codex", "prompts"],
 ];
 /** Net-new surfaces soaking in WARN (ADR-0055); promotion ticket flips to fail. */
-const SOAK_COMMAND_SURFACES = new Set(['.codex/prompts']);
+const SOAK_COMMAND_SURFACES = new Set([".codex/prompts"]);
 
 function checkCommands(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 6: commands in ${variant} ===`);
 
-  const allSharedCommands = ['changelog.md', 'commit-push-pr.md', 'gateguard.md', 'memlog.md', 'new-task.md', 'project-review.md', 'sync.md'];
+  const allSharedCommands = [
+    "changelog.md",
+    "commit-push-pr.md",
+    "gateguard.md",
+    "memlog.md",
+    "new-task.md",
+    "project-review.md",
+    "sync.md",
+  ];
 
-  if (variant === 'common') {
+  if (variant === "common") {
     // common/ must have all shared commands in every command surface
     for (const [platform, leaf] of COMMAND_SURFACES) {
-      const commandsDir = join(TEMPLATES_DIR, 'common', platform, leaf);
+      const commandsDir = join(TEMPLATES_DIR, "common", platform, leaf);
       if (!existsSync(commandsDir)) {
-        fail('common', 'commands-dir', `templates/common/${platform}/${leaf}/ not found`);
+        fail("common", "commands-dir", `templates/common/${platform}/${leaf}/ not found`);
         continue;
       }
       const soak = SOAK_COMMAND_SURFACES.has(`${platform}/${leaf}`);
@@ -1823,28 +2146,34 @@ function checkCommands(variant: string): void {
       for (const cmd of allSharedCommands) {
         // Gemini custom commands are TOML-only (T-20261013-009 phase 2): the
         // .gemini surface stores `<name>.toml` rendered from the .claude SSOT.
-        const expected = platform === '.gemini' ? cmd.replace(/\.md$/, '.toml') : cmd;
+        const expected = platform === ".gemini" ? cmd.replace(/\.md$/, ".toml") : cmd;
         if (!existsSync(join(commandsDir, expected))) {
-          emit('common', 'command-missing', `${platform}/${leaf}/${expected} not found in common/`);
+          emit("common", "command-missing", `${platform}/${leaf}/${expected} not found in common/`);
         }
       }
-      pass(`common/${platform}/${leaf}: ${allSharedCommands.length} shared commands OK${soak ? ' (soak: WARN until promotion)' : ''}`);
+      pass(
+        `common/${platform}/${leaf}: ${allSharedCommands.length} shared commands OK${soak ? " (soak: WARN until promotion)" : ""}`,
+      );
     }
     return;
   }
 
   // Variants must NOT have shared commands (inherited from common/ via new-project.sh overlay)
   // Only security-check.md is allowed as a variant-specific command
-  const allowedVariantCommands = new Set(['security-check.md']);
+  const allowedVariantCommands = new Set(["security-check.md"]);
   for (const [platform, leaf] of COMMAND_SURFACES) {
     const commandsDir = join(TEMPLATES_DIR, variant, platform, leaf);
     if (!existsSync(commandsDir)) continue;
     const soak = SOAK_COMMAND_SURFACES.has(`${platform}/${leaf}`);
     const emit = soak ? warn : fail;
     const files = readdirSync(commandsDir);
-    const unexpected = files.filter(f => !allowedVariantCommands.has(f));
+    const unexpected = files.filter((f) => !allowedVariantCommands.has(f));
     if (unexpected.length > 0) {
-      emit(variant, 'command-duplicate', `${platform}/${leaf}/ contains shared commands that belong in common/ only: ${unexpected.join(', ')}`);
+      emit(
+        variant,
+        "command-duplicate",
+        `${platform}/${leaf}/ contains shared commands that belong in common/ only: ${unexpected.join(", ")}`,
+      );
     } else {
       pass(`${variant}/${platform}/${leaf}: OK (${files.length} variant-specific file(s))`);
     }
@@ -1859,17 +2188,27 @@ function checkCommands(variant: string): void {
 function checkReadmePresence(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 11: README presence in ${variant} ===`);
 
-  const readmePath = join(TEMPLATES_DIR, variant, 'README.md');
-  const readmeKoPath = join(TEMPLATES_DIR, variant, 'README_ko.md');
+  const readmePath = join(TEMPLATES_DIR, variant, "README.md");
+  const readmeKoPath = join(TEMPLATES_DIR, variant, "README_ko.md");
 
   const readmeExists = existsSync(readmePath);
   const readmeKoExists = existsSync(readmeKoPath);
 
   if (!readmeExists) {
-    fail(variant, 'readme-presence', `templates/${variant}/README.md is missing`, `Create README.md with a content_hash: frontmatter field`);
+    fail(
+      variant,
+      "readme-presence",
+      `templates/${variant}/README.md is missing`,
+      `Create README.md with a content_hash: frontmatter field`,
+    );
   }
   if (!readmeKoExists) {
-    fail(variant, 'readme-presence', `templates/${variant}/README_ko.md is missing`, `Create README_ko.md with a translated_from_hash: frontmatter field`);
+    fail(
+      variant,
+      "readme-presence",
+      `templates/${variant}/README_ko.md is missing`,
+      `Create README_ko.md with a translated_from_hash: frontmatter field`,
+    );
   }
 
   if (readmeExists && readmeKoExists) {
@@ -1878,15 +2217,25 @@ function checkReadmePresence(variant: string): void {
 
   // Warn if frontmatter hash fields are missing
   if (readmeExists) {
-    const readmeFields = parseFrontmatter(readFileSync(readmePath, 'utf-8'));
-    if (!('content_hash' in readmeFields)) {
-      warn(variant, 'readme-frontmatter', `templates/${variant}/README.md is missing 'content_hash:' frontmatter field`, `Add 'content_hash: <hash>' to the README.md frontmatter`);
+    const readmeFields = parseFrontmatter(readFileSync(readmePath, "utf-8"));
+    if (!("content_hash" in readmeFields)) {
+      warn(
+        variant,
+        "readme-frontmatter",
+        `templates/${variant}/README.md is missing 'content_hash:' frontmatter field`,
+        `Add 'content_hash: <hash>' to the README.md frontmatter`,
+      );
     }
   }
   if (readmeKoExists) {
-    const readmeKoFields = parseFrontmatter(readFileSync(readmeKoPath, 'utf-8'));
-    if (!('translated_from_hash' in readmeKoFields)) {
-      warn(variant, 'readme-frontmatter', `templates/${variant}/README_ko.md is missing 'translated_from_hash:' frontmatter field`, `Add 'translated_from_hash: <hash>' to the README_ko.md frontmatter`);
+    const readmeKoFields = parseFrontmatter(readFileSync(readmeKoPath, "utf-8"));
+    if (!("translated_from_hash" in readmeKoFields)) {
+      warn(
+        variant,
+        "readme-frontmatter",
+        `templates/${variant}/README_ko.md is missing 'translated_from_hash:' frontmatter field`,
+        `Add 'translated_from_hash: <hash>' to the README_ko.md frontmatter`,
+      );
     }
   }
 }
@@ -1894,22 +2243,27 @@ function checkReadmePresence(variant: string): void {
 // Check 9: docs/context.md sync and broken paths
 function checkContextSync(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 9: docs/context.md sync and paths in ${variant} ===`);
-  const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
-  const contextMdPath = join(TEMPLATES_DIR, variant, 'docs', `${variant}.context.md`);
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
+  const contextMdPath = join(TEMPLATES_DIR, variant, "docs", `${variant}.context.md`);
 
   if (!existsSync(agentsMdPath) || !existsSync(contextMdPath)) {
     if (existsSync(agentsMdPath) && !existsSync(contextMdPath)) {
-      warn(variant, 'context-missing', `templates/${variant}/docs/${variant}.context.md not found — variant contract declares this as Required`, `Create docs/${variant}.context.md`);
+      warn(
+        variant,
+        "context-missing",
+        `templates/${variant}/docs/${variant}.context.md not found — variant contract declares this as Required`,
+        `Create docs/${variant}.context.md`,
+      );
     }
     return;
   }
 
-  const agentsMd = readFileSync(agentsMdPath, 'utf-8');
-  const contextMd = readFileSync(contextMdPath, 'utf-8');
+  const agentsMd = readFileSync(agentsMdPath, "utf-8");
+  const contextMd = readFileSync(contextMdPath, "utf-8");
 
   // Check for broken paths in AGENTS.md
-  if (agentsMd.includes('../common/skills/')) {
-    fail(variant, 'broken-paths', `AGENTS.md contains broken '../common/skills/' paths`, `Change to 'skills/'`);
+  if (agentsMd.includes("../common/skills/")) {
+    fail(variant, "broken-paths", `AGENTS.md contains broken '../common/skills/' paths`, `Change to 'skills/'`);
   }
 
   // Find all skills in AGENTS.md
@@ -1927,28 +2281,37 @@ function checkContextSync(variant: string): void {
   // platform-lifecycle-manager pair instead.
   let commonSkillsAllowed = true;
   try {
-    const vjson = JSON.parse(readFileSync(join(TEMPLATES_DIR, variant, 'variant.json'), 'utf-8')) as { inherits_common?: unknown };
+    const vjson = JSON.parse(readFileSync(join(TEMPLATES_DIR, variant, "variant.json"), "utf-8")) as {
+      inherits_common?: unknown;
+    };
     commonSkillsAllowed = vjson.inherits_common !== false;
-  } catch { /* unparseable/absent variant.json: default to common-allowed */ }
+  } catch {
+    /* unparseable/absent variant.json: default to common-allowed */
+  }
   const skillHomeBases = [
-    join(TEMPLATES_DIR, variant, 'skills'),
-    ...(commonSkillsAllowed ? [join(TEMPLATES_DIR, 'common', 'skills')] : []),
-    ...PLATFORM_MIRROR_DIRS.map((m) => join(TEMPLATES_DIR, variant, m, 'skills')),
+    join(TEMPLATES_DIR, variant, "skills"),
+    ...(commonSkillsAllowed ? [join(TEMPLATES_DIR, "common", "skills")] : []),
+    ...PLATFORM_MIRROR_DIRS.map((m) => join(TEMPLATES_DIR, variant, m, "skills")),
   ];
   const unresolvedSkillRefs: string[] = [];
   for (const ref of expectedSkills) {
-    const name = ref.split('/').slice(-2, -1)[0] ?? ref;
-    if (skillHomeBases.some((base) => existsSync(join(base, name, 'SKILL.md')))) continue;
+    const name = ref.split("/").slice(-2, -1)[0] ?? ref;
+    if (skillHomeBases.some((base) => existsSync(join(base, name, "SKILL.md")))) continue;
     unresolvedSkillRefs.push(ref);
   }
   if (unresolvedSkillRefs.length > 0) {
-    fail(variant, 'phantom-skill-ref', `AGENTS.md references skills that resolve to no skill dir: ${unresolvedSkillRefs.join(', ')}`, 'Fix the path (variant skills/, templates/common/skills/, or a platform mirror) or remove the reference');
+    fail(
+      variant,
+      "phantom-skill-ref",
+      `AGENTS.md references skills that resolve to no skill dir: ${unresolvedSkillRefs.join(", ")}`,
+      "Fix the path (variant skills/, templates/common/skills/, or a platform mirror) or remove the reference",
+    );
   } else if (expectedSkills.size > 0) {
     pass(`${variant}/AGENTS.md skill references resolve (${expectedSkills.size} referenced)`);
   }
 
   // If DYNAMIC_SKILLS markers are present, inject-skills.ts handles sync at scaffold time — skip static check
-  if (contextMd.includes('<!-- DYNAMIC_SKILLS_START -->')) {
+  if (contextMd.includes("<!-- DYNAMIC_SKILLS_START -->")) {
     pass(`${variant}/docs/context.md uses DYNAMIC_SKILLS injection (runtime sync via inject-skills.ts)`);
     return;
   }
@@ -1962,7 +2325,12 @@ function checkContextSync(variant: string): void {
   }
 
   if (missingSkills.length > 0) {
-    fail(variant, 'context-sync', `docs/context.md is missing skills defined in AGENTS.md: ${missingSkills.join(', ')}`, 'Sync the ## Skills table in docs/context.md with AGENTS.md');
+    fail(
+      variant,
+      "context-sync",
+      `docs/context.md is missing skills defined in AGENTS.md: ${missingSkills.join(", ")}`,
+      "Sync the ## Skills table in docs/context.md with AGENTS.md",
+    );
   } else {
     pass(`${variant}/docs/context.md has all ${expectedSkills.size} skills from AGENTS.md`);
   }
@@ -1970,8 +2338,8 @@ function checkContextSync(variant: string): void {
 
 // Check 10: Root vs Template Alignment (L0 vs L1 Sync)
 function checkL0L1ScriptParity() {
-  const L0_SCRIPTS = join(ROOT, 'scripts');
-  const L1_SCRIPTS = join(ROOT, 'templates', 'common', 'scripts');
+  const L0_SCRIPTS = join(ROOT, "scripts");
+  const L1_SCRIPTS = join(ROOT, "templates", "common", "scripts");
 
   if (!existsSync(L1_SCRIPTS) || !existsSync(L0_SCRIPTS)) return;
 
@@ -1979,16 +2347,16 @@ function checkL0L1ScriptParity() {
   // Any script whose `layer` column is exactly "common" must exist in both
   // scripts/ (workspace root) and templates/common/scripts/.
   // To add a new script to the check, register it in SCRIPTS.md with layer=common.
-  const scriptsRegistryPath = join(ROOT, 'scripts', 'SCRIPTS.md');
+  const scriptsRegistryPath = join(ROOT, "scripts", "SCRIPTS.md");
   const commonScripts = new Set<string>();
 
   if (existsSync(scriptsRegistryPath)) {
-    const registryContent = readFileSync(scriptsRegistryPath, 'utf-8');
+    const registryContent = readFileSync(scriptsRegistryPath, "utf-8");
     // Parse the markdown table rows between ## Registry and the next ## header.
     // Column order: script | source | version | status | removal-date | security-advisory | layer | pair
-    const registrySection = registryContent.split(/^## /m).find(s => s.startsWith('Registry'));
+    const registrySection = registryContent.split(/^## /m).find((s) => s.startsWith("Registry"));
     if (registrySection) {
-      for (const line of registrySection.split('\n')) {
+      for (const line of registrySection.split("\n")) {
         // Match table data rows (start with |, not separator rows with dashes)
         const match = line.match(/^\|\s*`([^`]+)`\s*\|(?:[^|]*\|){4}[^|]*\|\s*common\s*\|/);
         if (match) {
@@ -2003,31 +2371,31 @@ function checkL0L1ScriptParity() {
   // files without pulling in intentionally diverged L0-only scripts.
   const l0OnlyScripts = new Set<string>();
   if (existsSync(scriptsRegistryPath)) {
-    const registryContent = readFileSync(scriptsRegistryPath, 'utf-8');
-    const registrySection = registryContent.split(/^## /m).find(s => s.startsWith('Registry'));
+    const registryContent = readFileSync(scriptsRegistryPath, "utf-8");
+    const registrySection = registryContent.split(/^## /m).find((s) => s.startsWith("Registry"));
     if (registrySection) {
-      for (const line of registrySection.split('\n')) {
+      for (const line of registrySection.split("\n")) {
         const match = line.match(/^\|\s*`([^`]+)`\s*\|(?:[^|]*\|){4}[^|]*\|\s*L0-only\s*\|/);
         if (match) l0OnlyScripts.add(match[1].trim());
       }
     }
   }
-  const l0Files = new Set(readdirSync(L0_SCRIPTS).filter(f => !statSync(join(L0_SCRIPTS, f)).isDirectory()));
-  const l1Files = new Set(readdirSync(L1_SCRIPTS).filter(f => !statSync(join(L1_SCRIPTS, f)).isDirectory()));
+  const l0Files = new Set(readdirSync(L0_SCRIPTS).filter((f) => !statSync(join(L0_SCRIPTS, f)).isDirectory()));
+  const l1Files = new Set(readdirSync(L1_SCRIPTS).filter((f) => !statSync(join(L1_SCRIPTS, f)).isDirectory()));
   // Exclude registry/documentation files — SCRIPTS.md is intentionally a per-layer subset
-  const registryFiles = new Set(['SCRIPTS.md']);
-  const filesInBoth = [...l1Files].filter(f => l0Files.has(f) && !l0OnlyScripts.has(f) && !registryFiles.has(f));
+  const registryFiles = new Set(["SCRIPTS.md"]);
+  const filesInBoth = [...l1Files].filter((f) => l0Files.has(f) && !l0OnlyScripts.has(f) && !registryFiles.has(f));
   for (const f of filesInBoth) {
     commonScripts.add(f);
   }
 
-  const normalize = (str: string) => str.replace(/\r\n/g, '\n');
+  const normalize = (str: string) => str.replace(/\r\n/g, "\n");
 
   for (const script of commonScripts) {
     // Skip helper sub-paths and non-file entries that may appear in the registry
-    if (script.includes('/')) continue;
+    if (script.includes("/")) continue;
     // Scripts, docs, and data files are parity-checked; other extensions are not propagated
-    if (!script.endsWith('.ts') && !script.endsWith('.md') && !script.endsWith('.json')) continue;
+    if (!script.endsWith(".ts") && !script.endsWith(".md") && !script.endsWith(".json")) continue;
 
     const l1Path = join(L1_SCRIPTS, script);
     const l0Path = join(L0_SCRIPTS, script);
@@ -2035,10 +2403,15 @@ function checkL0L1ScriptParity() {
     if (existsSync(l1Path) && existsSync(l0Path)) {
       let l1Content: string, l0Content: string;
       try {
-        l1Content = readFileSync(l1Path, 'utf-8');
-        l0Content = readFileSync(l0Path, 'utf-8');
+        l1Content = readFileSync(l1Path, "utf-8");
+        l0Content = readFileSync(l0Path, "utf-8");
       } catch (err) {
-        warn('common', 'l0-l1-script-parity', `Failed to read ${script} in L0 or L1: ${err}`, `Check file permissions or OS file locks.`);
+        warn(
+          "common",
+          "l0-l1-script-parity",
+          `Failed to read ${script} in L0 or L1: ${err}`,
+          `Check file permissions or OS file locks.`,
+        );
         continue;
       }
 
@@ -2046,7 +2419,12 @@ function checkL0L1ScriptParity() {
       // see propagate-to-templates.ts's scrubConstitutionRefs); normalize L0 the same way before comparison.
       const l0Normalized = scrubConstitutionRefs(normalize(l0Content), l0Path, l1Path);
       if (normalize(l1Content) !== l0Normalized) {
-        fail('common', 'l0-l1-script-parity', `Script ${script} differs between L0 (root) and L1 (templates/common).`, `Backport L0 changes to L1 or update L0 to match L1.`);
+        fail(
+          "common",
+          "l0-l1-script-parity",
+          `Script ${script} differs between L0 (root) and L1 (templates/common).`,
+          `Backport L0 changes to L1 or update L0 to match L1.`,
+        );
       } else {
         pass(`Script ${script} is in sync between L0 and L1`);
       }
@@ -2062,24 +2440,39 @@ function checkL0L1ScriptParity() {
   // be identical; a mismatch is an Error. Row presence differences (a name in
   // only one registry) are verify-scripts.ts's ghost/unregistered scope, not
   // parity's.
-  const l1RegistryPath = join(L1_SCRIPTS, 'SCRIPTS.md');
+  const l1RegistryPath = join(L1_SCRIPTS, "SCRIPTS.md");
   if (existsSync(scriptsRegistryPath) && existsSync(l1RegistryPath)) {
     let l0Rows: Map<string, ScriptsRegistryRow> | null = null;
     let l1Rows: Map<string, ScriptsRegistryRow> | null = null;
     try {
-      l0Rows = parseScriptsMdRegistry(readFileSync(scriptsRegistryPath, 'utf-8'));
-      l1Rows = parseScriptsMdRegistry(readFileSync(l1RegistryPath, 'utf-8'));
+      l0Rows = parseScriptsMdRegistry(readFileSync(scriptsRegistryPath, "utf-8"));
+      l1Rows = parseScriptsMdRegistry(readFileSync(l1RegistryPath, "utf-8"));
     } catch (err) {
-      warn('common', 'l0-l1-scripts-registry-version', `Failed to read a SCRIPTS.md registry: ${err}`, `Check file permissions or OS file locks.`);
+      warn(
+        "common",
+        "l0-l1-scripts-registry-version",
+        `Failed to read a SCRIPTS.md registry: ${err}`,
+        `Check file permissions or OS file locks.`,
+      );
     }
     if (l0Rows && l1Rows) {
       for (const [name, l0Row] of l0Rows) {
         const l1Row = l1Rows.get(name);
         if (!l1Row) continue; // name present in only one registry — out of parity scope
         if (!l0Row.version || !l1Row.version) {
-          fail('common', 'l0-l1-scripts-registry-version', `SCRIPTS.md registry row '${name}' has an empty Version cell (L0=${l0Row.version || '<empty>'}, L1=${l1Row.version || '<empty>'})`, `Set the Version cell in both SCRIPTS.md registries (the frontmatter/@version of the script is the source)`);
+          fail(
+            "common",
+            "l0-l1-scripts-registry-version",
+            `SCRIPTS.md registry row '${name}' has an empty Version cell (L0=${l0Row.version || "<empty>"}, L1=${l1Row.version || "<empty>"})`,
+            `Set the Version cell in both SCRIPTS.md registries (the frontmatter/@version of the script is the source)`,
+          );
         } else if (l0Row.version !== l1Row.version) {
-          fail('common', 'l0-l1-scripts-registry-version', `SCRIPTS.md registry version mismatch for '${name}': L0=${l0Row.version}, L1=${l1Row.version}`, `Update the templates/common/scripts/SCRIPTS.md row to ${l0Row.version} (the L1 registry is hand-maintained)`);
+          fail(
+            "common",
+            "l0-l1-scripts-registry-version",
+            `SCRIPTS.md registry version mismatch for '${name}': L0=${l0Row.version}, L1=${l1Row.version}`,
+            `Update the templates/common/scripts/SCRIPTS.md row to ${l0Row.version} (the L1 registry is hand-maintained)`,
+          );
         } else {
           pass(`SCRIPTS.md registry version parity OK for '${name}' (${l0Row.version})`);
         }
@@ -2089,9 +2482,9 @@ function checkL0L1ScriptParity() {
 
   // Recursively check subdirectories: helpers/, hooks/ (WARN on diff/missing), lib/ (ERROR on diff/missing)
   const subdirs = [
-    { name: 'helpers', level: 'warn' as const },
-    { name: 'hooks',   level: 'warn' as const },
-    { name: 'lib',     level: 'error' as const },
+    { name: "helpers", level: "warn" as const },
+    { name: "hooks", level: "warn" as const },
+    { name: "lib", level: "error" as const },
   ];
 
   for (const { name: subdir, level } of subdirs) {
@@ -2100,8 +2493,9 @@ function checkL0L1ScriptParity() {
 
     if (!existsSync(l0SubDir)) continue; // subdir doesn't exist in L0 — skip
 
-    const l0SubFiles = readdirSync(l0SubDir)
-      .filter(f => f.endsWith('.ts') && !statSync(join(l0SubDir, f)).isDirectory());
+    const l0SubFiles = readdirSync(l0SubDir).filter(
+      (f) => f.endsWith(".ts") && !statSync(join(l0SubDir, f)).isDirectory(),
+    );
 
     for (const file of l0SubFiles) {
       const l0FilePath = join(l0SubDir, file);
@@ -2113,20 +2507,25 @@ function checkL0L1ScriptParity() {
         if (!includeScriptInL1(file)) continue;
         const msg = `scripts/${subdir}/${file} exists in L0 but is missing from templates/common/scripts/${subdir}/`;
         const fix = `Copy scripts/${subdir}/${file} to templates/common/scripts/${subdir}/${file}`;
-        if (level === 'error') {
-          fail('common', 'l0-l1-subdir-parity', msg, fix);
+        if (level === "error") {
+          fail("common", "l0-l1-subdir-parity", msg, fix);
         } else {
-          warn('common', 'l0-l1-subdir-parity', msg, fix);
+          warn("common", "l0-l1-subdir-parity", msg, fix);
         }
         continue;
       }
 
       let l0Content: string, l1Content: string;
       try {
-        l0Content = readFileSync(l0FilePath, 'utf-8');
-        l1Content = readFileSync(l1FilePath, 'utf-8');
+        l0Content = readFileSync(l0FilePath, "utf-8");
+        l1Content = readFileSync(l1FilePath, "utf-8");
       } catch (err) {
-        warn('common', 'l0-l1-subdir-parity', `Failed to read scripts/${subdir}/${file} in L0 or L1: ${err}`, `Check file permissions or OS file locks.`);
+        warn(
+          "common",
+          "l0-l1-subdir-parity",
+          `Failed to read scripts/${subdir}/${file} in L0 or L1: ${err}`,
+          `Check file permissions or OS file locks.`,
+        );
         continue;
       }
 
@@ -2136,10 +2535,10 @@ function checkL0L1ScriptParity() {
       if (l0Normalized !== normalize(l1Content)) {
         const msg = `scripts/${subdir}/${file} content differs between L0 (root) and L1 (templates/common/scripts/${subdir}/).`;
         const fix = `Backport L0 changes to templates/common/scripts/${subdir}/${file} or update L0 to match L1.`;
-        if (level === 'error') {
-          fail('common', 'l0-l1-subdir-parity', msg, fix);
+        if (level === "error") {
+          fail("common", "l0-l1-subdir-parity", msg, fix);
         } else {
-          warn('common', 'l0-l1-subdir-parity', msg, fix);
+          warn("common", "l0-l1-subdir-parity", msg, fix);
         }
       } else {
         pass(`Script ${subdir}/${file} is in sync between L0 and L1`);
@@ -2150,131 +2549,148 @@ function checkL0L1ScriptParity() {
 
 // Check P-01: Platform Documentation Parity and Template Sync
 function checkPlatformDocumentationParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check P-01: Platform Documentation Parity ===');
-  
-  const claudePath = join(ROOT, 'CLAUDE.md');
-  const geminiPath = join(ROOT, 'GEMINI.md');
-  
+  if (!JSON_MODE) console.log("\n=== Check P-01: Platform Documentation Parity ===");
+
+  const claudePath = join(ROOT, "CLAUDE.md");
+  const geminiPath = join(ROOT, "GEMINI.md");
+
   if (!existsSync(claudePath) || !existsSync(geminiPath)) return;
-  
+
   const extractSections = (content: string) => {
     const matches = content.matchAll(/^#{2,4} (.+)$/gm);
-    return new Set(Array.from(matches).map(m => m[1].trim().replace(/^\d+\.\s*/, '')));
+    return new Set(Array.from(matches).map((m) => m[1].trim().replace(/^\d+\.\s*/, "")));
   };
-  
-  const claudeSections = extractSections(readFileSync(claudePath, 'utf-8'));
-  const geminiSections = extractSections(readFileSync(geminiPath, 'utf-8'));
-  
+
+  const claudeSections = extractSections(readFileSync(claudePath, "utf-8"));
+  const geminiSections = extractSections(readFileSync(geminiPath, "utf-8"));
+
   // Parity between root CLAUDE.md and root GEMINI.md
   const ignoreParity = [
-    'Claude Code-Specific Behaviors', 
-    'Project-Specific Gemini Settings', 
-    'Tool Name Mapping & Safeguards', 
-    'Native Antigravity 2.0 Features', 
-    'Git & PR Additions (Claude Code)',
-    'Git & PR Additions (Gemini)',
-    'Gemini-Specific & Antigravity Workflows',
-    'Active Antigravity Tool Suite Mapping & Safeguards',
-    'Planning Mode & Artifact Specifications',
-    'Subagent Instantiation & Async Orchestration',
-    'Automated Hooks',
-    'Native Slash Commands',
-    'MCP Configurations & Absolute Resolving',
-    'Native Sub-agents',
-    'Native Plan Mode',
-    'Task Tracking',
-    'Custom Command Error Recovery',
-    'Windows Platform Requirement',
-    'Language Policy for Documentation',
-    'Agent Dispatch Rules',
-    'Lifecycle Management Rules',
-    'Security & Hook Configuration',
-    'Git Commit Policy',
-    'Executing Project Commands',
-    'Pre-PR Security Gate',
-    'Model Selection Override',
-    'Security Engagement Rules',
-    'Surgical Multi-Replace Offset Safeguard',
-    'Windows Terminal & Code Page Safeguard',
-    'Grep Search 50-Match Cap Safeguard',
-    'implementation_plan.md',
-    'task.md',
-    'walkthrough.md',
-    'Define Subagent',
-    'Invoke Subagent',
-    'Communication',
-    'Phase 4 Execution Loop',
-    'Mandatory Execution Plan Display',
-    'Specialist Agent List',
-    'Superpowers Plugin & Cost Optimization',
-    'Agent Teams (Experimental)',
-    'Agent Teams vs. Antigravity Agent Manager',
-    'Antigravity Agent Manager',
-    'Antigravity Parallel Agent Workflow',
-    'GEMINI.md Equivalent Settings',
-    'Antigravity-Specific Dispatch',
-    'Skill Resolution Priority',
-    'Claude Code-Specific Dispatch',
-    'Workspace & Template Boundary Policy'
+    "Claude Code-Specific Behaviors",
+    "Project-Specific Gemini Settings",
+    "Tool Name Mapping & Safeguards",
+    "Native Antigravity 2.0 Features",
+    "Git & PR Additions (Claude Code)",
+    "Git & PR Additions (Gemini)",
+    "Gemini-Specific & Antigravity Workflows",
+    "Active Antigravity Tool Suite Mapping & Safeguards",
+    "Planning Mode & Artifact Specifications",
+    "Subagent Instantiation & Async Orchestration",
+    "Automated Hooks",
+    "Native Slash Commands",
+    "MCP Configurations & Absolute Resolving",
+    "Native Sub-agents",
+    "Native Plan Mode",
+    "Task Tracking",
+    "Custom Command Error Recovery",
+    "Windows Platform Requirement",
+    "Language Policy for Documentation",
+    "Agent Dispatch Rules",
+    "Lifecycle Management Rules",
+    "Security & Hook Configuration",
+    "Git Commit Policy",
+    "Executing Project Commands",
+    "Pre-PR Security Gate",
+    "Model Selection Override",
+    "Security Engagement Rules",
+    "Surgical Multi-Replace Offset Safeguard",
+    "Windows Terminal & Code Page Safeguard",
+    "Grep Search 50-Match Cap Safeguard",
+    "implementation_plan.md",
+    "task.md",
+    "walkthrough.md",
+    "Define Subagent",
+    "Invoke Subagent",
+    "Communication",
+    "Phase 4 Execution Loop",
+    "Mandatory Execution Plan Display",
+    "Specialist Agent List",
+    "Superpowers Plugin & Cost Optimization",
+    "Agent Teams (Experimental)",
+    "Agent Teams vs. Antigravity Agent Manager",
+    "Antigravity Agent Manager",
+    "Antigravity Parallel Agent Workflow",
+    "GEMINI.md Equivalent Settings",
+    "Antigravity-Specific Dispatch",
+    "Skill Resolution Priority",
+    "Claude Code-Specific Dispatch",
+    "Workspace & Template Boundary Policy",
   ];
-  
-  const isIgnored = (s: string) => ignoreParity.some(ignore => s.includes(ignore));
-  
-  const missingInClaude = [...geminiSections].filter(s => !claudeSections.has(s) && !isIgnored(s));
-  const missingInGemini = [...claudeSections].filter(s => !geminiSections.has(s) && !isIgnored(s));
-  
+
+  const isIgnored = (s: string) => ignoreParity.some((ignore) => s.includes(ignore));
+
+  const missingInClaude = [...geminiSections].filter((s) => !claudeSections.has(s) && !isIgnored(s));
+  const missingInGemini = [...claudeSections].filter((s) => !geminiSections.has(s) && !isIgnored(s));
+
   if (missingInClaude.length > 0) {
-    fail('root', 'platform-parity', `CLAUDE.md is missing sections present in GEMINI.md: ${missingInClaude.join(', ')}`);
+    fail(
+      "root",
+      "platform-parity",
+      `CLAUDE.md is missing sections present in GEMINI.md: ${missingInClaude.join(", ")}`,
+    );
   }
   if (missingInGemini.length > 0) {
-    fail('root', 'platform-parity', `GEMINI.md is missing sections present in CLAUDE.md: ${missingInGemini.join(', ')}`);
+    fail(
+      "root",
+      "platform-parity",
+      `GEMINI.md is missing sections present in CLAUDE.md: ${missingInGemini.join(", ")}`,
+    );
   }
   if (missingInClaude.length === 0 && missingInGemini.length === 0) {
-    pass('Platform parity: CLAUDE.md and GEMINI.md section parity OK');
+    pass("Platform parity: CLAUDE.md and GEMINI.md section parity OK");
   }
-  
+
   // Sync check: Root vs Templates
   const templatesDir = readdirSync(TEMPLATES_DIR);
   for (const tpl of templatesDir) {
-    if (tpl === 'common' || tpl.startsWith('.')) continue;
+    if (tpl === "common" || tpl.startsWith(".")) continue;
     if (isTransientTestFixture(tpl)) continue; // E2E staging dirs (T-20260916-001)
-    if (tpl.startsWith('co-') && !isCoVariantTracked(tpl)) continue;
+    if (tpl.startsWith("co-") && !isCoVariantTracked(tpl)) continue;
     const tplPath = join(TEMPLATES_DIR, tpl);
     if (!statSync(tplPath).isDirectory()) continue;
-    
-    for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
+
+    for (const doc of ["CLAUDE.md", "GEMINI.md"]) {
       const rootDoc = join(ROOT, doc);
       const variantDoc = join(tplPath, doc);
       if (!existsSync(rootDoc) || !existsSync(variantDoc)) continue;
-      
-      const rootSecs = extractSections(readFileSync(rootDoc, 'utf-8'));
-      const variantSecs = extractSections(readFileSync(variantDoc, 'utf-8'));
-      
-      const missingInVariant = [...rootSecs].filter(s => !variantSecs.has(s) && !isIgnored(s));
-      
+
+      const rootSecs = extractSections(readFileSync(rootDoc, "utf-8"));
+      const variantSecs = extractSections(readFileSync(variantDoc, "utf-8"));
+
+      const missingInVariant = [...rootSecs].filter((s) => !variantSecs.has(s) && !isIgnored(s));
+
       if (missingInVariant.length > 0) {
-        fail(tpl, 'template-sync', `templates/${tpl}/${doc} is missing sections from root ${doc}: ${missingInVariant.join(', ')}`);
+        fail(
+          tpl,
+          "template-sync",
+          `templates/${tpl}/${doc} is missing sections from root ${doc}: ${missingInVariant.join(", ")}`,
+        );
       }
     }
   }
 
   // P-01b: Variant CLAUDE.md <-> GEMINI.md Specialist Agent List content parity
-  if (!JSON_MODE) console.log('\n=== Check P-01b: Variant Specialist Agent List Parity ===');
+  if (!JSON_MODE) console.log("\n=== Check P-01b: Variant Specialist Agent List Parity ===");
   const extractAgentList = (content: string): string => {
     const match = content.match(/####\s*Specialist Agent List[\s\S]*?(?=\n###|\n##|\n---|\Z)/);
-    return match ? match[0].trim() : '';
+    return match ? match[0].trim() : "";
   };
   for (const tpl of templatesDir) {
-    if (tpl === 'common' || tpl.startsWith('.')) continue;
+    if (tpl === "common" || tpl.startsWith(".")) continue;
     const tplPath = join(TEMPLATES_DIR, tpl);
     if (!statSync(tplPath).isDirectory()) continue;
-    const claudeVariant = join(tplPath, 'CLAUDE.md');
-    const geminiVariant = join(tplPath, 'GEMINI.md');
+    const claudeVariant = join(tplPath, "CLAUDE.md");
+    const geminiVariant = join(tplPath, "GEMINI.md");
     if (!existsSync(claudeVariant) || !existsSync(geminiVariant)) continue;
-    const claudeList = extractAgentList(readFileSync(claudeVariant, 'utf-8'));
-    const geminiList = extractAgentList(readFileSync(geminiVariant, 'utf-8'));
+    const claudeList = extractAgentList(readFileSync(claudeVariant, "utf-8"));
+    const geminiList = extractAgentList(readFileSync(geminiVariant, "utf-8"));
     if (claudeList && geminiList && claudeList !== geminiList) {
-      fail(tpl, 'agent-list-parity', `templates/${tpl}/CLAUDE.md and GEMINI.md have different Specialist Agent List content`, 'Apply identical §5 changes to both files');
+      fail(
+        tpl,
+        "agent-list-parity",
+        `templates/${tpl}/CLAUDE.md and GEMINI.md have different Specialist Agent List content`,
+        "Apply identical §5 changes to both files",
+      );
     } else if (claudeList || geminiList) {
       pass(`${tpl}: Specialist Agent List parity OK`);
     }
@@ -2283,11 +2699,16 @@ function checkPlatformDocumentationParity(): void {
     // Specialist Agent List must match too. existsSync-guarded — no variant
     // carries CODEX.md today (no-op), future-proof when one does.
     // Net-new coverage soaking in WARN — TODO(promotion): flip to fail.
-    const codexVariant = join(tplPath, 'CODEX.md');
+    const codexVariant = join(tplPath, "CODEX.md");
     if (claudeList && existsSync(codexVariant)) {
-      const codexList = extractAgentList(readFileSync(codexVariant, 'utf-8'));
+      const codexList = extractAgentList(readFileSync(codexVariant, "utf-8"));
       if (codexList && codexList !== claudeList) {
-        warn(tpl, 'agent-list-parity', `templates/${tpl}/CODEX.md has different Specialist Agent List content from CLAUDE.md (soak: WARN until promotion)`, 'Apply identical §5 changes to CLAUDE.md and CODEX.md');
+        warn(
+          tpl,
+          "agent-list-parity",
+          `templates/${tpl}/CODEX.md has different Specialist Agent List content from CLAUDE.md (soak: WARN until promotion)`,
+          "Apply identical §5 changes to CLAUDE.md and CODEX.md",
+        );
       } else if (codexList) {
         pass(`${tpl}: Specialist Agent List parity OK (CODEX.md)`);
       }
@@ -2298,18 +2719,18 @@ function checkPlatformDocumentationParity(): void {
 // Check P-02: Root .claude/commands/ and .gemini/commands/ must be mirrored in templates/common/
 // Exception: new-project.md has gemini-parity: skip, so it only needs to be in .claude/commands/
 function checkRootCommonCommandsParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check P-02: Root ↔ Common Commands Parity ===');
+  if (!JSON_MODE) console.log("\n=== Check P-02: Root ↔ Common Commands Parity ===");
 
   const pairs = [
     {
-      rootDir: join(ROOT, '.claude', 'commands'),
-      commonDir: join(TEMPLATES_DIR, 'common', '.claude', 'commands'),
-      label: '.claude/commands',
+      rootDir: join(ROOT, ".claude", "commands"),
+      commonDir: join(TEMPLATES_DIR, "common", ".claude", "commands"),
+      label: ".claude/commands",
     },
     {
-      rootDir: join(ROOT, '.gemini', 'commands'),
-      commonDir: join(TEMPLATES_DIR, 'common', '.gemini', 'commands'),
-      label: '.gemini/commands',
+      rootDir: join(ROOT, ".gemini", "commands"),
+      commonDir: join(TEMPLATES_DIR, "common", ".gemini", "commands"),
+      label: ".gemini/commands",
     },
   ];
 
@@ -2320,8 +2741,8 @@ function checkRootCommonCommandsParity(): void {
   const commandStems = (dir: string): string[] =>
     existsSync(dir)
       ? readdirSync(dir)
-          .filter(f => f.endsWith('.md') || f.endsWith('.toml'))
-          .map(f => f.replace(/\.(md|toml)$/, ''))
+          .filter((f) => f.endsWith(".md") || f.endsWith(".toml"))
+          .map((f) => f.replace(/\.(md|toml)$/, ""))
       : [];
 
   for (const { rootDir, commonDir, label } of pairs) {
@@ -2331,25 +2752,29 @@ function checkRootCommonCommandsParity(): void {
 
     // Special case: new-project has gemini-parity: skip
     // It should exist in .claude/commands/ but NOT in .gemini/commands/
-    const workspaceOnlyCmd = 'new-project';
-    const isGemini = label.includes('.gemini');
+    const workspaceOnlyCmd = "new-project";
+    const isGemini = label.includes(".gemini");
 
     // Filter out the workspace-only command when checking parity
     // new-project is workspace-only and should NOT be in common/
-    const filesToCheck = [...rootStems].filter(f => f !== workspaceOnlyCmd);
+    const filesToCheck = [...rootStems].filter((f) => f !== workspaceOnlyCmd);
 
-    const missing = filesToCheck.filter(f => !commonStems.has(f));
+    const missing = filesToCheck.filter((f) => !commonStems.has(f));
     if (missing.length > 0) {
-      fail('root', 'command-parity',
-        `Root ${label}/ has files not mirrored in templates/common/${label}/: ${missing.join(', ')}`,
-        `Copy missing files to templates/common/${label}/`
+      fail(
+        "root",
+        "command-parity",
+        `Root ${label}/ has files not mirrored in templates/common/${label}/: ${missing.join(", ")}`,
+        `Copy missing files to templates/common/${label}/`,
       );
     } else {
       // Verify that new-project is NOT in .gemini/commands/
       if (isGemini && rootStems.has(workspaceOnlyCmd)) {
-        fail('root', 'command-parity',
+        fail(
+          "root",
+          "command-parity",
           `Root ${label}/ contains ${workspaceOnlyCmd} but it has gemini-parity: skip — remove from ${label}`,
-          `Remove ${workspaceOnlyCmd} from ${label} (it should only exist in .claude/commands/)`
+          `Remove ${workspaceOnlyCmd} from ${label} (it should only exist in .claude/commands/)`,
         );
       } else {
         pass(`Root ↔ common ${label} parity OK (${rootStems.size} command(s))`);
@@ -2367,11 +2792,11 @@ function checkRootCommonCommandsParity(): void {
 function collectSkillDirs(dir: string, skillsDir: string): string[] {
   const results: string[] = [];
   for (const entry of readdirSync(dir)) {
-    if (entry === '_archive' || entry === 'local' || entry === 'external' || entry.startsWith('_')) continue;
+    if (entry === "_archive" || entry === "local" || entry === "external" || entry.startsWith("_")) continue;
     const fullPath = join(dir, entry);
     if (!statSync(fullPath).isDirectory()) continue;
-    if (existsSync(join(fullPath, 'SKILL.md'))) {
-      results.push(fullPath.slice(skillsDir.length + 1).replace(/\\/g, '/'));
+    if (existsSync(join(fullPath, "SKILL.md"))) {
+      results.push(fullPath.slice(skillsDir.length + 1).replace(/\\/g, "/"));
     } else {
       results.push(...collectSkillDirs(fullPath, skillsDir));
     }
@@ -2381,7 +2806,7 @@ function collectSkillDirs(dir: string, skillsDir: string): string[] {
 
 // Check B-09: Per-variant skill lifecycle (presence-driven)
 function checkVariantSkills(variant: string): void {
-  const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
+  const skillsDir = join(TEMPLATES_DIR, variant, "skills");
   if (!existsSync(skillsDir)) {
     pass(`${variant}/skills/: not present (OK — skill lifecycle check not applicable)`);
     return;
@@ -2392,47 +2817,75 @@ function checkVariantSkills(variant: string): void {
   const dirs = collectSkillDirs(skillsDir, skillsDir);
 
   if (dirs.length === 0) {
-    warn(variant, 'skill-lifecycle', `${variant}/skills/ exists but contains no skill directories`);
+    warn(variant, "skill-lifecycle", `${variant}/skills/ exists but contains no skill directories`);
     return;
   }
 
   let missingSkillMd = 0;
   let deprecatedCount = 0;
   for (const skillName of dirs) {
-    const skillMd = join(skillsDir, skillName, 'SKILL.md');
+    const skillMd = join(skillsDir, skillName, "SKILL.md");
     if (!existsSync(skillMd)) {
-      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md missing`, `Create SKILL.md with required frontmatter`);
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md missing`,
+        `Create SKILL.md with required frontmatter`,
+      );
       missingSkillMd++;
       continue;
     }
-    const content = readFileSync(skillMd, 'utf-8');
+    const content = readFileSync(skillMd, "utf-8");
     const fields = parseFrontmatter(content);
-    if (!('name' in fields) || !('description' in fields)) {
-      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (name, description)`);
+    if (!("name" in fields) || !("description" in fields)) {
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (name, description)`,
+      );
     }
     // Scope field required (CONSTITUTION §6.2)
-    if (!('scope' in fields)) {
-      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (scope)`, `Add 'scope: ${variant}' (variant-exclusive) or 'scope: common'`);
+    if (!("scope" in fields)) {
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (scope)`,
+        `Add 'scope: ${variant}' (variant-exclusive) or 'scope: common'`,
+      );
     }
     // Version must be full semver X.Y.Z (2-part versions break tooling that compares versions)
-    const verLine = content.split('\n').find(l => l.startsWith('version:'));
-    const verVal = verLine ? verLine.slice(verLine.indexOf(':') + 1).trim().replace(/^["']|["']$/g, '') : '';
+    const verLine = content.split("\n").find((l) => l.startsWith("version:"));
+    const verVal = verLine
+      ? verLine
+          .slice(verLine.indexOf(":") + 1)
+          .trim()
+          .replace(/^["']|["']$/g, "")
+      : "";
     if (verVal && !/^\d+\.\d+\.\d+$/.test(verVal)) {
-      fail(variant, 'skill-lifecycle', `${variant}/skills/${skillName}/SKILL.md version is not semver: '${verVal}'`, `Use X.Y.Z (e.g. 'version: 1.0.0')`);
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md version is not semver: '${verVal}'`,
+        `Use X.Y.Z (e.g. 'version: 1.0.0')`,
+      );
     }
     // Per-skill README.md/README_ko.md requirement retired 2026-08-29 (DEC-20260829-01):
     // SKILL.md is the authoritative, machine-consumed definition; per-skill READMEs
     // were seeded boilerplate and are no longer gated.
-    if ('status' in fields) {
-      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
-      const statusVal = statusLine ? statusLine.slice(statusLine.indexOf(':') + 1).trim() : '';
-      if (statusVal === 'deprecated') deprecatedCount++;
+    if ("status" in fields) {
+      const statusLine = content.split("\n").find((l) => l.startsWith("status:"));
+      const statusVal = statusLine ? statusLine.slice(statusLine.indexOf(":") + 1).trim() : "";
+      if (statusVal === "deprecated") deprecatedCount++;
     }
   }
 
   if (missingSkillMd === 0) {
     if (deprecatedCount > 0) {
-      warn(variant, 'skill-lifecycle', `${variant}/skills/: ${deprecatedCount} deprecated skill(s) — remove before stable promotion`);
+      warn(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/: ${deprecatedCount} deprecated skill(s) — remove before stable promotion`,
+      );
     } else {
       pass(`${variant}/skills/: ${dirs.length} skill(s) OK, no deprecated`);
     }
@@ -2456,34 +2909,48 @@ function checkVariantSkills(variant: string): void {
 // root). Absent file → no check (the manifest is project-authored and
 // optional; absence must never become a template-validation failure).
 function checkVariantGeneratorManifest(variant: string): void {
-  const manifestPath = join(TEMPLATES_DIR, variant, 'scripts', variant, 'generators.json');
+  const manifestPath = join(TEMPLATES_DIR, variant, "scripts", variant, "generators.json");
   if (!existsSync(manifestPath)) return; // absent = skip cleanly
   const variantRoot = join(TEMPLATES_DIR, variant);
   let content: string;
   try {
-    content = readFileSync(manifestPath, 'utf-8');
+    content = readFileSync(manifestPath, "utf-8");
   } catch (err) {
-    fail(variant, 'generator-manifest', `templates/${variant}/scripts/${variant}/generators.json unreadable: ${err instanceof Error ? err.message : String(err)}`);
+    fail(
+      variant,
+      "generator-manifest",
+      `templates/${variant}/scripts/${variant}/generators.json unreadable: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return;
   }
   const parsed = parseGeneratorManifest(content);
   if (!parsed.ok) {
-    fail(variant, 'generator-manifest', `templates/${variant}/scripts/${variant}/generators.json: ${parsed.error}`,
-      'See the "Declared generators" section in docs/guides/creating-a-variant.md');
+    fail(
+      variant,
+      "generator-manifest",
+      `templates/${variant}/scripts/${variant}/generators.json: ${parsed.error}`,
+      'See the "Declared generators" section in docs/guides/creating-a-variant.md',
+    );
     return;
   }
   const rootErrors = validateManifestAgainstRoot(variantRoot, parsed.manifest);
   for (const e of rootErrors) {
-    fail(variant, 'generator-manifest', `templates/${variant}/scripts/${variant}/generators.json: ${e}`,
-      'Command scripts and outputs must be project-relative, traversal-free, and resolve inside the variant root');
+    fail(
+      variant,
+      "generator-manifest",
+      `templates/${variant}/scripts/${variant}/generators.json: ${e}`,
+      "Command scripts and outputs must be project-relative, traversal-free, and resolve inside the variant root",
+    );
   }
   if (rootErrors.length === 0) {
-    pass(`templates/${variant}/scripts/${variant}/generators.json: valid (${parsed.manifest.generators.length} generator(s))`);
+    pass(
+      `templates/${variant}/scripts/${variant}/generators.json: valid (${parsed.manifest.generators.length} generator(s))`,
+    );
   }
 }
 
 function checkVariantScriptsLayout(variant: string): void {
-  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts', variant);
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, "scripts", variant);
   if (!existsSync(variantScriptsDir)) {
     pass(`${variant}/scripts/${variant}/: not present (OK — layout convention optional)`);
     return;
@@ -2491,35 +2958,59 @@ function checkVariantScriptsLayout(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check B-10: scripts/${variant}/ layout in ${variant} ===`);
   let layoutErrors = 0;
   // 1. No foreign-variant or generic nested script folders next to scripts/<variant>/
-  const scriptsRoot = join(TEMPLATES_DIR, variant, 'scripts');
+  const scriptsRoot = join(TEMPLATES_DIR, variant, "scripts");
   for (const e of readdirSync(scriptsRoot, { withFileTypes: true })) {
     if (!e.isDirectory()) continue;
-    if (e.name === variant || e.name === 'helpers' || e.name === 'hooks' || e.name === 'lib' || e.name === 'node_modules' || e.name.startsWith('.')) continue;
-    if (existsSync(join(scriptsRoot, e.name, 'scripts'))) {
-      fail(variant, 'scripts-layout', `${variant}/scripts/${e.name}/ contains a nested scripts/ directory — recursion forbidden`);
+    if (
+      e.name === variant ||
+      e.name === "helpers" ||
+      e.name === "hooks" ||
+      e.name === "lib" ||
+      e.name === "node_modules" ||
+      e.name.startsWith(".")
+    )
+      continue;
+    if (existsSync(join(scriptsRoot, e.name, "scripts"))) {
+      fail(
+        variant,
+        "scripts-layout",
+        `${variant}/scripts/${e.name}/ contains a nested scripts/ directory — recursion forbidden`,
+      );
       layoutErrors++;
     } else if (/^co-/.test(e.name)) {
-      fail(variant, 'scripts-layout', `${variant}/scripts/${e.name}/ is a foreign-variant script folder`, `Move to templates/${e.name}/scripts/${e.name}/ or delete`);
+      fail(
+        variant,
+        "scripts-layout",
+        `${variant}/scripts/${e.name}/ is a foreign-variant script folder`,
+        `Move to templates/${e.name}/scripts/${e.name}/ or delete`,
+      );
       layoutErrors++;
     }
   }
   // 2. No recursion inside scripts/<variant>/
-  if (existsSync(join(variantScriptsDir, 'scripts'))) {
-    fail(variant, 'scripts-layout', `${variant}/scripts/${variant}/scripts/ nested recursion forbidden`);
+  if (existsSync(join(variantScriptsDir, "scripts"))) {
+    fail(variant, "scripts-layout", `${variant}/scripts/${variant}/scripts/ nested recursion forbidden`);
     layoutErrors++;
   }
   // 3. Registry coverage (when the variant ships its own SCRIPTS.md next to the folder)
-  const regPath = join(variantScriptsDir, 'SCRIPTS.md');
+  const regPath = join(variantScriptsDir, "SCRIPTS.md");
   if (existsSync(regPath)) {
-    const regContent = readFileSync(regPath, 'utf-8');
+    const regContent = readFileSync(regPath, "utf-8");
     const walk = (dir: string): void => {
       for (const e of readdirSync(dir, { withFileTypes: true })) {
         const p = join(dir, e.name);
-        if (e.isDirectory()) { walk(p); continue; }
-        if (!e.name.endsWith('.ts')) continue;
-        const rel = p.slice(variantScriptsDir.length + 1).replace(/\\/g, '/');
+        if (e.isDirectory()) {
+          walk(p);
+          continue;
+        }
+        if (!e.name.endsWith(".ts")) continue;
+        const rel = p.slice(variantScriptsDir.length + 1).replace(/\\/g, "/");
         if (!regContent.includes(`\`${rel}\``) && !regContent.includes(`\`${e.name}\``)) {
-          fail(variant, 'scripts-layout', `${variant}/scripts/${variant}/${rel} not registered in scripts/${variant}/SCRIPTS.md`);
+          fail(
+            variant,
+            "scripts-layout",
+            `${variant}/scripts/${variant}/${rel} not registered in scripts/${variant}/SCRIPTS.md`,
+          );
           layoutErrors++;
         }
       }
@@ -2538,29 +3029,37 @@ function checkVariantScriptsLayout(variant: string): void {
 // and its 2026-09-27 orphan-mirror recurrence that broke the nightly scaffold
 // E2E's Test 26 precisely because the platform mirrors were never scanned).
 function checkVariantScopedSkillLeak(): void {
-  if (!JSON_MODE) console.log(`\n=== Check B-11: variant-scoped skills must not live in templates/common (canonical + platform mirrors) ===`);
-  const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+  if (!JSON_MODE)
+    console.log(
+      `\n=== Check B-11: variant-scoped skills must not live in templates/common (canonical + platform mirrors) ===`,
+    );
+  const schemaPath = join(ROOT, "docs", "workspace-schema.json");
   if (!existsSync(schemaPath)) {
-    warn('root', 'B-11', 'docs/workspace-schema.json not found — variant_scoped_skills check skipped');
+    warn("root", "B-11", "docs/workspace-schema.json not found — variant_scoped_skills check skipped");
     return;
   }
-  const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+  const schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
   const map = schema?.variant_scoped_skills || {};
   const skillNames = new Set<string>();
   const ownerBySkill = new Map<string, string>();
   for (const [ownerVariant, skills] of Object.entries(map as Record<string, string[]>)) {
-    if (ownerVariant === 'description' || !Array.isArray(skills)) continue;
+    if (ownerVariant === "description" || !Array.isArray(skills)) continue;
     for (const skill of skills as string[]) {
       skillNames.add(skill);
       ownerBySkill.set(skill, ownerVariant);
     }
   }
-  const leaks = variantScopedSkillLeaks(join(TEMPLATES_DIR, 'common'), skillNames);
+  const leaks = variantScopedSkillLeaks(join(TEMPLATES_DIR, "common"), skillNames);
   for (const leak of leaks) {
-    const skill = leak.split('/').pop()!;
-    fail('root', 'B-11', `variant-exclusive skill '${skill}' (owner: ${ownerBySkill.get(skill)}) exists in templates/common/${leak}/`, `Delete templates/common/${leak}/ — mirror copies of a variant-scoped skill contradict its variant-overlay re-delivery at scaffold time and break delivery-derivation parity (the 2026-09-27 sound-synth orphan class)`);
+    const skill = leak.split("/").pop()!;
+    fail(
+      "root",
+      "B-11",
+      `variant-exclusive skill '${skill}' (owner: ${ownerBySkill.get(skill)}) exists in templates/common/${leak}/`,
+      `Delete templates/common/${leak}/ — mirror copies of a variant-scoped skill contradict its variant-overlay re-delivery at scaffold time and break delivery-derivation parity (the 2026-09-27 sound-synth orphan class)`,
+    );
   }
-  if (leaks.length === 0) pass('templates/common (skills/ + 5 platform mirrors): no variant-scoped skill leaks');
+  if (leaks.length === 0) pass("templates/common (skills/ + 5 platform mirrors): no variant-scoped skill leaks");
 }
 
 // Check: external-dep-vendoring (v1.72.0, design
@@ -2573,42 +3072,53 @@ function checkVariantScopedSkillLeak(): void {
 // vendors into a template. Variant promotion inherits the guard because it runs
 // through this validation.
 function checkExternalDepVendoring(): void {
-  if (!JSON_MODE) console.log('\n=== Check external-dep-vendoring: no manifest install_dir vendored into a template tree (D4) ===');
+  if (!JSON_MODE)
+    console.log("\n=== Check external-dep-vendoring: no manifest install_dir vendored into a template tree (D4) ===");
   // Union of every declared install_dir (common seed + all variant seeds) — a
   // superset is the safe direction for a guard.
   const installDirs = new Set<string>();
   const seeds: Array<{ variant: string; path: string }> = [
-    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'external-deps.json') },
+    { variant: "common", path: join(TEMPLATES_DIR, "common", "external-deps.json") },
   ];
   if (existsSync(TEMPLATES_DIR)) {
     for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-      if (entry.isDirectory() && entry.name.startsWith('co-')) {
-        seeds.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'external-deps.json') });
+      if (entry.isDirectory() && entry.name.startsWith("co-")) {
+        seeds.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "external-deps.json") });
       }
     }
   }
   for (const seed of seeds) {
     if (!existsSync(seed.path)) continue;
     try {
-      for (const dir of extractInstallDirsLoose(readFileSync(seed.path, 'utf-8'))) installDirs.add(dir);
-    } catch { /* unreadable seed — the strict manifest validation owns that failure */ }
+      for (const dir of extractInstallDirsLoose(readFileSync(seed.path, "utf-8"))) installDirs.add(dir);
+    } catch {
+      /* unreadable seed — the strict manifest validation owns that failure */
+    }
   }
   if (installDirs.size === 0) {
-    pass('external-dep-vendoring: no external-deps seeds declare install_dirs (guard vacuous)');
+    pass("external-dep-vendoring: no external-deps seeds declare install_dirs (guard vacuous)");
     return;
   }
   let totalHits = 0;
-  for (const tplDir of [join(TEMPLATES_DIR, 'common'), ...seeds.filter((s) => s.variant !== 'common').map((s) => join(TEMPLATES_DIR, s.variant))]) {
+  for (const tplDir of [
+    join(TEMPLATES_DIR, "common"),
+    ...seeds.filter((s) => s.variant !== "common").map((s) => join(TEMPLATES_DIR, s.variant)),
+  ]) {
     const hits = findVendoredInstallDirs(tplDir, [...installDirs]);
     for (const hit of hits) {
       totalHits++;
-      fail('root', 'external-dep-vendoring',
+      fail(
+        "root",
+        "external-dep-vendoring",
         `template tree ${tplDir} contains a vendored external-dependency path: ${hit}/`,
-        `Delete ${join(tplDir, hit)} — external code is cloned at scaffold time into the gitignored project-local install_dir (design 2026-11-07-external-deps-machinery D4); it never vendors into a template`);
+        `Delete ${join(tplDir, hit)} — external code is cloned at scaffold time into the gitignored project-local install_dir (design 2026-11-07-external-deps-machinery D4); it never vendors into a template`,
+      );
     }
   }
   if (totalHits === 0) {
-    pass(`external-dep-vendoring: no install_dir path vendored in templates/common or any co-* template (${installDirs.size} declared dir(s))`);
+    pass(
+      `external-dep-vendoring: no install_dir path vendored in templates/common or any co-* template (${installDirs.size} declared dir(s))`,
+    );
   }
 }
 
@@ -2624,51 +3134,101 @@ function checkExternalDepVendoring(): void {
 // heuristic) FAIL. All verdicts come from scripts/lib/external-deps.ts — one
 // policy constant, no copy here.
 function checkExternalDepLicense(): void {
-  if (!JSON_MODE) console.log('\n=== Check external-dep-license: seed manifests pass the license policy + coupling contract (standard §5.4 E2) ===');
-  const seeds: Array<{ variant: string; dir: string }> = [{ variant: 'common', dir: join(TEMPLATES_DIR, 'common') }];
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check external-dep-license: seed manifests pass the license policy + coupling contract (standard §5.4 E2) ===",
+    );
+  const seeds: Array<{ variant: string; dir: string }> = [{ variant: "common", dir: join(TEMPLATES_DIR, "common") }];
   if (existsSync(TEMPLATES_DIR)) {
     for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-      if (entry.isDirectory() && entry.name.startsWith('co-')) seeds.push({ variant: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+      if (entry.isDirectory() && entry.name.startsWith("co-"))
+        seeds.push({ variant: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
     }
   }
   let checked = 0;
   let entries = 0;
   let problems = 0;
   for (const seed of seeds) {
-    const manifestPath = join(seed.dir, 'external-deps.json');
+    const manifestPath = join(seed.dir, "external-deps.json");
     if (!existsSync(manifestPath)) continue;
     checked++;
-    let manifest;
+    let manifest: ExternalDepsManifest;
     try {
-      manifest = parseExternalDepsManifest(readFileSync(manifestPath, 'utf-8'), `templates/${seed.variant}/external-deps.json`);
+      manifest = parseExternalDepsManifest(
+        readFileSync(manifestPath, "utf-8"),
+        `templates/${seed.variant}/external-deps.json`,
+      );
     } catch (err) {
       problems++;
-      fail(seed.variant, 'external-dep-license', (err as Error).message, 'Fix the seed to schema v2 (standard §5.2) — the loader in scripts/lib/external-deps.ts is the schema SSOT');
+      fail(
+        seed.variant,
+        "external-dep-license",
+        (err as Error).message,
+        "Fix the seed to schema v2 (standard §5.2) — the loader in scripts/lib/external-deps.ts is the schema SSOT",
+      );
       continue;
     }
     if (manifest.schema_version === 1 && manifest.dependencies.length > 0) {
       problems++;
-      fail(seed.variant, 'external-dep-license', `templates/${seed.variant}/external-deps.json is schema v1 with dependencies — license undeclared`, 'Bump the seed to schema_version 2 and declare license / usage / adapter per entry (standard §5.2)');
+      fail(
+        seed.variant,
+        "external-dep-license",
+        `templates/${seed.variant}/external-deps.json is schema v1 with dependencies — license undeclared`,
+        "Bump the seed to schema_version 2 and declare license / usage / adapter per entry (standard §5.2)",
+      );
     }
     for (const dep of manifest.dependencies) {
       entries++;
       const lic = evaluateLicensePolicy(dep);
-      if (lic.severity === 'fail') { problems++; fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${lic.message}`, 'Only a reviewed change to EXTERNAL_DEP_LICENSE_POLICY (L1 release + decision record) can admit a deny-class dependency; GPL used as a separate process needs license_decision'); }
-      else if (lic.severity === 'warn') warn(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${lic.message}`);
-      const conv = evaluateInstallDirConvention(dep);
-      if (conv.severity === 'fail') { problems++; fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${conv.message}`, `Use install_dir "external/${dep.id}" (R3, DEC-20261107-02)`); }
-      else if (conv.severity === 'warn') warn(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${conv.message}`);
-      if (dep.adapter && !existsSync(join(seed.dir, dep.adapter)) && !existsSync(join(TEMPLATES_DIR, 'common', dep.adapter))) {
+      if (lic.severity === "fail") {
         problems++;
-        fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${dep.id}: adapter ${dep.adapter} is not delivered by the variant or common tree`, 'The single coupling file named in the seed must ship with the template (standard §5.2)');
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${lic.message}`,
+          "Only a reviewed change to EXTERNAL_DEP_LICENSE_POLICY (L1 release + decision record) can admit a deny-class dependency; GPL used as a separate process needs license_decision",
+        );
+      } else if (lic.severity === "warn")
+        warn(seed.variant, "external-dep-license", `templates/${seed.variant}: ${lic.message}`);
+      const conv = evaluateInstallDirConvention(dep);
+      if (conv.severity === "fail") {
+        problems++;
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${conv.message}`,
+          `Use install_dir "external/${dep.id}" (R3, DEC-20261107-02)`,
+        );
+      } else if (conv.severity === "warn")
+        warn(seed.variant, "external-dep-license", `templates/${seed.variant}: ${conv.message}`);
+      if (
+        dep.adapter &&
+        !existsSync(join(seed.dir, dep.adapter)) &&
+        !existsSync(join(TEMPLATES_DIR, "common", dep.adapter))
+      ) {
+        problems++;
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${dep.id}: adapter ${dep.adapter} is not delivered by the variant or common tree`,
+          "The single coupling file named in the seed must ship with the template (standard §5.2)",
+        );
       }
       for (const hit of scanExcludedComponents(dep, seed.dir)) {
         problems++;
-        fail(seed.variant, 'external-dep-license', `templates/${seed.variant}: ${dep.id}: excluded component ${hit.component} is named on install surface ${hit.file} (heuristic name match)`, 'Remove the excluded component from the install surface — it must never be installed (standard §5.3 V5)');
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${dep.id}: excluded component ${hit.component} is named on install surface ${hit.file} (heuristic name match)`,
+          "Remove the excluded component from the install surface — it must never be installed (standard §5.3 V5)",
+        );
       }
     }
   }
-  if (problems === 0) pass(`external-dep-license: ${checked} seed manifest(s), ${entries} entr${entries === 1 ? 'y' : 'ies'} — license policy, R3 convention, adapter delivery, and exclusions all clean`);
+  if (problems === 0)
+    pass(
+      `external-dep-license: ${checked} seed manifest(s), ${entries} entr${entries === 1 ? "y" : "ies"} — license policy, R3 convention, adapter delivery, and exclusions all clean`,
+    );
 }
 
 // Check: platform-mirror-freshness — L1 platform skill mirrors must carry the
@@ -2678,24 +3238,25 @@ function checkExternalDepLicense(): void {
 // platform domains. With all four domains propagating uniformly (the T-008
 // fix) this arm fails if any mirror copy of an SSOT skill ever diverges again.
 function checkPlatformMirrorFreshness(): void {
-  if (!JSON_MODE) console.log('\n=== Check platform-mirror-freshness: L1 platform skill mirrors carry SSOT versions ===');
-  const ssotSkillsDir = join(ROOT, 'skills');
-  const commonDir = join(TEMPLATES_DIR, 'common');
+  if (!JSON_MODE)
+    console.log("\n=== Check platform-mirror-freshness: L1 platform skill mirrors carry SSOT versions ===");
+  const ssotSkillsDir = join(ROOT, "skills");
+  const commonDir = join(TEMPLATES_DIR, "common");
   if (!existsSync(ssotSkillsDir) || !existsSync(commonDir)) {
-    if (!JSON_MODE) pass('platform-mirror-freshness: skills/ or templates/common/ missing — nothing to compare');
+    if (!JSON_MODE) pass("platform-mirror-freshness: skills/ or templates/common/ missing — nothing to compare");
     return;
   }
   const drift = collectMirrorFreshnessDrift({ ssotSkillsDir, commonDir, mirrorDirs: PLATFORM_MIRROR_DIRS });
   if (drift.length === 0) {
-    pass('platform-mirror-freshness: all five platform skill mirrors carry SSOT versions');
+    pass("platform-mirror-freshness: all five platform skill mirrors carry SSOT versions");
     return;
   }
   for (const d of drift) {
     fail(
-      'common',
-      'platform-mirror-freshness',
+      "common",
+      "platform-mirror-freshness",
       `templates/common/${d.mirror}/${d.skill}/SKILL.md version ${d.mirrorVersion} != skills/${d.skill} SSOT version ${d.ssotVersion}`,
-      `Re-run propagate-to-templates.ts --apply (domain mirror for ${d.mirror}); if it stays stale, check the propagator's platform-skills domain handling`
+      `Re-run propagate-to-templates.ts --apply (domain mirror for ${d.mirror}); if it stays stale, check the propagator's platform-skills domain handling`,
     );
   }
 }
@@ -2711,11 +3272,14 @@ function checkPlatformMirrorFreshness(): void {
 //   2. unmirrored variant skill — a variant skill WITHOUT the flags missing from a
 //      mirror (four-mirror parity, ADR-0077 W1)
 function checkVariantMirrorParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check variant-mirror-parity: variant platform skill mirrors carry exactly the mirrorable set ===');
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check variant-mirror-parity: variant platform skill mirrors carry exactly the mirrorable set ===",
+    );
   const variantsDir = TEMPLATES_DIR;
   const neverMirror = (skillMd: string): boolean => {
     try {
-      const content = readFileSync(skillMd, 'utf-8');
+      const content = readFileSync(skillMd, "utf-8");
       return /^mirror:\s*false\b/m.test(content) || /^security-gate:\s*true\b/m.test(content);
     } catch {
       return false; // unreadable — treat as mirrorable rather than guess
@@ -2724,7 +3288,9 @@ function checkVariantMirrorParity(): void {
   const listSkillDirs = (dir: string): Set<string> =>
     new Set(
       existsSync(dir)
-        ? readdirSync(dir, { withFileTypes: true }).filter(e => e.isDirectory() && existsSync(join(dir, e.name, 'SKILL.md'))).map(e => e.name)
+        ? readdirSync(dir, { withFileTypes: true })
+            .filter((e) => e.isDirectory() && existsSync(join(dir, e.name, "SKILL.md")))
+            .map((e) => e.name)
         : [],
     );
   let checked = 0;
@@ -2737,7 +3303,7 @@ function checkVariantMirrorParity(): void {
   const mirrorCarriers = new Map<string, Set<string>>();
   const readFmVersion = (skillMd: string): string | null => {
     try {
-      const fm = readFileSync(skillMd, 'utf-8').match(/^---\n([\s\S]*?)\n---/);
+      const fm = readFileSync(skillMd, "utf-8").match(/^---\n([\s\S]*?)\n---/);
       if (!fm) return null;
       const v = fm[1].match(/^version:\s*["']?(\d+\.\d+\.\d+)/m);
       return v ? v[1] : null;
@@ -2746,12 +3312,12 @@ function checkVariantMirrorParity(): void {
     }
   };
   const commonSkillVersions = new Map<string, string>();
-  for (const name of listSkillDirs(join(TEMPLATES_DIR, 'common', 'skills'))) {
-    const v = readFmVersion(join(TEMPLATES_DIR, 'common', 'skills', name, 'SKILL.md'));
+  for (const name of listSkillDirs(join(TEMPLATES_DIR, "common", "skills"))) {
+    const v = readFmVersion(join(TEMPLATES_DIR, "common", "skills", name, "SKILL.md"));
     if (v !== null) commonSkillVersions.set(name, v);
   }
   for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
     for (const mirror of PLATFORM_MIRROR_DIRS) {
       for (const name of listSkillDirs(join(variantsDir, entry.name, mirror))) {
         if (!mirrorCarriers.has(name)) mirrorCarriers.set(name, new Set());
@@ -2760,44 +3326,58 @@ function checkVariantMirrorParity(): void {
     }
   }
   const semverOlder = (a: string, b: string): boolean => {
-    const pa = a.split('.').map(Number); const pb = b.split('.').map(Number);
-    for (let i = 0; i < 3; i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d !== 0) return d < 0; }
+    const pa = a.split(".").map(Number);
+    const pb = b.split(".").map(Number);
+    for (let i = 0; i < 3; i++) {
+      const d = (pa[i] || 0) - (pb[i] || 0);
+      if (d !== 0) return d < 0;
+    }
     return false;
   };
 
   for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
     const vdir = join(variantsDir, entry.name);
-    const vSkills = join(vdir, 'skills');
+    const vSkills = join(vdir, "skills");
     if (!existsSync(vSkills)) continue;
     checked++;
     const variantSkills = listSkillDirs(vSkills);
-    const commonSkills = listSkillDirs(join(TEMPLATES_DIR, 'common', 'skills'));
+    const commonSkills = listSkillDirs(join(TEMPLATES_DIR, "common", "skills"));
     for (const mirror of PLATFORM_MIRROR_DIRS) {
       const mirrorDir = join(vdir, mirror);
       for (const name of listSkillDirs(mirrorDir)) {
         const inVariant = variantSkills.has(name);
         const inCommon = commonSkills.has(name);
-        const flagged = (inVariant && neverMirror(join(vSkills, name, 'SKILL.md')))
-          || (!inVariant && inCommon && neverMirror(join(TEMPLATES_DIR, 'common', 'skills', name, 'SKILL.md')));
+        const flagged =
+          (inVariant && neverMirror(join(vSkills, name, "SKILL.md"))) ||
+          (!inVariant && inCommon && neverMirror(join(TEMPLATES_DIR, "common", "skills", name, "SKILL.md")));
         if ((inVariant || inCommon) && !flagged) {
           // T-20260924-004: stale variant platform-mirror copy of a COMMON
           // skill without variant declaration/SSOT and with no peer carrying
           // it — the D1/D2 drift class must not regrow silently.
           if (!inVariant && inCommon) {
-            const mirrorVersion = readFmVersion(join(mirrorDir, name, 'SKILL.md'));
+            const mirrorVersion = readFmVersion(join(mirrorDir, name, "SKILL.md"));
             const commonVersion = commonSkillVersions.get(name) ?? null;
             const peerCount = (mirrorCarriers.get(name)?.size ?? 1) - 1;
-            console.log(`TRACE mirror-check: ${entry.name}/${mirror}/${name} inV=${inVariant} inC=${inCommon} flag=${flagged} mv=${mirrorVersion} cv=${commonVersion} peers=${peerCount}`);
+            console.log(
+              `TRACE mirror-check: ${entry.name}/${mirror}/${name} inV=${inVariant} inC=${inCommon} flag=${flagged} mv=${mirrorVersion} cv=${commonVersion} peers=${peerCount}`,
+            );
             const verdict = classifyVariantMirrorCopy({
-              inVariant, inCommon, flagged,
-              mirrorVersion, commonVersion, peerCount,
+              inVariant,
+              inCommon,
+              flagged,
+              mirrorVersion,
+              commonVersion,
+              peerCount,
             });
             console.log(`TRACE verdict: ${verdict}`);
-            if (verdict === 'fail-stale-orphan') {
-              fail(entry.name, 'variant-mirror-parity',
+            if (verdict === "fail-stale-orphan") {
+              fail(
+                entry.name,
+                "variant-mirror-parity",
                 `${mirror}/${name}/ is a stale platform-mirror copy of common skill "${name}" (mirror v${mirrorVersion} vs common v${commonVersion}) with no variant declaration, no skills/ SSOT copy, and no peer carrying it — regrown D1/D2-class drift`,
-                `Delete templates/${entry.name}/${mirror}/${name}/ (stale copy of common v${commonVersion}) or declare the variant-specific copy in variant.json`);
+                `Delete templates/${entry.name}/${mirror}/${name}/ (stale copy of common v${commonVersion}) or declare the variant-specific copy in variant.json`,
+              );
               errors++;
               continue;
             }
@@ -2807,36 +3387,47 @@ function checkVariantMirrorParity(): void {
             // SSOT 1.6.0) passed every gate because this arm hit `continue`
             // without any comparison — mirrors survive upgrades untouched, so
             // drift here means a hand-edit bypassed the SSOT.
-            const ssotVersion = readFmVersion(join(vSkills, name, 'SKILL.md'));
-            const mirrorVersion = readFmVersion(join(mirrorDir, name, 'SKILL.md'));
+            const ssotVersion = readFmVersion(join(vSkills, name, "SKILL.md"));
+            const mirrorVersion = readFmVersion(join(mirrorDir, name, "SKILL.md"));
             if (ssotVersion && mirrorVersion && semverOlder(mirrorVersion, ssotVersion)) {
-              fail(entry.name, 'variant-mirror-parity',
+              fail(
+                entry.name,
+                "variant-mirror-parity",
                 `${mirror}/${name}/ is a stale platform-mirror copy of variant-owned skill "${name}" (mirror v${mirrorVersion} vs skills/ SSOT v${ssotVersion})`,
-                `Byte-copy templates/${entry.name}/skills/${name}/SKILL.md over templates/${entry.name}/${mirror}/${name}/SKILL.md (or re-run sync-skills for ${entry.name})`);
+                `Byte-copy templates/${entry.name}/skills/${name}/SKILL.md over templates/${entry.name}/${mirror}/${name}/SKILL.md (or re-run sync-skills for ${entry.name})`,
+              );
               errors++;
               continue;
             }
           }
           continue;
         }
-        warn(entry.name, 'variant-mirror-parity',
-          `${mirror}/${name}/ must not be mirrored — ${flagged ? 'the owning skill is flagged mirror:false/security-gate:true' : 'absent from both the variant and the common skills/ tree'}`,
-          `Delete templates/${entry.name}/${mirror}/${name}/ (sync-skills never prunes; it will not be resurrected while the flag stands)`);
+        warn(
+          entry.name,
+          "variant-mirror-parity",
+          `${mirror}/${name}/ must not be mirrored — ${flagged ? "the owning skill is flagged mirror:false/security-gate:true" : "absent from both the variant and the common skills/ tree"}`,
+          `Delete templates/${entry.name}/${mirror}/${name}/ (sync-skills never prunes; it will not be resurrected while the flag stands)`,
+        );
         warnings++;
       }
       for (const name of variantSkills) {
-        if (variantSkills.has(name) && neverMirror(join(vSkills, name, 'SKILL.md'))) continue;
-        if (!existsSync(join(vdir, mirror, name, 'SKILL.md'))) {
-          warn(entry.name, 'variant-mirror-parity', `${mirror}/${name}/ missing — mirrorable variant skill not mirrored to ${mirror}`,
-            `Run bun scripts/sync-skills.ts --all-variants (or --dir templates/${entry.name}) to heal`);
+        if (variantSkills.has(name) && neverMirror(join(vSkills, name, "SKILL.md"))) continue;
+        if (!existsSync(join(vdir, mirror, name, "SKILL.md"))) {
+          warn(
+            entry.name,
+            "variant-mirror-parity",
+            `${mirror}/${name}/ missing — mirrorable variant skill not mirrored to ${mirror}`,
+            `Run bun scripts/sync-skills.ts --all-variants (or --dir templates/${entry.name}) to heal`,
+          );
           warnings++;
         }
       }
     }
   }
   if (!JSON_MODE) {
-    if (checked === 0) console.log('  (no variant templates with a skills/ tree found)');
-    else if (warnings === 0) console.log(`  ✓ ${checked} variant template(s): platform mirrors carry exactly the mirrorable set`);
+    if (checked === 0) console.log("  (no variant templates with a skills/ tree found)");
+    else if (warnings === 0)
+      console.log(`  ✓ ${checked} variant template(s): platform mirrors carry exactly the mirrorable set`);
   }
 }
 
@@ -2844,7 +3435,7 @@ function checkVariantMirrorParity(): void {
 // its owning trees — pure decision core for checkVariantMirrorParity so the
 // stale-orphan arm is unit-testable (positive fixture must FAIL, clean
 // fixture must PASS; the convention from the 09-22 detector review).
-export type VariantMirrorCopyVerdict = 'ok' | 'warn-undeclared' | 'fail-stale-orphan';
+export type VariantMirrorCopyVerdict = "ok" | "warn-undeclared" | "fail-stale-orphan";
 export function classifyVariantMirrorCopy(opts: {
   inVariant: boolean;
   inCommon: boolean;
@@ -2855,21 +3446,25 @@ export function classifyVariantMirrorCopy(opts: {
 }): VariantMirrorCopyVerdict {
   const { inVariant, inCommon, flagged } = opts;
   // Owning-tree flagged skills must not be mirrored.
-  if (flagged) return 'warn-undeclared';
+  if (flagged) return "warn-undeclared";
   // T-20260924-004: stale variant platform-mirror copy of a COMMON skill —
   // older than the common SSOT, absent from the variant skills/ tree, not
   // declared in variant.json, and carried by no peer variant → regrown
   // D1/D2-class drift. Fail so it cannot regrow silently.
-  if (!inVariant && inCommon
-      && opts.mirrorVersion !== null && opts.commonVersion !== null
-      && opts.mirrorVersion !== opts.commonVersion
-      && opts.peerCount === 0) {
-    return 'fail-stale-orphan';
+  if (
+    !inVariant &&
+    inCommon &&
+    opts.mirrorVersion !== null &&
+    opts.commonVersion !== null &&
+    opts.mirrorVersion !== opts.commonVersion &&
+    opts.peerCount === 0
+  ) {
+    return "fail-stale-orphan";
   }
   // Same-version undecorated copies (uniform baseline set) or peer-shared
   // mirrors stay at the pre-existing WARN level; variant skills mirrored to
   // their own platform dirs are correct.
-  return 'ok';
+  return "ok";
 }
 
 // Check: roster-tier-consistency (T-20260921-020, validator-hardening) — an
@@ -2887,7 +3482,7 @@ function readFrontmatterTier(fmPath: string): string | null {
   if (!existsSync(fmPath)) return null;
   let fm: string;
   try {
-    const m = readFileSync(fmPath, 'utf-8').match(/^---\n([\s\S]*?)\n---/);
+    const m = readFileSync(fmPath, "utf-8").match(/^---\n([\s\S]*?)\n---/);
     if (!m) return null;
     fm = m[1];
   } catch {
@@ -2905,7 +3500,7 @@ function resolveTierViaExtends(fmPath: string, depth = 0): string | null {
   if (direct) return direct;
   let content: string;
   try {
-    content = readFileSync(fmPath, 'utf-8');
+    content = readFileSync(fmPath, "utf-8");
   } catch {
     return null;
   }
@@ -2918,18 +3513,23 @@ function rosterTierRows(agentsMd: string): Array<{ name: string; tier: string; l
   const out: Array<{ name: string; tier: string; line: number }> = [];
   let lines: string[] = [];
   try {
-    lines = readFileSync(agentsMd, 'utf-8').split('\n');
+    lines = readFileSync(agentsMd, "utf-8").split("\n");
   } catch {
     return out;
   }
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (!line.trim().startsWith('|') || !line.includes('agents/')) continue;
-    const cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+    if (!line.trim().startsWith("|") || !line.includes("agents/")) continue;
+    const cells = line
+      .trim()
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((c) => c.trim());
     for (let j = 0; j < cells.length; j++) {
       const m = cells[j].match(/agents\/([A-Za-z0-9_-]+)\.md/);
       if (!m) continue;
-      const next = (cells[j + 1] ?? '').replace(/\*\*/g, '').trim().toLowerCase();
+      const next = (cells[j + 1] ?? "").replace(/\*\*/g, "").trim().toLowerCase();
       if (/^(high|medium|low)$/.test(next)) out.push({ name: m[1], tier: next, line: i + 1 });
       break; // the first agent-file cell in the row owns the tier cell
     }
@@ -2938,16 +3538,22 @@ function rosterTierRows(agentsMd: string): Array<{ name: string; tier: string; l
 }
 
 function checkRosterTierConsistency(): void {
-  if (!JSON_MODE) console.log('\n=== Check roster-tier-consistency: AGENTS.md roster tiers match resolved agent frontmatter tiers ===');
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check roster-tier-consistency: AGENTS.md roster tiers match resolved agent frontmatter tiers ===",
+    );
   let checked = 0;
 
   // 1. Workspace root self-check (AGENTS.md vs agents/*.md frontmatter)
-  for (const row of rosterTierRows(join(ROOT, 'AGENTS.md'))) {
-    const resolved = resolveTierViaExtends(join(ROOT, 'agents', `${row.name}.md`));
+  for (const row of rosterTierRows(join(ROOT, "AGENTS.md"))) {
+    const resolved = resolveTierViaExtends(join(ROOT, "agents", `${row.name}.md`));
     if (resolved && resolved !== row.tier) {
-      fail('common', 'roster-tier-consistency',
+      fail(
+        "common",
+        "roster-tier-consistency",
         `AGENTS.md roster row for agents/${row.name}.md says ${row.tier} but agents/${row.name}.md frontmatter resolves to ${resolved}`,
-        'Update the roster row or the agent frontmatter — hand-maintained rosters drift silently (PM 2026-09-15 instance)');
+        "Update the roster row or the agent frontmatter — hand-maintained rosters drift silently (PM 2026-09-15 instance)",
+      );
     }
     checked++;
   }
@@ -2955,28 +3561,35 @@ function checkRosterTierConsistency(): void {
   // 2. Variant templates: roster tier vs extends-chain resolution + L0 tier ceiling
   if (!existsSync(TEMPLATES_DIR)) return;
   for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
     const vdir = join(TEMPLATES_DIR, entry.name);
-    const agentsMd = join(vdir, 'AGENTS.md');
+    const agentsMd = join(vdir, "AGENTS.md");
     if (!existsSync(agentsMd)) continue;
     for (const row of rosterTierRows(agentsMd)) {
       checked++;
-      let resolved = resolveTierViaExtends(join(vdir, 'agents', `${row.name}.md`))
-        ?? resolveTierViaExtends(join(TEMPLATES_DIR, 'common', 'agents', `${row.name}.md`))
-        ?? resolveTierViaExtends(join(ROOT, 'agents', `${row.name}.md`));
+      let resolved =
+        resolveTierViaExtends(join(vdir, "agents", `${row.name}.md`)) ??
+        resolveTierViaExtends(join(TEMPLATES_DIR, "common", "agents", `${row.name}.md`)) ??
+        resolveTierViaExtends(join(ROOT, "agents", `${row.name}.md`));
       if (resolved && resolved !== row.tier) {
-        fail(entry.name, 'roster-tier-consistency',
+        fail(
+          entry.name,
+          "roster-tier-consistency",
           `AGENTS.md:${row.line} roster row for agents/${row.name}.md says ${row.tier} but the agent resolves to ${resolved} via the extends chain`,
-          `Update the roster row (or the agent frontmatter) — every scaffold inherits this table`);
+          `Update the roster row (or the agent frontmatter) — every scaffold inherits this table`,
+        );
       }
-      const baseline = resolveTierViaExtends(join(ROOT, 'agents', `${row.name}.md`));
+      const baseline = resolveTierViaExtends(join(ROOT, "agents", `${row.name}.md`));
       if (baseline && resolved && TIER_RANK[resolved] > TIER_RANK[baseline]) {
-        const vAgent = join(vdir, 'agents', `${row.name}.md`);
-        const exempt = existsSync(vAgent) && /^tier_ceiling_exempt:\s*\S/m.test(readFileSync(vAgent, 'utf-8'));
+        const vAgent = join(vdir, "agents", `${row.name}.md`);
+        const exempt = existsSync(vAgent) && /^tier_ceiling_exempt:\s*\S/m.test(readFileSync(vAgent, "utf-8"));
         if (!exempt) {
-          fail(entry.name, 'roster-tier-consistency',
+          fail(
+            entry.name,
+            "roster-tier-consistency",
             `agents/${row.name}.md resolves to ${resolved}, above the L0 baseline ${baseline} (AGENTS.md §3.5 Tier Ceiling Rule)`,
-            `Lower the tier to the L0 baseline, or declare \`tier_ceiling_exempt: <reason>\` in the variant agent frontmatter`);
+            `Lower the tier to the L0 baseline, or declare \`tier_ceiling_exempt: <reason>\` in the variant agent frontmatter`,
+          );
         }
       }
     }
@@ -2998,53 +3611,68 @@ function checkRosterTierConsistency(): void {
 // Extends stubs skip both (their tier resolves via the chain — covered by
 // roster-tier-consistency — and their bodies hydrate at scaffold).
 function checkAgentQualityRecursive(): void {
-  if (!JSON_MODE) console.log('\n=== Check agent-quality-recursive: nested template agent trees carry scalar tier + full bodies (ADR-0102 + agentBodyCompletenessFinding) ===');
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check agent-quality-recursive: nested template agent trees carry scalar tier + full bodies (ADR-0102 + agentBodyCompletenessFinding) ===",
+    );
   if (!existsSync(TEMPLATES_DIR)) return;
   let checked = 0;
   let findings = 0;
   for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    if (entry.name !== 'common' && !entry.name.startsWith('co-')) continue;
-    const agentsDir = join(TEMPLATES_DIR, entry.name, 'agents');
+    if (entry.name !== "common" && !entry.name.startsWith("co-")) continue;
+    const agentsDir = join(TEMPLATES_DIR, entry.name, "agents");
     if (!existsSync(agentsDir)) continue;
     // readdirSync recursive types as string | Buffer — coerce (entries are path strings)
     for (const rawRel of readdirSync(agentsDir, { recursive: true })) {
       const rel = String(rawRel);
-      if (!rel.endsWith('.md')) continue;
-      const base = rel.split('/').pop() ?? rel;
-      if (/^README(_\w+)?\.md$/.test(base) || base.startsWith('_')) continue;
-      const content = readFileSync(join(agentsDir, rel), 'utf-8').replace(/\r\n/g, '\n');
-      const fm = content.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
+      if (!rel.endsWith(".md")) continue;
+      const base = rel.split("/").pop() ?? rel;
+      if (/^README(_\w+)?\.md$/.test(base) || base.startsWith("_")) continue;
+      const content = readFileSync(join(agentsDir, rel), "utf-8").replace(/\r\n/g, "\n");
+      const fm = content.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
       if (/^extends:/m.test(fm)) continue; // extends stub: chain-resolved tier, scaffold-hydrated body
       checked++;
       const relPath = `agents/${rel}`;
       if (/^tier:\s*\n\s{2}\w/m.test(fm)) {
-        fail(entry.name, 'agent-quality-recursive',
+        fail(
+          entry.name,
+          "agent-quality-recursive",
           `${relPath}: legacy map-form tier block — ADR-0102 requires one scalar \`tier: high|medium|low\``,
-          'Replace the per-platform tier block with a single scalar `tier:` line (consensus rule: uniform value, else the claude value)');
+          "Replace the per-platform tier block with a single scalar `tier:` line (consensus rule: uniform value, else the claude value)",
+        );
         findings++;
       } else {
         const scalar = fm.match(/^tier:\s*(\S+)\s*$/m);
         if (scalar) {
           const value = scalar[1].toLowerCase();
-          if (!['high', 'medium', 'low'].includes(value)) {
-            fail(entry.name, 'agent-quality-recursive',
+          if (!["high", "medium", "low"].includes(value)) {
+            fail(
+              entry.name,
+              "agent-quality-recursive",
               `${relPath}: invalid tier value '${scalar[1]}' (allowed: high | medium | low)`,
-              'Set the scalar `tier:` line to high, medium, or low');
+              "Set the scalar `tier:` line to high, medium, or low",
+            );
             findings++;
           }
         } else {
-          fail(entry.name, 'agent-quality-recursive',
+          fail(
+            entry.name,
+            "agent-quality-recursive",
             `${relPath}: missing tier declaration — ADR-0102 requires a scalar \`tier: high|medium|low\``,
-            'Add a scalar `tier:` line to the frontmatter');
+            "Add a scalar `tier:` line to the frontmatter",
+          );
           findings++;
         }
       }
       const bodyFinding = agentBodyCompletenessFinding(content);
       if (bodyFinding) {
-        fail(entry.name, 'agent-quality-recursive',
+        fail(
+          entry.name,
+          "agent-quality-recursive",
           `${relPath}: ${bodyFinding}`,
-          'Rewrite the definition body to the canonical section standard (co-newbiz PR #731 is the worked example)');
+          "Rewrite the definition body to the canonical section standard (co-newbiz PR #731 is the worked example)",
+        );
         findings++;
       }
     }
@@ -3062,10 +3690,18 @@ function checkAgentQualityRecursive(): void {
 // reference note).
 function checkStyleNeutrality() {
   if (!JSON_MODE) console.log(`\n=== Check B-12: L0/L1 style neutrality (variant identity literals) ===`);
-  const TEMPLATES_DIR = join(ROOT, 'templates');
+  const TEMPLATES_DIR = join(ROOT, "templates");
   const GENERIC_FONT_TOKENS = new Set([
-    'system-ui', 'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy',
-    'ui-sans-serif', 'ui-serif', 'ui-monospace', 'ui-rounded',
+    "system-ui",
+    "sans-serif",
+    "serif",
+    "monospace",
+    "cursive",
+    "fantasy",
+    "ui-sans-serif",
+    "ui-serif",
+    "ui-monospace",
+    "ui-rounded",
   ]);
 
   // 1. Harvest variant-owned identity literals from every variant tokens.json.
@@ -3073,12 +3709,12 @@ function checkStyleNeutrality() {
   const variantsDir = join(TEMPLATES_DIR);
   if (existsSync(variantsDir)) {
     for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
-      if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
-      const tokensPath = join(variantsDir, entry.name, 'tokens.json');
+      if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+      const tokensPath = join(variantsDir, entry.name, "tokens.json");
       if (!existsSync(tokensPath)) continue;
       let tokens: unknown;
       try {
-        tokens = JSON.parse(readFileSync(tokensPath, 'utf-8'));
+        tokens = JSON.parse(readFileSync(tokensPath, "utf-8"));
       } catch {
         continue; // invalid JSON is another check's problem
       }
@@ -3088,21 +3724,24 @@ function checkStyleNeutrality() {
         if (!identity.has(literal)) identity.set(literal, entry.name);
       };
       const walk = (node: unknown) => {
-        if (typeof node === 'string') {
+        if (typeof node === "string") {
           for (const m of node.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) addLiteral(m[0].toLowerCase());
-          for (const m of node.matchAll(/\b(?:rgba?|hsla?)\([^)]*\)/g)) addLiteral(m[0].replace(/\s+/g, ' '));
+          for (const m of node.matchAll(/\b(?:rgba?|hsla?)\([^)]*\)/g)) addLiteral(m[0].replace(/\s+/g, " "));
           // typeface identity: first family of a comma-separated font stack
           // (single-word values like "monospace" are generic; require a stack or
           // a Capitalized name to avoid harvesting arbitrary strings)
-          const first = node.split(',')[0].trim().replace(/^["']|["']$/g, '');
-          const isStack = node.includes(',');
-          const isCapitalizedName = /^[A-Z]/.test(first) && first.split(' ').length <= 3;
+          const first = node
+            .split(",")[0]
+            .trim()
+            .replace(/^["']|["']$/g, "");
+          const isStack = node.includes(",");
+          const isCapitalizedName = /^[A-Z]/.test(first) && first.split(" ").length <= 3;
           if (isStack || isCapitalizedName) {
             if (!GENERIC_FONT_TOKENS.has(first.toLowerCase())) addLiteral(first);
           }
         } else if (Array.isArray(node)) {
           node.forEach(walk);
-        } else if (typeof node === 'object' && node !== null) {
+        } else if (typeof node === "object" && node !== null) {
           for (const val of Object.values(node as Record<string, unknown>)) walk(val);
         }
       };
@@ -3111,37 +3750,35 @@ function checkStyleNeutrality() {
   }
 
   if (identity.size === 0) {
-    pass('L0/L1 style neutrality: no variant tokens.json found — nothing to cross-check');
+    pass("L0/L1 style neutrality: no variant tokens.json found — nothing to cross-check");
     return;
   }
 
   // 2. Normative L0 governance text + L1 normative docs.
-  const normativeFiles: string[] = [
-    'CONSTITUTION.md', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md',
-  ];
-  for (const dir of [join(ROOT, 'docs', 'constitution'), join(ROOT, 'docs', 'governance')]) {
+  const normativeFiles: string[] = ["CONSTITUTION.md", "AGENTS.md", "CLAUDE.md", "GEMINI.md"];
+  for (const dir of [join(ROOT, "docs", "constitution"), join(ROOT, "docs", "governance")]) {
     if (existsSync(dir)) {
       for (const f of readdirSync(dir, { withFileTypes: true })) {
-        if (f.isFile() && f.name.endsWith('.md')) normativeFiles.push(join(dir, f.name));
+        if (f.isFile() && f.name.endsWith(".md")) normativeFiles.push(join(dir, f.name));
       }
     }
   }
-  const commonDocs = join(TEMPLATES_DIR, 'common', 'docs');
+  const commonDocs = join(TEMPLATES_DIR, "common", "docs");
   if (existsSync(commonDocs)) {
     const walkDocs = (dir: string) => {
       for (const f of readdirSync(dir, { withFileTypes: true })) {
         if (f.isDirectory()) walkDocs(join(dir, f.name));
-        else if (f.name.endsWith('.md') || f.name.endsWith('.css')) normativeFiles.push(join(dir, f.name));
+        else if (f.name.endsWith(".md") || f.name.endsWith(".css")) normativeFiles.push(join(dir, f.name));
       }
     };
     walkDocs(commonDocs);
   }
-  for (const base of ['skills', join(TEMPLATES_DIR, 'common', 'skills')]) {
+  for (const base of ["skills", join(TEMPLATES_DIR, "common", "skills")]) {
     const dir = join(ROOT, base);
     if (existsSync(dir)) {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         if (entry.isDirectory()) {
-          const skillMd = join(dir, entry.name, 'SKILL.md');
+          const skillMd = join(dir, entry.name, "SKILL.md");
           if (existsSync(skillMd)) normativeFiles.push(skillMd);
         }
       }
@@ -3151,26 +3788,36 @@ function checkStyleNeutrality() {
   // 3. Scan (line-scoped; hex compared case-insensitively).
   let violations = 0;
   for (const file of normativeFiles) {
-    let content = '';
-    try { content = readFileSync(file, 'utf-8'); } catch { continue; }
+    let content = "";
+    try {
+      content = readFileSync(file, "utf-8");
+    } catch {
+      continue;
+    }
     const rel = relative(ROOT, file) || file;
     const lines = content.split(/\r?\n/);
     lines.forEach((line, idx) => {
-      if (line.includes('neutrality-exempt:')) return;
+      if (line.includes("neutrality-exempt:")) return;
       for (const [literal, owner] of identity) {
-        const matched = literal.startsWith('#')
+        const matched = literal.startsWith("#")
           ? line.toLowerCase().includes(literal.toLowerCase())
-          : new RegExp(`(?<![\\w-])${literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(line);
+          : new RegExp(`(?<![\\w-])${literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\w-])`).test(line);
         if (matched) {
           violations++;
-          fail('root', 'B-12', `variant identity literal "${literal}" (${owner}) in normative L0/L1 file ${rel}:${idx + 1}`,
-            `Remove the variant-specific value or annotate the line with <!-- neutrality-exempt: <reason> --> (L0/L1 must stay style/pattern-neutral per ADR-0064/0066)`);
+          fail(
+            "root",
+            "B-12",
+            `variant identity literal "${literal}" (${owner}) in normative L0/L1 file ${rel}:${idx + 1}`,
+            `Remove the variant-specific value or annotate the line with <!-- neutrality-exempt: <reason> --> (L0/L1 must stay style/pattern-neutral per ADR-0064/0066)`,
+          );
         }
       }
     });
   }
   if (violations === 0) {
-    pass(`L0/L1 style neutrality: no variant identity literals in ${normativeFiles.length} normative file(s) (${identity.size} harvested literals)`);
+    pass(
+      `L0/L1 style neutrality: no variant identity literals in ${normativeFiles.length} normative file(s) (${identity.size} harvested literals)`,
+    );
   }
 }
 
@@ -3179,28 +3826,38 @@ function checkVariantContract(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
 
   try {
-    const contractPath = join(ROOT, 'docs', 'templates', 'variant-contract.json');
+    const contractPath = join(ROOT, "docs", "templates", "variant-contract.json");
     if (!existsSync(contractPath)) {
-      fail('root', 'variant-contract-missing', 'docs/templates/variant-contract.json not found', 'Create variant-contract.json with version, required, optional fields');
+      fail(
+        "root",
+        "variant-contract-missing",
+        "docs/templates/variant-contract.json not found",
+        "Create variant-contract.json with version, required, optional fields",
+      );
       return;
     }
 
-    const contractRaw = readFileSync(contractPath, 'utf-8');
+    const contractRaw = readFileSync(contractPath, "utf-8");
     let contract: VariantContract;
 
     try {
       contract = JSON.parse(contractRaw) as VariantContract;
     } catch (parseError) {
-      fail('root', 'variant-contract-invalid', 'docs/templates/variant-contract.json is not valid JSON', 'Fix JSON syntax');
+      fail(
+        "root",
+        "variant-contract-invalid",
+        "docs/templates/variant-contract.json is not valid JSON",
+        "Fix JSON syntax",
+      );
       return;
     }
 
     const variantDir = join(TEMPLATES_DIR, variant);
     const missingFiles: string[] = [];
 
-    const commonDir = join(TEMPLATES_DIR, 'common');
+    const commonDir = join(TEMPLATES_DIR, "common");
     for (const requiredPattern of contract.required) {
-      const requiredFile = requiredPattern.replaceAll('{variant}', variant);
+      const requiredFile = requiredPattern.replaceAll("{variant}", variant);
       const filePath = join(variantDir, requiredFile);
       const commonFilePath = join(commonDir, requiredFile);
       // A required file is satisfied if it exists in the variant OR in templates/common/
@@ -3211,12 +3868,22 @@ function checkVariantContract(variant: string): void {
     }
 
     if (missingFiles.length > 0) {
-      fail(variant, 'variant-contract', `Variant Contract FAILED — missing ${missingFiles.length} required files:\n     - ${missingFiles.join('\n     - ')}`);
+      fail(
+        variant,
+        "variant-contract",
+        `Variant Contract FAILED — missing ${missingFiles.length} required files:\n     - ${missingFiles.join("\n     - ")}`,
+      );
     } else {
-      pass(`${variant}: Variant Contract satisfied (${contract.required.length}/${contract.required.length} required files present)`);
+      pass(
+        `${variant}: Variant Contract satisfied (${contract.required.length}/${contract.required.length} required files present)`,
+      );
     }
   } catch (error) {
-    fail('root', 'variant-contract-error', `Failed to check Variant Contract: ${error instanceof Error ? error.message : String(error)}`);
+    fail(
+      "root",
+      "variant-contract-error",
+      `Failed to check Variant Contract: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -3224,38 +3891,36 @@ function checkVariantContract(variant: string): void {
 function checkSecurityGateSkills(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check B-03: security-gate skill placement in ${variant} ===`);
 
-  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, ".claude", "skills");
   if (!existsSync(claudeSkillsDir)) {
     pass(`${variant}/.claude/skills/: not present (OK — security-gate check not applicable)`);
     return;
   }
 
-  const skillDirs = readdirSync(claudeSkillsDir).filter(d =>
-    statSync(join(claudeSkillsDir, d)).isDirectory()
-  );
+  const skillDirs = readdirSync(claudeSkillsDir).filter((d) => statSync(join(claudeSkillsDir, d)).isDirectory());
 
   let violations = 0;
   for (const skillName of skillDirs) {
-    const skillMdPath = join(claudeSkillsDir, skillName, 'SKILL.md');
+    const skillMdPath = join(claudeSkillsDir, skillName, "SKILL.md");
     if (!existsSync(skillMdPath)) continue;
 
-    const rawContent = readFileSync(skillMdPath, 'utf-8');
+    const rawContent = readFileSync(skillMdPath, "utf-8");
     const fields = parseFrontmatter(rawContent);
 
-    if ('security-gate' in fields) {
+    if ("security-gate" in fields) {
       // Check if value is true
       const content = normalizeContent(rawContent);
       const match = content.match(/^---\n([\s\S]*?)\n---/);
       if (match) {
         const fmText = match[1];
-        const sgLine = fmText.split('\n').find(l => l.startsWith('security-gate:'));
-        const sgValue = sgLine ? sgLine.slice(sgLine.indexOf(':') + 1).trim() : '';
-        if (sgValue === 'true') {
+        const sgLine = fmText.split("\n").find((l) => l.startsWith("security-gate:"));
+        const sgValue = sgLine ? sgLine.slice(sgLine.indexOf(":") + 1).trim() : "";
+        if (sgValue === "true") {
           fail(
             variant,
-            'security-gate-placement',
+            "security-gate-placement",
             `${variant}/.claude/skills/${skillName}/SKILL.md has security-gate: true but is in .claude/skills/ (Claude Code-only). Move to skills/ (platform-neutral).`,
-            `Move skills/${skillName}/ out of .claude/skills/ into the top-level skills/ directory`
+            `Move skills/${skillName}/ out of .claude/skills/ into the top-level skills/ directory`,
           );
           violations++;
         }
@@ -3270,12 +3935,12 @@ function checkSecurityGateSkills(variant: string): void {
 
 // B-07: Sync scan results back to VERSION_REGISTRY.json
 function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
-  const registryPath = join(ROOT, 'docs', 'templates', 'VERSION_REGISTRY.json');
+  const registryPath = join(ROOT, "docs", "templates", "VERSION_REGISTRY.json");
   if (!existsSync(registryPath)) return;
 
   let registry: Record<string, unknown>;
   try {
-    registry = JSON.parse(readFileSync(registryPath, 'utf-8')) as Record<string, unknown>;
+    registry = JSON.parse(readFileSync(registryPath, "utf-8")) as Record<string, unknown>;
   } catch {
     return;
   }
@@ -3287,7 +3952,7 @@ function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
   for (const [name, manifest] of manifests) {
     const existing = variants[name] ?? {};
     const newStatus = manifest.status;
-    const newVersion = manifest.version ?? existing.latest ?? '0.0.0';
+    const newVersion = manifest.version ?? existing.latest ?? "0.0.0";
 
     if (existing.status !== newStatus || existing.latest !== newVersion) {
       variants[name] = {
@@ -3306,48 +3971,50 @@ function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
   if (changed) {
     registry.variants = variants;
     registry.last_updated = today;
-    writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
+    writeFileSync(registryPath, JSON.stringify(registry, null, 2) + "\n", "utf-8");
     if (!JSON_MODE) pass(`VERSION_REGISTRY.json updated (last_updated=${today})`);
   } else {
-    if (!JSON_MODE) pass('VERSION_REGISTRY.json already up-to-date');
+    if (!JSON_MODE) pass("VERSION_REGISTRY.json already up-to-date");
   }
 }
 
 // B-08: Check for deprecated agents/skills in variant and warn about version bump
 function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest): void {
-  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
-  const skillsDir = join(TEMPLATES_DIR, variant, 'skills');
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
+  const skillsDir = join(TEMPLATES_DIR, variant, "skills");
 
   let deprecatedAgents = 0;
   let deprecatedSkills = 0;
 
   if (existsSync(agentsDir)) {
-    for (const file of readdirSync(agentsDir).filter(f => f.endsWith('.md') && !f.startsWith('README'))) {
-      const content = readFileSync(join(agentsDir, file), 'utf-8');
-      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
-      if (statusLine && statusLine.includes('deprecated')) deprecatedAgents++;
+    for (const file of readdirSync(agentsDir).filter((f) => f.endsWith(".md") && !f.startsWith("README"))) {
+      const content = readFileSync(join(agentsDir, file), "utf-8");
+      const statusLine = content.split("\n").find((l) => l.startsWith("status:"));
+      if (statusLine && statusLine.includes("deprecated")) deprecatedAgents++;
     }
   }
 
   if (existsSync(skillsDir)) {
-    for (const d of readdirSync(skillsDir).filter(d => d !== '_archive' && statSync(join(skillsDir, d)).isDirectory())) {
-      const skillMd = join(skillsDir, d, 'SKILL.md');
+    for (const d of readdirSync(skillsDir).filter(
+      (d) => d !== "_archive" && statSync(join(skillsDir, d)).isDirectory(),
+    )) {
+      const skillMd = join(skillsDir, d, "SKILL.md");
       if (!existsSync(skillMd)) continue;
-      const content = readFileSync(skillMd, 'utf-8');
-      const statusLine = content.split('\n').find(l => l.startsWith('status:'));
-      if (statusLine && statusLine.includes('deprecated')) deprecatedSkills++;
+      const content = readFileSync(skillMd, "utf-8");
+      const statusLine = content.split("\n").find((l) => l.startsWith("status:"));
+      if (statusLine && statusLine.includes("deprecated")) deprecatedSkills++;
     }
   }
 
   if (deprecatedAgents > 0 || deprecatedSkills > 0) {
-    const currentVersion = manifest.version ?? '0.0.0';
-    const parts = currentVersion.split('.').map(Number);
+    const currentVersion = manifest.version ?? "0.0.0";
+    const parts = currentVersion.split(".").map(Number);
     const bumpedVersion = `${parts[0]}.${parts[1]}.${(parts[2] ?? 0) + 1}`;
     warn(
       variant,
-      'deprecated-version-bump',
+      "deprecated-version-bump",
       `${variant} has ${deprecatedAgents} deprecated agent(s) and ${deprecatedSkills} deprecated skill(s) — consider bumping patch version ${currentVersion} → ${bumpedVersion}`,
-      `Update version in templates/${variant}/variant.json and VERSION_REGISTRY.json to ${bumpedVersion}`
+      `Update version in templates/${variant}/variant.json and VERSION_REGISTRY.json to ${bumpedVersion}`,
     );
   }
 }
@@ -3365,16 +4032,16 @@ function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest):
  * After normalization the two copies must be semantically identical — any
  * OTHER divergence is real drift and still fails both parity checks.
  */
-function canonicalWsSchemaForParity(raw: string, level: 'root' | 'l1'): string {
+function canonicalWsSchemaForParity(raw: string, level: "root" | "l1"): string {
   const obj = JSON.parse(raw) as Record<string, unknown>;
   const clone = JSON.parse(JSON.stringify(obj)) as {
     rootAllowlist?: { files?: string[] };
     _notes?: Record<string, unknown>;
   };
-  if (level === 'root') {
+  if (level === "root") {
     const files = clone.rootAllowlist?.files;
     if (Array.isArray(files)) {
-      const idx = files.indexOf('CONSTITUTION.md');
+      const idx = files.indexOf("CONSTITUTION.md");
       if (idx !== -1) files.splice(idx, 1);
     }
   } else {
@@ -3382,11 +4049,13 @@ function canonicalWsSchemaForParity(raw: string, level: 'root' | 'l1'): string {
   }
   const canon = (v: unknown): unknown => {
     if (Array.isArray(v)) return v.map(canon);
-    if (v && typeof v === 'object') {
-      return Object.keys(v as Record<string, unknown>).sort().reduce<Record<string, unknown>>((acc, k) => {
-        acc[k] = canon((v as Record<string, unknown>)[k]);
-        return acc;
-      }, {});
+    if (v && typeof v === "object") {
+      return Object.keys(v as Record<string, unknown>)
+        .sort()
+        .reduce<Record<string, unknown>>((acc, k) => {
+          acc[k] = canon((v as Record<string, unknown>)[k]);
+          return acc;
+        }, {});
     }
     return v;
   };
@@ -3394,23 +4063,28 @@ function canonicalWsSchemaForParity(raw: string, level: 'root' | 'l1'): string {
 }
 
 function checkWorkspaceSchema(): void {
-  if (!JSON_MODE) console.log('\n=== Check WS-01: workspace-schema.json consistency ===');
+  if (!JSON_MODE) console.log("\n=== Check WS-01: workspace-schema.json consistency ===");
 
-  const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+  const schemaPath = join(ROOT, "docs", "workspace-schema.json");
   if (!existsSync(schemaPath)) {
-    warn('root', 'ws-schema-missing', 'workspace-schema.json not found at docs/', 'Create docs/workspace-schema.json with workflow.phases and models');
+    warn(
+      "root",
+      "ws-schema-missing",
+      "workspace-schema.json not found at docs/",
+      "Create docs/workspace-schema.json with workflow.phases and models",
+    );
     return;
   }
 
   let schema: Record<string, unknown>;
   try {
-    schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, unknown>;
+    schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, unknown>;
   } catch {
-    fail('root', 'ws-schema-invalid', 'workspace-schema.json is not valid JSON');
+    fail("root", "ws-schema-invalid", "workspace-schema.json is not valid JSON");
     return;
   }
 
-  pass('workspace-schema.json: present and valid JSON');
+  pass("workspace-schema.json: present and valid JSON");
 
   // --- WS-01 Check 0: L0↔L1 parity (root vs templates/common/docs copy) ---
   // The docs propagation domain is disabled (ADR-0069), so nothing else keeps the L1
@@ -3422,13 +4096,17 @@ function checkWorkspaceSchema(): void {
   // the stale CONSTITUTION.md rootAllowlist entry and records
   // _notes.root_allowlist_divergence). canonicalWsSchemaForParity normalizes that
   // sanctioned delta; any OTHER key divergence still fails below.
-  const l1SchemaPath = join(ROOT, 'templates', 'common', 'docs', 'workspace-schema.json');
+  const l1SchemaPath = join(ROOT, "templates", "common", "docs", "workspace-schema.json");
   if (!existsSync(l1SchemaPath)) {
-    fail('root', 'ws-schema-l1-missing', 'templates/common/docs/workspace-schema.json not found — scaffold reads the L1 copy; re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json');
+    fail(
+      "root",
+      "ws-schema-l1-missing",
+      "templates/common/docs/workspace-schema.json not found — scaffold reads the L1 copy; re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json",
+    );
   } else {
     try {
-      const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, 'utf-8'), 'root');
-      const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, 'utf-8'), 'l1');
+      const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, "utf-8"), "root");
+      const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, "utf-8"), "l1");
       const rootObj = JSON.parse(rootCanon) as Record<string, unknown>;
       const l1Obj = JSON.parse(l1Canon) as Record<string, unknown>;
       const rootKeys = new Set(Object.keys(rootObj));
@@ -3438,12 +4116,22 @@ function checkWorkspaceSchema(): void {
         if (JSON.stringify(rootObj[k]) !== JSON.stringify(l1Obj[k])) diverged.push(k);
       }
       if (diverged.length > 0) {
-        fail('root', 'ws-schema-l1-parity', `templates/common/docs/workspace-schema.json diverged from root beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) on key(s): ${diverged.join(', ')} — reconcile the hand-maintained pair deliberately, do not blind-copy.`);
+        fail(
+          "root",
+          "ws-schema-l1-parity",
+          `templates/common/docs/workspace-schema.json diverged from root beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) on key(s): ${diverged.join(", ")} — reconcile the hand-maintained pair deliberately, do not blind-copy.`,
+        );
       } else {
-        pass('workspace-schema.json L1 parity: templates/common copy matches root (modulo the sanctioned DEC-20261028-05 delta)');
+        pass(
+          "workspace-schema.json L1 parity: templates/common copy matches root (modulo the sanctioned DEC-20261028-05 delta)",
+        );
       }
     } catch {
-      fail('root', 'ws-schema-l1-invalid', 'templates/common/docs/workspace-schema.json is not valid JSON — re-sync from docs/workspace-schema.json');
+      fail(
+        "root",
+        "ws-schema-l1-invalid",
+        "templates/common/docs/workspace-schema.json is not valid JSON — re-sync from docs/workspace-schema.json",
+      );
     }
   }
 
@@ -3462,27 +4150,47 @@ function checkWorkspaceSchema(): void {
     const psBlock = schema.platform_surfaces as
       | { platforms?: Record<string, Record<string, { supported?: unknown; evidence?: unknown }>> }
       | undefined;
-    if (!psBlock || typeof psBlock !== 'object' || !psBlock.platforms) {
-      fail('root', 'ws-platform-surfaces-missing', 'workspace-schema.json is missing the platform_surfaces block — the capability registry is the generator\'s contract', 'Restore the block per docs/designs/2026-10-28-platform-agent-mirror-design.md §4.1');
+    if (!psBlock || typeof psBlock !== "object" || !psBlock.platforms) {
+      fail(
+        "root",
+        "ws-platform-surfaces-missing",
+        "workspace-schema.json is missing the platform_surfaces block — the capability registry is the generator's contract",
+        "Restore the block per docs/designs/2026-10-28-platform-agent-mirror-design.md §4.1",
+      );
     } else {
       const psRows = psBlock.platforms;
       const registryPlatforms = Object.keys(psRows).sort();
       const pinnedPlatforms = [...PLATFORMS].sort();
       if (JSON.stringify(registryPlatforms) !== JSON.stringify(pinnedPlatforms)) {
-        fail('root', 'ws-platform-surfaces-set', `platform_surfaces platform set [${registryPlatforms.join(', ')}] does not match validate-model-registry.ts PLATFORMS [${pinnedPlatforms.join(', ')}] — one platform vocabulary only`, 'Add or remove registry rows to match PLATFORMS');
+        fail(
+          "root",
+          "ws-platform-surfaces-set",
+          `platform_surfaces platform set [${registryPlatforms.join(", ")}] does not match validate-model-registry.ts PLATFORMS [${pinnedPlatforms.join(", ")}] — one platform vocabulary only`,
+          "Add or remove registry rows to match PLATFORMS",
+        );
       }
       const supportedAgentsPlatforms = new Set<string>();
       let shapeProblems = 0;
       for (const [platform, row] of Object.entries(psRows)) {
-        for (const surface of ['agents', 'skills', 'commands', 'hooks']) {
+        for (const surface of ["agents", "skills", "commands", "hooks"]) {
           const cap = row?.[surface];
-          if (!cap || typeof cap !== 'object' || typeof cap.supported !== 'boolean') {
-            fail('root', 'ws-platform-surfaces-shape', `platform_surfaces.platforms.${platform}.${surface} is missing a boolean "supported"`, 'Give every surface row a boolean supported flag');
+          if (!cap || typeof cap !== "object" || typeof cap.supported !== "boolean") {
+            fail(
+              "root",
+              "ws-platform-surfaces-shape",
+              `platform_surfaces.platforms.${platform}.${surface} is missing a boolean "supported"`,
+              "Give every surface row a boolean supported flag",
+            );
             shapeProblems += 1;
             continue;
           }
-          if (cap.supported === false && !(typeof cap.evidence === 'string' && cap.evidence.trim() !== '')) {
-            fail('root', 'ws-platform-surfaces-evidence', `platform_surfaces.platforms.${platform}.${surface} is supported:false without an "evidence" string`, 'Record WHY the surface is unsupported (an unsupported row without evidence FAILs — design §4.1)');
+          if (cap.supported === false && !(typeof cap.evidence === "string" && cap.evidence.trim() !== "")) {
+            fail(
+              "root",
+              "ws-platform-surfaces-evidence",
+              `platform_surfaces.platforms.${platform}.${surface} is supported:false without an "evidence" string`,
+              "Record WHY the surface is unsupported (an unsupported row without evidence FAILs — design §4.1)",
+            );
             shapeProblems += 1;
           }
         }
@@ -3490,16 +4198,28 @@ function checkWorkspaceSchema(): void {
       }
       for (const platform of supportedAgentsPlatforms) {
         if (!PLATFORM_AGENT_ADAPTERS[platform]) {
-          fail('root', 'ws-platform-surfaces-adapter', `platform_surfaces marks platforms.${platform}.agents supported:true but scripts/sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has no '${platform}' adapter`, 'Add the adapter, or set the row to supported:false with evidence');
+          fail(
+            "root",
+            "ws-platform-surfaces-adapter",
+            `platform_surfaces marks platforms.${platform}.agents supported:true but scripts/sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has no '${platform}' adapter`,
+            "Add the adapter, or set the row to supported:false with evidence",
+          );
         }
       }
       for (const platform of Object.keys(PLATFORM_AGENT_ADAPTERS)) {
         if (!supportedAgentsPlatforms.has(platform)) {
-          fail('root', 'ws-platform-surfaces-adapter', `sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has a '${platform}' adapter naming no agents.supported:true registry row`, 'Remove the adapter, or flip the registry row deliberately');
+          fail(
+            "root",
+            "ws-platform-surfaces-adapter",
+            `sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has a '${platform}' adapter naming no agents.supported:true registry row`,
+            "Remove the adapter, or flip the registry row deliberately",
+          );
         }
       }
       if (shapeProblems === 0) {
-        pass(`platform_surfaces registry: ${registryPlatforms.length} platform row(s) well-formed, ${supportedAgentsPlatforms.size} agents-capable (adapters in lockstep)`);
+        pass(
+          `platform_surfaces registry: ${registryPlatforms.length} platform row(s) well-formed, ${supportedAgentsPlatforms.size} agents-capable (adapters in lockstep)`,
+        );
       }
     }
   }
@@ -3508,7 +4228,7 @@ function checkWorkspaceSchema(): void {
   const phases = workflow?.phases as Record<string, unknown> | undefined;
 
   if (!phases) {
-    fail('root', 'ws-schema-structure', 'workspace-schema.json missing workflow.phases');
+    fail("root", "ws-schema-structure", "workspace-schema.json missing workflow.phases");
     return;
   }
 
@@ -3517,74 +4237,94 @@ function checkWorkspaceSchema(): void {
   const schemaCount = phases.count as number | undefined;
 
   // --- WS-01 Check 1: agents/pm.md Can Lead Phases vs schema pm_owned ---
-  const pmMdPath = join(ROOT, 'agents', 'pm.md');
+  const pmMdPath = join(ROOT, "agents", "pm.md");
   if (!existsSync(pmMdPath)) {
-    warn('root', 'ws-01-pm-missing', 'agents/pm.md not found — skipping PM phase check');
+    warn("root", "ws-01-pm-missing", "agents/pm.md not found — skipping PM phase check");
   } else {
-    const pmContent = readFileSync(pmMdPath, 'utf-8');
+    const pmContent = readFileSync(pmMdPath, "utf-8");
     const phaseLineMatch = pmContent.match(/\*{0,2}Can Lead Phases\*{0,2}\s*:\s*\[([^\]]+)\]/);
     if (!phaseLineMatch) {
-      warn('root', 'ws-01-pm-phases', 'agents/pm.md: Can Lead Phases line not found');
+      warn("root", "ws-01-pm-phases", "agents/pm.md: Can Lead Phases line not found");
     } else {
-      const pmPhases = phaseLineMatch[1].split(',').map(s => s.trim().replace(/"/g, '').replace(/'/g, ''));
+      const pmPhases = phaseLineMatch[1].split(",").map((s) => s.trim().replace(/"/g, "").replace(/'/g, ""));
       const pmSorted = [...pmPhases].sort();
       const schemaSorted = [...schemaPmOwned].sort();
       if (JSON.stringify(pmSorted) === JSON.stringify(schemaSorted)) {
-        pass(`agents/pm.md: Can Lead Phases [${pmPhases.join(', ')}] matches schema pm_owned`);
+        pass(`agents/pm.md: Can Lead Phases [${pmPhases.join(", ")}] matches schema pm_owned`);
       } else {
-        fail('root', 'ws-01-pm-phases',
-          `[FAIL] agents/pm.md: Can Lead Phases [${pmPhases.join(', ')}] does not match workspace-schema.json pm_owned [${schemaPmOwned.join(', ')}]`,
-          'Update Can Lead Phases in agents/pm.md or pm_owned in workspace-schema.json'
+        fail(
+          "root",
+          "ws-01-pm-phases",
+          `[FAIL] agents/pm.md: Can Lead Phases [${pmPhases.join(", ")}] does not match workspace-schema.json pm_owned [${schemaPmOwned.join(", ")}]`,
+          "Update Can Lead Phases in agents/pm.md or pm_owned in workspace-schema.json",
         );
       }
     }
   }
 
   // --- WS-01 Check 2: templates/common/docs/phase-definitions.md canonical phases ---
-  const phaseDefPath = join(ROOT, 'templates', 'common', 'docs', 'phase-definitions.md');
+  const phaseDefPath = join(ROOT, "templates", "common", "docs", "phase-definitions.md");
   if (!existsSync(phaseDefPath)) {
-    warn('root', 'ws-01-phase-defs-missing', 'templates/common/docs/phase-definitions.md not found — skipping canonical phase check');
+    warn(
+      "root",
+      "ws-01-phase-defs-missing",
+      "templates/common/docs/phase-definitions.md not found — skipping canonical phase check",
+    );
   } else {
-    const phaseDefContent = readFileSync(phaseDefPath, 'utf-8');
+    const phaseDefContent = readFileSync(phaseDefPath, "utf-8");
     // Extract phase identifiers from Phase Overview table rows (first column)
     const tableRowRegex = /^\|\s*([0-9][0-9-]*)\s*\|/gm;
     const foundPhases = new Set<string>();
     for (const m of phaseDefContent.matchAll(tableRowRegex)) {
       foundPhases.add(m[1].trim());
     }
-    const missingFromDoc = schemaCanonical.filter(p => !foundPhases.has(p));
+    const missingFromDoc = schemaCanonical.filter((p) => !foundPhases.has(p));
     if (missingFromDoc.length === 0) {
       pass(`templates/common/docs/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
     } else {
       for (const missing of missingFromDoc) {
-        fail('root', 'ws-01-phase-defs',
+        fail(
+          "root",
+          "ws-01-phase-defs",
           `[FAIL] phase-definitions.md: missing phase "${missing}" from canonical list`,
-          `Add phase "${missing}" to the Phase Overview table in templates/common/docs/phase-definitions.md`
+          `Add phase "${missing}" to the Phase Overview table in templates/common/docs/phase-definitions.md`,
         );
       }
     }
   }
 
   // --- WS-01 Check 3: docs/constitution/05-multi-agent-architecture.md phase count ---
-  const constitutionPath = join(ROOT, 'docs', 'constitution', '05-multi-agent-architecture.md');
+  const constitutionPath = join(ROOT, "docs", "constitution", "05-multi-agent-architecture.md");
   if (!existsSync(constitutionPath)) {
-    warn('root', 'ws-01-constitution-missing', 'docs/constitution/05-multi-agent-architecture.md not found — skipping phase count check');
+    warn(
+      "root",
+      "ws-01-constitution-missing",
+      "docs/constitution/05-multi-agent-architecture.md not found — skipping phase count check",
+    );
   } else {
-    const constitutionContent = readFileSync(constitutionPath, 'utf-8');
+    const constitutionContent = readFileSync(constitutionPath, "utf-8");
     // Find §5.4 section (including heading line) and look for "N phases" or "N-phase" pattern
     const section54Match = constitutionContent.match(/(#{1,4}\s*5\.4[^\n]*\n[\s\S]*?)(?=\n#{1,4}\s*5\.\d|$)/);
     const searchContent = section54Match ? section54Match[1] : constitutionContent;
     const phaseCountMatch = searchContent.match(/(\d+)[- ]phase/i) ?? searchContent.match(/(\d+)\s+phases/i);
     if (!phaseCountMatch) {
-      warn('root', 'ws-01-constitution-count', 'constitution §5.4: phase count pattern not found (may be stated differently) — manual review recommended');
+      warn(
+        "root",
+        "ws-01-constitution-count",
+        "constitution §5.4: phase count pattern not found (may be stated differently) — manual review recommended",
+      );
     } else {
       const declaredCount = parseInt(phaseCountMatch[1], 10);
       if (declaredCount === schemaCount) {
-        pass(`docs/constitution/05-multi-agent-architecture.md §5.4: declares ${declaredCount} phases — matches schema`);
+        pass(
+          `docs/constitution/05-multi-agent-architecture.md §5.4: declares ${declaredCount} phases — matches schema`,
+        );
       } else {
-        fail('root', 'ws-01-constitution-count',
+        fail(
+          "root",
+          "ws-01-constitution-count",
           `[FAIL] constitution §5.4: declares ${declaredCount} phases, schema requires ${schemaCount}`,
-          `Update phase count in docs/constitution/05-multi-agent-architecture.md §5.4 or workspace-schema.json workflow.phases.count`
+          `Update phase count in docs/constitution/05-multi-agent-architecture.md §5.4 or workspace-schema.json workflow.phases.count`,
         );
       }
     }
@@ -3609,17 +4349,17 @@ function checkWorkspaceSchema(): void {
 // R1.4): the .codex mirror was previously invisible to C-CM-03b — a version bump
 // on a .codex copy drifted silently. All 22 listed skills carry .codex copies.
 const PLATFORM_SOURCE_KEYS: Readonly<Record<string, string>> = {
-  claude_source: '.claude',
-  gemini_source: '.gemini',
-  agents_source: '.agents',
-  codex_source: '.codex',
+  claude_source: ".claude",
+  gemini_source: ".gemini",
+  agents_source: ".agents",
+  codex_source: ".codex",
 };
 
 /** Map a common_platform_skills entry's declared *_source keys to platform tree dirs. */
 export function declaredPlatformTrees(entry: Record<string, unknown>): string[] {
   return Object.keys(PLATFORM_SOURCE_KEYS)
-    .filter(k => typeof entry[k] === 'string' && (entry[k] as string).length > 0)
-    .map(k => PLATFORM_SOURCE_KEYS[k]);
+    .filter((k) => typeof entry[k] === "string" && (entry[k] as string).length > 0)
+    .map((k) => PLATFORM_SOURCE_KEYS[k]);
 }
 
 /** SKILL.md frontmatter `version:` extraction — same pattern as C-CM-03/03a. */
@@ -3627,17 +4367,20 @@ export function extractFrontmatterVersion(content: string): string | undefined {
   return content.match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
 }
 
-export type VersionParityIssueKind = 'missing-contract-version' | 'missing-artifact-version' | 'mismatch';
+export type VersionParityIssueKind = "missing-contract-version" | "missing-artifact-version" | "mismatch";
 
 /**
  * Three-branch parity comparison shared by C-CM-03/03a/03b semantics: a
  * missing version on either side is a failure (never a silent skip — the M5
  * direction), and unequal versions are a mismatch.
  */
-export function versionParityIssue(contractVersion: string | undefined, artifactVersion: string | undefined): VersionParityIssueKind | null {
-  if (!contractVersion) return 'missing-contract-version';
-  if (!artifactVersion) return 'missing-artifact-version';
-  return contractVersion !== artifactVersion ? 'mismatch' : null;
+export function versionParityIssue(
+  contractVersion: string | undefined,
+  artifactVersion: string | undefined,
+): VersionParityIssueKind | null {
+  if (!contractVersion) return "missing-contract-version";
+  if (!artifactVersion) return "missing-artifact-version";
+  return contractVersion !== artifactVersion ? "mismatch" : null;
 }
 
 /**
@@ -3670,7 +4413,7 @@ export function unlistedPlatformSkillDirs(
   exempt: ReadonlySet<string>,
   excluded: ReadonlySet<string>,
 ): string[] {
-  return dirNames.filter(e => !listed.has(e) && !exempt.has(e) && !excluded.has(e));
+  return dirNames.filter((e) => !listed.has(e) && !exempt.has(e) && !excluded.has(e));
 }
 
 /**
@@ -3679,12 +4422,9 @@ export function unlistedPlatformSkillDirs(
  * the exclusion record must go too (same direction as the C-CM-05
  * SINGLE_PLATFORM_EXCEPTIONS stale rule).
  */
-export function stalePlatformSkillExclusions(
-  exclusions: Iterable<string>,
-  existingNames: Iterable<string>,
-): string[] {
+export function stalePlatformSkillExclusions(exclusions: Iterable<string>, existingNames: Iterable<string>): string[] {
   const live = new Set(existingNames);
-  return [...exclusions].filter(name => !live.has(name));
+  return [...exclusions].filter((name) => !live.has(name));
 }
 
 /**
@@ -3702,11 +4442,11 @@ export function variantScopedSkillLeaks(
 ): string[] {
   const leaks: string[] = [];
   for (const skill of variantScopedSkills) {
-    if (existsSync(join(commonDir, 'skills', skill, 'SKILL.md'))) {
+    if (existsSync(join(commonDir, "skills", skill, "SKILL.md"))) {
       leaks.push(`skills/${skill}`);
     }
     for (const mirror of mirrorDirs) {
-      if (existsSync(join(commonDir, mirror, skill, 'SKILL.md'))) {
+      if (existsSync(join(commonDir, mirror, skill, "SKILL.md"))) {
         leaks.push(`${mirror}/${skill}`);
       }
     }
@@ -3723,14 +4463,15 @@ export function variantScopedSkillLeaks(
 // are vacuously green with an empty entries[] array and activate as the
 // Phase 1 promotion batches B-D land registry rows.
 function checkHubTopology(): void {
-  if (!JSON_MODE) console.log('\n=== Check hub-topology: hub_topology registry legs (hub-consolidation design §2.4) ===');
+  if (!JSON_MODE)
+    console.log("\n=== Check hub-topology: hub_topology registry legs (hub-consolidation design §2.4) ===");
   const loaded = loadHubTopology(ROOT);
   if (!loaded.ok) {
-    if (loaded.error === 'absent-file' || loaded.error === 'absent-section') {
-      pass('hub_topology: registry absent (legacy checkout) — hub legs skip cleanly');
+    if (loaded.error === "absent-file" || loaded.error === "absent-section") {
+      pass("hub_topology: registry absent (legacy checkout) — hub legs skip cleanly");
       return;
     }
-    fail('root', 'hub-topology-shape', loaded.error ?? 'hub_topology unreadable');
+    fail("root", "hub-topology-shape", loaded.error ?? "hub_topology unreadable");
     return;
   }
   const topology = loaded.topology!;
@@ -3739,31 +4480,36 @@ function checkHubTopology(): void {
   // non-semver versions, unknown capability keys all FAIL)
   const shapeErrors = validateHubTopologyShape(topology);
   for (const e of shapeErrors) {
-    fail('root', 'hub-topology-shape', `hub_topology: ${e}`, 'Fix docs/workspace-schema.json hub_topology — reconcile the hand-maintained root + L1 pair in the same commit');
+    fail(
+      "root",
+      "hub-topology-shape",
+      `hub_topology: ${e}`,
+      "Fix docs/workspace-schema.json hub_topology — reconcile the hand-maintained root + L1 pair in the same commit",
+    );
   }
-  if (shapeErrors.length === 0) pass('hub-topology-shape: registry shape valid');
+  if (shapeErrors.length === 0) pass("hub-topology-shape: registry shape valid");
 
   // Leg 1 — unregistered cross-variant duplication (design §2.4 leg 1):
   // L1-common assets are excluded (common delivery is inheritance, not
   // duplication); declared soak rows WARN; everything else FAILs.
   const dupLeg = checkUnregisteredDuplicates(topology, findCrossVariantDuplicates(ROOT));
-  for (const f of dupLeg.fails) fail('root', 'hub-dup-unregistered', f);
-  for (const w of dupLeg.warns) warn('root', 'hub-dup-unregistered', w);
+  for (const f of dupLeg.fails) fail("root", "hub-dup-unregistered", f);
+  for (const w of dupLeg.warns) warn("root", "hub-dup-unregistered", w);
   for (const p of dupLeg.passes) pass(`hub-dup-unregistered: ${p}`);
 
   // Leg 2 — variant-identity unauthorized promotion (design §2.4 leg 2):
   // identity assets may not exist in foreign variant templates.
   const identityLeg = checkVariantIdentity(topology, ROOT);
-  for (const f of identityLeg.fails) fail('root', 'hub-identity-clobber', f);
-  for (const w of identityLeg.warns) warn('root', 'hub-identity-clobber', w);
+  for (const f of identityLeg.fails) fail("root", "hub-identity-clobber", f);
+  for (const w of identityLeg.warns) warn("root", "hub-identity-clobber", w);
   for (const p of identityLeg.passes) pass(`hub-identity-clobber: ${p}`);
 
   // Leg 3 — consumer minimum_version (design §2.4 leg 3): variant.json
   // hub.consumes resolved against registry entries; vacuously green while
   // entries[] is empty.
   const consumerLeg = checkConsumerMinimumVersions(topology, loadConsumingVariants(ROOT));
-  for (const f of consumerLeg.fails) fail('root', 'hub-consumer-min-version', f);
-  for (const w of consumerLeg.warns) warn('root', 'hub-consumer-min-version', w);
+  for (const f of consumerLeg.fails) fail("root", "hub-consumer-min-version", f);
+  for (const w of consumerLeg.warns) warn("root", "hub-consumer-min-version", w);
   for (const p of consumerLeg.passes) pass(`hub-consumer-min-version: ${p}`);
 }
 
@@ -3782,53 +4528,70 @@ export interface ScriptsRegistryRow {
  */
 export function parseScriptsMdRegistry(content: string): Map<string, ScriptsRegistryRow> {
   const rows = new Map<string, ScriptsRegistryRow>();
-  const registrySection = content
-    .split(/^## /m)
-    .find(s => s.split('\n')[0].trim() === 'Registry');
+  const registrySection = content.split(/^## /m).find((s) => s.split("\n")[0].trim() === "Registry");
   if (!registrySection) return rows;
-  for (const line of registrySection.split('\n')) {
+  for (const line of registrySection.split("\n")) {
     // Data rows start with a backticked name cell; header/separator rows never do.
     const match = line.match(/^\|\s*`([^`]+)`\s*\|/);
     if (!match) continue;
-    const cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+    const cells = line
+      .trim()
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((c) => c.trim());
     const name = match[1].trim();
-    const version = cells.length >= 3 ? cells[2].replace(/`/g, '').trim() : '';
+    const version = cells.length >= 3 ? cells[2].replace(/`/g, "").trim() : "";
     rows.set(name, { name, version });
   }
   return rows;
 }
 
 function checkCommonContract(): void {
-  if (!JSON_MODE) console.log('\n=== Check WS-02: common-contract.json compliance ===');
+  if (!JSON_MODE) console.log("\n=== Check WS-02: common-contract.json compliance ===");
 
-  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
   if (!existsSync(contractPath)) {
-    warn('common', 'common-contract-missing', 'docs/templates/common-contract.json not found', 'Create common-contract.json with common_agents and common_skills');
+    warn(
+      "common",
+      "common-contract-missing",
+      "docs/templates/common-contract.json not found",
+      "Create common-contract.json with common_agents and common_skills",
+    );
     return;
   }
 
   let contract: Record<string, unknown>;
   try {
-    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
   } catch {
-    fail('common', 'common-contract-invalid', 'docs/templates/common-contract.json is not valid JSON');
+    fail("common", "common-contract-invalid", "docs/templates/common-contract.json is not valid JSON");
     return;
   }
 
   const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
   const commonAgents = Object.keys((contract.common_agents as Record<string, unknown>) ?? {});
 
-  const variantDirs = readdirSync(TEMPLATES_DIR).filter(e => {
+  const variantDirs = readdirSync(TEMPLATES_DIR).filter((e) => {
     if (isTransientTestFixture(e)) return false; // E2E staging dirs (T-20260916-001)
     const fullPath = join(TEMPLATES_DIR, e);
-    try { return statSync(fullPath).isDirectory() && !e.startsWith('.') && e !== 'common'; } catch { return false; }
+    try {
+      return statSync(fullPath).isDirectory() && !e.startsWith(".") && e !== "common";
+    } catch {
+      return false;
+    }
   });
 
   // C-CM-01 (ERROR): common/skills/ matches common-contract.json
   for (const skillName of commonSkills) {
-    const skillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+    const skillPath = join(TEMPLATES_DIR, "common", "skills", skillName, "SKILL.md");
     if (!existsSync(skillPath)) {
-      fail('common', 'C-CM-01', `common-contract.json lists common skill '${skillName}' but templates/common/skills/${skillName}/SKILL.md is missing`, `Create templates/common/skills/${skillName}/SKILL.md`);
+      fail(
+        "common",
+        "C-CM-01",
+        `common-contract.json lists common skill '${skillName}' but templates/common/skills/${skillName}/SKILL.md is missing`,
+        `Create templates/common/skills/${skillName}/SKILL.md`,
+      );
     } else {
       pass(`C-CM-01: common skill '${skillName}' → SKILL.md present`);
     }
@@ -3836,28 +4599,50 @@ function checkCommonContract(): void {
 
   // C-CM-03 (ERROR): contract common_skills versions must match templates/common/skills/ frontmatter
   // (added 2026-08-29 after the sync 1.0.0-vs-1.2.2 stale-entry find; DEC-20260829-02 follow-up)
-  for (const [skillName, entry] of Object.entries(contract.common_skills as Record<string, { version?: string; source?: string }>)) {
-    const skillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+  for (const [skillName, entry] of Object.entries(
+    contract.common_skills as Record<string, { version?: string; source?: string }>,
+  )) {
+    const skillPath = join(TEMPLATES_DIR, "common", "skills", skillName, "SKILL.md");
     if (!existsSync(skillPath)) continue; // C-CM-01 already flagged this
-    const fmVersion = extractFrontmatterVersion(readFileSync(skillPath, 'utf-8'));
+    const fmVersion = extractFrontmatterVersion(readFileSync(skillPath, "utf-8"));
     const contractVersion = entry.version;
     if (!contractVersion) {
-      fail('common', 'C-CM-03', `common-contract.json entry '${skillName}' has no version`, `Set "version" to the SKILL.md frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
+      fail(
+        "common",
+        "C-CM-03",
+        `common-contract.json entry '${skillName}' has no version`,
+        `Set "version" to the SKILL.md frontmatter version (${fmVersion ?? "X.Y.Z"})`,
+      );
     } else if (!fmVersion) {
       // M5 (2026-09-15 project review): a contract version with no comparable
       // frontmatter version skipped the check silently — one deleted frontmatter
       // line would reintroduce the exact drift this check exists to catch.
-      fail('common', 'C-CM-03', `common-contract.json declares version ${contractVersion} for '${skillName}' but SKILL.md frontmatter has no version field`, `Restore "version: ${contractVersion}" to the SKILL.md frontmatter`);
+      fail(
+        "common",
+        "C-CM-03",
+        `common-contract.json declares version ${contractVersion} for '${skillName}' but SKILL.md frontmatter has no version field`,
+        `Restore "version: ${contractVersion}" to the SKILL.md frontmatter`,
+      );
     } else if (contractVersion !== fmVersion) {
-      fail('common', 'C-CM-03', `common-contract.json version mismatch for '${skillName}': contract=${contractVersion}, SKILL.md=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
+      fail(
+        "common",
+        "C-CM-03",
+        `common-contract.json version mismatch for '${skillName}': contract=${contractVersion}, SKILL.md=${fmVersion}`,
+        `Update common-contract.json "version" to ${fmVersion}`,
+      );
     }
   }
 
   // C-CM-02 (ERROR): common/agents/ matches common-contract.json
   for (const agentName of commonAgents) {
-    const agentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    const agentPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
     if (!existsSync(agentPath)) {
-      fail('common', 'C-CM-02', `common-contract.json lists common agent '${agentName}' but templates/common/agents/${agentName}.md is missing`, `Create templates/common/agents/${agentName}.md`);
+      fail(
+        "common",
+        "C-CM-02",
+        `common-contract.json lists common agent '${agentName}' but templates/common/agents/${agentName}.md is missing`,
+        `Create templates/common/agents/${agentName}.md`,
+      );
     } else {
       pass(`C-CM-02: common agent '${agentName}' → agent file present`);
     }
@@ -3867,17 +4652,34 @@ function checkCommonContract(): void {
   // frontmatter — the agent counterpart of C-CM-03 (skills). Without this, a tier/metadata
   // change that bumps an agent's version leaves the contract entry silently stale
   // (2026-09-15-agent-metadata-drift-check-design.md).
-  for (const [agentName, entry] of Object.entries(contract.common_agents as Record<string, { version?: string; source?: string }>)) {
-    const agentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+  for (const [agentName, entry] of Object.entries(
+    contract.common_agents as Record<string, { version?: string; source?: string }>,
+  )) {
+    const agentPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
     if (!existsSync(agentPath)) continue; // C-CM-02 already flagged this
-    const fmVersion = extractFrontmatterVersion(readFileSync(agentPath, 'utf-8'));
+    const fmVersion = extractFrontmatterVersion(readFileSync(agentPath, "utf-8"));
     const contractVersion = entry.version;
     if (!contractVersion) {
-      fail('common', 'C-CM-03a', `common-contract.json entry '${agentName}' has no version`, `Set "version" to the agent frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
+      fail(
+        "common",
+        "C-CM-03a",
+        `common-contract.json entry '${agentName}' has no version`,
+        `Set "version" to the agent frontmatter version (${fmVersion ?? "X.Y.Z"})`,
+      );
     } else if (!fmVersion) {
-      fail('common', 'C-CM-03a', `common-contract.json declares version ${contractVersion} for '${agentName}' but the agent frontmatter has no version field`, `Restore "version: ${contractVersion}" to the agent frontmatter`);
+      fail(
+        "common",
+        "C-CM-03a",
+        `common-contract.json declares version ${contractVersion} for '${agentName}' but the agent frontmatter has no version field`,
+        `Restore "version: ${contractVersion}" to the agent frontmatter`,
+      );
     } else if (contractVersion !== fmVersion) {
-      fail('common', 'C-CM-03a', `common-contract.json version mismatch for '${agentName}': contract=${contractVersion}, agent frontmatter=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
+      fail(
+        "common",
+        "C-CM-03a",
+        `common-contract.json version mismatch for '${agentName}': contract=${contractVersion}, agent frontmatter=${fmVersion}`,
+        `Update common-contract.json "version" to ${fmVersion}`,
+      );
     }
   }
 
@@ -3893,34 +4695,68 @@ function checkCommonContract(): void {
   //       direction as the 1.28.0 M5 fix: unverifiable parity must fail loud).
   //   (b) a skill listed in BOTH common_skills and common_platform_skills must
   //       carry the SAME version in both sections (9 skills are double-registered).
-  const platformSkillEntries = Object.entries((contract.common_platform_skills ?? {}) as Record<string, { version?: string }>);
+  const platformSkillEntries = Object.entries(
+    (contract.common_platform_skills ?? {}) as Record<string, { version?: string }>,
+  );
   const commonSkillEntries = (contract.common_skills ?? {}) as Record<string, { version?: string }>;
   for (const [skillName, entry] of platformSkillEntries) {
     const platforms = declaredPlatformTrees(entry as Record<string, unknown>);
     if (platforms.length === 0) {
-      fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' declares no platform source key (claude_source/gemini_source/agents_source/codex_source)`, `Add the *_source key(s) for the platform tree(s) that carry '${skillName}'`);
+      fail(
+        "common",
+        "C-CM-03b",
+        `common-contract.json platform skill '${skillName}' declares no platform source key (claude_source/gemini_source/agents_source/codex_source)`,
+        `Add the *_source key(s) for the platform tree(s) that carry '${skillName}'`,
+      );
     }
     for (const platform of platforms) {
-      const copyPath = join(TEMPLATES_DIR, 'common', platform, 'skills', skillName, 'SKILL.md');
+      const copyPath = join(TEMPLATES_DIR, "common", platform, "skills", skillName, "SKILL.md");
       if (!existsSync(copyPath)) {
-        fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' has no propagated copy at templates/common/${platform}/skills/ — version parity unverifiable`, `Propagate the skill to templates/common/${platform}/skills/ (platform-skill-lifecycle-manager skill)`);
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json platform skill '${skillName}' has no propagated copy at templates/common/${platform}/skills/ — version parity unverifiable`,
+          `Propagate the skill to templates/common/${platform}/skills/ (platform-skill-lifecycle-manager skill)`,
+        );
         continue;
       }
-      const fmVersion = extractFrontmatterVersion(readFileSync(copyPath, 'utf-8'));
+      const fmVersion = extractFrontmatterVersion(readFileSync(copyPath, "utf-8"));
       const issue = versionParityIssue(entry.version, fmVersion);
-      if (issue === 'missing-contract-version') {
-        fail('common', 'C-CM-03b', `common-contract.json platform skill '${skillName}' has no version`, `Set "version" to the templates/common/${platform}/skills/ SKILL.md frontmatter version (${fmVersion ?? 'X.Y.Z'})`);
-      } else if (issue === 'missing-artifact-version') {
-        fail('common', 'C-CM-03b', `common-contract.json declares version ${entry.version} for platform skill '${skillName}' but templates/common/${platform}/skills/ SKILL.md has no version field`, `Restore "version: ${entry.version}" to the SKILL.md frontmatter`);
-      } else if (issue === 'mismatch') {
-        fail('common', 'C-CM-03b', `common-contract.json version mismatch for platform skill '${skillName}' (${platform}): contract=${entry.version}, SKILL.md=${fmVersion}`, `Update common-contract.json "version" to ${fmVersion}`);
+      if (issue === "missing-contract-version") {
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json platform skill '${skillName}' has no version`,
+          `Set "version" to the templates/common/${platform}/skills/ SKILL.md frontmatter version (${fmVersion ?? "X.Y.Z"})`,
+        );
+      } else if (issue === "missing-artifact-version") {
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json declares version ${entry.version} for platform skill '${skillName}' but templates/common/${platform}/skills/ SKILL.md has no version field`,
+          `Restore "version: ${entry.version}" to the SKILL.md frontmatter`,
+        );
+      } else if (issue === "mismatch") {
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json version mismatch for platform skill '${skillName}' (${platform}): contract=${entry.version}, SKILL.md=${fmVersion}`,
+          `Update common-contract.json "version" to ${fmVersion}`,
+        );
       } else {
-        pass(`C-CM-03b: platform skill '${skillName}' (${platform}) version ${entry.version} matches the propagated copy`);
+        pass(
+          `C-CM-03b: platform skill '${skillName}' (${platform}) version ${entry.version} matches the propagated copy`,
+        );
       }
     }
     const commonEntry = commonSkillEntries[skillName];
     if (commonEntry?.version && entry.version && commonEntry.version !== entry.version) {
-      fail('common', 'C-CM-03b', `platform skill '${skillName}' is double-registered with divergent versions: common_skills=${commonEntry.version}, common_platform_skills=${entry.version}`, `Align the two common-contract.json entries for '${skillName}' to the SKILL.md frontmatter version`);
+      fail(
+        "common",
+        "C-CM-03b",
+        `platform skill '${skillName}' is double-registered with divergent versions: common_skills=${commonEntry.version}, common_platform_skills=${entry.version}`,
+        `Align the two common-contract.json entries for '${skillName}' to the SKILL.md frontmatter version`,
+      );
     }
   }
 
@@ -3929,7 +4765,9 @@ function checkCommonContract(): void {
   // verify-platform-lifecycle Check G; this catches the drift direction the
   // 2026-09-10 review found (M12): a command added to templates/common that the
   // contract never declares — scaffolding propagates it, governance is blind to it.
-  const contractCommands = contract.common_commands as Record<string, { source?: string; gemini_source?: string }> | undefined;
+  const contractCommands = contract.common_commands as
+    | Record<string, { source?: string; gemini_source?: string }>
+    | undefined;
   if (contractCommands) {
     // Codex leg is DERIVED from `source` (Ruling K, spec
     // 2026-09-25-verifier-platform-expansion-design): sync-skills Phase 1b maps
@@ -3941,28 +4779,40 @@ function checkCommonContract(): void {
     // 2026-09-25-inventory-decisions-batch-design) and C-CM-03b verifies their
     // version parity like any other platform tree.
     // .agents has no command surface (Finding D exclusion).
-    const reverseSurfaces: ReadonlyArray<readonly [string, string, 'source' | 'gemini_source']> = [
-      ['.claude', 'commands', 'source'],
-      ['.gemini', 'commands', 'gemini_source'],
-      ['.codex', 'prompts', 'source'],
+    const reverseSurfaces: ReadonlyArray<readonly [string, string, "source" | "gemini_source"]> = [
+      [".claude", "commands", "source"],
+      [".gemini", "commands", "gemini_source"],
+      [".codex", "prompts", "source"],
     ];
     for (const [platform, leaf, sourceKey] of reverseSurfaces) {
-      const cmdDir = join(TEMPLATES_DIR, 'common', platform, leaf);
+      const cmdDir = join(TEMPLATES_DIR, "common", platform, leaf);
       if (!existsSync(cmdDir)) continue;
-      const soak = platform === '.codex'; // TODO(promotion): flip to fail after soak
+      const soak = platform === ".codex"; // TODO(promotion): flip to fail after soak
       const emit = soak ? warn : fail;
       let listedCount = 0;
-      for (const file of readdirSync(cmdDir).filter(f => f.endsWith('.md'))) {
-        const name = file.replace(/\.md$/, '');
+      for (const file of readdirSync(cmdDir).filter((f) => f.endsWith(".md"))) {
+        const name = file.replace(/\.md$/, "");
         listedCount++;
         if (!contractCommands[name]) {
-          emit('common', 'C-CM-04', `templates/common/${platform}/${leaf}/${file} exists but is not declared in common-contract.json common_commands`, `Add a "${name}" entry to common_commands (source + gemini_source + description)`);
+          emit(
+            "common",
+            "C-CM-04",
+            `templates/common/${platform}/${leaf}/${file} exists but is not declared in common-contract.json common_commands`,
+            `Add a "${name}" entry to common_commands (source + gemini_source + description)`,
+          );
         } else if (!contractCommands[name][sourceKey]) {
-          emit('common', 'C-CM-04', `common-contract.json command "${name}" is missing "${sourceKey}" for ${platform}/${leaf}/`, `Set "${sourceKey}" on the "${name}" entry`);
+          emit(
+            "common",
+            "C-CM-04",
+            `common-contract.json command "${name}" is missing "${sourceKey}" for ${platform}/${leaf}/`,
+            `Set "${sourceKey}" on the "${name}" entry`,
+          );
         }
       }
       if (listedCount > 0) {
-        pass(`C-CM-04: all ${listedCount} ${platform}/${leaf}/ file(s) declared in common_commands${soak ? ' (soak: WARN until promotion)' : ''}`);
+        pass(
+          `C-CM-04: all ${listedCount} ${platform}/${leaf}/ file(s) declared in common_commands${soak ? " (soak: WARN until promotion)" : ""}`,
+        );
       }
     }
   }
@@ -3978,50 +4828,61 @@ function checkCommonContract(): void {
   // ADR-0076 amendment — it is now an ordinary mirrored skill.)
   const platformSkills = contract.common_platform_skills as Record<string, unknown> | undefined;
   if (platformSkills) {
-    const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+    const schemaPath = join(ROOT, "docs", "workspace-schema.json");
     let countryScoped = new Set<string>();
     let variantScoped = new Set<string>();
     if (existsSync(schemaPath)) {
       try {
-        const wsSchema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as {
+        const wsSchema = JSON.parse(readFileSync(schemaPath, "utf-8")) as {
           country_scoped_assets?: { skills?: Record<string, string> };
           variant_scoped_skills?: Record<string, string[]>;
         };
         countryScoped = new Set(Object.keys(wsSchema.country_scoped_assets?.skills ?? {}));
         variantScoped = new Set(Object.values(wsSchema.variant_scoped_skills ?? {}).flat());
-      } catch { /* workspace-schema checks report their own drift */ }
+      } catch {
+        /* workspace-schema checks report their own drift */
+      }
     }
-    const skillDir = join(TEMPLATES_DIR, 'common', '.claude', 'skills');
+    const skillDir = join(TEMPLATES_DIR, "common", ".claude", "skills");
     if (existsSync(skillDir)) {
       let unlistedErrors = 0;
       for (const entry of readdirSync(skillDir, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue;
         const name = entry.name;
-        if (!existsSync(join(skillDir, name, 'SKILL.md'))) continue;
+        if (!existsSync(join(skillDir, name, "SKILL.md"))) continue;
         if (platformSkills[name]) continue; // listed — Check H owns forward coverage
-        if (existsSync(join(ROOT, 'skills', name, 'SKILL.md'))) continue; // mirrored workspace skill
+        if (existsSync(join(ROOT, "skills", name, "SKILL.md"))) continue; // mirrored workspace skill
         if (countryScoped.has(name)) continue; // country-scoped — contract description excludes
         if (variantScoped.has(name)) continue; // variant-scoped — contract description excludes
-        fail('common', 'C-CM-05', `templates/common/.claude/skills/${name}/ exists but is not declared in common-contract.json common_platform_skills and matches no documented exclusion class`, `Add "${name}" to common_platform_skills, or register it in workspace-schema.json country_scoped_assets/variant_scoped_skills`);
+        fail(
+          "common",
+          "C-CM-05",
+          `templates/common/.claude/skills/${name}/ exists but is not declared in common-contract.json common_platform_skills and matches no documented exclusion class`,
+          `Add "${name}" to common_platform_skills, or register it in workspace-schema.json country_scoped_assets/variant_scoped_skills`,
+        );
         unlistedErrors++;
       }
       if (unlistedErrors === 0) {
-        pass('C-CM-05: all templates/common platform skills declared or explicitly excluded');
+        pass("C-CM-05: all templates/common platform skills declared or explicitly excluded");
       }
     }
   }
 
   // C-SK-01 (WARNING): No duplicate common skills in variant dirs
   for (const skillName of commonSkills) {
-    const commonSkillPath = join(TEMPLATES_DIR, 'common', 'skills', skillName, 'SKILL.md');
+    const commonSkillPath = join(TEMPLATES_DIR, "common", "skills", skillName, "SKILL.md");
     if (!existsSync(commonSkillPath)) continue; // C-CM-01 already flagged this
-    const commonContent = normalizeContent(readFileSync(commonSkillPath, 'utf-8'));
+    const commonContent = normalizeContent(readFileSync(commonSkillPath, "utf-8"));
     for (const variant of variantDirs) {
-      const variantSkillPath = join(TEMPLATES_DIR, variant, 'skills', skillName, 'SKILL.md');
+      const variantSkillPath = join(TEMPLATES_DIR, variant, "skills", skillName, "SKILL.md");
       if (existsSync(variantSkillPath)) {
-        const variantContent = normalizeContent(readFileSync(variantSkillPath, 'utf-8'));
+        const variantContent = normalizeContent(readFileSync(variantSkillPath, "utf-8"));
         if (variantContent === commonContent) {
-          warn(variant, 'C-SK-01', `Duplicate common skill '${skillName}' in ${variant}/skills/ — remove variant copy to inherit from common`);
+          warn(
+            variant,
+            "C-SK-01",
+            `Duplicate common skill '${skillName}' in ${variant}/skills/ — remove variant copy to inherit from common`,
+          );
         }
       }
     }
@@ -4035,15 +4896,19 @@ function checkCommonContract(): void {
     const agentMeta2 = commonAgentsMap2[agentName];
     if (agentMeta2?.expected_override_all_variants) continue; // intentional override — skip
 
-    const commonAgentPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    const commonAgentPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
     if (!existsSync(commonAgentPath)) continue; // C-CM-02 already flagged this
-    const commonContent = normalizeContent(readFileSync(commonAgentPath, 'utf-8'));
+    const commonContent = normalizeContent(readFileSync(commonAgentPath, "utf-8"));
     for (const variant of variantDirs) {
-      const variantAgentPath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+      const variantAgentPath = join(TEMPLATES_DIR, variant, "agents", `${agentName}.md`);
       if (existsSync(variantAgentPath)) {
-        const variantContent = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
+        const variantContent = normalizeContent(readFileSync(variantAgentPath, "utf-8"));
         if (variantContent === commonContent) {
-          warn(variant, 'C-AG-01', `Duplicate common agent '${agentName}' in ${variant}/agents/ — remove variant copy to inherit from common`);
+          warn(
+            variant,
+            "C-AG-01",
+            `Duplicate common agent '${agentName}' in ${variant}/agents/ — remove variant copy to inherit from common`,
+          );
         }
       }
     }
@@ -4051,18 +4916,24 @@ function checkCommonContract(): void {
 
   // C-AG-02 (INFO/WARNING): Replacement overrides flagged
   for (const variant of variantDirs) {
-    const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+    const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
     if (!existsSync(variantJsonPath)) continue;
     let variantJson: Record<string, unknown>;
     try {
-      variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
-    } catch { continue; }
+      variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      continue;
+    }
     const agentOverrides = variantJson.agent_overrides as Record<string, Record<string, unknown>> | undefined;
     if (!agentOverrides) continue;
     for (const [agentName, override] of Object.entries(agentOverrides)) {
-      if (override.type === 'replacement') {
-        const reason = (override.reason as string | undefined) ?? 'no reason given';
-        warn(variant, 'C-AG-02', `${variant}: ${agentName} has replacement override (reason: ${reason}) — lifecycle-manager review confirmed`);
+      if (override.type === "replacement") {
+        const reason = (override.reason as string | undefined) ?? "no reason given";
+        warn(
+          variant,
+          "C-AG-02",
+          `${variant}: ${agentName} has replacement override (reason: ${reason}) — lifecycle-manager review confirmed`,
+        );
       }
     }
   }
@@ -4074,20 +4945,20 @@ function checkCommonContract(): void {
     const skeletonSections = (agentMeta.skeleton_sections as string[] | undefined) ?? [];
     if (skeletonSections.length === 0) continue;
 
-    const skeletonPath = join(TEMPLATES_DIR, 'common', 'agents', `${agentName}.md`);
+    const skeletonPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
     if (!existsSync(skeletonPath)) continue; // C-CM-02 already flagged this
 
-    const skeletonRaw = normalizeContent(readFileSync(skeletonPath, 'utf-8'));
+    const skeletonRaw = normalizeContent(readFileSync(skeletonPath, "utf-8"));
 
     // Helper: extract section content (heading line + body until next ## heading)
     function extractSection(content: string, heading: string): string | null {
       // Match the heading line (## heading, possibly with bold/emoji prefix)
       // We search for lines that contain the heading text after ##
-      const lines = content.split('\n');
+      const lines = content.split("\n");
       let startIdx = -1;
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (line.startsWith('## ') && line.includes(heading)) {
+        if (line.startsWith("## ") && line.includes(heading)) {
           startIdx = i;
           break;
         }
@@ -4097,10 +4968,10 @@ function checkCommonContract(): void {
       // Collect until next ## heading
       const sectionLines: string[] = [lines[startIdx]];
       for (let i = startIdx + 1; i < lines.length; i++) {
-        if (lines[i].startsWith('## ')) break;
+        if (lines[i].startsWith("## ")) break;
         sectionLines.push(lines[i]);
       }
-      return sectionLines.join('\n').trimEnd();
+      return sectionLines.join("\n").trimEnd();
     }
 
     // Build map of invariant section content from skeleton
@@ -4114,10 +4985,10 @@ function checkCommonContract(): void {
 
     // Check each variant
     for (const variant of variantDirs) {
-      const variantAgentPath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+      const variantAgentPath = join(TEMPLATES_DIR, variant, "agents", `${agentName}.md`);
       if (!existsSync(variantAgentPath)) continue; // variant inherits from common — no override to check
 
-      const variantRaw = normalizeContent(readFileSync(variantAgentPath, 'utf-8'));
+      const variantRaw = normalizeContent(readFileSync(variantAgentPath, "utf-8"));
 
       // Check if variant uses extends pattern
       // Parse with a real YAML parser, not the line-based parseFrontmatter(): that helper trims
@@ -4125,12 +4996,18 @@ function checkCommonContract(): void {
       // (e.g. prose under `variant_overrides:`) whose text contains a colon were reported as
       // top-level frontmatter keys — producing nonsense C-SK-02 warnings like
       // "unexpected fields: <!-- VARIANT-SECTION, 1. HS classification memorandum, ...".
-      const fmMatchV = normalizeContent(variantRaw.replace(/^# @resolved-from:.*\n/, '')).match(/^---\n([\s\S]*?)\n---/);
+      const fmMatchV = normalizeContent(variantRaw.replace(/^# @resolved-from:.*\n/, "")).match(
+        /^---\n([\s\S]*?)\n---/,
+      );
       let variantFields: Record<string, unknown> = {};
       if (fmMatchV) {
-        try { variantFields = (load(fmMatchV[1]) as Record<string, unknown>) ?? {}; } catch { variantFields = {}; }
+        try {
+          variantFields = (load(fmMatchV[1]) as Record<string, unknown>) ?? {};
+        } catch {
+          variantFields = {};
+        }
       }
-      const hasExtends = 'extends' in variantFields;
+      const hasExtends = "extends" in variantFields;
 
       if (hasExtends) {
         // Per ADR-0048 / docs/architecture/extends-pattern.md, the variant pm.md
@@ -4151,21 +5028,33 @@ function checkCommonContract(): void {
         // persona's description (2026-09-23 fleet repair,
         // 2026-09-22-agent-persona-integrity-gate).
         const allowedWithExtends = new Set([
-          'extends', 'name', 'variant', 'version', 'last_updated', 'status',
-          'remove_sections', 'variant_overrides', 'owner', 'capabilities', 'lifecycle',
-          'description',
+          "extends",
+          "name",
+          "variant",
+          "version",
+          "last_updated",
+          "status",
+          "remove_sections",
+          "variant_overrides",
+          "owner",
+          "capabilities",
+          "lifecycle",
+          "description",
           // PM Tier Semantics (design 2026-09-29): variant pm.md stubs carry the
           // per-platform tier mapping and model override — documented optional fields
           // in docs/architecture/extends-pattern.md, present on the L1 pm.md they extend.
-          'tier', 'model',
+          "tier",
+          "model",
         ]);
         const fieldKeys = Object.keys(variantFields);
-        const unexpectedKeys = fieldKeys.filter(k => !allowedWithExtends.has(k));
+        const unexpectedKeys = fieldKeys.filter((k) => !allowedWithExtends.has(k));
 
         if (unexpectedKeys.length > 0) {
-          warn(variant, 'C-SK-02',
-            `C-SK-02: ${variant}/agents/${agentName}.md uses 'extends' but also has unexpected frontmatter fields: ${unexpectedKeys.join(', ')} — see docs/architecture/extends-pattern.md for the allowed schema`,
-            `Remove the unexpected frontmatter fields, or add them to the schema in docs/architecture/extends-pattern.md if intentional`
+          warn(
+            variant,
+            "C-SK-02",
+            `C-SK-02: ${variant}/agents/${agentName}.md uses 'extends' but also has unexpected frontmatter fields: ${unexpectedKeys.join(", ")} — see docs/architecture/extends-pattern.md for the allowed schema`,
+            `Remove the unexpected frontmatter fields, or add them to the schema in docs/architecture/extends-pattern.md if intentional`,
           );
         }
 
@@ -4175,10 +5064,12 @@ function checkCommonContract(): void {
       }
 
       // Sub-check A: no <!-- VARIANT-SECTION: markers should remain in scaffolded file
-      if (variantRaw.includes('<!-- VARIANT-SECTION:')) {
-        fail(variant, 'C-SK-02',
+      if (variantRaw.includes("<!-- VARIANT-SECTION:")) {
+        fail(
+          variant,
+          "C-SK-02",
           `C-SK-02: ${variant}/agents/${agentName}.md contains unresolved <!-- VARIANT-SECTION: --> markers — skeleton not fully scaffolded`,
-          `Replace all <!-- VARIANT-SECTION: --> blocks with actual variant-specific content`
+          `Replace all <!-- VARIANT-SECTION: --> blocks with actual variant-specific content`,
         );
       }
 
@@ -4186,63 +5077,73 @@ function checkCommonContract(): void {
       // additive: skeleton provides invariant sections → missing in variant is EXPECTED (skip warn)
       // replacement: variant provides everything → missing invariant = may have been stripped (warn)
       // both: if invariant section IS present but DIFFERENT → always warn
-      const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
-      let overrideType = 'replacement'; // conservative default
+      const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
+      let overrideType = "replacement"; // conservative default
       if (existsSync(variantJsonPath)) {
         try {
-          const vj = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
-          overrideType = vj.agent_overrides?.[agentName]?.type ?? 'replacement';
-        } catch { /* keep default */ }
+          const vj = JSON.parse(readFileSync(variantJsonPath, "utf-8"));
+          overrideType = vj.agent_overrides?.[agentName]?.type ?? "replacement";
+        } catch {
+          /* keep default */
+        }
       }
 
       for (const [sectionTitle, skeletonContent] of invariantSections) {
         const variantContent = extractSection(variantRaw, sectionTitle);
         if (variantContent === null) {
-          if (overrideType !== 'additive') {
-            warn(variant, 'C-SK-02',
+          if (overrideType !== "additive") {
+            warn(
+              variant,
+              "C-SK-02",
               `C-SK-02: ${variant}/agents/${agentName}.md is missing invariant section '## ${sectionTitle}' — may have been stripped during override`,
-              `Restore the '## ${sectionTitle}' section from templates/common/agents/${agentName}.md`
+              `Restore the '## ${sectionTitle}' section from templates/common/agents/${agentName}.md`,
             );
           }
           // additive: missing invariant section is EXPECTED — skeleton provides it at scaffolding time
         } else if (variantContent !== skeletonContent) {
-          warn(variant, 'C-SK-02',
+          warn(
+            variant,
+            "C-SK-02",
             `C-SK-02: ${variant}/agents/${agentName}.md has modified invariant section '## ${sectionTitle}' — invariant sections should not be changed in variant overrides`,
-            `Restore '## ${sectionTitle}' to match templates/common/agents/${agentName}.md, or promote the change to the skeleton`
+            `Restore '## ${sectionTitle}' to match templates/common/agents/${agentName}.md, or promote the change to the skeleton`,
           );
         }
       }
     }
 
     // Sub-check C: skeleton must not contain variant-specific agent names
-    const variantSpecificNames = ['designer', 'code-writer', 'test-runner', 'red-team-lead'];
+    const variantSpecificNames = ["designer", "code-writer", "test-runner", "red-team-lead"];
     for (const agentSpecificName of variantSpecificNames) {
       // Search in non-frontmatter body only (strip frontmatter)
-      const bodyStart = skeletonRaw.indexOf('\n---\n', skeletonRaw.indexOf('---\n'));
+      const bodyStart = skeletonRaw.indexOf("\n---\n", skeletonRaw.indexOf("---\n"));
       const body = bodyStart !== -1 ? skeletonRaw.slice(bodyStart + 5) : skeletonRaw;
       // Use word-boundary-style check: the name must appear as a standalone reference
-      const nameRegex = new RegExp(`(?<![a-z])${agentSpecificName.replace('-', '[- ]')}(?![a-z])`, 'i');
+      const nameRegex = new RegExp(`(?<![a-z])${agentSpecificName.replace("-", "[- ]")}(?![a-z])`, "i");
       if (nameRegex.test(body)) {
-        warn('common', 'C-SK-02',
+        warn(
+          "common",
+          "C-SK-02",
           `C-SK-02: Skeleton templates/common/agents/${agentName}.md contains variant-specific agent name: '${agentSpecificName}' — skeleton should be agent-agnostic`,
-          `Remove or generalize the reference to '${agentSpecificName}' in the skeleton`
+          `Remove or generalize the reference to '${agentSpecificName}' in the skeleton`,
         );
       }
     }
   }
-  if (!JSON_MODE) pass('C-SK-02: invariant section check complete');
+  if (!JSON_MODE) pass("C-SK-02: invariant section check complete");
 
   // WS-02 (WARNING): Anti-swelling 50% rule
   const totalVariants = variantDirs.length;
   for (const agentName of commonAgents) {
     let overrideCount = 0;
     for (const variant of variantDirs) {
-      const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+      const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
       if (!existsSync(variantJsonPath)) continue;
       let variantJson: Record<string, unknown>;
       try {
-        variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
-      } catch { continue; }
+        variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+      } catch {
+        continue;
+      }
       const agentOverrides = variantJson.agent_overrides as Record<string, unknown> | undefined;
       if (agentOverrides && agentName in agentOverrides) overrideCount++;
     }
@@ -4250,7 +5151,11 @@ function checkCommonContract(): void {
     if (agentContract?.expected_override_all_variants) {
       // skip anti-swelling check for this agent — all variants are expected to override
     } else if (totalVariants > 0 && overrideCount / totalVariants >= 0.5) {
-      warn('common', 'WS-02', `Anti-swelling alert: '${agentName}' overridden by ${overrideCount}/${totalVariants} variants — consider updating common definition`);
+      warn(
+        "common",
+        "WS-02",
+        `Anti-swelling alert: '${agentName}' overridden by ${overrideCount}/${totalVariants} variants — consider updating common definition`,
+      );
     }
   }
 
@@ -4267,18 +5172,23 @@ function checkCommonContract(): void {
   // entries claimed propagated_to_common:true — drift was invisible to every gate.
   // A value not starting with '.' is an exclusion prose record (gateguard precedent)
   // and is skipped here.
-  const pathSections = ['common_commands', 'common_platform_skills'] as const;
+  const pathSections = ["common_commands", "common_platform_skills"] as const;
   let declaredPathCount = 0;
   for (const section of pathSections) {
     const entries = (contract[section] ?? {}) as Record<string, Record<string, unknown>>;
     for (const [entryName, entry] of Object.entries(entries)) {
       for (const [key, value] of Object.entries(entry)) {
-        const isSourceKey = key === 'source' || key.endsWith('_source');
-        if (!isSourceKey || typeof value !== 'string' || !value.startsWith('.')) continue;
+        const isSourceKey = key === "source" || key.endsWith("_source");
+        if (!isSourceKey || typeof value !== "string" || !value.startsWith(".")) continue;
         declaredPathCount++;
-        const mirrorPath = join(TEMPLATES_DIR, 'common', value);
+        const mirrorPath = join(TEMPLATES_DIR, "common", value);
         if (!existsSync(mirrorPath)) {
-          fail('common', 'C-CM-06', `common-contract.json ${section}.${entryName} declares ${key}="${value}" but templates/common/${value} does not exist (found in 2026-10-27 project-review slot D: 13 stale declarations)`, `Point ${key} at the actual templates/common mirror path (e.g. the rendered .gemini/commands/<n>.toml), or replace it with an exclusion prose record citing the governing ruling (gateguard precedent)`);
+          fail(
+            "common",
+            "C-CM-06",
+            `common-contract.json ${section}.${entryName} declares ${key}="${value}" but templates/common/${value} does not exist (found in 2026-10-27 project-review slot D: 13 stale declarations)`,
+            `Point ${key} at the actual templates/common mirror path (e.g. the rendered .gemini/commands/<n>.toml), or replace it with an exclusion prose record citing the governing ruling (gateguard precedent)`,
+          );
         }
       }
     }
@@ -4287,7 +5197,7 @@ function checkCommonContract(): void {
     pass(`C-CM-06: all ${declaredPathCount} declared contract source paths resolve under templates/common/`);
   }
 
-  pass('WS-02: common-contract.json compliance check complete');
+  pass("WS-02: common-contract.json compliance check complete");
 }
 
 // Check C-CM-04 (T-20260910-019): reverse exists→listed coverage for common-contract.json.
@@ -4305,13 +5215,13 @@ function checkCommonContract(): void {
 // since the 2026-09-25 full-inventory ruling (T-20260924-002) every dir must be
 // listed, schema-exempt, or contract-excluded — the aggregated WARN signals drift.
 function checkCommonContractReverseCoverage(): void {
-  if (!JSON_MODE) console.log('\n=== Check C-CM-04: common-contract.json reverse coverage (exists→listed) ===');
+  if (!JSON_MODE) console.log("\n=== Check C-CM-04: common-contract.json reverse coverage (exists→listed) ===");
 
-  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
   if (!existsSync(contractPath)) return; // prerequisite missing — already reported by WS-02
   let contract: Record<string, unknown>;
   try {
-    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
   } catch {
     return; // already reported by WS-02
   }
@@ -4320,12 +5230,14 @@ function checkCommonContractReverseCoverage(): void {
   // variant-scoped VALUES — skill names; R1.5 of 2026-09-25-inventory-decisions-
   // batch-design fixed the keys-based build that exempted variant NAMES).
   let exemptSkills = new Set<string>();
-  const schemaPath = join(ROOT, 'docs', 'workspace-schema.json');
+  const schemaPath = join(ROOT, "docs", "workspace-schema.json");
   if (existsSync(schemaPath)) {
     try {
-      const schema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as Record<string, any>;
+      const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, any>;
       exemptSkills = collectSchemaExemptSkills(schema);
-    } catch { /* fall through with no exemptions */ }
+    } catch {
+      /* fall through with no exemptions */
+    }
   }
   // Contract-declared exclusions (T-20260924-002 R1.2/R1.3): platform skills
   // deliberately outside the common inventory (L0-only operator skills, the
@@ -4342,30 +5254,40 @@ function checkCommonContractReverseCoverage(): void {
 
   // ── agents: templates/common/agents/*.md must be listed in common_agents ──
   // _COMMON.md is a shared frontmatter fragment injected into agent files, not a roster agent.
-  const agentsDir = join(TEMPLATES_DIR, 'common', 'agents');
+  const agentsDir = join(TEMPLATES_DIR, "common", "agents");
   if (existsSync(agentsDir)) {
     const unlistedAgents = readdirSync(agentsDir)
-      .filter(f => f.endsWith('.md') && f !== '_COMMON.md')
-      .map(f => f.replace(/\.md$/, ''))
-      .filter(name => !commonAgents.has(name));
+      .filter((f) => f.endsWith(".md") && f !== "_COMMON.md")
+      .map((f) => f.replace(/\.md$/, ""))
+      .filter((name) => !commonAgents.has(name));
     if (unlistedAgents.length > 0) {
-      fail('common', 'C-CM-04', `templates/common/agents/ has agent(s) not listed in common-contract.json common_agents: ${unlistedAgents.join(', ')}`, `Add the agent(s) to common-contract.json common_agents or remove them from templates/common/agents/`);
+      fail(
+        "common",
+        "C-CM-04",
+        `templates/common/agents/ has agent(s) not listed in common-contract.json common_agents: ${unlistedAgents.join(", ")}`,
+        `Add the agent(s) to common-contract.json common_agents or remove them from templates/common/agents/`,
+      );
     } else {
-      pass('C-CM-04: all templates/common/agents/*.md files are listed in common_agents');
+      pass("C-CM-04: all templates/common/agents/*.md files are listed in common_agents");
     }
   }
 
   // ── skills: templates/common/skills/*/ must be listed in common_skills (or platform/country/variant exemptions) ──
-  const skillsDir = join(TEMPLATES_DIR, 'common', 'skills');
+  const skillsDir = join(TEMPLATES_DIR, "common", "skills");
   if (existsSync(skillsDir)) {
-    const unlistedSkills = readdirSync(skillsDir).filter(e => {
-      if (!existsSync(join(skillsDir, e, 'SKILL.md'))) return false; // non-skill entries (README etc.)
+    const unlistedSkills = readdirSync(skillsDir).filter((e) => {
+      if (!existsSync(join(skillsDir, e, "SKILL.md"))) return false; // non-skill entries (README etc.)
       return !commonSkills.has(e) && !commonPlatformSkills.has(e) && !exemptSkills.has(e);
     });
     if (unlistedSkills.length > 0) {
-      fail('common', 'C-CM-04', `templates/common/skills/ has skill(s) not listed in common-contract.json common_skills: ${unlistedSkills.join(', ')}`, `Add the skill(s) to common_skills (or document them as country-scoped/variant-scoped in workspace-schema.json)`);
+      fail(
+        "common",
+        "C-CM-04",
+        `templates/common/skills/ has skill(s) not listed in common-contract.json common_skills: ${unlistedSkills.join(", ")}`,
+        `Add the skill(s) to common_skills (or document them as country-scoped/variant-scoped in workspace-schema.json)`,
+      );
     } else {
-      pass('C-CM-04: all templates/common/skills/ directories are listed in common_skills');
+      pass("C-CM-04: all templates/common/skills/ directories are listed in common_skills");
     }
   }
 
@@ -4373,31 +5295,41 @@ function checkCommonContractReverseCoverage(): void {
   // must be listed in common_commands (codex leg: spec site 3c, WARN soak) ──
   const unlistedCommands = new Set<string>();
   const unlistedCodexCommands = new Set<string>();
-  for (const platformDir of ['.claude', '.gemini']) {
-    const cmdDir = join(TEMPLATES_DIR, 'common', platformDir, 'commands');
+  for (const platformDir of [".claude", ".gemini"]) {
+    const cmdDir = join(TEMPLATES_DIR, "common", platformDir, "commands");
     if (!existsSync(cmdDir)) continue;
     for (const f of readdirSync(cmdDir)) {
-      if (!f.endsWith('.md')) continue;
-      const name = f.replace(/\.md$/, '');
+      if (!f.endsWith(".md")) continue;
+      const name = f.replace(/\.md$/, "");
       if (!commonCommands.has(name)) unlistedCommands.add(name);
     }
   }
-  const codexPromptsDir = join(TEMPLATES_DIR, 'common', '.codex', 'prompts');
+  const codexPromptsDir = join(TEMPLATES_DIR, "common", ".codex", "prompts");
   if (existsSync(codexPromptsDir)) {
     for (const f of readdirSync(codexPromptsDir)) {
-      if (!f.endsWith('.md')) continue;
-      const name = f.replace(/\.md$/, '');
+      if (!f.endsWith(".md")) continue;
+      const name = f.replace(/\.md$/, "");
       if (!commonCommands.has(name)) unlistedCodexCommands.add(name);
     }
   }
   if (unlistedCommands.size > 0) {
-    fail('common', 'C-CM-04', `templates/common/.claude|.gemini/commands/ has command(s) not listed in common-contract.json common_commands: ${[...unlistedCommands].join(', ')}`, `Add the command(s) to common_commands with their source/gemini_source paths`);
+    fail(
+      "common",
+      "C-CM-04",
+      `templates/common/.claude|.gemini/commands/ has command(s) not listed in common-contract.json common_commands: ${[...unlistedCommands].join(", ")}`,
+      `Add the command(s) to common_commands with their source/gemini_source paths`,
+    );
   } else {
-    pass('C-CM-04: all common command files are listed in common_commands');
+    pass("C-CM-04: all common command files are listed in common_commands");
   }
   if (unlistedCodexCommands.size > 0) {
     // TODO(promotion): flip to fail after soak (T-20261009 ticket)
-    warn('common', 'C-CM-04', `templates/common/.codex/prompts/ has prompt(s) not listed in common-contract.json common_commands: ${[...unlistedCodexCommands].join(', ')} (soak: WARN until promotion)`, `Add the command(s) to common_commands with their source paths`);
+    warn(
+      "common",
+      "C-CM-04",
+      `templates/common/.codex/prompts/ has prompt(s) not listed in common-contract.json common_commands: ${[...unlistedCodexCommands].join(", ")} (soak: WARN until promotion)`,
+      `Add the command(s) to common_commands with their source paths`,
+    );
   }
 
   // ── platform skills: templates/common/.{claude,gemini,agents,codex}/skills/*/
@@ -4410,17 +5342,22 @@ function checkCommonContractReverseCoverage(): void {
   let platformTreeCount = 0;
   const listedPlatformNames = new Set([...commonSkills, ...commonPlatformSkills]);
   for (const platform of PLATFORM_MIRROR_DIRS) {
-    const platformDir = join(TEMPLATES_DIR, 'common', platform);
+    const platformDir = join(TEMPLATES_DIR, "common", platform);
     if (!existsSync(platformDir)) continue;
     platformTreeCount++;
     const unlistedPlatform = unlistedPlatformSkillDirs(
-      readdirSync(platformDir).filter(e => existsSync(join(platformDir, e, 'SKILL.md'))),
+      readdirSync(platformDir).filter((e) => existsSync(join(platformDir, e, "SKILL.md"))),
       listedPlatformNames,
       exemptSkills,
       platformSkillExclusions,
     );
     if (unlistedPlatform.length > 0) {
-      warn('common', 'C-CM-04', `${unlistedPlatform.length} platform skill dir(s) under templates/common/${platform}/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(', ')}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ''}`, `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`);
+      warn(
+        "common",
+        "C-CM-04",
+        `${unlistedPlatform.length} platform skill dir(s) under templates/common/${platform}/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(", ")}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ""}`,
+        `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`,
+      );
     } else {
       platformTreesCovered++;
     }
@@ -4430,18 +5367,25 @@ function checkCommonContractReverseCoverage(): void {
   if (platformSkillExclusions.size > 0) {
     const existingPlatformSkillNames = new Set<string>();
     for (const platform of PLATFORM_MIRROR_DIRS) {
-      const dir = join(TEMPLATES_DIR, 'common', platform);
+      const dir = join(TEMPLATES_DIR, "common", platform);
       if (!existsSync(dir)) continue;
       for (const e of readdirSync(dir)) {
-        if (existsSync(join(dir, e, 'SKILL.md'))) existingPlatformSkillNames.add(e);
+        if (existsSync(join(dir, e, "SKILL.md"))) existingPlatformSkillNames.add(e);
       }
     }
     for (const name of stalePlatformSkillExclusions(platformSkillExclusions, existingPlatformSkillNames)) {
-      fail('common', 'C-CM-04', `common-contract.json common_platform_skill_exclusions names '${name}' but no templates/common/.{claude,gemini,agents,codex}/skills/${name}/ directory exists — remove the stale exclusion`, `Delete the '${name}' entry from common-contract.json common_platform_skill_exclusions`);
+      fail(
+        "common",
+        "C-CM-04",
+        `common-contract.json common_platform_skill_exclusions names '${name}' but no templates/common/.{claude,gemini,agents,codex}/skills/${name}/ directory exists — remove the stale exclusion`,
+        `Delete the '${name}' entry from common-contract.json common_platform_skill_exclusions`,
+      );
     }
   }
   if (platformTreeCount > 0 && platformTreesCovered === platformTreeCount) {
-    pass(`C-CM-04: all platform skill dirs are covered by common_platform_skills/common_skills (${platformTreesCovered}/${platformTreeCount} tree(s))`);
+    pass(
+      `C-CM-04: all platform skill dirs are covered by common_platform_skills/common_skills (${platformTreesCovered}/${platformTreeCount} tree(s))`,
+    );
   }
 }
 
@@ -4449,19 +5393,23 @@ function checkCommonContractReverseCoverage(): void {
 // different content hash across scopes. Reads the committed graph; v1 graphs carry no hashes and
 // are skipped (divergence is only computable where hashes exist). WARN only.
 function checkSkillGraphVersionDrift(): void {
-  if (!JSON_MODE) console.log('\n=== Check skill-graph-version-drift: same version, different content across scopes (E2) ===');
-  const graph = loadSkillGraph(join(ROOT, 'docs', 'skill-graph.json'));
+  if (!JSON_MODE)
+    console.log("\n=== Check skill-graph-version-drift: same version, different content across scopes (E2) ===");
+  const graph = loadSkillGraph(join(ROOT, "docs", "skill-graph.json"));
   if (!graph) {
-    if (!JSON_MODE) console.log('  (no docs/skill-graph.json — skipped)');
+    if (!JSON_MODE) console.log("  (no docs/skill-graph.json — skipped)");
     return;
   }
-  const drift = findCapabilityDivergence(graph, ['skill']).filter(d => d.kind === 'version-drift');
+  const drift = findCapabilityDivergence(graph, ["skill"]).filter((d) => d.kind === "version-drift");
   for (const d of drift) {
-    warn('common', 'skill-graph-version-drift',
-      `skill '${d.capability}' has the same version but different content in: ${d.entries.map(e => `${e.scope}@${e.version ?? '?'}`).join(', ')}`,
-      `Bump the version of the copy that changed, or reconcile the copies (see docs/skill-graph.md "Same-Name Divergence")`);
+    warn(
+      "common",
+      "skill-graph-version-drift",
+      `skill '${d.capability}' has the same version but different content in: ${d.entries.map((e) => `${e.scope}@${e.version ?? "?"}`).join(", ")}`,
+      `Bump the version of the copy that changed, or reconcile the copies (see docs/skill-graph.md "Same-Name Divergence")`,
+    );
   }
-  if (!JSON_MODE && drift.length === 0) console.log('  ✓ no same-version-different-content skills in the graph');
+  if (!JSON_MODE && drift.length === 0) console.log("  ✓ no same-version-different-content skills in the graph");
 }
 
 // Check: mirror-hygiene (R6, spec 2026-09-25-verifier-platform-expansion-design)
@@ -4471,14 +5419,14 @@ function checkSkillGraphVersionDrift(): void {
 // them (generateSkillDirectories empty-rel guard), so the only correct state
 // is absence. WARN during the ADR-0055 soak — TODO(promotion): flip to fail.
 function checkMirrorHygiene(): void {
-  if (!JSON_MODE) console.log('\n=== Check mirror-hygiene: platform skill mirrors carry only skill directories ===');
+  if (!JSON_MODE) console.log("\n=== Check mirror-hygiene: platform skill mirrors carry only skill directories ===");
   let checked = 0;
   let findings = 0;
   const scanRoots: ReadonlyArray<readonly [string, string]> = [
-    [join(TEMPLATES_DIR, 'common'), 'common'],
+    [join(TEMPLATES_DIR, "common"), "common"],
     ...readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-      .filter(e => e.isDirectory() && e.name.startsWith('co-'))
-      .map(e => [join(TEMPLATES_DIR, e.name), e.name] as const),
+      .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+      .map((e) => [join(TEMPLATES_DIR, e.name), e.name] as const),
   ];
   for (const [rootPath, label] of scanRoots) {
     for (const mirror of PLATFORM_MIRROR_DIRS) {
@@ -4486,13 +5434,18 @@ function checkMirrorHygiene(): void {
       if (!existsSync(mirrorDir)) continue;
       checked++;
       for (const f of scanMirrorHygiene(mirrorDir)) {
-        warn(label, 'mirror-hygiene', `templates/${label}/${mirror}/${f.entry} — mirrors contain only skill directories (${f.kind})`, `Delete templates/${label}/${mirror}/${f.entry} (sync-skills never re-emits non-skill entries)`);
+        warn(
+          label,
+          "mirror-hygiene",
+          `templates/${label}/${mirror}/${f.entry} — mirrors contain only skill directories (${f.kind})`,
+          `Delete templates/${label}/${mirror}/${f.entry} (sync-skills never re-emits non-skill entries)`,
+        );
         findings++;
       }
     }
   }
   if (!JSON_MODE) {
-    if (checked === 0) console.log('  (no platform skill mirrors found)');
+    if (checked === 0) console.log("  (no platform skill mirrors found)");
     else if (findings === 0) console.log(`  ✓ ${checked} mirror dir(s) clean: only skill directories present`);
   }
 }
@@ -4501,35 +5454,48 @@ function checkMirrorHygiene(): void {
 function checkPhaseSummaryAgents(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-01: Phase Summary agents cross-validation (${variant}) ===`);
 
-  const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
   if (!existsSync(agentsMdPath)) {
-    warn(variant, 'VA-01', `${variant}/AGENTS.md not found -- cannot validate Phase Summary agents`);
+    warn(variant, "VA-01", `${variant}/AGENTS.md not found -- cannot validate Phase Summary agents`);
     return;
   }
 
-  const content = readFileSync(agentsMdPath, 'utf-8');
+  const content = readFileSync(agentsMdPath, "utf-8");
 
   const SKIP_CELLS = new Set([
-    '—', 'Specialist Agents', 'Orchestrator', 'Observer', 'Gate Keeper', 'Coordinator', 'Owner',
+    "—",
+    "Specialist Agents",
+    "Orchestrator",
+    "Observer",
+    "Gate Keeper",
+    "Coordinator",
+    "Owner",
   ]);
   // Match data rows: | <digit(s)> | <Name> | <PM Facilitation> | <Specialist Agents> |
   const rowRegex = /^\|\s*\d+\s*\|[^|]*\|[^|]*\|([^|]+)\|/gm;
-  let match: RegExpExecArray | null;
+  let match: RegExpExecArray | null = rowRegex.exec(content);
   const agentNames: string[] = [];
 
-  while ((match = rowRegex.exec(content)) !== null) {
+  while (match !== null) {
     const specialistCell = match[1].trim();
     // Skip header, PM-only, and role-name cells
-    if (SKIP_CELLS.has(specialistCell) || specialistCell.includes('PM only') || specialistCell === '') continue;
+    if (SKIP_CELLS.has(specialistCell) || specialistCell.includes("PM only") || specialistCell === "") {
+      match = rowRegex.exec(content);
+      continue;
+    }
     // Split on comma or literal <br> tag, not on individual characters
-    const names = specialistCell.split(/,|<br\s*\/?>/).map((n: string) => n.trim()).filter(Boolean);
+    const names = specialistCell
+      .split(/,|<br\s*\/?>/)
+      .map((n: string) => n.trim())
+      .filter(Boolean);
     for (const name of names) {
-      const clean = name.replace(/[*_`—]/g, '').trim();
+      const clean = name.replace(/[*_`—]/g, "").trim();
       // Only accept lowercase hyphen-separated identifiers (e.g. analyst, content-writer)
       if (clean && /^[a-z][a-z0-9-]*$/.test(clean)) {
         agentNames.push(clean);
       }
     }
+    match = rowRegex.exec(content);
   }
 
   if (agentNames.length === 0) {
@@ -4538,9 +5504,14 @@ function checkPhaseSummaryAgents(variant: string): void {
   }
 
   for (const agentName of agentNames) {
-    const agentFilePath = join(TEMPLATES_DIR, variant, 'agents', `${agentName}.md`);
+    const agentFilePath = join(TEMPLATES_DIR, variant, "agents", `${agentName}.md`);
     if (!existsSync(agentFilePath)) {
-      fail(variant, 'VA-01', `Phase Summary references agent '${agentName}' but templates/${variant}/agents/${agentName}.md is missing`, `Create templates/${variant}/agents/${agentName}.md or remove the reference from the Phase Summary`);
+      fail(
+        variant,
+        "VA-01",
+        `Phase Summary references agent '${agentName}' but templates/${variant}/agents/${agentName}.md is missing`,
+        `Create templates/${variant}/agents/${agentName}.md or remove the reference from the Phase Summary`,
+      );
     } else {
       pass(`VA-01: ${variant} Phase Summary agent '${agentName}' -- agents/${agentName}.md present`);
     }
@@ -4551,33 +5522,39 @@ function checkPhaseSummaryAgents(variant: string): void {
 function checkWorkspaceRootAgentIntrusion(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-02: Workspace-root agent intrusion detection (${variant}) ===`);
 
-  const agentsMdPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
   if (!existsSync(agentsMdPath)) {
     return; // VA-01 already warned about missing AGENTS.md
   }
 
   const WORKSPACE_ROOT_AGENTS = [
-    'scaffolding-expert',
-    'automation-engineer',
-    'docs-writer',
-    'security-expert',
-    'architect',
-    'auditor',
-    'lifecycle-manager',
+    "scaffolding-expert",
+    "automation-engineer",
+    "docs-writer",
+    "security-expert",
+    "architect",
+    "auditor",
+    "lifecycle-manager",
   ];
 
-  const content = readFileSync(agentsMdPath, 'utf-8');
+  const content = readFileSync(agentsMdPath, "utf-8");
 
   const rowRegex = /^\|\s*\d+\s*\|[^|]*\|([^|]+)\|/gm;
-  let match2: RegExpExecArray | null;
+  let match2: RegExpExecArray | null = rowRegex.exec(content);
 
-  while ((match2 = rowRegex.exec(content)) !== null) {
+  while (match2 !== null) {
     const specialistCell = match2[1].trim();
     for (const wsAgent of WORKSPACE_ROOT_AGENTS) {
       if (specialistCell.includes(wsAgent)) {
-        fail(variant, 'VA-02', `Workspace-root agent '${wsAgent}' referenced in ${variant}/AGENTS.md Phase Summary -- variants must use only their own agents`, `Remove '${wsAgent}' from the Phase Summary table in templates/${variant}/AGENTS.md`);
+        fail(
+          variant,
+          "VA-02",
+          `Workspace-root agent '${wsAgent}' referenced in ${variant}/AGENTS.md Phase Summary -- variants must use only their own agents`,
+          `Remove '${wsAgent}' from the Phase Summary table in templates/${variant}/AGENTS.md`,
+        );
       }
     }
+    match2 = rowRegex.exec(content);
   }
 
   pass(`VA-02: ${variant} AGENTS.md Phase Summary workspace-root agent intrusion check complete`);
@@ -4591,7 +5568,7 @@ function checkWorkspaceRootAgentIntrusion(variant: string): void {
 function checkSkillPlatformParity(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-03: .claude/skills vs platform mirrors parity (${variant}) ===`);
 
-  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, ".claude", "skills");
   if (!existsSync(claudeSkillsDir)) {
     if (!JSON_MODE) console.log(`  (no .claude/skills/ directory for ${variant} -- skipping VA-03)`);
     return;
@@ -4600,47 +5577,58 @@ function checkSkillPlatformParity(variant: string): void {
   // [.gemini leg is pre-existing fail semantics; .agents/.codex legs are
   // net-new coverage soaking in WARN (ADR-0055) — TODO(promotion): flip to fail.]
   const counterpartMirrors: ReadonlyArray<readonly [string, boolean]> = [
-    ['.gemini', false],
-    ['.agents', true],
-    ['.codex', true],
+    [".gemini", false],
+    [".agents", true],
+    [".codex", true],
   ];
 
   let skillDirs: string[];
   try {
-    skillDirs = readdirSync(claudeSkillsDir).filter(e => {
-      try { return statSync(join(claudeSkillsDir, e)).isDirectory(); } catch { return false; }
+    skillDirs = readdirSync(claudeSkillsDir).filter((e) => {
+      try {
+        return statSync(join(claudeSkillsDir, e)).isDirectory();
+      } catch {
+        return false;
+      }
     });
   } catch {
-    warn(variant, 'VA-03', `Could not read ${variant}/.claude/skills/ directory`);
+    warn(variant, "VA-03", `Could not read ${variant}/.claude/skills/ directory`);
     return;
   }
 
   for (const skillName of skillDirs) {
-    const skillMdPath = join(claudeSkillsDir, skillName, 'SKILL.md');
+    const skillMdPath = join(claudeSkillsDir, skillName, "SKILL.md");
     if (!existsSync(skillMdPath)) continue;
 
-    const raw = readFileSync(skillMdPath, 'utf-8');
+    const raw = readFileSync(skillMdPath, "utf-8");
 
     let frontmatter: Record<string, unknown> = {};
     const fmMatch = raw.match(/^---\n([\s\S]*?)\n---/);
     if (fmMatch) {
       try {
         frontmatter = (load(fmMatch[1]) as Record<string, unknown>) ?? {};
-      } catch { /* ignore parse errors */ }
+      } catch {
+        /* ignore parse errors */
+      }
     }
 
-    const skipMarker =
-      frontmatter['mirror-parity'] === 'skip' || frontmatter['gemini-parity'] === 'skip';
+    const skipMarker = frontmatter["mirror-parity"] === "skip" || frontmatter["gemini-parity"] === "skip";
     if (skipMarker) {
-      if (!JSON_MODE) console.log(`  VA-03: ${variant}/.claude/skills/${skillName} -- mirror-parity: skip (claude-only)`);
+      if (!JSON_MODE)
+        console.log(`  VA-03: ${variant}/.claude/skills/${skillName} -- mirror-parity: skip (claude-only)`);
       continue;
     }
 
     for (const [mirror, soak] of counterpartMirrors) {
       const emit = soak ? warn : fail;
-      const counterpartPath = join(TEMPLATES_DIR, variant, mirror, 'skills', skillName, 'SKILL.md');
+      const counterpartPath = join(TEMPLATES_DIR, variant, mirror, "skills", skillName, "SKILL.md");
       if (!existsSync(counterpartPath)) {
-        emit(variant, 'VA-03', `${variant}/.claude/skills/${skillName}/SKILL.md exists but ${variant}/${mirror}/skills/${skillName}/SKILL.md is missing -- platform parity required${soak ? ' (soak: WARN until promotion)' : ''}`, `Create templates/${variant}/${mirror}/skills/${skillName}/SKILL.md or add 'mirror-parity: skip' to the SKILL.md frontmatter`);
+        emit(
+          variant,
+          "VA-03",
+          `${variant}/.claude/skills/${skillName}/SKILL.md exists but ${variant}/${mirror}/skills/${skillName}/SKILL.md is missing -- platform parity required${soak ? " (soak: WARN until promotion)" : ""}`,
+          `Create templates/${variant}/${mirror}/skills/${skillName}/SKILL.md or add 'mirror-parity: skip' to the SKILL.md frontmatter`,
+        );
       } else {
         pass(`VA-03: ${variant} skill '${skillName}' -- ${mirror}/skills counterpart present`);
       }
@@ -4670,7 +5658,7 @@ export interface MirrorVersionMismatch {
 // html-build staleness (1.5.0 vs 1.6.0) was invisible because .hermes was
 // outside this list. The loop below existence-guards each mirror dir, so
 // variants without a .hermes tree are unaffected.
-const VA07_MIRROR_DIRS = ['.claude', '.gemini', '.agents', '.codex', '.hermes'] as const;
+const VA07_MIRROR_DIRS = [".claude", ".gemini", ".agents", ".codex", ".hermes"] as const;
 
 /**
  * Pure core of VA-07 (T-004 convention): enumerate the union of skill dirs
@@ -4683,40 +5671,54 @@ export function collectMirrorVersionMismatches(variantDir: string, variant: stri
   // Authored registry rows (curated SKILLS.md) — the secondary cross-check's
   // expected versions. An unparseable/absent registry simply contributes no rows.
   const registryRows = new Map<string, string>();
-  const registryPath = join(variantDir, 'skills', 'SKILLS.md');
+  const registryPath = join(variantDir, "skills", "SKILLS.md");
   if (existsSync(registryPath)) {
     try {
-      const { rows } = parseSkillRegistryRows(readFileSync(registryPath, 'utf-8'));
+      const { rows } = parseSkillRegistryRows(readFileSync(registryPath, "utf-8"));
       for (const [name, row] of rows) registryRows.set(name, row.version);
-    } catch { /* unreadable registry — no cross-check rows */ }
+    } catch {
+      /* unreadable registry — no cross-check rows */
+    }
   }
 
   // skill name -> mirror -> frontmatter version (undefined = present but unparseable)
   const versionsBySkill = new Map<string, Map<string, string | undefined>>();
   for (const mirror of VA07_MIRROR_DIRS) {
-    const skillsDir = join(variantDir, mirror, 'skills');
+    const skillsDir = join(variantDir, mirror, "skills");
     if (!existsSync(skillsDir)) continue;
     let skillDirs: string[];
     try {
-      skillDirs = readdirSync(skillsDir).filter(e => {
-        try { return statSync(join(skillsDir, e)).isDirectory(); } catch { return false; }
+      skillDirs = readdirSync(skillsDir).filter((e) => {
+        try {
+          return statSync(join(skillsDir, e)).isDirectory();
+        } catch {
+          return false;
+        }
       });
-    } catch { continue; }
+    } catch {
+      continue;
+    }
     for (const skill of skillDirs) {
-      const skillMdPath = join(skillsDir, skill, 'SKILL.md');
+      const skillMdPath = join(skillsDir, skill, "SKILL.md");
       if (!existsSync(skillMdPath)) continue;
       let version: string | undefined;
       try {
-        const raw = readFileSync(skillMdPath, 'utf-8');
+        const raw = readFileSync(skillMdPath, "utf-8");
         version = extractFrontmatterVersion(raw);
         // VA-03 exemption vocabulary — one exemption language for the file class.
         const fmMatch = raw.match(/^---\n([\s\S]*?)\n---/);
         if (fmMatch) {
           let fm: Record<string, unknown> = {};
-          try { fm = (load(fmMatch[1]) as Record<string, unknown>) ?? {}; } catch { /* ignore */ }
-          if (fm['mirror-parity'] === 'skip' || fm['gemini-parity'] === 'skip') continue;
+          try {
+            fm = (load(fmMatch[1]) as Record<string, unknown>) ?? {};
+          } catch {
+            /* ignore */
+          }
+          if (fm["mirror-parity"] === "skip" || fm["gemini-parity"] === "skip") continue;
         }
-      } catch { /* unreadable SKILL.md — treated as missing version */ }
+      } catch {
+        /* unreadable SKILL.md — treated as missing version */
+      }
       if (!versionsBySkill.has(skill)) versionsBySkill.set(skill, new Map());
       versionsBySkill.get(skill)!.set(mirror, version);
     }
@@ -4725,7 +5727,7 @@ export function collectMirrorVersionMismatches(variantDir: string, variant: stri
   for (const [skill, byMirror] of versionsBySkill) {
     if (byMirror.size < 2) continue; // VA-03 owns presence; VA-07 compares versions
     const present = [...byMirror.entries()];
-    const versionList = present.map(([m, v]) => `${m}=${v ?? '(missing)'}`).join(', ');
+    const versionList = present.map(([m, v]) => `${m}=${v ?? "(missing)"}`).join(", ");
 
     if (present.some(([, v]) => v === undefined)) {
       findings.push({
@@ -4769,7 +5771,12 @@ function checkSkillMirrorVersionSync(variant: string): void {
   // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-006).
   for (const f of findings) {
     // PROMOTED to fail 2026-09-27 (T-20260925-006, zero-WARN precondition verified).
-    fail(variant, 'VA-07', f.message, `Align the SKILL.md frontmatter version across all platform mirrors of ${variant} (and the curated registry row)`);
+    fail(
+      variant,
+      "VA-07",
+      f.message,
+      `Align the SKILL.md frontmatter version across all platform mirrors of ${variant} (and the curated registry row)`,
+    );
   }
   if (findings.length === 0) {
     pass(`VA-07: ${variant} -- mirror skill versions in sync (mirrors and registry rows)`);
@@ -4791,10 +5798,15 @@ function checkSkillRegistrySync(): void {
   // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-007).
   for (const f of findings) {
     // PROMOTED to fail 2026-09-27 (T-20260925-007, zero-WARN precondition verified).
-    fail('registries', 'VA-08', f.message, 'Run: bun scripts/sync-skill-registries.ts (dev-sync Step 4.63 re-converges on every /sync)');
+    fail(
+      "registries",
+      "VA-08",
+      f.message,
+      "Run: bun scripts/sync-skill-registries.ts (dev-sync Step 4.63 re-converges on every /sync)",
+    );
   }
   if (findings.length === 0) {
-    pass('VA-08: all skill registry tables match SKILL.md frontmatter');
+    pass("VA-08: all skill registry tables match SKILL.md frontmatter");
   }
 }
 
@@ -4803,16 +5815,17 @@ function checkSkillRegistrySync(): void {
 // They are NOT expected in templates/co-*/skills/ (empty delta after fork) nor in .claude/skills/.
 // Per-variant variant_specific skills are still verified against the variant's .claude/skills/.
 function checkCommonContractVariantSkills(variant: string): void {
-  if (!JSON_MODE) console.log(`\n=== Check WS-03: Common-contract x variant .claude/skills cross-validation (${variant}) ===`);
+  if (!JSON_MODE)
+    console.log(`\n=== Check WS-03: Common-contract x variant .claude/skills cross-validation (${variant}) ===`);
 
-  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
   if (!existsSync(contractPath)) {
     return; // WS-02 already warned about missing contract
   }
 
   let contract: Record<string, unknown>;
   try {
-    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
   } catch {
     return; // WS-02 already reported invalid JSON
   }
@@ -4822,34 +5835,46 @@ function checkCommonContractVariantSkills(variant: string): void {
   // common_skills are delivered via templates/common/skills/ — check there, NOT in each variant
   // This check runs once per variant call but only needs to validate the common layer once.
   // We gate it on variant === first stable variant to avoid repeating; simpler: always check, pass is idempotent.
-  const commonSkillsBase = join(TEMPLATES_DIR, 'common', 'skills');
+  const commonSkillsBase = join(TEMPLATES_DIR, "common", "skills");
   for (const skillName of commonSkills) {
-    const skillPath = join(commonSkillsBase, skillName, 'SKILL.md');
+    const skillPath = join(commonSkillsBase, skillName, "SKILL.md");
     if (!existsSync(skillPath)) {
-      warn('common', 'WS-03', `Common skill '${skillName}' (from common-contract.json) is missing from templates/common/skills/${skillName}/SKILL.md`, `Create templates/common/skills/${skillName}/SKILL.md`);
+      warn(
+        "common",
+        "WS-03",
+        `Common skill '${skillName}' (from common-contract.json) is missing from templates/common/skills/${skillName}/SKILL.md`,
+        `Create templates/common/skills/${skillName}/SKILL.md`,
+      );
     } else {
       pass(`WS-03: common skill '${skillName}' → templates/common/skills/${skillName}/SKILL.md present`);
     }
   }
 
   // Check variant_specific skills from variant.json (still against .claude/skills/ — platform skills)
-  const claudeSkillsDir = join(TEMPLATES_DIR, variant, '.claude', 'skills');
-  const variantJsonPath = join(TEMPLATES_DIR, variant, 'variant.json');
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, ".claude", "skills");
+  const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
   if (!existsSync(variantJsonPath)) return;
 
   let variantJson: Record<string, unknown>;
   try {
-    variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
-  } catch { return; }
+    variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    return;
+  }
 
   const skillManifest = variantJson.skill_manifest as Record<string, unknown> | undefined;
   const variantSpecificSkills = (skillManifest?.variant_specific as Array<{ name: string }> | undefined) ?? [];
 
   for (const entry of variantSpecificSkills) {
     const skillName = entry.name;
-    const skillMdPath = join(claudeSkillsDir, skillName, 'SKILL.md');
+    const skillMdPath = join(claudeSkillsDir, skillName, "SKILL.md");
     if (!existsSync(skillMdPath)) {
-      fail(variant, 'WS-03', `variant.json skill_manifest.variant_specific lists '${skillName}' but templates/${variant}/.claude/skills/${skillName}/SKILL.md is missing`, `Create templates/${variant}/.claude/skills/${skillName}/SKILL.md or remove from variant_specific in variant.json`);
+      fail(
+        variant,
+        "WS-03",
+        `variant.json skill_manifest.variant_specific lists '${skillName}' but templates/${variant}/.claude/skills/${skillName}/SKILL.md is missing`,
+        `Create templates/${variant}/.claude/skills/${skillName}/SKILL.md or remove from variant_specific in variant.json`,
+      );
     } else {
       pass(`WS-03: ${variant} -- variant_specific skill '${skillName}' SKILL.md present`);
     }
@@ -4858,10 +5883,10 @@ function checkCommonContractVariantSkills(variant: string): void {
 
 // Check VA-04: Platform settings parity
 function getNestedKey(obj: Record<string, unknown>, dotKey: string): unknown {
-  const parts = dotKey.split('.');
+  const parts = dotKey.split(".");
   let current: unknown = obj;
   for (const part of parts) {
-    if (current === null || typeof current !== 'object') return undefined;
+    if (current === null || typeof current !== "object") return undefined;
     current = (current as Record<string, unknown>)[part];
   }
   return current;
@@ -4870,14 +5895,14 @@ function getNestedKey(obj: Record<string, unknown>, dotKey: string): unknown {
 function checkPlatformSettingsParity(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-04: Platform settings parity (${variant}) ===`);
 
-  const contractPath = join(ROOT, 'docs', 'templates', 'common-contract.json');
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
   if (!existsSync(contractPath)) {
     return; // WS-02 already warned about missing contract
   }
 
   let contract: Record<string, unknown>;
   try {
-    contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as Record<string, unknown>;
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
   } catch {
     return; // WS-02 already reported invalid JSON
   }
@@ -4888,46 +5913,58 @@ function checkPlatformSettingsParity(variant: string): void {
     return;
   }
 
-  const sharedKeys = Object.keys((platformSettings.shared as Record<string, unknown> | undefined)?.keys as Record<string, unknown> ?? {});
-  const claudeOnlyKeys = Object.keys((platformSettings.claude_only as Record<string, unknown> | undefined)?.keys as Record<string, unknown> ?? {});
+  const sharedKeys = Object.keys(
+    ((platformSettings.shared as Record<string, unknown> | undefined)?.keys as Record<string, unknown>) ?? {},
+  );
+  const claudeOnlyKeys = Object.keys(
+    ((platformSettings.claude_only as Record<string, unknown> | undefined)?.keys as Record<string, unknown>) ?? {},
+  );
 
-  const claudeSettingsPath = join(TEMPLATES_DIR, variant, '.claude', 'settings.json');
-  const geminiSettingsPath = join(TEMPLATES_DIR, variant, '.gemini', 'settings.json');
+  const claudeSettingsPath = join(TEMPLATES_DIR, variant, ".claude", "settings.json");
+  const geminiSettingsPath = join(TEMPLATES_DIR, variant, ".gemini", "settings.json");
 
   let claudeSettings: Record<string, unknown> | null = null;
   let geminiSettings: Record<string, unknown> | null = null;
 
   if (!existsSync(claudeSettingsPath)) {
-    warn(variant, 'VA-04', `templates/${variant}/.claude/settings.json is missing -- cannot verify shared settings parity`);
+    warn(
+      variant,
+      "VA-04",
+      `templates/${variant}/.claude/settings.json is missing -- cannot verify shared settings parity`,
+    );
   } else {
     try {
-      claudeSettings = JSON.parse(readFileSync(claudeSettingsPath, 'utf-8')) as Record<string, unknown>;
+      claudeSettings = JSON.parse(readFileSync(claudeSettingsPath, "utf-8")) as Record<string, unknown>;
     } catch {
-      warn(variant, 'VA-04', `templates/${variant}/.claude/settings.json is invalid JSON`);
+      warn(variant, "VA-04", `templates/${variant}/.claude/settings.json is invalid JSON`);
     }
   }
 
   if (!existsSync(geminiSettingsPath)) {
-    warn(variant, 'VA-04', `templates/${variant}/.gemini/settings.json is missing -- cannot verify shared settings parity`);
+    warn(
+      variant,
+      "VA-04",
+      `templates/${variant}/.gemini/settings.json is missing -- cannot verify shared settings parity`,
+    );
   } else {
     try {
-      geminiSettings = JSON.parse(readFileSync(geminiSettingsPath, 'utf-8')) as Record<string, unknown>;
+      geminiSettings = JSON.parse(readFileSync(geminiSettingsPath, "utf-8")) as Record<string, unknown>;
     } catch {
-      warn(variant, 'VA-04', `templates/${variant}/.gemini/settings.json is invalid JSON`);
+      warn(variant, "VA-04", `templates/${variant}/.gemini/settings.json is invalid JSON`);
     }
   }
 
   for (const key of sharedKeys) {
     if (claudeSettings !== null) {
       if (getNestedKey(claudeSettings, key) === undefined) {
-        warn(variant, 'VA-04', `Shared key '${key}' is missing from templates/${variant}/.claude/settings.json`);
+        warn(variant, "VA-04", `Shared key '${key}' is missing from templates/${variant}/.claude/settings.json`);
       } else {
         pass(`VA-04: ${variant} -- shared key '${key}' present in .claude/settings.json`);
       }
     }
     if (geminiSettings !== null) {
       if (getNestedKey(geminiSettings, key) === undefined) {
-        warn(variant, 'VA-04', `Shared key '${key}' is missing from templates/${variant}/.gemini/settings.json`);
+        warn(variant, "VA-04", `Shared key '${key}' is missing from templates/${variant}/.gemini/settings.json`);
       } else {
         pass(`VA-04: ${variant} -- shared key '${key}' present in .gemini/settings.json`);
       }
@@ -4938,7 +5975,11 @@ function checkPlatformSettingsParity(variant: string): void {
   if (geminiSettings !== null) {
     for (const key of claudeOnlyKeys) {
       if (getNestedKey(geminiSettings, key) !== undefined) {
-        warn(variant, 'VA-04', `Claude-only key '${key}' was found in templates/${variant}/.gemini/settings.json -- incorrect parity attempt`);
+        warn(
+          variant,
+          "VA-04",
+          `Claude-only key '${key}' was found in templates/${variant}/.gemini/settings.json -- incorrect parity attempt`,
+        );
       }
     }
   }
@@ -4962,12 +6003,12 @@ const EXECUTION_POLICY_RANK: Record<string, number> = { Auto: 0, Manual: 1, Off:
 function checkGeminiExecutionPolicyFloor(variant: string, geminiSettings: Record<string, unknown> | null): void {
   if (geminiSettings === null) return; // missing/invalid overlay already WARNed by the parity loop above
 
-  const commonGeminiPath = join(TEMPLATES_DIR, 'common', '.gemini', 'settings.json');
+  const commonGeminiPath = join(TEMPLATES_DIR, "common", ".gemini", "settings.json");
   if (!existsSync(commonGeminiPath)) return; // common-surface checks live elsewhere; nothing to compare against
 
   let commonPolicy: unknown;
   try {
-    commonPolicy = JSON.parse(readFileSync(commonGeminiPath, 'utf-8'))['terminal.executionPolicy'];
+    commonPolicy = JSON.parse(readFileSync(commonGeminiPath, "utf-8"))["terminal.executionPolicy"];
   } catch {
     return; // unreadable common baseline -- not this arm's failure to report
   }
@@ -4975,22 +6016,28 @@ function checkGeminiExecutionPolicyFloor(variant: string, geminiSettings: Record
   const floorRank = EXECUTION_POLICY_RANK[String(commonPolicy)];
   if (floorRank === undefined) return; // unknown baseline value: skip (schema concern, not a floor violation)
 
-  const variantPolicy = geminiSettings['terminal.executionPolicy'];
+  const variantPolicy = geminiSettings["terminal.executionPolicy"];
   const variantRank = variantPolicy === undefined ? undefined : EXECUTION_POLICY_RANK[String(variantPolicy)];
   if (variantRank === undefined) return; // missing key -> shared-key loop; unknown value -> schema concern
 
   if (variantRank < floorRank) {
-    warn(variant, 'gemini-execution-policy-floor', `templates/${variant}/.gemini/settings.json executionPolicy '${String(variantPolicy)}' is weaker than the common floor '${String(commonPolicy)}' -- the overlay wins over common in the effective template tree, so the template security floor is defeated; raise the overlay to 'Manual' + the common 50-entry terminal.denyList (stricter overlays are preserved verbatim; see design 2026-10-31-template-security-hardening Addendum 2026-11-01)`);
+    warn(
+      variant,
+      "gemini-execution-policy-floor",
+      `templates/${variant}/.gemini/settings.json executionPolicy '${String(variantPolicy)}' is weaker than the common floor '${String(commonPolicy)}' -- the overlay wins over common in the effective template tree, so the template security floor is defeated; raise the overlay to 'Manual' + the common 50-entry terminal.denyList (stricter overlays are preserved verbatim; see design 2026-10-31-template-security-hardening Addendum 2026-11-01)`,
+    );
   } else {
-    pass(`gemini-execution-policy-floor: ${variant} -- executionPolicy '${String(variantPolicy)}' at-or-above the common floor '${String(commonPolicy)}'`);
+    pass(
+      `gemini-execution-policy-floor: ${variant} -- executionPolicy '${String(variantPolicy)}' at-or-above the common floor '${String(commonPolicy)}'`,
+    );
   }
 }
 
 // Helper: extract sections marked with <!-- MARKERNAME:START --> ... <!-- MARKERNAME:END -->
-function extractMarkedSections(content: string, markerName: string): Array<{heading: string, content: string}> {
+function extractMarkedSections(content: string, markerName: string): Array<{ heading: string; content: string }> {
   const startTag = `<!-- ${markerName}:START -->`;
   const endTag = `<!-- ${markerName}:END -->`;
-  const sections: Array<{heading: string, content: string}> = [];
+  const sections: Array<{ heading: string; content: string }> = [];
   let pos = 0;
   while (true) {
     const startIdx = content.indexOf(startTag, pos);
@@ -5018,30 +6065,40 @@ function checkModelLiteralPlacement(): void {
   // the L3 tier-vocabulary convergence is achieved (all 16 projects at 0.26.0,
   // 0 gpt-5.6 literals in delivered md surfaces), so any future gpt-5.6
   // literal outside a managed section FAILs loudly again.
-  const LITERAL = /\b(?:gpt-6\.1-(?:sol|terra)|gpt-6-luna|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
+  const LITERAL =
+    /\b(?:gpt-6\.1-(?:sol|terra)|gpt-6-luna|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
   const STARTS = /<!--\s*(?:COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):START|WORKSPACE-MANAGED:[^>]*?)\s*-->/;
   const ENDS = /<!--\s*(?:\/WORKSPACE-MANAGED|COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):END)\s*-->/;
   const files = [
-    'CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'AGENTS.md',
-    'templates/common/CLAUDE.md', 'templates/common/GEMINI.md',
-    'templates/common/CODEX.md', 'templates/common/AGENTS.md',
+    "CLAUDE.md",
+    "GEMINI.md",
+    "CODEX.md",
+    "AGENTS.md",
+    "templates/common/CLAUDE.md",
+    "templates/common/GEMINI.md",
+    "templates/common/CODEX.md",
+    "templates/common/AGENTS.md",
   ];
   let hits = 0;
   for (const rel of files) {
     const p = join(ROOT, rel);
     if (!existsSync(p)) continue;
-    const lines = readFileSync(p, 'utf-8').split('\n');
+    const lines = readFileSync(p, "utf-8").split("\n");
     let inside = false;
     for (let i = 0; i < lines.length; i++) {
       if (STARTS.test(lines[i])) inside = true;
       if (ENDS.test(lines[i])) inside = false;
       if (!inside && LITERAL.test(lines[i])) {
-        fail('common', 'model-literal-outside-managed-section', `${rel}:${i + 1} — model ID outside a managed marker section will not propagate (wrap it in COMMON-*/WORKSPACE-MANAGED markers or drop the literal)`);
+        fail(
+          "common",
+          "model-literal-outside-managed-section",
+          `${rel}:${i + 1} — model ID outside a managed marker section will not propagate (wrap it in COMMON-*/WORKSPACE-MANAGED markers or drop the literal)`,
+        );
         hits++;
       }
     }
   }
-  if (hits === 0) pass('Model literal placement: all instruction-twin literals inside managed sections');
+  if (hits === 0) pass("Model literal placement: all instruction-twin literals inside managed sections");
 }
 
 // Check VA-05: CLAUDE.md and GEMINI.md common section sync between workspace root and variant files
@@ -5049,9 +6106,9 @@ function checkDocumentCommonSections(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-05: Document common section sync (${variant}) ===`);
 
   const docFiles: Array<{ file: string; markerName: string }> = [
-    { file: 'CLAUDE.md', markerName: 'COMMON-CLAUDE' },
-    { file: 'GEMINI.md', markerName: 'COMMON-GEMINI' },
-    { file: 'CODEX.md', markerName: 'COMMON-CODEX' },
+    { file: "CLAUDE.md", markerName: "COMMON-CLAUDE" },
+    { file: "GEMINI.md", markerName: "COMMON-GEMINI" },
+    { file: "CODEX.md", markerName: "COMMON-CODEX" },
   ];
 
   for (const { file: docFile, markerName } of docFiles) {
@@ -5060,8 +6117,8 @@ function checkDocumentCommonSections(variant: string): void {
 
     if (!existsSync(rootPath) || !existsSync(variantPath)) continue;
 
-    const rootContent = normalizeContent(readFileSync(rootPath, 'utf-8'));
-    const variantContent = normalizeContent(readFileSync(variantPath, 'utf-8'));
+    const rootContent = normalizeContent(readFileSync(rootPath, "utf-8"));
+    const variantContent = normalizeContent(readFileSync(variantPath, "utf-8"));
 
     const rootSections = extractMarkedSections(rootContent, markerName);
     if (rootSections.length === 0) continue; // root has no markers — pass silently
@@ -5069,12 +6126,22 @@ function checkDocumentCommonSections(variant: string): void {
     for (const { heading, content: rootBlock } of rootSections) {
       // Find the same marker block in the variant file
       const variantSections = extractMarkedSections(variantContent, markerName);
-      const variantSection = variantSections.find(s => s.heading === heading);
+      const variantSection = variantSections.find((s) => s.heading === heading);
 
       if (!variantSection) {
-        warn(variant, 'VA-05', `${docFile}: common section "${heading}" is not marked for sync in variant — run 'bun run propagate:docs' to sync`, `bun run propagate:docs`);
+        warn(
+          variant,
+          "VA-05",
+          `${docFile}: common section "${heading}" is not marked for sync in variant — run 'bun run propagate:docs' to sync`,
+          `bun run propagate:docs`,
+        );
       } else if (variantSection.content !== rootBlock) {
-        warn(variant, 'VA-05', `${docFile}: common section "${heading}" differs from root — run 'bun run propagate:docs' to sync`, `bun run propagate:docs`);
+        warn(
+          variant,
+          "VA-05",
+          `${docFile}: common section "${heading}" differs from root — run 'bun run propagate:docs' to sync`,
+          `bun run propagate:docs`,
+        );
       } else {
         pass(`VA-05: ${variant} ${docFile} common section "${heading}" in sync`);
       }
@@ -5088,33 +6155,43 @@ function checkDocumentCommonSections(variant: string): void {
 // CODEX.md Language Policy gap). The three instruction twins must each carry
 // the shared policy set — checked by anchor substring, not full content
 // equality, because platform-specific sections legitimately differ.
-const TWIN_FILES = ['CLAUDE.md', 'GEMINI.md', 'CODEX.md'];
+const TWIN_FILES = ["CLAUDE.md", "GEMINI.md", "CODEX.md"];
 const TWIN_COMMON_ANCHORS = [
-  'Language Policy for Documentation',
-  'Execution Plan Boilerplate',
-  'Cost Optimization (3-Tier Model Strategy)',
-  'Custom Command Error Recovery',
-  'Windows Platform Requirement',
-  'Git & PR Additions',
+  "Language Policy for Documentation",
+  "Execution Plan Boilerplate",
+  "Cost Optimization (3-Tier Model Strategy)",
+  "Custom Command Error Recovery",
+  "Windows Platform Requirement",
+  "Git & PR Additions",
 ];
 
 function checkTwinCommonSectionParity(): void {
   if (!JSON_MODE) console.log(`\n=== Check VA-06: Cross-twin common section parity ===`);
   const layers = [
-    { label: 'root', dir: ROOT, variant: 'root' },
-    { label: 'templates/common', dir: join(TEMPLATES_DIR, 'common'), variant: 'common' },
+    { label: "root", dir: ROOT, variant: "root" },
+    { label: "templates/common", dir: join(TEMPLATES_DIR, "common"), variant: "common" },
   ];
   for (const layer of layers) {
     for (const file of TWIN_FILES) {
       const twinPath = join(layer.dir, file);
       if (!existsSync(twinPath)) {
-        fail(layer.variant, 'VA-06', `${layer.label}/${file}: platform twin not found — ADR-0077 requires all three instruction twins`, 'Restore the twin from its sibling platforms or templates/common');
+        fail(
+          layer.variant,
+          "VA-06",
+          `${layer.label}/${file}: platform twin not found — ADR-0077 requires all three instruction twins`,
+          "Restore the twin from its sibling platforms or templates/common",
+        );
         continue;
       }
-      const content = readFileSync(twinPath, 'utf-8');
+      const content = readFileSync(twinPath, "utf-8");
       for (const anchor of TWIN_COMMON_ANCHORS) {
         if (!content.includes(anchor)) {
-          fail(layer.variant, 'VA-06', `${layer.label}/${file}: common policy section "${anchor}" missing — the instruction twins must all carry the shared policy set`, `Port the section from a sibling twin (see ${layer.dir === ROOT ? 'CLAUDE.md' : 'templates/common/CLAUDE.md'}) — governance-l1 then deploys it (bun run propagate:governance)`);
+          fail(
+            layer.variant,
+            "VA-06",
+            `${layer.label}/${file}: common policy section "${anchor}" missing — the instruction twins must all carry the shared policy set`,
+            `Port the section from a sibling twin (see ${layer.dir === ROOT ? "CLAUDE.md" : "templates/common/CLAUDE.md"}) — governance-l1 then deploys it (bun run propagate:governance)`,
+          );
         } else {
           pass(`VA-06: ${layer.label}/${file} carries "${anchor}"`);
         }
@@ -5124,10 +6201,13 @@ function checkTwinCommonSectionParity(): void {
 }
 
 // Check WS-04: L0 scripts must NOT exist in templates/co-*/scripts/
-function checkL0ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+function checkL0ScriptsNotInVariants(
+  variant: string,
+  scriptLayerMap: Map<string, import("./helpers/layer-filter.js").LayerValue>,
+): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-04: L0 scripts must not exist in ${variant}/scripts/ ===`);
 
-  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts');
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, "scripts");
   if (!existsSync(variantScriptsDir)) return;
 
   function scanRecursive(dir: string): void {
@@ -5136,11 +6216,16 @@ function checkL0ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string
       const stat = statSync(fullPath);
       if (stat.isDirectory()) {
         scanRecursive(fullPath);
-      } else if (entry.endsWith('.ts') || entry.endsWith('.sh') || entry.endsWith('.ps1')) {
+      } else if (entry.endsWith(".ts") || entry.endsWith(".sh") || entry.endsWith(".ps1")) {
         const layer = getScriptLayer(entry, scriptLayerMap);
-        if (layer === 'L0') {
-          const relFile = fullPath.slice(join(TEMPLATES_DIR, variant, 'scripts').length + 1).replace(/\\/g, '/');
-          fail(variant, 'WS-04', `templates/${variant}/scripts/${relFile} is classified L0 — must not exist in variant template`, `Remove templates/${variant}/scripts/${relFile}`);
+        if (layer === "L0") {
+          const relFile = fullPath.slice(join(TEMPLATES_DIR, variant, "scripts").length + 1).replace(/\\/g, "/");
+          fail(
+            variant,
+            "WS-04",
+            `templates/${variant}/scripts/${relFile} is classified L0 — must not exist in variant template`,
+            `Remove templates/${variant}/scripts/${relFile}`,
+          );
         }
       }
     }
@@ -5150,19 +6235,27 @@ function checkL0ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string
 }
 
 // Check WS-05: L0+L1 scripts must NOT exist in templates/co-*/scripts/ (flat root only)
-function checkL0L1ScriptsNotInVariants(variant: string, scriptLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+function checkL0L1ScriptsNotInVariants(
+  variant: string,
+  scriptLayerMap: Map<string, import("./helpers/layer-filter.js").LayerValue>,
+): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-05: L0+L1 scripts must not exist in ${variant}/scripts/ (flat) ===`);
 
-  const variantScriptsDir = join(TEMPLATES_DIR, variant, 'scripts');
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, "scripts");
   if (!existsSync(variantScriptsDir)) return;
 
   for (const entry of readdirSync(variantScriptsDir)) {
     const fullPath = join(variantScriptsDir, entry);
     if (statSync(fullPath).isDirectory()) continue;
-    if (!entry.endsWith('.ts') && !entry.endsWith('.sh') && !entry.endsWith('.ps1')) continue;
+    if (!entry.endsWith(".ts") && !entry.endsWith(".sh") && !entry.endsWith(".ps1")) continue;
     const layer = getScriptLayer(entry, scriptLayerMap);
-    if (layer === 'L0+L1') {
-      warn(variant, 'WS-05', `templates/${variant}/scripts/${entry} is L0+L1 — redundant copy (managed in templates/common/scripts/)`, `Remove templates/${variant}/scripts/${entry} — it is inherited from templates/common/scripts/`);
+    if (layer === "L0+L1") {
+      warn(
+        variant,
+        "WS-05",
+        `templates/${variant}/scripts/${entry} is L0+L1 — redundant copy (managed in templates/common/scripts/)`,
+        `Remove templates/${variant}/scripts/${entry} — it is inherited from templates/common/scripts/`,
+      );
     }
   }
 }
@@ -5172,15 +6265,16 @@ function checkL0OnlyToolRefsInVariantCommandSkills(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-05a: L0-only tool refs in ${variant} command/skill files ===`);
 
   const scanRoots = [
-    join(TEMPLATES_DIR, variant, '.claude', 'commands'),
-    join(TEMPLATES_DIR, variant, '.gemini', 'commands'),
-    join(TEMPLATES_DIR, variant, '.agents', 'commands'),
-    join(TEMPLATES_DIR, variant, '.claude', 'skills'),
-    join(TEMPLATES_DIR, variant, '.gemini', 'skills'),
-    join(TEMPLATES_DIR, variant, '.agents', 'skills'),
-    join(TEMPLATES_DIR, variant, 'skills'),
+    join(TEMPLATES_DIR, variant, ".claude", "commands"),
+    join(TEMPLATES_DIR, variant, ".gemini", "commands"),
+    join(TEMPLATES_DIR, variant, ".agents", "commands"),
+    join(TEMPLATES_DIR, variant, ".claude", "skills"),
+    join(TEMPLATES_DIR, variant, ".gemini", "skills"),
+    join(TEMPLATES_DIR, variant, ".agents", "skills"),
+    join(TEMPLATES_DIR, variant, "skills"),
   ];
-  const forbidden = /\b(?:bun\s+scripts\/)?(?:validate-templates|propagate-to-templates|ticket)\.ts\b|\bbun\s+scripts\/(?:validate-templates|propagate-to-templates|ticket)\b/g;
+  const forbidden =
+    /\b(?:bun\s+scripts\/)?(?:validate-templates|propagate-to-templates|ticket)\.ts\b|\bbun\s+scripts\/(?:validate-templates|propagate-to-templates|ticket)\b/g;
   let checked = 0;
 
   function scanRecursive(dir: string): void {
@@ -5191,21 +6285,21 @@ function checkL0OnlyToolRefsInVariantCommandSkills(variant: string): void {
         scanRecursive(fullPath);
         continue;
       }
-      if (!entry.endsWith('.md')) continue;
+      if (!entry.endsWith(".md")) continue;
 
       checked++;
-      const relFile = relative(ROOT, fullPath).replace(/\\/g, '/');
-      const content = readFileSync(fullPath, 'utf-8');
+      const relFile = relative(ROOT, fullPath).replace(/\\/g, "/");
+      const content = readFileSync(fullPath, "utf-8");
       const lines = content.split(/\r?\n/);
       for (let i = 0; i < lines.length; i++) {
         forbidden.lastIndex = 0;
-        const matches = [...lines[i].matchAll(forbidden)].map(m => m[0]);
+        const matches = [...lines[i].matchAll(forbidden)].map((m) => m[0]);
         if (matches.length === 0) continue;
         fail(
           variant,
-          'WS-05a',
-          `${relFile}:${i + 1} references L0-only workspace tooling (${Array.from(new Set(matches)).join(', ')})`,
-          'Replace actionable references with project-local audit/verify commands, or describe the workspace-only gate without naming the L0-only script.'
+          "WS-05a",
+          `${relFile}:${i + 1} references L0-only workspace tooling (${Array.from(new Set(matches)).join(", ")})`,
+          "Replace actionable references with project-local audit/verify commands, or describe the workspace-only gate without naming the L0-only script.",
         );
       }
     }
@@ -5215,7 +6309,8 @@ function checkL0OnlyToolRefsInVariantCommandSkills(variant: string): void {
     if (existsSync(root)) scanRecursive(root);
   }
 
-  if (checked > 0) pass(`WS-05a: ${variant} command/skill markdown has no L0-only tool references (${checked} file(s) checked)`);
+  if (checked > 0)
+    pass(`WS-05a: ${variant} command/skill markdown has no L0-only tool references (${checked} file(s) checked)`);
 }
 
 // ============================================================================
@@ -5242,21 +6337,21 @@ const AGENT_REFERENCE_EXEMPT = new Set<string>([
   // (empty at v1.42.0 — the healed fleet resolves cleanly)
 ]);
 
-export type AgentReferenceVerdict = 'resolved' | 'unresolved';
+export type AgentReferenceVerdict = "resolved" | "unresolved";
 
 /** Pure resolution decision: a reference resolves when the name is exempt or
  *  an agent file exists at the variant, common, or workspace-root agents/ tree
  *  (resolution order per design R4). */
 export function classifyAgentReference(opts: {
   name: string;
-  inVariantAgents: boolean;  // templates/<v>/agents/<name>.md exists
-  inCommonAgents: boolean;   // templates/common/agents/<name>.md exists
-  inRootAgents: boolean;     // agents/<name>.md exists (L0)
-  exempt: boolean;           // name on AGENT_REFERENCE_EXEMPT
+  inVariantAgents: boolean; // templates/<v>/agents/<name>.md exists
+  inCommonAgents: boolean; // templates/common/agents/<name>.md exists
+  inRootAgents: boolean; // agents/<name>.md exists (L0)
+  exempt: boolean; // name on AGENT_REFERENCE_EXEMPT
 }): AgentReferenceVerdict {
-  if (opts.exempt) return 'resolved';
-  if (opts.inVariantAgents || opts.inCommonAgents || opts.inRootAgents) return 'resolved';
-  return 'unresolved';
+  if (opts.exempt) return "resolved";
+  if (opts.inVariantAgents || opts.inCommonAgents || opts.inRootAgents) return "resolved";
+  return "unresolved";
 }
 
 export interface AgentReferenceCandidate {
@@ -5288,11 +6383,17 @@ export function extractAgentReferenceCandidates(content: string): AgentReference
   for (let i = 0; i < lines.length; i++) {
     for (const m of lines[i].matchAll(AGENT_PATH_REF_RE)) {
       const key = `${m[1]}:${i + 1}`;
-      if (!seen.has(key)) { seen.add(key); candidates.push({ name: m[1], line: i + 1 }); }
+      if (!seen.has(key)) {
+        seen.add(key);
+        candidates.push({ name: m[1], line: i + 1 });
+      }
     }
     for (const m of lines[i].matchAll(AGENT_BACKTICK_MENTION_RE)) {
       const key = `${m[1]}:${i + 1}`;
-      if (!seen.has(key)) { seen.add(key); candidates.push({ name: m[1], line: i + 1 }); }
+      if (!seen.has(key)) {
+        seen.add(key);
+        candidates.push({ name: m[1], line: i + 1 });
+      }
     }
   }
   return candidates;
@@ -5304,28 +6405,31 @@ export function extractAgentReferenceCandidates(content: string): AgentReference
  *  agents/. WARN-mode per ADR-0055 soak at introduction (T-20260924-007c);
  *  PROMOTED to fail 2026-09-27 (T-20260925-004) after the governance-doc-link
  *  false positives were fixed at the extractor. */
-function checkVariantAgentReferences(variant: string, opts?: {
-  /** Directory-root override for fixture tests (defaults to the real templates/). */
-  templatesDir?: string;
-  /** Finding sink override for fixture tests (defaults to the module warn()). */
-  report?: (finding: string) => void;
-}): void {
+function checkVariantAgentReferences(
+  variant: string,
+  opts?: {
+    /** Directory-root override for fixture tests (defaults to the real templates/). */
+    templatesDir?: string;
+    /** Finding sink override for fixture tests (defaults to the module warn()). */
+    report?: (finding: string) => void;
+  },
+): void {
   const templatesDir = opts?.templatesDir ?? TEMPLATES_DIR;
   const quiet = opts !== undefined;
   const FIX =
-    'Fix the reference so it names an agent that exists at templates/<variant>/agents/, templates/common/agents/, or the workspace-root agents/ — or remove it. A legitimately agent-shaped name that must stay unresolvable goes on AGENT_REFERENCE_EXEMPT with a justification.';
+    "Fix the reference so it names an agent that exists at templates/<variant>/agents/, templates/common/agents/, or the workspace-root agents/ — or remove it. A legitimately agent-shaped name that must stay unresolvable goes on AGENT_REFERENCE_EXEMPT with a justification.";
   // PROMOTED to fail 2026-09-27 (T-20260925-004, user-authorized early promotion):
   // the ADR-0090 governance-doc-link false positives were root-caused out of the
   // extractor (governance/ lookbehind), leaving zero findings on the fleet.
-  const report = opts?.report ?? ((finding: string) => fail(variant, 'variant-agent-references', finding, FIX));
+  const report = opts?.report ?? ((finding: string) => fail(variant, "variant-agent-references", finding, FIX));
 
   if (!quiet && !JSON_MODE) {
     console.log(`\n=== Check T-007c: agent references resolve in ${variant} AGENTS.md and scripts ===`);
   }
 
-  const variantAgentsDir = join(templatesDir, variant, 'agents');
-  const commonAgentsDir = join(TEMPLATES_DIR, 'common', 'agents');
-  const rootAgentsDir = join(ROOT, 'agents');
+  const variantAgentsDir = join(templatesDir, variant, "agents");
+  const commonAgentsDir = join(TEMPLATES_DIR, "common", "agents");
+  const rootAgentsDir = join(ROOT, "agents");
   const resolves = (name: string): boolean =>
     existsSync(join(variantAgentsDir, `${name}.md`)) ||
     existsSync(join(commonAgentsDir, `${name}.md`)) ||
@@ -5333,15 +6437,18 @@ function checkVariantAgentReferences(variant: string, opts?: {
 
   // Scan set: the variant's AGENTS.md + every .ts under its scripts/ tree.
   const scanFiles: Array<{ abs: string; rel: string }> = [];
-  const agentsMd = join(templatesDir, variant, 'AGENTS.md');
+  const agentsMd = join(templatesDir, variant, "AGENTS.md");
   if (existsSync(agentsMd)) scanFiles.push({ abs: agentsMd, rel: `templates/${variant}/AGENTS.md` });
-  const scriptsDir = join(templatesDir, variant, 'scripts');
+  const scriptsDir = join(templatesDir, variant, "scripts");
   const walkTs = (dir: string): void => {
     if (!existsSync(dir)) return;
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
-      if (entry.isDirectory()) { walkTs(full); continue; }
-      if (entry.name.endsWith('.ts')) scanFiles.push({ abs: full, rel: relative(ROOT, full).replace(/\\/g, '/') });
+      if (entry.isDirectory()) {
+        walkTs(full);
+        continue;
+      }
+      if (entry.name.endsWith(".ts")) scanFiles.push({ abs: full, rel: relative(ROOT, full).replace(/\\/g, "/") });
     }
   };
   walkTs(scriptsDir);
@@ -5350,7 +6457,11 @@ function checkVariantAgentReferences(variant: string, opts?: {
   let candidatesChecked = 0;
   for (const file of scanFiles) {
     let content: string;
-    try { content = readFileSync(file.abs, 'utf-8'); } catch { continue; }
+    try {
+      content = readFileSync(file.abs, "utf-8");
+    } catch {
+      continue;
+    }
     for (const candidate of extractAgentReferenceCandidates(content)) {
       candidatesChecked++;
       const verdict = classifyAgentReference({
@@ -5360,22 +6471,29 @@ function checkVariantAgentReferences(variant: string, opts?: {
         inRootAgents: existsSync(join(rootAgentsDir, `${candidate.name}.md`)),
         exempt: AGENT_REFERENCE_EXEMPT.has(candidate.name),
       });
-      if (verdict === 'resolved') continue;
+      if (verdict === "resolved") continue;
       unresolvedCount++;
-      report(`${file.rel}:${candidate.line} references agent "${candidate.name}" — no templates/${variant}/agents/${candidate.name}.md, no templates/common/agents/${candidate.name}.md, no agents/${candidate.name}.md`);
+      report(
+        `${file.rel}:${candidate.line} references agent "${candidate.name}" — no templates/${variant}/agents/${candidate.name}.md, no templates/common/agents/${candidate.name}.md, no agents/${candidate.name}.md`,
+      );
     }
   }
 
   if (!quiet && unresolvedCount === 0 && scanFiles.length > 0) {
-    pass(`variant-agent-references: ${variant} agent references all resolve (${candidatesChecked} candidate(s) in ${scanFiles.length} file(s))`);
+    pass(
+      `variant-agent-references: ${variant} agent references all resolve (${candidatesChecked} candidate(s) in ${scanFiles.length} file(s))`,
+    );
   }
 }
 
 // Check WS-06: Skills in templates/co-*/skills/ must be variant-scoped (L0+L2)
-function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, import('./helpers/layer-filter.js').LayerValue>): void {
+function checkVariantSkillsLayer(
+  variant: string,
+  _skillLayerMap: Map<string, import("./helpers/layer-filter.js").LayerValue>,
+): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L2 in ${variant}/skills/ ===`);
 
-  const variantSkillsDir = join(TEMPLATES_DIR, variant, 'skills');
+  const variantSkillsDir = join(TEMPLATES_DIR, variant, "skills");
   if (!existsSync(variantSkillsDir)) return;
 
   // Domain-only skills live exclusively under templates/co-*/skills/ with no
@@ -5387,8 +6505,13 @@ function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, im
 
   for (const entry of collectSkillDirs(variantSkillsDir, variantSkillsDir)) {
     const layer = getSkillLayer(entry, variantSkillLayerMap);
-    if (layer !== 'L0+L2') {
-      warn(variant, 'WS-06', `templates/${variant}/skills/${entry} is not declared L0+L2`, `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${basename(entry)}/ if it should be shared across all variants`);
+    if (layer !== "L0+L2") {
+      warn(
+        variant,
+        "WS-06",
+        `templates/${variant}/skills/${entry} is not declared L0+L2`,
+        `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${basename(entry)}/ if it should be shared across all variants`,
+      );
     }
   }
 }
@@ -5398,15 +6521,24 @@ function checkVariantSkillsLayer(variant: string, _skillLayerMap: Map<string, im
 // same SSOT new-project's variant overlay skips, T-20260917-009). Owned
 // solely by templates/common/ and copied into every project at scaffold time.
 function checkNoVariantLocalContextMd(variant: string): void {
-  if (!JSON_MODE) console.log(`\n=== Check WS-07: ${variant} must not carry common-owned scaffold files (SCAFFOLD_COMMON_OWNED_FILES) ===`);
+  if (!JSON_MODE)
+    console.log(
+      `\n=== Check WS-07: ${variant} must not carry common-owned scaffold files (SCAFFOLD_COMMON_OWNED_FILES) ===`,
+    );
 
   for (const relFile of [...SCAFFOLD_COMMON_OWNED_FILES].sort()) {
-    const variantFile = join(TEMPLATES_DIR, variant, ...relFile.split('/'));
+    const variantFile = join(TEMPLATES_DIR, variant, ...relFile.split("/"));
     if (existsSync(variantFile)) {
-      const hint = relFile === 'docs/context.md'
-        ? `Delete templates/${variant}/${relFile}; move any variant-specific content into docs/${variant}.context.md`
-        : `Delete templates/${variant}/${relFile} — the common copy is the single source of record`;
-      fail(variant, 'WS-07', `templates/${variant}/${relFile} must not exist — it is classified SCAFFOLD_COMMON_OWNED_FILES in lib/upgrade-policy.ts (owned solely by templates/common, copied into every project at scaffold time, and skipped by the variant overlay)`, hint);
+      const hint =
+        relFile === "docs/context.md"
+          ? `Delete templates/${variant}/${relFile}; move any variant-specific content into docs/${variant}.context.md`
+          : `Delete templates/${variant}/${relFile} — the common copy is the single source of record`;
+      fail(
+        variant,
+        "WS-07",
+        `templates/${variant}/${relFile} must not exist — it is classified SCAFFOLD_COMMON_OWNED_FILES in lib/upgrade-policy.ts (owned solely by templates/common, copied into every project at scaffold time, and skipped by the variant overlay)`,
+        hint,
+      );
     } else {
       pass(`WS-07: ${variant} has no local ${relFile} (inherits common's)`);
     }
@@ -5427,9 +6559,14 @@ function checkNoVariantLocalContextMd(variant: string): void {
 function checkNoVariantVersionManifest(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check T-010: ${variant} must not ship docs/VERSION_MANIFEST.md ===`);
 
-  const manifestPath = join(TEMPLATES_DIR, variant, 'docs', 'VERSION_MANIFEST.md');
+  const manifestPath = join(TEMPLATES_DIR, variant, "docs", "VERSION_MANIFEST.md");
   if (existsSync(manifestPath)) {
-    fail(variant, 'variant-version-manifest', `templates/${variant}/docs/VERSION_MANIFEST.md must not exist — the manifest is generated state, not template content: new-project.ts §7.8 runs the project's own scripts/generate-version-manifest.ts after delivery and upgrade-project.ts regenerates it on upgrade (lib/upgrade-policy.ts classifies it REGENERATED)`, `Delete templates/${variant}/docs/VERSION_MANIFEST.md (stub or otherwise) — scaffolds and upgrades generate the full manifest in-project`);
+    fail(
+      variant,
+      "variant-version-manifest",
+      `templates/${variant}/docs/VERSION_MANIFEST.md must not exist — the manifest is generated state, not template content: new-project.ts §7.8 runs the project's own scripts/generate-version-manifest.ts after delivery and upgrade-project.ts regenerates it on upgrade (lib/upgrade-policy.ts classifies it REGENERATED)`,
+      `Delete templates/${variant}/docs/VERSION_MANIFEST.md (stub or otherwise) — scaffolds and upgrades generate the full manifest in-project`,
+    );
   } else {
     pass(`variant-version-manifest: ${variant} ships no docs/VERSION_MANIFEST.md (generated in-project)`);
   }
@@ -5459,22 +6596,28 @@ function checkNoVariantVersionManifest(variant: string): void {
 // skipped (nothing to enforce). Severity: Error. Extraction/comparison
 // primitives live in scripts/lib/managed-block-parity.ts (unit-tested).
 function checkManagedBlockParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check PM-04: managed-block parity (common → every variant, MERGE_MANAGED files) ===');
+  if (!JSON_MODE)
+    console.log("\n=== Check PM-04: managed-block parity (common → every variant, MERGE_MANAGED files) ===");
 
   const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-    .filter(e => e.isDirectory() && e.name.startsWith('co-') && !isTransientTestFixture(e.name))
-    .map(e => e.name)
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-") && !isTransientTestFixture(e.name))
+    .map((e) => e.name)
     .sort();
 
   let enforcedFiles = 0;
   let checkedCopies = 0;
   for (const relFile of [...MERGE_MANAGED_FILES].sort()) {
-    const commonPath = join(TEMPLATES_DIR, 'common', relFile);
+    const commonPath = join(TEMPLATES_DIR, "common", relFile);
     if (!existsSync(commonPath)) continue;
     const commonIssues: string[] = [];
-    const commonBlocks = extractKeyedBlocks(readFileSync(commonPath, 'utf-8'), commonIssues);
+    const commonBlocks = extractKeyedBlocks(readFileSync(commonPath, "utf-8"), commonIssues);
     for (const issue of commonIssues) {
-      fail('common', 'managed-block-parity', `templates/common/${relFile}: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
+      fail(
+        "common",
+        "managed-block-parity",
+        `templates/common/${relFile}: ${issue}`,
+        "Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->",
+      );
     }
     if (commonBlocks.size === 0) continue; // common defines no managed blocks here — nothing to enforce
 
@@ -5483,32 +6626,57 @@ function checkManagedBlockParity(): void {
       const variantRel = `templates/${variant}/${relFile}`;
       const variantPath = join(TEMPLATES_DIR, variant, relFile);
       if (!existsSync(variantPath)) {
-        if (relFile === 'AGENTS.md') {
-          fail(variant, 'managed-block-parity', `${variantRel} not found — the common managed blocks have no delivery channel into this variant`, `Create ${variantRel} carrying every common WORKSPACE-MANAGED block (see templates/common/AGENTS.md)`);
+        if (relFile === "AGENTS.md") {
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} not found — the common managed blocks have no delivery channel into this variant`,
+            `Create ${variantRel} carrying every common WORKSPACE-MANAGED block (see templates/common/AGENTS.md)`,
+          );
         }
         // Other MERGE_MANAGED files: absence is compliant — the scaffold copies
         // the common file into the project and the variant overlay never fires.
         continue;
       }
-      const variantContent = readFileSync(variantPath, 'utf-8');
-      if (relFile === 'agents/pm.md' && isExtendsStub(variantContent)) {
+      const variantContent = readFileSync(variantPath, "utf-8");
+      if (relFile === "agents/pm.md" && isExtendsStub(variantContent)) {
         // Stub resolution delivers the common body (keyed blocks included) at scaffold.
         continue;
       }
       const variantIssues: string[] = [];
       const variantBlocks = extractKeyedBlocks(variantContent, variantIssues);
       for (const issue of variantIssues) {
-        fail(variant, 'managed-block-parity', `${variantRel}: ${issue}`, 'Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->');
+        fail(
+          variant,
+          "managed-block-parity",
+          `${variantRel}: ${issue}`,
+          "Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->",
+        );
       }
 
       const violations = compareKeyedBlocks(commonBlocks, variantBlocks);
       for (const v of violations) {
-        if (v.kind === 'missing-key') {
-          fail(variant, 'managed-block-parity', `${variantRel} carries no "WORKSPACE-MANAGED: ${v.key}" block — the common ${relFile} keyed block has no L1→L2 delivery channel (fresh scaffolds overlay the variant copy over the common one; the COMMON-AGENTS marker-inject zone does not cover it)`, `Copy the "<!-- WORKSPACE-MANAGED: ${v.key} -->" block(s) from templates/common/${relFile} into ${variantRel} at the matching section, markers included — or delete ${variantRel} so the common copy delivers`);
-        } else if (v.kind === 'missing-content') {
-          fail(variant, 'managed-block-parity', `${variantRel} "WORKSPACE-MANAGED: ${v.key}" content diverges from templates/common/${relFile} (missing the common block content)`, `Replace the variant's "<!-- WORKSPACE-MANAGED: ${v.key} -->" block content with the common copy (markers included), byte-identical after line normalization`);
+        if (v.kind === "missing-key") {
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} carries no "WORKSPACE-MANAGED: ${v.key}" block — the common ${relFile} keyed block has no L1→L2 delivery channel (fresh scaffolds overlay the variant copy over the common one; the COMMON-AGENTS marker-inject zone does not cover it)`,
+            `Copy the "<!-- WORKSPACE-MANAGED: ${v.key} -->" block(s) from templates/common/${relFile} into ${variantRel} at the matching section, markers included — or delete ${variantRel} so the common copy delivers`,
+          );
+        } else if (v.kind === "missing-content") {
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} "WORKSPACE-MANAGED: ${v.key}" content diverges from templates/common/${relFile} (missing the common block content)`,
+            `Replace the variant's "<!-- WORKSPACE-MANAGED: ${v.key} -->" block content with the common copy (markers included), byte-identical after line normalization`,
+          );
         } else {
-          fail(variant, 'managed-block-parity', `${variantRel} "WORKSPACE-MANAGED: ${v.key}" carries content templates/common/${relFile} does not — a variant-only managed block would be unioned into projects by upgrade MERGE with no common source`, `Adjudicate: move the content out of WORKSPACE-MANAGED markers, or add the block to templates/common/${relFile} so parity holds`);
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} "WORKSPACE-MANAGED: ${v.key}" carries content templates/common/${relFile} does not — a variant-only managed block would be unioned into projects by upgrade MERGE with no common source`,
+            `Adjudicate: move the content out of WORKSPACE-MANAGED markers, or add the block to templates/common/${relFile} so parity holds`,
+          );
         }
       }
       if (violations.length === 0 && variantIssues.length === 0) {
@@ -5517,11 +6685,13 @@ function checkManagedBlockParity(): void {
     }
   }
   if (enforcedFiles === 0) {
-    pass('managed-block-parity: no common MERGE_MANAGED file carries managed blocks (nothing to enforce)');
+    pass("managed-block-parity: no common MERGE_MANAGED file carries managed blocks (nothing to enforce)");
     return;
   }
   if (checkedCopies > 0) {
-    pass(`managed-block-parity: ${checkedCopies} variant file copies across ${enforcedFiles} MERGE_MANAGED file(s) carry every common WORKSPACE-MANAGED block with content parity`);
+    pass(
+      `managed-block-parity: ${checkedCopies} variant file copies across ${enforcedFiles} MERGE_MANAGED file(s) carry every common WORKSPACE-MANAGED block with content parity`,
+    );
   }
 }
 
@@ -5538,25 +6708,38 @@ function checkManagedBlockParity(): void {
 // numbers inside the template's out-of-zone skeleton fail. Severity: Error.
 // Primitives: lib/platform-skeleton-merge.ts validateSkeletonRegistry (unit-tested).
 function checkSkeletonRegistry(): void {
-  if (!JSON_MODE) console.log('\n=== Check SK-01: platform skeleton section registry (templates/common CLAUDE/GEMINI) ===');
+  if (!JSON_MODE)
+    console.log("\n=== Check SK-01: platform skeleton section registry (templates/common CLAUDE/GEMINI) ===");
 
   const rels = [...new Set(MANAGED_SKELETON_SECTIONS.map((s) => s.rel))];
   let issueCount = 0;
   for (const rel of rels) {
-    const commonPath = join(TEMPLATES_DIR, 'common', rel);
+    const commonPath = join(TEMPLATES_DIR, "common", rel);
     if (!existsSync(commonPath)) {
-      fail('common', 'skeleton-registry', `templates/common/${rel} not found — the skeleton registry (${MANAGED_SKELETON_SECTIONS.filter((s) => s.rel === rel).length} registered section(s)) has no content source`, `Restore templates/common/${rel} or trim MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts`);
+      fail(
+        "common",
+        "skeleton-registry",
+        `templates/common/${rel} not found — the skeleton registry (${MANAGED_SKELETON_SECTIONS.filter((s) => s.rel === rel).length} registered section(s)) has no content source`,
+        `Restore templates/common/${rel} or trim MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts`,
+      );
       issueCount++;
       continue;
     }
-    const issues = validateSkeletonRegistry(readFileSync(commonPath, 'utf-8'), rel);
+    const issues = validateSkeletonRegistry(readFileSync(commonPath, "utf-8"), rel);
     for (const issue of issues) {
-      fail('common', 'skeleton-registry', issue, 'Realign the registry (MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts) with the template heading, or fix the template heading — the MERGE pass reads section content from this file at merge time');
+      fail(
+        "common",
+        "skeleton-registry",
+        issue,
+        "Realign the registry (MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts) with the template heading, or fix the template heading — the MERGE pass reads section content from this file at merge time",
+      );
       issueCount++;
     }
   }
   if (issueCount === 0) {
-    pass(`skeleton-registry: ${MANAGED_SKELETON_SECTIONS.length} registered skeleton section(s) across ${rels.length} platform file(s) resolve out-of-zone in templates/common, in registry order, with unique section numbers`);
+    pass(
+      `skeleton-registry: ${MANAGED_SKELETON_SECTIONS.length} registered skeleton section(s) across ${rels.length} platform file(s) resolve out-of-zone in templates/common, in registry order, with unique section numbers`,
+    );
   }
 }
 
@@ -5597,23 +6780,23 @@ const L1_IMPORT_SIDEEFFECT_RE = /^[ \t]*import[ \t]*['"](\.[^'"]+)['"]/gm;
 export function collectL1ImportClosureIssues(scriptsRoot: string): L1ImportClosureIssue[] {
   const issues: L1ImportClosureIssue[] = [];
   const walk = (dir: string): void => {
-    let entries;
+    let entries: Dirent[];
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
-      issues.push({ file: relative(scriptsRoot, dir), specifier: '<unreadable directory>' });
+      issues.push({ file: relative(scriptsRoot, dir), specifier: "<unreadable directory>" });
       return;
     }
     for (const entry of entries) {
       // `_`-prefixed fixture files/dirs per registry convention; dependency installs excluded.
-      if (entry.name.startsWith('_') || entry.name === 'node_modules') continue;
+      if (entry.name.startsWith("_") || entry.name === "node_modules") continue;
       const abs = join(dir, entry.name);
       if (entry.isDirectory()) {
         walk(abs);
         continue;
       }
-      if (!entry.name.endsWith('.ts')) continue;
-      const content = readFileSync(abs, 'utf-8');
+      if (!entry.name.endsWith(".ts")) continue;
+      const content = readFileSync(abs, "utf-8");
       const relFile = relative(scriptsRoot, abs);
       for (const re of [L1_IMPORT_FROM_RE, L1_IMPORT_SIDEEFFECT_RE]) {
         for (const m of content.matchAll(re)) {
@@ -5635,41 +6818,47 @@ export function collectL1ImportClosureIssues(scriptsRoot: string): L1ImportClosu
 // escapes the tree (e.g. ../../../scripts/x — exists at L0, absent in every
 // project) is exactly the A1 class and fails.
 function resolvesWithinTree(baseCandidate: string, scriptsRoot: string): boolean {
-  for (const candidate of [baseCandidate, `${baseCandidate}.ts`, join(baseCandidate, 'index.ts')]) {
+  for (const candidate of [baseCandidate, `${baseCandidate}.ts`, join(baseCandidate, "index.ts")]) {
     if (!existsSync(candidate)) continue;
     const rel = relative(scriptsRoot, candidate);
-    if (rel.length > 0 && !rel.startsWith('..') && !isAbsolute(rel)) return true;
+    if (rel.length > 0 && !rel.startsWith("..") && !isAbsolute(rel)) return true;
   }
   return false;
 }
 
 function checkL1ImportClosure(): void {
-  if (!JSON_MODE) console.log('\n=== Check IC-01: l1-import-closure (templates/common/scripts static import resolution) ===');
-  const l1ScriptsDir = join(TEMPLATES_DIR, 'common', 'scripts');
+  if (!JSON_MODE)
+    console.log("\n=== Check IC-01: l1-import-closure (templates/common/scripts static import resolution) ===");
+  const l1ScriptsDir = join(TEMPLATES_DIR, "common", "scripts");
   // Workspace-root-only self-skip: the marker dir exists only where the L1
   // tree is the workspace's own delivered tree (check-upgrade-coverage
   // convention — outside the workspace there is nothing to validate).
   if (!existsSync(l1ScriptsDir)) {
-    if (!JSON_MODE) console.log('  l1-import-closure: no templates/common/scripts — not a workspace root, skipping.');
+    if (!JSON_MODE) console.log("  l1-import-closure: no templates/common/scripts — not a workspace root, skipping.");
     return;
   }
   const issues = collectL1ImportClosureIssues(l1ScriptsDir);
   for (const issue of issues) {
-    fail('common', 'l1-import-closure',
+    fail(
+      "common",
+      "l1-import-closure",
       `templates/common/scripts/${issue.file} imports '${issue.specifier}' — target not found within the delivered tree (l1-import-closure IC-01)`,
-      'Deliver the module or drop the import — see ADR-0073 Amendment 4 (engine vs leaf-module classes)');
+      "Deliver the module or drop the import — see ADR-0073 Amendment 4 (engine vs leaf-module classes)",
+    );
   }
   if (issues.length === 0) {
     let fileCount = 0;
     const count = (dir: string): void => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        if (entry.name.startsWith('_') || entry.name === 'node_modules') continue;
+        if (entry.name.startsWith("_") || entry.name === "node_modules") continue;
         if (entry.isDirectory()) count(join(dir, entry.name));
-        else if (entry.name.endsWith('.ts')) fileCount++;
+        else if (entry.name.endsWith(".ts")) fileCount++;
       }
     };
     count(l1ScriptsDir);
-    pass(`l1-import-closure: all static relative import(s) in ${fileCount} .ts file(s) under templates/common/scripts resolve within the delivered tree`);
+    pass(
+      `l1-import-closure: all static relative import(s) in ${fileCount} .ts file(s) under templates/common/scripts resolve within the delivered tree`,
+    );
   }
 }
 
@@ -5685,47 +6874,79 @@ function checkL1ImportClosure(): void {
 // block with normalized content identical to templates/common/AGENTS.md's.
 // Severity: Error. Primitives: lib/managed-block-parity.ts (unit-tested).
 function checkCommonAgentsBlockParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check PM-04b: COMMON-AGENTS block parity (common → every variant AGENTS.md) ===');
+  if (!JSON_MODE) console.log("\n=== Check PM-04b: COMMON-AGENTS block parity (common → every variant AGENTS.md) ===");
 
-  const commonPath = join(TEMPLATES_DIR, 'common', 'AGENTS.md');
+  const commonPath = join(TEMPLATES_DIR, "common", "AGENTS.md");
   const commonIssues: string[] = [];
-  const commonBlock = extractCommonAgentsBlock(readFileSync(commonPath, 'utf-8'), commonIssues);
+  const commonBlock = extractCommonAgentsBlock(readFileSync(commonPath, "utf-8"), commonIssues);
   for (const issue of commonIssues) {
-    fail('common', 'common-agents-parity', `templates/common/AGENTS.md: ${issue}`, 'Close the block with <!-- /COMMON-AGENTS -->');
+    fail(
+      "common",
+      "common-agents-parity",
+      `templates/common/AGENTS.md: ${issue}`,
+      "Close the block with <!-- /COMMON-AGENTS -->",
+    );
   }
   if (commonBlock === null) {
-    fail('common', 'common-agents-parity', 'templates/common/AGENTS.md carries no COMMON-AGENTS block', 'Add the <!-- COMMON-AGENTS:START/END --> marker-inject zone (it is the delivery channel for common policy sections into variant/project AGENTS.md)');
+    fail(
+      "common",
+      "common-agents-parity",
+      "templates/common/AGENTS.md carries no COMMON-AGENTS block",
+      "Add the <!-- COMMON-AGENTS:START/END --> marker-inject zone (it is the delivery channel for common policy sections into variant/project AGENTS.md)",
+    );
     return;
   }
 
   const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-    .filter(e => e.isDirectory() && e.name.startsWith('co-') && !isTransientTestFixture(e.name))
-    .map(e => e.name)
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-") && !isTransientTestFixture(e.name))
+    .map((e) => e.name)
     .sort();
 
   let checked = 0;
   for (const variant of variants) {
-    const variantPath = join(TEMPLATES_DIR, variant, 'AGENTS.md');
+    const variantPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
     if (!existsSync(variantPath)) {
-      fail(variant, 'common-agents-parity', `${variant}/AGENTS.md not found — the COMMON-AGENTS zone has no delivery channel into this variant`, `Create ${variant}/AGENTS.md with the COMMON-AGENTS block copied from templates/common/AGENTS.md`);
+      fail(
+        variant,
+        "common-agents-parity",
+        `${variant}/AGENTS.md not found — the COMMON-AGENTS zone has no delivery channel into this variant`,
+        `Create ${variant}/AGENTS.md with the COMMON-AGENTS block copied from templates/common/AGENTS.md`,
+      );
       continue;
     }
     const variantIssues: string[] = [];
-    const variantBlock = extractCommonAgentsBlock(readFileSync(variantPath, 'utf-8'), variantIssues);
+    const variantBlock = extractCommonAgentsBlock(readFileSync(variantPath, "utf-8"), variantIssues);
     for (const issue of variantIssues) {
-      fail(variant, 'common-agents-parity', `templates/${variant}/AGENTS.md: ${issue}`, 'Close the block with <!-- /COMMON-AGENTS -->');
+      fail(
+        variant,
+        "common-agents-parity",
+        `templates/${variant}/AGENTS.md: ${issue}`,
+        "Close the block with <!-- /COMMON-AGENTS -->",
+      );
     }
     const violation = compareCommonAgentsBlock(commonBlock, variantBlock);
-    if (violation === 'missing') {
-      fail(variant, 'common-agents-parity', `templates/${variant}/AGENTS.md carries no COMMON-AGENTS block — common policy sections (LLM routing, instruction standard, PM team-management authority) have no delivery channel into this variant`, `Copy the "<!-- COMMON-AGENTS:START/END -->" block from templates/common/AGENTS.md into ${variant}/AGENTS.md`);
-    } else if (violation === 'mismatch') {
-      fail(variant, 'common-agents-parity', `templates/${variant}/AGENTS.md COMMON-AGENTS block content diverges from templates/common/AGENTS.md`, `Replace the variant's COMMON-AGENTS block content with the common copy (markers included), byte-identical after line normalization`);
+    if (violation === "missing") {
+      fail(
+        variant,
+        "common-agents-parity",
+        `templates/${variant}/AGENTS.md carries no COMMON-AGENTS block — common policy sections (LLM routing, instruction standard, PM team-management authority) have no delivery channel into this variant`,
+        `Copy the "<!-- COMMON-AGENTS:START/END -->" block from templates/common/AGENTS.md into ${variant}/AGENTS.md`,
+      );
+    } else if (violation === "mismatch") {
+      fail(
+        variant,
+        "common-agents-parity",
+        `templates/${variant}/AGENTS.md COMMON-AGENTS block content diverges from templates/common/AGENTS.md`,
+        `Replace the variant's COMMON-AGENTS block content with the common copy (markers included), byte-identical after line normalization`,
+      );
     } else {
       checked++;
     }
   }
   if (checked > 0) {
-    pass(`common-agents-parity: ${checked}/${variants.length} variant AGENTS.md files carry the COMMON-AGENTS block with content parity`);
+    pass(
+      `common-agents-parity: ${checked}/${variants.length} variant AGENTS.md files carry the COMMON-AGENTS block with content parity`,
+    );
   }
 }
 
@@ -5746,45 +6967,78 @@ function checkCommonAgentsBlockParity(): void {
 // re-sync; the workspace must not fight upsertSection with a hard gate).
 // Primitives: lib/trail-block-parity.ts (unit-tested).
 function checkTrailBlockParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check TB-01: trail marker-block parity (root → common → every variant AGENTS.md) ===');
+  if (!JSON_MODE)
+    console.log("\n=== Check TB-01: trail marker-block parity (root → common → every variant AGENTS.md) ===");
 
-  const rootContent = readFileSync(join(ROOT, 'AGENTS.md'), 'utf-8');
+  const rootContent = readFileSync(join(ROOT, "AGENTS.md"), "utf-8");
   const rootBlock = extractTrailBlock(rootContent);
-  const commonPath = join(TEMPLATES_DIR, 'common', 'AGENTS.md');
-  const commonContent = readFileSync(commonPath, 'utf-8');
+  const commonPath = join(TEMPLATES_DIR, "common", "AGENTS.md");
+  const commonContent = readFileSync(commonPath, "utf-8");
   const commonBlock = extractTrailBlock(commonContent);
 
   if (rootBlock === null) {
-    warn('root', 'trail-block-parity', 'AGENTS.md carries no trail marker block (tool-owned block absent — run `trail init` or restore it)', 'Re-run `trail init` in the workspace root (the tool re-appends its block; do NOT hand-write the prose)');
+    warn(
+      "root",
+      "trail-block-parity",
+      "AGENTS.md carries no trail marker block (tool-owned block absent — run `trail init` or restore it)",
+      "Re-run `trail init` in the workspace root (the tool re-appends its block; do NOT hand-write the prose)",
+    );
   } else if (commonBlock === null) {
-    fail('common', 'trail-block-parity', 'templates/common/AGENTS.md carries no trail marker block', `Copy the root AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/common/AGENTS.md`);
+    fail(
+      "common",
+      "trail-block-parity",
+      "templates/common/AGENTS.md carries no trail marker block",
+      `Copy the root AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/common/AGENTS.md`,
+    );
   } else if (normalizeForTrail(rootBlock) !== normalizeForTrail(commonBlock)) {
-    warn('common', 'trail-block-parity', 'templates/common/AGENTS.md trail block diverges from the root (tool-owned) block — a vendor update landed at root; re-sync the template wave', `Copy the root AGENTS.md trail block over templates/common/AGENTS.md's, then re-verify variant parity`);
+    warn(
+      "common",
+      "trail-block-parity",
+      "templates/common/AGENTS.md trail block diverges from the root (tool-owned) block — a vendor update landed at root; re-sync the template wave",
+      `Copy the root AGENTS.md trail block over templates/common/AGENTS.md's, then re-verify variant parity`,
+    );
   }
 
   if (commonBlock === null) return;
 
   const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-    .filter(e => e.isDirectory() && e.name.startsWith('co-') && !isTransientTestFixture(e.name))
-    .map(e => e.name)
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-") && !isTransientTestFixture(e.name))
+    .map((e) => e.name)
     .sort();
 
   let checked = 0;
   for (const variant of variants) {
-    const variantContent = readFileSync(join(TEMPLATES_DIR, variant, 'AGENTS.md'), 'utf-8');
+    const variantContent = readFileSync(join(TEMPLATES_DIR, variant, "AGENTS.md"), "utf-8");
     const violation = compareTrailBlock(commonBlock, variantContent);
-    if (violation === 'missing') {
-      fail(variant, 'trail-block-parity', `templates/${variant}/AGENTS.md carries no trail marker block — the fleet standard (DEC-20261108-01 R1) ships it in every variant`, `Append the templates/common/AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/${variant}/AGENTS.md`);
-    } else if (violation === 'duplicate') {
-      fail(variant, 'trail-block-parity', `templates/${variant}/AGENTS.md carries MULTIPLE trail marker blocks — a hand copy landed next to a tool-managed copy`, `Delete all but one block, keeping the copy that is byte-identical to templates/common/AGENTS.md's`);
-    } else if (violation === 'mismatch') {
-      fail(variant, 'trail-block-parity', `templates/${variant}/AGENTS.md trail block diverges from templates/common/AGENTS.md`, `Replace the variant's trail block with the common copy (markers included), byte-identical after line normalization`);
+    if (violation === "missing") {
+      fail(
+        variant,
+        "trail-block-parity",
+        `templates/${variant}/AGENTS.md carries no trail marker block — the fleet standard (DEC-20261108-01 R1) ships it in every variant`,
+        `Append the templates/common/AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/${variant}/AGENTS.md`,
+      );
+    } else if (violation === "duplicate") {
+      fail(
+        variant,
+        "trail-block-parity",
+        `templates/${variant}/AGENTS.md carries MULTIPLE trail marker blocks — a hand copy landed next to a tool-managed copy`,
+        `Delete all but one block, keeping the copy that is byte-identical to templates/common/AGENTS.md's`,
+      );
+    } else if (violation === "mismatch") {
+      fail(
+        variant,
+        "trail-block-parity",
+        `templates/${variant}/AGENTS.md trail block diverges from templates/common/AGENTS.md`,
+        `Replace the variant's trail block with the common copy (markers included), byte-identical after line normalization`,
+      );
     } else {
       checked++;
     }
   }
   if (checked > 0) {
-    pass(`trail-block-parity: ${checked}/${variants.length} variant AGENTS.md files carry the trail block with content parity`);
+    pass(
+      `trail-block-parity: ${checked}/${variants.length} variant AGENTS.md files carry the trail block with content parity`,
+    );
   }
 }
 
@@ -5792,7 +7046,13 @@ function checkTrailBlockParity(): void {
  *  normalizeBlockContent: CRLF → LF, strip trailing whitespace, collapse blank
  *  edges). Local alias keeps the arm's import surface minimal. */
 function normalizeForTrail(raw: string): string {
-  return raw.replace(/\r\n/g, '\n').split('\n').map(l => l.replace(/\s+$/, '')).join('\n').replace(/^\n+/, '').replace(/\n+$/, '');
+  return raw
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((l) => l.replace(/\s+$/, ""))
+    .join("\n")
+    .replace(/^\n+/, "")
+    .replace(/\n+$/, "");
 }
 
 // Check WS-11: bilingual user-guide pair (docs/user-guide.md + docs/user-guide_ko.md)
@@ -5804,17 +7064,27 @@ function normalizeForTrail(raw: string): string {
 function checkUserGuidePair(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-11: bilingual user-guide pair in ${variant} ===`);
 
-  const guidePath = join(TEMPLATES_DIR, variant, 'docs', 'user-guide.md');
-  const guideKoPath = join(TEMPLATES_DIR, variant, 'docs', 'user-guide_ko.md');
+  const guidePath = join(TEMPLATES_DIR, variant, "docs", "user-guide.md");
+  const guideKoPath = join(TEMPLATES_DIR, variant, "docs", "user-guide_ko.md");
 
   const guideExists = existsSync(guidePath);
   const guideKoExists = existsSync(guideKoPath);
 
   if (!guideExists) {
-    fail(variant, 'WS-11', `templates/${variant}/docs/user-guide.md is missing`, `Author docs/user-guide.md per the User-Guide Standard (docs/governance/variant-contract.md "User-Guide Standard"); reference implementation: templates/co-work/docs/user-guide.md`);
+    fail(
+      variant,
+      "WS-11",
+      `templates/${variant}/docs/user-guide.md is missing`,
+      `Author docs/user-guide.md per the User-Guide Standard (docs/governance/variant-contract.md "User-Guide Standard"); reference implementation: templates/co-work/docs/user-guide.md`,
+    );
   }
   if (!guideKoExists) {
-    fail(variant, 'WS-11', `templates/${variant}/docs/user-guide_ko.md is missing`, `Author docs/user-guide_ko.md as a 1:1 Korean mirror of docs/user-guide.md`);
+    fail(
+      variant,
+      "WS-11",
+      `templates/${variant}/docs/user-guide_ko.md is missing`,
+      `Author docs/user-guide_ko.md as a 1:1 Korean mirror of docs/user-guide.md`,
+    );
   }
   if (guideExists && guideKoExists) {
     pass(`WS-11: ${variant} has the bilingual user-guide pair`);
@@ -5831,33 +7101,43 @@ function checkVariantIndexCoverage(manifests: Map<string, VariantManifest>): voi
   if (!JSON_MODE) console.log(`\n=== Check WS-12: variant index coverage in README files ===`);
 
   const indexedVariants = [...manifests.entries()]
-    .filter(([name, manifest]) => name.startsWith('co-') && manifest.status !== 'draft')
+    .filter(([name, manifest]) => name.startsWith("co-") && manifest.status !== "draft")
     .map(([name]) => name);
 
   if (indexedVariants.length === 0) return;
 
-  const indexFiles: Array<{ rel: string; level: 'error' | 'warning' }> = [
-    { rel: 'README.md', level: 'error' },
-    { rel: 'README_ko.md', level: 'error' },
-    { rel: 'templates/README.md', level: 'error' },
-    { rel: 'templates/README_ko.md', level: 'error' },
-    { rel: 'README_es.md', level: 'warning' },
-    { rel: 'README_ja.md', level: 'warning' },
+  const indexFiles: Array<{ rel: string; level: "error" | "warning" }> = [
+    { rel: "README.md", level: "error" },
+    { rel: "README_ko.md", level: "error" },
+    { rel: "templates/README.md", level: "error" },
+    { rel: "templates/README_ko.md", level: "error" },
+    { rel: "README_es.md", level: "warning" },
+    { rel: "README_ja.md", level: "warning" },
   ];
 
   for (const { rel, level } of indexFiles) {
     const filePath = join(ROOT, rel);
     if (!existsSync(filePath)) continue; // presence of the index files themselves is governed elsewhere
 
-    const content = readFileSync(filePath, 'utf-8');
-    const missing = indexedVariants.filter(name => !content.includes(name));
+    const content = readFileSync(filePath, "utf-8");
+    const missing = indexedVariants.filter((name) => !content.includes(name));
 
     if (missing.length === 0) {
       pass(`WS-12: all ${indexedVariants.length} variants indexed in ${rel}`);
-    } else if (level === 'error') {
-      fail('root', 'WS-12', `${rel} does not mention variant(s): ${missing.join(', ')}`, `Add the missing variant(s) to ${rel}'s template tree + "Available Variants" table (all 6 index READMEs must list every non-draft variant)`);
+    } else if (level === "error") {
+      fail(
+        "root",
+        "WS-12",
+        `${rel} does not mention variant(s): ${missing.join(", ")}`,
+        `Add the missing variant(s) to ${rel}'s template tree + "Available Variants" table (all 6 index READMEs must list every non-draft variant)`,
+      );
     } else {
-      warn('root', 'WS-12', `${rel} does not mention variant(s): ${missing.join(', ')}`, `Backfill the missing variant(s) in ${rel} (translation index — update in the same change that adds the variant to the primary READMEs)`);
+      warn(
+        "root",
+        "WS-12",
+        `${rel} does not mention variant(s): ${missing.join(", ")}`,
+        `Backfill the missing variant(s) in ${rel} (translation index — update in the same change that adds the variant to the primary READMEs)`,
+      );
     }
   }
 }
@@ -5873,69 +7153,106 @@ function checkVariantIndexCoverage(manifests: Map<string, VariantManifest>): voi
 function checkReadmeStandard(variant: string): void {
   if (!JSON_MODE) console.log(`\n=== Check WS-08: README standard conformance in ${variant} ===`);
 
-  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes('WS-08') ?? false;
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes("WS-08") ?? false;
   const report = (msg: string, fix: string): void => {
-    if (isWarningOnly) warn(variant, 'WS-08', msg, fix);
-    else fail(variant, 'WS-08', msg, fix);
+    if (isWarningOnly) warn(variant, "WS-08", msg, fix);
+    else fail(variant, "WS-08", msg, fix);
   };
 
-  const EN_H2 = ['Overview', 'Quick Start', 'Team Mission', 'Meet the AI Team', 'Skills', 'How to Collaborate', 'Variant Type'];
-  const KO_H2 = ['개요', '빠른 시작', '팀 미션', 'AI 팀 소개', '스킬', '협업 방법', '변형 유형'];
+  const EN_H2 = [
+    "Overview",
+    "Quick Start",
+    "Team Mission",
+    "Meet the AI Team",
+    "Skills",
+    "How to Collaborate",
+    "Variant Type",
+  ];
+  const KO_H2 = ["개요", "빠른 시작", "팀 미션", "AI 팀 소개", "스킬", "협업 방법", "변형 유형"];
   const STATUS_RE_EN = /^> \*\*Status\*\*: (✅ Stable|⚠️ Beta) — v\d+\.\d+\.\d+$/m;
   const STATUS_RE_KO = /^> \*\*상태\*\*: (✅ Stable|⚠️ Beta) — v\d+\.\d+\.\d+$/m;
 
-  const readmePath = join(TEMPLATES_DIR, variant, 'README.md');
-  const readmeKoPath = join(TEMPLATES_DIR, variant, 'README_ko.md');
+  const readmePath = join(TEMPLATES_DIR, variant, "README.md");
+  const readmeKoPath = join(TEMPLATES_DIR, variant, "README_ko.md");
   if (!existsSync(readmePath) && !existsSync(readmeKoPath)) return; // presence is Check 11's concern
 
   let issuesFound = 0;
   const checkFile = (
-    path: string, label: string, h2Required: string[], statusRe: RegExp,
-    statusLabel: string, langSelector: string, agentHeader: string,
+    path: string,
+    label: string,
+    h2Required: string[],
+    statusRe: RegExp,
+    statusLabel: string,
+    langSelector: string,
+    agentHeader: string,
   ): void => {
-    const c = readFileSync(path, 'utf-8');
-    const h2 = [...c.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
+    const c = readFileSync(path, "utf-8");
+    const h2 = [...c.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
     const h2Set = new Set(h2);
-    const missing = h2Required.filter(h => !h2Set.has(h));
-    const extra = h2.filter(h => !h2Required.includes(h));
+    const missing = h2Required.filter((h) => !h2Set.has(h));
+    const extra = h2.filter((h) => !h2Required.includes(h));
     if (missing.length) {
-      report(`templates/${variant}/${label} is missing required section(s): ${missing.join(', ')}`,
-        `Add the missing ## section(s) per the README standard (docs/governance/variant-contract.md "README Standard"). Required: ${h2Required.join(' · ')}`);
+      report(
+        `templates/${variant}/${label} is missing required section(s): ${missing.join(", ")}`,
+        `Add the missing ## section(s) per the README standard (docs/governance/variant-contract.md "README Standard"). Required: ${h2Required.join(" · ")}`,
+      );
       issuesFound++;
     }
     if (extra.length) {
-      report(`templates/${variant}/${label} has non-standard top-level section(s): ${extra.join(', ')}`,
-        `Remove or demote (to ###) the non-standard ## section(s); only the 7 standard top-level sections are allowed`);
+      report(
+        `templates/${variant}/${label} has non-standard top-level section(s): ${extra.join(", ")}`,
+        `Remove or demote (to ###) the non-standard ## section(s); only the 7 standard top-level sections are allowed`,
+      );
       issuesFound++;
     }
     if (!statusRe.test(c)) {
-      report(`templates/${variant}/${label} status line must match '> **${statusLabel}**: (✅ Stable|⚠️ Beta) — vX.Y.Z'`,
-        `Normalize the status line, e.g. '> **${statusLabel}**: ✅ Stable — v1.0.0'`);
+      report(
+        `templates/${variant}/${label} status line must match '> **${statusLabel}**: (✅ Stable|⚠️ Beta) — vX.Y.Z'`,
+        `Normalize the status line, e.g. '> **${statusLabel}**: ✅ Stable — v1.0.0'`,
+      );
       issuesFound++;
     }
     if (!c.includes(langSelector)) {
-      report(`templates/${variant}/${label} is missing the standard language-selector line`,
-        `Add the language-selector blockquote linking to the other-language README`);
+      report(
+        `templates/${variant}/${label} is missing the standard language-selector line`,
+        `Add the language-selector blockquote linking to the other-language README`,
+      );
       issuesFound++;
     }
     if (!c.includes(agentHeader)) {
-      report(`templates/${variant}/${label} agent table must use the 4-column header '${agentHeader}'`,
-        `Convert the agent roster table to the 4-column schema (Agent | Role | Tier | Model)`);
+      report(
+        `templates/${variant}/${label} agent table must use the 4-column header '${agentHeader}'`,
+        `Convert the agent roster table to the 4-column schema (Agent | Role | Tier | Model)`,
+      );
       issuesFound++;
     }
   };
 
   if (existsSync(readmePath)) {
-    checkFile(readmePath, 'README.md', EN_H2, STATUS_RE_EN, 'Status',
-      '**English** · [한국어](README_ko.md)', '| Agent | Role | Tier | Model |');
+    checkFile(
+      readmePath,
+      "README.md",
+      EN_H2,
+      STATUS_RE_EN,
+      "Status",
+      "**English** · [한국어](README_ko.md)",
+      "| Agent | Role | Tier | Model |",
+    );
   }
   if (existsSync(readmeKoPath)) {
-    checkFile(readmeKoPath, 'README_ko.md', KO_H2, STATUS_RE_KO, '상태',
-      '[English](README.md) · **한국어**', '| 에이전트 | 역할 | 티어 | 모델 |');
+    checkFile(
+      readmeKoPath,
+      "README_ko.md",
+      KO_H2,
+      STATUS_RE_KO,
+      "상태",
+      "[English](README.md) · **한국어**",
+      "| 에이전트 | 역할 | 티어 | 모델 |",
+    );
   }
 
   if (issuesFound === 0) {
-    pass(`WS-08: ${variant} README conforms to the standard${isWarningOnly ? ' (warning-only policy active)' : ''}`);
+    pass(`WS-08: ${variant} README conforms to the standard${isWarningOnly ? " (warning-only policy active)" : ""}`);
   }
 }
 
@@ -5953,36 +7270,36 @@ function checkReadmeStandard(variant: string): void {
 // match per slot — never a whitelist of allowed headings — so domain-specific extra headings
 // (e.g. co-export's "Overview"/"Regulatory Scope" before Stack) are always permitted.
 const WS09_STRUCTURE_SCHEMA: { slot: string; match: RegExp; required: boolean }[] = [
-  { slot: 'Stack', match: /^(Tool|Tech|Design) Stack$/, required: true },
-  { slot: 'Agents', match: /^Agents?\b/, required: true },
-  { slot: 'Skills', match: /^Skills$/, required: true },
-  { slot: 'Environment Setup', match: /^Environment Setup$/, required: false },
-  { slot: 'Development Workflow', match: /^(Development|Engagement) Workflow\b/, required: true },
-  { slot: 'Guidelines', match: /\bGuidelines$/, required: true },
-  { slot: 'File Organization Policy', match: /^File Organization Policy$/, required: true },
-  { slot: 'Domain Rules', match: /^Domain Rules$/, required: true },
+  { slot: "Stack", match: /^(Tool|Tech|Design) Stack$/, required: true },
+  { slot: "Agents", match: /^Agents?\b/, required: true },
+  { slot: "Skills", match: /^Skills$/, required: true },
+  { slot: "Environment Setup", match: /^Environment Setup$/, required: false },
+  { slot: "Development Workflow", match: /^(Development|Engagement) Workflow\b/, required: true },
+  { slot: "Guidelines", match: /\bGuidelines$/, required: true },
+  { slot: "File Organization Policy", match: /^File Organization Policy$/, required: true },
+  { slot: "Domain Rules", match: /^Domain Rules$/, required: true },
 ];
 // co-abap is a structurally distinct SAP/ABAP domain (30+ headings, no Stack/Guidelines/File
 // Organization Policy slots at all) — forcing it into this skeleton would misrepresent its actual
 // structure rather than standardize it. Exempt rather than fail.
-const WS09_EXEMPT_VARIANTS = new Set(['co-abap']);
+const WS09_EXEMPT_VARIANTS = new Set(["co-abap"]);
 
 function checkContextMdStructure(variant: string): void {
   if (WS09_EXEMPT_VARIANTS.has(variant)) return;
 
-  const contextPath = join(TEMPLATES_DIR, variant, 'docs', `${variant}.context.md`);
+  const contextPath = join(TEMPLATES_DIR, variant, "docs", `${variant}.context.md`);
   if (!existsSync(contextPath)) return; // presence is Check WS-checkContextSync's concern
 
   if (!JSON_MODE) console.log(`\n=== Check WS-09: docs/${variant}.context.md structure conformance ===`);
 
-  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes('WS-09') ?? false;
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes("WS-09") ?? false;
   const report = (msg: string, fix: string): void => {
-    if (isWarningOnly) warn(variant, 'WS-09', msg, fix);
-    else fail(variant, 'WS-09', msg, fix);
+    if (isWarningOnly) warn(variant, "WS-09", msg, fix);
+    else fail(variant, "WS-09", msg, fix);
   };
 
-  const content = readFileSync(contextPath, 'utf-8');
-  const headings = [...content.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
+  const content = readFileSync(contextPath, "utf-8");
+  const headings = [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
 
   let lastMatchedIndex = -1;
   let issuesFound = 0;
@@ -5990,8 +7307,10 @@ function checkContextMdStructure(variant: string): void {
     const idx = headings.findIndex((h, i) => i > lastMatchedIndex && match.test(h));
     if (idx === -1) {
       if (required) {
-        report(`templates/${variant}/docs/${variant}.context.md is missing the required "${slot}" slot (or it appears before an earlier required slot)`,
-          `Add a "## ${slot}" section (or matching domain-flavored heading) in the standard slot order: ${WS09_STRUCTURE_SCHEMA.map(s => s.slot).join(' → ')}`);
+        report(
+          `templates/${variant}/docs/${variant}.context.md is missing the required "${slot}" slot (or it appears before an earlier required slot)`,
+          `Add a "## ${slot}" section (or matching domain-flavored heading) in the standard slot order: ${WS09_STRUCTURE_SCHEMA.map((s) => s.slot).join(" → ")}`,
+        );
         issuesFound++;
       }
       continue;
@@ -6000,7 +7319,9 @@ function checkContextMdStructure(variant: string): void {
   }
 
   if (issuesFound === 0) {
-    pass(`WS-09: ${variant} context.md structure conforms to the standard slot order${isWarningOnly ? ' (warning-only policy active)' : ''}`);
+    pass(
+      `WS-09: ${variant} context.md structure conforms to the standard slot order${isWarningOnly ? " (warning-only policy active)" : ""}`,
+    );
   }
 }
 
@@ -6020,7 +7341,7 @@ function checkContextMdStructure(variant: string): void {
 //   - Any file with `extends:` in its frontmatter (i.e. pm.md) — an L1-B stub whose lifecycle block
 //     is inherited from the L0 root agent at resolve time, so requiring a literal block here would
 //     duplicate the SSOT. pm.md's own scaffold-time lifecycle handling lives in new-project.ts §2.5.
-const WS10_SKIP_FILES = new Set(['README.md', 'README_ko.md']);
+const WS10_SKIP_FILES = new Set(["README.md", "README_ko.md"]);
 // No exemptions remain. co-abap was exempted at introduction (it had no docs/lifecycle/agents/
 // directory at all, so its 19 agents had nowhere to point); its governance records were authored
 // 2026-08-21 and the exemption lifted in the same session. Keep the set rather than deleting it —
@@ -6030,28 +7351,33 @@ const WS10_EXEMPT_VARIANTS = new Set<string>();
 function checkAgentLifecycleFrontmatter(variant: string): void {
   if (WS10_EXEMPT_VARIANTS.has(variant)) return;
 
-  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
   if (!existsSync(agentsDir)) return; // variant carries no agent roster of its own
 
   if (!JSON_MODE) console.log(`\n=== Check WS-10: agents/*.md lifecycle frontmatter in ${variant} ===`);
 
-  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes('WS-10') ?? false;
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes("WS-10") ?? false;
   const report = (msg: string, fix: string): void => {
-    if (isWarningOnly) warn(variant, 'WS-10', msg, fix);
-    else fail(variant, 'WS-10', msg, fix);
+    if (isWarningOnly) warn(variant, "WS-10", msg, fix);
+    else fail(variant, "WS-10", msg, fix);
   };
 
   let checked = 0;
   let issuesFound = 0;
 
-  for (const file of readdirSync(agentsDir).filter(f => f.endsWith('.md') && !WS10_SKIP_FILES.has(f))) {
+  for (const file of readdirSync(agentsDir).filter((f) => f.endsWith(".md") && !WS10_SKIP_FILES.has(f))) {
     const agentPath = join(agentsDir, file);
-    const content = readFileSync(agentPath, 'utf-8');
+    const content = readFileSync(agentPath, "utf-8");
 
-    const match = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---/);
+    const match = content
+      .replace(/^\uFEFF/, "")
+      .replace(/\r\n/g, "\n")
+      .match(/^---\n([\s\S]*?)\n---/);
     if (!match) {
-      report(`templates/${variant}/agents/${file} has no YAML frontmatter`,
-        `Add a frontmatter block with at minimum: name, and a lifecycle: block with phase + governance`);
+      report(
+        `templates/${variant}/agents/${file} has no YAML frontmatter`,
+        `Add a frontmatter block with at minimum: name, and a lifecycle: block with phase + governance`,
+      );
       issuesFound++;
       continue;
     }
@@ -6060,8 +7386,10 @@ function checkAgentLifecycleFrontmatter(variant: string): void {
     try {
       fm = (load(match[1]) as Record<string, unknown>) ?? {};
     } catch {
-      report(`templates/${variant}/agents/${file} frontmatter is not valid YAML`,
-        `Fix the YAML syntax in the frontmatter block`);
+      report(
+        `templates/${variant}/agents/${file} frontmatter is not valid YAML`,
+        `Fix the YAML syntax in the frontmatter block`,
+      );
       issuesFound++;
       continue;
     }
@@ -6069,20 +7397,24 @@ function checkAgentLifecycleFrontmatter(variant: string): void {
     if (fm.extends) continue; // L1-B stub — lifecycle is inherited from the L0 root agent
 
     checked++;
-    const agentName = typeof fm.name === 'string' && fm.name.trim() ? fm.name.trim() : file.replace(/\.md$/, '');
+    const agentName = typeof fm.name === "string" && fm.name.trim() ? fm.name.trim() : file.replace(/\.md$/, "");
     const lifecycle = fm.lifecycle as Record<string, unknown> | undefined;
 
-    if (!lifecycle || typeof lifecycle !== 'object') {
-      report(`templates/${variant}/agents/${file} is missing the required lifecycle: frontmatter block`,
-        `Add:\n  lifecycle:\n    phase: production\n    created: "YYYY-MM-DD"\n    last_updated: "YYYY-MM-DD"\n    governance: docs/lifecycle/agents/${agentName}.md`);
+    if (!lifecycle || typeof lifecycle !== "object") {
+      report(
+        `templates/${variant}/agents/${file} is missing the required lifecycle: frontmatter block`,
+        `Add:\n  lifecycle:\n    phase: production\n    created: "YYYY-MM-DD"\n    last_updated: "YYYY-MM-DD"\n    governance: docs/lifecycle/agents/${agentName}.md`,
+      );
       issuesFound++;
       continue;
     }
 
-    const missing = (['phase', 'governance'] as const).filter(k => !lifecycle[k]);
+    const missing = (["phase", "governance"] as const).filter((k) => !lifecycle[k]);
     if (missing.length > 0) {
-      report(`templates/${variant}/agents/${file} lifecycle block is missing: ${missing.map(m => `lifecycle.${m}`).join(', ')}`,
-        `validate-agents.ts requires both lifecycle.phase and lifecycle.governance — add the missing key(s)`);
+      report(
+        `templates/${variant}/agents/${file} lifecycle block is missing: ${missing.map((m) => `lifecycle.${m}`).join(", ")}`,
+        `validate-agents.ts requires both lifecycle.phase and lifecycle.governance — add the missing key(s)`,
+      );
       issuesFound++;
       continue;
     }
@@ -6095,14 +7427,18 @@ function checkAgentLifecycleFrontmatter(variant: string): void {
     // co-security was corrected (2026-08-21), so an unresolvable pointer can never land again.
     const govRel = String(lifecycle.governance);
     if (!existsSync(join(TEMPLATES_DIR, variant, govRel))) {
-      report(`templates/${variant}/agents/${file} points at a governance record that does not exist: ${govRel}`,
-        `Set lifecycle.governance to a path, e.g. docs/lifecycle/agents/${agentName}.md, and create that record ("## Phase History" + "## Acceptance Criteria")`);
+      report(
+        `templates/${variant}/agents/${file} points at a governance record that does not exist: ${govRel}`,
+        `Set lifecycle.governance to a path, e.g. docs/lifecycle/agents/${agentName}.md, and create that record ("## Phase History" + "## Acceptance Criteria")`,
+      );
       issuesFound++;
     }
   }
 
   if (issuesFound === 0) {
-    pass(`WS-10: ${variant} agent lifecycle frontmatter OK (${checked} agent(s) checked)${isWarningOnly ? ' (warning-only policy active)' : ''}`);
+    pass(
+      `WS-10: ${variant} agent lifecycle frontmatter OK (${checked} agent(s) checked)${isWarningOnly ? " (warning-only policy active)" : ""}`,
+    );
   }
 }
 
@@ -6118,10 +7454,10 @@ function checkAgentLifecycleFrontmatter(variant: string): void {
  * above by asserting each variant is internally consistent and usable.
  */
 function checkVariantReadinessGate(): void {
-  if (!JSON_MODE) console.log('\n=== VRG-01: Variant Readiness Gate (all variants) ===');
-  const gateTs = join(__dirname, 'validate-variant-readiness.ts');
+  if (!JSON_MODE) console.log("\n=== VRG-01: Variant Readiness Gate (all variants) ===");
+  const gateTs = join(__dirname, "validate-variant-readiness.ts");
   if (!existsSync(gateTs)) {
-    warn('root', 'vrg-missing', 'validate-variant-readiness.ts not found — skipping VRG check');
+    warn("root", "vrg-missing", "validate-variant-readiness.ts not found — skipping VRG check");
     return;
   }
   let dirs: string[] = [];
@@ -6130,26 +7466,31 @@ function checkVariantReadinessGate(): void {
       .filter((e) => e.isDirectory())
       .map((e) => e.name)
       .filter((name) => !isTransientTestFixture(name)) // E2E staging dirs (T-20260916-001)
-      .filter((name) => name.startsWith('co-') ? isCoVariantTracked(name) : true)
-      .filter((name) => existsSync(join(TEMPLATES_DIR, name, 'variant.json')));
+      .filter((name) => (name.startsWith("co-") ? isCoVariantTracked(name) : true))
+      .filter((name) => existsSync(join(TEMPLATES_DIR, name, "variant.json")));
   } catch {
     return;
   }
   let checked = 0;
   for (const name of dirs) {
-    if (variantArg !== 'all' && name !== variantArg) continue;
+    if (variantArg !== "all" && name !== variantArg) continue;
     const dir = join(TEMPLATES_DIR, name);
-    const res = spawnSync(process.execPath, [gateTs, '--dir', dir, '--json'], { encoding: 'utf8' });
+    const res = spawnSync(process.execPath, [gateTs, "--dir", dir, "--json"], { encoding: "utf8" });
     let parsed: { findings?: Array<{ severity: string; code: string; message: string }> } = {};
     try {
-      parsed = JSON.parse(res.stdout || '{}');
+      parsed = JSON.parse(res.stdout || "{}");
     } catch {
       continue;
     }
     const findings = parsed.findings || [];
     for (const f of findings) {
-      if (f.severity === 'error') {
-        fail(name, `vrg:${f.code}`, `VRG: ${f.message}`, `Run: bun scripts/validate-variant-readiness.ts --variant ${name}`);
+      if (f.severity === "error") {
+        fail(
+          name,
+          `vrg:${f.code}`,
+          `VRG: ${f.message}`,
+          `Run: bun scripts/validate-variant-readiness.ts --variant ${name}`,
+        );
       }
     }
     checked++;
@@ -6158,26 +7499,30 @@ function checkVariantReadinessGate(): void {
 }
 
 function checkPropagationMapSchema(): void {
-  if (!JSON_MODE) console.log('\n=== Check PM-01: propagation-map.json schema ===');
-  const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
+  if (!JSON_MODE) console.log("\n=== Check PM-01: propagation-map.json schema ===");
+  const mapPath = join(ROOT, "scripts", "propagation-map.json");
   if (!existsSync(mapPath)) {
-    warn('root', 'propagation-map-missing', 'scripts/propagation-map.json not found');
+    warn("root", "propagation-map-missing", "scripts/propagation-map.json not found");
     return;
   }
   let map: unknown;
   try {
-    map = JSON.parse(readFileSync(mapPath, 'utf-8'));
+    map = JSON.parse(readFileSync(mapPath, "utf-8"));
   } catch {
-    fail('root', 'propagation-map-invalid-json', 'scripts/propagation-map.json is not valid JSON');
+    fail("root", "propagation-map-invalid-json", "scripts/propagation-map.json is not valid JSON");
     return;
   }
   const errors = validatePropagationMap(map);
   if (errors.length > 0) {
     for (const e of errors) {
-      fail('root', `propagation-map-schema:${e.domain}.${e.field}`, `propagation-map.json domain [${e.domain}].${e.field}: ${e.message}`);
+      fail(
+        "root",
+        `propagation-map-schema:${e.domain}.${e.field}`,
+        `propagation-map.json domain [${e.domain}].${e.field}: ${e.message}`,
+      );
     }
   } else {
-    pass('propagation-map.json schema valid');
+    pass("propagation-map.json schema valid");
   }
 }
 
@@ -6196,18 +7541,30 @@ function checkPropagationMapSchema(): void {
 //     inject here and will recreate/overwrite the file's zone)
 // A variant with no zone and no listing is an intentional exclusion — not reported.
 function checkMarkerZoneParity(): void {
-  if (!JSON_MODE) console.log('\n=== Check PM-02: marker-inject zone parity ===');
-  const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
+  if (!JSON_MODE) console.log("\n=== Check PM-02: marker-inject zone parity ===");
+  const mapPath = join(ROOT, "scripts", "propagation-map.json");
   if (!existsSync(mapPath)) return; // PM-01 already reported the missing map
 
-  let map: { domains?: Record<string, { mode?: string; source_file?: string; target_file?: string; marker?: string; target_variants?: string[]; excluded_variants?: Array<string | { variant: string; reason?: string }> }> };
+  let map: {
+    domains?: Record<
+      string,
+      {
+        mode?: string;
+        source_file?: string;
+        target_file?: string;
+        marker?: string;
+        target_variants?: string[];
+        excluded_variants?: Array<string | { variant: string; reason?: string }>;
+      }
+    >;
+  };
   try {
-    map = JSON.parse(readFileSync(mapPath, 'utf-8'));
+    map = JSON.parse(readFileSync(mapPath, "utf-8"));
   } catch {
     return; // PM-01 already reported invalid JSON
   }
 
-  const normalize = (s: string) => s.replace(/\r\n/g, '\n').trim();
+  const normalize = (s: string) => s.replace(/\r\n/g, "\n").trim();
   const extractZone = (content: string, marker: string): string | null => {
     const m = content.match(new RegExp(`<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`));
     return m ? normalize(m[0]) : null;
@@ -6215,12 +7572,17 @@ function checkMarkerZoneParity(): void {
 
   let checkedZones = 0;
   for (const [domainName, domain] of Object.entries(map.domains ?? {})) {
-    if (domain.mode !== 'marker-inject' || !domain.source_file || !domain.marker) continue;
+    if (domain.mode !== "marker-inject" || !domain.source_file || !domain.marker) continue;
     const sourcePath = join(ROOT, domain.source_file);
     if (!existsSync(sourcePath)) continue; // publishDocs() owns source-file validation
-    const sourceZone = extractZone(readFileSync(sourcePath, 'utf-8'), domain.marker);
+    const sourceZone = extractZone(readFileSync(sourcePath, "utf-8"), domain.marker);
     if (!sourceZone) {
-      warn('root', 'marker-zone-parity', `marker-inject domain [${domainName}]: source ${domain.source_file} has no ${domain.marker} zone`, 'Re-publish the source file or update the propagation-map marker');
+      warn(
+        "root",
+        "marker-zone-parity",
+        `marker-inject domain [${domainName}]: source ${domain.source_file} has no ${domain.marker} zone`,
+        "Re-publish the source file or update the propagation-map marker",
+      );
       continue;
     }
     const listed = new Set(domain.target_variants ?? []);
@@ -6229,44 +7591,62 @@ function checkMarkerZoneParity(): void {
     // skipped by parity checks instead of emitting FAIL/WARN.
     const excluded = new Map<string, string>();
     for (const e of domain.excluded_variants ?? []) {
-      if (typeof e === 'string') excluded.set(e, '');
-      else if (e && typeof e.variant === 'string') excluded.set(e.variant, e.reason ?? '');
+      if (typeof e === "string") excluded.set(e, "");
+      else if (e && typeof e.variant === "string") excluded.set(e.variant, e.reason ?? "");
     }
 
     for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-      if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+      if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
       if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
       const variant = entry.name;
-      const targetFile = (domain.target_file ?? 'AGENTS.md').replace('{variant}', variant);
+      const targetFile = (domain.target_file ?? "AGENTS.md").replace("{variant}", variant);
       const variantPath = join(TEMPLATES_DIR, variant, targetFile);
       const variantZone = existsSync(variantPath)
-        ? extractZone(readFileSync(variantPath, 'utf-8'), domain.marker)
+        ? extractZone(readFileSync(variantPath, "utf-8"), domain.marker)
         : null;
       if (!variantZone) continue; // absent + (listed handled below / unlisted intentional)
 
       checkedZones++;
       if (listed.has(variant)) continue; // managed — publishDocs() drift checks own content sync
       if (excluded.has(variant)) {
-        if (!JSON_MODE) console.log(`  ℹ️  marker-zone-parity: ${variant}/${targetFile} is an adjudicated variant-owned fork (documented exclusion)`);
+        if (!JSON_MODE)
+          console.log(
+            `  ℹ️  marker-zone-parity: ${variant}/${targetFile} is an adjudicated variant-owned fork (documented exclusion)`,
+          );
         continue;
       }
 
       if (variantZone === sourceZone) {
-        fail('root', 'marker-zone-parity', `marker-inject domain [${domainName}]: ${variant}/${targetFile} carries a ${domain.marker} zone identical to the source but is not in target_variants — unmanaged coverage, the zone silently stops propagating on the next source change`, `Add "${variant}" to propagation-map.json domain [${domainName}].target_variants`);
+        fail(
+          "root",
+          "marker-zone-parity",
+          `marker-inject domain [${domainName}]: ${variant}/${targetFile} carries a ${domain.marker} zone identical to the source but is not in target_variants — unmanaged coverage, the zone silently stops propagating on the next source change`,
+          `Add "${variant}" to propagation-map.json domain [${domainName}].target_variants`,
+        );
       } else {
-        warn('root', 'marker-zone-parity', `marker-inject domain [${domainName}]: ${variant}/${targetFile} carries a ${domain.marker} zone that diverges from the source and is not in target_variants — if this divergence is intentional, document it in the domain note (adjudication: T-20260910-022)`, 'Adjudicate the divergence: list the variant in target_variants and re-publish, or document the intentional divergence');
+        warn(
+          "root",
+          "marker-zone-parity",
+          `marker-inject domain [${domainName}]: ${variant}/${targetFile} carries a ${domain.marker} zone that diverges from the source and is not in target_variants — if this divergence is intentional, document it in the domain note (adjudication: T-20260910-022)`,
+          "Adjudicate the divergence: list the variant in target_variants and re-publish, or document the intentional divergence",
+        );
       }
     }
 
     for (const variant of listed) {
-      if (!variant.startsWith('co-')) continue; // 'common' and other non-variant targets
-      const targetFile = (domain.target_file ?? 'AGENTS.md').replace('{variant}', variant);
+      if (!variant.startsWith("co-")) continue; // 'common' and other non-variant targets
+      const targetFile = (domain.target_file ?? "AGENTS.md").replace("{variant}", variant);
       const variantPath = join(TEMPLATES_DIR, variant, targetFile);
       const variantZone = existsSync(variantPath)
-        ? extractZone(readFileSync(variantPath, 'utf-8'), domain.marker)
+        ? extractZone(readFileSync(variantPath, "utf-8"), domain.marker)
         : null;
       if (!variantZone) {
-        fail('root', 'marker-zone-parity', `marker-inject domain [${domainName}]: target_variants lists "${variant}" but ${variant}/${targetFile} has no ${domain.marker} zone — stale target`, 'Re-run publishDocs for the domain or remove the variant from target_variants');
+        fail(
+          "root",
+          "marker-zone-parity",
+          `marker-inject domain [${domainName}]: target_variants lists "${variant}" but ${variant}/${targetFile} has no ${domain.marker} zone — stale target`,
+          "Re-run publishDocs for the domain or remove the variant from target_variants",
+        );
       }
       checkedZones++;
     }
@@ -6301,62 +7681,85 @@ function checkMarkerZoneParity(): void {
 // Every Error's fix hint names the exact JSON pointer to edit. Pure helpers
 // live in lib/propagation-map-schema.ts (unit-tested against synthetic trees).
 function checkPropagationTargets(): void {
-  if (!JSON_MODE) console.log('\n=== Check PM-03: propagation targets ≡ templates/co-* dir set ===');
+  if (!JSON_MODE) console.log("\n=== Check PM-03: propagation targets ≡ templates/co-* dir set ===");
   const coDirs = deriveCoVariantDirs(TEMPLATES_DIR);
   if (coDirs.length === 0) {
-    warn('root', 'propagation-targets', 'no templates/co-* directories found — target derivation skipped');
+    warn("root", "propagation-targets", "no templates/co-* directories found — target derivation skipped");
     return;
   }
 
   let auditedDomains = 0;
   let violations = 0;
-  const mapPath = join(ROOT, 'scripts', 'propagation-map.json');
+  const mapPath = join(ROOT, "scripts", "propagation-map.json");
   if (existsSync(mapPath)) {
-    let map: { domains?: Record<string, { mode?: string; target_file?: string; target_variants?: string[]; exclude_variants?: string[] }> };
+    let map: {
+      domains?: Record<
+        string,
+        { mode?: string; target_file?: string; target_variants?: string[]; exclude_variants?: string[] }
+      >;
+    };
     try {
-      map = JSON.parse(readFileSync(mapPath, 'utf-8'));
+      map = JSON.parse(readFileSync(mapPath, "utf-8"));
     } catch {
       map = {}; // PM-01 already reported the invalid JSON
     }
 
     for (const [domainName, domain] of Object.entries(map.domains ?? {})) {
-      if (domain.mode !== 'marker-inject') continue;
+      if (domain.mode !== "marker-inject") continue;
       auditedDomains++;
       const listed = domain.target_variants ?? [];
 
-      if (markerInjectTargetScope(domain) === 'variant-scoped') {
+      if (markerInjectTargetScope(domain) === "variant-scoped") {
         const excluded = domain.exclude_variants ?? [];
         const audit = auditVariantScopedTargets(listed, coDirs, excluded);
-        const targetDesc = (domain.target_file ?? 'AGENTS.md (basename-of-source default)').replace('{variant}', '<variant>');
+        const targetDesc = (domain.target_file ?? "AGENTS.md (basename-of-source default)").replace(
+          "{variant}",
+          "<variant>",
+        );
         for (const v of audit.staleEntries) {
           violations++;
-          fail('root', `propagation-targets:${domainName}`,
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
             `marker-inject domain [${domainName}] target_variants lists "${v}" but templates/${v}/ does not exist — stale listing`,
-            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the variant directory it references)`);
+            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the variant directory it references)`,
+          );
         }
         for (const v of audit.missingVariants) {
           violations++;
-          fail('root', `propagation-targets:${domainName}`,
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
             `variant "${v}" exists (templates/${v}/) but marker-inject domain [${domainName}] neither targets nor excludes it — its ${targetDesc} would silently stop propagating (M8 registration drift)`,
-            `Add "${v}" to scripts/propagation-map.json domains.${domainName}.target_variants, or declare the deliberate non-target in domains.${domainName}.exclude_variants`);
+            `Add "${v}" to scripts/propagation-map.json domains.${domainName}.target_variants, or declare the deliberate non-target in domains.${domainName}.exclude_variants`,
+          );
         }
         for (const v of audit.invalidExclusions) {
           violations++;
-          fail('root', `propagation-targets:${domainName}`,
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
             `marker-inject domain [${domainName}] exclude_variants lists "${v}" but templates/${v}/ does not exist — typo?`,
-            `Remove or correct "${v}" in scripts/propagation-map.json domains.${domainName}.exclude_variants`);
+            `Remove or correct "${v}" in scripts/propagation-map.json domains.${domainName}.exclude_variants`,
+          );
         }
         for (const v of audit.overlaps) {
           violations++;
-          fail('root', `propagation-targets:${domainName}`,
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
             `marker-inject domain [${domainName}] lists "${v}" in both target_variants and exclude_variants — contradictory declaration`,
-            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.exclude_variants (target_variants wins)`);
+            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.exclude_variants (target_variants wins)`,
+          );
         }
         for (const v of audit.duplicates) {
           violations++;
-          fail('root', `propagation-targets:${domainName}`,
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
             `marker-inject domain [${domainName}] lists "${v}" more than once across target_variants/exclude_variants — duplicate entry`,
-            `Keep exactly one entry for "${v}" in scripts/propagation-map.json domains.${domainName}.target_variants or .exclude_variants`);
+            `Keep exactly one entry for "${v}" in scripts/propagation-map.json domains.${domainName}.target_variants or .exclude_variants`,
+          );
         }
       } else {
         // fixed-target: validated against the domain's own declared shape
@@ -6364,67 +7767,95 @@ function checkPropagationTargets(): void {
         for (const t of listed) {
           if (seen.has(t)) {
             violations++;
-            fail('root', `propagation-targets:${domainName}`,
+            fail(
+              "root",
+              `propagation-targets:${domainName}`,
               `marker-inject domain [${domainName}] target_variants lists "${t}" more than once — duplicate entry`,
-              `Keep exactly one entry for "${t}" in scripts/propagation-map.json domains.${domainName}.target_variants`);
+              `Keep exactly one entry for "${t}" in scripts/propagation-map.json domains.${domainName}.target_variants`,
+            );
           }
           seen.add(t);
         }
         const audit = auditFixedTargets(listed, domain.target_file!, TEMPLATES_DIR);
         for (const t of audit.unknownDirs) {
           violations++;
-          fail('root', `propagation-targets:${domainName}`,
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
             `marker-inject domain [${domainName}] target_variants lists "${t}" but templates/${t}/ does not exist — stale listing`,
-            `Remove "${t}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the template directory it references)`);
+            `Remove "${t}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the template directory it references)`,
+          );
         }
         for (const m of audit.missingTargetFiles) {
           violations++;
-          fail('root', `propagation-targets:${domainName}`,
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
             `marker-inject domain [${domainName}] targets ${m.file} (declared target_file: ${domain.target_file}) but the file does not exist — dead target`,
-            `Create ${m.file} with the ${domainName} marker zone, or remove "${m.target}" from scripts/propagation-map.json domains.${domainName}.target_variants`);
+            `Create ${m.file} with the ${domainName} marker zone, or remove "${m.target}" from scripts/propagation-map.json domains.${domainName}.target_variants`,
+          );
         }
         if ((domain.exclude_variants ?? []).length > 0) {
-          warn('root', `propagation-targets:${domainName}`,
+          warn(
+            "root",
+            `propagation-targets:${domainName}`,
             `marker-inject domain [${domainName}] is fixed-target (no {variant} in target_file) — exclude_variants is never consulted for this shape`,
-            `Remove the dead exclude_variants from scripts/propagation-map.json domains.${domainName}, or drop the entries`);
+            `Remove the dead exclude_variants from scripts/propagation-map.json domains.${domainName}, or drop the entries`,
+          );
         }
       }
     }
   }
 
   // (c) common.lifecycle.json propagatedTo ≡ co-* dir set (both directions)
-  const lcPath = join(ROOT, 'docs', 'templates', 'common.lifecycle.json');
+  const lcPath = join(ROOT, "docs", "templates", "common.lifecycle.json");
   let lifecycleChecked = false;
   if (existsSync(lcPath)) {
     let lc: { propagatedTo?: unknown };
     try {
-      lc = JSON.parse(readFileSync(lcPath, 'utf-8'));
+      lc = JSON.parse(readFileSync(lcPath, "utf-8"));
     } catch {
-      fail('common', 'common-lifecycle-propagatedto', 'docs/templates/common.lifecycle.json is not valid JSON — propagatedTo cannot be derived-checked');
+      fail(
+        "common",
+        "common-lifecycle-propagatedto",
+        "docs/templates/common.lifecycle.json is not valid JSON — propagatedTo cannot be derived-checked",
+      );
       return; // nothing else in this check can run meaningfully
     }
-    if (!Array.isArray(lc.propagatedTo) || lc.propagatedTo.some((v) => typeof v !== 'string')) {
-      fail('common', 'common-lifecycle-propagatedto', 'docs/templates/common.lifecycle.json propagatedTo must be an array of variant names');
+    if (!Array.isArray(lc.propagatedTo) || lc.propagatedTo.some((v) => typeof v !== "string")) {
+      fail(
+        "common",
+        "common-lifecycle-propagatedto",
+        "docs/templates/common.lifecycle.json propagatedTo must be an array of variant names",
+      );
     } else {
       lifecycleChecked = true;
       const listed = lc.propagatedTo as string[];
       for (const v of listed.filter((v) => !coDirs.includes(v))) {
         violations++;
-        fail('common', 'common-lifecycle-propagatedto',
+        fail(
+          "common",
+          "common-lifecycle-propagatedto",
           `docs/templates/common.lifecycle.json propagatedTo lists "${v}" but templates/${v}/ does not exist — stale entry`,
-          `Remove "${v}" from docs/templates/common.lifecycle.json propagatedTo (or create the variant directory it references)`);
+          `Remove "${v}" from docs/templates/common.lifecycle.json propagatedTo (or create the variant directory it references)`,
+        );
       }
       for (const v of coDirs.filter((v) => !listed.includes(v))) {
         violations++;
-        fail('common', 'common-lifecycle-propagatedto',
+        fail(
+          "common",
+          "common-lifecycle-propagatedto",
           `variant "${v}" exists (templates/${v}/) but docs/templates/common.lifecycle.json propagatedTo does not list it — the lifecycle record under-reports common-layer propagation`,
-          `Add "${v}" to docs/templates/common.lifecycle.json propagatedTo`);
+          `Add "${v}" to docs/templates/common.lifecycle.json propagatedTo`,
+        );
       }
     }
   }
 
   if ((auditedDomains > 0 || lifecycleChecked) && violations === 0) {
-    pass(`propagation-targets: ${auditedDomains} marker-inject domain(s) + common.lifecycle.json propagatedTo consistent with the templates/co-* dir set (${coDirs.length} variants)`);
+    pass(
+      `propagation-targets: ${auditedDomains} marker-inject domain(s) + common.lifecycle.json propagatedTo consistent with the templates/co-* dir set (${coDirs.length} variants)`,
+    );
   }
 }
 
@@ -6436,27 +7867,35 @@ function checkPropagationTargets(): void {
 // block never appended, no warning). The scaffolders also warn at extraction
 // time; this standing check fails the battery BEFORE anything scaffolds.
 function checkScaffoldMarkerSources(): void {
-  if (!JSON_MODE) console.log('\n=== Check scaffold-marker-source: scaffolder markers vs source templates ===');
+  if (!JSON_MODE) console.log("\n=== Check scaffold-marker-source: scaffolder markers vs source templates ===");
   let verified = 0;
   for (const entry of SCAFFOLD_MARKER_SOURCES) {
     for (const relSource of entry.sources) {
       const absSource = join(ROOT, relSource);
       if (!existsSync(absSource)) {
-        fail('common', 'scaffold-marker-source',
+        fail(
+          "common",
+          "scaffold-marker-source",
           `${relSource} not found — cannot verify scaffolder marker reference: ${entry.marker} (${entry.purpose})`,
-          `Restore the source template file, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`);
+          `Restore the source template file, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`,
+        );
         continue;
       }
-      if (!readFileSync(absSource, 'utf-8').includes(entry.marker)) {
-        fail('common', 'scaffold-marker-source',
+      if (!readFileSync(absSource, "utf-8").includes(entry.marker)) {
+        fail(
+          "common",
+          "scaffold-marker-source",
           `marker missing from ${relSource}: "${entry.marker}" (${entry.purpose}) — scaffolders referencing it silently no-op (C3 class)`,
-          `Re-wrap the block in the declared marker in ${relSource}, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`);
+          `Re-wrap the block in the declared marker in ${relSource}, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`,
+        );
         continue;
       }
       verified++;
     }
   }
-  pass(`scaffold-marker-source: ${verified}/${SCAFFOLD_MARKER_SOURCES.length} declared marker reference(s) verified in their source templates`);
+  pass(
+    `scaffold-marker-source: ${verified}/${SCAFFOLD_MARKER_SOURCES.length} declared marker reference(s) verified in their source templates`,
+  );
 }
 
 // ── pm-extends-stub-body (T-20260915-010 / H12) ──────────────────────────────
@@ -6466,23 +7905,26 @@ function checkScaffoldMarkerSources(): void {
 // body — a non-canonical body means real variant content is lost silently at
 // scaffold time (the matching scaffold-time WARN lives in new-project.ts).
 function checkPmExtendsStubBodies(): void {
-  if (!JSON_MODE) console.log('\n=== Check pm-extends-stub-body: variant pm.md extends-stub bodies are canonical ===');
+  if (!JSON_MODE) console.log("\n=== Check pm-extends-stub-body: variant pm.md extends-stub bodies are canonical ===");
   let checked = 0;
   for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !entry.name.startsWith('co-')) continue;
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
     if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
-    if (variantArg !== 'all' && variantArg !== entry.name) continue;
-    const pmPath = join(TEMPLATES_DIR, entry.name, 'agents', 'pm.md');
+    if (variantArg !== "all" && variantArg !== entry.name) continue;
+    const pmPath = join(TEMPLATES_DIR, entry.name, "agents", "pm.md");
     if (!existsSync(pmPath)) continue; // presence is checkAgents/checkReadmePresence's domain
-    const content = readFileSync(pmPath, 'utf-8');
+    const content = readFileSync(pmPath, "utf-8");
     const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n?/);
     if (!fmMatch || !/(^|\n)\s*extends:/.test(fmMatch[1])) continue;
     checked++;
     const body = content.slice(fmMatch[0].length);
     if (isCanonicalPmStubBody(body, entry.name)) continue;
-    fail(entry.name, 'pm-extends-stub-body',
+    fail(
+      entry.name,
+      "pm-extends-stub-body",
       `agents/pm.md declares extends: but its body is not the canonical stub — scaffold-time resolution would silently discard ${body.trim().length} char(s) of variant content`,
-      `Inline the real content in agents/pm.md and drop extends:, or restore the canonical stub prose (canonicalPmStubBody in scripts/helpers/scaffold-markers.ts)`);
+      `Inline the real content in agents/pm.md and drop extends:, or restore the canonical stub prose (canonicalPmStubBody in scripts/helpers/scaffold-markers.ts)`,
+    );
   }
   if (checked > 0) {
     pass(`pm-extends-stub-body: ${checked} extends-stub variant pm.md file(s) carry canonical stub bodies`);
@@ -6503,30 +7945,40 @@ function checkPmExtendsStubBodies(): void {
 // declaration check scopes templates/ only — project-side variant.json could drift by
 // omission. Every delivered Projects/<name>/variant.json declares the mechanism too.
 function checkProjectCountryConfigDeclarations(): void {
-  const projectsDir = join(ROOT, 'Projects');
+  const projectsDir = join(ROOT, "Projects");
   if (!existsSync(projectsDir)) return;
   for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
-    const variantJsonPath = join(projectsDir, entry.name, 'variant.json');
+    const variantJsonPath = join(projectsDir, entry.name, "variant.json");
     if (!existsSync(variantJsonPath)) continue; // projects without a variant.json are out of scope
     let raw: Record<string, unknown> | null = null;
     try {
-      raw = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
+      raw = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
     } catch {
-      fail(entry.name, 'country-config', `Projects/${entry.name}/variant.json is not valid JSON`,
-        'Fix the JSON syntax — the project-side copy must stay parseable for upgrade tooling');
+      fail(
+        entry.name,
+        "country-config",
+        `Projects/${entry.name}/variant.json is not valid JSON`,
+        "Fix the JSON syntax — the project-side copy must stay parseable for upgrade tooling",
+      );
       continue;
     }
     const cc = raw.country_config as Record<string, unknown> | undefined;
-    if (!cc || typeof cc !== 'object' || Array.isArray(cc)) {
-      fail(entry.name, 'country-config',
+    if (!cc || typeof cc !== "object" || Array.isArray(cc)) {
+      fail(
+        entry.name,
+        "country-config",
         `Projects/${entry.name}/variant.json missing 'country_config' (ADR-0091 R3 uniform declaration)`,
-        'Copy the country_config block from the variant template\'s variant.json (empty supported = non-adopting)');
-    } else if (cc.profiles_dir !== 'docs/countries' || !Array.isArray(cc.supported)) {
-      fail(entry.name, 'country-config',
+        "Copy the country_config block from the variant template's variant.json (empty supported = non-adopting)",
+      );
+    } else if (cc.profiles_dir !== "docs/countries" || !Array.isArray(cc.supported)) {
+      fail(
+        entry.name,
+        "country-config",
         `Projects/${entry.name}/variant.json country_config diverges from the ADR-0091 R3 shape (profiles_dir="docs/countries", supported array)`,
-        'Re-sync the country_config block from the variant template\'s variant.json');
+        "Re-sync the country_config block from the variant template's variant.json",
+      );
     } else {
       pass(`Projects/${entry.name}/variant.json country_config declaration OK (ADR-0091 R3)`);
     }
@@ -6534,7 +7986,7 @@ function checkProjectCountryConfigDeclarations(): void {
 }
 
 function checkProjectIdentityPlaceholders(): void {
-  const projectsDir = join(ROOT, 'Projects');
+  const projectsDir = join(ROOT, "Projects");
   if (!existsSync(projectsDir)) return;
   const placeholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
   // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
@@ -6548,25 +8000,34 @@ function checkProjectIdentityPlaceholders(): void {
   try {
     fleetDirs = listFleetProjects(ROOT);
   } catch (err) {
-    fail('fleet-membership', 'project-identity-placeholder',
+    fail(
+      "fleet-membership",
+      "project-identity-placeholder",
       `docs/fleet-membership.json failed to load: ${err instanceof Error ? err.message : String(err)}`,
-      'Fix or remove the malformed registry — fleet tooling must hard-fail rather than guess membership');
+      "Fix or remove the malformed registry — fleet tooling must hard-fail rather than guess membership",
+    );
     return;
   }
   for (const fleetPath of fleetDirs) {
     const project = fleetPath.split(/[\\/]/).pop() ?? fleetPath;
     if (isTransientTestFixture(project)) continue; // E2E staging dirs (T-20260916-001)
-    const projectMdPath = join(projectsDir, project, 'docs', 'project.md');
-    const contextMdPath = join(projectsDir, project, 'docs', 'context.md');
-    if (existsSync(projectMdPath) && placeholderRe.test(readFileSync(projectMdPath, 'utf-8'))) {
-      warn(project, 'project-identity-placeholder',
+    const projectMdPath = join(projectsDir, project, "docs", "project.md");
+    const contextMdPath = join(projectsDir, project, "docs", "context.md");
+    if (existsSync(projectMdPath) && placeholderRe.test(readFileSync(projectMdPath, "utf-8"))) {
+      warn(
+        project,
+        "project-identity-placeholder",
         `Projects/${project}/docs/project.md still carries the TODO(project-overview) identity fallback`,
-        'Fill Description/Type in docs/project.md (scaffold flags --description/--type, or edit the file by hand — upgrades never overwrite it)');
+        "Fill Description/Type in docs/project.md (scaffold flags --description/--type, or edit the file by hand — upgrades never overwrite it)",
+      );
     }
-    if (existsSync(contextMdPath) && placeholderRe.test(readFileSync(contextMdPath, 'utf-8'))) {
-      warn(project, 'project-identity-placeholder',
+    if (existsSync(contextMdPath) && placeholderRe.test(readFileSync(contextMdPath, "utf-8"))) {
+      warn(
+        project,
+        "project-identity-placeholder",
         `Projects/${project}/docs/context.md still carries literal template placeholders (pre-2.13 residue)`,
-        'Run upgrade-project (the 2.13 footer delivers the docs/project.md pointer section), then fill docs/project.md');
+        "Run upgrade-project (the 2.13 footer delivers the docs/project.md pointer section), then fill docs/project.md",
+      );
     }
   }
 }
@@ -6580,8 +8041,8 @@ function main(): number {
 
   // Project (L3) roots carry no templates/common — every check below assumes the
   // L0/L1 template tree and would fail or crash with ENOENT, so skip cleanly.
-  if (!existsSync(join(TEMPLATES_DIR, 'common'))) {
-    const summary = 'not applicable: no templates/common (variant/project context)';
+  if (!existsSync(join(TEMPLATES_DIR, "common"))) {
+    const summary = "not applicable: no templates/common (variant/project context)";
     if (JSON_MODE) {
       console.log(JSON.stringify({ variantsScanned: 0, errors: [], warnings: [], summary }, null, 2));
     } else {
@@ -6601,46 +8062,46 @@ function main(): number {
   const skillLayerMap = parseSkillLayers();
 
   // Check common/ commands and parity
-  checkCommands('common');
+  checkCommands("common");
   checkModelLiteralPlacement();
   checkTwinCommonSectionParity(); // VA-06: CLAUDE/GEMINI/CODEX twins carry the shared policy set
   // Script parity check removed (dead code after ADR-0036 TypeScript migration)
-  checkVariantScopedSkillLeak();  // B-11: variant_scoped_skills must not live in common
-  checkExternalDepVendoring();    // v1.72.0: no manifest install_dir vendored into a template tree (design D4)
-  checkExternalDepLicense();      // v1.74.0: seed manifests pass the license policy + coupling contract (standard §5.4 E2)
+  checkVariantScopedSkillLeak(); // B-11: variant_scoped_skills must not live in common
+  checkExternalDepVendoring(); // v1.72.0: no manifest install_dir vendored into a template tree (design D4)
+  checkExternalDepLicense(); // v1.74.0: seed manifests pass the license policy + coupling contract (standard §5.4 E2)
   checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
-  checkVariantMirrorParity();     // T-20260921-009: variant mirrors carry the variant skill set
-  checkSkillRegistrySync();       // VA-08: registry rows match SKILL.md frontmatter (WARN soak, T-20260925-007)
-  checkRosterTierConsistency();   // T-20260921-020: roster tiers match resolved agent frontmatter tiers
-  checkAgentQualityRecursive();   // T-20261027-001: nested agent trees carry scalar tier (ADR-0102) + full bodies
-  checkStyleNeutrality();         // B-12: L0/L1 style neutrality (ADR-0064/0066)
+  checkVariantMirrorParity(); // T-20260921-009: variant mirrors carry the variant skill set
+  checkSkillRegistrySync(); // VA-08: registry rows match SKILL.md frontmatter (WARN soak, T-20260925-007)
+  checkRosterTierConsistency(); // T-20260921-020: roster tiers match resolved agent frontmatter tiers
+  checkAgentQualityRecursive(); // T-20261027-001: nested agent trees carry scalar tier (ADR-0102) + full bodies
+  checkStyleNeutrality(); // B-12: L0/L1 style neutrality (ADR-0064/0066)
 
   let variantsChecked = 0;
   for (const [variant, manifest] of manifests) {
-    if (variantArg !== 'all' && variant !== variantArg) continue;
+    if (variantArg !== "all" && variant !== variantArg) continue;
 
     // Check Variant Contract for all variants (including draft)
     checkVariantContract(variant);
-    checkSecurityGateSkills(variant);          // B-03
-    checkVariantSkills(variant);               // B-09: presence-driven skill lifecycle
-    checkVariantScriptsLayout(variant);        // B-10: scripts/<variant>/ layout convention
-    checkVariantGeneratorManifest(variant);    // v1.66.0: declared generators.json arm (absent = skip)
+    checkSecurityGateSkills(variant); // B-03
+    checkVariantSkills(variant); // B-09: presence-driven skill lifecycle
+    checkVariantScriptsLayout(variant); // B-10: scripts/<variant>/ layout convention
+    checkVariantGeneratorManifest(variant); // v1.66.0: declared generators.json arm (absent = skip)
     checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
-    checkPlatformSettingsParity(variant);      // VA-04: run for stable and beta/draft so bad platform keys cannot hide
+    checkPlatformSettingsParity(variant); // VA-04: run for stable and beta/draft so bad platform keys cannot hide
 
-    if (manifest.status === 'stable') {
+    if (manifest.status === "stable") {
       checkAgents(variant);
       checkAgentsRoster(variant);
       checkPhaseSummaryAgents(variant);
       checkWorkspaceRootAgentIntrusion(variant);
       checkSkillPlatformParity(variant);
-      checkSkillMirrorVersionSync(variant);     // VA-07: mirror version sync (WARN soak, T-20260925-006)
+      checkSkillMirrorVersionSync(variant); // VA-07: mirror version sync (WARN soak, T-20260925-006)
       checkDocumentCommonSections(variant);
       checkCommands(variant);
       // Script parity check removed (dead code after ADR-0036 TypeScript migration)
       checkContextSync(variant);
       checkReadmePresence(variant);
-      checkVariantPackageContract(variant);   // VA-08: scaffold package contract (T-20261009-002)
+      checkVariantPackageContract(variant); // VA-08: scaffold package contract (T-20261009-002)
       variantsChecked++;
     }
   }
@@ -6650,197 +8111,233 @@ function main(): number {
   checkCommonContract();
   checkCommonContractReverseCoverage(); // C-CM-04: exists→listed contract coverage (T-20260910-019)
   for (const [variant, manifest] of manifests) {
-    if (manifest.status === 'stable') checkCommonContractVariantSkills(variant);
+    if (manifest.status === "stable") checkCommonContractVariantSkills(variant);
   }
 
   // WS-04, WS-05, WS-06, WS-07, WS-08: Reverse-direction layer checks for co-* variants
   for (const [variant] of manifests) {
-    if (!variant.startsWith('co-')) continue;
-      checkL0ScriptsNotInVariants(variant, scriptLayerMap);       // WS-04
-      checkL0L1ScriptsNotInVariants(variant, scriptLayerMap);     // WS-05
-      checkL0OnlyToolRefsInVariantCommandSkills(variant);         // WS-05a
-      checkVariantAgentReferences(variant);                        // T-007c: agent references resolve (WARN soak)
-      checkVariantSkillsLayer(variant, skillLayerMap);             // WS-06
-    checkNoVariantLocalContextMd(variant);                       // WS-07
-    checkNoVariantVersionManifest(variant);                      // T-20260916-010: no stub/full manifest in variant templates
-    checkReadmeStandard(variant);                                // WS-08
-    checkContextMdStructure(variant);                            // WS-09
-    checkAgentLifecycleFrontmatter(variant);                     // WS-10
-    checkUserGuidePair(variant);                                 // WS-11
+    if (!variant.startsWith("co-")) continue;
+    checkL0ScriptsNotInVariants(variant, scriptLayerMap); // WS-04
+    checkL0L1ScriptsNotInVariants(variant, scriptLayerMap); // WS-05
+    checkL0OnlyToolRefsInVariantCommandSkills(variant); // WS-05a
+    checkVariantAgentReferences(variant); // T-007c: agent references resolve (WARN soak)
+    checkVariantSkillsLayer(variant, skillLayerMap); // WS-06
+    checkNoVariantLocalContextMd(variant); // WS-07
+    checkNoVariantVersionManifest(variant); // T-20260916-010: no stub/full manifest in variant templates
+    checkReadmeStandard(variant); // WS-08
+    checkContextMdStructure(variant); // WS-09
+    checkAgentLifecycleFrontmatter(variant); // WS-10
+    checkUserGuidePair(variant); // WS-11
   }
 
+  // ── ADR-0090 W0: AGENTS.md thin-dispatcher precursor arms (WARN until W4 promotion) ──
 
-// ── ADR-0090 W0: AGENTS.md thin-dispatcher precursor arms (WARN until W4 promotion) ──
+  const AGENTS_MD_SIZE_BUDGET = 15_000;
 
-const AGENTS_MD_SIZE_BUDGET = 15_000;
-
-/** Size budget: every AGENTS.md at L0/L1/L2 must fit the thin-dispatcher budget. */
-function checkAgentsMdSizeBudget(): void {
-  if (!JSON_MODE) console.log('\n=== Check agents-md-size-budget: AGENTS.md ≤15,000 chars at every layer (ADR-0090) ===');
-  const targets: Array<{ variant: string; path: string }> = [
-    { variant: 'common', path: join(ROOT, 'AGENTS.md') },
-    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'AGENTS.md') },
-  ];
-  if (existsSync(TEMPLATES_DIR)) {
-    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-      if (entry.isDirectory() && entry.name.startsWith('co-')) {
-        targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'AGENTS.md') });
-      }
-    }
-  }
-  for (const t of targets) {
-    if (!existsSync(t.path)) continue;
-    const size = readFileSync(t.path, 'utf-8').length;
-    if (size > AGENTS_MD_SIZE_BUDGET) {
-      warn(t.variant, 'agents-md-size-budget',
-        `${t.path}: ${size.toLocaleString()} chars exceeds the 15,000-char thin-dispatcher budget (ADR-0090) — user decision 2026-09-26 (design Addendum 3): WARN-only visibility metric, no FAIL promotion and no further reduction; Hermes consumers use the documented context_file_max_chars config`,
-        `If truncation matters for a harness, see the config backstop in HERMES.md "Hermes Platform Mechanics" (context_file_max_chars) and CONSTITUTION.md §11`);
-    } else {
-      pass(`${t.path}: ${size.toLocaleString()} chars (within budget)`);
-    }
-  }
-}
-
-/** Pointer integrity: docs/governance|docs/constitution markdown references in any AGENTS.md must resolve on disk. */
-function checkAgentsMdPointerIntegrity(): void {
-  if (!JSON_MODE) console.log('\n=== Check agents-md-pointer-integrity: AGENTS.md reference pointers resolve (ADR-0090) ===');
-  const targets: Array<{ variant: string; path: string; base: string }> = [
-    { variant: 'common', path: join(ROOT, 'AGENTS.md'), base: ROOT },
-    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'AGENTS.md'), base: join(TEMPLATES_DIR, 'common') },
-  ];
-  if (existsSync(TEMPLATES_DIR)) {
-    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-      if (entry.isDirectory() && entry.name.startsWith('co-')) {
-        targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'AGENTS.md'), base: join(TEMPLATES_DIR, entry.name) });
-      }
-    }
-  }
-  let checked = 0;
-  const candidateBases = (base: string): string[] => [ROOT, TEMPLATES_DIR ? join(TEMPLATES_DIR, 'common') : '', base].filter(Boolean);
-  for (const t of targets) {
-    if (!existsSync(t.path)) continue;
-    const refs = [...readFileSync(t.path, 'utf-8').matchAll(/\]\((docs\/(?:governance|constitution)\/[^)`]+)\)/g)].map(m => m[1]);
-    for (const ref of refs) {
-      checked++;
-      // v1.50.4: strip the #anchor fragment before the existence check — anchors are
-      // in-page headings, not file names, so `docs/x.md#section` never existsSync'd and
-      // every anchored constitution reference misclassified as post-scaffold-only
-      // (observed 2026-10-02: the AGENTS.md §9.1 weekly-check pointer).
-      const refFile = ref.split('#')[0];
-      const resolvedSomewhere = candidateBases(t.base).some(b => existsSync(join(b, refFile)));
-      if (!resolvedSomewhere) {
-        if (ref.startsWith('docs/constitution/')) {
-          warn(t.variant, 'agents-md-pointer-integrity',
-            `${t.path} references '${ref}' — resolves only post-scaffold (constitution docs are delivered at project creation)`,
-            `Verify the file exists in templates delivery; if permanently absent, fix the pointer`);
-        } else {
-          fail(t.variant, 'agents-md-pointer-integrity',
-            `${t.path} references '${ref}' but it does not exist at the workspace root, templates/common, or ${t.base}`,
-            `Create the referenced governance file or fix the pointer`);
+  /** Size budget: every AGENTS.md at L0/L1/L2 must fit the thin-dispatcher budget. */
+  function checkAgentsMdSizeBudget(): void {
+    if (!JSON_MODE)
+      console.log("\n=== Check agents-md-size-budget: AGENTS.md ≤15,000 chars at every layer (ADR-0090) ===");
+    const targets: Array<{ variant: string; path: string }> = [
+      { variant: "common", path: join(ROOT, "AGENTS.md") },
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "AGENTS.md") });
         }
       }
     }
-  }
-  if (checked === 0) {
-    pass('agents-md-pointer-integrity: no pointer tables yet (populated at W1) — vacuous pass');
-  } else {
-    pass(`agents-md-pointer-integrity: ${checked} pointer reference(s) resolve`);
-  }
-}
-
-const DESTRUCTIVE_FILE_OPS_MARKER = 'Destructive File Operations';
-
-/**
- * §7 destructive-file-operations pin (design 2026-11-04-project-loss-hardening-design §5.4,
- * T-20261104-004 item 4): every template AGENTS.md §7 (templates/common + every co-*
- * variant) must carry the "Destructive File Operations" baseline bullet, so the multi-file
- * §7 propagation wave cannot silently rot. Severity: WARN per design (visibility pin,
- * not a structural failure; PM-04b covers only the COMMON-AGENTS zone, not §7).
- */
-function checkAgentsMdDestructiveFileOpsPin(): void {
-  if (!JSON_MODE) console.log('\n=== Check agents-md-destructive-file-ops-pin: §7 carries the destructive-file-operations baseline (project-loss-hardening design §5.4) ===');
-  const targets: Array<{ variant: string; path: string }> = [
-    { variant: 'common', path: join(TEMPLATES_DIR, 'common', 'AGENTS.md') },
-  ];
-  if (existsSync(TEMPLATES_DIR)) {
-    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
-      if (entry.isDirectory() && entry.name.startsWith('co-')) {
-        targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, 'AGENTS.md') });
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      const size = readFileSync(t.path, "utf-8").length;
+      if (size > AGENTS_MD_SIZE_BUDGET) {
+        warn(
+          t.variant,
+          "agents-md-size-budget",
+          `${t.path}: ${size.toLocaleString()} chars exceeds the 15,000-char thin-dispatcher budget (ADR-0090) — user decision 2026-09-26 (design Addendum 3): WARN-only visibility metric, no FAIL promotion and no further reduction; Hermes consumers use the documented context_file_max_chars config`,
+          `If truncation matters for a harness, see the config backstop in HERMES.md "Hermes Platform Mechanics" (context_file_max_chars) and CONSTITUTION.md §11`,
+        );
+      } else {
+        pass(`${t.path}: ${size.toLocaleString()} chars (within budget)`);
       }
     }
   }
-  let checked = 0;
-  for (const t of targets) {
-    if (!existsSync(t.path)) continue;
-    checked++;
-    const content = readFileSync(t.path, 'utf-8');
-    const sectionMatch = content.match(/^## §7: Universal Baseline Behaviors\n([\s\S]*?)(?=^## )/m);
-    if (!sectionMatch) {
-      warn(t.variant, 'agents-md-destructive-file-ops-pin',
-        `${t.path}: no "§7: Universal Baseline Behaviors" section found — the destructive-file-operations baseline pin cannot hold`,
-        `Restore the §7 section (copy from templates/common/AGENTS.md) including the "Destructive File Operations" bullet (design 2026-11-04-project-loss-hardening-design §5.4)`);
-      continue;
+
+  /** Pointer integrity: docs/governance|docs/constitution markdown references in any AGENTS.md must resolve on disk. */
+  function checkAgentsMdPointerIntegrity(): void {
+    if (!JSON_MODE)
+      console.log("\n=== Check agents-md-pointer-integrity: AGENTS.md reference pointers resolve (ADR-0090) ===");
+    const targets: Array<{ variant: string; path: string; base: string }> = [
+      { variant: "common", path: join(ROOT, "AGENTS.md"), base: ROOT },
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md"), base: join(TEMPLATES_DIR, "common") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({
+            variant: entry.name,
+            path: join(TEMPLATES_DIR, entry.name, "AGENTS.md"),
+            base: join(TEMPLATES_DIR, entry.name),
+          });
+        }
+      }
     }
-    if (!sectionMatch[1].includes(DESTRUCTIVE_FILE_OPS_MARKER)) {
-      warn(t.variant, 'agents-md-destructive-file-ops-pin',
-        `${t.path} §7 is missing the "Destructive File Operations" baseline bullet — the 2026-11-04 rm -rf Projects incident lesson must ride on every template AGENTS.md`,
-        `Add the "Destructive File Operations" bullet to §7 (copy verbatim from templates/common/AGENTS.md §7; design 2026-11-04-project-loss-hardening-design §5.4)`);
+    let checked = 0;
+    const candidateBases = (base: string): string[] =>
+      [ROOT, TEMPLATES_DIR ? join(TEMPLATES_DIR, "common") : "", base].filter(Boolean);
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      const refs = [
+        ...readFileSync(t.path, "utf-8").matchAll(/\]\((docs\/(?:governance|constitution)\/[^)`]+)\)/g),
+      ].map((m) => m[1]);
+      for (const ref of refs) {
+        checked++;
+        // v1.50.4: strip the #anchor fragment before the existence check — anchors are
+        // in-page headings, not file names, so `docs/x.md#section` never existsSync'd and
+        // every anchored constitution reference misclassified as post-scaffold-only
+        // (observed 2026-10-02: the AGENTS.md §9.1 weekly-check pointer).
+        const refFile = ref.split("#")[0];
+        const resolvedSomewhere = candidateBases(t.base).some((b) => existsSync(join(b, refFile)));
+        if (!resolvedSomewhere) {
+          if (ref.startsWith("docs/constitution/")) {
+            warn(
+              t.variant,
+              "agents-md-pointer-integrity",
+              `${t.path} references '${ref}' — resolves only post-scaffold (constitution docs are delivered at project creation)`,
+              `Verify the file exists in templates delivery; if permanently absent, fix the pointer`,
+            );
+          } else {
+            fail(
+              t.variant,
+              "agents-md-pointer-integrity",
+              `${t.path} references '${ref}' but it does not exist at the workspace root, templates/common, or ${t.base}`,
+              `Create the referenced governance file or fix the pointer`,
+            );
+          }
+        }
+      }
+    }
+    if (checked === 0) {
+      pass("agents-md-pointer-integrity: no pointer tables yet (populated at W1) — vacuous pass");
     } else {
-      pass(`agents-md-destructive-file-ops-pin: ${t.path} §7 carries the baseline`);
+      pass(`agents-md-pointer-integrity: ${checked} pointer reference(s) resolve`);
     }
   }
-  if (checked === 0) {
-    pass('agents-md-destructive-file-ops-pin: no template AGENTS.md found — vacuous pass');
+
+  const DESTRUCTIVE_FILE_OPS_MARKER = "Destructive File Operations";
+
+  /**
+   * §7 destructive-file-operations pin (design 2026-11-04-project-loss-hardening-design §5.4,
+   * T-20261104-004 item 4): every template AGENTS.md §7 (templates/common + every co-*
+   * variant) must carry the "Destructive File Operations" baseline bullet, so the multi-file
+   * §7 propagation wave cannot silently rot. Severity: WARN per design (visibility pin,
+   * not a structural failure; PM-04b covers only the COMMON-AGENTS zone, not §7).
+   */
+  function checkAgentsMdDestructiveFileOpsPin(): void {
+    if (!JSON_MODE)
+      console.log(
+        "\n=== Check agents-md-destructive-file-ops-pin: §7 carries the destructive-file-operations baseline (project-loss-hardening design §5.4) ===",
+      );
+    const targets: Array<{ variant: string; path: string }> = [
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "AGENTS.md") });
+        }
+      }
+    }
+    let checked = 0;
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      checked++;
+      const content = readFileSync(t.path, "utf-8");
+      const sectionMatch = content.match(/^## §7: Universal Baseline Behaviors\n([\s\S]*?)(?=^## )/m);
+      if (!sectionMatch) {
+        warn(
+          t.variant,
+          "agents-md-destructive-file-ops-pin",
+          `${t.path}: no "§7: Universal Baseline Behaviors" section found — the destructive-file-operations baseline pin cannot hold`,
+          `Restore the §7 section (copy from templates/common/AGENTS.md) including the "Destructive File Operations" bullet (design 2026-11-04-project-loss-hardening-design §5.4)`,
+        );
+        continue;
+      }
+      if (!sectionMatch[1].includes(DESTRUCTIVE_FILE_OPS_MARKER)) {
+        warn(
+          t.variant,
+          "agents-md-destructive-file-ops-pin",
+          `${t.path} §7 is missing the "Destructive File Operations" baseline bullet — the 2026-11-04 rm -rf Projects incident lesson must ride on every template AGENTS.md`,
+          `Add the "Destructive File Operations" bullet to §7 (copy verbatim from templates/common/AGENTS.md §7; design 2026-11-04-project-loss-hardening-design §5.4)`,
+        );
+      } else {
+        pass(`agents-md-destructive-file-ops-pin: ${t.path} §7 carries the baseline`);
+      }
+    }
+    if (checked === 0) {
+      pass("agents-md-destructive-file-ops-pin: no template AGENTS.md found — vacuous pass");
+    }
   }
-}
 
-  checkGraftMcpSurfaces();                                       // R2: template mcp surfaces are trail-only (graft-mcp-corrective-pass-design)
-  checkVariantIndexCoverage(manifests);                          // WS-12
-  checkMirrorHygiene();                                          // R6: mirrors carry only skill dirs (spec 2026-09-25-verifier-platform-expansion-design)
+  checkGraftMcpSurfaces(); // R2: template mcp surfaces are trail-only (graft-mcp-corrective-pass-design)
+  checkVariantIndexCoverage(manifests); // WS-12
+  checkMirrorHygiene(); // R6: mirrors carry only skill dirs (spec 2026-09-25-verifier-platform-expansion-design)
 
-  checkCountryProfileDivergence();                               // B-05: cross-variant last_verified divergence
+  checkCountryProfileDivergence(); // B-05: cross-variant last_verified divergence
 
   checkL0L1ScriptParity();
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
-  checkMarkerZoneParity();                                       // PM-02: marker-inject zones vs target_variants
-  checkManagedBlockParity();                                     // PM-04: WORKSPACE-MANAGED blocks, common → every variant MERGE_MANAGED copy (T-20260916-009, T-20260917-001)
-  checkSkeletonRegistry();                                       // SK-01: platform skeleton section registry vs templates/common CLAUDE/GEMINI (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101)
-  checkL1ImportClosure();                                        // IC-01: delivered-tree static import closure (T-20261026-011, spec 2026-10-26-project-review-remediation-design D4, ADR-0073 Amd. 4)
-  checkCommonAgentsBlockParity();                                // PM-04b: COMMON-AGENTS marker-inject zone, common → every variant AGENTS.md (ADR-0081, T-20260919-001)
-  checkTrailBlockParity();                                       // TB-01: trail marker block, root → common → every variant AGENTS.md (design 2026-11-08-trail-fleet-standard-design §5.4, DEC-20261108-01 R1/R3)
-  checkPropagationTargets();                                     // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
-  checkScaffoldMarkerSources();                                  // T-20260915-002: scaffolder markers vs source templates
-  checkPmExtendsStubBodies();                                    // T-20260915-010: variant pm.md extends-stub bodies
-  checkVariantReadinessGate();   // VRG-01: continuous Variant Readiness Gate enforcement
+  checkMarkerZoneParity(); // PM-02: marker-inject zones vs target_variants
+  checkManagedBlockParity(); // PM-04: WORKSPACE-MANAGED blocks, common → every variant MERGE_MANAGED copy (T-20260916-009, T-20260917-001)
+  checkSkeletonRegistry(); // SK-01: platform skeleton section registry vs templates/common CLAUDE/GEMINI (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101)
+  checkL1ImportClosure(); // IC-01: delivered-tree static import closure (T-20261026-011, spec 2026-10-26-project-review-remediation-design D4, ADR-0073 Amd. 4)
+  checkCommonAgentsBlockParity(); // PM-04b: COMMON-AGENTS marker-inject zone, common → every variant AGENTS.md (ADR-0081, T-20260919-001)
+  checkTrailBlockParity(); // TB-01: trail marker block, root → common → every variant AGENTS.md (design 2026-11-08-trail-fleet-standard-design §5.4, DEC-20261108-01 R1/R3)
+  checkPropagationTargets(); // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
+  checkScaffoldMarkerSources(); // T-20260915-002: scaffolder markers vs source templates
+  checkPmExtendsStubBodies(); // T-20260915-010: variant pm.md extends-stub bodies
+  checkVariantReadinessGate(); // VRG-01: continuous Variant Readiness Gate enforcement
   checkProjectIdentityPlaceholders(); // fleet WARN: Projects/*/docs identity placeholders (spec 2026-09-24-scaffold-identity-overview-design)
   checkProjectCountryConfigDeclarations(); // T-20260927-012: project-side half of the ADR-0091 R3 uniform declaration
-  checkAgentsMdSizeBudget();          // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
-  checkAgentsMdPointerIntegrity();    // ADR-0090 W0: pointer-table references resolve on disk
+  checkAgentsMdSizeBudget(); // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
+  checkAgentsMdPointerIntegrity(); // ADR-0090 W0: pointer-table references resolve on disk
   checkAgentsMdDestructiveFileOpsPin(); // §7 baseline pin: destructive-file-operations bullet on every template AGENTS.md (WARN; T-20261104-004 item 4)
-  checkSkillGraphVersionDrift();      // skill-graph v2 E2: same-version-different-content across scopes (WARN)
+  checkSkillGraphVersionDrift(); // skill-graph v2 E2: same-version-different-content across scopes (WARN)
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
-  if (!JSON_MODE) console.log('\n=== B-07: VERSION_REGISTRY.json sync ===');
+  if (!JSON_MODE) console.log("\n=== B-07: VERSION_REGISTRY.json sync ===");
   updateVersionRegistry(manifests);
 
-  const errors = issues.filter(i => i.level === 'error');
-  const warnings = issues.filter(i => i.level === 'warning');
+  const errors = issues.filter((i) => i.level === "error");
+  const warnings = issues.filter((i) => i.level === "warning");
 
   if (JSON_MODE) {
-    console.log(JSON.stringify({
-      variantsScanned: variantsChecked,
-      errors,
-      warnings,
-      summary: `${errors.length} error(s), ${warnings.length} warning(s)`,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          variantsScanned: variantsChecked,
+          errors,
+          warnings,
+          summary: `${errors.length} error(s), ${warnings.length} warning(s)`,
+        },
+        null,
+        2,
+      ),
+    );
   } else {
-    console.log(`\n${colors.dim}${'─'.repeat(50)}${colors.reset}`);
+    console.log(`\n${colors.dim}${"─".repeat(50)}${colors.reset}`);
     if (errors.length === 0) {
-      console.log(`${colors.green}✓ ${errors.length} error(s), ${warnings.length} warning(s) across ${variantsChecked} stable variant(s)${colors.reset}`);
+      console.log(
+        `${colors.green}✓ ${errors.length} error(s), ${warnings.length} warning(s) across ${variantsChecked} stable variant(s)${colors.reset}`,
+      );
     } else {
-      console.log(`${colors.red}✗ ${errors.length} error(s), ${warnings.length} warning(s) across ${variantsChecked} stable variant(s)${colors.reset}`);
+      console.log(
+        `${colors.red}✗ ${errors.length} error(s), ${warnings.length} warning(s) across ${variantsChecked} stable variant(s)${colors.reset}`,
+      );
     }
   }
 

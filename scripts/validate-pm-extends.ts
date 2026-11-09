@@ -34,10 +34,10 @@
  *   bun scripts/validate-pm-extends.ts --json
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, dirname, resolve } from 'node:path';
-import { execFileSync } from 'node:child_process';
-import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
+import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { join, relative, dirname, resolve } from "node:path";
+import { execFileSync } from "node:child_process";
+import { parsePmMd, extractVariantOverrides } from "./helpers/pm-md-parser.ts";
 
 /**
  * Returns true if the file was pre-resolved by resolve-variants.ts.
@@ -46,8 +46,8 @@ import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
  */
 function isResolvedFile(filePath: string): boolean {
   try {
-    const firstLine = readFileSync(filePath, 'utf-8').split('\n')[0];
-    return firstLine.startsWith('# @resolved-from:');
+    const firstLine = readFileSync(filePath, "utf-8").split("\n")[0];
+    return firstLine.startsWith("# @resolved-from:");
   } catch {
     return false;
   }
@@ -63,7 +63,7 @@ interface ValidationResult {
 }
 
 interface ValidationError {
-  type: 'circular' | 'depth' | 'missing' | 'syntax' | 'override';
+  type: "circular" | "depth" | "missing" | "syntax" | "override";
   message: string;
   file?: string;
   line?: number;
@@ -71,7 +71,7 @@ interface ValidationError {
 }
 
 interface ValidationWarning {
-  type: 'parity' | 'deprecated';
+  type: "parity" | "deprecated";
   message: string;
   file?: string;
 }
@@ -126,7 +126,7 @@ function parseFrontmatter(filePath: string): ExtendsFrontmatter | null {
  */
 function parseExtends(filePath: string): string[] | null {
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]+?)\n---/);
 
     if (!frontmatterMatch) {
@@ -139,8 +139,8 @@ function parseExtends(filePath: string): string[] | null {
     const arrayMatch = yamlContent.match(/^extends:\s*\[(.+)\]$/m);
     if (arrayMatch) {
       return arrayMatch[1]
-        .split(',')
-        .map(s => s.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, ''))
+        .split(",")
+        .map((s) => s.trim().replace(/^"|"$/g, "").replace(/^'|'$/g, ""))
         .filter(Boolean);
     }
 
@@ -163,7 +163,7 @@ function buildExtendsChain(
   filePath: string,
   workspaceRoot: string,
   visited = new Set<string>(),
-  depth = 0
+  depth = 0,
 ): { chain: string[]; errors: ValidationError[]; depth: number } {
   const errors: ValidationError[] = [];
   const chain: string[] = [];
@@ -171,7 +171,7 @@ function buildExtendsChain(
   // Check circular reference first
   if (visited.has(filePath)) {
     errors.push({
-      type: 'circular',
+      type: "circular",
       message: `Circular reference detected: ${filePath}`,
       file: filePath,
     });
@@ -191,7 +191,7 @@ function buildExtendsChain(
   // Check file existence
   if (!existsSync(filePath)) {
     errors.push({
-      type: 'missing',
+      type: "missing",
       message: `Extends target not found: ${filePath}`,
       file: filePath,
     });
@@ -210,7 +210,7 @@ function buildExtendsChain(
   // Check depth limit before recursing
   if (depth >= MAX_EXTENDS_DEPTH) {
     errors.push({
-      type: 'depth',
+      type: "depth",
       message: `Extends chain depth (${depth + 1}) exceeds maximum (${MAX_EXTENDS_DEPTH})`,
       file: filePath,
     });
@@ -225,7 +225,7 @@ function buildExtendsChain(
 
     if (!targetPath) {
       errors.push({
-        type: 'missing',
+        type: "missing",
         message: `Cannot resolve extends target: ${target}`,
         file: filePath,
       });
@@ -244,13 +244,9 @@ function buildExtendsChain(
 /**
  * Resolve extends path relative to current file
  */
-function resolveExtendsPath(
-  currentFile: string,
-  target: string,
-  workspaceRoot: string
-): string | null {
+function resolveExtendsPath(currentFile: string, target: string, workspaceRoot: string): string | null {
   // Handle absolute paths
-  if (target.startsWith('/') || target.match(/^[a-zA-Z]:/)) {
+  if (target.startsWith("/") || target.match(/^[a-zA-Z]:/)) {
     const absolutePath = target;
     if (existsSync(absolutePath)) {
       return absolutePath;
@@ -282,7 +278,7 @@ function validateSyntax(filePath: string): ValidationError[] {
   const errors: ValidationError[] = [];
 
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]+?)\n---/);
 
     if (!frontmatterMatch) {
@@ -291,22 +287,22 @@ function validateSyntax(filePath: string): ValidationError[] {
     }
 
     const yamlContent = frontmatterMatch[1];
-    const lines = yamlContent.split('\n');
+    const lines = yamlContent.split("\n");
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
       // Check extends format
-      if (line.startsWith('extends:')) {
+      if (line.startsWith("extends:")) {
         const validFormats = [
-          /^extends:\s*\[.+\]$/,  // Array format
-          /^extends:\s*[a-zA-Z0-9_\/\-\.]+$/,  // Single value
+          /^extends:\s*\[.+\]$/, // Array format
+          /^extends:\s*[a-zA-Z0-9_\/\-\.]+$/, // Single value
         ];
 
-        const isValid = validFormats.some(regex => regex.test(line));
+        const isValid = validFormats.some((regex) => regex.test(line));
         if (!isValid) {
           errors.push({
-            type: 'syntax',
+            type: "syntax",
             message: `Invalid extends syntax: ${line.trim()}`,
             file: filePath,
             line: i + 2, // +2 for frontmatter start
@@ -316,10 +312,10 @@ function validateSyntax(filePath: string): ValidationError[] {
       }
 
       // Check extends_overrides format
-      if (line.startsWith('extends_overrides:')) {
+      if (line.startsWith("extends_overrides:")) {
         if (!line.match(/^extends_overrides:\s*\{/)) {
           errors.push({
-            type: 'syntax',
+            type: "syntax",
             message: `Invalid extends_overrides syntax: ${line.trim()}`,
             file: filePath,
             line: i + 2,
@@ -330,7 +326,7 @@ function validateSyntax(filePath: string): ValidationError[] {
     }
   } catch (error) {
     errors.push({
-      type: 'syntax',
+      type: "syntax",
       message: `Failed to parse file: ${error}`,
       file: filePath,
     });
@@ -346,7 +342,7 @@ function validateOverrides(filePath: string, workspaceRoot: string): ValidationE
   const errors: ValidationError[] = [];
 
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]+?)\n---/);
 
     if (!frontmatterMatch) {
@@ -362,10 +358,10 @@ function validateOverrides(filePath: string, workspaceRoot: string): ValidationE
     }
 
     // Simple parsing - extend as needed
-    const overrideKeys = overrideMatch[1].split(',').map(s => s.trim());
+    const overrideKeys = overrideMatch[1].split(",").map((s) => s.trim());
 
     // Check if override sections exist in the file
-    const bodyContent = content.replace(/^---\n[\s\S]+?\n---\n/, '');
+    const bodyContent = content.replace(/^---\n[\s\S]+?\n---\n/, "");
 
     for (const key of overrideKeys) {
       const sectionMatch = key.match(/^(\w+):/);
@@ -373,11 +369,11 @@ function validateOverrides(filePath: string, workspaceRoot: string): ValidationE
 
       const sectionName = sectionMatch[1];
       // Check if section exists in body
-      const sectionExists = bodyContent.match(new RegExp(`^##\\s+${sectionName}`, 'm'));
+      const sectionExists = bodyContent.match(new RegExp(`^##\\s+${sectionName}`, "m"));
 
       if (!sectionExists) {
         errors.push({
-          type: 'override',
+          type: "override",
           message: `Override section '${sectionName}' not found in file body`,
           file: filePath,
         });
@@ -408,11 +404,11 @@ function checkPlatformParity(filePath: string, workspaceRoot: string): Validatio
 
   if (isL0) {
     // L0 should have L1 counterpart
-    const l1Path = join(workspaceRoot, relativePath.replace(/^agents\//, 'templates/common/agents/'));
+    const l1Path = join(workspaceRoot, relativePath.replace(/^agents\//, "templates/common/agents/"));
     if (!existsSync(l1Path)) {
       warnings.push({
-        type: 'parity',
-        message: `L0 file missing L1 counterpart: ${relativePath.replace(/^agents\//, 'templates/common/agents/')}`,
+        type: "parity",
+        message: `L0 file missing L1 counterpart: ${relativePath.replace(/^agents\//, "templates/common/agents/")}`,
         file: relativePath,
       });
     }
@@ -420,11 +416,11 @@ function checkPlatformParity(filePath: string, workspaceRoot: string): Validatio
 
   if (isL1) {
     // L1 should have L0 origin
-    const l0Path = join(workspaceRoot, relativePath.replace(/^templates\/common\/agents\//, 'agents/'));
+    const l0Path = join(workspaceRoot, relativePath.replace(/^templates\/common\/agents\//, "agents/"));
     if (!existsSync(l0Path)) {
       warnings.push({
-        type: 'parity',
-        message: `L1 file missing L0 origin: ${relativePath.replace(/^templates\/common\/agents\//, 'agents/')}`,
+        type: "parity",
+        message: `L1 file missing L0 origin: ${relativePath.replace(/^templates\/common\/agents\//, "agents/")}`,
         file: relativePath,
       });
     }
@@ -458,7 +454,7 @@ function validatePmFile(filePath: string, workspaceRoot: string, options: Valida
     valid: errors.length === 0,
     errors,
     warnings,
-    chain: chainResult.chain.map(p => relative(workspaceRoot, p)),
+    chain: chainResult.chain.map((p) => relative(workspaceRoot, p)),
     depth: chainResult.depth,
   };
 }
@@ -472,23 +468,23 @@ function validatePmFile(filePath: string, workspaceRoot: string, options: Valida
  */
 function findPmFiles(workspaceRoot: string, targetPaths?: string[]): string[] {
   if (targetPaths && targetPaths.length > 0) {
-    return targetPaths.filter(p => existsSync(p));
+    return targetPaths.filter((p) => existsSync(p));
   }
 
   // Primary: use git ls-files to get only tracked pm.md files
   try {
-    const trackedFiles = execFileSync('git', ['ls-files', '--', '*/pm.md', '**/pm.md', 'pm.md'], {
-  cwd: workspaceRoot,
-  encoding: 'utf-8',
-  stdio: ['pipe', 'pipe', 'pipe'],
-}).trim();
+    const trackedFiles = execFileSync("git", ["ls-files", "--", "*/pm.md", "**/pm.md", "pm.md"], {
+      cwd: workspaceRoot,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
 
     if (trackedFiles.length > 0) {
       return trackedFiles
-        .split('\n')
+        .split("\n")
         .filter(Boolean)
-        .map(f => resolve(workspaceRoot, f))
-        .filter(f => existsSync(f));
+        .map((f) => resolve(workspaceRoot, f))
+        .filter((f) => existsSync(f));
     }
   } catch {
     // git unavailable — fall through to filesystem scan
@@ -496,10 +492,7 @@ function findPmFiles(workspaceRoot: string, targetPaths?: string[]): string[] {
 
   // Fallback: filesystem scan (only in templates/ and agents/ + root)
   const pmFiles: string[] = [];
-  const scanDirs = [
-    join(workspaceRoot, 'agents'),
-    join(workspaceRoot, 'templates'),
-  ];
+  const scanDirs = [join(workspaceRoot, "agents"), join(workspaceRoot, "templates")];
 
   function scanDirectory(dir: string) {
     try {
@@ -509,10 +502,10 @@ function findPmFiles(workspaceRoot: string, targetPaths?: string[]): string[] {
         const fullPath = join(dir, entry.name);
 
         if (entry.isDirectory()) {
-          if (entry.name !== 'node_modules' && entry.name !== '.git') {
+          if (entry.name !== "node_modules" && entry.name !== ".git") {
             scanDirectory(fullPath);
           }
-        } else if (entry.name === 'pm.md') {
+        } else if (entry.name === "pm.md") {
           pmFiles.push(fullPath);
         }
       }
@@ -535,11 +528,11 @@ function autoFixErrors(filePath: string, errors: ValidationError[]): boolean {
   if (errors.length === 0) return false;
 
   let fixed = false;
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
   let newContent = content;
 
   for (const error of errors) {
-    if (error.fixable && error.type === 'syntax') {
+    if (error.fixable && error.type === "syntax") {
       // Fix simple syntax errors (extend as needed)
       fixed = true;
     }
@@ -579,7 +572,7 @@ function validate(workspaceRoot: string, options: ValidateOptions): ValidationRe
 function formatHuman(results: ValidationResult[], verbose: boolean): string {
   const lines: string[] = [];
 
-  const validCount = results.filter(r => r.valid).length;
+  const validCount = results.filter((r) => r.valid).length;
   const errorCount = results.reduce((sum, r) => sum + r.errors.length, 0);
   const warningCount = results.reduce((sum, r) => sum + r.warnings.length, 0);
 
@@ -601,7 +594,7 @@ function formatHuman(results: ValidationResult[], verbose: boolean): string {
       }
 
       if (result.chain.length > 0) {
-        lines.push(`  Chain: ${result.chain.join(' → ')}`);
+        lines.push(`  Chain: ${result.chain.join(" → ")}`);
         lines.push(`  Depth: ${result.depth}`);
       }
 
@@ -615,7 +608,7 @@ function formatHuman(results: ValidationResult[], verbose: boolean): string {
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -664,7 +657,7 @@ function showHelp(): void {
     `  6. Platform Parity - L0→L1→L2 sync status`,
   ];
 
-  console.error(lines.join('\n'));
+  console.error(lines.join("\n"));
 }
 
 /**
@@ -683,25 +676,25 @@ function parseArgs(args: string[]): ValidateOptions {
     const arg = args[i];
 
     switch (arg) {
-      case '--fix':
+      case "--fix":
         options.fix = true;
         break;
-      case '--verbose':
+      case "--verbose":
         options.verbose = true;
         break;
-      case '--json':
+      case "--json":
         options.json = true;
         break;
-      case '--max-depth':
+      case "--max-depth":
         options.maxDepth = parseInt(args[++i], 10);
         break;
-      case '--help':
-      case '-h':
+      case "--help":
+      case "-h":
         showHelp();
         process.exit(0);
         break;
       default:
-        if (!arg.startsWith('--')) {
+        if (!arg.startsWith("--")) {
           options.files = options.files || [];
           options.files.push(arg);
         }
@@ -716,7 +709,7 @@ function parseArgs(args: string[]): ValidateOptions {
  * Main entry point
  */
 async function main() {
-  const workspaceRoot = resolve(import.meta.dir, '..');
+  const workspaceRoot = resolve(import.meta.dir, "..");
   const options = parseArgs(process.argv.slice(2));
 
   const results = validate(workspaceRoot, options);
@@ -728,12 +721,12 @@ async function main() {
   }
 
   // Exit with error code if any validation failed
-  const hasErrors = results.some(r => !r.valid);
+  const hasErrors = results.some((r) => !r.valid);
   process.exit(hasErrors ? 1 : 0);
 }
 
 // Run main function
-main().catch(error => {
-  console.error('Error:', error);
+main().catch((error) => {
+  console.error("Error:", error);
   process.exit(1);
 });

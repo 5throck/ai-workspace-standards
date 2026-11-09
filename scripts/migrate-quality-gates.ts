@@ -23,9 +23,9 @@
  * recurred whenever a stage groups procedures with different owner_agents.
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { join, resolve } from "path";
-import { readdirSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { readdirSync } from "node:fs";
 import * as YAML from "js-yaml";
 
 const WORKSPACE_ROOT = resolve(import.meta.dir, "..");
@@ -132,9 +132,7 @@ function classifyGate(text: string, procContext: ProcedureSchema): QualityGate {
   }
 
   // GATE: Simple escalation (escalate before X, halt before X, etc)
-  if (
-    /escalate|halt|freeze|reopen|trigger before|trigger the|resolve before/.test(trimmed)
-  ) {
+  if (/escalate|halt|freeze|reopen|trigger before|trigger the|resolve before/.test(trimmed)) {
     return {
       text: trimmed,
       classification: "GATE",
@@ -162,11 +160,7 @@ function classifyGate(text: string, procContext: ProcedureSchema): QualityGate {
 
   // GATE: Review/approval with explicit pass/fail
   if (/review|audit|verify|check|validate|approve|sign/.test(trimmed)) {
-    if (
-      /pass|fail|approved|accepted|cleared|confirmed|verified|complete/.test(
-        trimmed,
-      )
-    ) {
+    if (/pass|fail|approved|accepted|cleared|confirmed|verified|complete/.test(trimmed)) {
       return {
         text: trimmed,
         classification: "GATE",
@@ -185,11 +179,7 @@ function classifyGate(text: string, procContext: ProcedureSchema): QualityGate {
 
   // GATE: "before/at" with decision keywords (before decision, at go/no-go)
   if (/before|at the/.test(trimmed)) {
-    if (
-      /gate|go\/no-go|approval|decision|sign-off|acceptance|completion|delivery/.test(
-        trimmed,
-      )
-    ) {
+    if (/gate|go\/no-go|approval|decision|sign-off|acceptance|completion|delivery/.test(trimmed)) {
       // But exclude "approved at the external gate" (reference to elsewhere)
       if (!/^.*approved at the.*gate/.test(trimmed)) {
         return {
@@ -232,9 +222,7 @@ function classifyGate(text: string, procContext: ProcedureSchema): QualityGate {
   }
 
   // INVARIANT: "... records / documents / identifies" (artifact creation, not decision)
-  if (
-    /record|document|identify|file|log|archive|store|capture/.test(trimmed)
-  ) {
+  if (/record|document|identify|file|log|archive|store|capture/.test(trimmed)) {
     if (!/before|at|gate|decision/.test(trimmed)) {
       return {
         text: trimmed,
@@ -340,9 +328,7 @@ function loadProcedures(variant: string): Map<string, ProcedureSchema> {
 /**
  * Load stages for a variant
  */
-function loadStages(
-  variant: string,
-): Map<string, { id: string; title: string; owner_agent: string }> {
+function loadStages(variant: string): Map<string, { id: string; title: string; owner_agent: string }> {
   const stagesFile = join(TEMPLATES_DIR, variant, "process", "stages.yaml");
   const stages = new Map<string, { id: string; title: string; owner_agent: string }>();
 
@@ -368,12 +354,7 @@ function loadStages(
  * Load output types for a variant
  */
 function loadOutputTypes(variant: string): Map<string, OutputTypeMetadata> {
-  const typesFile = join(
-    TEMPLATES_DIR,
-    variant,
-    "procedures",
-    "_output-types.yaml",
-  );
+  const typesFile = join(TEMPLATES_DIR, variant, "procedures", "_output-types.yaml");
   const types = new Map<string, OutputTypeMetadata>();
 
   if (!existsSync(typesFile)) {
@@ -401,14 +382,9 @@ function loadOutputTypes(variant: string): Map<string, OutputTypeMetadata> {
 /**
  * Determine probable owner_agent for an output_type based on procedures that produce it
  */
-function inferOwnerAgent(
-  outputType: string,
-  procedures: Map<string, ProcedureSchema>,
-): string | undefined {
+function inferOwnerAgent(outputType: string, procedures: Map<string, ProcedureSchema>): string | undefined {
   // Find procedures that produce this output type
-  const producers = Array.from(procedures.values()).filter((p) =>
-    p.outputs?.includes(outputType),
-  );
+  const producers = Array.from(procedures.values()).filter((p) => p.outputs?.includes(outputType));
 
   if (producers.length === 0) return undefined;
 
@@ -425,14 +401,8 @@ function inferOwnerAgent(
 /**
  * Infer format for an output type (markdown by default, json/yaml for structured types)
  */
-function inferFormat(
-  outputType: string,
-): "markdown" | "json" | "yaml" | "xlsx" | "pptx" | "docx" | "pdf" | "mixed" {
-  if (
-    /analysis|report|notes|findings|blueprint|plan|map|guide|summary/.test(
-      outputType,
-    )
-  ) {
+function inferFormat(outputType: string): "markdown" | "json" | "yaml" | "xlsx" | "pptx" | "docx" | "pdf" | "mixed" {
+  if (/analysis|report|notes|findings|blueprint|plan|map|guide|summary/.test(outputType)) {
     return "markdown";
   }
   if (/config|spec|schema|model/.test(outputType)) {
@@ -550,12 +520,7 @@ function writeGatesFile(ctx: VariantContext): void {
  * Enrich _output-types.yaml for a variant to schema_version 1.1
  */
 function enrichOutputTypes(ctx: VariantContext): void {
-  const typesFile = join(
-    TEMPLATES_DIR,
-    ctx.variant,
-    "procedures",
-    "_output-types.yaml",
-  );
+  const typesFile = join(TEMPLATES_DIR, ctx.variant, "procedures", "_output-types.yaml");
 
   if (!existsSync(typesFile)) {
     console.log(`  Skipping _output-types.yaml enrichment (file not found)`);
@@ -566,13 +531,8 @@ function enrichOutputTypes(ctx: VariantContext): void {
 
   for (const [name, meta] of ctx.outputTypes.entries()) {
     enriched[name] = {
-      description:
-        meta.description ||
-        `Output type used in ${ctx.variant} procedures.`,
-      owner_agent:
-        meta.owner_agent ||
-        inferOwnerAgent(name, ctx.procedures) ||
-        "unassigned",
+      description: meta.description || `Output type used in ${ctx.variant} procedures.`,
+      owner_agent: meta.owner_agent || inferOwnerAgent(name, ctx.procedures) || "unassigned",
       format: meta.format || inferFormat(name),
       evidence_model: meta.evidence_model ?? null,
       retention: meta.retention || "engagement",
@@ -591,9 +551,7 @@ function enrichOutputTypes(ctx: VariantContext): void {
   };
 
   writeFileSync(typesFile, YAML.dump(output), "utf-8");
-  console.log(
-    `  Enriched _output-types.yaml (${ctx.outputTypes.size} types, schema 1.1)`,
-  );
+  console.log(`  Enriched _output-types.yaml (${ctx.outputTypes.size} types, schema 1.1)`);
 }
 
 /**
@@ -606,11 +564,7 @@ function updateProcedures(ctx: VariantContext): number {
   let gateIdx = 0;
   for (const gate of ctx.gates) {
     for (const [procId, proc] of ctx.procedures.entries()) {
-      if (
-        proc.stage === gate.stage &&
-        proc.owner_agent === gate.decider_agent &&
-        !gatesByProc.has(procId)
-      ) {
+      if (proc.stage === gate.stage && proc.owner_agent === gate.decider_agent && !gatesByProc.has(procId)) {
         gatesByProc.set(procId, [gate.id]);
         break;
       }
@@ -627,21 +581,11 @@ function updateProcedures(ctx: VariantContext): number {
     // procId format: "<variant>-<procname>", e.g. "co-abap-custom-dev-delivery"
     // Extract <procname> by removing "<variant>-" prefix
     const variantPrefix = `${ctx.variant}-`;
-    const procDirName = procId.startsWith(variantPrefix)
-      ? procId.substring(variantPrefix.length)
-      : procId;
-    const schemaFile = join(
-      TEMPLATES_DIR,
-      ctx.variant,
-      "procedures",
-      procDirName,
-      "schema.yaml",
-    );
+    const procDirName = procId.startsWith(variantPrefix) ? procId.substring(variantPrefix.length) : procId;
+    const schemaFile = join(TEMPLATES_DIR, ctx.variant, "procedures", procDirName, "schema.yaml");
 
     if (!existsSync(schemaFile)) {
-      console.log(
-        `    WARNING: schema file not found for ${procId}: ${schemaFile}`,
-      );
+      console.log(`    WARNING: schema file not found for ${procId}: ${schemaFile}`);
       continue;
     }
 

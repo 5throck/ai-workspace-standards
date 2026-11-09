@@ -17,27 +17,29 @@
 //   L1-authored handbook suite), so they are content-compared only when present
 //   in both trees.
 
-import { $ } from 'bun';
-import { createHash } from 'node:crypto';
-import { normalizeLineEndings } from './lib/encoding-utils.ts';
+import { $ } from "bun";
+import { createHash } from "node:crypto";
+import { normalizeLineEndings } from "./lib/encoding-utils.ts";
 
 // Re-export for downstream consumers (e.g. unit tests)
 export { normalizeLineEndings };
 
-const CYAN   = '\x1b[36m';
-const RED    = '\x1b[31m';
-const YELLOW = '\x1b[33m';
-const GREEN  = '\x1b[32m';
-const RESET  = '\x1b[0m';
+const CYAN = "\x1b[36m";
+const RED = "\x1b[31m";
+const YELLOW = "\x1b[33m";
+const GREEN = "\x1b[32m";
+const RESET = "\x1b[0m";
 
 /** Replaces CONSTITUTION.md references with context.md so template transforms don't register as content drift. */
 export function scrubConstitutionRefs(content: string): string {
-  return content.replace(/CONSTITUTION\.md/g, 'context.md');
+  return content.replace(/CONSTITUTION\.md/g, "context.md");
 }
 
 /** SHA256 of CRLF-normalized, constitution-scrubbed content — used to compare L0/L1 file pairs without false positives from line-ending or template transform differences (M5). */
 export function sha256Normalized(content: string): string {
-  return createHash('sha256').update(scrubConstitutionRefs(normalizeLineEndings(content))).digest('hex');
+  return createHash("sha256")
+    .update(scrubConstitutionRefs(normalizeLineEndings(content)))
+    .digest("hex");
 }
 
 /**
@@ -46,8 +48,8 @@ export function sha256Normalized(content: string): string {
  * guard, same rationale as sync-skills.ts dirsEqual). Exported for unit tests.
  */
 export function walkFiles(dir: string, baseDir: string = dir): string[] {
-  const fsMod = require('node:fs') as typeof import('node:fs');
-  const pathMod = require('node:path') as typeof import('node:path');
+  const fsMod = require("node:fs") as typeof import("node:fs");
+  const pathMod = require("node:path") as typeof import("node:path");
   const out: string[] = [];
   if (!fsMod.existsSync(dir)) return out;
   // Structural entry type (fsMod is a runtime value, not a type namespace).
@@ -59,7 +61,7 @@ export function walkFiles(dir: string, baseDir: string = dir): string[] {
   }
   for (const entry of entries) {
     const full = pathMod.join(dir, entry.name);
-    const rel = pathMod.relative(baseDir, full).replace(/\\/g, '/');
+    const rel = pathMod.relative(baseDir, full).replace(/\\/g, "/");
     if (entry.isDirectory()) {
       if (entry.isSymbolicLink()) continue; // never follow dir symlinks
       out.push(...walkFiles(full, baseDir));
@@ -80,11 +82,11 @@ export function walkFiles(dir: string, baseDir: string = dir): string[] {
  * Exported for unit tests.
  */
 export function isMirroredScriptPath(relPath: string): boolean {
-  if (relPath === 'propagation-map.json') return true;
-  const hasDir = relPath.includes('/');
-  const top = hasDir ? relPath.split('/')[0] : null;
-  if (hasDir && !(top === 'helpers' || top === 'hooks' || top === 'lib')) return false;
-  return relPath.endsWith('.ts');
+  if (relPath === "propagation-map.json") return true;
+  const hasDir = relPath.includes("/");
+  const top = hasDir ? relPath.split("/")[0] : null;
+  if (hasDir && !(top === "helpers" || top === "hooks" || top === "lib")) return false;
+  return relPath.endsWith(".ts");
 }
 
 /**
@@ -99,14 +101,14 @@ export function isMirroredScriptPath(relPath: string): boolean {
  * L0+L1), column indices resolved from the header row, unknown values default
  * to L0+L1 (mirrored — fail-safe).
  */
-export type ScriptLayer = 'L0' | 'L0+L1';
+export type ScriptLayer = "L0" | "L0+L1";
 
 export function parseScriptLayersFromRegistry(scriptsMdPath: string): Map<string, ScriptLayer> {
-  const fsMod = require('node:fs') as typeof import('node:fs');
+  const fsMod = require("node:fs") as typeof import("node:fs");
   const layers = new Map<string, ScriptLayer>();
   let content: string;
   try {
-    content = fsMod.readFileSync(scriptsMdPath, 'utf-8');
+    content = fsMod.readFileSync(scriptsMdPath, "utf-8");
   } catch {
     return layers; // no registry — getScriptLayer defaults everything to L0+L1
   }
@@ -114,25 +116,28 @@ export function parseScriptLayersFromRegistry(scriptsMdPath: string): Map<string
   let headerParsed = false;
   let scriptCol = -1;
   let layerCol = -1;
-  for (const rawLine of content.split('\n')) {
+  for (const rawLine of content.split("\n")) {
     const line = rawLine.trim();
-    if (/^## Registry/.test(line)) { inRegistry = true; continue; }
+    if (/^## Registry/.test(line)) {
+      inRegistry = true;
+      continue;
+    }
     if (inRegistry && /^## /.test(line)) break;
-    if (!inRegistry || !line.startsWith('|')) continue;
+    if (!inRegistry || !line.startsWith("|")) continue;
     if (!headerParsed) {
-      const cols = line.split('|').map(c => c.trim().toLowerCase());
-      scriptCol = cols.findIndex(c => c === 'script');
-      layerCol = cols.findIndex(c => c === 'layer');
+      const cols = line.split("|").map((c) => c.trim().toLowerCase());
+      scriptCol = cols.findIndex((c) => c === "script");
+      layerCol = cols.findIndex((c) => c === "layer");
       if (scriptCol >= 0 && layerCol >= 0) headerParsed = true;
       continue;
     }
     if (/^\|[-\s|]+\|$/.test(line)) continue; // separator row
-    const cols = line.split('|').map(c => c.trim());
-    const scriptCell = cols[scriptCol] ?? '';
+    const cols = line.split("|").map((c) => c.trim());
+    const scriptCell = cols[scriptCol] ?? "";
     if (!scriptCell) continue;
-    const name = scriptCell.replace(/`/g, '').trim();
-    const rawLayer = (cols[layerCol] ?? '').trim();
-    const layer: ScriptLayer = (rawLayer === 'L0-only' || rawLayer === 'L0') ? 'L0' : 'L0+L1';
+    const name = scriptCell.replace(/`/g, "").trim();
+    const rawLayer = (cols[layerCol] ?? "").trim();
+    const layer: ScriptLayer = rawLayer === "L0-only" || rawLayer === "L0" ? "L0" : "L0+L1";
     layers.set(name, layer);
   }
   return layers;
@@ -140,13 +145,13 @@ export function parseScriptLayersFromRegistry(scriptsMdPath: string): Map<string
 
 /** Layer for a script path: exact registry key, then basename fallback, then default L0+L1 (mirrored — same fallback as layer-filter.ts getScriptLayer). */
 export function getScriptLayer(layers: Map<string, ScriptLayer>, relPath: string): ScriptLayer {
-  const pathMod = require('node:path') as typeof import('node:path');
+  const pathMod = require("node:path") as typeof import("node:path");
   if (layers.has(relPath)) return layers.get(relPath)!;
   const base = pathMod.basename(relPath);
   for (const [key, val] of layers) {
     if (pathMod.basename(key) === base) return val;
   }
-  return 'L0+L1';
+  return "L0+L1";
 }
 
 /**
@@ -156,19 +161,19 @@ export function getScriptLayer(layers: Map<string, ScriptLayer>, relPath: string
  * (e.g. `scope: co-consult`) -> variant-scoped L0+L2 (no L1 mirror);
  * `l2_propagate: false` forces L0.
  */
-export function skillLayerFromFrontmatter(skillMdContent: string): ScriptLayer | 'L0+L2' {
+export function skillLayerFromFrontmatter(skillMdContent: string): ScriptLayer | "L0+L2" {
   const fm = skillMdContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  let layer: ScriptLayer | 'L0+L2' = 'L0+L1'; // default: mirrored
+  let layer: ScriptLayer | "L0+L2" = "L0+L1"; // default: mirrored
   if (fm) {
     for (const line of fm[1].split(/\r?\n/)) {
       const scope = line.match(/^\s*scope\s*:\s*(.+)$/);
       if (scope) {
         const val = scope[1].trim().toLowerCase();
-        if (val === 'workspace') layer = 'L0';
-        else if (val === 'common') layer = 'L0+L1';
-        else layer = 'L0+L2';
+        if (val === "workspace") layer = "L0";
+        else if (val === "common") layer = "L0+L1";
+        else layer = "L0+L2";
       }
-      if (/^\s*l2_propagate\s*:\s*false\b/.test(line)) layer = 'L0';
+      if (/^\s*l2_propagate\s*:\s*false\b/.test(line)) layer = "L0";
     }
   }
   return layer;
@@ -205,49 +210,63 @@ export function collectMirrorParityFailures(
   l0Skills: string,
   l1Skills: string,
 ): string[] {
-  const fsMod = require('node:fs') as typeof import('node:fs');
-  const pathMod = require('node:path') as typeof import('node:path');
+  const fsMod = require("node:fs") as typeof import("node:fs");
+  const pathMod = require("node:path") as typeof import("node:path");
   const failures: string[] = [];
 
   if (fsMod.existsSync(l0Scripts) && fsMod.existsSync(l1Scripts)) {
     const l0Rel = new Set(walkFiles(l0Scripts));
     const l1Rel = new Set(walkFiles(l1Scripts));
-    const layers = parseScriptLayersFromRegistry(pathMod.join(l0Scripts, 'SCRIPTS.md'));
+    const layers = parseScriptLayersFromRegistry(pathMod.join(l0Scripts, "SCRIPTS.md"));
 
     // (a1) Files present in BOTH trees: normalized content hash (CRLF +
     // CONSTITUTION-scrub tolerant).
-    for (const rel of [...l0Rel].filter(r => l1Rel.has(r)).sort()) {
-      if (rel === 'SCRIPTS.md') continue;
-      const h0 = sha256Normalized(fsMod.readFileSync(pathMod.join(l0Scripts, rel), 'utf-8'));
-      const h1 = sha256Normalized(fsMod.readFileSync(pathMod.join(l1Scripts, rel), 'utf-8'));
+    for (const rel of [...l0Rel].filter((r) => l1Rel.has(r)).sort()) {
+      if (rel === "SCRIPTS.md") continue;
+      const h0 = sha256Normalized(fsMod.readFileSync(pathMod.join(l0Scripts, rel), "utf-8"));
+      const h1 = sha256Normalized(fsMod.readFileSync(pathMod.join(l1Scripts, rel), "utf-8"));
       if (h0 !== h1) {
-        failures.push(`scripts/${rel} differs from templates/common/scripts/${rel}. Lifecycle Manager deployment not run!`);
+        failures.push(
+          `scripts/${rel} differs from templates/common/scripts/${rel}. Lifecycle Manager deployment not run!`,
+        );
       }
     }
 
     // (a2) One-sided files inside the mirror contract.
-    for (const rel of [...l0Rel].filter(r => !l1Rel.has(r)).sort()) {
+    for (const rel of [...l0Rel].filter((r) => !l1Rel.has(r)).sort()) {
       if (!isMirroredScriptPath(rel)) continue;
-      if (getScriptLayer(layers, rel) !== 'L0+L1') continue; // registered L0-only
-      failures.push(`scripts/${rel} is missing from templates/common/scripts/ (registry layer L0+L1). Lifecycle Manager deployment not run!`);
+      if (getScriptLayer(layers, rel) !== "L0+L1") continue; // registered L0-only
+      failures.push(
+        `scripts/${rel} is missing from templates/common/scripts/ (registry layer L0+L1). Lifecycle Manager deployment not run!`,
+      );
     }
-    for (const rel of [...l1Rel].filter(r => !l0Rel.has(r)).sort()) {
+    for (const rel of [...l1Rel].filter((r) => !l0Rel.has(r)).sort()) {
       if (!isMirroredScriptPath(rel)) continue;
       // Fix hint intentionally names no L0-only script: this file is mirrored to
       // L1, where a mention of an L0-only tool would trip lifecycle-sync-audit
       // Check X (L0-only references in generated projects).
-      failures.push(`templates/common/scripts/${rel} is an orphan — no scripts/${rel} at L0. Fix: remove it in the L0→L1 propagation pipeline (mirror prune step).`);
+      failures.push(
+        `templates/common/scripts/${rel} is an orphan — no scripts/${rel} at L0. Fix: remove it in the L0→L1 propagation pipeline (mirror prune step).`,
+      );
     }
   }
 
   if (fsMod.existsSync(l0Skills) && fsMod.existsSync(l1Skills)) {
-    const skillDirs = fsMod.readdirSync(l0Skills, { withFileTypes: true })
-      .filter(e => e.isDirectory() && e.name !== '_archive' && e.name !== 'local' && e.name !== 'external' && !e.name.startsWith('_'))
-      .map(e => e.name);
+    const skillDirs = fsMod
+      .readdirSync(l0Skills, { withFileTypes: true })
+      .filter(
+        (e) =>
+          e.isDirectory() &&
+          e.name !== "_archive" &&
+          e.name !== "local" &&
+          e.name !== "external" &&
+          !e.name.startsWith("_"),
+      )
+      .map((e) => e.name);
     for (const skill of skillDirs) {
-      const skillMdPath = pathMod.join(l0Skills, skill, 'SKILL.md');
+      const skillMdPath = pathMod.join(l0Skills, skill, "SKILL.md");
       if (!fsMod.existsSync(skillMdPath)) continue; // not a skill dir
-      if (skillLayerFromFrontmatter(fsMod.readFileSync(skillMdPath, 'utf-8')) !== 'L0+L1') continue;
+      if (skillLayerFromFrontmatter(fsMod.readFileSync(skillMdPath, "utf-8")) !== "L0+L1") continue;
 
       const l0Dir = pathMod.join(l0Skills, skill);
       const l1Dir = pathMod.join(l1Skills, skill);
@@ -257,17 +276,23 @@ export function collectMirrorParityFailures(
       }
       const l0Files = new Set(walkFiles(l0Dir));
       const l1Files = new Set(walkFiles(l1Dir));
-      for (const rel of [...l0Files].filter(f => !l1Files.has(f)).sort()) {
-        failures.push(`skills/${skill}/${rel} is missing from templates/common/skills/${skill}/. Lifecycle Manager deployment not run!`);
+      for (const rel of [...l0Files].filter((f) => !l1Files.has(f)).sort()) {
+        failures.push(
+          `skills/${skill}/${rel} is missing from templates/common/skills/${skill}/. Lifecycle Manager deployment not run!`,
+        );
       }
-      for (const rel of [...l1Files].filter(f => !l0Files.has(f)).sort()) {
-        failures.push(`templates/common/skills/${skill}/${rel} is an orphan — not in skills/${skill}/. Lifecycle Manager deployment not run!`);
+      for (const rel of [...l1Files].filter((f) => !l0Files.has(f)).sort()) {
+        failures.push(
+          `templates/common/skills/${skill}/${rel} is an orphan — not in skills/${skill}/. Lifecycle Manager deployment not run!`,
+        );
       }
-      for (const rel of [...l0Files].filter(f => l1Files.has(f)).sort()) {
-        const h0 = sha256Normalized(fsMod.readFileSync(pathMod.join(l0Dir, rel), 'utf-8'));
-        const h1 = sha256Normalized(fsMod.readFileSync(pathMod.join(l1Dir, rel), 'utf-8'));
+      for (const rel of [...l0Files].filter((f) => l1Files.has(f)).sort()) {
+        const h0 = sha256Normalized(fsMod.readFileSync(pathMod.join(l0Dir, rel), "utf-8"));
+        const h1 = sha256Normalized(fsMod.readFileSync(pathMod.join(l1Dir, rel), "utf-8"));
         if (h0 !== h1) {
-          failures.push(`Skill ${skill} file ${rel} differs from templates/common/skills/${skill}/${rel}. Lifecycle Manager deployment not run!`);
+          failures.push(
+            `Skill ${skill} file ${rel} differs from templates/common/skills/${skill}/${rel}. Lifecycle Manager deployment not run!`,
+          );
         }
       }
     }
@@ -278,10 +303,10 @@ export function collectMirrorParityFailures(
 
 async function runQaGate(): Promise<void> {
   console.log(`${CYAN}🔬 QA Gate - Phase 6${RESET}`);
-  console.log('=====================');
+  console.log("=====================");
 
   // 1. Workspace audit
-  console.log('Step 1: Workspace standards audit...');
+  console.log("Step 1: Workspace standards audit...");
   const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
   if (auditRes.exitCode !== 0) {
@@ -290,11 +315,11 @@ async function runQaGate(): Promise<void> {
   }
 
   // 2. Project-specific tests (if package.json exists)
-  const pkgFile = Bun.file('package.json');
+  const pkgFile = Bun.file("package.json");
   if (await pkgFile.exists()) {
-    console.log('Step 2: Running project tests...');
+    console.log("Step 2: Running project tests...");
     const pkg = await pkgFile.json();
-    if (pkg.scripts && 'test' in pkg.scripts) {
+    if (pkg.scripts && "test" in pkg.scripts) {
       const testRes = await $`bun run test`.nothrow();
       if (testRes.exitCode !== 0) {
         console.log(`${RED}❌ FAIL: Tests failed${RESET}`);
@@ -306,32 +331,32 @@ async function runQaGate(): Promise<void> {
   }
 
   // 3. Documentation consistency checks
-  console.log('Step 3: Checking documentation consistency...');
+  console.log("Step 3: Checking documentation consistency...");
 
   // Check AGENTS.md exists
-  if (!(await Bun.file('AGENTS.md').exists())) {
+  if (!(await Bun.file("AGENTS.md").exists())) {
     console.log(`${RED}❌ FAIL: AGENTS.md not found${RESET}`);
     process.exit(1);
   }
 
   // Check README.md has Korean pair (for templates only)
-  const hasTemplateReadme = await Bun.file('templates/README.md').exists();
-  const hasTemplateReadmeKo = await Bun.file('templates/README_ko.md').exists();
+  const hasTemplateReadme = await Bun.file("templates/README.md").exists();
+  const hasTemplateReadmeKo = await Bun.file("templates/README_ko.md").exists();
   if (hasTemplateReadme && !hasTemplateReadmeKo) {
     console.log(`${RED}❌ FAIL: templates/README.md exists but templates/README_ko.md missing${RESET}`);
     process.exit(1);
   }
 
   // 4. Verify Lifecycle Manager deployment (L0↔L1 mirror parity)
-  console.log('Step 4: Verifying L0↔L1 mirror parity (scripts trees + skill dirs, recursive)...');
+  console.log("Step 4: Verifying L0↔L1 mirror parity (scripts trees + skill dirs, recursive)...");
 
-  const fs = await import('node:fs');
-  const path = await import('node:path');
+  const fs = await import("node:fs");
+  const path = await import("node:path");
 
-  const l0Scripts = 'scripts';
-  const l1Scripts = path.join('templates', 'common', 'scripts');
-  const l0Skills = 'skills';
-  const l1Skills = path.join('templates', 'common', 'skills');
+  const l0Scripts = "scripts";
+  const l1Scripts = path.join("templates", "common", "scripts");
+  const l0Skills = "skills";
+  const l1Skills = path.join("templates", "common", "skills");
 
   const parityFailures = collectMirrorParityFailures(l0Scripts, l1Scripts, l0Skills, l1Skills);
   for (const failure of parityFailures) {
@@ -342,24 +367,26 @@ async function runQaGate(): Promise<void> {
   }
 
   // 5. Validate variant.json schema
-  console.log('Step 5: Validating variant.json schema...');
-  const templatesDir = 'templates';
+  console.log("Step 5: Validating variant.json schema...");
+  const templatesDir = "templates";
   if (fs.existsSync(templatesDir)) {
-    const variants = fs.readdirSync(templatesDir).filter(f => fs.statSync(path.join(templatesDir, f)).isDirectory() && f.startsWith('co-'));
+    const variants = fs
+      .readdirSync(templatesDir)
+      .filter((f) => fs.statSync(path.join(templatesDir, f)).isDirectory() && f.startsWith("co-"));
     for (const variant of variants) {
-      const variantJsonPath = path.join(templatesDir, variant, 'variant.json');
+      const variantJsonPath = path.join(templatesDir, variant, "variant.json");
       if (fs.existsSync(variantJsonPath)) {
         try {
-          const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, 'utf-8'));
+          const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
           const skillExt = variantJson.skill_manifest?.external;
           if (skillExt && !Array.isArray(skillExt)) {
-             console.log(`${RED}❌ FAIL: ${variant}/variant.json skill_manifest.external is not an array${RESET}`);
-             process.exit(1);
+            console.log(`${RED}❌ FAIL: ${variant}/variant.json skill_manifest.external is not an array${RESET}`);
+            process.exit(1);
           }
           const scriptExt = variantJson.script_manifest?.external;
           if (scriptExt && !Array.isArray(scriptExt)) {
-             console.log(`${RED}❌ FAIL: ${variant}/variant.json script_manifest.external is not an array${RESET}`);
-             process.exit(1);
+            console.log(`${RED}❌ FAIL: ${variant}/variant.json script_manifest.external is not an array${RESET}`);
+            process.exit(1);
           }
         } catch (e) {
           console.log(`${RED}❌ FAIL: Could not parse ${variantJsonPath}: ${e}${RESET}`);
@@ -370,7 +397,7 @@ async function runQaGate(): Promise<void> {
   }
 
   console.log(`${GREEN}✔ QA PASS${RESET}`);
-  console.log('==========');
+  console.log("==========");
   process.exit(0);
 }
 

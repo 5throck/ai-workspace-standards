@@ -21,29 +21,29 @@
  * @version 1.1.0
  */
 
-import { existsSync, renameSync, rmSync, statSync } from 'node:fs';
-import { basename, dirname, join, resolve, sep } from 'node:path';
+import { existsSync, renameSync, rmSync, statSync } from "node:fs";
+import { basename, dirname, join, resolve, sep } from "node:path";
 
 export interface RollbackResult {
-    rolledBack: boolean;
-    reason?: string;
+  rolledBack: boolean;
+  reason?: string;
 }
 
 export interface OverlaySnapshotResult {
-    snapshotted: boolean;
-    /** Dot-prefixed sibling path the previous tree was renamed to. */
-    backupPath?: string;
-    reason?: string;
+  snapshotted: boolean;
+  /** Dot-prefixed sibling path the previous tree was renamed to. */
+  backupPath?: string;
+  reason?: string;
 }
 
 export interface OverlayRestoreResult {
-    restored: boolean;
-    reason?: string;
+  restored: boolean;
+  reason?: string;
 }
 
 export interface OverlayDiscardResult {
-    discarded: boolean;
-    reason?: string;
+  discarded: boolean;
+  reason?: string;
 }
 
 /**
@@ -51,7 +51,7 @@ export interface OverlayDiscardResult {
  * name is filename-safe on every CI platform (Windows forbids `:` in names).
  */
 function overlaySnapshotStamp(date = new Date()): string {
-    return date.toISOString().replace(/[:.]/g, '-');
+  return date.toISOString().replace(/[:.]/g, "-");
 }
 
 /**
@@ -61,21 +61,21 @@ function overlaySnapshotStamp(date = new Date()): string {
  * unrelated directories.
  */
 export function rollbackPartialProject(projectDir: string, workspaceRoot: string): RollbackResult {
-    const resolvedProjectDir = resolve(projectDir);
-    const resolvedRoot = resolve(workspaceRoot);
+  const resolvedProjectDir = resolve(projectDir);
+  const resolvedRoot = resolve(workspaceRoot);
 
-    if (resolvedProjectDir === resolvedRoot) {
-        return { rolledBack: false, reason: 'refusing to remove the workspace root itself' };
-    }
-    if (!resolvedProjectDir.startsWith(resolvedRoot + sep)) {
-        return { rolledBack: false, reason: 'projectDir is not inside workspaceRoot' };
-    }
-    if (!existsSync(resolvedProjectDir)) {
-        return { rolledBack: false, reason: 'nothing to roll back' };
-    }
+  if (resolvedProjectDir === resolvedRoot) {
+    return { rolledBack: false, reason: "refusing to remove the workspace root itself" };
+  }
+  if (!resolvedProjectDir.startsWith(resolvedRoot + sep)) {
+    return { rolledBack: false, reason: "projectDir is not inside workspaceRoot" };
+  }
+  if (!existsSync(resolvedProjectDir)) {
+    return { rolledBack: false, reason: "nothing to roll back" };
+  }
 
-    rmSync(resolvedProjectDir, { recursive: true, force: true });
-    return { rolledBack: true };
+  rmSync(resolvedProjectDir, { recursive: true, force: true });
+  return { rolledBack: true };
 }
 
 /**
@@ -84,11 +84,11 @@ export function rollbackPartialProject(projectDir: string, workspaceRoot: string
  * anything outside it.
  */
 function checkContainment(path: string, workspaceRoot: string): string | undefined {
-    const resolved = resolve(path);
-    const resolvedRoot = resolve(workspaceRoot);
-    if (resolved === resolvedRoot) return 'refusing to operate on the workspace root itself';
-    if (!resolved.startsWith(resolvedRoot + sep)) return 'path is not inside workspaceRoot';
-    return undefined;
+  const resolved = resolve(path);
+  const resolvedRoot = resolve(workspaceRoot);
+  if (resolved === resolvedRoot) return "refusing to operate on the workspace root itself";
+  if (!resolved.startsWith(resolvedRoot + sep)) return "path is not inside workspaceRoot";
+  return undefined;
 }
 
 /**
@@ -99,30 +99,30 @@ function checkContainment(path: string, workspaceRoot: string): string | undefin
  * mask the run's original error (best-effort with loud reporting, design §4.2).
  */
 export function snapshotDirForOverlay(targetDir: string, workspaceRoot: string): OverlaySnapshotResult {
-    const resolvedTarget = resolve(targetDir);
-    const containment = checkContainment(resolvedTarget, workspaceRoot);
-    if (containment) return { snapshotted: false, reason: containment };
-    if (!existsSync(resolvedTarget)) {
-        return { snapshotted: false, reason: 'nothing to snapshot — target does not exist' };
-    }
-    if (!statSync(resolvedTarget).isDirectory()) {
-        return { snapshotted: false, reason: 'target is not a directory' };
-    }
+  const resolvedTarget = resolve(targetDir);
+  const containment = checkContainment(resolvedTarget, workspaceRoot);
+  if (containment) return { snapshotted: false, reason: containment };
+  if (!existsSync(resolvedTarget)) {
+    return { snapshotted: false, reason: "nothing to snapshot — target does not exist" };
+  }
+  if (!statSync(resolvedTarget).isDirectory()) {
+    return { snapshotted: false, reason: "target is not a directory" };
+  }
 
-    const backupPath = join(
-        dirname(resolvedTarget),
-        `.overlay-backup-${basename(resolvedTarget)}-${overlaySnapshotStamp()}`,
-    );
-    if (existsSync(backupPath)) {
-        return { snapshotted: false, reason: `snapshot path already exists: ${backupPath}` };
-    }
+  const backupPath = join(
+    dirname(resolvedTarget),
+    `.overlay-backup-${basename(resolvedTarget)}-${overlaySnapshotStamp()}`,
+  );
+  if (existsSync(backupPath)) {
+    return { snapshotted: false, reason: `snapshot path already exists: ${backupPath}` };
+  }
 
-    try {
-        renameSync(resolvedTarget, backupPath);
-    } catch (error) {
-        return { snapshotted: false, reason: `rename failed: ${error instanceof Error ? error.message : String(error)}` };
-    }
-    return { snapshotted: true, backupPath };
+  try {
+    renameSync(resolvedTarget, backupPath);
+  } catch (error) {
+    return { snapshotted: false, reason: `rename failed: ${error instanceof Error ? error.message : String(error)}` };
+  }
+  return { snapshotted: true, backupPath };
 }
 
 /**
@@ -132,33 +132,37 @@ export function snapshotDirForOverlay(targetDir: string, workspaceRoot: string):
  * operator (or a re-run) can still recover — the original run error must
  * never be masked by a rollback failure.
  */
-export function restoreOverlaySnapshot(backupPath: string, targetDir: string, workspaceRoot: string): OverlayRestoreResult {
-    const resolvedBackup = resolve(backupPath);
-    const resolvedTarget = resolve(targetDir);
+export function restoreOverlaySnapshot(
+  backupPath: string,
+  targetDir: string,
+  workspaceRoot: string,
+): OverlayRestoreResult {
+  const resolvedBackup = resolve(backupPath);
+  const resolvedTarget = resolve(targetDir);
 
-    const backupContainment = checkContainment(resolvedBackup, workspaceRoot);
-    if (backupContainment) return { restored: false, reason: `backupPath: ${backupContainment}` };
-    const targetContainment = checkContainment(resolvedTarget, workspaceRoot);
-    if (targetContainment) return { restored: false, reason: `targetDir: ${targetContainment}` };
-    if (!existsSync(resolvedBackup)) {
-        return { restored: false, reason: `snapshot not found: ${resolvedBackup}` };
-    }
-    if (resolvedBackup === resolvedTarget) {
-        return { restored: false, reason: 'backupPath and targetDir are the same path' };
-    }
+  const backupContainment = checkContainment(resolvedBackup, workspaceRoot);
+  if (backupContainment) return { restored: false, reason: `backupPath: ${backupContainment}` };
+  const targetContainment = checkContainment(resolvedTarget, workspaceRoot);
+  if (targetContainment) return { restored: false, reason: `targetDir: ${targetContainment}` };
+  if (!existsSync(resolvedBackup)) {
+    return { restored: false, reason: `snapshot not found: ${resolvedBackup}` };
+  }
+  if (resolvedBackup === resolvedTarget) {
+    return { restored: false, reason: "backupPath and targetDir are the same path" };
+  }
 
-    try {
-        if (existsSync(resolvedTarget)) {
-            rmSync(resolvedTarget, { recursive: true, force: true });
-        }
-        renameSync(resolvedBackup, resolvedTarget);
-    } catch (error) {
-        return {
-            restored: false,
-            reason: `restore failed (snapshot kept at ${resolvedBackup}): ${error instanceof Error ? error.message : String(error)}`,
-        };
+  try {
+    if (existsSync(resolvedTarget)) {
+      rmSync(resolvedTarget, { recursive: true, force: true });
     }
-    return { restored: true };
+    renameSync(resolvedBackup, resolvedTarget);
+  } catch (error) {
+    return {
+      restored: false,
+      reason: `restore failed (snapshot kept at ${resolvedBackup}): ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+  return { restored: true };
 }
 
 /**
@@ -167,16 +171,16 @@ export function restoreOverlaySnapshot(backupPath: string, targetDir: string, wo
  * silently straying in templates/.
  */
 export function discardOverlaySnapshot(backupPath: string, workspaceRoot: string): OverlayDiscardResult {
-    const resolvedBackup = resolve(backupPath);
-    const containment = checkContainment(resolvedBackup, workspaceRoot);
-    if (containment) return { discarded: false, reason: `backupPath: ${containment}` };
-    if (!existsSync(resolvedBackup)) {
-        return { discarded: false, reason: `snapshot not found: ${resolvedBackup}` };
-    }
-    try {
-        rmSync(resolvedBackup, { recursive: true, force: true });
-    } catch (error) {
-        return { discarded: false, reason: `discard failed: ${error instanceof Error ? error.message : String(error)}` };
-    }
-    return { discarded: true };
+  const resolvedBackup = resolve(backupPath);
+  const containment = checkContainment(resolvedBackup, workspaceRoot);
+  if (containment) return { discarded: false, reason: `backupPath: ${containment}` };
+  if (!existsSync(resolvedBackup)) {
+    return { discarded: false, reason: `snapshot not found: ${resolvedBackup}` };
+  }
+  try {
+    rmSync(resolvedBackup, { recursive: true, force: true });
+  } catch (error) {
+    return { discarded: false, reason: `discard failed: ${error instanceof Error ? error.message : String(error)}` };
+  }
+  return { discarded: true };
 }

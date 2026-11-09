@@ -11,8 +11,8 @@
  * @version 1.3.0
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { dirname } from "node:path";
 
 export interface ContextTemplateSubstitutions {
   variantName: string;
@@ -33,20 +33,16 @@ export interface ContextTemplateSubstitutions {
  * @param substitutions Map of placeholder name (without braces, e.g. `VARIANT_NAME`) → value
  * @returns             The outputPath that was written
  */
-export function applyTemplate(
-  templatePath: string,
-  outputPath: string,
-  substitutions: Record<string, string>
-): string {
+export function applyTemplate(templatePath: string, outputPath: string, substitutions: Record<string, string>): string {
   if (!existsSync(templatePath)) {
     throw new Error(`applyTemplate: template not found at ${templatePath}`);
   }
 
-  let content = readFileSync(templatePath, 'utf-8');
+  let content = readFileSync(templatePath, "utf-8");
 
   for (const [key, value] of Object.entries(substitutions)) {
     // Keys are identifier-like (UPPER_SNAKE_CASE); escape any regex metacharacters defensively.
-    const pattern = new RegExp(`\\{\\{${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\}\\}`, 'g');
+    const pattern = new RegExp(`\\{\\{${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\}\\}`, "g");
     content = content.replace(pattern, value);
   }
 
@@ -55,7 +51,7 @@ export function applyTemplate(
     mkdirSync(dir, { recursive: true });
   }
 
-  writeFileSync(outputPath, content, 'utf-8');
+  writeFileSync(outputPath, content, "utf-8");
   return outputPath;
 }
 
@@ -72,7 +68,7 @@ export function applyTemplate(
 export function applyContextTemplate(
   templatePath: string,
   outputPath: string,
-  substitutions: ContextTemplateSubstitutions
+  substitutions: ContextTemplateSubstitutions,
 ): string {
   return applyTemplate(templatePath, outputPath, {
     VARIANT_NAME: substitutions.variantName,
@@ -100,19 +96,20 @@ export function applyContextTemplate(
  *          and the 6-workflow phase table).
  */
 export const DEFAULT_PM_ROLE_DESCRIPTIONS: Record<string, string> = {
-  'co-abap':      'SAP ABAP delivery orchestration, module analysis dispatch, transport and QA gates',
-  'co-architect': 'Architecture workspace orchestration, cross-team dispatch (design, research, engineering), design-delivery quality gates',
-  'co-consult':   'Engagement orchestration, client interface, final decisions',
-  'co-deck':      'Deck pipeline orchestration, stage gate approvals, export readiness',
-  'co-design':    'Design process management, creative direction, quality review',
-  'co-develop':   'Workflow management, task dispatch, quality gates',
-  'co-export':    'Trade engagement coordination, compliance approval gates, final sign-off',
-  'co-game':      'Game pipeline orchestration, genre-based dispatch, test and debug gates',
-  'co-hr':        'HR engagement coordination, people-domain dispatch, client approval gates',
-  'co-learning':  'Assessment pipeline orchestration, question-bank quality gates, exam delivery readiness',
-  'co-news':      'Newsroom pipeline gating, editorial approval, publication readiness',
-  'co-price':     'Pricing engagement governance, method dispatch, executive synthesis',
-  'co-safety':    'Safety governance, regulatory evidence gates, deliverable closeout approval',
-  'co-security':  'Security governance, threat modeling, compliance review',
-  'co-work':      'Content workflow management, editorial oversight, quality gates',
+  "co-abap": "SAP ABAP delivery orchestration, module analysis dispatch, transport and QA gates",
+  "co-architect":
+    "Architecture workspace orchestration, cross-team dispatch (design, research, engineering), design-delivery quality gates",
+  "co-consult": "Engagement orchestration, client interface, final decisions",
+  "co-deck": "Deck pipeline orchestration, stage gate approvals, export readiness",
+  "co-design": "Design process management, creative direction, quality review",
+  "co-develop": "Workflow management, task dispatch, quality gates",
+  "co-export": "Trade engagement coordination, compliance approval gates, final sign-off",
+  "co-game": "Game pipeline orchestration, genre-based dispatch, test and debug gates",
+  "co-hr": "HR engagement coordination, people-domain dispatch, client approval gates",
+  "co-learning": "Assessment pipeline orchestration, question-bank quality gates, exam delivery readiness",
+  "co-news": "Newsroom pipeline gating, editorial approval, publication readiness",
+  "co-price": "Pricing engagement governance, method dispatch, executive synthesis",
+  "co-safety": "Safety governance, regulatory evidence gates, deliverable closeout approval",
+  "co-security": "Security governance, threat modeling, compliance review",
+  "co-work": "Content workflow management, editorial oversight, quality gates",
 };

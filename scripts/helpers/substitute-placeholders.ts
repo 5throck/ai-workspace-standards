@@ -24,10 +24,10 @@
  *   <variant> → <variant> (in docs/context.md, within backtick paths only)
  */
 
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-export const PLACEHOLDER_TEXT_EXTENSIONS = ['.md', '.json', '.sh', '.ps1', '.toml', '.yaml', '.yml', '.sample'];
+export const PLACEHOLDER_TEXT_EXTENSIONS = [".md", ".json", ".sh", ".ps1", ".toml", ".yaml", ".yml", ".sample"];
 
 export interface SubstitutionParams {
   projectName: string;
@@ -45,7 +45,7 @@ export function applySubstitutions(content: string, p: SubstitutionParams): stri
   modified = modified.replace(/\{\{PROJECT_DESCRIPTION\}\}/g, p.description);
   modified = modified.replace(/\{\{PROJECT_CHARACTERISTICS\}\}/g, p.characteristics);
   // Replace {{COUNTRY}} with display name or fallback
-  const countryReplacement = p.countryDisplayName || 'the applicable jurisdiction';
+  const countryReplacement = p.countryDisplayName || "the applicable jurisdiction";
   modified = modified.replace(/\{\{COUNTRY\}\}/g, countryReplacement);
   // Replace variant placeholders in docs/context.md
   modified = modified.replace(/<variant-name>/g, p.variantName);
@@ -63,19 +63,19 @@ export function applySubstitutions(content: string, p: SubstitutionParams): stri
 export function substituteFiles(files: string[], baseDir: string, p: SubstitutionParams): string[] {
   const rewritten: string[] = [];
   for (const rel of files) {
-    if (!PLACEHOLDER_TEXT_EXTENSIONS.some(ext => rel.endsWith(ext))) continue;
+    if (!PLACEHOLDER_TEXT_EXTENSIONS.some((ext) => rel.endsWith(ext))) continue;
     const fullPath = join(baseDir, rel);
     let content: string;
     try {
       // strict UTF-8: fatal decode on invalid sequences — skip binary look-alikes
       const bytes = readFileSync(fullPath);
-      content = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      content = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
     } catch {
       continue;
     }
     const modified = applySubstitutions(content, p);
     if (modified !== content) {
-      writeFileSync(fullPath, modified, 'utf-8');
+      writeFileSync(fullPath, modified, "utf-8");
       rewritten.push(rel);
     }
   }
@@ -88,19 +88,21 @@ export function substituteFiles(files: string[], baseDir: string, p: Substitutio
 if (import.meta.main) {
   const args = process.argv.slice(2);
   const projectDir = args[0];
-  const projectName = args[1] || '';
-  const description = args[2] || 'A new project';
-  const characteristics = args[3] || '';
+  const projectName = args[1] || "";
+  const description = args[2] || "A new project";
+  const characteristics = args[3] || "";
   const variantName = args[4] || projectName;
-  const countryDisplayName = args[5] || '';
+  const countryDisplayName = args[5] || "";
 
   if (!projectDir || !projectName) {
-    console.error('Usage: bun substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant] [country]');
+    console.error(
+      "Usage: bun substitute-placeholders.ts <project-dir> <project-name> [description] [characteristics] [variant] [country]",
+    );
     process.exit(1);
   }
 
   // Find all text files
-  function getTextFiles(dir: string, relPath = ''): string[] {
+  function getTextFiles(dir: string, relPath = ""): string[] {
     const files: string[] = [];
 
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -110,7 +112,7 @@ if (import.meta.main) {
       if (entry.isDirectory()) {
         files.push(...getTextFiles(fullPath, relativePath));
       } else if (entry.isFile()) {
-        const ext = entry.name.substring(entry.name.lastIndexOf('.'));
+        const ext = entry.name.substring(entry.name.lastIndexOf("."));
         if (PLACEHOLDER_TEXT_EXTENSIONS.includes(ext)) {
           files.push(relativePath);
         }

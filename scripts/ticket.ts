@@ -80,34 +80,51 @@
 //         docs/designs/2026-08-16-governance-backlog-design.md (not_before / --ready / --kind),
 //         docs/designs/2026-10-01-upstream-request-mcp-design.md (§14.1)
 
-import { resolve, join, dirname } from 'node:path';
+import { resolve, join, dirname } from "node:path";
 import {
-  createTicket, listTickets, moveTicket, nextServiceTicket, staleRunningTickets, loadCatalog, DEFAULT_ATTEMPTS_CAP,
-  resolveTicketLocation, readTicket, readTicketRaw, setUpstreamTriage, setUpstreamResolution,
-  archiveDirFor, archiveCandidates, archiveTickets, restoreTicket, DEFAULT_ARCHIVE_DAYS,
-  repairTicketHistory, loadKanbanAliases, reprioritizeTicket, autoReadySev1Ticket,
+  createTicket,
+  listTickets,
+  moveTicket,
+  nextServiceTicket,
+  staleRunningTickets,
+  loadCatalog,
+  DEFAULT_ATTEMPTS_CAP,
+  resolveTicketLocation,
+  readTicket,
+  readTicketRaw,
+  setUpstreamTriage,
+  setUpstreamResolution,
+  archiveDirFor,
+  archiveCandidates,
+  archiveTickets,
+  restoreTicket,
+  DEFAULT_ARCHIVE_DAYS,
+  repairTicketHistory,
+  loadKanbanAliases,
+  reprioritizeTicket,
+  autoReadySev1Ticket,
   DuplicateTicketError,
-} from './helpers/ticket-store.ts';
-import { driftCheck } from './helpers/ticket-drift.ts';
-import { dump } from 'js-yaml';
-import type { Priority, Status, Kind, Ticket } from './helpers/ticket-schema.ts';
-import { PRIORITIES, corruptedProseFinding, resolvePriorityInput } from './helpers/ticket-schema.ts';
-import { parseActor, ReprioritizeRefusedError } from './helpers/reprioritize.ts';
-import { effectiveOperationalState, readState, HubStateError } from './helpers/hub-state.ts';
+} from "./helpers/ticket-store.ts";
+import { driftCheck } from "./helpers/ticket-drift.ts";
+import { dump } from "js-yaml";
+import type { Priority, Status, Kind, Ticket } from "./helpers/ticket-schema.ts";
+import { PRIORITIES, corruptedProseFinding, resolvePriorityInput } from "./helpers/ticket-schema.ts";
+import { parseActor, ReprioritizeRefusedError } from "./helpers/reprioritize.ts";
+import { effectiveOperationalState, readState, HubStateError } from "./helpers/hub-state.ts";
 
 // Test seam (T-20261001-016): TICKET_WORKSPACE_ROOT redirects the tickets/ root for
 // subprocess CLI tests — same pattern as the installer's UPSTREAM_INSTALL_HOME.
 // Never set it in normal operation; the default is always the script's own workspace.
 const workspaceRoot = process.env.TICKET_WORKSPACE_ROOT
   ? resolve(process.env.TICKET_WORKSPACE_ROOT)
-  : resolve(import.meta.dir, '..');
+  : resolve(import.meta.dir, "..");
 // Service tickets: ephemeral execution-queue instances (tickets/*.yaml is gitignored — Task 8).
-const ticketsDir = join(workspaceRoot, 'tickets');
+const ticketsDir = join(workspaceRoot, "tickets");
 // Manual (Governance Backlog) tickets: deliberately git-tracked so deferred decisions survive
 // across sessions/machines. `tickets/*.yaml` only ignores direct children, not this subdirectory —
 // see docs/designs/2026-08-16-governance-backlog-design.md.
-const governanceDir = join(ticketsDir, 'governance');
-const catalogPath = join(workspaceRoot, 'services.yaml');
+const governanceDir = join(ticketsDir, "governance");
+const catalogPath = join(workspaceRoot, "services.yaml");
 
 /** kind: manual tickets live in governanceDir; kind: service tickets live in ticketsDir.
  * Used by commands (move) that take only an id, not a kind. Delegates to the
@@ -120,17 +137,29 @@ function resolveTicketDir(id: string): { dir: string; id: string } {
 
 const [, , cmd, ...rest] = process.argv;
 
-const BOOLEAN_FLAGS = new Set(['manual', 'force', 'json', 'html', 'ready', 'confirm-reviewed', 'archived', 'apply', 'allow-duplicate']);
+const BOOLEAN_FLAGS = new Set([
+  "manual",
+  "force",
+  "json",
+  "html",
+  "ready",
+  "confirm-reviewed",
+  "archived",
+  "apply",
+  "allow-duplicate",
+]);
 
 function parseFlags(args: string[]): { positional: string[]; flags: Record<string, string | boolean> } {
   const positional: string[] = [];
   const flags: Record<string, string | boolean> = {};
   for (let i = 0; i < args.length; i++) {
-    if (args[i].startsWith('--')) {
+    if (args[i].startsWith("--")) {
       const key = args[i].slice(2);
       const next = args[i + 1];
-      if (!BOOLEAN_FLAGS.has(key) && next !== undefined && !next.startsWith('--')) { flags[key] = next; i++; }
-      else flags[key] = true;
+      if (!BOOLEAN_FLAGS.has(key) && next !== undefined && !next.startsWith("--")) {
+        flags[key] = next;
+        i++;
+      } else flags[key] = true;
     } else positional.push(args[i]);
   }
   return { positional, flags };
@@ -142,7 +171,12 @@ function fail(msg: string): never {
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 /** Angle-bracket lookalikes that NFKC leaves untouched (NFKC itself folds U+FF1C/FF1E, U+FE64/FE65). */
@@ -152,50 +186,50 @@ const CLOSE_LOOKALIKES = /[\u203A\u27E9\u27EB\u276F\u232A\u3009\u300B\u276D\u29F
 function escapeBoundaryTags(s: string): string {
   // Display-only fold: compatibility forms (fullwidth etc.) become ASCII so they cannot dodge the
   // tag match; lookalike brackets are neutralized outright. Then any boundary tag variant is escaped.
-  const folded = s.normalize('NFKC').replace(OPEN_LOOKALIKES, '&lt;').replace(CLOSE_LOOKALIKES, '&gt;');
-  return folded.replace(/<(\s*\/?\s*untrusted-upstream-request)/gi, '&lt;$1');
+  const folded = s.normalize("NFKC").replace(OPEN_LOOKALIKES, "&lt;").replace(CLOSE_LOOKALIKES, "&gt;");
+  return folded.replace(/<(\s*\/?\s*untrusted-upstream-request)/gi, "&lt;$1");
 }
 
 function formatUpstreamBlock(ticket: Ticket): string {
-  if (!ticket.upstream) return '';
+  if (!ticket.upstream) return "";
   const u = ticket.upstream;
   const lines: string[] = [];
 
-  if (u.flagged) lines.push('🚩 FLAGGED - needs human review');
+  if (u.flagged) lines.push("🚩 FLAGGED - needs human review");
 
   lines.push(`<untrusted-upstream-request id="${ticket.id}" project="${u.project}" flagged="${u.flagged}">`);
-  lines.push(`Project: ${u.project || 'unknown'}`);
+  lines.push(`Project: ${u.project || "unknown"}`);
   lines.push(`Layer: ${u.suspected_layer}`);
   lines.push(`Triage: ${u.triage}`);
   if (u.triage_reasons && u.triage_reasons.length > 0) {
-    lines.push(`Reasons: ${u.triage_reasons.join(', ')}`);
+    lines.push(`Reasons: ${u.triage_reasons.join(", ")}`);
   }
-  lines.push('');
-  lines.push('Symptom:');
+  lines.push("");
+  lines.push("Symptom:");
   lines.push(escapeBoundaryTags(u.symptom));
-  lines.push('');
+  lines.push("");
   if (u.affected_paths && u.affected_paths.length > 0) {
-    lines.push(`Affected paths: ${u.affected_paths.join(', ')}`);
-    lines.push('');
+    lines.push(`Affected paths: ${u.affected_paths.join(", ")}`);
+    lines.push("");
   }
   if (u.repro) {
-    lines.push('Repro:');
+    lines.push("Repro:");
     lines.push(escapeBoundaryTags(u.repro));
-    lines.push('');
+    lines.push("");
   }
   if (u.local_workaround_diff) {
-    lines.push('Local workaround:');
+    lines.push("Local workaround:");
     lines.push(escapeBoundaryTags(u.local_workaround_diff));
-    lines.push('');
+    lines.push("");
   }
   lines.push(`</untrusted-upstream-request>`);
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 try {
   switch (cmd) {
-    case 'create': {
+    case "create": {
       const { positional, flags } = parseFlags(rest);
       // T-20261026-015 (finding #19): validate create inputs BEFORE any write.
       // A bad --priority used to reach createTicket, whose schema check throws
@@ -205,25 +239,25 @@ try {
       // exit 1, nothing written.
       const priorityFlag = flags.priority;
       if (priorityFlag !== undefined && !(PRIORITIES as readonly string[]).includes(String(priorityFlag))) {
-        fail(`--priority must be one of ${PRIORITIES.join('|')} (got: ${priorityFlag})`);
+        fail(`--priority must be one of ${PRIORITIES.join("|")} (got: ${priorityFlag})`);
       }
       // v1.13.0 (hub-consolidation §5.1): delegation kanban alias on create —
       // P0|P1|P2|P3 maps through docs/templates/hub-kanban-aliases.json onto the
       // canonical enum. Mutually exclusive with --priority (one input, one surface).
       // The CLI is the user's surface, so P0 is allowed here (agent actors must use
       // reprioritize, where P0 is a hard error).
-      const aliasFlag = flags['priority-alias'];
+      const aliasFlag = flags["priority-alias"];
       let aliasPriority: Priority | undefined;
       if (aliasFlag !== undefined) {
-        if (priorityFlag !== undefined) fail('--priority and --priority-alias are mutually exclusive — pass one');
+        if (priorityFlag !== undefined) fail("--priority and --priority-alias are mutually exclusive — pass one");
         const aliases = loadKanbanAliases(workspaceRoot);
         const mapped = aliases.priorityAliases[String(aliasFlag)];
         if (mapped === undefined) {
-          fail(`--priority-alias must be one of ${Object.keys(aliases.priorityAliases).join('|')} (got: ${aliasFlag})`);
+          fail(`--priority-alias must be one of ${Object.keys(aliases.priorityAliases).join("|")} (got: ${aliasFlag})`);
         }
         aliasPriority = mapped;
       }
-      const priority = aliasPriority ?? ((priorityFlag as Priority | undefined) ?? 'normal');
+      const priority = aliasPriority ?? (priorityFlag as Priority | undefined) ?? "normal";
       // v1.14.0 (hub-consolidation §4.5): delegation target hub. The flag
       // writes the `hub` metadata field AND gates the write on the hub's
       // lifecycle state: UNAVAILABLE (declared, or an expired TTL lease) is a
@@ -240,7 +274,7 @@ try {
         }
         const hubState = (() => {
           try {
-            return readState(join(workspaceRoot, 'Projects', hubName), hubName);
+            return readState(join(workspaceRoot, "Projects", hubName), hubName);
           } catch (err) {
             if (err instanceof HubStateError) fail(`cannot verify hub '${hubName}' state: ${err.message}`);
             throw err;
@@ -248,15 +282,18 @@ try {
         })();
         if (hubState) {
           const effective = effectiveOperationalState(hubState);
-          if (effective === 'UNAVAILABLE') {
-            const expired = hubState.operational_state !== 'UNAVAILABLE'
-              ? ` (declared ${hubState.operational_state} on an EXPIRED TTL lease until ${hubState.ttl_lease?.expires_at ?? '?'})`
-              : '';
-            fail(`refused: hub '${hubName}' is UNAVAILABLE${expired} — delegated ticket creation is blocked (design §3.4). Next declaration or probe re-opens the channel`);
+          if (effective === "UNAVAILABLE") {
+            const expired =
+              hubState.operational_state !== "UNAVAILABLE"
+                ? ` (declared ${hubState.operational_state} on an EXPIRED TTL lease until ${hubState.ttl_lease?.expires_at ?? "?"})`
+                : "";
+            fail(
+              `refused: hub '${hubName}' is UNAVAILABLE${expired} — delegated ticket creation is blocked (design §3.4). Next declaration or probe re-opens the channel`,
+            );
           }
         }
       }
-      const notBeforeFlag = flags['not-before'];
+      const notBeforeFlag = flags["not-before"];
       if (notBeforeFlag !== undefined) {
         const v = String(notBeforeFlag);
         // Shape check + real-calendar round trip: Date.parse alone is not enough
@@ -264,38 +301,60 @@ try {
         // components must survive an exact UTC reconstruction.
         const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
         const dt = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : null;
-        const realDate = m !== null && dt !== null
-          && dt.getUTCFullYear() === Number(m[1])
-          && dt.getUTCMonth() === Number(m[2]) - 1
-          && dt.getUTCDate() === Number(m[3]);
+        const realDate =
+          m !== null &&
+          dt !== null &&
+          dt.getUTCFullYear() === Number(m[1]) &&
+          dt.getUTCMonth() === Number(m[2]) - 1 &&
+          dt.getUTCDate() === Number(m[3]);
         if (!realDate) fail(`--not-before must be a valid ISO date (YYYY-MM-DD), got: ${notBeforeFlag}`);
       }
       const notBefore = notBeforeFlag as string | undefined;
       if (flags.manual) {
         const title = positional[0];
-        if (!title) fail('usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--priority-alias P0|P1|P2|P3] [--not-before YYYY-MM-DD] [--hub co-<slug>] [--allow-duplicate]');
+        if (!title)
+          fail(
+            'usage: ticket.ts create --manual "<title>" [--priority low|normal|high|urgent] [--priority-alias P0|P1|P2|P3] [--not-before YYYY-MM-DD] [--hub co-<slug>] [--allow-duplicate]',
+          );
         // v1.15.0 (DEC-20261104-02 ruling 5): the store refuses an exact
         // normalized-title duplicate by default (DuplicateTicketError naming the
         // existing id); --allow-duplicate is the reviewed escape for the
         // legitimate re-file-after-archive case.
-        const t = createTicket(governanceDir, { kind: 'manual', title, priority, not_before: notBefore, hub: hubName }, { allowDuplicate: flags['allow-duplicate'] === true });
-        console.log(`✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ''}${hubName ? ` (hub ${hubName})` : ''}`);
+        const t = createTicket(
+          governanceDir,
+          { kind: "manual", title, priority, not_before: notBefore, hub: hubName },
+          { allowDuplicate: flags["allow-duplicate"] === true },
+        );
+        console.log(
+          `✅ Created manual ticket ${t.id}: ${title}${notBefore ? ` (not before ${notBefore})` : ""}${hubName ? ` (hub ${hubName})` : ""}`,
+        );
       } else {
         const serviceId = positional[0];
-        if (!serviceId) fail('usage: ticket.ts create <service-id> [--priority ...] [--priority-alias P0|P1|P2|P3] [--inputs \'{"k":"v"}\'] [--hub co-<slug>]');
+        if (!serviceId)
+          fail(
+            'usage: ticket.ts create <service-id> [--priority ...] [--priority-alias P0|P1|P2|P3] [--inputs \'{"k":"v"}\'] [--hub co-<slug>]',
+          );
         const catalog = loadCatalog(catalogPath);
-        if (!catalog.services.some(s => s.id === serviceId)) fail(`unknown service id: ${serviceId} (see services.yaml)`);
+        if (!catalog.services.some((s) => s.id === serviceId))
+          fail(`unknown service id: ${serviceId} (see services.yaml)`);
         let inputs: Record<string, string> | undefined;
         if (flags.inputs) {
-          try { inputs = JSON.parse(flags.inputs as string); }
-          catch { fail(`--inputs is not valid JSON: ${flags.inputs}`); }
+          try {
+            inputs = JSON.parse(flags.inputs as string);
+          } catch {
+            fail(`--inputs is not valid JSON: ${flags.inputs}`);
+          }
         }
-        const t = createTicket(ticketsDir, { kind: 'service', service: serviceId, priority, inputs, hub: hubName }, { allowDuplicate: flags['allow-duplicate'] === true });
-        console.log(`✅ Created service ticket ${t.id} for '${serviceId}'${hubName ? ` (hub ${hubName})` : ''}`);
+        const t = createTicket(
+          ticketsDir,
+          { kind: "service", service: serviceId, priority, inputs, hub: hubName },
+          { allowDuplicate: flags["allow-duplicate"] === true },
+        );
+        console.log(`✅ Created service ticket ${t.id} for '${serviceId}'${hubName ? ` (hub ${hubName})` : ""}`);
       }
       break;
     }
-    case 'list': {
+    case "list": {
       const { flags } = parseFlags(rest);
       // --kind and --ready are independent, composable filters (not a bundled mode) — see
       // docs/designs/2026-08-16-governance-backlog-design.md. Service and manual tickets live
@@ -309,64 +368,80 @@ try {
       const archivedMode = flags.archived === true;
       let tickets = archivedMode
         ? [
-          ...(kindFilter === 'manual' ? [] : listTickets(archiveDirFor(ticketsDir))),
-          ...(kindFilter === 'service' ? [] : listTickets(archiveDirFor(governanceDir))),
-        ]
+            ...(kindFilter === "manual" ? [] : listTickets(archiveDirFor(ticketsDir))),
+            ...(kindFilter === "service" ? [] : listTickets(archiveDirFor(governanceDir))),
+          ]
         : [
-          ...(kindFilter === 'manual' ? [] : listTickets(ticketsDir, { ...listFilter, kind: 'service' })),
-          ...(kindFilter === 'service' ? [] : listTickets(governanceDir, { ...listFilter, kind: 'manual' })),
-        ];
+            ...(kindFilter === "manual" ? [] : listTickets(ticketsDir, { ...listFilter, kind: "service" })),
+            ...(kindFilter === "service" ? [] : listTickets(governanceDir, { ...listFilter, kind: "manual" })),
+          ];
       if (upstreamOnly) {
-        tickets = tickets.filter(t => t.upstream !== undefined);
+        tickets = tickets.filter((t) => t.upstream !== undefined);
       }
       if (flags.json) console.log(JSON.stringify(tickets, null, 2));
       else {
         // M10 (design §9 L3): flagged tickets sort first and carry a [FLAGGED] prefix;
         // upstream listings end with triage counts.
-        const upstream = tickets.filter(t => t.upstream !== undefined);
+        const upstream = tickets.filter((t) => t.upstream !== undefined);
         if (upstreamOnly && upstream.length > 0) {
-          tickets = [...tickets].sort((a, b) => Number(b.upstream?.flagged ?? false) - Number(a.upstream?.flagged ?? false) || a.id.localeCompare(b.id));
+          tickets = [...tickets].sort(
+            (a, b) =>
+              Number(b.upstream?.flagged ?? false) - Number(a.upstream?.flagged ?? false) || a.id.localeCompare(b.id),
+          );
         }
         for (const t of tickets) {
-          const flaggedMarker = t.upstream?.flagged ? ' [FLAGGED]' : '';
-          console.log(`${t.id}  [${t.status}]  ${t.kind === 'service' ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ''}${flaggedMarker}${archivedMode ? '  [ARCHIVED]' : ''}`);
+          const flaggedMarker = t.upstream?.flagged ? " [FLAGGED]" : "";
+          console.log(
+            `${t.id}  [${t.status}]  ${t.kind === "service" ? t.service : t.title}  (${t.priority})${t.not_before ? `  not-before:${t.not_before}` : ""}${flaggedMarker}${archivedMode ? "  [ARCHIVED]" : ""}`,
+          );
         }
         if (upstreamOnly && upstream.length > 0) {
-          const inbox = upstream.filter(t => t.upstream!.triage === 'inbox').length;
-          const ready = upstream.filter(t => t.upstream!.triage === 'ready').length;
-          console.log(`\n${upstream.length} upstream ticket(s): ${inbox} inbox, ${ready} ready, ${upstream.filter(t => t.upstream!.flagged).length} flagged`);
+          const inbox = upstream.filter((t) => t.upstream!.triage === "inbox").length;
+          const ready = upstream.filter((t) => t.upstream!.triage === "ready").length;
+          console.log(
+            `\n${upstream.length} upstream ticket(s): ${inbox} inbox, ${ready} ready, ${upstream.filter((t) => t.upstream!.flagged).length} flagged`,
+          );
         }
       }
       break;
     }
-    case 'next': {
+    case "next": {
       const picked = nextServiceTicket(ticketsDir);
-      if (!picked) { console.log('No waiting service tickets.'); break; }
+      if (!picked) {
+        console.log("No waiting service tickets.");
+        break;
+      }
       console.log(JSON.stringify(picked, null, 2));
       break;
     }
-    case 'move': {
+    case "move": {
       const { positional, flags } = parseFlags(rest);
       const [id, status] = positional;
       if (!id || !status) fail('usage: ticket.ts move <id> <status> [--force] [--error "<text>"] [--result "<text>"]');
       // T-20260912-023: closing a ticket requires a non-empty outcome summary.
       // Deliberately NOT bypassable by --force — a forced done without a result
       // would defeat the audit trail the requirement exists to guarantee.
-      if (status === 'done') {
+      if (status === "done") {
         const result = flags.result;
-        if (typeof result !== 'string' || result.trim() === '') {
-          fail('usage: ticket.ts move <id> done --result "<text>" — moving to done requires a non-empty --result outcome summary (--force does not bypass this)');
+        if (typeof result !== "string" || result.trim() === "") {
+          fail(
+            'usage: ticket.ts move <id> done --result "<text>" — moving to done requires a non-empty --result outcome summary (--force does not bypass this)',
+          );
         }
       }
       const { dir, id: bareId } = resolveTicketDir(id);
-      const moved = moveTicket(dir, bareId, status as Status, { force: Boolean(flags.force), error: flags.error as string | undefined, result: flags.result as string | undefined });
+      const moved = moveTicket(dir, bareId, status as Status, {
+        force: Boolean(flags.force),
+        error: flags.error as string | undefined,
+        result: flags.result as string | undefined,
+      });
       console.log(`✅ ${id} -> ${moved.status}`);
       break;
     }
-    case 'show': {
+    case "show": {
       const { positional } = parseFlags(rest);
       const id = positional[0];
-      if (!id) fail('usage: ticket.ts show <id>');
+      if (!id) fail("usage: ticket.ts show <id>");
       const { dir, id: bareId } = resolveTicketDir(id);
       let ticket: Ticket;
       try {
@@ -377,7 +452,9 @@ try {
         // boundary-tag escaped. `doctor` still reports it once repaired fields validate.
         const raw = readTicketRaw(dir, bareId);
         console.log(`\n🚨 CORRUPT TICKET — failed schema validation: ${(err as Error).message}`);
-        console.log('   Raw YAML below (NOT validated — repair by hand, then re-check with `bun scripts/ticket.ts show`):');
+        console.log(
+          "   Raw YAML below (NOT validated — repair by hand, then re-check with `bun scripts/ticket.ts show`):",
+        );
         console.log(escapeBoundaryTags(dump(raw)));
         break;
       }
@@ -388,7 +465,7 @@ try {
       if (ticket.sev) console.log(`   Sev: ${ticket.sev}`);
       if (ticket.blocked_reason) console.log(`   Blocked: ${ticket.blocked_reason}`);
       if (ticket.hub) console.log(`   Hub: ${ticket.hub}`);
-      if (ticket.kind === 'service') {
+      if (ticket.kind === "service") {
         console.log(`   Service: ${ticket.service}`);
       } else {
         console.log(`   Title: ${ticket.title}`);
@@ -396,18 +473,20 @@ try {
       console.log(`   Created: ${ticket.created_at}`);
       if (ticket.not_before) console.log(`   Not before: ${ticket.not_before}`);
       if (ticket.upstream) {
-        console.log('\n--- Upstream Request ---');
+        console.log("\n--- Upstream Request ---");
         console.log(formatUpstreamBlock(ticket));
       }
-      console.log('');
+      console.log("");
       break;
     }
-    case 'triage': {
+    case "triage": {
       // T-20261001-016 — PM triage of an upstream request (§3.12 steps 3/5).
       const { positional, flags } = parseFlags(rest);
       const [id, verdict] = positional;
-      if (!id || (verdict !== 'inbox' && verdict !== 'ready')) {
-        fail('usage: ticket.ts triage <U-id> <inbox|ready> [--confirm-reviewed] — ready on a flagged ticket requires --confirm-reviewed');
+      if (!id || (verdict !== "inbox" && verdict !== "ready")) {
+        fail(
+          "usage: ticket.ts triage <U-id> <inbox|ready> [--confirm-reviewed] — ready on a flagged ticket requires --confirm-reviewed",
+        );
       }
       const { dir, id: bareId } = resolveTicketDir(id);
       // v1.13.0 (hub-consolidation §5.1): SEV1 bypass-triage — an SEV1 upstream ticket
@@ -415,16 +494,16 @@ try {
       // bypass). NEGATIVE rule: sev=SEV2/SEV3 or no sev never bypasses — the normal
       // human triage path below is the only route to ready for those.
       const peek = readTicket(dir, bareId);
-      if (peek.sev === 'SEV1') {
+      if (peek.sev === "SEV1") {
         const t = autoReadySev1Ticket(dir, bareId);
         console.log(`✅ ${id}: sev=SEV1 bypass-triage — upstream.triage=ready (auto), status=${t.status}`);
         break;
       }
-      const t = setUpstreamTriage(dir, bareId, verdict, { confirmReviewed: flags['confirm-reviewed'] === true });
+      const t = setUpstreamTriage(dir, bareId, verdict, { confirmReviewed: flags["confirm-reviewed"] === true });
       console.log(`✅ ${id}: upstream.triage=${verdict}, status=${t.status}`);
       break;
     }
-    case 'reprioritize': {
+    case "reprioritize": {
       // v1.13.0 (hub-consolidation §5.2) — priority-only change with governance:
       // P0/urgent is user-only (hard error for agents); spoke actors (spoke-pm,
       // and spoke-tenant since v1.16.0, design 2026-11-08 §3.3) are capped at
@@ -436,18 +515,22 @@ try {
       const priorityArg = flags.priority;
       const actorArg = flags.actor;
       if (!id || priorityArg === undefined || actorArg === undefined) {
-        fail('usage: ticket.ts reprioritize <id> --priority <P0|P1|P2|P3|low|normal|high|urgent> --actor <user|hub-pm|spoke-pm:NAME|spoke-tenant:gw-<12hex>>');
+        fail(
+          "usage: ticket.ts reprioritize <id> --priority <P0|P1|P2|P3|low|normal|high|urgent> --actor <user|hub-pm|spoke-pm:NAME|spoke-tenant:gw-<12hex>>",
+        );
       }
       const actor = parseActor(String(actorArg));
       if (!actor) fail(`--actor must be user | hub-pm | spoke-pm:NAME | spoke-tenant:gw-<12hex> (got: ${actorArg})`);
       const aliases = loadKanbanAliases(workspaceRoot);
       const to = resolvePriorityInput(String(priorityArg), aliases);
       if (!to) {
-        fail(`--priority must be a kanban alias (${Object.keys(aliases.priorityAliases).join('|')}) or a canonical priority (${PRIORITIES.join('|')}) (got: ${priorityArg})`);
+        fail(
+          `--priority must be a kanban alias (${Object.keys(aliases.priorityAliases).join("|")}) or a canonical priority (${PRIORITIES.join("|")}) (got: ${priorityArg})`,
+        );
       }
       const { dir, id: bareId } = resolveTicketDir(id);
       try {
-        const t = reprioritizeTicket(dir, bareId, to, actor, { stateDir: join(workspaceRoot, '.pipeline-state') });
+        const t = reprioritizeTicket(dir, bareId, to, actor, { stateDir: join(workspaceRoot, ".pipeline-state") });
         console.log(`✅ ${id}: priority ${t.priority} (actor ${actor})`);
       } catch (err) {
         if (err instanceof ReprioritizeRefusedError) {
@@ -457,18 +540,20 @@ try {
       }
       break;
     }
-    case 'resolve': {
+    case "resolve": {
       // T-20261001-016 — record the PM resolution and close (§3.12 step 8).
       const { positional, flags } = parseFlags(rest);
       const id = positional[0];
       const outcome = flags.outcome as string | undefined;
       const summary = flags.summary as string | undefined;
-      const prUrl = flags['pr-url'] as string | undefined;
-      const templateVersion = flags['template-version'] as string | undefined;
-      if (!id || !outcome || typeof summary !== 'string' || summary.trim() === '') {
-        fail('usage: ticket.ts resolve <U-id> --outcome <fixed|rejected|local-only|duplicate> --summary "<text>" [--pr-url <url>] [--template-version <ver>|unreleased]');
+      const prUrl = flags["pr-url"] as string | undefined;
+      const templateVersion = flags["template-version"] as string | undefined;
+      if (!id || !outcome || typeof summary !== "string" || summary.trim() === "") {
+        fail(
+          'usage: ticket.ts resolve <U-id> --outcome <fixed|rejected|local-only|duplicate> --summary "<text>" [--pr-url <url>] [--template-version <ver>|unreleased]',
+        );
       }
-      if (!['fixed', 'rejected', 'local-only', 'duplicate'].includes(outcome)) {
+      if (!["fixed", "rejected", "local-only", "duplicate"].includes(outcome)) {
         fail(`--outcome must be fixed | rejected | local-only | duplicate (got: ${outcome})`);
       }
       if (prUrl !== undefined && !/^https:\/\/\S+$/.test(prUrl)) {
@@ -478,17 +563,22 @@ try {
       const t = setUpstreamResolution(
         dir,
         bareId,
-        { outcome: outcome as 'fixed' | 'rejected' | 'local-only' | 'duplicate', pr_url: prUrl, template_version: templateVersion, summary },
+        {
+          outcome: outcome as "fixed" | "rejected" | "local-only" | "duplicate",
+          pr_url: prUrl,
+          template_version: templateVersion,
+          summary,
+        },
         summary,
       );
       console.log(`✅ ${id}: outcome=${outcome}, status=${t.status}, resolution recorded`);
       break;
     }
-    case 'doctor': {
+    case "doctor": {
       const { flags } = parseFlags(rest);
       let thresholdMinutes = 30;
       if (flags.minutes !== undefined) {
-        if (typeof flags.minutes !== 'string' || flags.minutes.trim() === '' || Number.isNaN(Number(flags.minutes))) {
+        if (typeof flags.minutes !== "string" || flags.minutes.trim() === "" || Number.isNaN(Number(flags.minutes))) {
           fail(`--minutes must be a number, got: ${flags.minutes}`);
         }
         thresholdMinutes = Number(flags.minutes);
@@ -500,28 +590,37 @@ try {
         ...staleRunningTickets(ticketsDir, thresholdMinutes),
         ...staleRunningTickets(governanceDir, thresholdMinutes),
       ];
-      if (stale.length === 0) { console.log('No stale running tickets.'); }
+      if (stale.length === 0) {
+        console.log("No stale running tickets.");
+      }
       for (const t of stale) console.log(`⚠️  ${t.id} has been running > ${thresholdMinutes}m`);
       // Retry-budget visibility (T-20260926-021): tickets at/over the
       // attempts cap are escalation candidates — the store refuses to
       // re-queue them past the cap, so they need a human decision.
-      const capped = [...listTickets(ticketsDir), ...listTickets(governanceDir)]
-        .filter(t => t.status !== 'done' && t.attempts >= DEFAULT_ATTEMPTS_CAP);
+      const capped = [...listTickets(ticketsDir), ...listTickets(governanceDir)].filter(
+        (t) => t.status !== "done" && t.attempts >= DEFAULT_ATTEMPTS_CAP,
+      );
       if (capped.length === 0) {
         if (stale.length === 0) console.log(`No tickets at/over the retry cap (${DEFAULT_ATTEMPTS_CAP}).`);
       } else {
         console.log(`\nTickets at/over the retry cap (${DEFAULT_ATTEMPTS_CAP}) — escalate or dispose:`);
-        for (const t of capped) console.log(`🚧  ${t.id} attempts=${t.attempts} [${t.status}] ${t.kind === 'service' ? t.service : (t.title ?? '').slice(0, 80)}`);
+        for (const t of capped)
+          console.log(
+            `🚧  ${t.id} attempts=${t.attempts} [${t.status}] ${t.kind === "service" ? t.service : (t.title ?? "").slice(0, 80)}`,
+          );
       }
       // Prose-fragment lint (T-20261029-001): report-only — the 2026-10-29
       // adjudication writer embedded shell conditionals verbatim into
       // resolution/result prose. Repair needs a sanctioned re-render path;
       // doctor only names the corrupted records.
       const proseCorrupt = [...listTickets(ticketsDir), ...listTickets(governanceDir)]
-        .map(t => {
+        .map((t) => {
           const fields: string[] = [];
           const resSummary = (t.upstream as { resolution?: { summary?: unknown } } | undefined)?.resolution?.summary;
-          for (const [label, value] of [['result', t.result], ['upstream.resolution.summary', resSummary]] as const) {
+          for (const [label, value] of [
+            ["result", t.result],
+            ["upstream.resolution.summary", resSummary],
+          ] as const) {
             const f = corruptedProseFinding(value);
             if (f) fields.push(`${label} — ${f}`);
           }
@@ -529,53 +628,75 @@ try {
         })
         .filter((x): x is { id: string; fields: string[] } => x !== null);
       if (proseCorrupt.length === 0) {
-        console.log('No corrupted prose fragments detected.');
+        console.log("No corrupted prose fragments detected.");
       } else {
         console.log(`\nCorrupted prose fragments (T-20261029-001 writer class) — repair needs a sanctioned re-render:`);
-        for (const c of proseCorrupt) console.log(`\u{1F9F9}  ${c.id}: ${c.fields.join('; ')}`);
+        for (const c of proseCorrupt) console.log(`\u{1F9F9}  ${c.id}: ${c.fields.join("; ")}`);
       }
       // Referenced-id drift arm (v1.15.0, project-loss-hardening design §5.3b):
       // a ticket id cited in memory/*.md must resolve in a live store or an
       // archive — the vanish vector that ate the original T-20261104-004 filing.
       // Report-only here (the diagnostic surface the runner closeout protocol
       // consults); the machine-enforced FATAL trigger is the dev-sync step.
-      const drift = await driftCheck({ memoryDir: join(workspaceRoot, 'memory'), serviceDir: ticketsDir, governanceDir });
+      const drift = await driftCheck({
+        memoryDir: join(workspaceRoot, "memory"),
+        serviceDir: ticketsDir,
+        governanceDir,
+      });
       if (drift.unresolved.length === 0) {
         console.log(`No unresolved ticket-id citations in memory/ (${drift.cited} distinct id(s) cited, all resolve).`);
       } else {
-        console.log(`\nUnresolved ticket-id citations in memory/ (${drift.unresolved.length} of ${drift.cited} cited) — silent-loss candidates, triage each:`);
-        for (const f of drift.unresolved) console.log(`🔎  ${f.id} cited at ${f.file}:${f.line} — resolves in NO store or archive`);
+        console.log(
+          `\nUnresolved ticket-id citations in memory/ (${drift.unresolved.length} of ${drift.cited} cited) — silent-loss candidates, triage each:`,
+        );
+        for (const f of drift.unresolved)
+          console.log(`🔎  ${f.id} cited at ${f.file}:${f.line} — resolves in NO store or archive`);
       }
       // Archive visibility (design 2026-10-04-ticket-archive-design.md): archived
       // tickets leave the live stores, so state them here instead of staying silent.
-      const archivedCount = listTickets(archiveDirFor(ticketsDir)).length + listTickets(archiveDirFor(governanceDir)).length;
+      const archivedCount =
+        listTickets(archiveDirFor(ticketsDir)).length + listTickets(archiveDirFor(governanceDir)).length;
       if (archivedCount > 0) {
-        console.log(`\n${archivedCount} archived ticket(s) in tickets/archive and tickets/governance/archive — list with 'list --archived'.`);
+        console.log(
+          `\n${archivedCount} archived ticket(s) in tickets/archive and tickets/governance/archive — list with 'list --archived'.`,
+        );
       }
       break;
     }
-    case 'board': {
+    case "board": {
       const { flags } = parseFlags(rest);
       const tickets = [...listTickets(ticketsDir), ...listTickets(governanceDir)];
-      const lanes: Status[] = ['backlog', 'waiting', 'running', 'review', 'done', 'failed'];
+      const lanes: Status[] = ["backlog", "waiting", "running", "review", "done", "failed"];
       if (flags.html) {
         const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
 <title>Ticket Board</title>
 <style>body{font-family:sans-serif}.lane{display:inline-block;vertical-align:top;width:180px;margin:8px;padding:8px;border:1px solid #ccc}.card{border:1px solid #999;margin:4px 0;padding:4px;font-size:12px}</style>
 </head><body>
-${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.filter(t => t.status === lane).map(t => `<div class="card">${escapeHtml(t.id)}<br>${escapeHtml(t.kind === 'service' ? (t.service ?? '') : (t.title ?? ''))}</div>`).join('')}</div>`).join('')}
+${lanes
+  .map(
+    (lane) =>
+      `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets
+        .filter((t) => t.status === lane)
+        .map(
+          (t) =>
+            `<div class="card">${escapeHtml(t.id)}<br>${escapeHtml(t.kind === "service" ? (t.service ?? "") : (t.title ?? ""))}</div>`,
+        )
+        .join("")}</div>`,
+  )
+  .join("")}
 </body></html>`;
         console.log(html);
       } else {
         for (const lane of lanes) {
           console.log(`\n## ${lane}`);
-          for (const t of tickets.filter(t => t.status === lane)) console.log(`  ${t.id}  ${t.kind === 'service' ? t.service : t.title}`);
+          for (const t of tickets.filter((t) => t.status === lane))
+            console.log(`  ${t.id}  ${t.kind === "service" ? t.service : t.title}`);
         }
       }
       break;
     }
-    case 'repair-history': {
+    case "repair-history": {
       // v1.10.0 (T-20261007-004): one-off legacy-history repair — drop
       // non-chaining duplicate edges (the doubled backlog→waiting from the
       // 2026-10-06 upstream import), sort entries chronologically, and
@@ -585,7 +706,7 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       const { positional, flags } = parseFlags(rest);
       const id = positional[0];
       if (!id) {
-        console.error('usage: ticket.ts repair-history <id> [--apply] — dry-run plan by default');
+        console.error("usage: ticket.ts repair-history <id> [--apply] — dry-run plan by default");
         process.exit(1);
       }
       const { dir, id: resolvedId } = resolveTicketDir(id);
@@ -593,13 +714,17 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       if (!changed) {
         console.log(`✅ ${resolvedId}: history already schema-clean — nothing to repair`);
       } else {
-        console.log(`${flags.apply === true ? '🛠  repaired' : '📋 plan (dry run — add --apply to write)'} ${resolvedId}:`);
-        for (const d of plan.dropped) console.log(`   drop ${d.at} ${d.from ?? 'null'} → ${d.to} (non-chaining duplicate edge)`);
-        if (plan.createdAtTo !== plan.createdAtFrom) console.log(`   created_at ${plan.createdAtFrom} → ${plan.createdAtTo} (reconciled with the earliest event)`);
+        console.log(
+          `${flags.apply === true ? "🛠  repaired" : "📋 plan (dry run — add --apply to write)"} ${resolvedId}:`,
+        );
+        for (const d of plan.dropped)
+          console.log(`   drop ${d.at} ${d.from ?? "null"} → ${d.to} (non-chaining duplicate edge)`);
+        if (plan.createdAtTo !== plan.createdAtFrom)
+          console.log(`   created_at ${plan.createdAtFrom} → ${plan.createdAtTo} (reconciled with the earliest event)`);
       }
       break;
     }
-    case 'archive': {
+    case "archive": {
       // v1.9.0 (design 2026-10-04-ticket-archive-design.md): done tickets leave the
       // live stores after a dwell of DEFAULT_ARCHIVE_DAYS. Dry-run by default —
       // governance tickets are git-tracked, so the operator reviews the plan first.
@@ -607,29 +732,34 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       if (flags.restore !== undefined) {
         const id = String(flags.restore);
         const loc = resolveTicketLocation(ticketsDir, governanceDir, id);
-        if (!loc.archived) fail(`${loc.id} is not archived — it is live in ${loc.dir === governanceDir ? 'tickets/governance' : 'tickets'}`);
+        if (!loc.archived)
+          fail(
+            `${loc.id} is not archived — it is live in ${loc.dir === governanceDir ? "tickets/governance" : "tickets"}`,
+          );
         // Archived ids resolve to the archive dir (review C1); the live store is its parent.
         const storeDir = dirname(loc.dir);
         restoreTicket(storeDir, loc.id);
-        console.log(`✅ ${loc.id} restored: ${loc.dir} -> ${storeDir === governanceDir ? 'tickets/governance' : 'tickets'}`);
+        console.log(
+          `✅ ${loc.id} restored: ${loc.dir} -> ${storeDir === governanceDir ? "tickets/governance" : "tickets"}`,
+        );
         break;
       }
       let days = DEFAULT_ARCHIVE_DAYS;
       if (flags.days !== undefined) {
-        if (typeof flags.days !== 'string' || !/^\d+$/.test(flags.days)) {
+        if (typeof flags.days !== "string" || !/^\d+$/.test(flags.days)) {
           fail(`--days must be a non-negative integer, got: ${flags.days}`);
         }
         days = Number(flags.days);
       }
       const stores = [
-        { label: 'tickets/governance', dir: governanceDir },
-        { label: 'tickets', dir: ticketsDir },
+        { label: "tickets/governance", dir: governanceDir },
+        { label: "tickets", dir: ticketsDir },
       ];
-      const plans = stores.map(s => ({ ...s, list: archiveCandidates(s.dir, days) }));
+      const plans = stores.map((s) => ({ ...s, list: archiveCandidates(s.dir, days) }));
       const total = plans.reduce((n, p) => n + p.list.length, 0);
       // Single scan shared by plan and apply (review M3): the summary reports
       // exactly the candidates this invocation scanned.
-      const candidatesByDir = new Map(plans.map(p => [p.dir, p.list]));
+      const candidatesByDir = new Map(plans.map((p) => [p.dir, p.list]));
       if (total === 0) {
         console.log(`No tickets done >= ${days}d to archive.`);
         break;
@@ -637,8 +767,10 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       const apply = flags.apply === true;
       for (const p of plans) {
         for (const c of p.list) {
-          const label = c.ticket.kind === 'service' ? (c.ticket.service ?? '') : (c.ticket.title ?? '');
-          console.log(`${apply ? '📦' : '[dry-run]'}  ${p.label}/${c.ticket.id}  done ${Math.floor(c.ageDays)}d ago  ${label.slice(0, 80)}`);
+          const label = c.ticket.kind === "service" ? (c.ticket.service ?? "") : (c.ticket.title ?? "");
+          console.log(
+            `${apply ? "📦" : "[dry-run]"}  ${p.label}/${c.ticket.id}  done ${Math.floor(c.ageDays)}d ago  ${label.slice(0, 80)}`,
+          );
         }
       }
       if (!apply) {
@@ -647,11 +779,15 @@ ${lanes.map(lane => `<div class="lane"><h3>${escapeHtml(lane)}</h3>${tickets.fil
       }
       let moved = 0;
       for (const p of plans) moved += archiveTickets(p.dir, days, { candidates: candidatesByDir.get(p.dir) }).length;
-      console.log(`\n✅ archived ${moved} ticket(s) (done >= ${days}d). tickets/governance/archive is git-tracked — commit the renames.`);
+      console.log(
+        `\n✅ archived ${moved} ticket(s) (done >= ${days}d). tickets/governance/archive is git-tracked — commit the renames.`,
+      );
       break;
     }
     default:
-      console.log('usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|reprioritize|board|doctor|archive|repair-history> ...');
+      console.log(
+        "usage: bun scripts/ticket.ts <create|list|show|next|move|triage|resolve|reprioritize|board|doctor|archive|repair-history> ...",
+      );
       process.exit(cmd ? 1 : 0);
   }
 } catch (err) {

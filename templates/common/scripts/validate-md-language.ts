@@ -87,22 +87,24 @@
  * Exit codes: 0 (pass), 1 (violation found)
  */
 
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { execFileSync } from "node:child_process";
 import { die } from "./lib/error-handling.ts";
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
   try {
-    const out = execFileSync('git', ['ls-files', '--cached', '--', 'templates/'], { encoding: 'utf-8' }).trim();
+    const out = execFileSync("git", ["ls-files", "--cached", "--", "templates/"], { encoding: "utf-8" }).trim();
     const dirs = new Set<string>();
     if (!out) return dirs;
-    for (const line of out.split('\n')) {
+    for (const line of out.split("\n")) {
       const m = line.match(/^templates\/(co-[^/]+)\//);
       if (m) dirs.add(m[1]);
     }
     return dirs;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 })();
 
 function isCoVariantTracked(name: string): boolean {
@@ -121,8 +123,8 @@ function isCoVariantTracked(name: string): boolean {
 // Falls back to ['ko'] (degraded mode) if schema is unavailable
 function loadSupportedLocales(): string[] {
   try {
-    const schemaPath = join(dirname(import.meta.path), '..', 'docs', 'workspace-schema.json');
-    const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+    const schemaPath = join(dirname(import.meta.path), "..", "docs", "workspace-schema.json");
+    const schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
     const codes = schema?.i18n?.locale_codes;
     if (Array.isArray(codes) && codes.length > 0) return codes;
   } catch {
@@ -130,8 +132,10 @@ function loadSupportedLocales(): string[] {
   }
   // Degraded mode (schema missing, e.g. project-local runs where the workspace
   // schema is not shipped): only 'ko' is guaranteed without the registry.
-  console.warn('[validate-md-language] docs/workspace-schema.json unavailable — using degraded locale list (ko only); other translation zones will not be exempted.');
-  return ['ko'];
+  console.warn(
+    "[validate-md-language] docs/workspace-schema.json unavailable — using degraded locale list (ko only); other translation zones will not be exempted.",
+  );
+  return ["ko"];
 }
 
 const SUPPORTED_LOCALES: string[] = loadSupportedLocales();
@@ -143,14 +147,15 @@ const KOREAN_PATTERN = /[가-힯ᄀ-ᇿ]/;
 const ENGLISH_SENTENCE_PATTERN = /[A-Za-z][A-Za-z\s,;\.!\?]{10,}/;
 
 // Permitted lang_reason values for Korean exception declarations
-const ALLOWED_LANG_REASONS = ['legal', 'source-material', 'proper-noun'] as const;
+const ALLOWED_LANG_REASONS = ["legal", "source-material", "proper-noun"] as const;
 
 // Generated-region allowlist markers (see header comment). The begin marker
 // carries a reason="..." attribute; the region between the markers is stripped
 // before Korean detection so exactly the generated section is exempt — the
 // remainder of the file is still validated. Emitted by
 // scripts/generate-version-manifest.ts for the VERSION_MANIFEST Skills table.
-const ALLOWLIST_REGION_PATTERN = /<!--\s*validate-md-language:allowlist-begin\b[^\n]*-->[\s\S]*?<!--\s*validate-md-language:allowlist-end\s*-->/g;
+const ALLOWLIST_REGION_PATTERN =
+  /<!--\s*validate-md-language:allowlist-begin\b[^\n]*-->[\s\S]*?<!--\s*validate-md-language:allowlist-end\s*-->/g;
 
 interface Violation {
   file: string;
@@ -167,10 +172,11 @@ interface Violation {
  * used everywhere else — see Stage 3 in analyzeFile().
  */
 function isProtectedPath(filePath: string): boolean {
-  const normalized = filePath.replace(/\\/g, '/');
-  const basename = normalized.split('/').pop() ?? '';
-  if (['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md', 'CONSTITUTION.md', 'AGENTS.md'].includes(basename)) return true;
-  if (basename.endsWith('.context.md')) return true;
+  const normalized = filePath.replace(/\\/g, "/");
+  const basename = normalized.split("/").pop() ?? "";
+  if (["CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md", "CONSTITUTION.md", "AGENTS.md"].includes(basename))
+    return true;
+  if (basename.endsWith(".context.md")) return true;
   return false;
 }
 
@@ -184,16 +190,19 @@ function isProtectedPath(filePath: string): boolean {
  * treated identically for the exception check, with `langKey` reporting which
  * key was used so the caller can WARN in favor of the canonical `lang:`.
  */
-function parseLangDeclaration(content: string, isPlainYaml: boolean): { lang?: string; lang_reason?: string; langKey?: "lang" | "language" } {
+function parseLangDeclaration(
+  content: string,
+  isPlainYaml: boolean,
+): { lang?: string; lang_reason?: string; langKey?: "lang" | "language" } {
   const fenced = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  const source = fenced ? fenced[1] : (isPlainYaml ? content : null);
+  const source = fenced ? fenced[1] : isPlainYaml ? content : null;
   if (source === null) return {};
   const lang = source.match(/^lang:\s*(\S+)/m)?.[1];
   const languageAlias = lang ? undefined : source.match(/^language:\s*(\S+)/m)?.[1];
   return {
     lang: lang ?? languageAlias,
     lang_reason: source.match(/^lang_reason:\s*(\S+)/m)?.[1],
-    langKey: lang ? "lang" : (languageAlias ? "language" : undefined),
+    langKey: lang ? "lang" : languageAlias ? "language" : undefined,
   };
 }
 
@@ -281,7 +290,7 @@ export function isOfficialDocument(filePath: string): boolean {
     /^docs\/user-guide_ko\.md$/,
   ];
 
-  return officialPatterns.some(pattern => pattern.test(normalizedPath));
+  return officialPatterns.some((pattern) => pattern.test(normalizedPath));
 }
 
 /**
@@ -290,13 +299,13 @@ export function isOfficialDocument(filePath: string): boolean {
  */
 function isI18nLocalePath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, "/");
-  return SUPPORTED_LOCALES.some(locale => {
+  return SUPPORTED_LOCALES.some((locale) => {
     return (
       new RegExp(`[._-]${locale}\\.(md|ya?ml)$`).test(normalized) || // README-ko.md, foo-ko.yaml
-      normalized.startsWith(`${locale}/`) ||         // ko/...
-      normalized.includes(`/${locale}/`) ||          // .../ko/...
+      normalized.startsWith(`${locale}/`) || // ko/...
+      normalized.includes(`/${locale}/`) || // .../ko/...
       normalized.startsWith(`locales/${locale}/`) || // locales/ko/...
-      normalized.includes(`/locales/${locale}/`)     // .../locales/ko/...
+      normalized.includes(`/locales/${locale}/`) // .../locales/ko/...
     );
   });
 }
@@ -310,8 +319,8 @@ function isI18nLocalePath(filePath: string): boolean {
  */
 function suffixLocaleOfFile(filePath: string): string | null {
   const normalized = filePath.replace(/\\/g, "/");
-  const m = normalized.match(new RegExp(`[._-](${SUPPORTED_LOCALES.join('|')})\\.(md|ya?ml)$`));
-  if (!m || m[1] === 'en') return null;
+  const m = normalized.match(new RegExp(`[._-](${SUPPORTED_LOCALES.join("|")})\\.(md|ya?ml)$`));
+  if (!m || m[1] === "en") return null;
   return m[1];
 }
 
@@ -334,7 +343,7 @@ export function evaluateSuffixLocaleGate(filePath: string, content: string | nul
     return {
       file: filePath,
       reason: declared
-        ? `suffix declares unknown locale "${declared}" — must be one of: ${SUPPORTED_LOCALES.join(', ')}`
+        ? `suffix declares unknown locale "${declared}" — must be one of: ${SUPPORTED_LOCALES.join(", ")}`
         : `${suffixLocale}-suffixed file carries locale content without a lang declaration — add 'lang: ${suffixLocale}' (markdown: frontmatter; yaml: top-level key)`,
     };
   }
@@ -402,17 +411,19 @@ export function analyzeFile(filePath: string): Violation | null {
     if (isProtectedPath(filePath)) {
       return {
         file: filePath,
-        reason: "Korean content in protected path (core governance/routing file) — lang: ko exception is not permitted"
+        reason: "Korean content in protected path (core governance/routing file) — lang: ko exception is not permitted",
       };
     }
 
     // Stage 3: Frontmatter/top-level lang declaration
     const { lang, lang_reason, langKey } = parseLangDeclaration(content, /\.ya?ml$/.test(filePath));
-    if (lang === 'ko') {
+    if (lang === "ko") {
       // Legacy `language: ko` alias (T-20260910-027): accepted, but nudge
       // toward the canonical `lang:` key so the vocabulary converges.
-      if (langKey === 'language') {
-        console.log(`   ⚠️  [WARN] Legacy declaration: ${filePath} uses 'language: ko' — migrate to 'lang: ko' (the policy key)`);
+      if (langKey === "language") {
+        console.log(
+          `   ⚠️  [WARN] Legacy declaration: ${filePath} uses 'language: ko' — migrate to 'lang: ko' (the policy key)`,
+        );
       }
       if (lang_reason && (ALLOWED_LANG_REASONS as readonly string[]).includes(lang_reason)) {
         console.log(`   ℹ️  [INFO] Korean exception granted: ${filePath} (lang_reason: ${lang_reason})`);
@@ -420,14 +431,14 @@ export function analyzeFile(filePath: string): Violation | null {
       }
       return {
         file: filePath,
-        reason: `lang: ko declared but lang_reason is ${lang_reason ? `invalid ("${lang_reason}")` : 'missing'} — must be one of: ${ALLOWED_LANG_REASONS.join(' | ')}`
+        reason: `lang: ko declared but lang_reason is ${lang_reason ? `invalid ("${lang_reason}")` : "missing"} — must be one of: ${ALLOWED_LANG_REASONS.join(" | ")}`,
       };
     }
 
     // Stage 4: Korean without declaration
     return {
       file: filePath,
-      reason: "Korean content detected without lang: ko declaration"
+      reason: "Korean content detected without lang: ko declaration",
     };
   } catch (error) {
     console.error(`Error reading ${filePath}:`, error);
@@ -447,12 +458,12 @@ async function validateMarkdownLanguage(): Promise<void> {
   try {
     for (const pattern of globPatterns) {
       const globber = new Bun.Glob(pattern);
-      allFiles.push(...await Array.fromAsync(globber.scan({ cwd: process.cwd(), onlyFiles: true })));
+      allFiles.push(...(await Array.fromAsync(globber.scan({ cwd: process.cwd(), onlyFiles: true }))));
     }
   } catch (err) {
     // On Windows, scaffold test directories may have EPERM; collect files that are accessible
     const code = (err as NodeJS.ErrnoException).code;
-    if (code !== 'EPERM' && code !== 'EACCES') throw err;
+    if (code !== "EPERM" && code !== "EACCES") throw err;
     console.warn(`⚠️  Glob scan encountered permission error (${code}) — some directories may be skipped`);
   }
   // Collect root-level generated project directories (have AGENTS.md or variant.json)
@@ -460,45 +471,54 @@ async function validateMarkdownLanguage(): Promise<void> {
   const cwd = process.cwd();
   const rootProjectDirs = new Set<string>();
   try {
-    const { readdirSync, statSync } = await import("fs");
+    const { readdirSync, statSync } = await import("node:fs");
     for (const entry of readdirSync(cwd, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
       const fullPath = join(cwd, entry.name);
-      if (existsSync(join(fullPath, 'AGENTS.md')) || existsSync(join(fullPath, 'variant.json'))) {
-        rootProjectDirs.add(entry.name + '/');
+      if (existsSync(join(fullPath, "AGENTS.md")) || existsSync(join(fullPath, "variant.json"))) {
+        rootProjectDirs.add(entry.name + "/");
       }
     }
-  } catch { /* ignore scan errors */ }
+  } catch {
+    /* ignore scan errors */
+  }
 
   // Collect templates/<variant>/ directories whose variant.json has country_config.locales
   // Files under those variants are exempt from Korean language validation
   const variantLocaleExemptions = new Map<string, Set<string>>(); // variantDir -> Set<locale>
   try {
-    const templatesDir = join(cwd, 'templates');
+    const templatesDir = join(cwd, "templates");
     if (existsSync(templatesDir)) {
-      const { readdirSync } = await import('fs');
+      const { readdirSync } = await import("node:fs");
       for (const entry of readdirSync(templatesDir, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue;
-        const vf = join(templatesDir, entry.name, 'variant.json');
+        const vf = join(templatesDir, entry.name, "variant.json");
         if (!existsSync(vf)) continue;
         try {
-          const vjson = JSON.parse(readFileSync(vf, 'utf-8'));
+          const vjson = JSON.parse(readFileSync(vf, "utf-8"));
           const locales: string[] = vjson?.country_config?.locales ?? [];
           if (locales.length > 0) {
-            variantLocaleExemptions.set(entry.name + '/', new Set(locales));
+            variantLocaleExemptions.set(entry.name + "/", new Set(locales));
           }
-        } catch { /* ignore parse errors */ }
+        } catch {
+          /* ignore parse errors */
+        }
       }
     }
-  } catch { /* ignore scan errors */ }
+  } catch {
+    /* ignore scan errors */
+  }
 
   const candidateFiles = allFiles.filter((f) => {
     const normalized = f.replace(/\\/g, "/");
-    if (normalized.includes("node_modules/") ||
-        normalized.includes(".git/") ||
-        normalized.includes("dist/") ||
-        normalized.includes("build/") ||
-        normalized.startsWith("test-project/")) return false;
+    if (
+      normalized.includes("node_modules/") ||
+      normalized.includes(".git/") ||
+      normalized.includes("dist/") ||
+      normalized.includes("build/") ||
+      normalized.startsWith("test-project/")
+    )
+      return false;
     // Exclude root-level generated project directories
     for (const dir of rootProjectDirs) {
       if (normalized.startsWith(dir)) return false;
@@ -506,7 +526,7 @@ async function validateMarkdownLanguage(): Promise<void> {
     // Skip untracked template variants (WIP scaffolds on disk)
     if (normalized.startsWith("templates/co-")) {
       const afterTemplates = normalized.slice("templates/".length);
-      const slashIdx = afterTemplates.indexOf('/');
+      const slashIdx = afterTemplates.indexOf("/");
       if (slashIdx > 0) {
         const variantName = afterTemplates.slice(0, slashIdx);
         if (!isCoVariantTracked(variantName)) return false;
@@ -538,7 +558,9 @@ async function validateMarkdownLanguage(): Promise<void> {
       let content: string | null = null;
       try {
         content = readFileSync(file, "utf-8");
-      } catch { content = null; }
+      } catch {
+        content = null;
+      }
       return evaluateSuffixLocaleGate(file, content);
     })();
     if (suffixViolation) {
@@ -558,11 +580,11 @@ async function validateMarkdownLanguage(): Promise<void> {
     let variantExempt = false;
     if (normed.startsWith("templates/")) {
       const afterTemplates = normed.slice("templates/".length);
-      const slashIdx = afterTemplates.indexOf('/');
+      const slashIdx = afterTemplates.indexOf("/");
       if (slashIdx > 0) {
         const variantDir = afterTemplates.slice(0, slashIdx + 1);
         const exemptLocales = variantLocaleExemptions.get(variantDir);
-        if (exemptLocales?.has('ko')) {
+        if (exemptLocales?.has("ko")) {
           variantExempt = true;
         }
       }
@@ -579,7 +601,9 @@ async function validateMarkdownLanguage(): Promise<void> {
   if (violations.length === 0) {
     console.log("✅ No language violations in official documents.\n");
     console.log(`   Scanned ${officialCount} official markdown/YAML files (agents, governance, skills, templates)`);
-    console.log(`   I18N locale files excluded: ${SUPPORTED_LOCALES.length} language codes (${SUPPORTED_LOCALES.join(", ")})`);
+    console.log(
+      `   I18N locale files excluded: ${SUPPORTED_LOCALES.length} language codes (${SUPPORTED_LOCALES.join(", ")})`,
+    );
     process.exit(0);
   } else {
     console.log(`❌ Found ${violations.length} language violation(s) in official documents:\n`);
@@ -587,8 +611,12 @@ async function validateMarkdownLanguage(): Promise<void> {
       console.log(`   📄 ${v.file}`);
       console.log(`      Reason: ${v.reason}\n`);
     });
-    console.log("Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter (Markdown) or as a top-level key (plain YAML). Legacy 'language: ko' declarations are accepted with a migration warning — prefer 'lang: ko'.");
-    console.log("Exception NOT available for: CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, CONSTITUTION.md, AGENTS.md, *.context.md");
+    console.log(
+      "Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter (Markdown) or as a top-level key (plain YAML). Legacy 'language: ko' declarations are accepted with a migration warning — prefer 'lang: ko'.",
+    );
+    console.log(
+      "Exception NOT available for: CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, CONSTITUTION.md, AGENTS.md, *.context.md",
+    );
     console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
     process.exit(1);
   }

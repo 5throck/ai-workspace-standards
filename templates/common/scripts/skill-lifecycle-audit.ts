@@ -73,18 +73,23 @@
  * @license MIT
  */
 
-import { readFileSync, existsSync, readdirSync, statSync, type Dirent } from 'node:fs';
-import { join, dirname, relative, basename } from 'node:path';
-import { cwd } from 'node:process';
-import { isSelfManagedPath } from './lib/self-managed-tools.ts';
-import { lastContentCommitDate, loadDeliveryBaselineManifest, isDeliveredBaselineEqual, deliveryStalenessInfoLine } from './agent-lifecycle-audit.ts';
-import { findModelLiterals } from './lib/model-literal-patterns.ts';
+import { readFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
+import { join, dirname, relative, basename } from "node:path";
+import { cwd } from "node:process";
+import { isSelfManagedPath } from "./lib/self-managed-tools.ts";
+import {
+  lastContentCommitDate,
+  loadDeliveryBaselineManifest,
+  isDeliveredBaselineEqual,
+  deliveryStalenessInfoLine,
+} from "./agent-lifecycle-audit.ts";
+import { findModelLiterals } from "./lib/model-literal-patterns.ts";
 
 interface SkillFrontmatter {
   name: string;
   description: string;
   version?: string;
-  status?: 'draft' | 'active' | 'deprecated' | 'archived';
+  status?: "draft" | "active" | "deprecated" | "archived";
   owner?: string;
   requires?: string[];
   supersedes?: string;
@@ -100,7 +105,7 @@ interface ReferenceAllowlistEntry {
 }
 
 interface SkillIssue {
-  level: 'error' | 'warning';
+  level: "error" | "warning";
   file: string;
   message: string;
   fix?: string;
@@ -111,7 +116,7 @@ interface AuditResult {
   errors: SkillIssue[];
   warnings: SkillIssue[];
   summary: string;
-  summaryClean: string;  // Without ANSI colors for JSON output
+  summaryClean: string; // Without ANSI colors for JSON output
 }
 
 interface AgentRegistry {
@@ -129,17 +134,17 @@ interface SkillRegistryRow {
 
 // ANSI colors for terminal output
 const colors = {
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  green: '\x1b[32m',
-  cyan: '\x1b[36m',
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
 };
 
 const ROOT = cwd();
-const AGENTS_FILE = join(ROOT, 'AGENTS.md');
-const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+const AGENTS_FILE = join(ROOT, "AGENTS.md");
+const CONSTITUTION_FILE = join(ROOT, "CONSTITUTION.md");
 
 // A skill's `scope` may be 'workspace' (L0-only), 'common' (L0+L1, shared across
 // all variants), or the literal name of the variant it belongs to (L0+L1+L2) —
@@ -151,25 +156,27 @@ const CURRENT_VARIANT_NAME = basename(ROOT);
 // accepted) — not the project directory name (a project named `co-develop-demo`
 // still carries `scope: co-develop` skills).
 const PROJECT_VARIANT_NAME = (() => {
-  const canonical = join(ROOT, 'template-version.txt');
-  const tv = existsSync(canonical) ? canonical : join(ROOT, '.claude', 'template-version.txt');
-  if (!existsSync(tv)) return '';
-  const m = readFileSync(tv, 'utf-8').match(/^variant=(\S+)/m);
-  return m ? m[1].trim() : '';
+  const canonical = join(ROOT, "template-version.txt");
+  const tv = existsSync(canonical) ? canonical : join(ROOT, ".claude", "template-version.txt");
+  if (!existsSync(tv)) return "";
+  const m = readFileSync(tv, "utf-8").match(/^variant=(\S+)/m);
+  return m ? m[1].trim() : "";
 })();
 // Root-level (L0) skills in skills/ may declare a specific variant's name as
 // their scope even though the audit always runs from workspace root (where
 // CURRENT_VARIANT_NAME resolves to the workspace folder name, never a co-*
 // name) — so known variant directory names must be accepted too.
 const KNOWN_VARIANT_NAMES = (() => {
-  const templatesDir = join(ROOT, 'templates');
+  const templatesDir = join(ROOT, "templates");
   if (!existsSync(templatesDir)) return [] as string[];
   return readdirSync(templatesDir, { withFileTypes: true })
-    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
-    .map(e => e.name);
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+    .map((e) => e.name);
 })();
 function isValidScope(scope: string): boolean {
-  return ['workspace', 'common', 'variant', CURRENT_VARIANT_NAME, PROJECT_VARIANT_NAME, ...KNOWN_VARIANT_NAMES].filter(Boolean).includes(scope);
+  return ["workspace", "common", "variant", CURRENT_VARIANT_NAME, PROJECT_VARIANT_NAME, ...KNOWN_VARIANT_NAMES]
+    .filter(Boolean)
+    .includes(scope);
 }
 
 // Detect if we're at workspace root or in a sub-project
@@ -178,24 +185,26 @@ const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
 // Platform detection: Claude Code vs Antigravity
 const PLATFORM = detectPlatform();
 
-function detectPlatform(): 'claude-code' | 'antigravity' | 'unknown' {
-  if (existsSync(join(ROOT, 'GEMINI.md'))) return 'antigravity';
-  if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) return 'claude-code';
-  return 'unknown';
+function detectPlatform(): "claude-code" | "antigravity" | "unknown" {
+  if (existsSync(join(ROOT, "GEMINI.md"))) return "antigravity";
+  if (existsSync(join(ROOT, "CLAUDE.md")) || existsSync(join(ROOT, ".claude"))) return "claude-code";
+  return "unknown";
 }
 
-
-function parseSkillRegistryRows(registryPath = join(ROOT, 'skills', 'SKILLS.md')): Map<string, SkillRegistryRow> {
+function parseSkillRegistryRows(registryPath = join(ROOT, "skills", "SKILLS.md")): Map<string, SkillRegistryRow> {
   const rows = new Map<string, SkillRegistryRow>();
   if (!existsSync(registryPath)) return rows;
-  const content = readFileSync(registryPath, 'utf-8').replace(/\r\n/g, '\n');
-  const registrySection = (content.split(/\n###\s+Workspace Skills\b/i)[1]?.split(/\n###\s+Variant-Exclusive Skills\b/i)[0]) ?? (content.split(/\n##\s+Registry\b/i)[1]?.split(/\n##\s+/)[0] ?? content);
-  for (const line of registrySection.split('\n')) {
-    const cells = line.split('|').map(c => c.trim());
+  const content = readFileSync(registryPath, "utf-8").replace(/\r\n/g, "\n");
+  const registrySection =
+    content.split(/\n###\s+Workspace Skills\b/i)[1]?.split(/\n###\s+Variant-Exclusive Skills\b/i)[0] ??
+    content.split(/\n##\s+Registry\b/i)[1]?.split(/\n##\s+/)[0] ??
+    content;
+  for (const line of registrySection.split("\n")) {
+    const cells = line.split("|").map((c) => c.trim());
     if (cells.length < 8) continue;
     const nameMatch = cells[1].match(/`([^`]+)`/);
     if (!nameMatch) continue;
-    if (cells[2].toLowerCase() === 'version') continue;
+    if (cells[2].toLowerCase() === "version") continue;
     rows.set(nameMatch[1], {
       version: cells[2],
       status: cells[3],
@@ -216,7 +225,7 @@ function getAgentRegistry(): AgentRegistry {
     return registry;
   }
 
-  const content = readFileSync(AGENTS_FILE, 'utf-8');
+  const content = readFileSync(AGENTS_FILE, "utf-8");
 
   // Extract agent names from markdown table
   const agentMatches = content.matchAll(/\[([^\]]+)\]\(agents\/([^)]+)\.md\)/g);
@@ -230,29 +239,29 @@ function getAgentRegistry(): AgentRegistry {
 // Parse YAML frontmatter from SKILL.md
 function parseFrontmatter(filePath: string): SkillFrontmatter | null {
   try {
-    const content = readFileSync(filePath, 'utf-8').replace(/\r\n/g, '\n');
+    const content = readFileSync(filePath, "utf-8").replace(/\r\n/g, "\n");
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
     if (!frontmatterMatch) return null;
 
     const frontmatter: Record<string, unknown> = {};
-    const lines = frontmatterMatch[1].split('\n');
+    const lines = frontmatterMatch[1].split("\n");
 
     for (const line of lines) {
-      const colonIndex = line.indexOf(':');
+      const colonIndex = line.indexOf(":");
       if (colonIndex === -1) continue;
 
       const key = line.slice(0, colonIndex).trim();
       const value = line.slice(colonIndex + 1).trim();
 
-      if (value.startsWith('[') && value.endsWith(']')) {
+      if (value.startsWith("[") && value.endsWith("]")) {
         frontmatter[key] = value
           .slice(1, -1)
-          .split(',')
-          .map((v) => v.trim().replace(/^['"]|['"]$/g, ''))
+          .split(",")
+          .map((v) => v.trim().replace(/^['"]|['"]$/g, ""))
           .filter(Boolean);
       } else {
-        frontmatter[key] = value.replace(/^['"]|['"]$/g, '');
+        frontmatter[key] = value.replace(/^['"]|['"]$/g, "");
       }
     }
 
@@ -276,21 +285,21 @@ function findSkillFiles(dir: string, baseDir: string = ROOT, depth = 0): string[
     const fullPath = join(dir, entry.name);
 
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
       // Skip agent directories (they don't contain skills)
-      if (entry.name === 'agents') continue;
+      if (entry.name === "agents") continue;
       // Skip documentation/teaching example trees — illustrative SKILL.md
       // samples under docs/_examples/ are not real, lifecycle-managed skills.
-      if (entry.name === '_examples' && basename(dir) === 'docs') continue;
+      if (entry.name === "_examples" && basename(dir) === "docs") continue;
 
       // At workspace root: only scan known subdirectories
       if (IS_WORKSPACE_ROOT && dir === ROOT) {
         // Only recurse into skills/ and .claude/ directories
-        if (entry.name !== 'skills' && entry.name !== '.claude') continue;
+        if (entry.name !== "skills" && entry.name !== ".claude") continue;
       }
 
       skills.push(...findSkillFiles(fullPath, baseDir, depth + 1));
-    } else if (entry.name === 'SKILL.md') {
+    } else if (entry.name === "SKILL.md") {
       skills.push(fullPath);
     }
   }
@@ -302,15 +311,15 @@ function findSkillFiles(dir: string, baseDir: string = ROOT, depth = 0): string[
 function agentExists(owner: string, registry: AgentRegistry): boolean {
   if (registry.agents.includes(owner)) return true;
 
-  const agentPath1 = join(ROOT, 'agents', `${owner}.md`);
-  const agentPath2 = join(ROOT, '.claude', 'agents', `${owner}.md`);
+  const agentPath1 = join(ROOT, "agents", `${owner}.md`);
+  const agentPath2 = join(ROOT, ".claude", "agents", `${owner}.md`);
   if (existsSync(agentPath1) || existsSync(agentPath2)) return true;
 
   // A root-level (L0) skill's owner may be a variant-specific agent (the
   // skill's home domain) even though the skill itself lives in the shared
   // skills/ directory for L1 propagation — check every variant's roster too.
   for (const variantName of KNOWN_VARIANT_NAMES) {
-    const variantAgentPath = join(ROOT, 'templates', variantName, 'agents', `${owner}.md`);
+    const variantAgentPath = join(ROOT, "templates", variantName, "agents", `${owner}.md`);
     if (existsSync(variantAgentPath)) return true;
   }
   return false;
@@ -331,12 +340,12 @@ function wasModifiedRecently(filePath: string, days: number = 30): boolean {
 function collectKnownSkillNames(): { names: Set<string>; statusByName: Map<string, string> } {
   const names = new Set<string>();
   const statusByName = new Map<string, string>();
-  const roots = [join(ROOT, 'skills')];
-  const templatesDir = join(ROOT, 'templates');
+  const roots = [join(ROOT, "skills")];
+  const templatesDir = join(ROOT, "templates");
   if (existsSync(templatesDir)) {
     for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
-      if (e.isDirectory() && (e.name.startsWith('co-') || e.name === 'common')) {
-        roots.push(join(templatesDir, e.name, 'skills'));
+      if (e.isDirectory() && (e.name.startsWith("co-") || e.name === "common")) {
+        roots.push(join(templatesDir, e.name, "skills"));
       }
     }
   }
@@ -344,7 +353,7 @@ function collectKnownSkillNames(): { names: Set<string>; statusByName: Map<strin
     if (!existsSync(base)) continue;
     for (const e of readdirSync(base, { withFileTypes: true })) {
       if (!e.isDirectory()) continue;
-      const fm = parseFrontmatter(join(base, e.name, 'SKILL.md'));
+      const fm = parseFrontmatter(join(base, e.name, "SKILL.md"));
       if (fm?.name) {
         names.add(fm.name);
         if (fm.status) statusByName.set(fm.name, String(fm.status));
@@ -356,11 +365,11 @@ function collectKnownSkillNames(): { names: Set<string>; statusByName: Map<strin
 
 /** Allowlisted intentional historical references (docs/lifecycle/reference-allowlist.json). */
 function loadReferenceAllowlist(): ReferenceAllowlistEntry[] {
-  const p = join(ROOT, 'docs', 'lifecycle', 'reference-allowlist.json');
+  const p = join(ROOT, "docs", "lifecycle", "reference-allowlist.json");
   if (!existsSync(p)) return [];
   try {
-    const parsed = JSON.parse(readFileSync(p, 'utf-8'));
-    return Array.isArray(parsed?.allow) ? parsed.allow as ReferenceAllowlistEntry[] : [];
+    const parsed = JSON.parse(readFileSync(p, "utf-8"));
+    return Array.isArray(parsed?.allow) ? (parsed.allow as ReferenceAllowlistEntry[]) : [];
   } catch {
     return [];
   }
@@ -377,8 +386,7 @@ function loadReferenceAllowlist(): ReferenceAllowlistEntry[] {
 export function lifecycleRecordVersions(content: string): { header: string; footer: string } | null {
   const blocks = content.split(/^##\s+Metadata\s*$/m).slice(1);
   if (blocks.length < 2) return null;
-  const pick = (block: string): string | null =>
-    block.match(/^\s*-\s+\*\*Version\*\*:\s*(\S+)/m)?.[1] ?? null;
+  const pick = (block: string): string | null => block.match(/^\s*-\s+\*\*Version\*\*:\s*(\S+)/m)?.[1] ?? null;
   const header = pick(blocks[0]);
   const footer = pick(blocks[blocks.length - 1]);
   if (!header || !footer) return null;
@@ -400,12 +408,12 @@ export function scanSkillReferences(
   allowlist: ReferenceAllowlistEntry[],
   agentNames: Set<string> = new Set(),
 ): { unknown: string[]; deprecated: string[]; agentOnly: string[] } {
-  const content = readFileSync(skillFile, 'utf-8').replace(/\r\n/g, '\n');
-  const body = content.replace(/^---\n[\s\S]*?\n---/, ''); // frontmatter relations are covered by requires/relates_to checks
-  const self = parseFrontmatter(skillFile)?.name ?? '';
+  const content = readFileSync(skillFile, "utf-8").replace(/\r\n/g, "\n");
+  const body = content.replace(/^---\n[\s\S]*?\n---/, ""); // frontmatter relations are covered by requires/relates_to checks
+  const self = parseFrontmatter(skillFile)?.name ?? "";
   const allowForFile = allowlist
-    .filter(e => skillFile.replace(/\\/g, '/').includes(e.file_substring))
-    .flatMap(e => e.refs);
+    .filter((e) => skillFile.replace(/\\/g, "/").includes(e.file_substring))
+    .flatMap((e) => e.refs);
 
   const candidates = new Set<string>();
   // (a) Related Skills sections
@@ -423,7 +431,7 @@ export function scanSkillReferences(
   for (const name of candidates) {
     if (name === self) continue;
     if (known.names.has(name)) {
-      if (known.statusByName.get(name) === 'deprecated') deprecated.add(name);
+      if (known.statusByName.get(name) === "deprecated") deprecated.add(name);
       continue;
     }
     if (agentNames.has(name)) {
@@ -439,17 +447,17 @@ export function scanSkillReferences(
 /** Every agent name declared in agents/ rosters at L0 and inside template variants. */
 function collectKnownAgentNames(): Set<string> {
   const names = new Set<string>();
-  const dirs = [join(ROOT, 'agents'), join(ROOT, '.claude', 'agents')];
-  const templatesDir = join(ROOT, 'templates');
+  const dirs = [join(ROOT, "agents"), join(ROOT, ".claude", "agents")];
+  const templatesDir = join(ROOT, "templates");
   if (existsSync(templatesDir)) {
     for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
-      if (e.isDirectory() && e.name.startsWith('co-')) dirs.push(join(templatesDir, e.name, 'agents'));
+      if (e.isDirectory() && e.name.startsWith("co-")) dirs.push(join(templatesDir, e.name, "agents"));
     }
   }
   for (const dir of dirs) {
     if (!existsSync(dir)) continue;
     for (const f of readdirSync(dir)) {
-      if (f.endsWith('.md')) names.add(f.replace(/\.md$/, ''));
+      if (f.endsWith(".md")) names.add(f.replace(/\.md$/, ""));
     }
   }
   return names;
@@ -458,7 +466,7 @@ function collectKnownAgentNames(): Set<string> {
 /** Registry removal-date ≤ today on a skill that still exists (Check RD, ERROR). */
 function isRemovalDateExpired(removalDate: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(removalDate)) return false;
-  return new Date(removalDate + 'T23:59:59').getTime() <= Date.now();
+  return new Date(removalDate + "T23:59:59").getTime() <= Date.now();
 }
 
 // Text file extensions scanned for model-ID literals (Check MM). Binary and
@@ -473,7 +481,10 @@ const MODEL_LITERAL_TEXT_EXT = /\.(md|markdown|txt|json|jsonc|yaml|yml|html|htm|
  * literals. Directory bounds mirror findSkillFiles (symlink skip, depth cap,
  * node_modules/hidden-dir skip). Exported for unit tests.
  */
-export function scanSkillTreeForModelLiterals(skillDir: string, depth = 0): Array<{ file: string; literals: string[] }> {
+export function scanSkillTreeForModelLiterals(
+  skillDir: string,
+  depth = 0,
+): Array<{ file: string; literals: string[] }> {
   if (depth > 8) return [];
   const hits: Array<{ file: string; literals: string[] }> = [];
   let entries: Dirent<string>[];
@@ -487,11 +498,11 @@ export function scanSkillTreeForModelLiterals(skillDir: string, depth = 0): Arra
     if (entry.isSymbolicLink()) continue;
     const full = join(skillDir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
       hits.push(...scanSkillTreeForModelLiterals(full, depth + 1));
     } else if (MODEL_LITERAL_TEXT_EXT.test(entry.name)) {
       try {
-        const text: string = readFileSync(full, 'utf-8');
+        const text: string = readFileSync(full, "utf-8");
         const literals = findModelLiterals(text);
         if (literals.length > 0) hits.push({ file: full, literals });
       } catch {
@@ -508,7 +519,7 @@ function checkCircularDependencies(
   requires: string[],
   allSkills: Map<string, string>,
   visited = new Set<string>(),
-  path: string[] = []
+  path: string[] = [],
 ): string[] | null {
   const skillName = dirname(relative(ROOT, skillFile));
 
@@ -547,11 +558,14 @@ function checkCircularDependencies(
  */
 function parseRegistryVersions(content: string): Record<string, { version: string; status: string }> {
   const scripts: Record<string, { version: string; status: string }> = {};
-  for (const line of content.split('\n')) {
+  for (const line of content.split("\n")) {
     if (!/^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(line)) continue;
-    const parts = line.split('|').map((p) => p.trim()).filter((p) => p);
+    const parts = line
+      .split("|")
+      .map((p) => p.trim())
+      .filter((p) => p);
     if (parts.length < 4) continue;
-    const name = parts[0].replace(/`/g, '');
+    const name = parts[0].replace(/`/g, "");
     const version = parts[2];
     const status = parts[3];
     if (!/^\d+\.\d+\.\d+$/.test(version)) continue;
@@ -588,13 +602,13 @@ function auditSkills(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 Skill Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}=========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
-    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? "workspace root" : "current project"}${colors.reset}`);
     console.log(`${colors.dim}Skills found: ${skillFiles.length}${colors.reset}`);
-    console.log('');
+    console.log("");
   }
 
   for (const skillFile of skillFiles) {
-    const relPath = relative(ROOT, skillFile).replace(/\\/g, '/');
+    const relPath = relative(ROOT, skillFile).replace(/\\/g, "/");
     // T-20261108-004 (F-1): vendored external-deps clones (external/<id>/ per
     // DEC-20261106-04 "consumed as-is") are tool-custody upstream content —
     // exempt from every authoring check here (frontmatter, owner, registry,
@@ -606,22 +620,22 @@ function auditSkills(jsonMode = false): AuditResult {
 
     if (!frontmatter) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'No valid frontmatter found',
-        fix: 'Add YAML frontmatter with name and description',
+        message: "No valid frontmatter found",
+        fix: "Add YAML frontmatter with name and description",
       });
       continue;
     }
 
-    const isPlatformSkill = skillFile.includes('/.claude/skills/') || skillFile.includes('\\.claude\\skills\\');
+    const isPlatformSkill = skillFile.includes("/.claude/skills/") || skillFile.includes("\\.claude\\skills\\");
     if (frontmatter.name && !isPlatformSkill) runtimeSkillNames.add(frontmatter.name);
 
     if (!frontmatter.name) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'Missing name in frontmatter',
+        message: "Missing name in frontmatter",
         fix: "Add 'name: skill-name' to frontmatter",
       });
       continue;
@@ -629,9 +643,9 @@ function auditSkills(jsonMode = false): AuditResult {
 
     if (!frontmatter.description) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: 'Missing description in frontmatter',
+        message: "Missing description in frontmatter",
         fix: "Add 'description: This skill should be used when...'",
       });
     }
@@ -644,9 +658,9 @@ function auditSkills(jsonMode = false): AuditResult {
     // exempts them here exactly like the tool-owned graft/trail skills.
     if (!isPlatformSkill && !frontmatter.owner && !isSelfManagedPath(relPath)) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'No owner defined',
+        message: "No owner defined",
         fix: "Add 'owner: agent-name' to frontmatter",
       });
       continue;
@@ -656,7 +670,7 @@ function auditSkills(jsonMode = false): AuditResult {
     // keep their delivered owners as-is (same rationale as agent-audit Check 12).
     if (IS_WORKSPACE_ROOT && !isPlatformSkill && frontmatter.owner && !agentExists(frontmatter.owner, registry)) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
         message: `Orphaned skill (owner: ${frontmatter.owner} not found)`,
         fix: `Reassign to valid agent or create agents/${frontmatter.owner}.md`,
@@ -664,29 +678,29 @@ function auditSkills(jsonMode = false): AuditResult {
     }
 
     // Check status field is present and valid
-    const validSkillStatuses = ['active', 'deprecated', 'experimental', 'archived'];
+    const validSkillStatuses = ["active", "deprecated", "experimental", "archived"];
     if (!isPlatformSkill && !frontmatter.status) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'Missing status in frontmatter',
+        message: "Missing status in frontmatter",
         fix: "Add 'status: active' (or deprecated/experimental/archived)",
       });
     } else if (!isPlatformSkill && frontmatter.status && !validSkillStatuses.includes(frontmatter.status as string)) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: `Invalid status value '${frontmatter.status}' (allowed: ${validSkillStatuses.join(' | ')})`,
-        fix: `Set status to one of: ${validSkillStatuses.join(', ')}`,
+        message: `Invalid status value '${frontmatter.status}' (allowed: ${validSkillStatuses.join(" | ")})`,
+        fix: `Set status to one of: ${validSkillStatuses.join(", ")}`,
       });
     }
 
-    if (frontmatter.status === 'deprecated' && wasModifiedRecently(skillFile, 30)) {
+    if (frontmatter.status === "deprecated" && wasModifiedRecently(skillFile, 30)) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: `Deprecated skill still active (v${frontmatter.version || 'unknown'})`,
-        fix: 'Archive to skills/_archive/ or remove from repository',
+        message: `Deprecated skill still active (v${frontmatter.version || "unknown"})`,
+        fix: "Archive to skills/_archive/ or remove from repository",
       });
     }
     // T-20261108-004: vendored external-deps clones are tool-custody content —
@@ -696,7 +710,7 @@ function auditSkills(jsonMode = false): AuditResult {
       const row = registryRows.get(frontmatter.name);
       if (!row) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
           message: `Missing skills/SKILLS.md registry row for ${frontmatter.name}`,
           fix: `Add a registry row for ${frontmatter.name} or remove the runtime skill`,
@@ -704,53 +718,53 @@ function auditSkills(jsonMode = false): AuditResult {
       } else {
         if (frontmatter.version && row.version !== String(frontmatter.version)) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `Registry version drift for ${frontmatter.name}: SKILL.md=${frontmatter.version}, SKILLS.md=${row.version}`,
-            fix: 'Update skills/SKILLS.md version to match SKILL.md frontmatter',
+            fix: "Update skills/SKILLS.md version to match SKILL.md frontmatter",
           });
         }
         if (frontmatter.status && row.status !== String(frontmatter.status)) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `Registry status drift for ${frontmatter.name}: SKILL.md=${frontmatter.status}, SKILLS.md=${row.status}`,
-            fix: 'Update skills/SKILLS.md status to match SKILL.md frontmatter',
+            fix: "Update skills/SKILLS.md status to match SKILL.md frontmatter",
           });
         }
         if (frontmatter.owner && row.owner !== String(frontmatter.owner)) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `Registry owner drift for ${frontmatter.name}: SKILL.md=${frontmatter.owner}, SKILLS.md=${row.owner}`,
-            fix: 'Update skills/SKILLS.md owner to match SKILL.md frontmatter',
+            fix: "Update skills/SKILLS.md owner to match SKILL.md frontmatter",
           });
         }
         if (frontmatter.last_reviewed && row.lastReviewed !== String(frontmatter.last_reviewed)) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `Registry last_reviewed drift for ${frontmatter.name}: SKILL.md=${frontmatter.last_reviewed}, SKILLS.md=${row.lastReviewed}`,
-            fix: 'Update skills/SKILLS.md last reviewed date to match SKILL.md frontmatter',
+            fix: "Update skills/SKILLS.md last reviewed date to match SKILL.md frontmatter",
           });
         }
       }
     }
 
     // Check: scope field should be declared
-    const skillContent = readFileSync(skillFile, 'utf-8');
+    const skillContent = readFileSync(skillFile, "utf-8");
     const scopeMatch = skillContent.match(/^scope:\s*(\S+)/m);
     if (!scopeMatch) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
         message: `scope field missing in SKILL.md frontmatter — declare scope: workspace | common | variant`,
       });
     } else if (!isValidScope(scopeMatch[1])) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant | ${CURRENT_VARIANT_NAME} | ${KNOWN_VARIANT_NAMES.join(' | ')}`,
+        message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant | ${CURRENT_VARIANT_NAME} | ${KNOWN_VARIANT_NAMES.join(" | ")}`,
       });
     }
 
@@ -764,19 +778,19 @@ function auditSkills(jsonMode = false): AuditResult {
       for (const hit of scanSkillTreeForModelLiterals(skillDir)) {
         if (hit.file === skillFile) continue; // SKILL.md reported below with its own relPath context
         errors.push({
-          level: 'error',
-          file: relative(ROOT, hit.file).replace(/\\/g, '/'),
-          message: `Model-ID literal(s) in skill tree: ${hit.literals.join(', ')} (Check MM)`,
-          fix: 'Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose',
+          level: "error",
+          file: relative(ROOT, hit.file).replace(/\\/g, "/"),
+          message: `Model-ID literal(s) in skill tree: ${hit.literals.join(", ")} (Check MM)`,
+          fix: "Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose",
         });
       }
       const ownLiterals = findModelLiterals(skillContent);
       if (ownLiterals.length > 0) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
-          message: `Model-ID literal(s) in skill tree: ${ownLiterals.join(', ')} (Check MM)`,
-          fix: 'Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose',
+          message: `Model-ID literal(s) in skill tree: ${ownLiterals.join(", ")} (Check MM)`,
+          fix: "Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose",
         });
       }
     }
@@ -785,7 +799,7 @@ function auditSkills(jsonMode = false): AuditResult {
       for (const req of frontmatter.requires) {
         if (!allSkills.has(req)) {
           warnings.push({
-            level: 'warning',
+            level: "warning",
             file: relPath,
             message: `Missing dependency: ${req}`,
             fix: `Create ${req} skill or remove from requires: []`,
@@ -798,10 +812,10 @@ function auditSkills(jsonMode = false): AuditResult {
       const cycle = checkCircularDependencies(skillFile, frontmatter.requires, allSkills);
       if (cycle) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
-          message: `Circular dependency: ${cycle.join(' → ')}`,
-          fix: 'Break the cycle by removing one dependency',
+          message: `Circular dependency: ${cycle.join(" → ")}`,
+          fix: "Break the cycle by removing one dependency",
         });
       }
     }
@@ -811,7 +825,7 @@ function auditSkills(jsonMode = false): AuditResult {
       const { unknown, deprecated, agentOnly } = scanSkillReferences(skillFile, knownSkills, refAllowlist, knownAgents);
       for (const name of unknown) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
           message: `Reference integrity: backtick reference \`${name}\` resolves to no skill in skills/ or templates/*/skills/`,
           fix: `Fix or remove the reference (add docs/lifecycle/reference-allowlist.json entry if it is an intentional historical note)`,
@@ -819,7 +833,7 @@ function auditSkills(jsonMode = false): AuditResult {
       }
       for (const name of deprecated) {
         warnings.push({
-          level: 'warning',
+          level: "warning",
           file: relPath,
           message: `Reference \`${name}\` points at a deprecated skill`,
           fix: `Update the reference to the successor skill`,
@@ -827,7 +841,7 @@ function auditSkills(jsonMode = false): AuditResult {
       }
       for (const name of agentOnly) {
         warnings.push({
-          level: 'warning',
+          level: "warning",
           file: relPath,
           message: `Related-Skills entry \`${name}\` resolves to an agent, not a skill`,
           fix: `Move the reference to the agent-relations section or cite the actual skill name`,
@@ -853,7 +867,7 @@ function auditSkills(jsonMode = false): AuditResult {
       // absent at L0, where the tolerance is inert) is suppressed to an INFO
       // line instead; any genuine project edit breaks the hash and re-arms the
       // warning with full history.
-      if (frontmatter.status === 'active' && !selfManaged) {
+      if (frontmatter.status === "active" && !selfManaged) {
         const reviewed = frontmatter.last_reviewed;
         const commitDate = lastContentCommitDate(skillFile);
         if (reviewed && /^\d{4}-\d{2}-\d{2}$/.test(reviewed) && commitDate && reviewed < commitDate) {
@@ -864,7 +878,7 @@ function auditSkills(jsonMode = false): AuditResult {
             }
           } else {
             warnings.push({
-              level: 'warning',
+              level: "warning",
               file: relPath,
               message: `frontmatter last_reviewed (${reviewed}) is older than the last git content commit (${commitDate})`,
               fix: "Review the current content and update 'last_reviewed' in SKILL.md frontmatter",
@@ -878,13 +892,13 @@ function auditSkills(jsonMode = false): AuditResult {
       // `script.ts v?X.Y.Z` WITHOUT a floor operator (≥/>= floors are
       // minimums, not pins, and never drift stale). Unknown script names are
       // ignored (prose references, other-variant tools).
-      if (frontmatter.status === 'active') {
+      if (frontmatter.status === "active") {
         if (scriptRegistry === null) {
-          scriptRegistry = existsSync(join(ROOT, 'scripts', 'SCRIPTS.md'))
-            ? parseRegistryVersions(readFileSync(join(ROOT, 'scripts', 'SCRIPTS.md'), 'utf-8'))
+          scriptRegistry = existsSync(join(ROOT, "scripts", "SCRIPTS.md"))
+            ? parseRegistryVersions(readFileSync(join(ROOT, "scripts", "SCRIPTS.md"), "utf-8"))
             : {};
         }
-        const content = skillContent.replace(/\r\n/g, '\n');
+        const content = skillContent.replace(/\r\n/g, "\n");
         for (const m of content.matchAll(/([\w./-]+\.ts)`?[ \t]+(?:v|≥|>=)?[ \t]*(\d+\.\d+\.\d+)/g)) {
           if (/≥|>=/.test(m[0])) continue; // floor, not a pin
           const script = m[1];
@@ -892,7 +906,7 @@ function auditSkills(jsonMode = false): AuditResult {
           if (!current) continue;
           if (current.version !== m[2]) {
             warnings.push({
-              level: 'warning',
+              level: "warning",
               file: relPath,
               message: `script version pin drift: "${script} ${m[2]}" but the registry has ${current.version}`,
               fix: `Update the ${script} version pin in the SKILL.md body to ${current.version} (or drop the pin)`,
@@ -915,30 +929,33 @@ function auditSkills(jsonMode = false): AuditResult {
     // version bump and a hand-maintained record would just drift.
     if (!isPlatformSkill && frontmatter.name) {
       const selfManaged = isSelfManagedPath(relPath);
-      const lifecycleRecordPath = join(ROOT, 'docs', 'lifecycle', 'skills', `${frontmatter.name}.md`);
-      if (frontmatter.status === 'active' && !selfManaged && !existsSync(lifecycleRecordPath)) {
+      const lifecycleRecordPath = join(ROOT, "docs", "lifecycle", "skills", `${frontmatter.name}.md`);
+      if (frontmatter.status === "active" && !selfManaged && !existsSync(lifecycleRecordPath)) {
         warnings.push({
-          level: 'warning',
+          level: "warning",
           file: relPath,
           message: `No lifecycle record: docs/lifecycle/skills/${frontmatter.name}.md is missing for an active skill`,
           fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata)`,
         });
-      } else if (frontmatter.status === 'active' && selfManaged && !existsSync(lifecycleRecordPath)) {
-        if (!jsonMode) console.log(`  ℹ️  lifecycle: ${relPath} is self-managed (docs/self-managed-surfaces.json) — lifecycle record not required`);
-      } else if (frontmatter.status === 'active' && existsSync(lifecycleRecordPath)) {
+      } else if (frontmatter.status === "active" && selfManaged && !existsSync(lifecycleRecordPath)) {
+        if (!jsonMode)
+          console.log(
+            `  ℹ️  lifecycle: ${relPath} is self-managed (docs/self-managed-surfaces.json) — lifecycle record not required`,
+          );
+      } else if (frontmatter.status === "active" && existsSync(lifecycleRecordPath)) {
         // Check MV (v1.6.0, T-20261004-020): the record's footer Metadata Version
         // must match the header Metadata Version and the SKILL.md frontmatter —
         // the ci-triage footer said 0.1.0 while header/frontmatter said 0.2.0
         // after the 2026-10-04 bump and nothing caught it.
-        const versions = lifecycleRecordVersions(readFileSync(lifecycleRecordPath, 'utf-8'));
+        const versions = lifecycleRecordVersions(readFileSync(lifecycleRecordPath, "utf-8"));
         if (versions) {
-          const fmVersion = frontmatter.version ?? '—';
+          const fmVersion = frontmatter.version ?? "—";
           if (versions.header !== versions.footer || versions.footer !== fmVersion) {
             errors.push({
-              level: 'error',
+              level: "error",
               file: relPath,
               message: `Lifecycle record version drift for ${frontmatter.name}: header=${versions.header}, footer=${versions.footer}, SKILL.md=${fmVersion} (docs/lifecycle/skills/${frontmatter.name}.md)`,
-              fix: 'Align both Metadata Version lines in the lifecycle record with the SKILL.md frontmatter version',
+              fix: "Align both Metadata Version lines in the lifecycle record with the SKILL.md frontmatter version",
             });
           }
         }
@@ -950,8 +967,8 @@ function auditSkills(jsonMode = false): AuditResult {
     for (const name of registryRows.keys()) {
       if (!runtimeSkillNames.has(name)) {
         errors.push({
-          level: 'error',
-          file: 'skills/SKILLS.md',
+          level: "error",
+          file: "skills/SKILLS.md",
           message: `Registry row has no matching runtime skill: ${name}`,
           fix: `Remove the ${name} row from skills/SKILLS.md or restore skills/${name}/SKILL.md`,
         });
@@ -960,8 +977,8 @@ function auditSkills(jsonMode = false): AuditResult {
       const row = registryRows.get(name)!;
       if (row.removalDate && isRemovalDateExpired(row.removalDate)) {
         errors.push({
-          level: 'error',
-          file: 'skills/SKILLS.md',
+          level: "error",
+          file: "skills/SKILLS.md",
           message: `Removal date expired for ${name} (removal-date ${row.removalDate} has passed; the skill is still present)`,
           fix: `Run the removal review now: remove the skill or push the removal-date out with a recorded rationale`,
         });
@@ -972,20 +989,20 @@ function auditSkills(jsonMode = false): AuditResult {
   // Check RI for template-resident skills (v1.5.0) — templates/*/skills are not
   // part of the runtime scan above, but their SKILL.md bodies reference skills too.
   if (IS_WORKSPACE_ROOT) {
-    const templatesDir = join(ROOT, 'templates');
+    const templatesDir = join(ROOT, "templates");
     if (existsSync(templatesDir)) {
       for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
-        if (!e.isDirectory() || !(e.name.startsWith('co-') || e.name === 'common')) continue;
-        const tplSkillsDir = join(templatesDir, e.name, 'skills');
+        if (!e.isDirectory() || !(e.name.startsWith("co-") || e.name === "common")) continue;
+        const tplSkillsDir = join(templatesDir, e.name, "skills");
         if (!existsSync(tplSkillsDir)) continue;
         for (const s of readdirSync(tplSkillsDir, { withFileTypes: true })) {
           if (!s.isDirectory()) continue;
-          const f = join(tplSkillsDir, s.name, 'SKILL.md');
+          const f = join(tplSkillsDir, s.name, "SKILL.md");
           if (!existsSync(f)) continue;
           const { unknown } = scanSkillReferences(f, knownSkills, refAllowlist, knownAgents);
           for (const name of unknown) {
             errors.push({
-              level: 'error',
+              level: "error",
               file: `templates/${e.name}/skills/${s.name}/SKILL.md`,
               message: `Reference integrity: backtick reference \`${name}\` resolves to no skill in skills/ or templates/*/skills/`,
               fix: `Fix or remove the reference (add docs/lifecycle/reference-allowlist.json entry if it is an intentional historical note)`,
@@ -995,12 +1012,12 @@ function auditSkills(jsonMode = false): AuditResult {
           // literal-free too (same patterns, same rule as the runtime scan).
           const skillDir = join(tplSkillsDir, s.name);
           for (const hit of scanSkillTreeForModelLiterals(skillDir)) {
-            const hitRel = relative(skillDir, hit.file).replace(/\\/g, '/');
+            const hitRel = relative(skillDir, hit.file).replace(/\\/g, "/");
             errors.push({
-              level: 'error',
+              level: "error",
               file: `templates/${e.name}/skills/${s.name}/${hitRel}`,
-              message: `Model-ID literal(s) in skill tree: ${hit.literals.join(', ')} (Check MM)`,
-              fix: 'Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose',
+              message: `Model-ID literal(s) in skill tree: ${hit.literals.join(", ")} (Check MM)`,
+              fix: "Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose",
             });
           }
         }
@@ -1027,12 +1044,14 @@ function generateSummary(scanned: number, errors: number, warnings: number): { c
     };
   }
   return {
-    colored: `${colors.green}✓ Skills scanned: ${scanned}${colors.reset}` +
-      (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : '') +
-      (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ''),
-    clean: `Skills scanned: ${scanned}` +
-      (warnings > 0 ? `, Warnings: ${warnings}` : '') +
-      (errors > 0 ? `, Errors: ${errors}` : ''),
+    colored:
+      `${colors.green}✓ Skills scanned: ${scanned}${colors.reset}` +
+      (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : "") +
+      (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ""),
+    clean:
+      `Skills scanned: ${scanned}` +
+      (warnings > 0 ? `, Warnings: ${warnings}` : "") +
+      (errors > 0 ? `, Errors: ${errors}` : ""),
   };
 }
 
@@ -1041,14 +1060,14 @@ function printResults(result: AuditResult): void {
     console.log(`${colors.red}✖ ERROR: ${error.message}${colors.reset}`);
     console.log(`   File: ${error.file}`);
     if (error.fix) console.log(`   Fix: ${error.fix}`);
-    console.log('');
+    console.log("");
   }
 
   for (const warning of result.warnings) {
     console.log(`${colors.yellow}⚠️  WARNING: ${warning.message}${colors.reset}`);
     console.log(`   File: ${warning.file}`);
     if (warning.fix) console.log(`   Fix: ${warning.fix}`);
-    console.log('');
+    console.log("");
   }
 
   console.log(`${colors.cyan}=========================${colors.reset}`);
@@ -1061,8 +1080,8 @@ function printJsonResults(result: AuditResult): void {
 
 // CLI interface
 const args = process.argv.slice(2);
-const jsonMode = args.includes('--json');
-const helpMode = args.includes('--help') || args.includes('-h');
+const jsonMode = args.includes("--json");
+const helpMode = args.includes("--help") || args.includes("-h");
 
 if (helpMode) {
   console.log(`
@@ -1098,4 +1117,3 @@ if (jsonMode) {
 if (import.meta.main) {
   process.exit(result.errors.length > 0 ? 1 : 0);
 }
-

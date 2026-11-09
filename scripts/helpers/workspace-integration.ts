@@ -24,10 +24,10 @@
  * - lib/encoding-utils.ts (readUTF8File / writeUTF8File)
  */
 
-import { join } from 'path';
-import { existsSync, accessSync, constants } from 'fs';
-import { createHash } from 'crypto';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
+import { join } from "node:path";
+import { existsSync, accessSync, constants } from "node:fs";
+import { createHash } from "node:crypto";
+import { readUTF8File, writeUTF8File } from "../lib/encoding-utils.ts";
 import {
   initializeState,
   saveState,
@@ -37,10 +37,10 @@ import {
   failPipeline,
   rollbackPipeline,
   type PipelineState,
-} from '../lib/pipeline-state.ts';
-import { ErrorPhase } from '../lib/error-handling.ts';
-import type { VariantType } from './registries/variant-type-registry.ts';
-import { validateRegistryIntegrity } from './registries/index.ts';
+} from "../lib/pipeline-state.ts";
+import { ErrorPhase } from "../lib/error-handling.ts";
+import type { VariantType } from "./registries/variant-type-registry.ts";
+import { validateRegistryIntegrity } from "./registries/index.ts";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -72,7 +72,7 @@ export interface WorkspaceRegistrationResult {
  * A single error encountered during registration.
  */
 export interface RegistrationError {
-  readonly phase: 'preflight' | 'begin' | 'write' | 'verify';
+  readonly phase: "preflight" | "begin" | "write" | "verify";
   readonly step: string;
   readonly message: string;
   readonly file?: string;
@@ -102,14 +102,14 @@ interface FileSnapshot {
 
 const WORKSPACE_ROOT = process.cwd();
 
-const PROPAGATION_MAP_PATH = join(WORKSPACE_ROOT, 'scripts', 'propagation-map.json');
-const VERSION_REGISTRY_PATH = join(WORKSPACE_ROOT, 'docs', 'templates', 'VERSION_REGISTRY.json');
-const README_PATH = join(WORKSPACE_ROOT, 'README.md');
-const AGENTS_MD_PATH = join(WORKSPACE_ROOT, 'AGENTS.md');
+const PROPAGATION_MAP_PATH = join(WORKSPACE_ROOT, "scripts", "propagation-map.json");
+const VERSION_REGISTRY_PATH = join(WORKSPACE_ROOT, "docs", "templates", "VERSION_REGISTRY.json");
+const README_PATH = join(WORKSPACE_ROOT, "README.md");
+const AGENTS_MD_PATH = join(WORKSPACE_ROOT, "AGENTS.md");
 
-const NEW_PROJECT_TS = join(WORKSPACE_ROOT, 'scripts', 'new-project.ts');
-const NEW_PROJECT_SH = join(WORKSPACE_ROOT, 'scripts', 'new-project.sh');
-const NEW_PROJECT_PS1 = join(WORKSPACE_ROOT, 'scripts', 'new-project.ps1');
+const NEW_PROJECT_TS = join(WORKSPACE_ROOT, "scripts", "new-project.ts");
+const NEW_PROJECT_SH = join(WORKSPACE_ROOT, "scripts", "new-project.sh");
+const NEW_PROJECT_PS1 = join(WORKSPACE_ROOT, "scripts", "new-project.ps1");
 
 /** All target files that must be snapshotted before writes begin. */
 const ALL_TARGET_FILES = [
@@ -130,7 +130,7 @@ const ALL_TARGET_FILES = [
  * Compute SHA-256 hex digest of a string.
  */
 function sha256(content: string): string {
-  return createHash('sha256').update(content, 'utf-8').digest('hex');
+  return createHash("sha256").update(content, "utf-8").digest("hex");
 }
 
 /**
@@ -163,14 +163,14 @@ function safeJsonParse(content: string): unknown {
  */
 function isValidPropagationMap(content: string): { valid: boolean; reason?: string } {
   const data = safeJsonParse(content);
-  if (!data || typeof data !== 'object' || data === null) {
-    return { valid: false, reason: 'File is not valid JSON or is not an object' };
+  if (!data || typeof data !== "object" || data === null) {
+    return { valid: false, reason: "File is not valid JSON or is not an object" };
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.version !== 'string') {
+  if (typeof obj.version !== "string") {
     return { valid: false, reason: 'Missing or non-string "version" field' };
   }
-  if (typeof obj.domains !== 'object' || obj.domains === null || Array.isArray(obj.domains)) {
+  if (typeof obj.domains !== "object" || obj.domains === null || Array.isArray(obj.domains)) {
     return { valid: false, reason: 'Missing or non-object "domains" field' };
   }
   return { valid: true };
@@ -183,29 +183,33 @@ function isValidPropagationMap(content: string): { valid: boolean; reason?: stri
  */
 function isValidVersionRegistry(content: string): { valid: boolean; reason?: string } {
   const data = safeJsonParse(content);
-  if (!data || typeof data !== 'object' || data === null) {
-    return { valid: false, reason: 'File is not valid JSON or is not an object' };
+  if (!data || typeof data !== "object" || data === null) {
+    return { valid: false, reason: "File is not valid JSON or is not an object" };
   }
   const obj = data as Record<string, unknown>;
 
   // Detect legacy array format — `variants` must be an object, not an array
   if (Array.isArray(obj.variants)) {
-    return { valid: false, reason: 'VERSION_REGISTRY uses legacy array format — expected nested object format with "variants" as a keyed object' };
+    return {
+      valid: false,
+      reason:
+        'VERSION_REGISTRY uses legacy array format — expected nested object format with "variants" as a keyed object',
+    };
   }
 
-  if (typeof obj.variants !== 'object' || obj.variants === null) {
+  if (typeof obj.variants !== "object" || obj.variants === null) {
     return { valid: false, reason: 'Missing or non-object "variants" field' };
   }
 
   // Verify at least one existing entry has the expected nested structure
   const variants = obj.variants as Record<string, unknown>;
   for (const [key, entry] of Object.entries(variants)) {
-    if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
+    if (entry && typeof entry === "object" && !Array.isArray(entry)) {
       const e = entry as Record<string, unknown>;
-      if (typeof e.latest !== 'string') {
+      if (typeof e.latest !== "string") {
         return { valid: false, reason: `Variant "${key}" missing required "latest" field` };
       }
-      if (typeof e.status !== 'string') {
+      if (typeof e.status !== "string") {
         return { valid: false, reason: `Variant "${key}" missing required "status" field` };
       }
       // Structure looks correct
@@ -229,15 +233,15 @@ interface MarkerInjectDomain {
 
 function getMarkerInjectDomains(data: unknown): MarkerInjectDomain[] {
   const domains: MarkerInjectDomain[] = [];
-  if (!data || typeof data !== 'object') return domains;
+  if (!data || typeof data !== "object") return domains;
   const obj = data as Record<string, unknown>;
   const domainsObj = obj.domains as Record<string, unknown> | undefined;
-  if (!domainsObj || typeof domainsObj !== 'object') return domains;
+  if (!domainsObj || typeof domainsObj !== "object") return domains;
 
   for (const [key, domain] of Object.entries(domainsObj)) {
-    if (!domain || typeof domain !== 'object') continue;
+    if (!domain || typeof domain !== "object") continue;
     const d = domain as Record<string, unknown>;
-    if (d.mode === 'marker-inject' && Array.isArray(d.target_variants)) {
+    if (d.mode === "marker-inject" && Array.isArray(d.target_variants)) {
       domains.push({
         key,
         targetVariants: d.target_variants as string[],
@@ -254,17 +258,17 @@ function getMarkerInjectDomains(data: unknown): MarkerInjectDomain[] {
  */
 function addVariantToPropagationMap(content: string, variantName: string): string {
   const data = safeJsonParse(content) as Record<string, unknown>;
-  if (!data || typeof data !== 'object') return content;
+  if (!data || typeof data !== "object") return content;
 
   const domainsObj = data.domains as Record<string, unknown>;
-  if (!domainsObj || typeof domainsObj !== 'object') return content;
+  if (!domainsObj || typeof domainsObj !== "object") return content;
 
   let modified = false;
 
   for (const domain of Object.values(domainsObj)) {
-    if (!domain || typeof domain !== 'object') continue;
+    if (!domain || typeof domain !== "object") continue;
     const d = domain as Record<string, unknown>;
-    if (d.mode === 'marker-inject' && Array.isArray(d.target_variants)) {
+    if (d.mode === "marker-inject" && Array.isArray(d.target_variants)) {
       const variants = d.target_variants as string[];
       if (!variants.includes(variantName)) {
         variants.push(variantName);
@@ -275,7 +279,7 @@ function addVariantToPropagationMap(content: string, variantName: string): strin
 
   if (!modified) return content;
 
-  return JSON.stringify(data, null, 2) + '\n';
+  return JSON.stringify(data, null, 2) + "\n";
 }
 
 /**
@@ -285,17 +289,14 @@ function addVariantToPropagationMap(content: string, variantName: string): strin
  * Output format:
  *   { "variants": { "<name>": { latest, released, status, changelog, ... } } }
  */
-function addVariantToVersionRegistry(
-  content: string,
-  config: WorkspaceRegistrationConfig,
-): string {
+function addVariantToVersionRegistry(content: string, config: WorkspaceRegistrationConfig): string {
   const data = safeJsonParse(content) as Record<string, unknown>;
-  if (!data || typeof data !== 'object') {
-    throw new Error('VERSION_REGISTRY.json is not a valid JSON object');
+  if (!data || typeof data !== "object") {
+    throw new Error("VERSION_REGISTRY.json is not a valid JSON object");
   }
 
   // Ensure variants object exists
-  if (!data.variants || typeof data.variants !== 'object' || Array.isArray(data.variants)) {
+  if (!data.variants || typeof data.variants !== "object" || Array.isArray(data.variants)) {
     data.variants = {};
   }
 
@@ -305,15 +306,15 @@ function addVariantToVersionRegistry(
   variants[config.variantName] = {
     latest: config.version,
     released: today,
-    status: 'beta',
+    status: "beta",
     changelog: [],
     security_advisories: [],
     migration_guides: [],
     source_project: config.sourceProject ?? `Projects/${config.variantName}`,
-    promoted_via: 'l3-to-variant-pipeline.ts',
+    promoted_via: "l3-to-variant-pipeline.ts",
   };
 
-  return JSON.stringify(data, null, 2) + '\n';
+  return JSON.stringify(data, null, 2) + "\n";
 }
 
 /**
@@ -339,10 +340,7 @@ function addVariantToReadme(content: string, config: WorkspaceRegistrationConfig
 
   const variantEntry = `### ${config.variantName}\n\n- **Type**: ${config.variantType}\n- **Status**: beta (v${config.version})\n- **Description**: ${config.description}\n`;
 
-  return content.replace(
-    variantsSectionRegex,
-    `${sectionHeader}${sectionContent}\n${variantEntry}${nextHeader}`,
-  );
+  return content.replace(variantsSectionRegex, `${sectionHeader}${sectionContent}\n${variantEntry}${nextHeader}`);
 }
 
 /**
@@ -362,10 +360,7 @@ function addVariantToNewProjectTs(content: string, variantName: string): string 
   const newOption = `  '${variantName}',`;
   const updatedArrayContent = arrayContent.trim() + `\n${newOption}\n`;
 
-  return content.replace(
-    variantOptionsRegex,
-    `${arrayStart}${updatedArrayContent}${arrayEnd}`,
-  );
+  return content.replace(variantOptionsRegex, `${arrayStart}${updatedArrayContent}${arrayEnd}`);
 }
 
 /**
@@ -384,10 +379,7 @@ function addVariantToNewProjectSh(content: string, variantName: string): string 
   const sectionEnd = match[3];
   const newOption = `    ${variantName})\n        VARIANT_NAME="${variantName}"\n        ;;\n`;
 
-  return content.replace(
-    variantOptionsRegex,
-    `${sectionHeader}${sectionContent}${newOption}${sectionEnd}`,
-  );
+  return content.replace(variantOptionsRegex, `${sectionHeader}${sectionContent}${newOption}${sectionEnd}`);
 }
 
 /**
@@ -407,10 +399,7 @@ function addVariantToNewProjectPs1(content: string, variantName: string): string
   const newOption = `    "${variantName}"`;
   const updatedArrayContent = arrayContent.trim() + `\n${newOption}\n`;
 
-  return content.replace(
-    variantOptionsRegex,
-    `${arrayStart}${updatedArrayContent}${arrayEnd}`,
-  );
+  return content.replace(variantOptionsRegex, `${arrayStart}${updatedArrayContent}${arrayEnd}`);
 }
 
 /**
@@ -423,7 +412,8 @@ function addVariantToAgentsMd(content: string, variantName: string): string {
 
   // Find PM Dispatch table — look for a markdown table containing variant rows
   // Pattern: lines like | co-design | `templates/co-design/AGENTS.md` |
-  const dispatchTableRegex = /(\|[\s]*Variant[\s]*\|[\s]*PM Dispatch Table File[\s]*\|\|?)([\s\S]*?)(\n(?:##|#{2,}\s|\Z))/;
+  const dispatchTableRegex =
+    /(\|[\s]*Variant[\s]*\|[\s]*PM Dispatch Table File[\s]*\|\|?)([\s\S]*?)(\n(?:##|#{2,}\s|\Z))/;
   const match = content.match(dispatchTableRegex);
 
   if (!match) {
@@ -434,7 +424,7 @@ function addVariantToAgentsMd(content: string, variantName: string): string {
 
     // Check if this table contains variant-like entries
     const tableBlock = simpleMatch[1];
-    if (!tableBlock.includes('co-')) return content;
+    if (!tableBlock.includes("co-")) return content;
 
     // Insert before the last newline of the table block
     const newRow = `| ${variantName} | \`templates/${variantName}/AGENTS.md\` |\n`;
@@ -447,10 +437,7 @@ function addVariantToAgentsMd(content: string, variantName: string): string {
   const tableEnd = match[3];
   const newRow = `| ${variantName} | \`templates/${variantName}/AGENTS.md\` |`;
 
-  return content.replace(
-    dispatchTableRegex,
-    `${tableHeader}${tableContent}\n${newRow}${tableEnd}`,
-  );
+  return content.replace(dispatchTableRegex, `${tableHeader}${tableContent}\n${newRow}${tableEnd}`);
 }
 
 // ============================================================================
@@ -468,17 +455,17 @@ async function runPreflight(
 
   // --- Check 1: All target files exist and are writable ---
   const fileLabels: Record<string, string> = {
-    [PROPAGATION_MAP_PATH]: 'propagation-map.json',
-    [VERSION_REGISTRY_PATH]: 'VERSION_REGISTRY.json',
-    [README_PATH]: 'README.md',
-    [AGENTS_MD_PATH]: 'AGENTS.md',
+    [PROPAGATION_MAP_PATH]: "propagation-map.json",
+    [VERSION_REGISTRY_PATH]: "VERSION_REGISTRY.json",
+    [README_PATH]: "README.md",
+    [AGENTS_MD_PATH]: "AGENTS.md",
   };
 
   for (const [filePath, label] of Object.entries(fileLabels)) {
     if (!fileExistsAndWritable(filePath)) {
       errors.push({
-        phase: 'preflight',
-        step: 'file_access',
+        phase: "preflight",
+        step: "file_access",
         message: `${label} does not exist or is not writable at ${filePath}`,
         file: filePath,
       });
@@ -488,21 +475,21 @@ async function runPreflight(
   // new-project scripts — at least .ts must exist; .sh and .ps1 are optional
   if (!fileExistsAndWritable(NEW_PROJECT_TS)) {
     errors.push({
-      phase: 'preflight',
-      step: 'file_access',
+      phase: "preflight",
+      step: "file_access",
       message: `new-project.ts does not exist or is not writable at ${NEW_PROJECT_TS}`,
       file: NEW_PROJECT_TS,
     });
   }
   // .sh and .ps1 are optional — only check if they exist
   for (const [filePath, label] of [
-    [NEW_PROJECT_SH, 'new-project.sh'],
-    [NEW_PROJECT_PS1, 'new-project.ps1'],
+    [NEW_PROJECT_SH, "new-project.sh"],
+    [NEW_PROJECT_PS1, "new-project.ps1"],
   ] as const) {
     if (existsSync(filePath) && !fileExistsAndWritable(filePath)) {
       errors.push({
-        phase: 'preflight',
-        step: 'file_access',
+        phase: "preflight",
+        step: "file_access",
         message: `${label} exists but is not writable at ${filePath}`,
         file: filePath,
       });
@@ -519,16 +506,16 @@ async function runPreflight(
     const propagationCheck = isValidPropagationMap(propagationContent);
     if (!propagationCheck.valid) {
       errors.push({
-        phase: 'preflight',
-        step: 'propagation_map_structure',
+        phase: "preflight",
+        step: "propagation_map_structure",
         message: `propagation-map.json structure invalid: ${propagationCheck.reason}`,
         file: PROPAGATION_MAP_PATH,
       });
     }
   } catch (err) {
     errors.push({
-      phase: 'preflight',
-      step: 'propagation_map_read',
+      phase: "preflight",
+      step: "propagation_map_read",
       message: `Failed to read propagation-map.json: ${err instanceof Error ? err.message : String(err)}`,
       file: PROPAGATION_MAP_PATH,
     });
@@ -540,16 +527,16 @@ async function runPreflight(
     const registryCheck = isValidVersionRegistry(registryContent);
     if (!registryCheck.valid) {
       errors.push({
-        phase: 'preflight',
-        step: 'version_registry_structure',
+        phase: "preflight",
+        step: "version_registry_structure",
         message: `VERSION_REGISTRY.json structure invalid: ${registryCheck.reason}`,
         file: VERSION_REGISTRY_PATH,
       });
     }
   } catch (err) {
     errors.push({
-      phase: 'preflight',
-      step: 'version_registry_read',
+      phase: "preflight",
+      step: "version_registry_read",
       message: `Failed to read VERSION_REGISTRY.json: ${err instanceof Error ? err.message : String(err)}`,
       file: VERSION_REGISTRY_PATH,
     });
@@ -566,19 +553,19 @@ async function runPreflight(
     }
   } catch (err) {
     errors.push({
-      phase: 'preflight',
-      step: 'readme_read',
+      phase: "preflight",
+      step: "readme_read",
       message: `Failed to read README.md: ${err instanceof Error ? err.message : String(err)}`,
       file: README_PATH,
     });
   }
 
   // --- Check 5: new-project scripts directory exists ---
-  const scriptsDir = join(WORKSPACE_ROOT, 'scripts');
+  const scriptsDir = join(WORKSPACE_ROOT, "scripts");
   if (!existsSync(scriptsDir)) {
     errors.push({
-      phase: 'preflight',
-      step: 'scripts_directory',
+      phase: "preflight",
+      step: "scripts_directory",
       message: `Scripts directory does not exist: ${scriptsDir}`,
       file: scriptsDir,
     });
@@ -590,18 +577,18 @@ async function runPreflight(
   try {
     const integrityReport = validateRegistryIntegrity();
     if (!integrityReport.passed) {
-      for (const issue of integrityReport.errors.filter(e => e.severity === 'error')) {
+      for (const issue of integrityReport.errors.filter((e) => e.severity === "error")) {
         errors.push({
-          phase: 'preflight',
-          step: 'registry_integrity',
+          phase: "preflight",
+          step: "registry_integrity",
           message: `Registry integrity check failed [${issue.registry}]: ${issue.message}`,
         });
       }
     }
   } catch (err) {
     errors.push({
-      phase: 'preflight',
-      step: 'registry_integrity',
+      phase: "preflight",
+      step: "registry_integrity",
       message: `validateRegistryIntegrity() threw: ${err instanceof Error ? err.message : String(err)}`,
     });
   }
@@ -623,7 +610,7 @@ function snapshotFiles(): Map<string, FileSnapshot> {
   const snapshots = new Map<string, FileSnapshot>();
 
   // Initialize pipeline state
-  const state = initializeState('workspace-integration');
+  const state = initializeState("workspace-integration");
 
   for (const filePath of ALL_TARGET_FILES) {
     if (!existsSync(filePath)) continue;
@@ -635,15 +622,9 @@ function snapshotFiles(): Map<string, FileSnapshot> {
       snapshots.set(filePath, { filePath, content, hash });
 
       // Record rollback action: restore original content on failure
-      addRollbackAction(
-        ErrorPhase.INTEGRATION,
-        'modify_file',
-        filePath,
-      );
+      addRollbackAction(ErrorPhase.INTEGRATION, "modify_file", filePath);
     } catch (err) {
-      throw new Error(
-        `Failed to snapshot ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
-      );
+      throw new Error(`Failed to snapshot ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -683,8 +664,8 @@ async function writePhase(
     }
   } catch (err) {
     errors.push({
-      phase: 'write',
-      step: 'propagation_map',
+      phase: "write",
+      step: "propagation_map",
       message: `Failed to update propagation-map.json: ${err instanceof Error ? err.message : String(err)}`,
       file: PROPAGATION_MAP_PATH,
     });
@@ -699,8 +680,8 @@ async function writePhase(
     modifiedFiles.push(VERSION_REGISTRY_PATH);
   } catch (err) {
     errors.push({
-      phase: 'write',
-      step: 'version_registry',
+      phase: "write",
+      step: "version_registry",
       message: `Failed to update VERSION_REGISTRY.json: ${err instanceof Error ? err.message : String(err)}`,
       file: VERSION_REGISTRY_PATH,
     });
@@ -717,8 +698,8 @@ async function writePhase(
     }
   } catch (err) {
     errors.push({
-      phase: 'write',
-      step: 'readme',
+      phase: "write",
+      step: "readme",
       message: `Failed to update README.md: ${err instanceof Error ? err.message : String(err)}`,
       file: README_PATH,
     });
@@ -736,8 +717,8 @@ async function writePhase(
     }
   } catch (err) {
     errors.push({
-      phase: 'write',
-      step: 'new_project_ts',
+      phase: "write",
+      step: "new_project_ts",
       message: `Failed to update new-project.ts: ${err instanceof Error ? err.message : String(err)}`,
       file: NEW_PROJECT_TS,
     });
@@ -755,8 +736,8 @@ async function writePhase(
       }
     } catch (err) {
       errors.push({
-        phase: 'write',
-        step: 'new_project_sh',
+        phase: "write",
+        step: "new_project_sh",
         message: `Failed to update new-project.sh: ${err instanceof Error ? err.message : String(err)}`,
         file: NEW_PROJECT_SH,
       });
@@ -775,8 +756,8 @@ async function writePhase(
       }
     } catch (err) {
       errors.push({
-        phase: 'write',
-        step: 'new_project_ps1',
+        phase: "write",
+        step: "new_project_ps1",
         message: `Failed to update new-project.ps1: ${err instanceof Error ? err.message : String(err)}`,
         file: NEW_PROJECT_PS1,
       });
@@ -794,8 +775,8 @@ async function writePhase(
     }
   } catch (err) {
     errors.push({
-      phase: 'write',
-      step: 'agents_md',
+      phase: "write",
+      step: "agents_md",
       message: `Failed to update AGENTS.md: ${err instanceof Error ? err.message : String(err)}`,
       file: AGENTS_MD_PATH,
     });
@@ -828,8 +809,8 @@ async function verifyPhase(
       // Verify the file actually changed from its snapshot
       if (original && currentHash === original.hash) {
         errors.push({
-          phase: 'verify',
-          step: 'content_change',
+          phase: "verify",
+          step: "content_change",
           message: `File was not modified from original: ${filePath}`,
           file: filePath,
         });
@@ -843,9 +824,9 @@ async function verifyPhase(
         let found = false;
         if (domainsObj) {
           for (const domain of Object.values(domainsObj)) {
-            if (!domain || typeof domain !== 'object') continue;
+            if (!domain || typeof domain !== "object") continue;
             const d = domain as Record<string, unknown>;
-            if (d.mode === 'marker-inject' && Array.isArray(d.target_variants)) {
+            if (d.mode === "marker-inject" && Array.isArray(d.target_variants)) {
               if ((d.target_variants as string[]).includes(config.variantName)) {
                 found = true;
                 break;
@@ -855,8 +836,8 @@ async function verifyPhase(
         }
         if (!found) {
           errors.push({
-            phase: 'verify',
-            step: 'propagation_map_content',
+            phase: "verify",
+            step: "propagation_map_content",
             message: `Variant "${config.variantName}" not found in any marker-inject target_variants`,
             file: filePath,
           });
@@ -864,8 +845,8 @@ async function verifyPhase(
       } else if (filePath === VERSION_REGISTRY_PATH) {
         if (!currentContent.includes(config.variantName)) {
           errors.push({
-            phase: 'verify',
-            step: 'version_registry_content',
+            phase: "verify",
+            step: "version_registry_content",
             message: `Variant "${config.variantName}" not found in VERSION_REGISTRY.json`,
             file: filePath,
           });
@@ -873,10 +854,10 @@ async function verifyPhase(
         // Verify nested object format
         const data = safeJsonParse(currentContent) as Record<string, unknown>;
         const variants = data?.variants as Record<string, unknown> | undefined;
-        if (!variants || typeof variants[config.variantName] !== 'object') {
+        if (!variants || typeof variants[config.variantName] !== "object") {
           errors.push({
-            phase: 'verify',
-            step: 'version_registry_format',
+            phase: "verify",
+            step: "version_registry_format",
             message: `VERSION_REGISTRY.json does not have nested object entry for "${config.variantName}"`,
             file: filePath,
           });
@@ -884,8 +865,8 @@ async function verifyPhase(
       } else if (filePath === README_PATH) {
         if (!currentContent.includes(config.variantName)) {
           errors.push({
-            phase: 'verify',
-            step: 'readme_content',
+            phase: "verify",
+            step: "readme_content",
             message: `Variant "${config.variantName}" not found in README.md`,
             file: filePath,
           });
@@ -893,22 +874,18 @@ async function verifyPhase(
       } else if (filePath === AGENTS_MD_PATH) {
         if (!currentContent.includes(`| ${config.variantName} |`)) {
           errors.push({
-            phase: 'verify',
-            step: 'agents_md_content',
+            phase: "verify",
+            step: "agents_md_content",
             message: `Variant "${config.variantName}" not found in AGENTS.md dispatch table`,
             file: filePath,
           });
         }
-      } else if (
-        filePath === NEW_PROJECT_TS ||
-        filePath === NEW_PROJECT_SH ||
-        filePath === NEW_PROJECT_PS1
-      ) {
+      } else if (filePath === NEW_PROJECT_TS || filePath === NEW_PROJECT_SH || filePath === NEW_PROJECT_PS1) {
         // For new-project scripts, the variant name should appear
         if (!currentContent.includes(config.variantName)) {
           errors.push({
-            phase: 'verify',
-            step: 'new_project_content',
+            phase: "verify",
+            step: "new_project_content",
             message: `Variant "${config.variantName}" not found in ${filePath}`,
             file: filePath,
           });
@@ -916,8 +893,8 @@ async function verifyPhase(
       }
     } catch (err) {
       errors.push({
-        phase: 'verify',
-        step: 'file_read',
+        phase: "verify",
+        step: "file_read",
         message: `Failed to verify ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
         file: filePath,
       });
@@ -941,9 +918,7 @@ function rollbackFiles(snapshots: Map<string, FileSnapshot>): void {
     try {
       writeUTF8File(snapshot.filePath, snapshot.content);
     } catch (err) {
-      console.error(
-        `⚠️  Failed to restore ${snapshot.filePath}: ${err instanceof Error ? err.message : String(err)}`,
-      );
+      console.error(`⚠️  Failed to restore ${snapshot.filePath}: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -1000,7 +975,7 @@ export async function registerVariantInWorkspace(
   if (!preflight.passed) {
     console.log(`  ❌ Preflight FAILED — aborting, no writes performed`);
     for (const err of preflight.errors) {
-      console.log(`     [${err.step}] ${err.message}${err.file ? ` (${err.file})` : ''}`);
+      console.log(`     [${err.step}] ${err.message}${err.file ? ` (${err.file})` : ""}`);
     }
     allErrors.push(...preflight.errors);
     return {
@@ -1023,8 +998,8 @@ export async function registerVariantInWorkspace(
     const errorMsg = `Snapshot failed: ${err instanceof Error ? err.message : String(err)}`;
     console.log(`  ❌ ${errorMsg}`);
     allErrors.push({
-      phase: 'begin',
-      step: 'snapshot',
+      phase: "begin",
+      step: "snapshot",
       message: errorMsg,
     });
     return {
@@ -1043,7 +1018,7 @@ export async function registerVariantInWorkspace(
   if (writeResult.errors.length > 0) {
     console.log(`  ❌ Write FAILED — rolling back`);
     for (const err of writeResult.errors) {
-      console.log(`     [${err.step}] ${err.message}${err.file ? ` (${err.file})` : ''}`);
+      console.log(`     [${err.step}] ${err.message}${err.file ? ` (${err.file})` : ""}`);
     }
     allErrors.push(...writeResult.errors);
 
@@ -1069,7 +1044,7 @@ export async function registerVariantInWorkspace(
   if (!verifyResult.passed) {
     console.log(`  ❌ Verify FAILED — rolling back`);
     for (const err of verifyResult.errors) {
-      console.log(`     [${err.step}] ${err.message}${err.file ? ` (${err.file})` : ''}`);
+      console.log(`     [${err.step}] ${err.message}${err.file ? ` (${err.file})` : ""}`);
     }
     allErrors.push(...verifyResult.errors);
 
@@ -1113,9 +1088,7 @@ export async function registerVariantInWorkspace(
  * @param config - Registration configuration specifying the variant to plan.
  * @returns Preflight results and a list of planned changes.
  */
-export async function dryRunRegistration(
-  config: WorkspaceRegistrationConfig,
-): Promise<{
+export async function dryRunRegistration(config: WorkspaceRegistrationConfig): Promise<{
   readonly preflightPassed: boolean;
   readonly plannedChanges: readonly PlannedChange[];
   readonly errors: readonly string[];
@@ -1125,7 +1098,7 @@ export async function dryRunRegistration(
 
   // Run preflight
   const preflight = await runPreflight(config);
-  const errors = preflight.errors.map(e => `[${e.phase}:${e.step}] ${e.message}${e.file ? ` (${e.file})` : ''}`);
+  const errors = preflight.errors.map((e) => `[${e.phase}:${e.step}] ${e.message}${e.file ? ` (${e.file})` : ""}`);
 
   // Build planned changes (only if preflight passes)
   const plannedChanges: PlannedChange[] = [];
@@ -1136,15 +1109,17 @@ export async function dryRunRegistration(
       const content = readUTF8File(PROPAGATION_MAP_PATH);
       const data = safeJsonParse(content) as Record<string, unknown>;
       const domains = getMarkerInjectDomains(data);
-      const injectDomains = domains.filter(d => !d.targetVariants.includes(config.variantName));
+      const injectDomains = domains.filter((d) => !d.targetVariants.includes(config.variantName));
       if (injectDomains.length > 0) {
         plannedChanges.push({
           file: PROPAGATION_MAP_PATH,
-          action: 'update',
-          description: `Add "${config.variantName}" to target_variants in ${injectDomains.length} marker-inject domain(s): ${injectDomains.map(d => d.key).join(', ')}`,
+          action: "update",
+          description: `Add "${config.variantName}" to target_variants in ${injectDomains.length} marker-inject domain(s): ${injectDomains.map((d) => d.key).join(", ")}`,
         });
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
 
     // 2. VERSION_REGISTRY.json
     try {
@@ -1152,11 +1127,13 @@ export async function dryRunRegistration(
       if (!content.includes(config.variantName)) {
         plannedChanges.push({
           file: VERSION_REGISTRY_PATH,
-          action: 'update',
+          action: "update",
           description: `Add nested object entry for "${config.variantName}" (version ${config.version}, status beta)`,
         });
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
 
     // 3. README.md
     try {
@@ -1164,17 +1141,19 @@ export async function dryRunRegistration(
       if (!content.includes(`### ${config.variantName}\n`)) {
         plannedChanges.push({
           file: README_PATH,
-          action: 'update',
+          action: "update",
           description: `Insert variant entry in ## Variants / ## Templates section`,
         });
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
 
     // 4. new-project scripts
     for (const [filePath, label] of [
-      [NEW_PROJECT_TS, 'new-project.ts'],
-      [NEW_PROJECT_SH, 'new-project.sh'],
-      [NEW_PROJECT_PS1, 'new-project.ps1'],
+      [NEW_PROJECT_TS, "new-project.ts"],
+      [NEW_PROJECT_SH, "new-project.sh"],
+      [NEW_PROJECT_PS1, "new-project.ps1"],
     ] as const) {
       if (!existsSync(filePath)) continue;
       try {
@@ -1182,11 +1161,13 @@ export async function dryRunRegistration(
         if (!content.includes(config.variantName)) {
           plannedChanges.push({
             file: filePath,
-            action: 'update',
+            action: "update",
             description: `Inject "${config.variantName}" into VARIANT_OPTIONS`,
           });
         }
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
 
     // 5. AGENTS.md
@@ -1195,14 +1176,16 @@ export async function dryRunRegistration(
       if (!content.includes(`| ${config.variantName} |`)) {
         plannedChanges.push({
           file: AGENTS_MD_PATH,
-          action: 'update',
+          action: "update",
           description: `Add row to PM Dispatch table`,
         });
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
 
-  console.log(`\nPreflight: ${preflight.passed ? '✅ PASSED' : '❌ FAILED'}`);
+  console.log(`\nPreflight: ${preflight.passed ? "✅ PASSED" : "❌ FAILED"}`);
   console.log(`Planned changes: ${plannedChanges.length}`);
   for (const change of plannedChanges) {
     console.log(`  [${change.action}] ${change.file}`);

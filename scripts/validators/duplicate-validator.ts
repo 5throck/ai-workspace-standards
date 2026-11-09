@@ -11,9 +11,9 @@
  *   3. Report duplicates as ERROR — they cause silent overwrites and ambiguity
  */
 
-import { join, basename } from 'path';
-import { existsSync, readdirSync } from 'fs';
-import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from './types.ts';
+import { join, basename } from "node:path";
+import { existsSync, readdirSync } from "node:fs";
+import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from "./types.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Validator Definition
@@ -23,9 +23,9 @@ import type { ValidatorContext, ValidatorDefinition, ValidatorResult, Validation
  * Detects duplicate agent filenames and names.
  */
 export const duplicateValidator: ValidatorDefinition = {
-  name: 'duplicate',
-  description: 'Detects duplicate agent filenames on disk and duplicate agent names in variant.json',
-  prerequisites: ['variant-json'],
+  name: "duplicate",
+  description: "Detects duplicate agent filenames on disk and duplicate agent names in variant.json",
+  prerequisites: ["variant-json"],
 
   validate(ctx: ValidatorContext): ValidatorResult {
     const start = performance.now();
@@ -45,8 +45,8 @@ export const duplicateValidator: ValidatorDefinition = {
     if (dupFiles.length > 0) {
       for (const [filename, count] of dupFiles) {
         issues.push({
-          severity: 'error',
-          category: 'duplicate-filename',
+          severity: "error",
+          category: "duplicate-filename",
           message: `Duplicate agent filename "${filename}" found ${count} times in agents/ directory`,
           file: filename,
         });
@@ -62,7 +62,7 @@ export const duplicateValidator: ValidatorDefinition = {
       const nameCounts = new Map<string, number[]>();
       for (let i = 0; i < agents.length; i++) {
         const agent = agents[i];
-        if (agent && typeof agent.name === 'string') {
+        if (agent && typeof agent.name === "string") {
           const existing = nameCounts.get(agent.name) ?? [];
           existing.push(i);
           nameCounts.set(agent.name, existing);
@@ -73,16 +73,16 @@ export const duplicateValidator: ValidatorDefinition = {
       if (dupNames.length > 0) {
         for (const [name, indices] of dupNames) {
           issues.push({
-            severity: 'error',
-            category: 'duplicate-agent-name',
-            message: `Duplicate agent name "${name}" in variant.json at indices [${indices.join(', ')}]`,
+            severity: "error",
+            category: "duplicate-agent-name",
+            message: `Duplicate agent name "${name}" in variant.json at indices [${indices.join(", ")}]`,
           });
         }
       }
     }
 
     return {
-      validator: 'duplicate',
+      validator: "duplicate",
       duration_ms: performance.now() - start,
       checks,
       issues,

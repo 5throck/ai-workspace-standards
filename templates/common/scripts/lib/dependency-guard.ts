@@ -13,8 +13,8 @@
 //           `node:` prefix, and the `bun` runtime module) — they are provided by
 //           the runtime, never package.json dependencies.
 
-import { readdirSync, readFileSync, statSync } from 'fs';
-import { join, relative } from 'path';
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 
 // Specifier position: `from '…'`, `import '…'` (side-effect), `import( '…' )`
 // (dynamic), `require('…')` — same line only, so prose wrapping can't match.
@@ -23,13 +23,49 @@ const IMPORT_RE = /(?:\bfrom[ \t]+|\bimport[ \t]+|\bimport\s*\(\s*|\brequire\s*\
 // Node builtins are importable with or without the `node:` prefix; `bun` is
 // the Bun runtime module. None of these are package.json dependencies.
 const RUNTIME_BUILTINS = new Set([
-  'assert', 'async_hooks', 'buffer', 'child_process', 'cluster', 'console',
-  'constants', 'crypto', 'dgram', 'diagnostics_channel', 'dns', 'domain',
-  'events', 'fs', 'http', 'http2', 'https', 'inspector', 'module', 'net',
-  'os', 'path', 'perf_hooks', 'process', 'punycode', 'querystring',
-  'readline', 'repl', 'stream', 'string_decoder', 'sys', 'timers', 'tls',
-  'trace_events', 'tty', 'url', 'util', 'v8', 'vm', 'wasi', 'worker_threads',
-  'zlib', 'bun',
+  "assert",
+  "async_hooks",
+  "buffer",
+  "child_process",
+  "cluster",
+  "console",
+  "constants",
+  "crypto",
+  "dgram",
+  "diagnostics_channel",
+  "dns",
+  "domain",
+  "events",
+  "fs",
+  "http",
+  "http2",
+  "https",
+  "inspector",
+  "module",
+  "net",
+  "os",
+  "path",
+  "perf_hooks",
+  "process",
+  "punycode",
+  "querystring",
+  "readline",
+  "repl",
+  "stream",
+  "string_decoder",
+  "sys",
+  "timers",
+  "tls",
+  "trace_events",
+  "tty",
+  "url",
+  "util",
+  "v8",
+  "vm",
+  "wasi",
+  "worker_threads",
+  "zlib",
+  "bun",
 ]);
 
 /** Collapse an import specifier to its package name: `js-yaml` → `js-yaml`,
@@ -37,17 +73,17 @@ const RUNTIME_BUILTINS = new Set([
  *  (relative paths, `node:`/`bun:` prefixes, runtime builtins, interpolated
  *  or otherwise non-package-looking strings). */
 export function barePackageName(spec: string): string | null {
-  if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('node:') || spec.startsWith('bun:')) {
+  if (spec.startsWith(".") || spec.startsWith("/") || spec.startsWith("node:") || spec.startsWith("bun:")) {
     return null;
   }
   if (/[$\s{}]/.test(spec)) return null; // `${…}` interpolation, wrapped prose
   let pkg: string;
-  if (spec.startsWith('@')) {
-    const parts = spec.split('/');
+  if (spec.startsWith("@")) {
+    const parts = spec.split("/");
     if (parts.length < 2) return null;
     pkg = `${parts[0]}/${parts[1]}`;
   } else {
-    const slash = spec.indexOf('/');
+    const slash = spec.indexOf("/");
     pkg = slash === -1 ? spec : spec.slice(0, slash);
   }
   if (RUNTIME_BUILTINS.has(pkg)) return null;
@@ -88,15 +124,19 @@ export function scanDeliveredScripts(scriptsRoots: string[], baseDir: string): D
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (entry.name === 'node_modules' || entry.name === '.git') continue;
+        if (entry.name === "node_modules" || entry.name === ".git") continue;
         walk(full);
-      } else if (entry.name.endsWith('.ts') && !seen.has(full)) {
+      } else if (entry.name.endsWith(".ts") && !seen.has(full)) {
         seen.add(full);
-        const rel = relative(baseDir, full).split('\\').join('/');
+        const rel = relative(baseDir, full).split("\\").join("/");
         // Skip comment lines: doc examples like from '…' must not match.
-        const code = readFileSync(full, 'utf8').split('\n')
-          .filter((l) => { const t = l.trim(); return !t.startsWith('//') && !t.startsWith('*') && !t.startsWith('/*'); })
-          .join('\n');
+        const code = readFileSync(full, "utf8")
+          .split("\n")
+          .filter((l) => {
+            const t = l.trim();
+            return !t.startsWith("//") && !t.startsWith("*") && !t.startsWith("/*");
+          })
+          .join("\n");
         for (const pkg of barePackageImports(code)) {
           if (!byPkg.has(pkg)) byPkg.set(pkg, new Set());
           byPkg.get(pkg)!.add(rel);

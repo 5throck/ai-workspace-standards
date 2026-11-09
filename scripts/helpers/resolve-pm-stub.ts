@@ -36,33 +36,33 @@
  *    requires lifecycle.phase + lifecycle.governance in every agents/*.md).
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import * as yaml from 'js-yaml';
-import { isCanonicalPmStubBody } from './scaffold-markers.ts';
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import * as yaml from "js-yaml";
+import { isCanonicalPmStubBody } from "./scaffold-markers.ts";
 
 /** Render variant_overrides values into body text, dropping VARIANT-SECTION markers. */
 export function stripVariantSectionMarkers(value: unknown): string {
-  if (value === undefined || value === null) return '';
-  const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  if (value === undefined || value === null) return "";
+  const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
   return text
-    .replace(/^\s*<!--\s*VARIANT-SECTION:\s*[\w-]+\s*-->\s*/gm, '')
-    .replace(/^\s*<!--\s*END VARIANT-SECTION\s*-->\s*/gm, '')
+    .replace(/^\s*<!--\s*VARIANT-SECTION:\s*[\w-]+\s*-->\s*/gm, "")
+    .replace(/^\s*<!--\s*END VARIANT-SECTION\s*-->\s*/gm, "")
     .trim();
 }
 
 /** Remove a markdown section (heading + body) up to the next same-or-higher heading. */
 export function removeMarkdownSection(content: string, heading: string): string {
-  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const level = heading.match(/^#+/)?.[0].length ?? 2;
   const nextSameOrHigher = `\\n#{1,${level}}\\s+`;
-  return content.replace(new RegExp(`(^|\\n)${escaped}[\\s\\S]*?(?=${nextSameOrHigher}|$)`, 'm'), '\n');
+  return content.replace(new RegExp(`(^|\\n)${escaped}[\\s\\S]*?(?=${nextSameOrHigher}|$)`, "m"), "\n");
 }
 
 export interface ResolvePmStubResult {
   /** true when the file carried `extends:` and was rewritten self-contained */
   resolved: boolean;
   /** stub body shape: 'prose' (non-empty stub body) or 'empty' */
-  shape?: 'prose' | 'empty';
+  shape?: "prose" | "empty";
   /** prose stub whose body is NOT the canonical stub prose (H12 — content discarded) */
   nonCanonical?: boolean;
   /** length of the discarded prose body when nonCanonical (for the H12 warning) */
@@ -97,7 +97,7 @@ export interface ComposedResolvedAgent {
    */
   content: string;
   /** stub body shape: 'prose' (non-empty stub body) or 'empty' */
-  shape?: 'prose' | 'empty';
+  shape?: "prose" | "empty";
   /** prose stub whose body is NOT the canonical stub prose (H12 — content discarded) */
   nonCanonical?: boolean;
   /** length of the discarded prose body when nonCanonical (for the H12 warning) */
@@ -122,7 +122,7 @@ export function composeResolvedAgentContent(
   variant: string,
   opts: ResolveAgentStubOptions = {},
 ): ComposedResolvedAgent {
-  const content = readFileSync(agentPath, 'utf8');
+  const content = readFileSync(agentPath, "utf8");
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n?/);
   const body = fmMatch ? content.slice(fmMatch[0].length) : content;
   if (!fmMatch || !/extends:/.test(fmMatch[1])) {
@@ -131,8 +131,8 @@ export function composeResolvedAgentContent(
   if (!existsSync(commonAgentPath)) {
     return { composed: false, content, missingL1: true };
   }
-  const isProseStub = body.trim() !== '';
-  const l1Content = readFileSync(commonAgentPath, 'utf8');
+  const isProseStub = body.trim() !== "";
+  const l1Content = readFileSync(commonAgentPath, "utf8");
   const l1FmMatch = l1Content.match(/^---\n([\s\S]*?)\n---\n?/);
   const l1Body = l1FmMatch ? l1Content.slice(l1FmMatch[0].length) : l1Content;
   // Merge: stub frontmatter wins, missing L1 fields are filled in; `extends:` is
@@ -140,15 +140,15 @@ export function composeResolvedAgentContent(
   // project repo. No `schema` option — js-yaml v5 selects the default schema when
   // `schema` is omitted.
   const stubFm: Record<string, unknown> = (yaml.load(fmMatch[1]) as Record<string, unknown>) || {};
-  const l1Fm: Record<string, unknown> = l1FmMatch ? ((yaml.load(l1FmMatch[1]) as Record<string, unknown>) || {}) : {};
+  const l1Fm: Record<string, unknown> = l1FmMatch ? (yaml.load(l1FmMatch[1]) as Record<string, unknown>) || {} : {};
   delete (stubFm as { extends?: unknown }).extends;
   for (const [k, v] of Object.entries(l1Fm)) {
-    if (stubFm[k] === undefined && k !== 'extends') stubFm[k] = v;
+    if (stubFm[k] === undefined && k !== "extends") stubFm[k] = v;
   }
   // ADR-0039/ADR-0034: render `variant_overrides` / `remove_sections` into real
   // markdown sections, then strip the raw YAML keys.
   const overrides = (stubFm.variant_overrides ?? {}) as Record<string, unknown>;
-  const removeSections = Array.isArray(stubFm.remove_sections) ? stubFm.remove_sections as string[] : [];
+  const removeSections = Array.isArray(stubFm.remove_sections) ? (stubFm.remove_sections as string[]) : [];
   delete (stubFm as { variant_overrides?: unknown }).variant_overrides;
   delete (stubFm as { remove_sections?: unknown }).remove_sections;
   let resolvedBody = l1Body;
@@ -156,29 +156,29 @@ export function composeResolvedAgentContent(
     resolvedBody = removeMarkdownSection(resolvedBody, section);
   }
   const injectedSections = [
-    stripVariantSectionMarkers(overrides['updated_role']),
-    stripVariantSectionMarkers(overrides['governance_workflow']),
-    stripVariantSectionMarkers(overrides['agent_roster']),
-    stripVariantSectionMarkers(overrides['dispatch_protocol']),
+    stripVariantSectionMarkers(overrides["updated_role"]),
+    stripVariantSectionMarkers(overrides["governance_workflow"]),
+    stripVariantSectionMarkers(overrides["agent_roster"]),
+    stripVariantSectionMarkers(overrides["dispatch_protocol"]),
   ].filter(Boolean);
   if (injectedSections.length > 0) {
-    resolvedBody = `${resolvedBody.trimEnd()}\n\n${injectedSections.join('\n\n')}\n`;
+    resolvedBody = `${resolvedBody.trimEnd()}\n\n${injectedSections.join("\n\n")}\n`;
   }
-  const mergedFm = '---\n' + (yaml.dump(stubFm) as string).trimEnd() + '\n---\n';
+  const mergedFm = "---\n" + (yaml.dump(stubFm) as string).trimEnd() + "\n---\n";
   if (isProseStub) {
     const nonCanonical = opts.isCanonicalStubBody ? !opts.isCanonicalStubBody(body, variant) : false;
     return {
       composed: true,
-      content: mergedFm + '\n' + resolvedBody,
-      shape: 'prose',
+      content: mergedFm + "\n" + resolvedBody,
+      shape: "prose",
       nonCanonical,
       proseBodyLength: body.trim().length,
     };
   }
   return {
     composed: true,
-    content: mergedFm + body + (body.endsWith('\n') ? '' : '\n') + resolvedBody,
-    shape: 'empty',
+    content: mergedFm + body + (body.endsWith("\n") ? "" : "\n") + resolvedBody,
+    shape: "empty",
   };
 }
 
@@ -202,7 +202,7 @@ export function resolveAgentExtendsStub(
   if (!composed.composed) {
     return composed.missingL1 ? { resolved: false, missingL1: true } : { resolved: false };
   }
-  writeFileSync(agentPath, composed.content, 'utf8');
+  writeFileSync(agentPath, composed.content, "utf8");
   return {
     resolved: true,
     shape: composed.shape,
@@ -226,22 +226,22 @@ export function resolvePmExtendsStub(pmPath: string, commonPmMdPath: string, var
  * project-local dates (validate-agents requires lifecycle.phase + governance).
  */
 export function stripL1BMetadata(pmPath: string, projectDate = new Date().toISOString().slice(0, 10)): void {
-  let content = readFileSync(pmPath, 'utf8');
-  content = content.replace(/^# @resolved-from:.*\n/m, '');
+  let content = readFileSync(pmPath, "utf8");
+  content = content.replace(/^# @resolved-from:.*\n/m, "");
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (match) {
     const fm: Record<string, unknown> = (yaml.load(match[1]) as Record<string, unknown>) || {};
     const inherited = (fm.lifecycle ?? {}) as Record<string, unknown>;
     fm.lifecycle = {
-      phase: inherited.phase ?? 'production',
+      phase: inherited.phase ?? "production",
       created: projectDate,
       last_updated: projectDate,
-      governance: 'docs/lifecycle/agents/pm.md',
+      governance: "docs/lifecycle/agents/pm.md",
     };
     delete fm.formal_name;
     delete fm.variant;
-    const newFm = '---\n' + (yaml.dump(fm) as string).trimEnd() + '\n---\n';
+    const newFm = "---\n" + (yaml.dump(fm) as string).trimEnd() + "\n---\n";
     content = newFm + content.slice(match[0].length);
   }
-  writeFileSync(pmPath, content, 'utf8');
+  writeFileSync(pmPath, content, "utf8");
 }

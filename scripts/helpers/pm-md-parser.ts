@@ -16,10 +16,10 @@
  *   const overrides = extractVariantOverrides(parsed.frontmatter);
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as yaml from "js-yaml";
+import { readUTF8File, writeUTF8File } from "../lib/encoding-utils.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -81,7 +81,10 @@ export interface PmMdParseResult {
  * @param filePath - File path (for error messages)
  * @returns Parsed frontmatter and content
  */
-function parseYamlFrontmatter(content: string, filePath: string): { frontmatter: PmMdFrontmatter; content: string; error?: string } {
+function parseYamlFrontmatter(
+  content: string,
+  filePath: string,
+): { frontmatter: PmMdFrontmatter; content: string; error?: string } {
   const match = content.match(/^---\r?\n([\s\S]+?)\r?\n---\r?\n?([\s\S]*)$/);
 
   if (!match) {
@@ -94,14 +97,14 @@ function parseYamlFrontmatter(content: string, filePath: string): { frontmatter:
 
     return {
       frontmatter: frontmatter || {},
-      content: match[2] ? match[2].trim() : ''
+      content: match[2] ? match[2].trim() : "",
     };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     return {
       frontmatter: {},
       content: content,
-      error: `Failed to parse YAML frontmatter in ${filePath}: ${errorMsg}`
+      error: `Failed to parse YAML frontmatter in ${filePath}: ${errorMsg}`,
     };
   }
 }
@@ -118,10 +121,10 @@ function parseYamlFrontmatter(content: string, filePath: string): { frontmatter:
 export function parsePmMd(filePath: string): PmMdParseResult {
   const result: PmMdParseResult = {
     frontmatter: {},
-    content: '',
+    content: "",
     removeSections: [],
     variantOverrides: {},
-    isValid: false
+    isValid: false,
   };
 
   // Check file existence
@@ -177,31 +180,31 @@ export function parsePmMd(filePath: string): PmMdParseResult {
 export function extractVariantOverrides(frontmatter: PmMdFrontmatter): VariantOverrides {
   const overrides: VariantOverrides = {};
 
-  if (frontmatter.variant_overrides && typeof frontmatter.variant_overrides === 'object') {
+  if (frontmatter.variant_overrides && typeof frontmatter.variant_overrides === "object") {
     const vo = frontmatter.variant_overrides as Record<string, unknown>;
 
     if (vo.role !== undefined) {
-      overrides.role = vo.role as VariantOverrides['role'];
+      overrides.role = vo.role as VariantOverrides["role"];
     }
 
     if (vo.updated_role !== undefined) {
-      overrides.updated_role = vo.updated_role as VariantOverrides['updated_role'];
+      overrides.updated_role = vo.updated_role as VariantOverrides["updated_role"];
     }
 
     if (vo.governance_workflow !== undefined) {
-      overrides.governance_workflow = vo.governance_workflow as VariantOverrides['governance_workflow'];
+      overrides.governance_workflow = vo.governance_workflow as VariantOverrides["governance_workflow"];
     }
 
     if (vo.agent_roster !== undefined) {
-      overrides.agent_roster = vo.agent_roster as VariantOverrides['agent_roster'];
+      overrides.agent_roster = vo.agent_roster as VariantOverrides["agent_roster"];
     }
 
     if (vo.dispatch_protocol !== undefined) {
-      overrides.dispatch_protocol = vo.dispatch_protocol as VariantOverrides['dispatch_protocol'];
+      overrides.dispatch_protocol = vo.dispatch_protocol as VariantOverrides["dispatch_protocol"];
     }
 
-    if (vo.phase_determination && typeof vo.phase_determination === 'object') {
-      overrides.phase_determination = vo.phase_determination as VariantOverrides['phase_determination'];
+    if (vo.phase_determination && typeof vo.phase_determination === "object") {
+      overrides.phase_determination = vo.phase_determination as VariantOverrides["phase_determination"];
     }
   }
 
@@ -218,7 +221,7 @@ export function extractVariantOverrides(frontmatter: PmMdFrontmatter): VariantOv
 export function resolveExtendsChain(
   filePath: string,
   workspaceRoot: string = process.cwd(),
-  visited: Set<string> = new Set()
+  visited: Set<string> = new Set(),
 ): PmMdParseResult[] {
   const chain: PmMdParseResult[] = [];
 
@@ -254,8 +257,8 @@ if (import.meta.main) {
   const args = process.argv.slice(2);
 
   if (args.length < 1) {
-    console.error('Usage: bun scripts/helpers/pm-md-parser.ts <pm-md-file-path>');
-    console.error('  pm-md-file-path: Path to a pm.md file');
+    console.error("Usage: bun scripts/helpers/pm-md-parser.ts <pm-md-file-path>");
+    console.error("  pm-md-file-path: Path to a pm.md file");
     process.exit(1);
   }
 
@@ -290,7 +293,7 @@ if (import.meta.main) {
   }
 
   console.log(`\nContent preview (first 200 chars):`);
-  console.log(result.content.substring(0, 200) + '...');
+  console.log(result.content.substring(0, 200) + "...");
 }
 
 /**
@@ -303,55 +306,55 @@ export function generateContextMd(variantName: string, variantOverrides: Variant
   const lines: string[] = [];
 
   lines.push(`# ${variantName} Context`);
-  lines.push('');
+  lines.push("");
   lines.push(`> Generated from pm.md variant_overrides`);
-  lines.push('');
+  lines.push("");
   lines.push(`## Variant-Specific PM Configuration`);
-  lines.push('');
+  lines.push("");
 
   const formatOverrideValue = (val: unknown): string => {
-    if (typeof val === 'string') return val;
+    if (typeof val === "string") return val;
     return JSON.stringify(val, null, 2);
   };
 
   if (variantOverrides.updated_role) {
     lines.push(`### Updated Role`);
-    lines.push('');
+    lines.push("");
     lines.push(formatOverrideValue(variantOverrides.updated_role));
-    lines.push('');
+    lines.push("");
   }
 
   if (variantOverrides.governance_workflow) {
     lines.push(`### Governance Workflow`);
-    lines.push('');
+    lines.push("");
     lines.push(formatOverrideValue(variantOverrides.governance_workflow));
-    lines.push('');
+    lines.push("");
   }
 
   if (variantOverrides.agent_roster) {
     lines.push(`### Agent Roster`);
-    lines.push('');
+    lines.push("");
     lines.push(formatOverrideValue(variantOverrides.agent_roster));
-    lines.push('');
+    lines.push("");
   }
 
   if (variantOverrides.dispatch_protocol) {
     lines.push(`### Dispatch Protocol`);
-    lines.push('');
+    lines.push("");
     lines.push(formatOverrideValue(variantOverrides.dispatch_protocol));
-    lines.push('');
+    lines.push("");
   }
 
   if (variantOverrides.phase_determination) {
     lines.push(`### Phase Determination`);
-    lines.push('');
+    lines.push("");
     if (variantOverrides.phase_determination.constraints?.phase_determination) {
       lines.push(variantOverrides.phase_determination.constraints.phase_determination);
-      lines.push('');
+      lines.push("");
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -364,7 +367,7 @@ export function generateContextMd(variantName: string, variantOverrides: Variant
  * @param variantOverrides - Variant overrides object
  */
 export function writeContextMd(variantPath: string, variantName: string, variantOverrides: VariantOverrides): void {
-  const contextPath = path.join(variantPath, 'docs', `${variantName}.context.md`);
+  const contextPath = path.join(variantPath, "docs", `${variantName}.context.md`);
 
   try {
     fs.mkdirSync(path.dirname(contextPath), { recursive: true });
@@ -375,10 +378,14 @@ export function writeContextMd(variantPath: string, variantName: string, variant
       const existingContent = readUTF8File(contextPath);
       const appendContent = generateContextMd(variantName, variantOverrides);
       // generateContextMd produces a full document — extract just the section body
-      const sectionBody = appendContent.replace(/^#[^\n]*\n*\n*> [^\n]*\n*\n*## Variant-Specific PM Configuration\n*/, '');
+      const sectionBody = appendContent.replace(
+        /^#[^\n]*\n*\n*> [^\n]*\n*\n*## Variant-Specific PM Configuration\n*/,
+        "",
+      );
       if (sectionBody.trim()) {
-        const separator = '\n\n---\n\n';
-        const fullContent = existingContent.trimEnd() + separator + '## Variant-Specific PM Configuration\n\n' + sectionBody.trim();
+        const separator = "\n\n---\n\n";
+        const fullContent =
+          existingContent.trimEnd() + separator + "## Variant-Specific PM Configuration\n\n" + sectionBody.trim();
         writeUTF8File(contextPath, fullContent);
         console.log(`✅ Appended variant-specific PM section to ${contextPath}`);
       } else {

@@ -25,7 +25,7 @@ interface ParallelAgentTask {
   task: string;
   context?: string[];
   outputFormat?: string;
-  priority?: 'high' | 'medium' | 'low';
+  priority?: "high" | "medium" | "low";
 }
 
 interface SerialAgentTask {
@@ -49,7 +49,7 @@ interface CliOptions {
 }
 
 interface ParallelDispatchResult {
-  status: 'dispatched' | 'completed' | 'failed';
+  status: "dispatched" | "completed" | "failed";
 }
 
 /**
@@ -136,21 +136,21 @@ CONFIGURATION:
  * Execute parallel dispatch mode
  */
 async function runParallel(args: string[]): Promise<void> {
-  console.log('🚀 Parallel Dispatch Mode\n');
+  console.log("🚀 Parallel Dispatch Mode\n");
 
   // Build task list from --task arguments
   const tasks: ParallelAgentTask[] = [];
-  const dryRun = args.includes('--dry-run');
+  const dryRun = args.includes("--dry-run");
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--task' && args[i + 1]) {
-      const parts = args[i + 1].split(':');
+    if (args[i] === "--task" && args[i + 1]) {
+      const parts = args[i + 1].split(":");
       if (parts.length >= 3) {
         tasks.push({
           description: parts[0],
           role: parts[1],
           task: parts[2],
-          priority: (parts[3] || 'medium') as ParallelAgentTask['priority']
+          priority: (parts[3] || "medium") as ParallelAgentTask["priority"],
         });
       }
       i++;
@@ -158,15 +158,15 @@ async function runParallel(args: string[]): Promise<void> {
   }
 
   // Import and run - pass tasks or undefined for defaults
-  const dispatchModule = await import('./dispatch-parallel.ts');
+  const dispatchModule = await import("./dispatch-parallel.ts");
 
   if (tasks.length > 0) {
     const results: ParallelDispatchResult[] = await dispatchModule.dispatchParallel(tasks, { dryRun });
-    if (results.some(result => result.status === 'failed')) process.exit(1);
+    if (results.some((result) => result.status === "failed")) process.exit(1);
   } else {
     // Use the runDispatcher helper that handles empty arrays
     const results: ParallelDispatchResult[] = await dispatchModule.runDispatcher(undefined, { dryRun });
-    if (results.some(result => result.status === 'failed')) process.exit(1);
+    if (results.some((result) => result.status === "failed")) process.exit(1);
   }
 }
 
@@ -174,21 +174,21 @@ async function runParallel(args: string[]): Promise<void> {
  * Execute serial dispatch mode
  */
 async function runSerial(args: string[]): Promise<void> {
-  console.log('🔄 Serial Dispatch Mode\n');
+  console.log("🔄 Serial Dispatch Mode\n");
 
   const options: SerialExecutionOptions = {
-    stopOnError: !args.includes('--continue-on-error'),
-    verbose: args.includes('--verbose') || args.includes('-v'),
-    dryRun: args.includes('--dry-run')
+    stopOnError: !args.includes("--continue-on-error"),
+    verbose: args.includes("--verbose") || args.includes("-v"),
+    dryRun: args.includes("--dry-run"),
   };
 
   // Check for custom pipeline
-  const pipelineIndex = args.indexOf('--pipeline');
+  const pipelineIndex = args.indexOf("--pipeline");
   let pipeline: SerialAgentTask[] | undefined;
 
   if (pipelineIndex >= 0 && args[pipelineIndex + 1]) {
     const pipelinePath = path.resolve(projectRoot, args[pipelineIndex + 1]);
-    if (!pipelinePath.startsWith(projectRoot + path.sep) || !pipelinePath.endsWith('.ts')) {
+    if (!pipelinePath.startsWith(projectRoot + path.sep) || !pipelinePath.endsWith(".ts")) {
       console.error(`[dispatch] Invalid pipeline path: ${pipelinePath}`);
       process.exit(1);
     }
@@ -202,15 +202,15 @@ async function runSerial(args: string[]): Promise<void> {
   }
 
   // Import dispatch module and run with pipeline or defaults
-  const dispatchModule = await import('./dispatch-serial.ts');
+  const dispatchModule = await import("./dispatch-serial.ts");
 
   if (pipeline) {
     const results = await dispatchModule.dispatchSerial(pipeline, options);
-    if (results.some((result: { status: string }) => result.status === 'failed')) process.exit(1);
+    if (results.some((result: { status: string }) => result.status === "failed")) process.exit(1);
   } else {
     // Use default pipeline from module
     const results = await dispatchModule.runDispatcher(options);
-    if (results.some((result: { status: string }) => result.status === 'failed')) process.exit(1);
+    if (results.some((result: { status: string }) => result.status === "failed")) process.exit(1);
   }
 }
 
@@ -239,7 +239,7 @@ async function main(): Promise<void> {
         break;
     }
   } catch (error) {
-    console.error('\n❌ Dispatch failed:', error instanceof Error ? error.message : error);
+    console.error("\n❌ Dispatch failed:", error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }
@@ -250,4 +250,3 @@ if (import.meta.main) {
 }
 
 export { main };
-

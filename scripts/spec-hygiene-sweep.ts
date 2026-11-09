@@ -21,10 +21,10 @@
  * Output per finding: id, age-in-days, title, doc path.
  */
 
-import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 
-export const REGISTRY_PATH = resolve(import.meta.dir, '..', 'docs', 'specs', 'registry.json');
+export const REGISTRY_PATH = resolve(import.meta.dir, "..", "docs", "specs", "registry.json");
 export const MAX_AGE_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -64,7 +64,7 @@ export function findStaleApprovedSpecs(
   const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
   const findings: StaleFinding[] = [];
   for (const entry of entries) {
-    if (entry.status !== 'approved') continue;
+    if (entry.status !== "approved") continue;
     const createdMs = Date.parse(`${entry.created}T00:00:00Z`);
     if (Number.isNaN(createdMs)) continue;
     const ageDays = Math.floor((todayUtc - createdMs) / DAY_MS);
@@ -82,11 +82,11 @@ export function findStaleApprovedSpecs(
 }
 
 function loadRegistry(): Registry {
-  return JSON.parse(readFileSync(REGISTRY_PATH, 'utf-8')) as Registry;
+  return JSON.parse(readFileSync(REGISTRY_PATH, "utf-8")) as Registry;
 }
 
 function main(): number {
-  const json = process.argv.includes('--json');
+  const json = process.argv.includes("--json");
   const registry = loadRegistry();
   const findings = findStaleApprovedSpecs(registry.specs, new Date());
 
@@ -106,7 +106,7 @@ function main(): number {
   } else {
     console.log(`spec-hygiene-sweep: docs/specs/registry.json (window: ${MAX_AGE_DAYS} days)`);
     if (findings.length === 0) {
-      console.log('OK — no approved specs older than the adjudication window.');
+      console.log("OK — no approved specs older than the adjudication window.");
       return 0;
     }
     console.log(`STALE — ${findings.length} approved spec(s) beyond the adjudication window:`);
@@ -115,7 +115,7 @@ function main(): number {
       console.log(`      title: ${f.title}`);
       console.log(`      doc:   ${f.file}`);
     }
-    console.log('Adjudication is human/PM work: implement, supersede, or re-confirm each.');
+    console.log("Adjudication is human/PM work: implement, supersede, or re-confirm each.");
   }
   return findings.length > 0 ? 1 : 0;
 }

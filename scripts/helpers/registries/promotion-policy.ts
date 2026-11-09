@@ -7,7 +7,7 @@
 //         exact-key-parity check (fatal) on every pipeline run.
 // SSOT for beta-to-stable promotion policies
 
-import type { VariantType } from './variant-type-registry.ts';
+import type { VariantType } from "./variant-type-registry.ts";
 
 /**
  * Defines the criteria for promoting a variant type from beta to stable.
@@ -31,7 +31,7 @@ export const PROMOTION_POLICIES = {
   security: {
     minEngagements: 5,
     minBetaMonths: 3,
-    additionalChecks: ['authorization-gate-review'] as const,
+    additionalChecks: ["authorization-gate-review"] as const,
   },
   development: {
     minEngagements: 3,
@@ -57,7 +57,7 @@ export const PROMOTION_POLICIES = {
     minEngagements: 3,
     minBetaMonths: 3,
   },
-  'abap-development': {
+  "abap-development": {
     minEngagements: 3,
     minBetaMonths: 2,
   },

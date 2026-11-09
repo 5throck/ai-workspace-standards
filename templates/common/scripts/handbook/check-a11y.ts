@@ -37,7 +37,8 @@ function checkMissingAlt(html: string, file: string): A11yIssue[] {
   const issues: A11yIssue[] = [];
   const imgRe = /<img\s[^>]*?>/gi;
   let m: RegExpExecArray | null;
-  while ((m = imgRe.exec(html)) !== null) {
+  m = imgRe.exec(html);
+  while (m !== null) {
     if (!/\balt\s*(?:=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?/i.test(m[0])) {
       const line = html.slice(0, m.index!).split("\n").length;
       issues.push({
@@ -47,6 +48,7 @@ function checkMissingAlt(html: string, file: string): A11yIssue[] {
         detail: `<img> without alt at line ${line}`,
       });
     }
+    m = imgRe.exec(html);
   }
   return issues;
 }
@@ -90,16 +92,20 @@ function isInsideResetContainer(html: string, pos: number): boolean {
   const events: DivEvent[] = [];
 
   let tm: RegExpExecArray | null;
-  while ((tm = divOpenRe.exec(segment)) !== null) {
+  tm = divOpenRe.exec(segment);
+  while (tm !== null) {
     const absPos = windowStart + tm.index;
     if (absPos >= pos) break;
     const classMatch = tm[0].match(classRe);
     events.push({ absPos, isOpen: true, classes: classMatch ? classMatch[1] : "" });
+    tm = divOpenRe.exec(segment);
   }
-  while ((tm = divCloseRe.exec(segment)) !== null) {
+  tm = divCloseRe.exec(segment);
+  while (tm !== null) {
     const absPos = windowStart + tm.index;
     if (absPos >= pos) break;
     events.push({ absPos, isOpen: false, classes: "" });
+    tm = divCloseRe.exec(segment);
   }
 
   // Sort by position and track nesting stack
@@ -117,13 +123,15 @@ function isInsideResetContainer(html: string, pos: number): boolean {
   // Check if any ancestor in the stack is a reset container.
   // HIERARCHY_RESET_CONTAINERS uses CSS class selectors (e.g. ".compare-col"),
   // but HTML class attributes don't have a leading dot.
-  const classList = cls => " " + cls + " "; // pad for word-boundary matching
+  const classList = (cls: string): string => " " + cls + " "; // pad for word-boundary matching
   for (const cls of stack) {
-    if (HIERARCHY_RESET_CONTAINERS.some((selector) => {
-      // Strip leading "." from selector for matching against class attribute
-      const className = selector.startsWith(".") ? selector.slice(1) : selector;
-      return classList(cls).includes(" " + className + " ");
-    })) {
+    if (
+      HIERARCHY_RESET_CONTAINERS.some((selector) => {
+        // Strip leading "." from selector for matching against class attribute
+        const className = selector.startsWith(".") ? selector.slice(1) : selector;
+        return classList(cls).includes(" " + className + " ");
+      })
+    ) {
       return true;
     }
   }
@@ -136,12 +144,14 @@ function checkHeadingHierarchy(html: string, file: string): A11yIssue[] {
   const headingRe = /<h([1-6])[^>]*>/gi;
   let prevLevel = 0;
   let m: RegExpExecArray | null;
-  while ((m = headingRe.exec(html)) !== null) {
+  m = headingRe.exec(html);
+  while (m !== null) {
     const level = parseInt(m[1], 10);
 
     // Reset hierarchy inside known layout containers
     if (isInsideResetContainer(html, m.index!)) {
       prevLevel = level;
+      m = headingRe.exec(html);
       continue;
     }
 
@@ -157,6 +167,7 @@ function checkHeadingHierarchy(html: string, file: string): A11yIssue[] {
       });
     }
     prevLevel = level;
+    m = headingRe.exec(html);
   }
   return issues;
 }
@@ -171,7 +182,8 @@ function checkEmptyLinks(html: string, file: string): A11yIssue[] {
   // Match <a> tags with an href attribute — capture the full tag and inner content
   const aRe = /<a\s+(?:[^>]*?\s)?href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
   let m: RegExpExecArray | null;
-  while ((m = aRe.exec(html)) !== null) {
+  m = aRe.exec(html);
+  while (m !== null) {
     // Strip inner HTML tags to get visible text only
     const innerHtml = m[1];
     const visibleText = innerHtml.replace(/<[^>]*>/g, "").trim();
@@ -184,6 +196,7 @@ function checkEmptyLinks(html: string, file: string): A11yIssue[] {
         detail: `empty <a href="...">...</a> at line ${line}`,
       });
     }
+    m = aRe.exec(html);
   }
   return issues;
 }
@@ -195,13 +208,12 @@ function checkEmptyLinks(html: string, file: string): A11yIssue[] {
 /** Verify <html lang="..."> is present. */
 function checkMissingLang(html: string, file: string): A11yIssue[] {
   const issues: A11yIssue[] = [];
-  if (!/<html\s[^>]*lang\s*=\s*"[^"]+"/i.test(html) &&
-      !/<html\s[^>]*lang\s*=\s*'[^']+'/i.test(html)) {
+  if (!/<html\s[^>]*lang\s*=\s*"[^"]+"/i.test(html) && !/<html\s[^>]*lang\s*=\s*'[^']+'/i.test(html)) {
     issues.push({
       file,
       line: 0,
       category: "missing-lang",
-      detail: "missing <html lang=\"...\"> attribute",
+      detail: 'missing <html lang="..."> attribute',
     });
   }
   return issues;
@@ -239,12 +251,13 @@ if (import.meta.main) {
   // Group by category for readable output
   const byCategory = new Map<string, A11yIssue[]>();
   for (const issue of issues) {
-    const label: Record<string, string> = {
+    const categoryLabels: Record<string, string> = {
       "missing-alt": "Missing alt attributes",
       "heading-hierarchy": "Heading hierarchy issues",
       "empty-link": "Empty links",
       "missing-lang": "Missing lang attributes",
-    }[issue.category] ?? issue.category;
+    };
+    const label = categoryLabels[issue.category] ?? issue.category;
     if (!byCategory.has(label)) byCategory.set(label, []);
     byCategory.get(label)!.push(issue);
   }

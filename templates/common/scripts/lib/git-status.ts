@@ -34,20 +34,20 @@
  * enumerated individually because callers pass `-uall`.
  */
 export function parseStatusPorcelain(out: string): Set<string> {
-    const paths = new Set<string>();
-    const records = out.split('\0').filter(Boolean);
-    for (let i = 0; i < records.length; i++) {
-        const record = records[i];
-        // Each record is "XY <path>" (two status letters + one space). Anything
-        // shorter cannot carry a path — skip rather than throw on stray input.
-        if (record.length < 4) continue;
-        paths.add(record.slice(3));
-        // Rename/copy records embed the original path as the next NUL field.
-        const x = record[0];
-        const y = record[1];
-        if (x === 'R' || x === 'C' || y === 'R' || y === 'C') i++;
-    }
-    return paths;
+  const paths = new Set<string>();
+  const records = out.split("\0").filter(Boolean);
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    // Each record is "XY <path>" (two status letters + one space). Anything
+    // shorter cannot carry a path — skip rather than throw on stray input.
+    if (record.length < 4) continue;
+    paths.add(record.slice(3));
+    // Rename/copy records embed the original path as the next NUL field.
+    const x = record[0];
+    const y = record[1];
+    if (x === "R" || x === "C" || y === "R" || y === "C") i++;
+  }
+  return paths;
 }
 
 /**
@@ -66,21 +66,21 @@ export function parseStatusPorcelain(out: string): Set<string> {
  * remove their source, so only rename sources are collected.
  */
 export function parseCachedNameStatus(out: string): Set<string> {
-    const removed = new Set<string>();
-    const records = out.split('\0');
-    for (let i = 0; i < records.length; i++) {
-        const status = records[i];
-        if (!status) continue;
-        const first = records[++i];
-        if (first === undefined) break; // truncated trailing record — ignore
-        if (status === 'D') {
-            removed.add(first);
-        } else if (status[0] === 'R' || status[0] === 'C') {
-            const second = records[++i];
-            if (second === undefined) break; // truncated rename record — ignore
-            if (status[0] === 'R') removed.add(first); // source, not target
-        }
-        // A / M / T / U and unknown statuses remove nothing.
+  const removed = new Set<string>();
+  const records = out.split("\0");
+  for (let i = 0; i < records.length; i++) {
+    const status = records[i];
+    if (!status) continue;
+    const first = records[++i];
+    if (first === undefined) break; // truncated trailing record — ignore
+    if (status === "D") {
+      removed.add(first);
+    } else if (status[0] === "R" || status[0] === "C") {
+      const second = records[++i];
+      if (second === undefined) break; // truncated rename record — ignore
+      if (status[0] === "R") removed.add(first); // source, not target
     }
-    return removed;
+    // A / M / T / U and unknown statuses remove nothing.
+  }
+  return removed;
 }

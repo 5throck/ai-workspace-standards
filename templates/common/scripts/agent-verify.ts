@@ -41,18 +41,39 @@ function extractDocAgents(content: string): string[] {
   const agents: string[] = [];
   // Match agent references in markdown tables: `agents/agent-name.md`
   const tableRegex = /\| [^|]*`agents\/([^. ]+)(?:\.md)?`[^|]*\|/g;
-  let match;
-  while ((match = tableRegex.exec(content)) !== null) {
+  let match: RegExpExecArray | null = tableRegex.exec(content);
+  while (match !== null) {
     const agentName = match[1];
-    if (agentName === '*' || agentName.includes('*') || agentName.includes('<') || agentName.includes('>') || agentName.startsWith('_')) continue;
+    if (
+      agentName === "*" ||
+      agentName.includes("*") ||
+      agentName.includes("<") ||
+      agentName.includes(">") ||
+      agentName.startsWith("_")
+    ) {
+      match = tableRegex.exec(content);
+      continue;
+    }
     if (!agents.includes(agentName)) agents.push(agentName);
+    match = tableRegex.exec(content);
   }
   // Match inline agent references (skip wildcards, placeholders, archive paths)
   const inlineRegex = /`agents\/([^. )]+)(?:\.md)?`/g;
-  while ((match = inlineRegex.exec(content)) !== null) {
+  match = inlineRegex.exec(content);
+  while (match !== null) {
     const agentName = match[1];
-    if (agentName === '*' || agentName.includes('*') || agentName.includes('<') || agentName.includes('>') || agentName.startsWith('_')) continue;
+    if (
+      agentName === "*" ||
+      agentName.includes("*") ||
+      agentName.includes("<") ||
+      agentName.includes(">") ||
+      agentName.startsWith("_")
+    ) {
+      match = inlineRegex.exec(content);
+      continue;
+    }
     if (!agents.includes(agentName)) agents.push(agentName);
+    match = inlineRegex.exec(content);
   }
   return agents;
 }
@@ -64,18 +85,30 @@ async function verifyAgents(): Promise<VerificationResult> {
   let agentFiles: string[] = [];
   try {
     const files = await fs.readdir(agentsDir);
-    agentFiles = files.filter((f) => f.endsWith(".md") && !["handoff-spec.md", "README.md", "README_ko.md"].includes(f));
+    agentFiles = files.filter(
+      (f) => f.endsWith(".md") && !["handoff-spec.md", "README.md", "README_ko.md"].includes(f),
+    );
     stats.totalAgents = agentFiles.length;
   } catch {
-    return { pass: false, issues: [{ type: "missing_file", agent: "N/A", message: "agents/ directory not found" }], stats };
+    return {
+      pass: false,
+      issues: [{ type: "missing_file", agent: "N/A", message: "agents/ directory not found" }],
+      stats,
+    };
   }
 
   let agentsMdContent = "";
   let constitutionMdContent = "";
-  try { agentsMdContent = await fs.readFile(agentsMdPath, "utf-8"); } catch {
+  try {
+    agentsMdContent = await fs.readFile(agentsMdPath, "utf-8");
+  } catch {
     issues.push({ type: "missing_docs", agent: "AGENTS.md", message: "AGENTS.md not found at workspace root" });
   }
-  try { constitutionMdContent = await fs.readFile(constitutionMdPath, "utf-8"); } catch { /* ignore */ }
+  try {
+    constitutionMdContent = await fs.readFile(constitutionMdPath, "utf-8");
+  } catch {
+    /* ignore */
+  }
 
   const documentedInAgentsMd = extractDocAgents(agentsMdContent);
   const documentedInConstitutionMd = extractDocAgents(constitutionMdContent);
@@ -85,14 +118,24 @@ async function verifyAgents(): Promise<VerificationResult> {
     const agentName = file.replace(".md", "");
     if (!allDocumentedAgents.has(agentName)) {
       stats.orphanedFiles++;
-      issues.push({ type: "missing_docs", agent: agentName, message: "Agent file exists but not documented", suggestion: `Add "${agentName}" to AGENTS.md` });
+      issues.push({
+        type: "missing_docs",
+        agent: agentName,
+        message: "Agent file exists but not documented",
+        suggestion: `Add "${agentName}" to AGENTS.md`,
+      });
     }
   }
 
   for (const docAgent of allDocumentedAgents) {
     if (!agentFiles.includes(`${docAgent}.md`)) {
       stats.orphanedDocs++;
-      issues.push({ type: "missing_file", agent: docAgent, message: "Agent documented but file does not exist", suggestion: `Create with: bun run agent:create ${docAgent}` });
+      issues.push({
+        type: "missing_file",
+        agent: docAgent,
+        message: "Agent documented but file does not exist",
+        suggestion: `Create with: bun run agent:create ${docAgent}`,
+      });
     }
   }
 
@@ -138,9 +181,10 @@ async function verifySharedBlocks(): Promise<void> {
   // Extract SHARED blocks from root pm.md
   const sharedBlockRegex = /<!-- SHARED:([^>]+)-->([\s\S]*?)<!-- \/SHARED -->/g;
   const rootBlocks: Array<{ label: string; full: string }> = [];
-  let match;
-  while ((match = sharedBlockRegex.exec(rootContent)) !== null) {
+  let match: RegExpExecArray | null = sharedBlockRegex.exec(rootContent);
+  while (match !== null) {
     rootBlocks.push({ label: match[1].trim(), full: match[0] });
+    match = sharedBlockRegex.exec(rootContent);
   }
 
   if (rootBlocks.length === 0) return; // No SHARED blocks in root — nothing to verify
@@ -149,9 +193,7 @@ async function verifySharedBlocks(): Promise<void> {
   let variantDirs: string[];
   try {
     const entries = await fs.readdir(templatesDir, { withFileTypes: true });
-    variantDirs = entries
-      .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
-      .map((e) => e.name);
+    variantDirs = entries.filter((e) => e.isDirectory() && e.name.startsWith("co-")).map((e) => e.name);
   } catch {
     return;
   }
@@ -176,9 +218,7 @@ async function verifySharedBlocks(): Promise<void> {
       } else {
         // Block present — check content matches
         const escapedKey = labelKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const variantBlockRegex = new RegExp(
-          `<!-- SHARED:\\s*${escapedKey}[^>]*-->[\\s\\S]*?<!-- \\/SHARED -->`,
-        );
+        const variantBlockRegex = new RegExp(`<!-- SHARED:\\s*${escapedKey}[^>]*-->[\\s\\S]*?<!-- \\/SHARED -->`);
         const variantMatch = variantContent.match(variantBlockRegex);
         if (variantMatch && variantMatch[0] !== block.full) {
           console.log(`⚠️  [SHARED_BLOCK_DRIFT] templates/${variant}/agents/pm.md`);
@@ -191,9 +231,7 @@ async function verifySharedBlocks(): Promise<void> {
   }
 
   if (warnCount === 0) {
-    console.log(
-      `✅ SHARED blocks: all ${variantDirs.length} L2 variant pm.md files contain required SHARED blocks\n`,
-    );
+    console.log(`✅ SHARED blocks: all ${variantDirs.length} L2 variant pm.md files contain required SHARED blocks\n`);
   }
 }
 
@@ -205,7 +243,10 @@ async function main() {
 }
 
 if (import.meta.main) {
-  main().catch((error) => { console.error("Error:", error); process.exit(1); });
+  main().catch((error) => {
+    console.error("Error:", error);
+    process.exit(1);
+  });
 }
 
 export { verifyAgents, VerificationResult, VerificationIssue };

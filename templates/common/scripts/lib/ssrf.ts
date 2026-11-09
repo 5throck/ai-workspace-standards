@@ -36,11 +36,11 @@
  * @security Production hardening — TOCTOU DNS rebinding mitigation
  */
 
-import * as dns from 'node:dns';
-import * as net from 'node:net';
-import * as URL from 'node:url';
-import * as http from 'node:http';
-import * as https from 'node:https';
+import * as dns from "node:dns";
+import * as net from "node:net";
+import * as URL from "node:url";
+import * as http from "node:http";
+import * as https from "node:https";
 
 // ============================================================================
 // CONSTANTS
@@ -49,32 +49,32 @@ import * as https from 'node:https';
 /** Blocked IP ranges (private, loopback, link-local, metadata endpoints) */
 const BLOCKED_CIDRS: ReadonlyArray<{ start: bigint; end: bigint; reason: string }> = [
   // Loopback (127.0.0.0/8)
-  { start: 0x7f000000n, end: 0x7fffffffn, reason: 'loopback' },
+  { start: 0x7f000000n, end: 0x7fffffffn, reason: "loopback" },
   // Current network (0.0.0.0/8)
   // U-20261031-003: end corrected 0x0fffffffn → 0x00ffffffn — the old value
   // spanned 0.0.0.0–15.255.255.255, blocking public 1.x–15.x addresses
   // (e.g. 8.8.8.8) as fail-open "availability" collateral.
-  { start: 0x00000000n, end: 0x00ffffffn, reason: 'current-network' },
+  { start: 0x00000000n, end: 0x00ffffffn, reason: "current-network" },
   // Private (10.0.0.0/8)
   // U-20261031-003: end corrected 0x0fffffffn → 0x0affffffn — the old value
   // spanned 10.0.0.0–15.255.255.255, blocking public 11.x–15.x addresses.
-  { start: 0x0a000000n, end: 0x0affffffn, reason: 'private-10' },
+  { start: 0x0a000000n, end: 0x0affffffn, reason: "private-10" },
   // Private (172.16.0.0/12)
-  { start: 0xac100000n, end: 0xac1fffffn, reason: 'private-172' },
+  { start: 0xac100000n, end: 0xac1fffffn, reason: "private-172" },
   // Private (192.168.0.0/16)
-  { start: 0xc0a80000n, end: 0xc0a8ffffn, reason: 'private-192' },
+  { start: 0xc0a80000n, end: 0xc0a8ffffn, reason: "private-192" },
   // Link-local (169.254.0.0/16) — AWS/GCP metadata endpoints
-  { start: 0xa9fe0000n, end: 0xa9feffffn, reason: 'link-local-metadata' },
+  { start: 0xa9fe0000n, end: 0xa9feffffn, reason: "link-local-metadata" },
   // Carrier-grade NAT / shared address space (100.64.0.0/10)
-  { start: 0x64400000n, end: 0x647fffffn, reason: 'carrier-grade-nat' },
+  { start: 0x64400000n, end: 0x647fffffn, reason: "carrier-grade-nat" },
   // Network benchmarking (198.18.0.0/15)
-  { start: 0xc6120000n, end: 0xc613ffffn, reason: 'network-benchmarking' },
+  { start: 0xc6120000n, end: 0xc613ffffn, reason: "network-benchmarking" },
   // Multicast (224.0.0.0/4)
-  { start: 0xe0000000n, end: 0xefffffffn, reason: 'multicast' },
+  { start: 0xe0000000n, end: 0xefffffffn, reason: "multicast" },
   // Reserved (240.0.0.0/4)
-  { start: 0xf0000000n, end: 0xffffffffn, reason: 'reserved' },
+  { start: 0xf0000000n, end: 0xffffffffn, reason: "reserved" },
   // IPv4-mapped IPv6 loopback (::ffff:127.0.0.0/104)
-  { start: 0xffff7f000000n, end: 0xffff7fffffffn, reason: 'ipv6-mapped-loopback' },
+  { start: 0xffff7f000000n, end: 0xffff7fffffffn, reason: "ipv6-mapped-loopback" },
 ];
 
 // ============================================================================
@@ -106,18 +106,16 @@ export interface SSRFValidationResult {
  * @param targetUrl - The URL to validate
  * @returns SSRFValidationResult with allowed/denied status and resolved IPs
  */
-export async function validateUrl(
-  targetUrl: string,
-): Promise<SSRFValidationResult> {
+export async function validateUrl(targetUrl: string): Promise<SSRFValidationResult> {
   let parsed: URL.URL;
   try {
     parsed = new URL.URL(targetUrl);
   } catch {
-    return { allowed: false, reason: 'invalid-url', hostname: targetUrl };
+    return { allowed: false, reason: "invalid-url", hostname: targetUrl };
   }
 
   // Only allow http/https
-  if (!['http:', 'https:'].includes(parsed.protocol)) {
+  if (!["http:", "https:"].includes(parsed.protocol)) {
     return { allowed: false, reason: `unsupported-protocol: ${parsed.protocol}`, hostname: parsed.hostname };
   }
 
@@ -135,14 +133,13 @@ export async function validateUrl(
   // DNS resolution with lookup (respects /etc/hosts and system DNS)
   let addresses: string[];
   try {
-    addresses = await dns.promises.lookup(hostname, { all: true })
-      .then((result) => result.map((r) => r.address));
+    addresses = await dns.promises.lookup(hostname, { all: true }).then((result) => result.map((r) => r.address));
   } catch {
-    return { allowed: false, reason: 'dns-resolution-failed', hostname };
+    return { allowed: false, reason: "dns-resolution-failed", hostname };
   }
 
   if (addresses.length === 0) {
-    return { allowed: false, reason: 'no-dns-records', hostname };
+    return { allowed: false, reason: "no-dns-records", hostname };
   }
 
   // Validate every resolved address
@@ -158,9 +155,12 @@ export async function validateUrl(
 
 /** Thrown by safeFetch() when validateUrl() rejects the target. */
 export class SSRFBlockedError extends Error {
-  constructor(public readonly reason: string, public readonly hostname: string) {
+  constructor(
+    public readonly reason: string,
+    public readonly hostname: string,
+  ) {
     super(`SSRF check blocked ${hostname}: ${reason}`);
-    this.name = 'SSRFBlockedError';
+    this.name = "SSRFBlockedError";
   }
 }
 
@@ -184,7 +184,7 @@ export async function fetchPinned(
   init: { signal?: AbortSignal } = {},
 ): Promise<Response> {
   const parsed = new URL.URL(targetUrl);
-  const isHttps = parsed.protocol === 'https:';
+  const isHttps = parsed.protocol === "https:";
   const requestFn = isHttps ? https.request : http.request;
 
   const lookup: net.LookupFunction = (_hostname, options, callback) => {
@@ -206,7 +206,7 @@ export async function fetchPinned(
         hostname: parsed.hostname,
         port: portOverride ?? (parsed.port || (isHttps ? 443 : 80)),
         path: `${parsed.pathname}${parsed.search}`,
-        method: 'GET',
+        method: "GET",
         lookup,
         // TLS: keep servername/cert validation pinned to the original hostname.
         ...(isHttps ? { servername: parsed.hostname } : {}),
@@ -215,38 +215,48 @@ export async function fetchPinned(
         const status = res.statusCode ?? 0;
         if (status >= 300 && status < 400) {
           res.resume();
-          reject(new Error(`fetchPinned: refusing to follow redirect (status ${status}, location: ${res.headers.location ?? 'unknown'})`));
+          reject(
+            new Error(
+              `fetchPinned: refusing to follow redirect (status ${status}, location: ${res.headers.location ?? "unknown"})`,
+            ),
+          );
           return;
         }
 
         const chunks: Buffer[] = [];
-        res.on('data', (chunk) => chunks.push(chunk));
-        res.on('end', () => {
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
           const headers = new Headers();
           for (const [key, value] of Object.entries(res.headers)) {
             if (value === undefined) continue;
-            headers.set(key, Array.isArray(value) ? value.join(', ') : String(value));
+            headers.set(key, Array.isArray(value) ? value.join(", ") : String(value));
           }
-          resolve(new Response(Buffer.concat(chunks), {
-            status,
-            statusText: res.statusMessage ?? '',
-            headers,
-          }));
+          resolve(
+            new Response(Buffer.concat(chunks), {
+              status,
+              statusText: res.statusMessage ?? "",
+              headers,
+            }),
+          );
         });
-        res.on('error', reject);
+        res.on("error", reject);
       },
     );
 
-    req.on('error', reject);
+    req.on("error", reject);
     if (init.signal) {
       if (init.signal.aborted) {
         req.destroy();
-        reject(new DOMException('Aborted', 'AbortError'));
+        reject(new DOMException("Aborted", "AbortError"));
       } else {
-        init.signal.addEventListener('abort', () => {
-          req.destroy();
-          reject(new DOMException('Aborted', 'AbortError'));
-        }, { once: true });
+        init.signal.addEventListener(
+          "abort",
+          () => {
+            req.destroy();
+            reject(new DOMException("Aborted", "AbortError"));
+          },
+          { once: true },
+        );
       }
     }
     req.end();
@@ -264,7 +274,7 @@ export async function fetchPinned(
 export async function safeFetch(targetUrl: string, init: { signal?: AbortSignal } = {}): Promise<Response> {
   const check = await validateUrl(targetUrl);
   if (!check.allowed) {
-    throw new SSRFBlockedError(check.reason ?? 'blocked', check.hostname);
+    throw new SSRFBlockedError(check.reason ?? "blocked", check.hostname);
   }
   return fetchPinned(targetUrl, check.resolvedAddresses!, undefined, init);
 }
@@ -281,7 +291,7 @@ export function isBlockedIp(ip: string): string | null {
   let ipNum: bigint;
 
   if (net.isIPv4(ip)) {
-    const parts = ip.split('.').map(Number);
+    const parts = ip.split(".").map(Number);
     ipNum = (BigInt(parts[0]) << 24n) | (BigInt(parts[1]) << 16n) | (BigInt(parts[2]) << 8n) | BigInt(parts[3]);
   } else if (net.isIPv6(ip)) {
     // Check for IPv4-mapped IPv6 (::ffff:x.x.x.x)
@@ -293,15 +303,15 @@ export function isBlockedIp(ip: string): string | null {
     const ipv6Num = ipv6ToBigInt(ip);
     const BLOCKED_IPV6_CIDRS: ReadonlyArray<{ start: bigint; end: bigint; reason: string }> = [
       // Loopback (::1/128)
-      { start: 1n, end: 1n, reason: 'ipv6-loopback' },
+      { start: 1n, end: 1n, reason: "ipv6-loopback" },
       // Unique local (fc00::/7)
-      { start: 0xfc00000000000000n, end: 0xfdffffffffffffffn, reason: 'ipv6-unique-local' },
+      { start: 0xfc00000000000000n, end: 0xfdffffffffffffffn, reason: "ipv6-unique-local" },
       // Link-local (fe80::/10)
-      { start: 0xfe80000000000000n, end: 0xfebfffffffffffffn, reason: 'ipv6-link-local' },
+      { start: 0xfe80000000000000n, end: 0xfebfffffffffffffn, reason: "ipv6-link-local" },
       // IPv4-mapped (::ffff:0:0/96)
-      { start: 0xffff000000000000n, end: 0xffffffffffffffffn, reason: 'ipv6-mapped' },
+      { start: 0xffff000000000000n, end: 0xffffffffffffffffn, reason: "ipv6-mapped" },
       // Multicast (ff00::/8)
-      { start: 0xff00000000000000n, end: 0xffffffffffffffffn, reason: 'ipv6-multicast' },
+      { start: 0xff00000000000000n, end: 0xffffffffffffffffn, reason: "ipv6-multicast" },
     ];
     for (const range of BLOCKED_IPV6_CIDRS) {
       if (ipv6Num >= range.start && ipv6Num <= range.end) {
@@ -310,7 +320,7 @@ export function isBlockedIp(ip: string): string | null {
     }
     return null;
   } else {
-    return 'invalid-ip-format';
+    return "invalid-ip-format";
   }
 
   for (const range of BLOCKED_CIDRS) {
@@ -326,18 +336,18 @@ export function isBlockedIp(ip: string): string | null {
  * Convert an IPv6 address string to a 128-bit bigint for CIDR comparison.
  */
 function ipv6ToBigInt(ip: string): bigint {
-  const groups = ip.split(':');
+  const groups = ip.split(":");
   let expanded: number[] = [];
 
   // Handle :: expansion
-  const doubleColonIdx = groups.indexOf('');
+  const doubleColonIdx = groups.indexOf("");
   if (doubleColonIdx !== -1) {
-    const before = groups.slice(0, doubleColonIdx).map(g => parseInt(g, 16) || 0);
-    const after = groups.slice(doubleColonIdx + 1).map(g => parseInt(g, 16) || 0);
+    const before = groups.slice(0, doubleColonIdx).map((g) => parseInt(g, 16) || 0);
+    const after = groups.slice(doubleColonIdx + 1).map((g) => parseInt(g, 16) || 0);
     const missing = 8 - before.length - after.length;
     expanded = [...before, ...new Array(missing).fill(0), ...after];
   } else {
-    expanded = groups.map(g => parseInt(g, 16) || 0);
+    expanded = groups.map((g) => parseInt(g, 16) || 0);
   }
 
   let result = 0n;

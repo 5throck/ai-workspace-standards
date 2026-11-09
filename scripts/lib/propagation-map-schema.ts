@@ -13,8 +13,8 @@
  *          auditVariantScopedTargets.
  */
 
-import { readdirSync, statSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, statSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
 export interface PropagationDomain {
   description?: string;
@@ -26,7 +26,7 @@ export interface PropagationDomain {
   exclude_prefixes?: string[];
   note?: string;
   // marker-inject mode fields
-  mode?: 'marker-inject';
+  mode?: "marker-inject";
   source_file?: string;
   marker?: string;
   target_variants?: string[];
@@ -65,69 +65,73 @@ export interface ValidationError {
 export function validatePropagationMap(map: unknown): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  if (typeof map !== 'object' || map === null) {
-    return [{ domain: '<root>', field: 'map', message: 'Must be a JSON object' }];
+  if (typeof map !== "object" || map === null) {
+    return [{ domain: "<root>", field: "map", message: "Must be a JSON object" }];
   }
 
   const m = map as Record<string, unknown>;
 
-  if (typeof m.version !== 'string') {
-    errors.push({ domain: '<root>', field: 'version', message: 'Must be a string (semver)' });
+  if (typeof m.version !== "string") {
+    errors.push({ domain: "<root>", field: "version", message: "Must be a string (semver)" });
   }
 
-  if (typeof m.domains !== 'object' || m.domains === null || Array.isArray(m.domains)) {
-    errors.push({ domain: '<root>', field: 'domains', message: 'Must be an object' });
+  if (typeof m.domains !== "object" || m.domains === null || Array.isArray(m.domains)) {
+    errors.push({ domain: "<root>", field: "domains", message: "Must be an object" });
     return errors;
   }
 
   for (const [name, raw] of Object.entries(m.domains as Record<string, unknown>)) {
-    if (typeof raw !== 'object' || raw === null) {
-      errors.push({ domain: name, field: '<domain>', message: 'Must be an object' });
+    if (typeof raw !== "object" || raw === null) {
+      errors.push({ domain: name, field: "<domain>", message: "Must be an object" });
       continue;
     }
     const d = raw as Record<string, unknown>;
 
-    if (d.mode === 'marker-inject') {
+    if (d.mode === "marker-inject") {
       // marker-inject domains require: source_file, marker, target_variants
-      if (typeof d.source_file !== 'string') {
-        errors.push({ domain: name, field: 'source_file', message: 'Required string for marker-inject domain' });
+      if (typeof d.source_file !== "string") {
+        errors.push({ domain: name, field: "source_file", message: "Required string for marker-inject domain" });
       }
-      if (typeof d.marker !== 'string') {
-        errors.push({ domain: name, field: 'marker', message: 'Required string for marker-inject domain' });
+      if (typeof d.marker !== "string") {
+        errors.push({ domain: name, field: "marker", message: "Required string for marker-inject domain" });
       }
       if (!Array.isArray(d.target_variants) || d.target_variants.length === 0) {
-        errors.push({ domain: name, field: 'target_variants', message: 'Required non-empty array for marker-inject domain' });
+        errors.push({
+          domain: name,
+          field: "target_variants",
+          message: "Required non-empty array for marker-inject domain",
+        });
       }
       if (d.exclude_variants !== undefined) {
-        if (!Array.isArray(d.exclude_variants) || d.exclude_variants.some((v) => typeof v !== 'string')) {
-          errors.push({ domain: name, field: 'exclude_variants', message: 'Must be an array of strings if present' });
+        if (!Array.isArray(d.exclude_variants) || d.exclude_variants.some((v) => typeof v !== "string")) {
+          errors.push({ domain: name, field: "exclude_variants", message: "Must be an array of strings if present" });
         }
       }
     } else {
       // Standard copy domains require: source, target
-      if (typeof d.source !== 'string') {
-        errors.push({ domain: name, field: 'source', message: 'Required string' });
+      if (typeof d.source !== "string") {
+        errors.push({ domain: name, field: "source", message: "Required string" });
       }
-      if (typeof d.target !== 'string') {
-        errors.push({ domain: name, field: 'target', message: 'Required string' });
+      if (typeof d.target !== "string") {
+        errors.push({ domain: name, field: "target", message: "Required string" });
       }
       if (d.exclude !== undefined && !Array.isArray(d.exclude)) {
-        errors.push({ domain: name, field: 'exclude', message: 'Must be an array if present' });
+        errors.push({ domain: name, field: "exclude", message: "Must be an array if present" });
       }
       if (d.exclude_prefixes !== undefined && !Array.isArray(d.exclude_prefixes)) {
-        errors.push({ domain: name, field: 'exclude_prefixes', message: 'Must be an array if present' });
+        errors.push({ domain: name, field: "exclude_prefixes", message: "Must be an array if present" });
       }
-      if (d.recursive !== undefined && typeof d.recursive !== 'boolean') {
-        errors.push({ domain: name, field: 'recursive', message: 'Must be a boolean if present' });
+      if (d.recursive !== undefined && typeof d.recursive !== "boolean") {
+        errors.push({ domain: name, field: "recursive", message: "Must be a boolean if present" });
       }
-      if (d.disabled !== undefined && typeof d.disabled !== 'boolean') {
-        errors.push({ domain: name, field: 'disabled', message: 'Must be a boolean if present' });
+      if (d.disabled !== undefined && typeof d.disabled !== "boolean") {
+        errors.push({ domain: name, field: "disabled", message: "Must be a boolean if present" });
       }
-      if (d.disabled_since !== undefined && typeof d.disabled_since !== 'string') {
-        errors.push({ domain: name, field: 'disabled_since', message: 'Must be a string (date) if present' });
+      if (d.disabled_since !== undefined && typeof d.disabled_since !== "string") {
+        errors.push({ domain: name, field: "disabled_since", message: "Must be a string (date) if present" });
       }
-      if (d.history !== undefined && typeof d.history !== 'string') {
-        errors.push({ domain: name, field: 'history', message: 'Must be a string if present' });
+      if (d.history !== undefined && typeof d.history !== "string") {
+        errors.push({ domain: name, field: "history", message: "Must be a string if present" });
       }
     }
   }
@@ -149,12 +153,12 @@ export function validatePropagationMap(map: unknown): ValidationError[] {
  */
 export function deriveCoVariantDirs(templatesDir: string): string[] {
   return readdirSync(templatesDir, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && e.name.startsWith('co-'))
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
     .map((e) => e.name)
     .sort();
 }
 
-export type TargetScope = 'variant-scoped' | 'fixed-target';
+export type TargetScope = "variant-scoped" | "fixed-target";
 
 /**
  * Structural classification of a marker-inject domain by its target-file
@@ -168,11 +172,9 @@ export type TargetScope = 'variant-scoped' | 'fixed-target';
  *   The domain targets exactly the template dirs it declares → validated
  *   against its own declared shape, not the co-* set.
  */
-export function markerInjectTargetScope(domain: {
-  target_file?: string;
-}): TargetScope {
-  if (!domain.target_file) return 'variant-scoped';
-  return domain.target_file.includes('{variant}') ? 'variant-scoped' : 'fixed-target';
+export function markerInjectTargetScope(domain: { target_file?: string }): TargetScope {
+  if (!domain.target_file) return "variant-scoped";
+  return domain.target_file.includes("{variant}") ? "variant-scoped" : "fixed-target";
 }
 
 export interface VariantCoverageAudit {

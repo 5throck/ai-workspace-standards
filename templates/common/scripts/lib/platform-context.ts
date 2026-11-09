@@ -8,19 +8,19 @@
  * @Risk #2: Cross-platform complete equivalence
  */
 
-import * as os from 'os';
-import { $ } from 'bun';
+import * as os from "node:os";
+import { $ } from "bun";
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
 export interface PlatformContext {
-  os: 'windows' | 'linux' | 'darwin';
-  shell: 'bash' | 'powershell' | 'cmd';
-  encoding: 'utf-8';
-  pathSeparator: '\\' | '/';
-  lineEnding: '\r\n' | '\n';
+  os: "windows" | "linux" | "darwin";
+  shell: "bash" | "powershell" | "cmd";
+  encoding: "utf-8";
+  pathSeparator: "\\" | "/";
+  lineEnding: "\r\n" | "\n";
   executableExtension: string;
 }
 
@@ -39,44 +39,42 @@ export interface PlatformContext {
  */
 export async function detectPlatform(): Promise<PlatformContext> {
   const platform = os.platform();
-  const detectedOS: PlatformContext['os'] =
-    platform === 'win32' ? 'windows' :
-    platform === 'darwin' ? 'darwin' :
-    platform === 'linux' ? 'linux' : 'linux'; // Default fallback
+  const detectedOS: PlatformContext["os"] =
+    platform === "win32" ? "windows" : platform === "darwin" ? "darwin" : platform === "linux" ? "linux" : "linux"; // Default fallback
 
   // Detect preferred shell
-  let detectedShell: PlatformContext['shell'] = 'bash';
+  let detectedShell: PlatformContext["shell"] = "bash";
   try {
-    if (detectedOS === 'windows') {
+    if (detectedOS === "windows") {
       // Try to detect if PowerShell is available
       try {
         await $`powershell -Command "echo test"`.quiet();
-        detectedShell = 'powershell';
+        detectedShell = "powershell";
       } catch {
         // Fallback to cmd or Git Bash
         try {
           await $`bash --version`.quiet();
-          detectedShell = 'bash';
+          detectedShell = "bash";
         } catch {
-          detectedShell = 'cmd';
+          detectedShell = "cmd";
         }
       }
     } else {
       // Unix-like systems default to bash
-      detectedShell = 'bash';
+      detectedShell = "bash";
     }
   } catch {
     // Default to bash for non-Windows, cmd for Windows
-    detectedShell = detectedOS === 'windows' ? 'cmd' : 'bash';
+    detectedShell = detectedOS === "windows" ? "cmd" : "bash";
   }
 
   return {
     os: detectedOS,
     shell: detectedShell,
-    encoding: 'utf-8',
-    pathSeparator: detectedOS === 'windows' ? '\\' : '/',
-    lineEnding: detectedOS === 'windows' ? '\r\n' : '\n',
-    executableExtension: detectedOS === 'windows' ? '.exe' : '',
+    encoding: "utf-8",
+    pathSeparator: detectedOS === "windows" ? "\\" : "/",
+    lineEnding: detectedOS === "windows" ? "\r\n" : "\n",
+    executableExtension: detectedOS === "windows" ? ".exe" : "",
   };
 }
 
@@ -85,14 +83,14 @@ export async function detectPlatform(): Promise<PlatformContext> {
  * @version 1.0.0
  */
 export function getScriptWrapper(context: PlatformContext, scriptPath: string): string {
-  const baseScript = scriptPath.replace(/\.ts$/, '');
+  const baseScript = scriptPath.replace(/\.ts$/, "");
 
   switch (context.shell) {
-    case 'powershell':
+    case "powershell":
       return `.\scripts\\${baseScript}.ps1`;
-    case 'bash':
+    case "bash":
       return `./scripts/${baseScript}.sh`;
-    case 'cmd':
+    case "cmd":
       return `scripts\\${baseScript}.bat`;
     default:
       return `./scripts/${baseScript}.sh`;
@@ -110,17 +108,17 @@ export function validatePlatformSupport(context: PlatformContext): {
   const issues: string[] = [];
 
   // UTF-8 encoding support check
-  if (context.encoding !== 'utf-8') {
+  if (context.encoding !== "utf-8") {
     issues.push(`Encoding ${context.encoding} not supported, requires utf-8`);
   }
 
   // Shell compatibility check
-  if (context.os === 'windows' && context.shell === 'bash') {
+  if (context.os === "windows" && context.shell === "bash") {
     // Verify Git Bash is available
     try {
       $`bash --version`.quiet();
     } catch {
-      issues.push('Windows with bash shell requires Git Bash to be installed');
+      issues.push("Windows with bash shell requires Git Bash to be installed");
     }
   }
 
@@ -134,17 +132,13 @@ export function validatePlatformSupport(context: PlatformContext): {
  * Get platform-specific file copy command
  * @version 1.0.0
  */
-export function getFileCopyCommand(
-  context: PlatformContext,
-  source: string,
-  destination: string
-): string {
+export function getFileCopyCommand(context: PlatformContext, source: string, destination: string): string {
   switch (context.shell) {
-    case 'powershell':
+    case "powershell":
       return `Copy-Item -Path "${source}" -Destination "${destination}" -Force`;
-    case 'bash':
+    case "bash":
       return `cp "${source}" "${destination}"`;
-    case 'cmd':
+    case "cmd":
       return `copy "${source}" "${destination}" /Y`;
     default:
       return `cp "${source}" "${destination}"`;
@@ -157,15 +151,15 @@ export function getFileCopyCommand(
  */
 export function getMkdirCommand(context: PlatformContext, dir: string): string {
   switch (context.shell) {
-    case 'powershell':
+    case "powershell":
       return `New-Item -ItemType Directory -Path "${dir}" -Force | Out-Null`;
-    case 'bash':
+    case "bash":
       return `mkdir -p "${dir}"`;
-    case 'cmd':
+    case "cmd":
       return `if not exist "${dir}" mkdir "${dir}"`;
     default:
       return `mkdir -p "${dir}"`;
-  };
+  }
 }
 
 /**
@@ -174,21 +168,18 @@ export function getMkdirCommand(context: PlatformContext, dir: string): string {
  */
 export function detectPlatformSync(): PlatformContext {
   const platform = os.platform();
-  const detectedOS: PlatformContext['os'] =
-    platform === 'win32' ? 'windows' :
-    platform === 'darwin' ? 'darwin' :
-    platform === 'linux' ? 'linux' : 'linux';
+  const detectedOS: PlatformContext["os"] =
+    platform === "win32" ? "windows" : platform === "darwin" ? "darwin" : platform === "linux" ? "linux" : "linux";
 
   // Default shell based on OS
-  const detectedShell: PlatformContext['shell'] =
-    detectedOS === 'windows' ? 'powershell' : 'bash';
+  const detectedShell: PlatformContext["shell"] = detectedOS === "windows" ? "powershell" : "bash";
 
   return {
     os: detectedOS,
     shell: detectedShell,
-    encoding: 'utf-8',
-    pathSeparator: detectedOS === 'windows' ? '\\' : '/',
-    lineEnding: detectedOS === 'windows' ? '\r\n' : '\n',
-    executableExtension: detectedOS === 'windows' ? '.exe' : '',
+    encoding: "utf-8",
+    pathSeparator: detectedOS === "windows" ? "\\" : "/",
+    lineEnding: detectedOS === "windows" ? "\r\n" : "\n",
+    executableExtension: detectedOS === "windows" ? ".exe" : "",
   };
 }

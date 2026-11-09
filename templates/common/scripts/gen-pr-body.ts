@@ -14,11 +14,11 @@
  *   template fallback and language-validation point for the pipeline.
  */
 
-import { $ } from 'bun';
-import { existsSync } from 'node:fs';
-import { hasNonEnglish } from './lib/language-guard.ts';
+import { $ } from "bun";
+import { existsSync } from "node:fs";
+import { hasNonEnglish } from "./lib/language-guard.ts";
 
-const commitMsg = process.argv.slice(2).join(' ');
+const commitMsg = process.argv.slice(2).join(" ");
 if (!commitMsg) {
   process.stderr.write('Usage: bun run scripts/gen-pr-body.ts "<commit message>"\n');
   if (import.meta.main) {
@@ -31,21 +31,21 @@ if (!commitMsg) {
 // (workspace root) or docs/context.md §3 (variant projects, which omit context.md).
 // Detection (Korean/Japanese/Chinese) lives in scripts/lib/language-guard.ts, shared
 // with dev-sync.ts and pre-commit.ts so the three enforcement points can't drift.
-const LANGUAGE_POLICY_REF = existsSync('CONSTITUTION.md') ? 'CONSTITUTION.md §3' : 'docs/context.md §3';
+const LANGUAGE_POLICY_REF = existsSync("CONSTITUTION.md") ? "CONSTITUTION.md §3" : "docs/context.md §3";
 
-function validateLanguage(text: string, label = 'PR body'): void {
+function validateLanguage(text: string, label = "PR body"): void {
   if (hasNonEnglish(text)) {
     process.stderr.write(
       `\x1b[31m[FAIL]\x1b[0m Non-English characters detected in ${label}.\n` +
-      `       ${LANGUAGE_POLICY_REF} mandates all PR titles and bodies must be written in English.\n` +
-      `       Translate the content to English before generating the PR.\n`
+        `       ${LANGUAGE_POLICY_REF} mandates all PR titles and bodies must be written in English.\n` +
+        `       Translate the content to English before generating the PR.\n`,
     );
     process.exit(1);
   }
 }
 
 // Validate commit message used as PR title/summary
-validateLanguage(commitMsg, 'commit message / PR title');
+validateLanguage(commitMsg, "commit message / PR title");
 
 // ── Collect changed files ──────────────────────────────────────────────────────
 async function getFiles(): Promise<string> {
@@ -57,12 +57,13 @@ async function getFiles(): Promise<string> {
 
 const filesRaw = await getFiles();
 
-const fileList = filesRaw
-  .split('\n')
-  .filter(Boolean)
-  .slice(0, 30)
-  .map(f => `- ${f}`)
-  .join('\n') || '';
+const fileList =
+  filesRaw
+    .split("\n")
+    .filter(Boolean)
+    .slice(0, 30)
+    .map((f) => `- ${f}`)
+    .join("\n") || "";
 
 // ── Fallback mode: structured template with auto-filled fields ────────────────
 const fallback = `## Why
@@ -86,5 +87,5 @@ None
 ---
 `;
 
-validateLanguage(fallback, 'fallback PR body');
+validateLanguage(fallback, "fallback PR body");
 process.stdout.write(fallback);

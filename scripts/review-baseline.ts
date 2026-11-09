@@ -62,26 +62,43 @@ const validators: Array<{
   driftJsonContract?: boolean;
 }> = [
   { name: "audit.ts (workspace standards)", cmd: ["bun", "scripts/audit.ts"] },
-  { name: "validate-templates.ts (template/variant integrity + L1 parity)", cmd: ["bun", "scripts/validate-templates.ts"] },
-  { name: "verify-scripts.ts --verify (SCRIPTS.md registry sync)", cmd: ["bun", "scripts/verify-scripts.ts", "--verify"] },
+  {
+    name: "validate-templates.ts (template/variant integrity + L1 parity)",
+    cmd: ["bun", "scripts/validate-templates.ts"],
+  },
+  {
+    name: "verify-scripts.ts --verify (SCRIPTS.md registry sync)",
+    cmd: ["bun", "scripts/verify-scripts.ts", "--verify"],
+  },
   { name: "agent-lifecycle-audit (agent health)", cmd: ["bun", "run", "agent-lifecycle-audit"] },
   { name: "skill-lifecycle-audit (skill health)", cmd: ["bun", "run", "skill-lifecycle-audit"] },
   // T-20260922-030: the tolerated exit-1 class is verified via the machine
   // contract (--json: toleratedDrift/unexpectedDrift) — a hard crash also
   // exits 1, and mapping it to "tolerated" would green-light a drift check
   // that never ran. Mirrors the test.yml drift step's contract.
-  { name: "propagate-to-templates --check-drift (L1↔L2 drift)", cmd: ["bun", "scripts/propagate-to-templates.ts", "--check-drift", "--json"], tolerateExit1: true, driftJsonContract: true },
+  {
+    name: "propagate-to-templates --check-drift (L1↔L2 drift)",
+    cmd: ["bun", "scripts/propagate-to-templates.ts", "--check-drift", "--json"],
+    tolerateExit1: true,
+    driftJsonContract: true,
+  },
   // D6 (2026-10-05 co-deck remediation): contract-truth battery entry —
   // prose claims and semantic bindings the structural validators above do
   // not see (roster/theme/status/process claims, phantom paths, boilerplate
   // drift). Runs against the default template (co-deck); exit 1 = findings.
-  { name: "validate-variant-claims.ts (variant contract-truth: roster/theme/status/process claims)", cmd: ["bun", "scripts/validate-variant-claims.ts"] },
+  {
+    name: "validate-variant-claims.ts (variant contract-truth: roster/theme/status/process claims)",
+    cmd: ["bun", "scripts/validate-variant-claims.ts"],
+  },
   // Battery #10 (spec 2026-11-07-handbook-archmap-drift-check-design): the two
   // handbook clones under Handbooks/ embed the canonical architecture map as
   // asset files and as an inline <svg>; exit 1 = a copy drifted from
   // docs/architecture/workspace-architecture*.svg. Handbooks/ absent → SKIP,
   // exit 0 (gitignored clones; CI and worktrees do not have them).
-  { name: "check-handbook-archmap-drift.ts (handbook architecture-map copies vs canonical)", cmd: ["bun", "scripts/check-handbook-archmap-drift.ts"] },
+  {
+    name: "check-handbook-archmap-drift.ts (handbook architecture-map copies vs canonical)",
+    cmd: ["bun", "scripts/check-handbook-archmap-drift.ts"],
+  },
 ];
 
 /** T-20261026-014 (finding #17): pure classifier for the battery #8 verdict over
@@ -92,7 +109,13 @@ const validators: Array<{
  * spawning gh. */
 export function nightlyE2EVerdict(runs: unknown): { warn: boolean; note: string } {
   const r = (Array.isArray(runs) ? runs[0] : undefined) as
-    | { conclusion?: string | null; status?: string | null; createdAt?: string; url?: string; databaseId?: number | string }
+    | {
+        conclusion?: string | null;
+        status?: string | null;
+        createdAt?: string;
+        url?: string;
+        databaseId?: number | string;
+      }
     | undefined;
   if (!r) {
     return {
@@ -127,7 +150,13 @@ export function nightlyE2EVerdict(runs: unknown): { warn: boolean; note: string 
  *  table without spawning the check. */
 export function designGateCoverageVerdict(report: unknown): { warn: boolean; note: string } {
   const r = report as
-    | { tickets?: Array<{ id: string; covered: boolean }>; uncovered?: string[]; unattributedCommits?: Array<{ sha: string; subject: string }>; touchingCommits?: number; window?: { since?: string; until?: string } }
+    | {
+        tickets?: Array<{ id: string; covered: boolean }>;
+        uncovered?: string[];
+        unattributedCommits?: Array<{ sha: string; subject: string }>;
+        touchingCommits?: number;
+        window?: { since?: string; until?: string };
+      }
     | undefined;
   if (!r || !Array.isArray(r.tickets) || !Array.isArray(r.uncovered) || !Array.isArray(r.unattributedCommits)) {
     return { warn: true, note: "unparseable design-gate-coverage JSON — treated as a failure by the spawn wrapper" };
@@ -213,7 +242,16 @@ function main(): void {
     let warn = false;
     let note = "skipped (gh unavailable or timed out)";
     const gh = Bun.spawnSync(
-      ["gh", "run", "list", "--workflow=nightly-scaffold-e2e.yml", "--limit", "1", "--json", "conclusion,createdAt,url,databaseId"],
+      [
+        "gh",
+        "run",
+        "list",
+        "--workflow=nightly-scaffold-e2e.yml",
+        "--limit",
+        "1",
+        "--json",
+        "conclusion,createdAt,url,databaseId",
+      ],
       { stdout: "pipe", stderr: "pipe", timeout: 15_000 },
     );
     if (gh.exitCode === 0) {
@@ -240,10 +278,11 @@ function main(): void {
     const ok = true;
     let warn = false;
     let note = "skipped (design-gate-coverage unavailable)";
-    const cov = Bun.spawnSync(
-      ["bun", "scripts/design-gate-coverage.ts", "--json", "--since", since],
-      { stdout: "pipe", stderr: "pipe", timeout: 120_000 },
-    );
+    const cov = Bun.spawnSync(["bun", "scripts/design-gate-coverage.ts", "--json", "--since", since], {
+      stdout: "pipe",
+      stderr: "pipe",
+      timeout: 120_000,
+    });
     const covOut = new TextDecoder().decode(cov.stdout);
     if (cov.exitCode !== 0) {
       // The check is report-only and always exits 0 on a produced report; a
@@ -268,8 +307,11 @@ function main(): void {
   if (!quiet || failures.length > 0) {
     const warned = results.filter((r) => r.warn && r.ok).length;
     const green = results.length - failures.length - warned;
-    console.log(`\n=== Review baseline summary: ${green}/${results.length} green, ${warned} warn, ${failures.length} fail ===`);
-    for (const r of results) console.log(`  ${r.ok ? (r.warn ? "⚠️" : "✅") : "❌"} ${r.name}${r.warn ? " (warn)" : ""}`);
+    console.log(
+      `\n=== Review baseline summary: ${green}/${results.length} green, ${warned} warn, ${failures.length} fail ===`,
+    );
+    for (const r of results)
+      console.log(`  ${r.ok ? (r.warn ? "⚠️" : "✅") : "❌"} ${r.name}${r.warn ? " (warn)" : ""}`);
   }
 
   process.exit(failures.length > 0 ? 1 : 0);

@@ -164,6 +164,7 @@
       "bun.lockb",
       "bun.lock",
       "tsconfig.json",
+      "biome.json",
       ".gitignore",
       ".gitattributes",
       ".gitmodules",

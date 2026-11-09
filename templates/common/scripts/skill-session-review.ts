@@ -43,104 +43,107 @@
 //
 // Exit codes: 0 always for evidence-accumulation issues (WARN-only by design,
 // ADR-0055 WARN-first playbook); 1 on internal errors only.
-import { $ } from 'bun';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { parseSkillsUsed, type SkillEvidence } from './lib/skills-used.ts';
+import { $ } from "bun";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { parseSkillsUsed, type SkillEvidence } from "./lib/skills-used.ts";
 
-const VERSION = '1.3.0';
-const GREEN = '\x1b[32m';
-const YELLOW = '\x1b[33m';
-const CYAN = '\x1b[36m';
-const RESET = '\x1b[0m';
+const VERSION = "1.3.0";
+const GREEN = "\x1b[32m";
+const YELLOW = "\x1b[33m";
+const CYAN = "\x1b[36m";
+const RESET = "\x1b[0m";
 
 const args = process.argv.slice(2);
-const JSON_MODE = args.includes('--json');
-const DRY_RUN = args.includes('--dry-run');
-const dateArgIdx = args.indexOf('--date');
-const date = dateArgIdx !== -1 && args[dateArgIdx + 1]
+const JSON_MODE = args.includes("--json");
+const DRY_RUN = args.includes("--dry-run");
+const dateArgIdx = args.indexOf("--date");
+const date =
+  dateArgIdx !== -1 && args[dateArgIdx + 1]
     ? args[dateArgIdx + 1]
     : (() => {
         const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    })();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      })();
 
 const SYMPTOM_TYPES = new Set([
-    'description_trigger_mismatch',
-    'missing_procedure',
-    'repeated_manual_intervention',
-    'outcome_failure',
+  "description_trigger_mismatch",
+  "missing_procedure",
+  "repeated_manual_intervention",
+  "outcome_failure",
 ]);
 
 interface ReviewRecord {
-    skill: string;
-    observed_symptom: { type: string; description: string };
-    evidence: { sessions: number; occurrences: number; sessions_list: string[] };
-    diagnosis: { likely_cause: string };
-    candidate: {
-        priority: string; confidence: string;
-        suggested_action: string; status: string;
-    };
+  skill: string;
+  observed_symptom: { type: string; description: string };
+  evidence: { sessions: number; occurrences: number; sessions_list: string[] };
+  diagnosis: { likely_cause: string };
+  candidate: {
+    priority: string;
+    confidence: string;
+    suggested_action: string;
+    status: string;
+  };
 }
 
 function localSkillNames(): Set<string> {
-    const names = new Set<string>();
-    for (const dir of ['skills', path.join('.agents', 'skills')]) {
-        const p = path.join(import.meta.dir, '..', dir);
-        if (!fs.existsSync(p)) continue;
-        for (const e of fs.readdirSync(p, { withFileTypes: true })) {
-            if (e.isDirectory() && fs.existsSync(path.join(p, e.name, 'SKILL.md'))) {
-                names.add(e.name);
-            }
-        }
+  const names = new Set<string>();
+  for (const dir of ["skills", path.join(".agents", "skills")]) {
+    const p = path.join(import.meta.dir, "..", dir);
+    if (!fs.existsSync(p)) continue;
+    for (const e of fs.readdirSync(p, { withFileTypes: true })) {
+      if (e.isDirectory() && fs.existsSync(path.join(p, e.name, "SKILL.md"))) {
+        names.add(e.name);
+      }
     }
-    return names;
+  }
+  return names;
 }
 
 // ── 1. Parse `## Skills Used` — see scripts/lib/skills-used.ts (shared parser) ──
 
 // ── 2. Derive Observed Symptoms from evidence ────────────────────────────────
 function deriveSymptoms(evidence: SkillEvidence[]): Map<string, ReviewRecord> {
-    const records = new Map<string, ReviewRecord>();
-    const add = (skill: string, type: string, description: string) => {
-        const key = `${skill}::${type}`;
-        const existing = records.get(key);
-        if (existing) {
-            existing.evidence.occurrences += 1;
-            if (!existing.evidence.sessions_list.includes(date)) {
-                existing.evidence.sessions_list.push(date);
-            }
-            existing.evidence.sessions = existing.evidence.sessions_list.length;
-        } else {
-            records.set(key, {
-                skill,
-                observed_symptom: { type, description },
-                evidence: { sessions: 1, occurrences: 1, sessions_list: [date] },
-                diagnosis: { likely_cause: '' },
-                candidate: { priority: '', confidence: '', suggested_action: '', status: 'proposed' },
-            });
-        }
-    };
-
-    for (const e of evidence) {
-        if (e.outcome === 'failed' || e.outcome === 'abandoned') {
-            add(e.skill, 'outcome_failure', `Session ${date}: skill used with outcome=${e.outcome}`);
-        }
-        for (const obs of e.observations) {
-            // Classification heuristic (structural keyword match, WARN-class —
-            // misclassification is corrected at triage, not automated away).
-            const lower = obs.toLowerCase();
-            const type = /manual(ly)?|by hand|separate(ly)? search|workaround/.test(lower)
-                ? 'repeated_manual_intervention'
-                : /no procedure|lacks?a (step|procedure)|missing step/.test(lower)
-                    ? 'missing_procedure'
-                    : /trigger|should have (used|matched)|wrong skill|didn'?t fire/.test(lower)
-                        ? 'description_trigger_mismatch'
-                        : null;
-            if (type) add(e.skill, type, obs);
-        }
+  const records = new Map<string, ReviewRecord>();
+  const add = (skill: string, type: string, description: string) => {
+    const key = `${skill}::${type}`;
+    const existing = records.get(key);
+    if (existing) {
+      existing.evidence.occurrences += 1;
+      if (!existing.evidence.sessions_list.includes(date)) {
+        existing.evidence.sessions_list.push(date);
+      }
+      existing.evidence.sessions = existing.evidence.sessions_list.length;
+    } else {
+      records.set(key, {
+        skill,
+        observed_symptom: { type, description },
+        evidence: { sessions: 1, occurrences: 1, sessions_list: [date] },
+        diagnosis: { likely_cause: "" },
+        candidate: { priority: "", confidence: "", suggested_action: "", status: "proposed" },
+      });
     }
-    return records;
+  };
+
+  for (const e of evidence) {
+    if (e.outcome === "failed" || e.outcome === "abandoned") {
+      add(e.skill, "outcome_failure", `Session ${date}: skill used with outcome=${e.outcome}`);
+    }
+    for (const obs of e.observations) {
+      // Classification heuristic (structural keyword match, WARN-class —
+      // misclassification is corrected at triage, not automated away).
+      const lower = obs.toLowerCase();
+      const type = /manual(ly)?|by hand|separate(ly)? search|workaround/.test(lower)
+        ? "repeated_manual_intervention"
+        : /no procedure|lacks?a (step|procedure)|missing step/.test(lower)
+          ? "missing_procedure"
+          : /trigger|should have (used|matched)|wrong skill|didn'?t fire/.test(lower)
+            ? "description_trigger_mismatch"
+            : null;
+      if (type) add(e.skill, type, obs);
+    }
+  }
+  return records;
 }
 
 // ── 3. Structural checks on skills modified this session ────────────────────
@@ -159,82 +162,87 @@ export const SKILL_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 // process.argv[1] inside the payload (Bun `$` passes the interpolated chunk
 // as one shell-escaped argv element).
 export const TRIGGERS_READ_PAYLOAD =
-    "const m=require('js-yaml');const f=require('fs');const p=process.argv[1];const t=f.readFileSync(p,'utf8');const fm=t.split('---')[1];const y=m.load(fm);console.log(JSON.stringify((y.metadata&&y.metadata.triggers)||[]))";
+  "const m=require('js-yaml');const f=require('fs');const p=process.argv[1];const t=f.readFileSync(p,'utf8');const fm=t.split('---')[1];const y=m.load(fm);console.log(JSON.stringify((y.metadata&&y.metadata.triggers)||[]))";
 
 async function touchedSkills(): Promise<string[]> {
-    const res = await $`git status --porcelain`.quiet().nothrow();
-    const names = new Set<string>();
-    for (const line of res.stdout.toString().split('\n').filter(Boolean)) {
-        const f = line.replace(/^.{3}/, '').trim();
-        const m = /^(?:skills|\.agents\/skills)\/([^/]+)\/SKILL\.md$/.exec(f);
-        if (m) names.add(m[1]);
-    }
-    return [...names];
+  const res = await $`git status --porcelain`.quiet().nothrow();
+  const names = new Set<string>();
+  for (const line of res.stdout.toString().split("\n").filter(Boolean)) {
+    const f = line.replace(/^.{3}/, "").trim();
+    const m = /^(?:skills|\.agents\/skills)\/([^/]+)\/SKILL\.md$/.exec(f);
+    if (m) names.add(m[1]);
+  }
+  return [...names];
 }
 
 function readFrontmatterField(skill: string, field: string): string | null {
-    const p = path.join(import.meta.dir, '..', 'skills', skill, 'SKILL.md');
-    if (!fs.existsSync(p)) return null;
-    const m = new RegExp(`^${field}:\\s*(.+)$`, 'm').exec(fs.readFileSync(p, 'utf-8'));
-    return m ? m[1].trim() : null;
+  const p = path.join(import.meta.dir, "..", "skills", skill, "SKILL.md");
+  if (!fs.existsSync(p)) return null;
+  const m = new RegExp(`^${field}:\\s*(.+)$`, "m").exec(fs.readFileSync(p, "utf-8"));
+  return m ? m[1].trim() : null;
 }
 
 export function manifestVersion(skill: string): string | null {
-    const p = path.join(import.meta.dir, '..', 'docs', 'VERSION_MANIFEST.md');
-    if (!fs.existsSync(p)) return null;
-    // U-20261031-001 (design R2.1, defense in depth): the name is allowlisted
-    // before this point, but escape it anyway so a future caller cannot turn
-    // this into a regex injection.
-    const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const m = new RegExp(`^\\|\\s*${escaped}\\s*\\|\\s*([0-9.]+)\\s*\\|`, 'm').exec(fs.readFileSync(p, 'utf-8'));
-    return m ? m[1] : null;
+  const p = path.join(import.meta.dir, "..", "docs", "VERSION_MANIFEST.md");
+  if (!fs.existsSync(p)) return null;
+  // U-20261031-001 (design R2.1, defense in depth): the name is allowlisted
+  // before this point, but escape it anyway so a future caller cannot turn
+  // this into a regex injection.
+  const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = new RegExp(`^\\|\\s*${escaped}\\s*\\|\\s*([0-9.]+)\\s*\\|`, "m").exec(fs.readFileSync(p, "utf-8"));
+  return m ? m[1] : null;
 }
 
 export async function runStructuralChecks(skills: string[]): Promise<string[]> {
-    const findings: string[] = [];
-    for (const skill of skills) {
-        // U-20261031-001 (design R2.1): strict name allowlist — reject before
-        // any downstream use (fs paths, `bun -e`, new RegExp, subprocess args).
-        if (!SKILL_NAME_RE.test(skill)) {
-            findings.push(`WARN ${skill}: skipped — skill directory name contains characters outside [A-Za-z0-9._-]`);
-            continue;
-        }
-        const fmVersion = readFrontmatterField(skill, 'version');
-        const manifestV = manifestVersion(skill);
-        if (fmVersion && manifestV && fmVersion !== manifestV) {
-            findings.push(`WARN ${skill}: SKILL.md version ${fmVersion} != VERSION_MANIFEST ${manifestV} (regenerate manifest)`);
-        }
-        const gov = path.join(import.meta.dir, '..', 'docs', 'lifecycle', 'skills', `${skill}.md`);
-        if (fs.existsSync(gov)) {
-            const govContent = fs.readFileSync(gov, 'utf-8');
-            if (fmVersion && !govContent.includes(fmVersion)) {
-                findings.push(`WARN ${skill}: governance record Changelog does not mention version ${fmVersion}`);
-            }
-        } else {
-            findings.push(`WARN ${skill}: no governance record at docs/lifecycle/skills/${skill}.md`);
-        }
-        const description = (readFrontmatterField(skill, 'description') ?? '').toLowerCase();
-        // U-20261031-001 (design R2.1): payload is the constant TRIGGERS_READ_PAYLOAD;
-        // the skill's SKILL.md path travels as one shell-escaped argv element.
-        const triggers = await $`bun -e "${TRIGGERS_READ_PAYLOAD}" "${path.join('skills', skill, 'SKILL.md')}"`
-            .quiet().nothrow();
-        try {
-            const triggersArr: string[] = JSON.parse(triggers.stdout.toString().trim() || '[]');
-            if (description && triggersArr.length === 0) {
-                findings.push(`WARN ${skill}: description present but metadata.triggers is empty`);
-            }
-        } catch { /* trigger parse issues are validate-skills' domain */ }
-        // Dependency re-check per touched skill. skill-dependency-analysis.ts is
-        // L0-only — in L1/L3 projects (this script is L0+L1) it is absent, so the
-        // check degrades to a skip rather than a false failure (ADR-0067 §Decision 5).
-        if (fs.existsSync(path.join(import.meta.dir, 'skill-dependency-analysis.ts'))) {
-            const depRes = await $`bun scripts/skill-dependency-analysis.ts --skill ${skill}`.quiet().nothrow();
-            if (depRes.exitCode !== 0) {
-                findings.push(`WARN ${skill}: skill-dependency-analysis reported issues (exit ${depRes.exitCode})`);
-            }
-        }
+  const findings: string[] = [];
+  for (const skill of skills) {
+    // U-20261031-001 (design R2.1): strict name allowlist — reject before
+    // any downstream use (fs paths, `bun -e`, new RegExp, subprocess args).
+    if (!SKILL_NAME_RE.test(skill)) {
+      findings.push(`WARN ${skill}: skipped — skill directory name contains characters outside [A-Za-z0-9._-]`);
+      continue;
     }
-    return findings;
+    const fmVersion = readFrontmatterField(skill, "version");
+    const manifestV = manifestVersion(skill);
+    if (fmVersion && manifestV && fmVersion !== manifestV) {
+      findings.push(
+        `WARN ${skill}: SKILL.md version ${fmVersion} != VERSION_MANIFEST ${manifestV} (regenerate manifest)`,
+      );
+    }
+    const gov = path.join(import.meta.dir, "..", "docs", "lifecycle", "skills", `${skill}.md`);
+    if (fs.existsSync(gov)) {
+      const govContent = fs.readFileSync(gov, "utf-8");
+      if (fmVersion && !govContent.includes(fmVersion)) {
+        findings.push(`WARN ${skill}: governance record Changelog does not mention version ${fmVersion}`);
+      }
+    } else {
+      findings.push(`WARN ${skill}: no governance record at docs/lifecycle/skills/${skill}.md`);
+    }
+    const description = (readFrontmatterField(skill, "description") ?? "").toLowerCase();
+    // U-20261031-001 (design R2.1): payload is the constant TRIGGERS_READ_PAYLOAD;
+    // the skill's SKILL.md path travels as one shell-escaped argv element.
+    const triggers = await $`bun -e "${TRIGGERS_READ_PAYLOAD}" "${path.join("skills", skill, "SKILL.md")}"`
+      .quiet()
+      .nothrow();
+    try {
+      const triggersArr: string[] = JSON.parse(triggers.stdout.toString().trim() || "[]");
+      if (description && triggersArr.length === 0) {
+        findings.push(`WARN ${skill}: description present but metadata.triggers is empty`);
+      }
+    } catch {
+      /* trigger parse issues are validate-skills' domain */
+    }
+    // Dependency re-check per touched skill. skill-dependency-analysis.ts is
+    // L0-only — in L1/L3 projects (this script is L0+L1) it is absent, so the
+    // check degrades to a skip rather than a false failure (ADR-0067 §Decision 5).
+    if (fs.existsSync(path.join(import.meta.dir, "skill-dependency-analysis.ts"))) {
+      const depRes = await $`bun scripts/skill-dependency-analysis.ts --skill ${skill}`.quiet().nothrow();
+      if (depRes.exitCode !== 0) {
+        findings.push(`WARN ${skill}: skill-dependency-analysis reported issues (exit ${depRes.exitCode})`);
+      }
+    }
+  }
+  return findings;
 }
 
 // ── 4. Report rendering ──────────────────────────────────────────────────────
@@ -242,120 +250,133 @@ export async function runStructuralChecks(skills: string[]): Promise<string[]> {
 // the only caller passes deriveSymptoms()'s Map) — the old `ReviewRecord[]`
 // annotation did not match the implementation.
 function renderMarkdown(records: Map<string, ReviewRecord>, evidence: SkillEvidence[], findings: string[]): string {
-    const typeCounts = new Map<string, number>();
-    for (const r of records.values()) {
-        typeCounts.set(r.observed_symptom.type, (typeCounts.get(r.observed_symptom.type) ?? 0) + 1);
-    }
-    const sessionsSet = new Set<string>();
-    for (const r of records.values()) for (const s of r.evidence.sessions_list) sessionsSet.add(s);
+  const typeCounts = new Map<string, number>();
+  for (const r of records.values()) {
+    typeCounts.set(r.observed_symptom.type, (typeCounts.get(r.observed_symptom.type) ?? 0) + 1);
+  }
+  const sessionsSet = new Set<string>();
+  for (const r of records.values()) for (const s of r.evidence.sessions_list) sessionsSet.add(s);
 
-    const lines: string[] = [];
-    lines.push(`# Skill Session Review — ${date}`, '');
-    lines.push(`> Auto-generated by scripts/skill-session-review.ts v${VERSION}.`);
-    lines.push(`> \`observed_symptom\` + \`evidence\` are automatic. \`diagnosis\` and \`candidate\``);
-    lines.push(`> are filled at human triage (PM / lifecycle-manager). Never auto-applied.`, '');
-    lines.push('## Summary', '');
-    lines.push(`- observation_count: ${records.size}`);
-    lines.push(`- evidence_sessions: ${sessionsSet.size}`);
-    lines.push(`- symptom_types: ${[...typeCounts.entries()].map(([t, c]) => `${t}=${c}`).join(', ') || 'none'}`, '');
+  const lines: string[] = [];
+  lines.push(`# Skill Session Review — ${date}`, "");
+  lines.push(`> Auto-generated by scripts/skill-session-review.ts v${VERSION}.`);
+  lines.push(`> \`observed_symptom\` + \`evidence\` are automatic. \`diagnosis\` and \`candidate\``);
+  lines.push(`> are filled at human triage (PM / lifecycle-manager). Never auto-applied.`, "");
+  lines.push("## Summary", "");
+  lines.push(`- observation_count: ${records.size}`);
+  lines.push(`- evidence_sessions: ${sessionsSet.size}`);
+  lines.push(`- symptom_types: ${[...typeCounts.entries()].map(([t, c]) => `${t}=${c}`).join(", ") || "none"}`, "");
 
-    if (records.size === 0) {
-        // v1.1.0: distinguish "no evidence at all" from "evidence parsed, zero
-        // symptoms classified" — the old message blamed an absent/empty section
-        // even when entries existed (Q3 2026 review finding #1).
-        if (evidence.length === 0) {
-            lines.push(`No skill usage evidence found in memory/${date}.md (\`## Skills Used\` absent or empty).`, '');
-        } else {
-            lines.push(`${evidence.length} evidence entries found in memory/${date}.md; none classified as symptoms (no actionable observations matched classifier heuristics).`, '');
-        }
+  if (records.size === 0) {
+    // v1.1.0: distinguish "no evidence at all" from "evidence parsed, zero
+    // symptoms classified" — the old message blamed an absent/empty section
+    // even when entries existed (Q3 2026 review finding #1).
+    if (evidence.length === 0) {
+      lines.push(`No skill usage evidence found in memory/${date}.md (\`## Skills Used\` absent or empty).`, "");
+    } else {
+      lines.push(
+        `${evidence.length} evidence entries found in memory/${date}.md; none classified as symptoms (no actionable observations matched classifier heuristics).`,
+        "",
+      );
     }
-    for (const r of records.values()) {
-        lines.push(`## Skill Review Entry — ${r.skill}`, '', '```yaml');
-        lines.push(`skill: ${r.skill}`);
-        lines.push(`date: ${date}`);
-        lines.push(`observed_symptom:`);
-        lines.push(`  type: ${r.observed_symptom.type}`);
-        lines.push(`  description: "${r.observed_symptom.description.replace(/"/g, '\\"')}"`);
-        lines.push(`evidence:`);
-        lines.push(`  sessions: ${r.evidence.sessions}`);
-        lines.push(`  occurrences: ${r.evidence.occurrences}`);
-        lines.push(`  sessions_list: [${r.evidence.sessions_list.join(', ')}]`);
-        lines.push(`diagnosis:`);
-        lines.push(`  likely_cause: ""   # triage-time`);
-        lines.push(`candidate:`);
-        lines.push(`  priority: ""`);
-        lines.push(`  confidence: ""`);
-        lines.push(`  suggested_action: ""  # revise | add_procedure | update_triggers | deprecate | monitor`);
-        lines.push(`  status: proposed`);
-        lines.push('```', '');
-    }
-    if (findings.length > 0) {
-        lines.push('## Structural Findings (session-modified skills)', '');
-        for (const f of findings) lines.push(`- ${f}`);
-        lines.push('');
-    }
-    return lines.join('\n');
+  }
+  for (const r of records.values()) {
+    lines.push(`## Skill Review Entry — ${r.skill}`, "", "```yaml");
+    lines.push(`skill: ${r.skill}`);
+    lines.push(`date: ${date}`);
+    lines.push(`observed_symptom:`);
+    lines.push(`  type: ${r.observed_symptom.type}`);
+    lines.push(`  description: "${r.observed_symptom.description.replace(/"/g, '\\"')}"`);
+    lines.push(`evidence:`);
+    lines.push(`  sessions: ${r.evidence.sessions}`);
+    lines.push(`  occurrences: ${r.evidence.occurrences}`);
+    lines.push(`  sessions_list: [${r.evidence.sessions_list.join(", ")}]`);
+    lines.push(`diagnosis:`);
+    lines.push(`  likely_cause: ""   # triage-time`);
+    lines.push(`candidate:`);
+    lines.push(`  priority: ""`);
+    lines.push(`  confidence: ""`);
+    lines.push(`  suggested_action: ""  # revise | add_procedure | update_triggers | deprecate | monitor`);
+    lines.push(`  status: proposed`);
+    lines.push("```", "");
+  }
+  if (findings.length > 0) {
+    lines.push("## Structural Findings (session-modified skills)", "");
+    for (const f of findings) lines.push(`- ${f}`);
+    lines.push("");
+  }
+  return lines.join("\n");
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 // v1.3.0: CLI dispatch is guarded by import.meta.main so the structural-check
 // helpers stay importable for unit tests (same pattern as lifecycle-sync-audit).
 if (import.meta.main) {
-    const memoryFile = path.join(import.meta.dir, '..', 'memory', `${date}.md`);
-    let evidence: SkillEvidence[] = [];
-    if (fs.existsSync(memoryFile)) {
-        evidence = parseSkillsUsed(fs.readFileSync(memoryFile, 'utf-8'));
-    }
+  const memoryFile = path.join(import.meta.dir, "..", "memory", `${date}.md`);
+  let evidence: SkillEvidence[] = [];
+  if (fs.existsSync(memoryFile)) {
+    evidence = parseSkillsUsed(fs.readFileSync(memoryFile, "utf-8"));
+  }
 
-    const records = deriveSymptoms(evidence);
-    const touched = await touchedSkills();
-    const findings = touched.length > 0 ? await runStructuralChecks(touched) : [];
+  const records = deriveSymptoms(evidence);
+  const touched = await touchedSkills();
+  const findings = touched.length > 0 ? await runStructuralChecks(touched) : [];
 
-    if (!JSON_MODE) {
-        console.log(`${CYAN}📋 Skill Session Review (${date})${RESET}`);
-        console.log(`   Evidence entries: ${evidence.length}, review records: ${records.size}, touched skills: ${touched.length}`);
-        for (const e of evidence) {
-            for (const w of e.schemaWarnings) {
-                console.log(`${YELLOW}   ⚠️  ${e.skill}: ${w}${RESET}`);
-            }
-        }
-        for (const f of findings) console.log(`${YELLOW}   ⚠️  ${f}${RESET}`);
-        if (records.size === 0) {
-            console.log(`${GREEN}   ✓ No symptoms to record (no Skills Used evidence or no classifiable observations)${RESET}`);
-        }
+  if (!JSON_MODE) {
+    console.log(`${CYAN}📋 Skill Session Review (${date})${RESET}`);
+    console.log(
+      `   Evidence entries: ${evidence.length}, review records: ${records.size}, touched skills: ${touched.length}`,
+    );
+    for (const e of evidence) {
+      for (const w of e.schemaWarnings) {
+        console.log(`${YELLOW}   ⚠️  ${e.skill}: ${w}${RESET}`);
+      }
     }
+    for (const f of findings) console.log(`${YELLOW}   ⚠️  ${f}${RESET}`);
+    if (records.size === 0) {
+      console.log(
+        `${GREEN}   ✓ No symptoms to record (no Skills Used evidence or no classifiable observations)${RESET}`,
+      );
+    }
+  }
 
-    const markdown = renderMarkdown(records, evidence, findings);
-    if (!DRY_RUN) {
-        const reviewDir = path.join(import.meta.dir, '..', 'memory', 'skill-review');
-        if (!fs.existsSync(reviewDir)) fs.mkdirSync(reviewDir, { recursive: true });
-        const reviewFile = path.join(reviewDir, `${date}.md`);
-        // Merge: if the file exists, replace only the auto-generated sections —
-        // manually triaged diagnosis/candidate content in existing entries persists
-        // via append-with-separator (entries are keyed by heading, dedup at triage).
-        const separator = fs.existsSync(reviewFile) ? '\n---\n\n' : '';
-        // A zero-observation run appends at most one block per day: repeat runs with
-        // no records must not stack identical blocks (2026-10-08 accumulated 20).
-        const dayHeading = `# Skill Session Review — ${date}`;
-        const alreadyRecordedToday = fs.existsSync(reviewFile)
-            && fs.readFileSync(reviewFile, 'utf8').includes(dayHeading);
-        if (records.size === 0 && alreadyRecordedToday) {
-            if (!JSON_MODE) console.log(`${GREEN}✓ Zero-observation run skipped — a block is already present for ${date}${RESET}`);
-        } else {
-            fs.appendFileSync(reviewFile, separator + markdown, 'utf8');
-            if (!JSON_MODE) console.log(`${GREEN}✓ Review report appended: memory/skill-review/${date}.md${RESET}`);
-        }
+  const markdown = renderMarkdown(records, evidence, findings);
+  if (!DRY_RUN) {
+    const reviewDir = path.join(import.meta.dir, "..", "memory", "skill-review");
+    if (!fs.existsSync(reviewDir)) fs.mkdirSync(reviewDir, { recursive: true });
+    const reviewFile = path.join(reviewDir, `${date}.md`);
+    // Merge: if the file exists, replace only the auto-generated sections —
+    // manually triaged diagnosis/candidate content in existing entries persists
+    // via append-with-separator (entries are keyed by heading, dedup at triage).
+    const separator = fs.existsSync(reviewFile) ? "\n---\n\n" : "";
+    // A zero-observation run appends at most one block per day: repeat runs with
+    // no records must not stack identical blocks (2026-10-08 accumulated 20).
+    const dayHeading = `# Skill Session Review — ${date}`;
+    const alreadyRecordedToday = fs.existsSync(reviewFile) && fs.readFileSync(reviewFile, "utf8").includes(dayHeading);
+    if (records.size === 0 && alreadyRecordedToday) {
+      if (!JSON_MODE)
+        console.log(`${GREEN}✓ Zero-observation run skipped — a block is already present for ${date}${RESET}`);
+    } else {
+      fs.appendFileSync(reviewFile, separator + markdown, "utf8");
+      if (!JSON_MODE) console.log(`${GREEN}✓ Review report appended: memory/skill-review/${date}.md${RESET}`);
     }
+  }
 
-    if (JSON_MODE) {
-        console.log(JSON.stringify({
-            date,
-            evidence_entries: evidence.length,
-            schema_warnings: evidence.flatMap(e => e.schemaWarnings.map(w => ({ skill: e.skill, warning: w }))),
-            records: [...records.values()],
-            touched_skills: touched,
-            structural_findings: findings,
-            dry_run: DRY_RUN,
-        }, null, 2));
-    }
+  if (JSON_MODE) {
+    console.log(
+      JSON.stringify(
+        {
+          date,
+          evidence_entries: evidence.length,
+          schema_warnings: evidence.flatMap((e) => e.schemaWarnings.map((w) => ({ skill: e.skill, warning: w }))),
+          records: [...records.values()],
+          touched_skills: touched,
+          structural_findings: findings,
+          dry_run: DRY_RUN,
+        },
+        null,
+        2,
+      ),
+    );
+  }
 }

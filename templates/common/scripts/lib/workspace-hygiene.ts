@@ -23,14 +23,14 @@
 
 /** Porcelain rows `?? <dir>/` with `<dir>` in this list classify as fixture residue. */
 export const KNOWN_TOP_LEVEL_DIRS: ReadonlySet<string> = new Set([
-  'Projects',
-  'services',
-  'templates',
-  'tests',
-  'docs',
-  'scripts',
-  'agents',
-  'skills',
+  "Projects",
+  "services",
+  "templates",
+  "tests",
+  "docs",
+  "scripts",
+  "agents",
+  "skills",
 ]);
 
 /**
@@ -46,9 +46,9 @@ export const KNOWN_TOP_LEVEL_DIRS: ReadonlySet<string> = new Set([
  */
 export function classifyWorkspaceHygieneResidue(porcelain: string): string[] {
   const offenders = new Set<string>();
-  for (const rawLine of porcelain.split('\n')) {
-    const line = rawLine.replace(/\r$/, '');
-    if (!line.startsWith('??')) continue;
+  for (const rawLine of porcelain.split("\n")) {
+    const line = rawLine.replace(/\r$/, "");
+    if (!line.startsWith("??")) continue;
     // Porcelain v1: two-char status, single space, then the path. Paths containing
     // special characters are C-quoted ("…") — strip the surrounding quotes so the
     // comparison below sees the literal path. (Non-ASCII stays escaped; those paths
@@ -57,9 +57,9 @@ export function classifyWorkspaceHygieneResidue(porcelain: string): string[] {
     if (path.startsWith('"') && path.endsWith('"') && path.length >= 2) {
       path = path.slice(1, -1);
     }
-    if (!path.endsWith('/')) continue; // a whole-untracked DIRECTORY always carries the trailing slash
+    if (!path.endsWith("/")) continue; // a whole-untracked DIRECTORY always carries the trailing slash
     const top = path.slice(0, -1);
-    if (top.includes('/')) continue; // nested inside a tracked dir — ordinary work
+    if (top.includes("/")) continue; // nested inside a tracked dir — ordinary work
     if (KNOWN_TOP_LEVEL_DIRS.has(top)) offenders.add(path);
   }
   return [...offenders].sort();
@@ -72,13 +72,13 @@ export function classifyWorkspaceHygieneResidue(porcelain: string): string[] {
  */
 export function formatHygieneResidueReport(offenders: string[]): string[] {
   return [
-    `Untracked whole-directory residue at the repo root (${offenders.join(', ')}):`,
-    'an untracked WHOLE top-level directory can only be test-fixture residue,',
-    'not work (work shows up as untracked FILES inside tracked directories).',
-    'This is the class behind the 2026-11-04 `rm -rf Projects` incident',
-    '(memory/2026-11-04.md:159, T-20261104-003). Remove the directory ONLY after',
-    'confirming it is not real work — fixtures must use absolute mkdtemp roots:',
-    '  rm -rf <each offending dir>   # after inspection',
-    'Spec: docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §5.1',
+    `Untracked whole-directory residue at the repo root (${offenders.join(", ")}):`,
+    "an untracked WHOLE top-level directory can only be test-fixture residue,",
+    "not work (work shows up as untracked FILES inside tracked directories).",
+    "This is the class behind the 2026-11-04 `rm -rf Projects` incident",
+    "(memory/2026-11-04.md:159, T-20261104-003). Remove the directory ONLY after",
+    "confirming it is not real work — fixtures must use absolute mkdtemp roots:",
+    "  rm -rf <each offending dir>   # after inspection",
+    "Spec: docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §5.1",
   ];
 }

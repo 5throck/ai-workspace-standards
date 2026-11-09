@@ -24,13 +24,13 @@
 // Pure functions only — no fs, no git, no clock; the caller supplies the date
 // (localDateISO) and reads/writes the bytes, keeping every branch unit-testable.
 
-import { bumpFrontmatterLastUpdated } from './upgrade-versions.ts';
+import { bumpFrontmatterLastUpdated } from "./upgrade-versions.ts";
 
 export interface FrontmatterSplit {
-    /** Frontmatter block content WITHOUT the `---` fences (may be empty). */
-    frontmatter: string;
-    /** Everything after the closing `---` fence, verbatim. */
-    body: string;
+  /** Frontmatter block content WITHOUT the `---` fences (may be empty). */
+  frontmatter: string;
+  /** Everything after the closing `---` fence, verbatim. */
+  body: string;
 }
 
 /**
@@ -38,9 +38,9 @@ export interface FrontmatterSplit {
  * does not open with a `---` fenced frontmatter block.
  */
 export function splitFrontmatter(text: string): FrontmatterSplit | null {
-    const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
-    if (!m) return null;
-    return { frontmatter: m[1], body: text.slice(m[0].length) };
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  if (!m) return null;
+  return { frontmatter: m[1], body: text.slice(m[0].length) };
 }
 
 /**
@@ -49,12 +49,12 @@ export function splitFrontmatter(text: string): FrontmatterSplit | null {
  * directory under templates/ (templates/common/agents, templates/co-X/agents).
  */
 export function isAgentMdPath(relPath: string): boolean {
-    const norm = relPath.replace(/\\/g, '/');
-    if (!norm.endsWith('.md')) return false;
-    const segments = norm.split('/');
-    if (segments.length < 2) return false;
-    if (segments[0] === 'agents') return true;
-    return segments[0] === 'templates' && segments.includes('agents');
+  const norm = relPath.replace(/\\/g, "/");
+  if (!norm.endsWith(".md")) return false;
+  const segments = norm.split("/");
+  if (segments.length < 2) return false;
+  if (segments[0] === "agents") return true;
+  return segments[0] === "templates" && segments.includes("agents");
 }
 
 /**
@@ -63,15 +63,12 @@ export function isAgentMdPath(relPath: string): boolean {
  * frontmatter itself changed? Anything else (body edit, new file, untouched
  * file, either side missing frontmatter) is not the sync engine's doing.
  */
-export function isMechanicalFrontmatterRewrite(
-    headText: string | null,
-    currentText: string,
-): boolean {
-    if (headText === null || headText === currentText) return false;
-    const head = splitFrontmatter(headText);
-    const current = splitFrontmatter(currentText);
-    if (!head || !current) return false;
-    return head.body === current.body && head.frontmatter !== current.frontmatter;
+export function isMechanicalFrontmatterRewrite(headText: string | null, currentText: string): boolean {
+  if (headText === null || headText === currentText) return false;
+  const head = splitFrontmatter(headText);
+  const current = splitFrontmatter(currentText);
+  if (!head || !current) return false;
+  return head.body === current.body && head.frontmatter !== current.frontmatter;
 }
 
 /**
@@ -81,12 +78,12 @@ export function isMechanicalFrontmatterRewrite(
  * Returns { text, bumped } — bumped is true only when the output differs.
  */
 export function bumpMechanicalLastUpdated(
-    headText: string | null,
-    currentText: string,
-    date: string,
+  headText: string | null,
+  currentText: string,
+  date: string,
 ): { text: string; bumped: boolean } {
-    if (!isMechanicalFrontmatterRewrite(headText, currentText)) {
-        return { text: currentText, bumped: false };
-    }
-    return bumpFrontmatterLastUpdated(currentText, date);
+  if (!isMechanicalFrontmatterRewrite(headText, currentText)) {
+    return { text: currentText, bumped: false };
+  }
+  return bumpFrontmatterLastUpdated(currentText, date);
 }

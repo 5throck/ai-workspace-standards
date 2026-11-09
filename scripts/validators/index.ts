@@ -17,19 +17,19 @@
  *   console.log(JSON.stringify(report, null, 2));
  */
 
-import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationReport } from './types.ts';
+import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationReport } from "./types.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Validator Imports
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { variantJsonValidator } from './variant-json-validator.ts';
-import { extendsValidatorWrapper } from './extends-validator-wrapper.ts';
-import { capabilityValidator } from './capability-validator.ts';
-import { orphanReferenceValidator } from './orphan-reference-validator.ts';
-import { duplicateValidator } from './duplicate-validator.ts';
-import { platformParityValidator } from './platform-parity-validator.ts';
-import { schemaValidator } from './schema-validator.ts';
+import { variantJsonValidator } from "./variant-json-validator.ts";
+import { extendsValidatorWrapper } from "./extends-validator-wrapper.ts";
+import { capabilityValidator } from "./capability-validator.ts";
+import { orphanReferenceValidator } from "./orphan-reference-validator.ts";
+import { duplicateValidator } from "./duplicate-validator.ts";
+import { platformParityValidator } from "./platform-parity-validator.ts";
+import { schemaValidator } from "./schema-validator.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Execution Order
@@ -62,20 +62,20 @@ const ALL_VALIDATORS: readonly ValidatorDefinition[] = [
 // Barrel Exports
 // ─────────────────────────────────────────────────────────────────────────────
 
-export { variantJsonValidator } from './variant-json-validator.ts';
-export { extendsValidatorWrapper } from './extends-validator-wrapper.ts';
-export { capabilityValidator } from './capability-validator.ts';
-export { orphanReferenceValidator } from './orphan-reference-validator.ts';
-export { duplicateValidator } from './duplicate-validator.ts';
-export { platformParityValidator } from './platform-parity-validator.ts';
-export { schemaValidator } from './schema-validator.ts';
+export { variantJsonValidator } from "./variant-json-validator.ts";
+export { extendsValidatorWrapper } from "./extends-validator-wrapper.ts";
+export { capabilityValidator } from "./capability-validator.ts";
+export { orphanReferenceValidator } from "./orphan-reference-validator.ts";
+export { duplicateValidator } from "./duplicate-validator.ts";
+export { platformParityValidator } from "./platform-parity-validator.ts";
+export { schemaValidator } from "./schema-validator.ts";
 export type {
   ValidatorContext,
   ValidationIssue,
   ValidatorResult,
   ValidatorDefinition,
   ValidationReport,
-} from './types.ts';
+} from "./types.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Runner
@@ -97,7 +97,7 @@ export async function runAllValidators(ctx: ValidatorContext): Promise<Validator
 
   for (const validator of ALL_VALIDATORS) {
     // ── Check prerequisites ─────────────────────────────────────────────
-    const unmetPrereqs = validator.prerequisites.filter(p => failedValidators.has(p));
+    const unmetPrereqs = validator.prerequisites.filter((p) => failedValidators.has(p));
 
     if (unmetPrereqs.length > 0) {
       results.push({
@@ -106,7 +106,7 @@ export async function runAllValidators(ctx: ValidatorContext): Promise<Validator
         checks: 0,
         issues: [],
         skipped: true,
-        skipReason: `Prerequisites failed: ${unmetPrereqs.join(', ')}`,
+        skipReason: `Prerequisites failed: ${unmetPrereqs.join(", ")}`,
       });
       continue;
     }
@@ -119,21 +119,23 @@ export async function runAllValidators(ctx: ValidatorContext): Promise<Validator
       result = await validator.validate(ctx);
     } catch (error) {
       // Catch unexpected exceptions — convert to a single ERROR issue
-      const message = (error as Error).message ?? 'Unknown error';
+      const message = (error as Error).message ?? "Unknown error";
       result = {
         validator: validator.name,
         duration_ms: performance.now() - start,
         checks: 0,
-        issues: [{
-          severity: 'error',
-          category: 'validator-crash',
-          message: `Validator "${validator.name}" threw unexpectedly: ${message}`,
-        }],
+        issues: [
+          {
+            severity: "error",
+            category: "validator-crash",
+            message: `Validator "${validator.name}" threw unexpectedly: ${message}`,
+          },
+        ],
       };
     }
 
     // ── Track failures ──────────────────────────────────────────────────
-    const hasErrors = result.issues.some(i => i.severity === 'error');
+    const hasErrors = result.issues.some((i) => i.severity === "error");
     if (hasErrors) {
       failedValidators.add(validator.name);
     }
@@ -161,11 +163,7 @@ export async function runAllValidators(ctx: ValidatorContext): Promise<Validator
  * @param type - The variant type (e.g., 'development').
  * @returns A complete ValidationReport.
  */
-export function generateReport(
-  results: readonly ValidatorResult[],
-  variant: string,
-  type: string,
-): ValidationReport {
+export function generateReport(results: readonly ValidatorResult[], variant: string, type: string): ValidationReport {
   let totalChecks = 0;
   let errors = 0;
   let warnings = 0;
@@ -182,7 +180,7 @@ export function generateReport(
       continue;
     }
 
-    const hasErrors = result.issues.some(i => i.severity === 'error');
+    const hasErrors = result.issues.some((i) => i.severity === "error");
     if (hasErrors) {
       failedValidators++;
     } else {
@@ -191,13 +189,13 @@ export function generateReport(
 
     for (const issue of result.issues) {
       switch (issue.severity) {
-        case 'error':
+        case "error":
           errors++;
           break;
-        case 'warning':
+        case "warning":
           warnings++;
           break;
-        case 'info':
+        case "info":
           infos++;
           break;
       }

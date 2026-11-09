@@ -77,7 +77,12 @@ for (const file of htmlFiles) {
 for (const file of htmlFiles) {
   const html = readHtml(file);
   const rel = relFile(file);
-  if (/^index(?:_[a-z]{2})?\.html$/.test(rel) || /[Cc]ourse[_\-][Oo]verview/.test(rel) || /[Ll]ecture[_\-][Gg]uide/.test(rel)) continue;
+  if (
+    /^index(?:_[a-z]{2})?\.html$/.test(rel) ||
+    /[Cc]ourse[_\-][Oo]verview/.test(rel) ||
+    /[Ll]ecture[_\-][Gg]uide/.test(rel)
+  )
+    continue;
   if (isReferenceDoc(rel)) continue;
   if (!html.includes("chapter-nav")) {
     allIssues.push({ file: rel, check: "chapter-nav", detail: "No chapter-nav found", severity: "warn" });
@@ -90,13 +95,23 @@ for (const file of htmlFiles) {
   const rel = relFile(file);
   const linkRe = /<a\s+(?:[^>]*?\s)?href="([^"]*)"[^>]*>/g;
   let m: RegExpExecArray | null;
-  while ((m = linkRe.exec(html)) !== null) {
+  m = linkRe.exec(html);
+  while (m !== null) {
     const href = m[1];
-    if (href.startsWith("http") || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("javascript:")) continue;
+    if (
+      href.startsWith("http") ||
+      href.startsWith("#") ||
+      href.startsWith("mailto:") ||
+      href.startsWith("javascript:")
+    ) {
+      m = linkRe.exec(html);
+      continue;
+    }
     const abs = join(dirname(file), href.split("?")[0].split("#")[0]);
     if (!existsSync(abs)) {
       allIssues.push({ file: rel, check: "broken-link", detail: `Broken link: "${href}"`, severity: "error" });
     }
+    m = linkRe.exec(html);
   }
 }
 
@@ -108,10 +123,20 @@ const mainCss = join(assetsDir, "css", "handbook-variables.css");
 if (existsSync(mainCss)) {
   const css = readFileSync(mainCss, "utf-8");
   if (!css.includes(".dark {") && !css.includes(".dark{")) {
-    allIssues.push({ file: "assets/css/handbook-variables.css", check: "dark-palette", detail: "No .dark manual toggle class", severity: "error" });
+    allIssues.push({
+      file: "assets/css/handbook-variables.css",
+      check: "dark-palette",
+      detail: "No .dark manual toggle class",
+      severity: "error",
+    });
   }
 } else {
-  allIssues.push({ file: "assets/css/handbook-variables.css", check: "dark-palette", detail: "handbook-variables.css not found", severity: "error" });
+  allIssues.push({
+    file: "assets/css/handbook-variables.css",
+    check: "dark-palette",
+    detail: "handbook-variables.css not found",
+    severity: "error",
+  });
 }
 
 // --- Check 5: Missing language pair ---
@@ -129,7 +154,12 @@ for (const [base, variants] of langMap) {
   if (variants.some((v) => /_[a-z]{2}\.html$/.test(v))) {
     const hasBase = variants.some((v) => !/_[a-z]{2}\.html$/.test(v));
     if (!hasBase && variants.length === 1) {
-      allIssues.push({ file: variants[0], check: "language-pair", detail: "Language variant without base file", severity: "warn" });
+      allIssues.push({
+        file: variants[0],
+        check: "language-pair",
+        detail: "Language variant without base file",
+        severity: "warn",
+      });
     }
   }
 }
@@ -143,7 +173,12 @@ for (const file of htmlFiles) {
   if (isReferenceDoc(rel)) continue;
   const hasVisual = /<img\s|<svg[\s>]|<table[\s>]|<pre[\s>]/i.test(html);
   if (!hasVisual) {
-    allIssues.push({ file: rel, check: "visual-element", detail: "No visual element (img, svg, table, code)", severity: "warn" });
+    allIssues.push({
+      file: rel,
+      check: "visual-element",
+      detail: "No visual element (img, svg, table, code)",
+      severity: "warn",
+    });
   }
 }
 
@@ -164,7 +199,12 @@ for (const file of htmlFiles) {
   }
 }
 if (!hasCourseOverview) {
-  allIssues.push({ file: "docs/", check: "course-overview", detail: "No course-overview.html found (§14 requirement for course handbooks)", severity: "warn" });
+  allIssues.push({
+    file: "docs/",
+    check: "course-overview",
+    detail: "No course-overview.html found (§14 requirement for course handbooks)",
+    severity: "warn",
+  });
 }
 
 // --- Check 8: Missing Instructor Guide ---
@@ -184,7 +224,12 @@ for (const file of htmlFiles) {
   }
 }
 if (!hasInstructorGuide) {
-  allIssues.push({ file: "docs/", check: "instructor-guide", detail: "No instructor-guide.html found (§24 requirement for course handbooks)", severity: "warn" });
+  allIssues.push({
+    file: "docs/",
+    check: "instructor-guide",
+    detail: "No instructor-guide.html found (§24 requirement for course handbooks)",
+    severity: "warn",
+  });
 }
 
 // --- Check 9: Unused assets ---
@@ -193,16 +238,23 @@ for (const file of htmlFiles) {
   const html = readHtml(file);
   const re = /(?:src|href)="([^"]*(?:\.css|\.js|\.png|\.jpg|\.svg|\.gif|\.ico))"/gi;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(html)) !== null) {
+  m = re.exec(html);
+  while (m !== null) {
     const ref = m[1].split("?")[0].split("#")[0];
     const filename = ref.split("/").pop() || "";
     allAssetRefs.add(filename);
+    m = re.exec(html);
   }
 }
 for (const file of [...cssFiles, ...jsFiles]) {
   const filename = file.split(/[/\\]/).pop() || "";
   if (!allAssetRefs.has(filename)) {
-    allIssues.push({ file: relFile(file), check: "unused-asset", detail: `Asset not referenced in any HTML file`, severity: "warn" });
+    allIssues.push({
+      file: relFile(file),
+      check: "unused-asset",
+      detail: `Asset not referenced in any HTML file`,
+      severity: "warn",
+    });
   }
 }
 
@@ -217,13 +269,20 @@ for (const file of htmlFiles) {
   const seen = new Set<string>();
   const re = /\sid="([^"]+)"/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(html)) !== null) {
+  m = re.exec(html);
+  while (m !== null) {
     const id = m[1];
     if (seen.has(id)) {
-      allIssues.push({ file: rel, check: "duplicate-id", detail: `Duplicate ID "${id}" within file`, severity: "warn" });
+      allIssues.push({
+        file: rel,
+        check: "duplicate-id",
+        detail: `Duplicate ID "${id}" within file`,
+        severity: "warn",
+      });
       break;
     }
     seen.add(id);
+    m = re.exec(html);
   }
 }
 
@@ -233,14 +292,21 @@ for (const file of htmlFiles) {
   const rel = relFile(file);
   const styleRe = /style="([^"]*)"/g;
   let m: RegExpExecArray | null;
-  while ((m = styleRe.exec(html)) !== null) {
+  m = styleRe.exec(html);
+  while (m !== null) {
     const style = m[1];
     const hexColors = style.match(/#[0-9a-fA-F]{3,8}\b/g);
     if (hexColors) {
       for (const color of hexColors) {
-        allIssues.push({ file: rel, check: "hardcoded-color", detail: `Hardcoded ${color} in inline style`, severity: "warn" });
+        allIssues.push({
+          file: rel,
+          check: "hardcoded-color",
+          detail: `Hardcoded ${color} in inline style`,
+          severity: "warn",
+        });
       }
     }
+    m = styleRe.exec(html);
   }
 }
 
@@ -266,7 +332,7 @@ for (const file of htmlFiles) {
 configureDocsDir(docsDir);
 for (const issue of checkI18nParity()) {
   allIssues.push({
-    file: issue.fileA,
+    file: issue.fileA ?? "(unknown)",
     check: "i18n-parity",
     detail: `[${issue.type}] ${issue.detail}`,
     severity: issue.severity === "fail" ? "error" : "warn",

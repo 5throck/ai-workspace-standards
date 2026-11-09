@@ -25,12 +25,12 @@
 // See: docs/adr/0043-l1-agent-layer-hybrid-override.md (:30, :74)
 // Sibling tooling: agent-similarity-analyzer.ts (Wave 2a full 6-section report).
 
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const TEMPLATES_DIR = join(WORKSPACE_ROOT, 'templates');
+const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const TEMPLATES_DIR = join(WORKSPACE_ROOT, "templates");
 
 /** ADR-0043 §4: Jaccard similarity >= 80% across Role + Responsibilities. */
 const SIMILARITY_THRESHOLD = 0.8;
@@ -78,30 +78,30 @@ interface AnalysisResult {
 //     (bodies end at the next `## ` heading).
 
 function stripFrontmatter(content: string): string {
-  const normalized = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  if (!normalized.startsWith('---')) return normalized;
-  const end = normalized.indexOf('\n---', 3);
-  return end === -1 ? normalized : normalized.slice(normalized.indexOf('\n', end + 1) + 1);
+  const normalized = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  if (!normalized.startsWith("---")) return normalized;
+  const end = normalized.indexOf("\n---", 3);
+  return end === -1 ? normalized : normalized.slice(normalized.indexOf("\n", end + 1) + 1);
 }
 
 /** Body of the named `## <title>` section (until the next `## ` heading), or ''. */
 function extractH2Body(body: string, title: RegExp): string {
-  const lines = body.split('\n');
+  const lines = body.split("\n");
   // T-20260922-030 fix: the heading line starts with "## ", so test the title
   // against the text AFTER the prefix — the old two-condition form
   // (/^##\s+/.test(l) && /^Role\s*$/.test(l)) was mutually exclusive and could
   // never match, silently reducing similarity to first-section-only.
-  const start = lines.findIndex(l => {
+  const start = lines.findIndex((l) => {
     const m = l.match(/^##\s+(.*)$/);
     return m !== null && title.test(m[1]);
   });
-  if (start === -1) return '';
+  if (start === -1) return "";
   const out: string[] = [];
   for (let i = start + 1; i < lines.length; i++) {
     if (/^##\s+/.test(lines[i])) break;
     out.push(lines[i]);
   }
-  return out.join('\n').trim();
+  return out.join("\n").trim();
 }
 
 function extractRoleResponsibilities(content: string): string {
@@ -110,15 +110,15 @@ function extractRoleResponsibilities(content: string): string {
   const responsibilities = extractH2Body(body, /^Responsibilities\s*$/);
   if (role || responsibilities) return `${role}\n${responsibilities}`.trim();
   // Fallback: first `## ` heading after the frontmatter, whatever it is titled.
-  const lines = body.split('\n');
-  const first = lines.findIndex(l => /^##\s+/.test(l));
-  if (first === -1) return '';
+  const lines = body.split("\n");
+  const first = lines.findIndex((l) => /^##\s+/.test(l));
+  if (first === -1) return "";
   const out: string[] = [];
   for (let i = first + 1; i < lines.length; i++) {
     if (/^##\s+/.test(lines[i])) break;
     out.push(lines[i]);
   }
-  return out.join('\n').trim();
+  return out.join("\n").trim();
 }
 
 // ── Jaccard (same tokenization contract as agent-similarity-analyzer.ts) ──────
@@ -127,9 +127,9 @@ function tokenise(text: string): Set<string> {
   return new Set(
     text
       .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
+      .replace(/[^\w\s]/g, " ")
       .split(/\s+/)
-      .filter(t => t.length > 1),
+      .filter((t) => t.length > 1),
   );
 }
 
@@ -147,20 +147,16 @@ function jaccard(a: Set<string>, b: Set<string>): number {
 
 /** Standalone (non-`# @extends:`) specialist agent files of one variant. */
 function discoverAgentFiles(variant: string): string[] {
-  const agentsDir = join(TEMPLATES_DIR, variant, 'agents');
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
   let entries: string[];
   try {
     entries = readdirSync(agentsDir);
   } catch {
     return [];
   }
-  return entries.filter(
-    f =>
-      f.endsWith('.md') &&
-      !f.startsWith('README') &&
-      !f.startsWith('_') &&
-      f !== 'pm.md',
-  ).map(f => join(agentsDir, f));
+  return entries
+    .filter((f) => f.endsWith(".md") && !f.startsWith("README") && !f.startsWith("_") && f !== "pm.md")
+    .map((f) => join(agentsDir, f));
 }
 
 /**
@@ -171,15 +167,15 @@ function discoverAgentFiles(variant: string): string[] {
  * stubs, not duplicated bodies (T-20260926-020c).
  */
 export function hasExtendsDeclaration(content: string): boolean {
-  if (/^#\s*@extends:\s*l1\//i.test(content.split('\n')[0] ?? '')) return true;
+  if (/^#\s*@extends:\s*l1\//i.test(content.split("\n")[0] ?? "")) return true;
   const fm = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   return fm !== null && /^\s*extends\s*:/m.test(fm[1]);
 }
 
 export function analyzeL1PromotionCandidates(): AnalysisResult {
   const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-    .filter(d => d.isDirectory() && /^co-/.test(d.name))
-    .map(d => d.name)
+    .filter((d) => d.isDirectory() && /^co-/.test(d.name))
+    .map((d) => d.name)
     .sort();
 
   // agent name → instances across variants
@@ -187,9 +183,9 @@ export function analyzeL1PromotionCandidates(): AnalysisResult {
   let scannedAgentCount = 0;
   for (const variant of variants) {
     for (const filePath of discoverAgentFiles(variant)) {
-      const content = readFileSync(filePath, 'utf8');
+      const content = readFileSync(filePath, "utf8");
       if (hasExtendsDeclaration(content)) continue; // already L2-extends-L1
-      const agent = filePath.split('/').pop()!.replace(/\.md$/, '');
+      const agent = filePath.split("/").pop()!.replace(/\.md$/, "");
       if (!agentMap.has(agent)) agentMap.set(agent, []);
       agentMap.get(agent)!.push({ variant, filePath, roleText: extractRoleResponsibilities(content) });
       scannedAgentCount++;
@@ -201,7 +197,7 @@ export function analyzeL1PromotionCandidates(): AnalysisResult {
 
   for (const [agent, instances] of agentMap.entries()) {
     if (instances.length < MIN_VARIANTS) continue;
-    const instanceVariants = instances.map(i => i.variant);
+    const instanceVariants = instances.map((i) => i.variant);
     considered.push({ agent, variants: instanceVariants });
 
     const pairs: AgentPair[] = [];
@@ -214,7 +210,7 @@ export function analyzeL1PromotionCandidates(): AnalysisResult {
         });
       }
     }
-    const min = Math.min(...pairs.map(p => p.similarity));
+    const min = Math.min(...pairs.map((p) => p.similarity));
     if (min >= SIMILARITY_THRESHOLD) {
       candidates.push({
         agent,
@@ -238,30 +234,30 @@ function pct(score: number): string {
 
 function formatReport(result: AnalysisResult): string {
   const lines: string[] = [
-    'agent-promote.ts — ADR-0043 L1 promotion-candidate analysis (READ-ONLY)',
+    "agent-promote.ts — ADR-0043 L1 promotion-candidate analysis (READ-ONLY)",
     `Rule: agent present in >= ${MIN_VARIANTS} variants with pairwise Role+Responsibilities Jaccard >= ${pct(SIMILARITY_THRESHOLD)}`,
     `Scanned: ${result.scannedVariants.length} variants, ${result.scannedAgentCount} standalone agent files, ${result.considered.length} name(s) in >= ${MIN_VARIANTS} variants`,
-    '',
+    "",
   ];
   if (result.candidates.length === 0) {
-    lines.push('No promotion candidates found (no group meets the threshold).');
+    lines.push("No promotion candidates found (no group meets the threshold).");
   } else {
-    lines.push(`PROMOTION CANDIDATES — ${result.candidates.length} found`, '');
+    lines.push(`PROMOTION CANDIDATES — ${result.candidates.length} found`, "");
     for (const c of result.candidates) {
-      lines.push(`  ${c.agent} — ${c.variants.length} variants: ${c.variants.join(', ')}`);
-      lines.push('    pairwise Jaccard (Role+Responsibilities):');
+      lines.push(`  ${c.agent} — ${c.variants.length} variants: ${c.variants.join(", ")}`);
+      lines.push("    pairwise Jaccard (Role+Responsibilities):");
       for (const p of c.pairs) lines.push(`      ${p.a} <-> ${p.b}: ${pct(p.similarity)}`);
-      lines.push(`    min ${pct(c.minSimilarity)}, avg ${pct(c.avgSimilarity)}`, '');
+      lines.push(`    min ${pct(c.minSimilarity)}, avg ${pct(c.avgSimilarity)}`, "");
     }
   }
-  lines.push('Analysis only — promotion remains human-initiated (ADR-0043 §4 gate). No files were modified.');
-  return lines.join('\n');
+  lines.push("Analysis only — promotion remains human-initiated (ADR-0043 §4 gate). No files were modified.");
+  return lines.join("\n");
 }
 
 function toJson(result: AnalysisResult): string {
   return JSON.stringify(
     {
-      rule: 'adr-0043',
+      rule: "adr-0043",
       minVariants: MIN_VARIANTS,
       similarityThreshold: SIMILARITY_THRESHOLD,
       scannedVariants: result.scannedVariants,
@@ -296,11 +292,11 @@ export { formatReport, toJson };
 
 if (import.meta.main) {
   const args = process.argv.slice(2);
-  if (args.includes('--help') || args.includes('-h')) {
+  if (args.includes("--help") || args.includes("-h")) {
     printHelp();
   } else {
     const result = analyzeL1PromotionCandidates();
-    if (args.includes('--json')) {
+    if (args.includes("--json")) {
       console.log(toJson(result));
     } else {
       console.log(formatReport(result));

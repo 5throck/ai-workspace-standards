@@ -82,7 +82,7 @@ export interface HookDriftReport {
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 interface NormalizedHookEntry {
@@ -96,9 +96,9 @@ function normalizeEntries(eventValue: unknown): NormalizedHookEntry[] {
   const entries: NormalizedHookEntry[] = [];
   for (const entry of eventValue) {
     if (!isPlainObject(entry)) continue;
-    const matcher = typeof entry.matcher === 'string' ? entry.matcher : '';
+    const matcher = typeof entry.matcher === "string" ? entry.matcher : "";
     const inner = Array.isArray(entry.hooks) ? entry.hooks : [];
-    const commands = inner.map((h) => (isPlainObject(h) && typeof h.command === 'string' ? h.command : ''));
+    const commands = inner.map((h) => (isPlainObject(h) && typeof h.command === "string" ? h.command : ""));
     entries.push({ matcher, commands });
   }
   return entries;
@@ -136,9 +136,9 @@ export function dedupeClaudeSettingsHooks(settings: unknown): DedupeResult {
         kept.push(entry);
         continue;
       }
-      const matcher = typeof entry.matcher === 'string' ? entry.matcher : '';
+      const matcher = typeof entry.matcher === "string" ? entry.matcher : "";
       const inner = Array.isArray(entry.hooks) ? entry.hooks : [];
-      const commands = inner.map((h) => (isPlainObject(h) && typeof h.command === 'string' ? h.command : ''));
+      const commands = inner.map((h) => (isPlainObject(h) && typeof h.command === "string" ? h.command : ""));
       const sig = entrySignature({ matcher, commands });
       if (seen.has(sig)) {
         for (const command of commands) removed.push({ event, matcher, command });
@@ -189,8 +189,8 @@ function commandPathRefs(command: string): string[] {
   for (const rawToken of command.split(/[\s"'`]+/)) {
     const token = rawToken.trim();
     if (!token || !COMMAND_PATH_EXTENSIONS.test(token)) continue;
-    if (token.startsWith('/') || token.includes('..')) continue;
-    refs.push(token.replace(/^\$\{CLAUDE_PROJECT_DIR:-\.\}\//, ''));
+    if (token.startsWith("/") || token.includes("..")) continue;
+    refs.push(token.replace(/^\$\{CLAUDE_PROJECT_DIR:-\.\}\//, ""));
   }
   return refs;
 }
@@ -221,11 +221,11 @@ export function dropMissingPathHookEntries(
         kept.push(entry);
         continue;
       }
-      const matcher = typeof entry.matcher === 'string' ? entry.matcher : '';
+      const matcher = typeof entry.matcher === "string" ? entry.matcher : "";
       const inner = Array.isArray(entry.hooks) ? entry.hooks : [];
       let dropWith: DroppedPathHookRef | null = null;
       for (const h of inner) {
-        if (!isPlainObject(h) || typeof h.command !== 'string') continue;
+        if (!isPlainObject(h) || typeof h.command !== "string") continue;
         const command = h.command;
         for (const rel of commandPathRefs(command)) {
           if (!exists(rel)) {
@@ -288,9 +288,9 @@ export function analyzeClaudeHookDrift(local: unknown, template: unknown | null)
       const templateEntries = normalizeEntries(template.hooks[event]);
       if (localEntries.length <= templateEntries.length) continue;
       const templateKeys = new Set(templateEntries.flatMap((e) => e.commands.map((c) => commandKey(e.matcher, c))));
-      const excess = [...new Set(
-        localEntries.flatMap((e) => e.commands.filter((c) => !templateKeys.has(commandKey(e.matcher, c)))),
-      )];
+      const excess = [
+        ...new Set(localEntries.flatMap((e) => e.commands.filter((c) => !templateKeys.has(commandKey(e.matcher, c))))),
+      ];
       report.overCount.push({
         event,
         localCount: localEntries.length,

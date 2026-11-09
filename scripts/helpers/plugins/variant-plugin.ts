@@ -13,8 +13,8 @@
  * logic, computation, or external I/O, it belongs in a plugin.
  */
 
-import type { VariantType } from '../registries/variant-type-registry.ts';
-import type { PromotionPolicy } from '../registries/promotion-policy.ts';
+import type { VariantType } from "../registries/variant-type-registry.ts";
+import type { PromotionPolicy } from "../registries/promotion-policy.ts";
 
 // ---------------------------------------------------------------------------
 // Plugin Lifecycle Interfaces
@@ -50,7 +50,7 @@ export interface ValidationContext {
  */
 export interface ValidationIssue {
   /** Severity level — see Appendix B of the design doc for semantics. */
-  readonly severity: 'error' | 'warning' | 'info';
+  readonly severity: "error" | "warning" | "info";
   /** Category for grouping (e.g., 'capability-coverage', 'performance-budget'). */
   readonly category: string;
   /** Human-readable description of the issue. */
@@ -120,7 +120,7 @@ export interface Engagement {
   /** The variant name used during this engagement. */
   readonly variantName: string;
   /** The outcome of the engagement. */
-  readonly outcome: 'success' | 'failure' | 'partial';
+  readonly outcome: "success" | "failure" | "partial";
 }
 
 // ---------------------------------------------------------------------------
@@ -253,9 +253,7 @@ const pluginMap: Map<VariantType, VariantPlugin> = new Map();
  */
 export function registerPlugin(plugin: VariantPlugin): void {
   if (pluginMap.has(plugin.type)) {
-    throw new Error(
-      `Plugin already registered for variant type "${String(plugin.type)}"`,
-    );
+    throw new Error(`Plugin already registered for variant type "${String(plugin.type)}"`);
   }
   pluginMap.set(plugin.type, plugin);
 }

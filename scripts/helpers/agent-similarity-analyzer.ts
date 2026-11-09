@@ -27,24 +27,24 @@
  *   1.0.0 — Initial implementation.
  */
 
-import { join, basename, resolve, sep } from 'path';
-import { existsSync, readdirSync } from 'fs';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
+import { join, basename, resolve, sep } from "node:path";
+import { existsSync, readdirSync } from "node:fs";
+import { readUTF8File, writeUTF8File } from "../lib/encoding-utils.ts";
 
 // ============================================================================
 // TYPES (subset also declared in l1-agent-format-spec.md)
 // ============================================================================
 
-export type SimilarityBand = 'high' | 'medium' | 'low';
+export type SimilarityBand = "high" | "medium" | "low";
 
 /** Valid section keys for agent_overrides.sections */
 export type SectionKey =
-  | 'role'
-  | 'responsibilities'
-  | 'output_format'
-  | 'constraints'
-  | 'meeting_participation'
-  | 'dispatch_protocol';
+  | "role"
+  | "responsibilities"
+  | "output_format"
+  | "constraints"
+  | "meeting_participation"
+  | "dispatch_protocol";
 
 /** Jaccard similarity scores for each agent section */
 export interface SectionSimilarityScores {
@@ -121,7 +121,7 @@ export interface DriftReport {
 // ============================================================================
 
 const THRESHOLD_HIGH = 0.85;
-const THRESHOLD_MEDIUM = 0.70;
+const THRESHOLD_MEDIUM = 0.7;
 const PROMOTION_MIN_VARIANTS = 3;
 
 // ============================================================================
@@ -136,7 +136,7 @@ const PROMOTION_MIN_VARIANTS = 3;
  * and causing jaccard() to return 1.0 for all empty-vs-empty pairs.
  */
 function normalizeContent(content: string): string {
-  return content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 }
 
 // ============================================================================
@@ -144,12 +144,12 @@ function normalizeContent(content: string): string {
 // ============================================================================
 
 const SECTION_KEYS: Array<SectionKey> = [
-  'role',
-  'responsibilities',
-  'output_format',
-  'constraints',
-  'meeting_participation',
-  'dispatch_protocol',
+  "role",
+  "responsibilities",
+  "output_format",
+  "constraints",
+  "meeting_participation",
+  "dispatch_protocol",
 ];
 
 /** Maps section key to the Markdown heading pattern to match */
@@ -164,7 +164,7 @@ const SECTION_HEADERS: Record<SectionKey, RegExp> = {
 
 /** Extracts the body text of a section from pre-normalized Markdown content */
 function extractSection(normalizedContent: string, headerPattern: RegExp): string {
-  const lines = normalizedContent.split('\n');
+  const lines = normalizedContent.split("\n");
   let inSection = false;
   const body: string[] = [];
 
@@ -180,16 +180,16 @@ function extractSection(normalizedContent: string, headerPattern: RegExp): strin
     }
   }
 
-  return body.join('\n').trim();
+  return body.join("\n").trim();
 }
 
 /** Tokenises text into a Set of lowercase words (for Jaccard) */
 function tokenise(text: string): Set<string> {
   const tokens = text
     .toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
+    .replace(/[^\w\s]/g, " ")
     .split(/\s+/)
-    .filter(t => t.length > 1);
+    .filter((t) => t.length > 1);
   return new Set(tokens);
 }
 
@@ -207,10 +207,7 @@ function jaccard(a: Set<string>, b: Set<string>): number {
 }
 
 /** Computes all section similarity scores between two pre-normalized agent file contents */
-function computeSectionScores(
-  normalizedA: string,
-  normalizedB: string
-): SectionSimilarityScores {
+function computeSectionScores(normalizedA: string, normalizedB: string): SectionSimilarityScores {
   const scores: Partial<SectionSimilarityScores> = {};
 
   for (const key of SECTION_KEYS) {
@@ -223,16 +220,16 @@ function computeSectionScores(
 }
 
 function classifyBand(primaryScore: number): SimilarityBand {
-  if (primaryScore >= THRESHOLD_HIGH) return 'high';
-  if (primaryScore >= THRESHOLD_MEDIUM) return 'medium';
-  return 'low';
+  if (primaryScore >= THRESHOLD_HIGH) return "high";
+  if (primaryScore >= THRESHOLD_MEDIUM) return "medium";
+  return "low";
 }
 
 // ============================================================================
 // FILE DISCOVERY
 // ============================================================================
 
-const VARIANTS_ROOT = 'templates';
+const VARIANTS_ROOT = "templates";
 const VARIANT_PATTERN = /^co-/;
 
 /** Returns all co-* variant directory names */
@@ -241,8 +238,8 @@ function discoverVariants(workspaceRoot: string): string[] {
   if (!existsSync(templatesDir)) return [];
 
   return readdirSync(templatesDir, { withFileTypes: true })
-    .filter(d => d.isDirectory() && VARIANT_PATTERN.test(d.name))
-    .map(d => d.name);
+    .filter((d) => d.isDirectory() && VARIANT_PATTERN.test(d.name))
+    .map((d) => d.name);
 }
 
 /**
@@ -250,28 +247,19 @@ function discoverVariants(workspaceRoot: string): string[] {
  * Excludes: README*, _-prefixed files, and pm.md (governance agent with
  * different structure — not a consolidation candidate).
  */
-function discoverAgentFiles(
-  workspaceRoot: string,
-  variantName: string
-): string[] {
-  const agentsDir = join(workspaceRoot, VARIANTS_ROOT, variantName, 'agents');
+function discoverAgentFiles(workspaceRoot: string, variantName: string): string[] {
+  const agentsDir = join(workspaceRoot, VARIANTS_ROOT, variantName, "agents");
   if (!existsSync(agentsDir)) return [];
 
   return readdirSync(agentsDir)
-    .filter(
-      f =>
-        f.endsWith('.md') &&
-        !f.startsWith('README') &&
-        !f.startsWith('_') &&
-        f !== 'pm.md'
-    )
-    .map(f => join(agentsDir, f));
+    .filter((f) => f.endsWith(".md") && !f.startsWith("README") && !f.startsWith("_") && f !== "pm.md")
+    .map((f) => join(agentsDir, f));
 }
 
 /** Declared version marker for frontmatter extends stubs — they resolve the
  * common body at read time (ADR-0033), so there is no pinned version and
  * version-drift comparison does not apply. */
-export const UNPINNED_EXTENDS = '(unpinned)';
+export const UNPINNED_EXTENDS = "(unpinned)";
 
 /**
  * True when the (normalized) file extends an L1 base. The live L2 stub
@@ -282,7 +270,7 @@ export const UNPINNED_EXTENDS = '(unpinned)';
  * standalone body (inflating scanned/considered counts).
  */
 export function hasExtendsDeclaration(normalizedContent: string): boolean {
-  if (/^#\s*@extends:\s*l1\//i.test(normalizedContent.split('\n')[0] ?? '')) return true;
+  if (/^#\s*@extends:\s*l1\//i.test(normalizedContent.split("\n")[0] ?? "")) return true;
   const fm = normalizedContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   return fm !== null && /^\s*extends\s*:/m.test(fm[1]);
 }
@@ -292,17 +280,15 @@ export function hasExtendsDeclaration(normalizedContent: string): boolean {
  * `# @extends: l1/<name>@<version>` first-line comment, or the frontmatter
  * `extends: …/common/agents/<name>.md` form (version UNPINNED_EXTENDS).
  */
-function parseExtendsRef(
-  normalizedContent: string
-): { l1Name: string; version: string } | null {
-  const firstLine = normalizedContent.split('\n')[0] ?? '';
+function parseExtendsRef(normalizedContent: string): { l1Name: string; version: string } | null {
+  const firstLine = normalizedContent.split("\n")[0] ?? "";
   const match = /^#\s*@extends:\s*l1\/([^@\s]+)@([^\s]+)/i.exec(firstLine);
   if (match) return { l1Name: match[1].trim(), version: match[2].trim() };
   const fm = normalizedContent.match(/^---\n([\s\S]*?)\n---/);
   if (fm) {
     const decl = /^\s*extends\s*:\s*["']?([^"'\s]+)["']?\s*$/m.exec(fm[1]);
     if (decl) {
-      const name = decl[1].split('/').pop()?.replace(/\.md$/, '');
+      const name = decl[1].split("/").pop()?.replace(/\.md$/, "");
       if (name) return { l1Name: name, version: UNPINNED_EXTENDS };
     }
   }
@@ -318,16 +304,8 @@ function parseExtendsRef(
  * Includes a path-traversal guard: if the resolved path escapes common/agents/,
  * returns null rather than reading an unintended file.
  */
-function getL1RegistryVersion(
-  workspaceRoot: string,
-  l1Name: string
-): string | null {
-  const expectedDir = resolve(
-    workspaceRoot,
-    'templates',
-    'common',
-    'agents'
-  );
+function getL1RegistryVersion(workspaceRoot: string, l1Name: string): string | null {
+  const expectedDir = resolve(workspaceRoot, "templates", "common", "agents");
   const l1Path = resolve(expectedDir, `${l1Name}.md`);
 
   // Path traversal guard
@@ -344,16 +322,11 @@ function getL1RegistryVersion(
 // ============================================================================
 
 /** Main Mode 1 entry point */
-export function analyzeAgentSimilarity(
-  workspaceRoot: string
-): SimilarityAnalysisResult {
+export function analyzeAgentSimilarity(workspaceRoot: string): SimilarityAnalysisResult {
   const variants = discoverVariants(workspaceRoot);
 
   // Build map: agentName → { variant, filePath, normalizedContent }[]
-  const agentMap = new Map<
-    string,
-    Array<{ variant: string; filePath: string; content: string }>
-  >();
+  const agentMap = new Map<string, Array<{ variant: string; filePath: string; content: string }>>();
 
   let scannedAgentCount = 0;
 
@@ -364,7 +337,7 @@ export function analyzeAgentSimilarity(
       // Mode 1 only processes standalone (non-extends) agents
       if (hasExtendsDeclaration(content)) continue;
 
-      const agentName = basename(filePath, '.md');
+      const agentName = basename(filePath, ".md");
       if (!agentMap.has(agentName)) agentMap.set(agentName, []);
       agentMap.get(agentName)!.push({ variant, filePath, content });
       scannedAgentCount++;
@@ -384,9 +357,7 @@ export function analyzeAgentSimilarity(
 
         const scores = computeSectionScores(a.content, b.content);
         const primaryScore = (scores.role + scores.responsibilities) / 2;
-        const overallScore =
-          SECTION_KEYS.reduce((sum, k) => sum + scores[k], 0) /
-          SECTION_KEYS.length;
+        const overallScore = SECTION_KEYS.reduce((sum, k) => sum + scores[k], 0) / SECTION_KEYS.length;
 
         pairComparisons.push({
           variantA: a.variant,
@@ -411,24 +382,22 @@ export function analyzeAgentSimilarity(
   for (const [agentName, instances] of agentMap.entries()) {
     if (instances.length < PROMOTION_MIN_VARIANTS) continue;
 
-    const pairs = pairComparisons.filter(p => p.agentName === agentName);
+    const pairs = pairComparisons.filter((p) => p.agentName === agentName);
     if (pairs.length === 0) continue;
 
-    const primaryScores = pairs.map(p => p.primaryScore);
+    const primaryScores = pairs.map((p) => p.primaryScore);
     const minPrimary = Math.min(...primaryScores);
 
     if (minPrimary < THRESHOLD_MEDIUM) continue;
 
-    const avgPrimary =
-      primaryScores.reduce((a, b) => a + b, 0) / primaryScores.length;
-    const overallScores = pairs.map(p => p.overallScore);
-    const avgOverall =
-      overallScores.reduce((a, b) => a + b, 0) / overallScores.length;
+    const avgPrimary = primaryScores.reduce((a, b) => a + b, 0) / primaryScores.length;
+    const overallScores = pairs.map((p) => p.overallScore);
+    const avgOverall = overallScores.reduce((a, b) => a + b, 0) / overallScores.length;
 
     const entry: ConsolidationCandidate = {
       agentName,
       variantCount: instances.length,
-      variants: instances.map(i => i.variant),
+      variants: instances.map((i) => i.variant),
       minPrimaryScore: minPrimary,
       maxPrimaryScore: Math.max(...primaryScores),
       avgPrimaryScore: avgPrimary,
@@ -468,92 +437,79 @@ function pct(score: number): string {
 
 function bandLabel(band: SimilarityBand): string {
   switch (band) {
-    case 'high':
-      return 'HIGH (auto-candidate >=85%)';
-    case 'medium':
-      return 'MEDIUM (review-needed 70-84%)';
-    case 'low':
-      return 'LOW (<70%)';
+    case "high":
+      return "HIGH (auto-candidate >=85%)";
+    case "medium":
+      return "MEDIUM (review-needed 70-84%)";
+    case "low":
+      return "LOW (<70%)";
   }
 }
 
 /** Formats Mode 1 analysis as a Markdown report string */
-export function formatConsolidationReport(
-  result: SimilarityAnalysisResult
-): string {
+export function formatConsolidationReport(result: SimilarityAnalysisResult): string {
   const lines: string[] = [
-    '# Agent Consolidation Report',
-    '',
+    "# Agent Consolidation Report",
+    "",
     `> Generated: ${result.timestamp}`,
-    `> Variants scanned: ${result.scannedVariants.join(', ')}`,
+    `> Variants scanned: ${result.scannedVariants.join(", ")}`,
     `> Standalone agents scanned: ${result.scannedAgentCount}`,
     `> Pair comparisons: ${result.pairComparisons.length}`,
-    '',
-    '---',
-    '',
+    "",
+    "---",
+    "",
   ];
 
   // --- HIGH-CONFIDENCE CANDIDATES ---
   if (result.candidates.length === 0) {
-    lines.push('## L1 Promotion Candidates (>=85% primary, 3+ variants)', '');
-    lines.push('_No high-confidence candidates found._', '');
+    lines.push("## L1 Promotion Candidates (>=85% primary, 3+ variants)", "");
+    lines.push("_No high-confidence candidates found._", "");
   } else {
-    lines.push(
-      `## L1 Promotion Candidates (>=85% primary, 3+ variants) — ${result.candidates.length} found`,
-      ''
-    );
+    lines.push(`## L1 Promotion Candidates (>=85% primary, 3+ variants) — ${result.candidates.length} found`, "");
     for (const c of result.candidates) {
       lines.push(
         `### \`${c.agentName}\` — ${bandLabel(c.band)}`,
-        '',
-        `- **Variants**: ${c.variants.join(', ')} (${c.variantCount} total)`,
+        "",
+        `- **Variants**: ${c.variants.join(", ")} (${c.variantCount} total)`,
         `- **Primary score range**: ${pct(c.minPrimaryScore)} – ${pct(c.maxPrimaryScore)} (avg ${pct(c.avgPrimaryScore)})`,
         `- **Overall score (all sections)**: avg ${pct(c.avgOverallScore)}`,
-        ''
+        "",
       );
-      lines.push('#### Section-by-section scores', '');
+      lines.push("#### Section-by-section scores", "");
       lines.push(
-        '| Pair | Role | Responsibilities | Output Format | Constraints | Meeting | Dispatch |',
-        '|------|------|-----------------|---------------|-------------|---------|----------|'
+        "| Pair | Role | Responsibilities | Output Format | Constraints | Meeting | Dispatch |",
+        "|------|------|-----------------|---------------|-------------|---------|----------|",
       );
       for (const p of c.pairs) {
         lines.push(
-          `| ${p.variantA} <-> ${p.variantB} | ${pct(p.scores.role)} | ${pct(p.scores.responsibilities)} | ${pct(p.scores.output_format)} | ${pct(p.scores.constraints)} | ${pct(p.scores.meeting_participation)} | ${pct(p.scores.dispatch_protocol)} |`
+          `| ${p.variantA} <-> ${p.variantB} | ${pct(p.scores.role)} | ${pct(p.scores.responsibilities)} | ${pct(p.scores.output_format)} | ${pct(p.scores.constraints)} | ${pct(p.scores.meeting_participation)} | ${pct(p.scores.dispatch_protocol)} |`,
         );
       }
-      lines.push('');
+      lines.push("");
     }
   }
 
   // --- MEDIUM-CONFIDENCE ---
   if (result.reviewNeeded.length === 0) {
-    lines.push('## Review-Needed (70-84% primary, 3+ variants)', '');
-    lines.push('_No medium-confidence candidates found._', '');
+    lines.push("## Review-Needed (70-84% primary, 3+ variants)", "");
+    lines.push("_No medium-confidence candidates found._", "");
   } else {
-    lines.push(
-      `## Review-Needed (70-84% primary, 3+ variants) — ${result.reviewNeeded.length} found`,
-      ''
-    );
+    lines.push(`## Review-Needed (70-84% primary, 3+ variants) — ${result.reviewNeeded.length} found`, "");
     for (const c of result.reviewNeeded) {
       lines.push(
         `### \`${c.agentName}\` — ${bandLabel(c.band)}`,
-        '',
-        `- **Variants**: ${c.variants.join(', ')} (${c.variantCount} total)`,
+        "",
+        `- **Variants**: ${c.variants.join(", ")} (${c.variantCount} total)`,
         `- **Primary score range**: ${pct(c.minPrimaryScore)} – ${pct(c.maxPrimaryScore)} (avg ${pct(c.avgPrimaryScore)})`,
         `- **Overall score**: avg ${pct(c.avgOverallScore)}`,
-        ''
+        "",
       );
     }
   }
 
-  lines.push(
-    '---',
-    '',
-    '_Next step: human review -> run `agent-promote.ts` for approved candidates_',
-    ''
-  );
+  lines.push("---", "", "_Next step: human review -> run `agent-promote.ts` for approved candidates_", "");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // ============================================================================
@@ -586,10 +542,10 @@ export function detectVersionDrift(workspaceRoot: string): DriftReport {
         // L1 file absent — broken pointer, not "up-to-date"
         missingL1.push({
           filePath,
-          agentName: basename(filePath, '.md'),
+          agentName: basename(filePath, ".md"),
           l1Name: ref.l1Name,
           declaredVersion: ref.version,
-          registryVersion: '(not found)',
+          registryVersion: "(not found)",
           isDrift: false,
         });
         continue;
@@ -601,7 +557,7 @@ export function detectVersionDrift(workspaceRoot: string): DriftReport {
       const isDrift = ref.version !== UNPINNED_EXTENDS && registryVersion !== ref.version;
       const entry: VersionDriftResult = {
         filePath,
-        agentName: basename(filePath, '.md'),
+        agentName: basename(filePath, ".md"),
         l1Name: ref.l1Name,
         declaredVersion: ref.version,
         registryVersion,
@@ -628,68 +584,56 @@ export function detectVersionDrift(workspaceRoot: string): DriftReport {
 /** Formats Mode 2 drift report as Markdown */
 export function formatDriftReport(report: DriftReport): string {
   const lines: string[] = [
-    '# L1 Agent Version Drift Report',
-    '',
+    "# L1 Agent Version Drift Report",
+    "",
     `> Generated: ${report.timestamp}`,
     `> L2 agents with \`# @extends:\`: ${report.scannedFiles}`,
     `> Drifted: ${report.drifted.length} | Current: ${report.current.length} | Missing L1: ${report.missingL1.length}`,
-    '',
-    '---',
-    '',
+    "",
+    "---",
+    "",
   ];
 
   // --- MISSING L1 ---
   if (report.missingL1.length > 0) {
-    lines.push(`## Missing L1 Files (${report.missingL1.length} broken pointers)`, '');
-    lines.push(
-      '| File | Agent | Declared L1 | Declared Version |',
-      '|------|-------|------------|-----------------|'
-    );
+    lines.push(`## Missing L1 Files (${report.missingL1.length} broken pointers)`, "");
+    lines.push("| File | Agent | Declared L1 | Declared Version |", "|------|-------|------------|-----------------|");
     for (const d of report.missingL1) {
-      lines.push(
-        `| \`${d.filePath}\` | ${d.agentName} | l1/${d.l1Name} | ${d.declaredVersion} |`
-      );
+      lines.push(`| \`${d.filePath}\` | ${d.agentName} | l1/${d.l1Name} | ${d.declaredVersion} |`);
     }
-    lines.push('');
+    lines.push("");
     lines.push(
-      '> **Action required**: Create the L1 agent file via `agent-promote.ts` or correct the `# @extends:` reference.',
-      ''
+      "> **Action required**: Create the L1 agent file via `agent-promote.ts` or correct the `# @extends:` reference.",
+      "",
     );
   }
 
   // --- DRIFTED ---
   if (report.drifted.length === 0) {
-    lines.push('## Version Drift', '', '_No drift detected._', '');
+    lines.push("## Version Drift", "", "_No drift detected._", "");
   } else {
-    lines.push(`## Version Drift (${report.drifted.length} files)`, '');
-    lines.push(
-      '| File | Agent | L1 | Declared | Registry |',
-      '|------|-------|----|---------|----------|'
-    );
+    lines.push(`## Version Drift (${report.drifted.length} files)`, "");
+    lines.push("| File | Agent | L1 | Declared | Registry |", "|------|-------|----|---------|----------|");
     for (const d of report.drifted) {
-      lines.push(
-        `| \`${d.filePath}\` | ${d.agentName} | ${d.l1Name} | ${d.declaredVersion} | ${d.registryVersion} |`
-      );
+      lines.push(`| \`${d.filePath}\` | ${d.agentName} | ${d.l1Name} | ${d.declaredVersion} | ${d.registryVersion} |`);
     }
-    lines.push('');
+    lines.push("");
     lines.push(
-      '> **Action required**: Update `# @extends:` comment and `agent_overrides.version` to match registry.',
-      ''
+      "> **Action required**: Update `# @extends:` comment and `agent_overrides.version` to match registry.",
+      "",
     );
   }
 
   // --- CURRENT ---
   if (report.current.length > 0) {
-    lines.push(`## Up-to-date (${report.current.length} files)`, '');
+    lines.push(`## Up-to-date (${report.current.length} files)`, "");
     for (const d of report.current) {
-      lines.push(
-        `- \`${d.filePath}\` -> l1/${d.l1Name}@${d.registryVersion}`
-      );
+      lines.push(`- \`${d.filePath}\` -> l1/${d.l1Name}@${d.registryVersion}`);
     }
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // ============================================================================
@@ -698,23 +642,21 @@ export function formatDriftReport(report: DriftReport): string {
 
 async function main() {
   const args = process.argv.slice(2);
-  const driftMode = args.includes('--drift');
+  const driftMode = args.includes("--drift");
   const workspaceRoot = process.cwd();
 
   // Workspace-root guard: this script must run from a directory that has templates/
-  if (!existsSync(join(workspaceRoot, 'templates'))) {
+  if (!existsSync(join(workspaceRoot, "templates"))) {
     console.error(
-      'Error: agent-similarity-analyzer must be run from the workspace root.\n' +
-      `Current directory (${workspaceRoot}) has no templates/ subdirectory.`
+      "Error: agent-similarity-analyzer must be run from the workspace root.\n" +
+        `Current directory (${workspaceRoot}) has no templates/ subdirectory.`,
     );
     process.exit(1);
   }
 
   // Parse --output= safely (handles paths that contain = characters)
-  const outputArgRaw = args.find(a => a.startsWith('--output='));
-  const outputPath = outputArgRaw
-    ? outputArgRaw.slice('--output='.length)
-    : null;
+  const outputArgRaw = args.find((a) => a.startsWith("--output="));
+  const outputPath = outputArgRaw ? outputArgRaw.slice("--output=".length) : null;
 
   if (driftMode) {
     const report = detectVersionDrift(workspaceRoot);
@@ -744,7 +686,7 @@ async function main() {
     console.error(
       `\nSummary: ${result.candidates.length} high-confidence + ` +
         `${result.reviewNeeded.length} review-needed = ${total} candidate(s) across ` +
-        `${result.scannedVariants.length} variants`
+        `${result.scannedVariants.length} variants`,
     );
 
     process.exit(0);
@@ -756,8 +698,8 @@ async function main() {
 // helper), silently double-running the analysis and printing a stray
 // report into the importer's output (T-20260926-020c).
 if (import.meta.main) {
-  main().catch(err => {
-    console.error('agent-similarity-analyzer error:', err);
+  main().catch((err) => {
+    console.error("agent-similarity-analyzer error:", err);
     process.exit(1);
   });
 }

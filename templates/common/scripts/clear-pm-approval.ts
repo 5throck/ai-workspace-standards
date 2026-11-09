@@ -8,9 +8,9 @@
  * Cross-platform: works on Windows, macOS, Linux via Bun runtime.
  */
 
-import { unlinkSync, existsSync } from 'node:fs';
+import { unlinkSync, existsSync } from "node:fs";
 
-const flag = '.pm-approved';
+const flag = ".pm-approved";
 if (existsSync(flag)) {
   try {
     unlinkSync(flag);

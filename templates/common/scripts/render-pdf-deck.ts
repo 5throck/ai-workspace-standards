@@ -175,7 +175,9 @@ async function runCheck(options: CliOptions): Promise<void> {
   console.log(`[INFO] Output target: ${outputPath}`);
   console.log(`[INFO] Deck title: ${inspection.title || "Untitled"}`);
   console.log(`[INFO] Slide elements detected: ${inspection.slideCount}`);
-  console.log(`[INFO] @page CSS rules detected: ${inspection.hasPageRules ? inspection.pageSizeRule || "Yes" : "None (will use default page size)"}`);
+  console.log(
+    `[INFO] @page CSS rules detected: ${inspection.hasPageRules ? inspection.pageSizeRule || "Yes" : "None (will use default page size)"}`,
+  );
   console.log(`[PASS] All dry-run verification checks passed cleanly`);
   process.exit(0);
 }
@@ -211,7 +213,7 @@ async function main(): Promise<void> {
   const outputPath = resolveOutputPath(inputPath, options.output);
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
-  let playwrightModule;
+  let playwrightModule: any; // dynamic import of an optional, non-installed peer — TS cannot resolve its module type
   try {
     // Same dynamic-specifier pattern as the availability probe above.
     const playwrightSpecifier = "playwright";

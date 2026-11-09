@@ -1,4 +1,10 @@
-// @version 1.46.0
+// @version 1.46.1
+// v1.46.1 (2026-11-10, design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md
+//          §4.3, U-20261108-001 / DEC-20261109-01): strict-profile compliance sweep —
+//          formatting reflow (double quotes, 2-space, lineWidth 120) and the enumerated
+//          `while ((match = re.exec(...)) !== null)` loop rewrites (noAssignInExpressions /
+//          noImplicitAnyLet). Behavior unchanged — this bump is the version-only bump for
+//          the format-class sweep; no step numbers added or reordered.
 // v1.46.0 (2026-11-09, spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md,
 //          T-20261109-002): step 4.88 becomes the SPAWNED-CHILD INTEGRITY GATE with a
 //          second arm. Arm 1 (existing config snapshot/compare) now also covers the
@@ -434,56 +440,56 @@
 //           reusing a branch name whose earlier PR was already MERGED/CLOSED caused
 //           new commits to be pushed with zero PR coverage (silently reported as
 //           "no new PR needed").
-import { $ } from 'bun';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as crypto from 'node:crypto';
-import { withRetry, DEFAULT_CONFIG } from './retry-handler.ts';
-import { hasNonEnglish } from './lib/language-guard.ts';
-import { parseCachedNameStatus, parseStatusPorcelain } from './lib/git-status.ts';
-import { gitCleanEnvForShell } from './lib/git-env.ts';
-import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from './helpers/merge-state.ts';
-import { isDeliveredDiff, manifestHasUnresolvedErrors } from './lib/upgrade-policy.ts';
-import { detectVersionBumps, hasTestUnitScript } from './helpers/version-bump.ts';
-import { changelogGateFindings } from './helpers/changelog-duplicates.ts';
-import { runDeclaredGenerators } from './lib/generator-manifest.ts';
-import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from './helpers/commit-message.ts';
-import { localDateISO } from './lib/local-date.ts';
-import { isAgentMdPath, bumpMechanicalLastUpdated } from './helpers/agent-mechanical-date-bump.ts';
-import { driftCheck } from './helpers/ticket-drift.ts';
-import { unionScan, wellFormedScan } from './helpers/memory-union-verify.ts';
-import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from './lib/workspace-hygiene.ts';
+import { $ } from "bun";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as crypto from "node:crypto";
+import { withRetry, DEFAULT_CONFIG } from "./retry-handler.ts";
+import { hasNonEnglish } from "./lib/language-guard.ts";
+import { parseCachedNameStatus, parseStatusPorcelain } from "./lib/git-status.ts";
+import { gitCleanEnvForShell } from "./lib/git-env.ts";
+import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from "./helpers/merge-state.ts";
+import { isDeliveredDiff, manifestHasUnresolvedErrors } from "./lib/upgrade-policy.ts";
+import { detectVersionBumps, hasTestUnitScript } from "./helpers/version-bump.ts";
+import { changelogGateFindings } from "./helpers/changelog-duplicates.ts";
+import { runDeclaredGenerators } from "./lib/generator-manifest.ts";
+import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from "./helpers/commit-message.ts";
+import { localDateISO } from "./lib/local-date.ts";
+import { isAgentMdPath, bumpMechanicalLastUpdated } from "./helpers/agent-mechanical-date-bump.ts";
+import { driftCheck } from "./helpers/ticket-drift.ts";
+import { unionScan, wellFormedScan } from "./helpers/memory-union-verify.ts";
+import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from "./lib/workspace-hygiene.ts";
 import {
-    assertWorkTreeHealthy,
-    diffRepoConfig,
-    formatRepoConfigDeltaRows,
-    isEmptyRepoConfigDelta,
-    resolveRogueScanBase,
-    rogueScanRefusalLines,
-    scanRogueCommits,
-    snapshotRepoConfig,
-    type RepoConfigSnapshot,
-} from './lib/repo-integrity.ts';
+  assertWorkTreeHealthy,
+  diffRepoConfig,
+  formatRepoConfigDeltaRows,
+  isEmptyRepoConfigDelta,
+  resolveRogueScanBase,
+  rogueScanRefusalLines,
+  scanRogueCommits,
+  snapshotRepoConfig,
+  type RepoConfigSnapshot,
+} from "./lib/repo-integrity.ts";
 
-const GREEN = '\x1b[32m';
-const RED = '\x1b[31m';
-const YELLOW = '\x1b[33m';
-const CYAN = '\x1b[36m';
-const DIM = '\x1b[2m';
-const RESET = '\x1b[0m';
+const GREEN = "\x1b[32m";
+const RED = "\x1b[31m";
+const YELLOW = "\x1b[33m";
+const CYAN = "\x1b[36m";
+const DIM = "\x1b[2m";
+const RESET = "\x1b[0m";
 
 // Workspace root guard — dev-sync must run from the workspace root it belongs to.
 // Using import.meta.dir (script location) prevents CWD mismatches when two clones exist.
-const expectedRoot = path.resolve(import.meta.dir, '..');
+const expectedRoot = path.resolve(import.meta.dir, "..");
 const actualCwd = process.cwd();
 if (path.resolve(actualCwd) !== expectedRoot) {
-    console.error(`${RED}❌ dev-sync: CWD mismatch.${RESET}`);
-    console.error(`   Expected: ${expectedRoot}`);
-    console.error(`   Current:  ${actualCwd}`);
-    console.error(`   Run from the workspace root: cd ${expectedRoot}`);
-    if (import.meta.main) {
-        process.exit(1);
-    }
+  console.error(`${RED}❌ dev-sync: CWD mismatch.${RESET}`);
+  console.error(`   Expected: ${expectedRoot}`);
+  console.error(`   Current:  ${actualCwd}`);
+  console.error(`   Run from the workspace root: cd ${expectedRoot}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Start-of-run repository-config invariant (spec 2026-11-08-gw-tenant-loop-and-
@@ -496,10 +502,10 @@ if (path.resolve(actualCwd) !== expectedRoot) {
 // repair command. Fail-closed: an unusable work tree cannot sync anything.
 const workTreeHealth = assertWorkTreeHealthy(expectedRoot);
 if (!workTreeHealth.ok) {
-    console.error(`${RED}❌ dev-sync: FATAL — ${workTreeHealth.reason}${RESET}`);
-    if (import.meta.main) {
-        process.exit(1);
-    }
+  console.error(`${RED}❌ dev-sync: FATAL — ${workTreeHealth.reason}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // Config integrity baseline: the local git config as it stands BEFORE any step runs.
@@ -508,12 +514,12 @@ if (!workTreeHealth.ok) {
 // `git config` probes) and never write.
 let configSnapshotAtStart: RepoConfigSnapshot | null = null;
 try {
-    configSnapshotAtStart = snapshotRepoConfig(expectedRoot);
+  configSnapshotAtStart = snapshotRepoConfig(expectedRoot);
 } catch (err) {
-    console.error(`${RED}❌ dev-sync: FATAL — repository config could not be read at run start: ${String(err)}${RESET}`);
-    if (import.meta.main) {
-        process.exit(1);
-    }
+  console.error(`${RED}❌ dev-sync: FATAL — repository config could not be read at run start: ${String(err)}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Argument parsing ──────────────────────────────────────────────────────────
@@ -522,14 +528,14 @@ try {
 // that file (see skills/sync/SKILL.md); when absent, the PR-creation fallback
 // chain below still applies.
 const rawArgs = process.argv.slice(2);
-let bodyFilePath = '';
-let specExempt = '';
+let bodyFilePath = "";
+let specExempt = "";
 // Scoped staging (design: docs/designs/2026-09-12-dev-sync-scoped-staging-design.md;
 // T-20261001-015 soak exit). DEFAULT is the promoted exclude-behavior — files that
 // are neither task-staged nor pipeline-generated are left OUT of the commit. Opt OUT
 // (restore the ADR-0055 WARN soak that sweeps them in) with SYNC_SCOPED_STAGING=0
 // or --warn-staging; SYNC_SCOPED_STAGING=1 / --scoped-staging remain accepted no-ops.
-let scopedStaging = process.env.SYNC_SCOPED_STAGING !== '0';
+let scopedStaging = process.env.SYNC_SCOPED_STAGING !== "0";
 // Main-integration hardening (ADR-0081 / T-20260918-002):
 //   --require-current-main — escalate the pre-flight main-drift warning to an
 //   abort (default: warn only).
@@ -544,36 +550,37 @@ let concludeMerge = false;
 const msgArgs: string[] = [];
 for (let i = 0; i < rawArgs.length; i++) {
   const arg = rawArgs[i];
-  if (arg === '--body-file') {
-    bodyFilePath = rawArgs[++i] ?? '';
-  } else if (arg.startsWith('--body-file=')) {
-    bodyFilePath = arg.slice('--body-file='.length);
-  } else if (arg.startsWith('--spec-exempt=')) {
-    specExempt = arg.slice('--spec-exempt='.length);
-  } else if (arg === '--scoped-staging') {
+  if (arg === "--body-file") {
+    bodyFilePath = rawArgs[++i] ?? "";
+  } else if (arg.startsWith("--body-file=")) {
+    bodyFilePath = arg.slice("--body-file=".length);
+  } else if (arg.startsWith("--spec-exempt=")) {
+    specExempt = arg.slice("--spec-exempt=".length);
+  } else if (arg === "--scoped-staging") {
     scopedStaging = true;
-  } else if (arg === '--warn-staging') {
+  } else if (arg === "--warn-staging") {
     // T-20261001-015: explicit opt-out back to the ADR-0055 WARN soak.
     scopedStaging = false;
-  } else if (arg === '--require-current-main') {
+  } else if (arg === "--require-current-main") {
     requireCurrentMain = true;
-  } else if (arg === '--conclude-merge') {
+  } else if (arg === "--conclude-merge") {
     concludeMerge = true;
   } else {
     msgArgs.push(arg);
   }
 }
-let msg = (msgArgs.join(' ') || "chore: update")
-  // Collapse newlines/control chars — safe for git -m and gh --title arguments
-  .replace(/[\r\n\t]+/g, ' ')
-  .replace(/\s+/g, ' ')
-  .trim() || "chore: update";
+let msg =
+  (msgArgs.join(" ") || "chore: update")
+    // Collapse newlines/control chars — safe for git -m and gh --title arguments
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim() || "chore: update";
 
 // T-20261024-001: a flag leaked into the message position (swapped argument
 // order, e.g. `dev-sync "--body-file <path>" <message>`) silently becomes the
 // commit message AND skips body-file handling — the co-design PR #47 failure.
 // Hard-fail with the copy-safe invocation instead of shipping a mangled PR.
-if (/^--/.test(msg) || msgArgs.some((a) => a.startsWith('--body-file'))) {
+if (/^--/.test(msg) || msgArgs.some((a) => a.startsWith("--body-file"))) {
   console.error(`\x1b[31m✗ dev-sync: the message position contains a flag: "${msg.slice(0, 60)}"\x1b[0m`);
   console.error(`  A --body-file token reached the message slot — the argument order is swapped.`);
   console.error(`  Copy-safe invocation:`);
@@ -591,7 +598,9 @@ if (/^--/.test(msg) || msgArgs.some((a) => a.startsWith('--body-file'))) {
 if (import.meta.main && !concludeMerge) {
   const noopRes = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
   if (noopRes.exitCode === 0 && noopRes.stdout.toString().length === 0) {
-    console.log(`${CYAN}ℹ️  dev-sync: nothing to sync — no staged changes and no working-tree changes. Pipeline not run.${RESET}`);
+    console.log(
+      `${CYAN}ℹ️  dev-sync: nothing to sync — no staged changes and no working-tree changes. Pipeline not run.${RESET}`,
+    );
     process.exit(0);
   }
 }
@@ -613,7 +622,7 @@ if (import.meta.main) {
   try {
     const earlyStagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
     if (earlyStagedRes.exitCode === 0) {
-      const stagedPaths = earlyStagedRes.stdout.toString().split('\0').filter(Boolean);
+      const stagedPaths = earlyStagedRes.stdout.toString().split("\0").filter(Boolean);
       msg = composeCommitMessage(msg, stagedPaths);
     }
   } catch (e) {
@@ -627,11 +636,11 @@ if (import.meta.main) {
 // silently swallowed by the PR-creation fallback below). Shared detector also catches
 // Japanese/Chinese, not just Korean — see scripts/lib/language-guard.ts.
 if (hasNonEnglish(msg)) {
-    console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
-    console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
-    }
+  console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
+  console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // ── Pre-flight main-drift detection (ADR-0081 / T-20260918-002) ──────────────
@@ -644,34 +653,45 @@ if (hasNonEnglish(msg)) {
 // Shared-file taxonomy + filtering live in scripts/helpers/merge-state.ts
 // (import-safe, unit-tested); this block is the git I/O + reporting only.
 if (import.meta.main) {
-    const fetchRes = await $`git fetch origin main`.quiet().nothrow();
-    if (fetchRes.exitCode !== 0) {
-        console.log(`${CYAN}ℹ️  main-drift check skipped (could not fetch origin/main)${RESET}`);
-    } else {
-        const baseRes = await $`git merge-base HEAD origin/main`.quiet().nothrow();
-        if (baseRes.exitCode === 0) {
-            const mergeBase = baseRes.stdout.toString().trim();
-            const countRes = await $`git rev-list --count ${mergeBase}..origin/main`.quiet().nothrow();
-            const ahead = parseInt(countRes.stdout.toString().trim() || '0', 10);
-            if (ahead > 0) {
-                const changedRes = await $`git diff --name-only ${mergeBase} origin/main`.quiet().nothrow();
-                const changedOnMain = changedRes.stdout.toString().split('\n').map((l) => l.trim()).filter(Boolean);
-                const shared = sharedPipelineFilesChanged(changedOnMain);
-                const sharedNote = shared.length > 0
-                    ? `Shared pipeline files changed on main: ${shared.join(', ')}`
-                    : 'No shared pipeline files changed on main (conflict risk lower)';
-                console.log(`${YELLOW}⚠️  main-drift: origin/main is ${ahead} commit(s) ahead of this branch's merge-base.${RESET}`);
-                console.log(`${YELLOW}   ${sharedNote}${RESET}`);
-                console.log(`${YELLOW}   Merging main into this branch NOW (while conflicts are small) is cheaper than at PR merge time. See CONSTITUTION §3.3 and ADR-0081.${RESET}`);
-                if (requireCurrentMain) {
-                    console.log(`${RED}❌ --require-current-main: integrate origin/main (git merge origin/main) and re-run /sync.${RESET}`);
-                    if (import.meta.main) {
-                      process.exit(1);
-                    }
-                }
-            }
+  const fetchRes = await $`git fetch origin main`.quiet().nothrow();
+  if (fetchRes.exitCode !== 0) {
+    console.log(`${CYAN}ℹ️  main-drift check skipped (could not fetch origin/main)${RESET}`);
+  } else {
+    const baseRes = await $`git merge-base HEAD origin/main`.quiet().nothrow();
+    if (baseRes.exitCode === 0) {
+      const mergeBase = baseRes.stdout.toString().trim();
+      const countRes = await $`git rev-list --count ${mergeBase}..origin/main`.quiet().nothrow();
+      const ahead = parseInt(countRes.stdout.toString().trim() || "0", 10);
+      if (ahead > 0) {
+        const changedRes = await $`git diff --name-only ${mergeBase} origin/main`.quiet().nothrow();
+        const changedOnMain = changedRes.stdout
+          .toString()
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
+        const shared = sharedPipelineFilesChanged(changedOnMain);
+        const sharedNote =
+          shared.length > 0
+            ? `Shared pipeline files changed on main: ${shared.join(", ")}`
+            : "No shared pipeline files changed on main (conflict risk lower)";
+        console.log(
+          `${YELLOW}⚠️  main-drift: origin/main is ${ahead} commit(s) ahead of this branch's merge-base.${RESET}`,
+        );
+        console.log(`${YELLOW}   ${sharedNote}${RESET}`);
+        console.log(
+          `${YELLOW}   Merging main into this branch NOW (while conflicts are small) is cheaper than at PR merge time. See CONSTITUTION §3.3 and ADR-0081.${RESET}`,
+        );
+        if (requireCurrentMain) {
+          console.log(
+            `${RED}❌ --require-current-main: integrate origin/main (git merge origin/main) and re-run /sync.${RESET}`,
+          );
+          if (import.meta.main) {
+            process.exit(1);
+          }
         }
+      }
     }
+  }
 }
 
 // ── Pre-flight working-tree snapshot (S0) ─────────────────────────────────────
@@ -683,14 +703,14 @@ if (import.meta.main) {
 let s0Paths = new Set<string>();
 let snapshotFailed = false;
 try {
-    const s0Res = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
-    if (s0Res.exitCode !== 0) throw new Error(s0Res.stderr.toString());
-    s0Paths = parseStatusPorcelain(s0Res.stdout.toString());
+  const s0Res = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+  if (s0Res.exitCode !== 0) throw new Error(s0Res.stderr.toString());
+  s0Paths = parseStatusPorcelain(s0Res.stdout.toString());
 } catch {
-    // WARN mode fails open (empty S0 ⇒ every S1 change classifies as pipeline
-    // output — today's behavior). Scoped mode must not misclassify agent files
-    // as generated, so it aborts at step 6 via snapshotFailed.
-    snapshotFailed = true;
+  // WARN mode fails open (empty S0 ⇒ every S1 change classifies as pipeline
+  // output — today's behavior). Scoped mode must not misclassify agent files
+  // as generated, so it aborts at step 6 via snapshotFailed.
+  snapshotFailed = true;
 }
 
 // U-20261107-003 (v1.43.0): per-path content capture for the dirty set —
@@ -701,7 +721,11 @@ try {
 // files (staged deletions) record undefined.
 const s0Content = new Map<string, string>();
 for (const p of s0Paths) {
-    try { s0Content.set(p, fs.readFileSync(p, 'utf-8')); } catch { /* absent at S0 */ }
+  try {
+    s0Content.set(p, fs.readFileSync(p, "utf-8"));
+  } catch {
+    /* absent at S0 */
+  }
 }
 
 // Pre-flight Link Validation Gate — ensures markdown documentation links resolve.
@@ -725,58 +749,61 @@ try {
 const dateObj = new Date();
 const date = [
   dateObj.getFullYear(),
-  String(dateObj.getMonth() + 1).padStart(2, '0'),
-  String(dateObj.getDate()).padStart(2, '0'),
-].join('-'); // yyyy-MM-dd (local)
+  String(dateObj.getMonth() + 1).padStart(2, "0"),
+  String(dateObj.getDate()).padStart(2, "0"),
+].join("-"); // yyyy-MM-dd (local)
 
-if (!fs.existsSync('memory')) fs.mkdirSync('memory');
+if (!fs.existsSync("memory")) fs.mkdirSync("memory");
 
 let gitStatus = "";
 try {
-    const { stdout } = await $`git status --short`.quiet().nothrow();
-    gitStatus = stdout.toString().trim();
+  const { stdout } = await $`git status --short`.quiet().nothrow();
+  gitStatus = stdout.toString().trim();
 } catch (err) {
   console.error(`[dev-sync] Error: ${err}`);
 }
 
 let fileLines = "- N/A";
 if (gitStatus) {
-    fileLines = gitStatus.split('\n').filter(Boolean).map(line => {
-        const f = line.replace(/^.{2}\s+/, '').trim();
-        return `- \`${f}\` — modified`;
-    }).join('\n');
+  fileLines = gitStatus
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const f = line.replace(/^.{2}\s+/, "").trim();
+      return `- \`${f}\` — modified`;
+    })
+    .join("\n");
 }
 
 let separator = "";
-const memoryFile = path.join('memory', `${date}.md`);
-if (fs.existsSync(memoryFile)) { separator = "\n---\n\n"; }
+const memoryFile = path.join("memory", `${date}.md`);
+if (fs.existsSync(memoryFile)) {
+  separator = "\n---\n\n";
+}
 
 // Idempotency check: skip append if a Session Summary with the same
 // commit message already exists for today (prevents duplicates when
 // /sync is re-run on the same day).
 let alreadyLogged = false;
 if (fs.existsSync(memoryFile)) {
-    const existing = fs.readFileSync(memoryFile, 'utf-8');
-    // Match a Session Summary header followed by the same message
-    const duplicatePattern = new RegExp(
-        `^## Session Summary\\s*\\n${msg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
-        'm'
-    );
-    alreadyLogged = duplicatePattern.test(existing);
+  const existing = fs.readFileSync(memoryFile, "utf-8");
+  // Match a Session Summary header followed by the same message
+  const duplicatePattern = new RegExp(`^## Session Summary\\s*\\n${msg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "m");
+  alreadyLogged = duplicatePattern.test(existing);
 }
 
 if (alreadyLogged) {
-    console.log(`${YELLOW}⚙ Session summary already logged for today — skipping append (idempotent).${RESET}`);
+  console.log(`${YELLOW}⚙ Session summary already logged for today — skipping append (idempotent).${RESET}`);
 } else {
-    // Session-evidence section (skill review loop): only append the skeleton
-    // when the log doesn't already carry a `## Skills Used` section — the
-    // agent is expected to fill it while the session is still open, BEFORE
-    // /sync runs (skills/sync/SKILL.md).
-    const skillsUsedSection = /^## Skills Used\s*$/m.test(
-        fs.existsSync(memoryFile) ? fs.readFileSync(memoryFile, 'utf-8') : ''
-    )
-        ? ''
-        : `
+  // Session-evidence section (skill review loop): only append the skeleton
+  // when the log doesn't already carry a `## Skills Used` section — the
+  // agent is expected to fill it while the session is still open, BEFORE
+  // /sync runs (skills/sync/SKILL.md).
+  const skillsUsedSection = /^## Skills Used\s*$/m.test(
+    fs.existsSync(memoryFile) ? fs.readFileSync(memoryFile, "utf-8") : "",
+  )
+    ? ""
+    : `
 ## Skills Used
 <!-- Optional session evidence for the skill review loop
      (docs/designs/2026-09-06-skill-session-review-design.md). Edit this entry
@@ -791,7 +818,7 @@ Remove this comment when filled. Unfilled sections are skipped by
 skill-session-review.ts (WARN only on malformed entries).
 -->
 `;
-    const template = `${separator}## Session Summary
+  const template = `${separator}## Session Summary
 ${msg}
 
 ## Changes
@@ -804,61 +831,61 @@ ${fileLines}
 - None
 ${skillsUsedSection}`;
 
-    fs.appendFileSync(memoryFile, template, 'utf8');
+  fs.appendFileSync(memoryFile, template, "utf8");
 }
 
 // 2. Update MEMORY.md index
 try {
-    await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
+  await $`bun run scripts/sync-md.ts ${date} "${msg}"`;
 } catch (e) {
-    console.log(`${RED}❌ sync-md.ts failed: ${e}${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
-    }
+  console.log(`${RED}❌ sync-md.ts failed: ${e}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 2.5 Generate scripts/README.md
-const genReadmeTs = path.join('scripts', 'generate-scripts-readme.ts');
+const genReadmeTs = path.join("scripts", "generate-scripts-readme.ts");
 if (fs.existsSync(genReadmeTs)) {
-    try {
-        await $`bun ${genReadmeTs}`;
-    } catch (e) {
-        console.log(`${RED}❌ generate-scripts-readme.ts failed: ${e}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  try {
+    await $`bun ${genReadmeTs}`;
+  } catch (e) {
+    console.log(`${RED}❌ generate-scripts-readme.ts failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
+  }
 }
 
 // 2.6 Generate templates/common/scripts/SCRIPTS.md registry span (T-20260924-001)
-const genMirrorTs = path.join('scripts', 'generate-scripts-mirror.ts');
+const genMirrorTs = path.join("scripts", "generate-scripts-mirror.ts");
 if (fs.existsSync(genMirrorTs)) {
-    try {
-        await $`bun ${genMirrorTs}`;
-    } catch (e) {
-        console.log(`${RED}❌ generate-scripts-mirror.ts failed: ${e}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  try {
+    await $`bun ${genMirrorTs}`;
+  } catch (e) {
+    console.log(`${RED}❌ generate-scripts-mirror.ts failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
+  }
 }
 
 // 3. Block if [Unreleased] section has no bullet items
-if (fs.existsSync('CHANGELOG.md')) {
-    const clCheck = fs.readFileSync('CHANGELOG.md', 'utf-8');
-    const match = /## \[Unreleased\]([\s\S]*?)(?=\n## |$)/.exec(clCheck);
-    if (match) {
-        const unreleasedSection = match[1];
-        if (!/^\s*-\s+/m.test(unreleasedSection)) {
-            console.log("");
-            console.log(`${RED}❌ CHANGELOG.md [Unreleased] section has no entries.${RESET}`);
-            console.log(`${YELLOW}   Run: /changelog 'type: description' to add an entry before syncing.${RESET}`);
-            console.log("");
-            if (import.meta.main) {
-              process.exit(1);
-            }
-        }
+if (fs.existsSync("CHANGELOG.md")) {
+  const clCheck = fs.readFileSync("CHANGELOG.md", "utf-8");
+  const match = /## \[Unreleased\]([\s\S]*?)(?=\n## |$)/.exec(clCheck);
+  if (match) {
+    const unreleasedSection = match[1];
+    if (!/^\s*-\s+/m.test(unreleasedSection)) {
+      console.log("");
+      console.log(`${RED}❌ CHANGELOG.md [Unreleased] section has no entries.${RESET}`);
+      console.log(`${YELLOW}   Run: /changelog 'type: description' to add an entry before syncing.${RESET}`);
+      console.log("");
+      if (import.meta.main) {
+        process.exit(1);
+      }
     }
+  }
 }
 
 // 3b. CHANGELOG structural-duplicate gate (v1.35.0, U-20261028-013 — spec
@@ -873,72 +900,74 @@ if (fs.existsSync('CHANGELOG.md')) {
 //     file is re-staged and the detector re-run; zero findings after → the gate
 //     proceeds. Findings remaining after normalization are a hard FAIL with the
 //     raw findings. Zero findings never touch the file (no write, no diff).
-if (fs.existsSync('CHANGELOG.md')) {
-    const clDup = fs.readFileSync('CHANGELOG.md', 'utf-8');
-    const dupFindings = changelogGateFindings(clDup);
-    if (dupFindings.length > 0) {
-        console.log("");
-        for (const f of dupFindings) {
-            console.log(`${YELLOW}⚠️  CHANGELOG.md: ${f.message}${RESET}`);
-        }
-        const normalizer = path.join('scripts', 'changelog-normalize.ts');
-        if (fs.existsSync(normalizer)) {
-            console.log(`${YELLOW}   Normalizing legacy structure (scripts/changelog-normalize.ts, write mode)...${RESET}`);
-            let changelogHealed = false;
-            try {
-                await $`bun ${normalizer} CHANGELOG.md`;
-                await $`git add CHANGELOG.md`;
-                const clHealed = fs.readFileSync('CHANGELOG.md', 'utf-8');
-                const reFindings = changelogGateFindings(clHealed);
-                if (reFindings.length === 0) {
-                    changelogHealed = true;
-                    console.log(`${GREEN}✅ CHANGELOG.md normalized (${dupFindings.length} finding(s) repaired) and re-staged — structural-duplicate gate now clean.${RESET}`);
-                }
-            } catch {
-                // normalization failed or exited nonzero — fall through to the FAIL below
-            }
-            if (!changelogHealed) {
-                console.log("");
-                console.log(`${RED}❌ CHANGELOG.md structural defects could not be normalized — gate FAIL.${RESET}`);
-                console.log(`${YELLOW}   Repair the structure by hand (see findings above), or inspect the repair first:`);
-                console.log(`${YELLOW}   bun scripts/changelog-normalize.ts --dry-run CHANGELOG.md${RESET}`);
-                console.log("");
-                if (import.meta.main) {
-                  process.exit(1);
-                }
-            }
-        } else {
-            // Normalizer not present (copy divergence) — v1.35.0 fail-only behavior.
-            console.log(`${YELLOW}   Merge the duplicated structure above, then re-run /sync.${RESET}`);
-            console.log("");
-            if (import.meta.main) {
-              process.exit(1);
-            }
-        }
+if (fs.existsSync("CHANGELOG.md")) {
+  const clDup = fs.readFileSync("CHANGELOG.md", "utf-8");
+  const dupFindings = changelogGateFindings(clDup);
+  if (dupFindings.length > 0) {
+    console.log("");
+    for (const f of dupFindings) {
+      console.log(`${YELLOW}⚠️  CHANGELOG.md: ${f.message}${RESET}`);
     }
+    const normalizer = path.join("scripts", "changelog-normalize.ts");
+    if (fs.existsSync(normalizer)) {
+      console.log(`${YELLOW}   Normalizing legacy structure (scripts/changelog-normalize.ts, write mode)...${RESET}`);
+      let changelogHealed = false;
+      try {
+        await $`bun ${normalizer} CHANGELOG.md`;
+        await $`git add CHANGELOG.md`;
+        const clHealed = fs.readFileSync("CHANGELOG.md", "utf-8");
+        const reFindings = changelogGateFindings(clHealed);
+        if (reFindings.length === 0) {
+          changelogHealed = true;
+          console.log(
+            `${GREEN}✅ CHANGELOG.md normalized (${dupFindings.length} finding(s) repaired) and re-staged — structural-duplicate gate now clean.${RESET}`,
+          );
+        }
+      } catch {
+        // normalization failed or exited nonzero — fall through to the FAIL below
+      }
+      if (!changelogHealed) {
+        console.log("");
+        console.log(`${RED}❌ CHANGELOG.md structural defects could not be normalized — gate FAIL.${RESET}`);
+        console.log(`${YELLOW}   Repair the structure by hand (see findings above), or inspect the repair first:`);
+        console.log(`${YELLOW}   bun scripts/changelog-normalize.ts --dry-run CHANGELOG.md${RESET}`);
+        console.log("");
+        if (import.meta.main) {
+          process.exit(1);
+        }
+      }
+    } else {
+      // Normalizer not present (copy divergence) — v1.35.0 fail-only behavior.
+      console.log(`${YELLOW}   Merge the duplicated structure above, then re-run /sync.${RESET}`);
+      console.log("");
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    }
+  }
 }
 
 // 3.6 Warn about deprecated scripts
-if (fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
-    const content = fs.readFileSync(path.join('scripts', 'SCRIPTS.md'), 'utf-8');
-    const lines = content.split('\n');
-    let hasDeprecated = false;
-    for (const line of lines) {
-        if (/^\|.*\|.*deprecated/.test(line)) {
-            if (!hasDeprecated) {
-                console.log(`${YELLOW}⚠️  Deprecated scripts detected in SCRIPTS.md:${RESET}`);
-                hasDeprecated = true;
-            }
-            const parts = line.split('|');
-            if (parts.length >= 3) {
-                console.log(`   - ${parts[1].trim()}`);
-            }
-        }
+if (fs.existsSync(path.join("scripts", "SCRIPTS.md"))) {
+  const content = fs.readFileSync(path.join("scripts", "SCRIPTS.md"), "utf-8");
+  const lines = content.split("\n");
+  let hasDeprecated = false;
+  for (const line of lines) {
+    if (/^\|.*\|.*deprecated/.test(line)) {
+      if (!hasDeprecated) {
+        console.log(`${YELLOW}⚠️  Deprecated scripts detected in SCRIPTS.md:${RESET}`);
+        hasDeprecated = true;
+      }
+      const parts = line.split("|");
+      if (parts.length >= 3) {
+        console.log(`   - ${parts[1].trim()}`);
+      }
     }
-    if (hasDeprecated) {
-        console.log("   Consider removing or updating these scripts.");
-        console.log("");
-    }
+  }
+  if (hasDeprecated) {
+    console.log("   Consider removing or updating these scripts.");
+    console.log("");
+  }
 }
 
 // 3.7 L0/L1 script drift check (BLOCKING — T-20260912-009): the verify-scripts exit
@@ -947,27 +976,27 @@ if (fs.existsSync(path.join('scripts', 'SCRIPTS.md'))) {
 // the drift table shows; same idiom as step 3.9 below.
 const hasBun = (await $`bun --version`.quiet().nothrow()).exitCode === 0;
 if (hasBun) {
-    const verifyScripts = path.join('scripts', 'verify-scripts.ts');
-    if (fs.existsSync(verifyScripts)) {
-        const driftRes = await $`bun ${verifyScripts} --check-drift`.nothrow();
-        if (driftRes.exitCode !== 0) {
-            console.error(`${RED}✗ Step 3.7: L0/L1 script drift detected (exit ${driftRes.exitCode})${RESET}`);
-            console.error('  Fix: bun scripts/propagate-to-templates.ts --apply refreshes stale mirrors');
-            console.error('  (then --check-drift to confirm only tolerated gemini-settings drift remains).');
-            if (import.meta.main) process.exit(1);
-        } else {
-            console.log(`${GREEN}✓ L0/L1 script drift check passed${RESET}`);
-        }
+  const verifyScripts = path.join("scripts", "verify-scripts.ts");
+  if (fs.existsSync(verifyScripts)) {
+    const driftRes = await $`bun ${verifyScripts} --check-drift`.nothrow();
+    if (driftRes.exitCode !== 0) {
+      console.error(`${RED}✗ Step 3.7: L0/L1 script drift detected (exit ${driftRes.exitCode})${RESET}`);
+      console.error("  Fix: bun scripts/propagate-to-templates.ts --apply refreshes stale mirrors");
+      console.error("  (then --check-drift to confirm only tolerated gemini-settings drift remains).");
+      if (import.meta.main) process.exit(1);
+    } else {
+      console.log(`${GREEN}✓ L0/L1 script drift check passed${RESET}`);
     }
+  }
 }
 
 // 3.8 Archive old memory files
-const archiveMemoryTs = path.join('scripts', 'archive-memory.ts');
+const archiveMemoryTs = path.join("scripts", "archive-memory.ts");
 if (fs.existsSync(archiveMemoryTs)) {
-    const archiveRes = await $`bun ${archiveMemoryTs}`.nothrow();
-    if (archiveRes.exitCode !== 0) {
-        console.warn(`⚠️  Memory archival had issues (non-blocking, exit ${archiveRes.exitCode})`);
-    }
+  const archiveRes = await $`bun ${archiveMemoryTs}`.nothrow();
+  if (archiveRes.exitCode !== 0) {
+    console.warn(`⚠️  Memory archival had issues (non-blocking, exit ${archiveRes.exitCode})`);
+  }
 }
 
 // 3.85 VERSION_MANIFEST pre-convergence (T-20260926-021)
@@ -978,14 +1007,16 @@ if (fs.existsSync(archiveMemoryTs)) {
 // regenerate-before-sync dance). Pre-regenerate here so 3.9's audit compares
 // against a fresh manifest. Step 4.7 stays as the final convergence pass —
 // both runs scan the same root-level inputs, so the second is a no-op.
-const preGenManifestTs = path.join('scripts', 'generate-version-manifest.ts');
+const preGenManifestTs = path.join("scripts", "generate-version-manifest.ts");
 if (fs.existsSync(preGenManifestTs)) {
-    const preGenRes = await $`bun ${preGenManifestTs}`.quiet().nothrow();
-    if (preGenRes.exitCode !== 0) {
-        console.warn(`⚠️  Step 3.85: VERSION_MANIFEST pre-regeneration failed (exit ${preGenRes.exitCode}) — Step 3.9 will re-check`);
-    } else {
-        console.log('📋 Step 3.85: VERSION_MANIFEST pre-converged for the 3.9 audit');
-    }
+  const preGenRes = await $`bun ${preGenManifestTs}`.quiet().nothrow();
+  if (preGenRes.exitCode !== 0) {
+    console.warn(
+      `⚠️  Step 3.85: VERSION_MANIFEST pre-regeneration failed (exit ${preGenRes.exitCode}) — Step 3.9 will re-check`,
+    );
+  } else {
+    console.log("📋 Step 3.85: VERSION_MANIFEST pre-converged for the 3.9 audit");
+  }
 }
 
 // 3.86 Declared generator pre-convergence (v1.37.0, U-20261029-004 — spec
@@ -1000,12 +1031,18 @@ if (fs.existsSync(preGenManifestTs)) {
 //     this step regenerates; it does not weaken any gate.
 const generatorRun = runDeclaredGenerators({ projectRoot: process.cwd() });
 if (generatorRun.ran > 0) {
-    console.log(`🛠️  Step 3.86: ${generatorRun.ran} declared generator(s) processed, ${generatorRun.staged.length} output(s) staged`);
+  console.log(
+    `🛠️  Step 3.86: ${generatorRun.ran} declared generator(s) processed, ${generatorRun.staged.length} output(s) staged`,
+  );
 }
 if (!generatorRun.ok) {
-    console.error(`${RED}✗ Step 3.86: declared generator(s) FAILED — /sync aborted (see the [generator:<name>] rows above)${RESET}`);
-    console.error('  Fix: run the failing generator by hand to inspect the full (unredacted) failure, then re-run /sync.');
-    if (import.meta.main) process.exit(1);
+  console.error(
+    `${RED}✗ Step 3.86: declared generator(s) FAILED — /sync aborted (see the [generator:<name>] rows above)${RESET}`,
+  );
+  console.error(
+    "  Fix: run the failing generator by hand to inspect the full (unredacted) failure, then re-run /sync.",
+  );
+  if (import.meta.main) process.exit(1);
 }
 
 // 3.87 Ticket-store memory-drift check (BLOCKING — v1.39.0, T-20261104-004
@@ -1023,21 +1060,27 @@ if (!generatorRun.ok) {
 //     references that do not match the id shape are out of scope. Absent
 //     memory/ (fresh scaffold) is a documented no-op; absent stores make every
 //     cited id unresolved, which is exactly the silent-loss signal.
-if (fs.existsSync(path.join('memory'))) {
-    const drift = await driftCheck({
-        memoryDir: path.join('memory'),
-        serviceDir: path.join('tickets'),
-        governanceDir: path.join('tickets', 'governance'),
-    });
-    if (drift.unresolved.length > 0) {
-        console.error(`${RED}✗ Step 3.87: ticket-store memory-drift — ${drift.unresolved.length} cited ticket id(s) resolve in NO store or archive (of ${drift.cited} cited)${RESET}`);
-        for (const f of drift.unresolved) {
-            console.error(`   ${f.id} cited at ${f.file}:${f.line}`);
-        }
-        console.error('  Fix: restore the vanished ticket file (check tickets/governance/archive, git history of tickets/), or correct the citation in the named memory file if it is a typo.');
-        if (import.meta.main) process.exit(1);
+if (fs.existsSync(path.join("memory"))) {
+  const drift = await driftCheck({
+    memoryDir: path.join("memory"),
+    serviceDir: path.join("tickets"),
+    governanceDir: path.join("tickets", "governance"),
+  });
+  if (drift.unresolved.length > 0) {
+    console.error(
+      `${RED}✗ Step 3.87: ticket-store memory-drift — ${drift.unresolved.length} cited ticket id(s) resolve in NO store or archive (of ${drift.cited} cited)${RESET}`,
+    );
+    for (const f of drift.unresolved) {
+      console.error(`   ${f.id} cited at ${f.file}:${f.line}`);
     }
-    console.log(`${GREEN}✓ Step 3.87: ticket-store memory-drift check passed (${drift.cited} distinct cited id(s), all resolve)${RESET}`);
+    console.error(
+      "  Fix: restore the vanished ticket file (check tickets/governance/archive, git history of tickets/), or correct the citation in the named memory file if it is a typo.",
+    );
+    if (import.meta.main) process.exit(1);
+  }
+  console.log(
+    `${GREEN}✓ Step 3.87: ticket-store memory-drift check passed (${drift.cited} distinct cited id(s), all resolve)${RESET}`,
+  );
 }
 
 // 3.88 Memory session-block union-verify (BLOCKING for post-activation merges
@@ -1064,171 +1107,215 @@ if (fs.existsSync(path.join('memory'))) {
 //     Drops via non-merge commits are not detectable (no parents to compare;
 //     design §5.3 documented limit). Read-only, lock-free, in the cheap-gates
 //     band; absent memory/ is a documented no-op (fresh scaffolds).
-const GATE_3_88_ACTIVATED_AT = '2026-11-05T07:00:00+09:00'; // gate landing instant (PR #1856 commit 2)
-if (fs.existsSync(path.join('memory'))) {
-    const merges = unionScan({ sinceDays: 7, maxCommits: 20, activationIso: GATE_3_88_ACTIVATED_AT });
-    const blocking = merges.filter((r) => r.tier === 'blocking');
-    const historical = merges.filter((r) => r.tier === 'historical');
-    const repaired = merges.filter((r) => r.tier === 'repaired-at-head');
-    if (blocking.length > 0) {
-        console.error(`${RED}✗ Step 3.88: memory union-verify — ${blocking.length} post-activation merge finding group(s)${RESET}`);
-        for (const r of blocking) {
-            console.error(`   ${r.file} @ merge ${r.commit.slice(0, 12)}:`);
-            for (const f of r.findings) console.error(`     [${f.kind}] ${f.detail}`);
-            console.error(`   Fix: compare git show ${r.commit}:${r.file} against git show ${r.commit}^1:${r.file} and git show ${r.commit}^2:${r.file}; restore the named block(s) in the working tree and re-commit (history is immutable — the repair lands forward).`);
-        }
-        if (import.meta.main) process.exit(1);
+const GATE_3_88_ACTIVATED_AT = "2026-11-05T07:00:00+09:00"; // gate landing instant (PR #1856 commit 2)
+if (fs.existsSync(path.join("memory"))) {
+  const merges = unionScan({ sinceDays: 7, maxCommits: 20, activationIso: GATE_3_88_ACTIVATED_AT });
+  const blocking = merges.filter((r) => r.tier === "blocking");
+  const historical = merges.filter((r) => r.tier === "historical");
+  const repaired = merges.filter((r) => r.tier === "repaired-at-head");
+  if (blocking.length > 0) {
+    console.error(
+      `${RED}✗ Step 3.88: memory union-verify — ${blocking.length} post-activation merge finding group(s)${RESET}`,
+    );
+    for (const r of blocking) {
+      console.error(`   ${r.file} @ merge ${r.commit.slice(0, 12)}:`);
+      for (const f of r.findings) console.error(`     [${f.kind}] ${f.detail}`);
+      console.error(
+        `   Fix: compare git show ${r.commit}:${r.file} against git show ${r.commit}^1:${r.file} and git show ${r.commit}^2:${r.file}; restore the named block(s) in the working tree and re-commit (history is immutable — the repair lands forward).`,
+      );
     }
-    if (historical.length > 0) {
-        console.log(`${YELLOW}⚠️  Step 3.88: ${historical.length} pre-activation merge finding group(s) (WARN — immutable history, ages out with the 7-day window):${RESET}`);
-        for (const r of historical) {
-            for (const f of r.findings) console.log(`   [${f.kind}] ${r.file} @ merge ${r.commit.slice(0, 12)}: ${f.detail}`);
-        }
+    if (import.meta.main) process.exit(1);
+  }
+  if (historical.length > 0) {
+    console.log(
+      `${YELLOW}⚠️  Step 3.88: ${historical.length} pre-activation merge finding group(s) (WARN — immutable history, ages out with the 7-day window):${RESET}`,
+    );
+    for (const r of historical) {
+      for (const f of r.findings) console.log(`   [${f.kind}] ${r.file} @ merge ${r.commit.slice(0, 12)}: ${f.detail}`);
     }
-    if (repaired.length > 0) {
-        console.log(`${GREEN}ℹ️  Step 3.88: ${repaired.length} repaired-at-head merge finding group(s) (INFO — the merge-time drop is restored in the current working tree; ages out with the window):${RESET}`);
-        for (const r of repaired) {
-            for (const f of r.findings) console.log(`   [${f.kind}] ${r.file} @ merge ${r.commit.slice(0, 12)}: ${f.detail}`);
-        }
+  }
+  if (repaired.length > 0) {
+    console.log(
+      `${GREEN}ℹ️  Step 3.88: ${repaired.length} repaired-at-head merge finding group(s) (INFO — the merge-time drop is restored in the current working tree; ages out with the window):${RESET}`,
+    );
+    for (const r of repaired) {
+      for (const f of r.findings) console.log(`   [${f.kind}] ${r.file} @ merge ${r.commit.slice(0, 12)}: ${f.detail}`);
     }
-    const wf = wellFormedScan({ memoryDir: path.join('memory') });
-    if (wf.length > 0) {
-        console.error(`${RED}✗ Step 3.88: memory structural integrity — ${wf.length} malformed memory log(s) at HEAD${RESET}`);
-        for (const r of wf) {
-            console.error(`   ${r.file}:`);
-            for (const f of r.findings) console.error(`     [${f.kind}] ${f.detail}`);
-        }
-        console.error(`  Fix: repair the named file(s) structurally (restore the missing '---' separator(s) / '## Session Summary' block heading), then re-run /sync.`);
-        if (import.meta.main) process.exit(1);
+  }
+  const wf = wellFormedScan({ memoryDir: path.join("memory") });
+  if (wf.length > 0) {
+    console.error(
+      `${RED}✗ Step 3.88: memory structural integrity — ${wf.length} malformed memory log(s) at HEAD${RESET}`,
+    );
+    for (const r of wf) {
+      console.error(`   ${r.file}:`);
+      for (const f of r.findings) console.error(`     [${f.kind}] ${f.detail}`);
     }
-    console.log(`${GREEN}✓ Step 3.88: memory union-verify passed (Arm A: ${merges.length} finding group(s), ${blocking.length} blocking / ${historical.length} historical / ${repaired.length} repaired-at-head; Arm B: worktree clean)${RESET}`);
+    console.error(
+      `  Fix: repair the named file(s) structurally (restore the missing '---' separator(s) / '## Session Summary' block heading), then re-run /sync.`,
+    );
+    if (import.meta.main) process.exit(1);
+  }
+  console.log(
+    `${GREEN}✓ Step 3.88: memory union-verify passed (Arm A: ${merges.length} finding group(s), ${blocking.length} blocking / ${historical.length} historical / ${repaired.length} repaired-at-head; Arm B: worktree clean)${RESET}`,
+  );
 }
 
 // 3.9 Spec registry check (BLOCKING since ADR-0055 Stage 2 — the relevance check
 // Fails when a code diff has no spec activity; stale/missing-spec stay WARN).
 // Output is intentionally visible (no .quiet()); same idiom as step 3.97.
-const specRegPath = path.join('docs', 'specs', 'registry.json');
+const specRegPath = path.join("docs", "specs", "registry.json");
 if (fs.existsSync(specRegPath)) {
-    // Pass the exemption via SYNC_SPEC_EXEMPT (documented env fallback in audit.ts):
-    // interpolating ` --spec-exempt=X` into the Bun $ shell keeps the leading space in
-    // a single argv word, which defeats audit's startsWith('--spec-exempt=') parse.
-    const specEnv = specExempt ? { SYNC_SPEC_EXEMPT: specExempt } : {};
-    const specRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
-        .env({ ...process.env, ...specEnv })
-        .nothrow();
-    if (specRes.exitCode !== 0) {
-        // v1.16.0: auto-E5 — a diff fully explained by the recorded upgrade delivery
-        // (.claude/last-upgrade-delivery.json) IS a sync execution; retry with E5.
-        // Any hand-edited file outside the delivered set keeps the block.
-        let handled = false;
-        const manifestPath = path.join('.claude', 'last-upgrade-delivery.json');
-        if (fs.existsSync(manifestPath)) {
-            try {
-                const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-                const st = await $`git status --porcelain -uall`.quiet().nothrow();
-                const changedFiles = String(st.stdout ?? '').split('\n')
-                    .map(l => l.slice(3).replace(/^.* -> /, '').trim().replace(/^"|"$/g, ''))
-                    .filter(Boolean);
-                if (isDeliveredDiff(changedFiles, manifest.files ?? [])) {
-                    // D3.1 (T-20261027-004, sync-overwrite-policy): a delivery whose
-                    // decision log still carries ERROR-severity CONFLICT dispositions
-                    // cannot be attributed as a clean sync — refuse auto-E5 until the
-                    // conflicts are resolved (deliver via --disposition adopt-template,
-                    // adjudicated port, or manual merge + re-baseline).
-                    const unresolvedErrors = manifestHasUnresolvedErrors(manifest)
-                      ? ((manifest as { decisions: Array<{ path?: string; detail?: string; severity?: string }> }).decisions)
-                          .filter((d) => d.severity === 'ERROR')
-                      : [];
-                    if (unresolvedErrors.length > 0) {
-                        console.log(`${YELLOW}ℹ️  Step 3.9: upgrade delivery carries ${unresolvedErrors.length} unresolved ERROR disposition(s) — auto-E5 REFUSED (D3.1, sync-overwrite-policy).${RESET}`);
-                        for (const d of unresolvedErrors.slice(0, 20)) {
-                            console.log(`${YELLOW}    ${d.path ?? '?'} — ${d.detail ?? 'CONFLICT disposition unresolved'}${RESET}`);
-                        }
-                        console.log(`${YELLOW}    Resolve in the project first (--disposition adopt-template, the §6 adjudicated port, or manual merge + re-run), then re-sync.${RESET}`);
-                    } else {
-                        console.log(`${YELLOW}ℹ️  Step 3.9: diff fully explained by upgrade delivery — auto-applying E5 (sync-only).${RESET}`);
-                        const retryRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
-                            .env({ ...process.env, SYNC_SPEC_EXEMPT: 'E5' })
-                            .nothrow();
-                        if (retryRes.exitCode === 0) {
-                            console.log(`${GREEN}✓ Spec registry check passed (upgrade-delivered diff)${RESET}`);
-                            handled = true;
-                        }
-                    }
-                }
-            } catch (err) {
-                console.log(`${YELLOW}⚠️  Step 3.9: auto-E5 inspection failed (${String(err)}) — treating as unattributed diff.${RESET}`);
+  // Pass the exemption via SYNC_SPEC_EXEMPT (documented env fallback in audit.ts):
+  // interpolating ` --spec-exempt=X` into the Bun $ shell keeps the leading space in
+  // a single argv word, which defeats audit's startsWith('--spec-exempt=') parse.
+  const specEnv = specExempt ? { SYNC_SPEC_EXEMPT: specExempt } : {};
+  const specRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
+    .env({ ...process.env, ...specEnv })
+    .nothrow();
+  if (specRes.exitCode !== 0) {
+    // v1.16.0: auto-E5 — a diff fully explained by the recorded upgrade delivery
+    // (.claude/last-upgrade-delivery.json) IS a sync execution; retry with E5.
+    // Any hand-edited file outside the delivered set keeps the block.
+    let handled = false;
+    const manifestPath = path.join(".claude", "last-upgrade-delivery.json");
+    if (fs.existsSync(manifestPath)) {
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+        const st = await $`git status --porcelain -uall`.quiet().nothrow();
+        const changedFiles = String(st.stdout ?? "")
+          .split("\n")
+          .map((l) =>
+            l
+              .slice(3)
+              .replace(/^.* -> /, "")
+              .trim()
+              .replace(/^"|"$/g, ""),
+          )
+          .filter(Boolean);
+        if (isDeliveredDiff(changedFiles, manifest.files ?? [])) {
+          // D3.1 (T-20261027-004, sync-overwrite-policy): a delivery whose
+          // decision log still carries ERROR-severity CONFLICT dispositions
+          // cannot be attributed as a clean sync — refuse auto-E5 until the
+          // conflicts are resolved (deliver via --disposition adopt-template,
+          // adjudicated port, or manual merge + re-baseline).
+          const unresolvedErrors = manifestHasUnresolvedErrors(manifest)
+            ? (
+                manifest as { decisions: Array<{ path?: string; detail?: string; severity?: string }> }
+              ).decisions.filter((d) => d.severity === "ERROR")
+            : [];
+          if (unresolvedErrors.length > 0) {
+            console.log(
+              `${YELLOW}ℹ️  Step 3.9: upgrade delivery carries ${unresolvedErrors.length} unresolved ERROR disposition(s) — auto-E5 REFUSED (D3.1, sync-overwrite-policy).${RESET}`,
+            );
+            for (const d of unresolvedErrors.slice(0, 20)) {
+              console.log(`${YELLOW}    ${d.path ?? "?"} — ${d.detail ?? "CONFLICT disposition unresolved"}${RESET}`);
             }
-        }
-        if (!handled && fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json')) {
-            // v1.25.0 (T-20261008-005): rule out publish-pending L0→L1 drift before
-            // blocking — one early scoped publish, then retry the gate. Workspace-root
-            // guard mirrors step 4.5's isWorkspaceRoot (declared later, so probed inline).
-            console.log(`${YELLOW}ℹ️  Step 3.9: attempting early L0→L1 publish to rule out publish-pending drift (T-20261008-005)...${RESET}`);
-            const earlyPub = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
-            if (earlyPub.exitCode === 0) {
-                const healRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
-                    .env({ ...process.env, ...specEnv })
-                    .nothrow();
-                if (healRes.exitCode === 0) {
-                    console.log(`${GREEN}✓ Spec registry check passed after early L0→L1 publish — the failure was publish-pending L1 drift${RESET}`);
-                    handled = true;
-                } else {
-                    console.log(`${YELLOW}⚠️  Step 3.9: early publish did not heal the failure — genuine gate failure.${RESET}`);
-                }
-            } else {
-                console.log(`${YELLOW}⚠️  Step 3.9: early L0→L1 publish failed (exit ${earlyPub.exitCode}) — cannot rule out publish-pending drift.${RESET}`);
+            console.log(
+              `${YELLOW}    Resolve in the project first (--disposition adopt-template, the §6 adjudicated port, or manual merge + re-run), then re-sync.${RESET}`,
+            );
+          } else {
+            console.log(
+              `${YELLOW}ℹ️  Step 3.9: diff fully explained by upgrade delivery — auto-applying E5 (sync-only).${RESET}`,
+            );
+            const retryRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
+              .env({ ...process.env, SYNC_SPEC_EXEMPT: "E5" })
+              .nothrow();
+            if (retryRes.exitCode === 0) {
+              console.log(`${GREEN}✓ Spec registry check passed (upgrade-delivered diff)${RESET}`);
+              handled = true;
             }
+          }
         }
-        if (!handled) {
-            console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
-            console.error('  The diff touches code (scripts/templates/agents) with no relevant spec activity.');
-            console.error('  Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the');
-            console.error('  sync with --spec-exempt=E1..E5 (AGENTS.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).');
-            if (import.meta.main) process.exit(1);
-        }
-    } else {
-        console.log(`${GREEN}✓ Spec registry check passed${RESET}`);
+      } catch (err) {
+        console.log(
+          `${YELLOW}⚠️  Step 3.9: auto-E5 inspection failed (${String(err)}) — treating as unattributed diff.${RESET}`,
+        );
+      }
     }
+    if (!handled && fs.existsSync("templates/common") && fs.existsSync("scripts/propagation-map.json")) {
+      // v1.25.0 (T-20261008-005): rule out publish-pending L0→L1 drift before
+      // blocking — one early scoped publish, then retry the gate. Workspace-root
+      // guard mirrors step 4.5's isWorkspaceRoot (declared later, so probed inline).
+      console.log(
+        `${YELLOW}ℹ️  Step 3.9: attempting early L0→L1 publish to rule out publish-pending drift (T-20261008-005)...${RESET}`,
+      );
+      const earlyPub = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
+      if (earlyPub.exitCode === 0) {
+        const healRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
+          .env({ ...process.env, ...specEnv })
+          .nothrow();
+        if (healRes.exitCode === 0) {
+          console.log(
+            `${GREEN}✓ Spec registry check passed after early L0→L1 publish — the failure was publish-pending L1 drift${RESET}`,
+          );
+          handled = true;
+        } else {
+          console.log(`${YELLOW}⚠️  Step 3.9: early publish did not heal the failure — genuine gate failure.${RESET}`);
+        }
+      } else {
+        console.log(
+          `${YELLOW}⚠️  Step 3.9: early L0→L1 publish failed (exit ${earlyPub.exitCode}) — cannot rule out publish-pending drift.${RESET}`,
+        );
+      }
+    }
+    if (!handled) {
+      console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
+      console.error("  The diff touches code (scripts/templates/agents) with no relevant spec activity.");
+      console.error("  Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the");
+      console.error(
+        "  sync with --spec-exempt=E1..E5 (AGENTS.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).",
+      );
+      if (import.meta.main) process.exit(1);
+    }
+  } else {
+    console.log(`${GREEN}✓ Spec registry check passed${RESET}`);
+  }
 } else {
-    // ADR-0074 Universal Design Gate: a missing registry means the gate is INACTIVE —
-    // make that loud instead of a silent skip (previously buried in one plain log line).
-    console.log(`${YELLOW}⚠️  Step 3.9: no docs/specs/registry.json — the Universal Design Gate spec-check is INACTIVE in this repository.${RESET}`);
-    console.log(`${YELLOW}   Activate it: create docs/designs/<spec-id>-design.md, then bun scripts/spec-register.ts --file <design-doc> --source manual${RESET}`);
+  // ADR-0074 Universal Design Gate: a missing registry means the gate is INACTIVE —
+  // make that loud instead of a silent skip (previously buried in one plain log line).
+  console.log(
+    `${YELLOW}⚠️  Step 3.9: no docs/specs/registry.json — the Universal Design Gate spec-check is INACTIVE in this repository.${RESET}`,
+  );
+  console.log(
+    `${YELLOW}   Activate it: create docs/designs/<spec-id>-design.md, then bun scripts/spec-register.ts --file <design-doc> --source manual${RESET}`,
+  );
 }
 
 // 3.95 QA Pre-checks (non-fatal — unique checks from qa-gate.ts)
-console.log('📋 Step 3.95: QA pre-checks...');
+console.log("📋 Step 3.95: QA pre-checks...");
 // Check 1: Project tests
-if (fs.existsSync('package.json')) {
-    try {
-        const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-        if (pkg.scripts?.test) {
-            // Bare `bun test` (no path) recursively scans the entire CWD tree for *.test.ts,
-            // which includes every nested Projects/*/ repo (separate git repos scaffolded
-            // from templates/ — see README.md § Repository Structure). That pulled in
-            // unrelated suites (Playwright visual-regression, MCP integration, etc.) from
-            // other projects, making this non-fatal check take many minutes and print noise
-            // irrelevant to this repo. `bun run test` invokes the actual package.json script
-            // (`bun scripts/test-runner.ts integration`), which is already correctly scoped
-            // to this repo's own tests/ directory.
-            // gitCleanEnvForShell(): this step may run inside a hook context (GIT_DIR
-            // exported) and the upgrade-project engine fixtures commit with plain `git`
-            // — that is the 2026-11-09 rogue-commit incident (10 rogue commits, 3 L1
-            // scripts deleted). Shell the test runner with a sanitized FULL env: Bun
-            // Shell's `.env()` replaces the child env, so a partial unset map would
-            // strip PATH (the v1.44.1 regression that broke 26 unit files at step 4.85).
-            const testResult = await $`bun run test`.env(gitCleanEnvForShell()).nothrow();
-            if (testResult.exitCode !== 0) {
-                console.warn(`⚠️  Project tests failed (non-blocking, exit ${testResult.exitCode})`);
-                if (testResult.stderr) console.warn(String(testResult.stderr).trim());
-            }
-        }
-    } catch { /* ignore parse errors */ }
+if (fs.existsSync("package.json")) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync("package.json", "utf-8"));
+    if (pkg.scripts?.test) {
+      // Bare `bun test` (no path) recursively scans the entire CWD tree for *.test.ts,
+      // which includes every nested Projects/*/ repo (separate git repos scaffolded
+      // from templates/ — see README.md § Repository Structure). That pulled in
+      // unrelated suites (Playwright visual-regression, MCP integration, etc.) from
+      // other projects, making this non-fatal check take many minutes and print noise
+      // irrelevant to this repo. `bun run test` invokes the actual package.json script
+      // (`bun scripts/test-runner.ts integration`), which is already correctly scoped
+      // to this repo's own tests/ directory.
+      // gitCleanEnvForShell(): this step may run inside a hook context (GIT_DIR
+      // exported) and the upgrade-project engine fixtures commit with plain `git`
+      // — that is the 2026-11-09 rogue-commit incident (10 rogue commits, 3 L1
+      // scripts deleted). Shell the test runner with a sanitized FULL env: Bun
+      // Shell's `.env()` replaces the child env, so a partial unset map would
+      // strip PATH (the v1.44.1 regression that broke 26 unit files at step 4.85).
+      const testResult = await $`bun run test`.env(gitCleanEnvForShell()).nothrow();
+      if (testResult.exitCode !== 0) {
+        console.warn(`⚠️  Project tests failed (non-blocking, exit ${testResult.exitCode})`);
+        if (testResult.stderr) console.warn(String(testResult.stderr).trim());
+      }
+    }
+  } catch {
+    /* ignore parse errors */
+  }
 }
 // Check 2: README_ko pair
-if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
-    console.warn('⚠️  README_ko.md missing (non-blocking)');
+if (fs.existsSync("README.md") && !fs.existsSync("README_ko.md")) {
+  console.warn("⚠️  README_ko.md missing (non-blocking)");
 }
 
 // 3.95b Typecheck gate (T-20260910-012; blocking, root context only). Runs
@@ -1237,40 +1324,46 @@ if (fs.existsSync('README.md') && !fs.existsSync('README_ko.md')) {
 // baseline file is a root-context asset; scaffolded projects (no baseline)
 // skip cleanly inside typecheck.ts itself. Inline workspace-root marker check (the
 // shared isL0Context const is declared further below).
-if (fs.existsSync('CONSTITUTION.md') && fs.existsSync('scripts/typecheck.ts')) {
-    console.log('📋 Step 3.95b: Typecheck gate (tsc --noEmit over scripts/)...');
-    const typecheckResult = await $`bun scripts/typecheck.ts`.nothrow();
-    if (typecheckResult.exitCode !== 0) {
-        console.error(`${RED}❌ Typecheck gate failed — fix the type errors (never raise the baseline to absorb new debt).${RESET}`);
-        process.exit(1);
-    }
+if (fs.existsSync("CONSTITUTION.md") && fs.existsSync("scripts/typecheck.ts")) {
+  console.log("📋 Step 3.95b: Typecheck gate (tsc --noEmit over scripts/)...");
+  const typecheckResult = await $`bun scripts/typecheck.ts`.nothrow();
+  if (typecheckResult.exitCode !== 0) {
+    console.error(
+      `${RED}❌ Typecheck gate failed — fix the type errors (never raise the baseline to absorb new debt).${RESET}`,
+    );
+    process.exit(1);
+  }
 }
 
 // 3.96 Skill & decision-chain validators (fail-closed gates, ADR-0055/0061; reledgev
 //      pipeline-coverage review 2026-08-29). Both are L0-scoped — scaffolded projects
 //      skip via existsSync guards. Previously standalone-only (manual invocation),
 //      which let relation/decision drift land unnoticed between syncs.
-if (fs.existsSync('scripts/validate-skills.ts')) {
-    console.log('📋 Step 3.96a: Skill lifecycle & relation validation...');
-    const skillsRes = await $`bun scripts/validate-skills.ts`.nothrow();
-    if (skillsRes.exitCode !== 0) {
-        console.error(`${RED}❌ Step 3.96a: validate-skills.ts FAILED (exit ${skillsRes.exitCode})${RESET}`);
-        console.error(`${YELLOW}   Fix: review relation metadata errors (form homogeneity, type vocabulary, target existence) in skills/ and templates/*/skills/, then re-run /sync.${RESET}`);
-        if (import.meta.main) process.exit(1);
-    } else {
-        console.log(`${GREEN}✓ Skill lifecycle & relation validation passed${RESET}`);
-    }
+if (fs.existsSync("scripts/validate-skills.ts")) {
+  console.log("📋 Step 3.96a: Skill lifecycle & relation validation...");
+  const skillsRes = await $`bun scripts/validate-skills.ts`.nothrow();
+  if (skillsRes.exitCode !== 0) {
+    console.error(`${RED}❌ Step 3.96a: validate-skills.ts FAILED (exit ${skillsRes.exitCode})${RESET}`);
+    console.error(
+      `${YELLOW}   Fix: review relation metadata errors (form homogeneity, type vocabulary, target existence) in skills/ and templates/*/skills/, then re-run /sync.${RESET}`,
+    );
+    if (import.meta.main) process.exit(1);
+  } else {
+    console.log(`${GREEN}✓ Skill lifecycle & relation validation passed${RESET}`);
+  }
 }
-if (fs.existsSync('docs/decisions') && fs.existsSync('scripts/validate-decisions.ts')) {
-    console.log('📋 Step 3.96b: Decision record chain validation...');
-    const decRes = await $`bun scripts/validate-decisions.ts`.nothrow();
-    if (decRes.exitCode !== 0) {
-        console.error(`${RED}❌ Step 3.96b: validate-decisions.ts FAILED (exit ${decRes.exitCode})${RESET}`);
-        console.error(`${YELLOW}   Fix: repair DEC frontmatter/chain links (evidence_refs ⊆ ledger, knowledge_refs existence) per ADR-0061, then re-run /sync.${RESET}`);
-        if (import.meta.main) process.exit(1);
-    } else {
-        console.log(`${GREEN}✓ Decision record chain validation passed${RESET}`);
-    }
+if (fs.existsSync("docs/decisions") && fs.existsSync("scripts/validate-decisions.ts")) {
+  console.log("📋 Step 3.96b: Decision record chain validation...");
+  const decRes = await $`bun scripts/validate-decisions.ts`.nothrow();
+  if (decRes.exitCode !== 0) {
+    console.error(`${RED}❌ Step 3.96b: validate-decisions.ts FAILED (exit ${decRes.exitCode})${RESET}`);
+    console.error(
+      `${YELLOW}   Fix: repair DEC frontmatter/chain links (evidence_refs ⊆ ledger, knowledge_refs existence) per ADR-0061, then re-run /sync.${RESET}`,
+    );
+    if (import.meta.main) process.exit(1);
+  } else {
+    console.log(`${GREEN}✓ Decision record chain validation passed${RESET}`);
+  }
 }
 
 // 3.96c Session-evidence skill review (non-fatal — SkillHone-inspired loop;
@@ -1281,72 +1374,80 @@ if (fs.existsSync('docs/decisions') && fs.existsSync('scripts/validate-decisions
 //      human triage — evaluation is automatic, revision is human-approved.
 //      Also emits the full skill-dependency-analysis health report as a
 //      non-fatal warning pass (previously manual/quarterly only).
-if (fs.existsSync('scripts/skill-session-review.ts')) {
-    console.log('📋 Step 3.96c: Session-evidence skill review...');
-    const reviewRes = await $`bun scripts/skill-session-review.ts`.nothrow();
-    if (reviewRes.exitCode !== 0) {
-        console.warn(`⚠️  Step 3.96c: skill-session-review.ts failed (non-blocking, exit ${reviewRes.exitCode})`);
+if (fs.existsSync("scripts/skill-session-review.ts")) {
+  console.log("📋 Step 3.96c: Session-evidence skill review...");
+  const reviewRes = await $`bun scripts/skill-session-review.ts`.nothrow();
+  if (reviewRes.exitCode !== 0) {
+    console.warn(`⚠️  Step 3.96c: skill-session-review.ts failed (non-blocking, exit ${reviewRes.exitCode})`);
+  }
+  // Full health report pass — the analyzer is L0-only, so this sub-step only
+  // runs where the script exists (workspace root / L0 dev machines).
+  if (fs.existsSync("scripts/skill-dependency-analysis.ts")) {
+    const depReport = await $`bun scripts/skill-dependency-analysis.ts --report`.nothrow();
+    if (depReport.exitCode !== 0) {
+      console.warn(
+        `⚠️  Step 3.96c: skill-dependency-analysis reported issues (non-blocking, exit ${depReport.exitCode})`,
+      );
     }
-    // Full health report pass — the analyzer is L0-only, so this sub-step only
-    // runs where the script exists (workspace root / L0 dev machines).
-    if (fs.existsSync('scripts/skill-dependency-analysis.ts')) {
-        const depReport = await $`bun scripts/skill-dependency-analysis.ts --report`.nothrow();
-        if (depReport.exitCode !== 0) {
-            console.warn(`⚠️  Step 3.96c: skill-dependency-analysis reported issues (non-blocking, exit ${depReport.exitCode})`);
-        }
-    }
+  }
 }
 
 // 3.97 ADR governance linkage gate (blocking — Stage 2 of ADR-0059).
 //     The validator is L0-only (no docs/adr corpus exists in generated projects),
 //     so this step is guarded by existsSync — scaffolded projects skip it.
-if (fs.existsSync('scripts/verify-adr-governance.ts')) {
-    console.log('📋 Step 3.97: ADR governance linkage check...');
-    const govRes = await $`bun scripts/verify-adr-governance.ts --strict`.nothrow();
-    if (govRes.exitCode !== 0) {
-        console.error(`${RED}❌ ADR governance linkage check failed.${RESET}`);
-        console.error(`${YELLOW}   One or more post-cutoff Accepted ADRs lack governance-doc references, or marker-drift findings exist.${RESET}`);
-        console.error(`${YELLOW}   For linkage: Add ADR-00NN pointers to CONSTITUTION.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`);
-        console.error(`${YELLOW}   For marker-drift: Review the duplicated section, update it if stale, then re-seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes${RESET}`);
-        if (import.meta.main) {
-            process.exit(1);
-        }
-    } else {
-        console.log(`${GREEN}✓ ADR governance linkage check passed${RESET}`);
+if (fs.existsSync("scripts/verify-adr-governance.ts")) {
+  console.log("📋 Step 3.97: ADR governance linkage check...");
+  const govRes = await $`bun scripts/verify-adr-governance.ts --strict`.nothrow();
+  if (govRes.exitCode !== 0) {
+    console.error(`${RED}❌ ADR governance linkage check failed.${RESET}`);
+    console.error(
+      `${YELLOW}   One or more post-cutoff Accepted ADRs lack governance-doc references, or marker-drift findings exist.${RESET}`,
+    );
+    console.error(
+      `${YELLOW}   For linkage: Add ADR-00NN pointers to CONSTITUTION.md, docs/constitution/, or docs/governance/ per docs/adr/0059 and re-run /sync.${RESET}`,
+    );
+    console.error(
+      `${YELLOW}   For marker-drift: Review the duplicated section, update it if stale, then re-seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
+  } else {
+    console.log(`${GREEN}✓ ADR governance linkage check passed${RESET}`);
+  }
 } else {
-    console.log('📋 Step 3.97: skipped — ADR governance validator is L0-only (not present in scaffolded projects)');
+  console.log("📋 Step 3.97: skipped — ADR governance validator is L0-only (not present in scaffolded projects)");
 }
 
 // 4.5 L0→L1 publish — must run BEFORE audit gate so that CONSTITUTION scrub
 //     is applied to templates/common/ files before the L0-leakage check.
-const isWorkspaceRoot = fs.existsSync('templates/common') && fs.existsSync('scripts/propagation-map.json');
+const isWorkspaceRoot = fs.existsSync("templates/common") && fs.existsSync("scripts/propagation-map.json");
 // L0 context: the workspace-root marker exists — publish failures are fatal here.
-const isL0Context = fs.existsSync('CONSTITUTION.md');
+const isL0Context = fs.existsSync("CONSTITUTION.md");
 if (isWorkspaceRoot) {
-    console.log('\n📦 Publishing L0→L1 (scripts, skills, commands)...');
-    try {
-        const publishRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
-        if (publishRes.exitCode !== 0) {
-            if (isL0Context) {
-                console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
-                if (import.meta.main) {
-                  process.exit(1);
-                }
-            } else {
-                console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
-            }
+  console.log("\n📦 Publishing L0→L1 (scripts, skills, commands)...");
+  try {
+    const publishRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
+    if (publishRes.exitCode !== 0) {
+      if (isL0Context) {
+        console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
         }
-    } catch (e) {
-        if (isL0Context) {
-            console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
-            if (import.meta.main) {
-              process.exit(1);
-            }
-        } else {
-            console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
-        }
+      } else {
+        console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+      }
     }
+  } catch (e) {
+    if (isL0Context) {
+      console.log(`${RED}❌ L0→L1 publish failed — fatal in L0 context (CONSTITUTION.md present)${RESET}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    } else {
+      console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
+    }
+  }
 }
 
 // ── Step 4.51: Governance L0→L1 file deployment (CLAUDE/GEMINI/AGENTS/CODEX.md) ──
@@ -1359,30 +1460,30 @@ if (isWorkspaceRoot) {
 //     templates/common during /sync) plus the --docs marker injection, and a dry-run
 //     verification afterwards fails the step if L1 is still out of sync.
 if (isWorkspaceRoot && isL0Context) {
-    console.log('\n📘 Publishing governance instruction files L0→L1 (CLAUDE/GEMINI/AGENTS/CODEX.md)...');
-    try {
-        const govRes = await $`bun scripts/propagate-to-templates.ts --apply --governance-l1 --docs`.nothrow();
-        if (govRes.exitCode !== 0) {
-            console.log(`${RED}❌ governance-l1 publish failed — fatal in L0 context${RESET}`);
-            if (import.meta.main) {
-              process.exit(1);
-            }
-        }
-    } catch (e) {
-        console.log(`${RED}❌ governance-l1 publish errored — fatal in L0 context: ${e}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  console.log("\n📘 Publishing governance instruction files L0→L1 (CLAUDE/GEMINI/AGENTS/CODEX.md)...");
+  try {
+    const govRes = await $`bun scripts/propagate-to-templates.ts --apply --governance-l1 --docs`.nothrow();
+    if (govRes.exitCode !== 0) {
+      console.log(`${RED}❌ governance-l1 publish failed — fatal in L0 context${RESET}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
     }
-    // Fail the step when L1 STAYS out of sync after the apply (belt-and-suspenders:
-    // the dry run exits 1 on any pending diff).
-    const govVerify = await $`bun scripts/propagate-to-templates.ts --governance-l1 --docs`.nothrow();
-    if (govVerify.exitCode !== 0) {
-        console.log(`${RED}❌ governance-l1 still out of sync after apply — fatal in L0 context${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  } catch (e) {
+    console.log(`${RED}❌ governance-l1 publish errored — fatal in L0 context: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
+  }
+  // Fail the step when L1 STAYS out of sync after the apply (belt-and-suspenders:
+  // the dry run exits 1 on any pending diff).
+  const govVerify = await $`bun scripts/propagate-to-templates.ts --governance-l1 --docs`.nothrow();
+  if (govVerify.exitCode !== 0) {
+    console.log(`${RED}❌ governance-l1 still out of sync after apply — fatal in L0 context${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
 }
 
 // ── Step 4.52: Dependency version sync (root → templates/common) ──
@@ -1393,26 +1494,26 @@ if (isWorkspaceRoot && isL0Context) {
 //     self-healed state. Files written here are swept into the same
 //     commit by git add -A.
 if (isWorkspaceRoot) {
-    console.log('\n📦 Syncing dependency versions (root → templates/common)...');
-    try {
-        const depSyncRes = await $`bun scripts/sync-template-deps.ts --apply`.nothrow();
-        if (depSyncRes.exitCode !== 0) {
-            console.error(`${RED}❌ Dependency sync failed.${RESET}`);
-            if (depSyncRes.stderr) {
-                console.error(String(depSyncRes.stderr).trim());
-            }
-            if (import.meta.main) {
-                process.exit(1);
-            }
-        } else {
-            console.log(`${GREEN}✓ Dependency sync completed${RESET}`);
-        }
-    } catch (e) {
-        console.error(`${RED}❌ Dependency sync failed: ${e}${RESET}`);
-        if (import.meta.main) {
-            process.exit(1);
-        }
+  console.log("\n📦 Syncing dependency versions (root → templates/common)...");
+  try {
+    const depSyncRes = await $`bun scripts/sync-template-deps.ts --apply`.nothrow();
+    if (depSyncRes.exitCode !== 0) {
+      console.error(`${RED}❌ Dependency sync failed.${RESET}`);
+      if (depSyncRes.stderr) {
+        console.error(String(depSyncRes.stderr).trim());
+      }
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    } else {
+      console.log(`${GREEN}✓ Dependency sync completed${RESET}`);
     }
+  } catch (e) {
+    console.error(`${RED}❌ Dependency sync failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
 }
 
 // ── Step 4.55: COMMON-CONTEXT marker-rewrite drift check (WARN stage, L0-only) ──
@@ -1428,52 +1529,62 @@ if (isWorkspaceRoot) {
 // Wired 2026-08-25 after the 4-variant pilot held 0 would-overwrite across ~10 PRs
 // (design doc: docs/designs/2026-08-24-marker-propagation-engine-design.md).
 if (isWorkspaceRoot && isL0Context) {
-    console.log('\n🔍 COMMON-CONTEXT marker-rewrite drift check (WARN stage)...');
-    for (const domain of ['constitution-context', 'constitution-context-pr', 'variant-context']) {
-        try {
-            const res = await $`bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain}`.nothrow();
-            const out = res.stdout.toString();
-            const m = out.match(/Would overwrite: (\d+)/);
-            const wouldOverwrite = m ? parseInt(m[1], 10) : null;
-            // v1.17.1: the append-on-missing engine adds a second drift counter —
-            // a pending append is drift the same way a pending overwrite is.
-            const a = out.match(/Would append: (\d+)/);
-            const wouldAppend = a ? parseInt(a[1], 10) : null;
-            if (res.exitCode !== 0) {
-                console.log(`${YELLOW}⚠️  marker-rewrite check failed for domain '${domain}' (exit ${res.exitCode}) — investigate manually${RESET}`);
-            } else if (wouldOverwrite === null || wouldAppend === null) {
-                console.log(`${YELLOW}⚠️  marker-rewrite output for domain '${domain}' had no drift counter — investigate manually${RESET}`);
-            } else if (wouldOverwrite + wouldAppend > 0) {
-                console.log(`${YELLOW}⚠️  COMMON-CONTEXT drift in domain '${domain}': ${wouldOverwrite} zone(s) would be overwritten, ${wouldAppend} zone(s) would be appended${RESET}`);
-                console.log(`${YELLOW}   Refresh manually: bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain} --apply${RESET}`);
-            } else {
-                console.log(`${GREEN}✓ COMMON-CONTEXT domain '${domain}' in sync (0 would-overwrite, 0 would-append)${RESET}`);
-            }
-        } catch {
-            console.log(`${YELLOW}⚠️  marker-rewrite check could not run for domain '${domain}' — investigate manually${RESET}`);
-        }
+  console.log("\n🔍 COMMON-CONTEXT marker-rewrite drift check (WARN stage)...");
+  for (const domain of ["constitution-context", "constitution-context-pr", "variant-context"]) {
+    try {
+      const res = await $`bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain}`.nothrow();
+      const out = res.stdout.toString();
+      const m = out.match(/Would overwrite: (\d+)/);
+      const wouldOverwrite = m ? parseInt(m[1], 10) : null;
+      // v1.17.1: the append-on-missing engine adds a second drift counter —
+      // a pending append is drift the same way a pending overwrite is.
+      const a = out.match(/Would append: (\d+)/);
+      const wouldAppend = a ? parseInt(a[1], 10) : null;
+      if (res.exitCode !== 0) {
+        console.log(
+          `${YELLOW}⚠️  marker-rewrite check failed for domain '${domain}' (exit ${res.exitCode}) — investigate manually${RESET}`,
+        );
+      } else if (wouldOverwrite === null || wouldAppend === null) {
+        console.log(
+          `${YELLOW}⚠️  marker-rewrite output for domain '${domain}' had no drift counter — investigate manually${RESET}`,
+        );
+      } else if (wouldOverwrite + wouldAppend > 0) {
+        console.log(
+          `${YELLOW}⚠️  COMMON-CONTEXT drift in domain '${domain}': ${wouldOverwrite} zone(s) would be overwritten, ${wouldAppend} zone(s) would be appended${RESET}`,
+        );
+        console.log(
+          `${YELLOW}   Refresh manually: bun scripts/propagate-to-templates.ts --marker-rewrite --domain ${domain} --apply${RESET}`,
+        );
+      } else {
+        console.log(`${GREEN}✓ COMMON-CONTEXT domain '${domain}' in sync (0 would-overwrite, 0 would-append)${RESET}`);
+      }
+    } catch {
+      console.log(
+        `${YELLOW}⚠️  marker-rewrite check could not run for domain '${domain}' — investigate manually${RESET}`,
+      );
     }
+  }
 }
 
 // 4.6 Skill sync to platform directories — must run BEFORE audit gate so
 //     that templates/common/ platform skills are current.
-console.log('📋 Step 4.6: Syncing skills to platform directories...');
+console.log("📋 Step 4.6: Syncing skills to platform directories...");
 const syncSkillsResult = await $`bun scripts/sync-skills.ts`.nothrow();
 if (syncSkillsResult.exitCode !== 0) {
-    const syncSkillsErr = syncSkillsResult.stderr ? String(syncSkillsResult.stderr).trim() : '';
-    // A non-zero exit here can leave platform skill trees partially synced —
-    // committing that state would propagate the inconsistency. Mirrors the
-    // step 4.5 publish gate: fatal in L0 context, warn + continue elsewhere.
-    if (isL0Context) {
-        console.error(`${RED}❌ Skill sync failed (exit ${syncSkillsResult.exitCode}) — fatal in L0 context.${RESET}`);
-        if (syncSkillsErr) console.error(syncSkillsErr);
-        if (import.meta.main) {
-            process.exit(1);
-        }
-    } else {
-        console.warn(`${YELLOW}⚠️  Skill sync failed (exit ${syncSkillsResult.exitCode}) — continuing sync${RESET}`);
-        if (syncSkillsErr) console.warn(syncSkillsErr);
+  const syncSkillsErr = syncSkillsResult.stderr ? String(syncSkillsResult.stderr).trim() : "";
+  // A non-zero exit here can leave platform skill trees partially synced —
+  // committing that state would propagate the inconsistency. Mirrors the
+  // step 4.5 publish gate: fatal in L0 context, warn + continue elsewhere.
+  if (isL0Context) {
+    console.error(`${RED}❌ Skill sync failed (exit ${syncSkillsResult.exitCode}) — fatal in L0 context.${RESET}`);
+    if (syncSkillsErr) console.error(syncSkillsErr);
+    if (import.meta.main) {
+      process.exit(1);
     }
+  } else {
+    console.warn(`${YELLOW}⚠️  Skill sync failed (exit ${syncSkillsResult.exitCode}) — continuing sync${RESET}`);
+    if (syncSkillsErr) console.warn(syncSkillsErr);
+  }
 }
 
 // 4.61 Agent-mirror parity gate — blocking from day one (design
@@ -1483,21 +1594,23 @@ if (syncSkillsResult.exitCode !== 0) {
 //     workspace root this is a green no-op (root dispatch reads agents/ directly —
 //     no mirrors by design, §12); in delivered projects it blocks /sync until the
 //     one deliberate write-mode run has produced the mirror tree (§5 wave notes).
-console.log('📋 Step 4.61: Agent-mirror parity check (--check)...');
+console.log("📋 Step 4.61: Agent-mirror parity check (--check)...");
 const syncMirrorsResult = await $`bun scripts/sync-agent-mirrors.ts --check`.nothrow();
 if (syncMirrorsResult.exitCode !== 0) {
-    const syncMirrorsErr = syncMirrorsResult.stderr ? String(syncMirrorsResult.stderr).trim() : '';
-    // Blocking gate (Q3 default): a drift here means a mirror was regenerated or
-    // hand-edited behind the pipeline's back — /sync must fail loudly, and repair
-    // is a deliberate write-mode run, never an auto-fix.
-    console.error(`${RED}❌ Agent-mirror parity check failed (exit ${syncMirrorsResult.exitCode}) — blocking gate.${RESET}`);
-    if (syncMirrorsErr) console.error(syncMirrorsErr);
-    console.error(`${YELLOW}   Repair (deliberate, reviewable write): bun scripts/sync-agent-mirrors.ts${RESET}`);
-    if (import.meta.main) {
-        process.exit(1);
-    }
+  const syncMirrorsErr = syncMirrorsResult.stderr ? String(syncMirrorsResult.stderr).trim() : "";
+  // Blocking gate (Q3 default): a drift here means a mirror was regenerated or
+  // hand-edited behind the pipeline's back — /sync must fail loudly, and repair
+  // is a deliberate write-mode run, never an auto-fix.
+  console.error(
+    `${RED}❌ Agent-mirror parity check failed (exit ${syncMirrorsResult.exitCode}) — blocking gate.${RESET}`,
+  );
+  if (syncMirrorsErr) console.error(syncMirrorsErr);
+  console.error(`${YELLOW}   Repair (deliberate, reviewable write): bun scripts/sync-agent-mirrors.ts${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 } else {
-    console.log(`${GREEN}✓ Step 4.61: agent-mirror parity check passed${RESET}`);
+  console.log(`${GREEN}✓ Step 4.61: agent-mirror parity check passed${RESET}`);
 }
 
 // 4.62 Cascade re-publish — unconditional second L0→L1 pass after skill sync.
@@ -1509,42 +1622,42 @@ if (syncMirrorsResult.exitCode !== 0) {
 //     Transforms are directional and idempotent, so the converged pass copies nothing.
 //     Design doc: docs/designs/2026-08-25-pipeline-cascade-repass-design.md
 if (isWorkspaceRoot) {
-    console.log('📦 Step 4.62: Cascade re-publish (L0→L1 after skill sync)...');
-    try {
-        const repassRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
-        if (repassRes.exitCode !== 0) {
-            if (isL0Context) {
-                console.log(`${RED}❌ Cascade re-publish failed — fatal in L0 context${RESET}`);
-                if (import.meta.main) {
-                    process.exit(1);
-                }
-            } else {
-                console.log(`${YELLOW}⚠️  Cascade re-publish failed — continuing sync${RESET}`);
-            }
-        } else {
-            const stdout = repassRes.stdout.toString();
-            if (stdout.includes('Nothing to apply')) {
-                console.log(`${GREEN}✓ Step 4.62: template mirrors already converged (nothing to apply)${RESET}`);
-            } else {
-                const match = stdout.match(/Done\. (\d+) file\(s\) copied\./);
-                if (match) {
-                    const n = match[1];
-                    console.log(`${GREEN}✓ Step 4.62: cascade re-publish complete — ${n} file(s) copied${RESET}`);
-                } else {
-                    console.log(`${GREEN}✓ Step 4.62: cascade re-publish complete${RESET}`);
-                }
-            }
+  console.log("📦 Step 4.62: Cascade re-publish (L0→L1 after skill sync)...");
+  try {
+    const repassRes = await $`bun scripts/propagate-to-templates.ts --apply`.nothrow();
+    if (repassRes.exitCode !== 0) {
+      if (isL0Context) {
+        console.log(`${RED}❌ Cascade re-publish failed — fatal in L0 context${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
         }
-    } catch (e) {
-        if (isL0Context) {
-            console.log(`${RED}❌ Cascade re-publish failed — fatal in L0 context${RESET}`);
-            if (import.meta.main) {
-                process.exit(1);
-            }
+      } else {
+        console.log(`${YELLOW}⚠️  Cascade re-publish failed — continuing sync${RESET}`);
+      }
+    } else {
+      const stdout = repassRes.stdout.toString();
+      if (stdout.includes("Nothing to apply")) {
+        console.log(`${GREEN}✓ Step 4.62: template mirrors already converged (nothing to apply)${RESET}`);
+      } else {
+        const match = stdout.match(/Done\. (\d+) file\(s\) copied\./);
+        if (match) {
+          const n = match[1];
+          console.log(`${GREEN}✓ Step 4.62: cascade re-publish complete — ${n} file(s) copied${RESET}`);
         } else {
-            console.log(`${YELLOW}⚠️  Cascade re-publish failed — continuing sync${RESET}`);
+          console.log(`${GREEN}✓ Step 4.62: cascade re-publish complete${RESET}`);
         }
+      }
     }
+  } catch (e) {
+    if (isL0Context) {
+      console.log(`${RED}❌ Cascade re-publish failed — fatal in L0 context${RESET}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    } else {
+      console.log(`${YELLOW}⚠️  Cascade re-publish failed — continuing sync${RESET}`);
+    }
+  }
 }
 
 // 4.63 Skill registry sync — converge every skill registry table with the
@@ -1555,22 +1668,26 @@ if (isWorkspaceRoot) {
 //     job); a non-zero exit means the script crashed, which is fatal in L0 —
 //     committing un-converged registries would ship the drift forward.
 //     Design: docs/designs/2026-09-25-registry-policy-completeness-design.md W5.
-if (isWorkspaceRoot && fs.existsSync('scripts/sync-skill-registries.ts')) {
-    console.log('📋 Step 4.63: Syncing skill registries to SKILL.md frontmatter...');
-    const registrySyncRes = await $`bun scripts/sync-skill-registries.ts`.nothrow();
-    if (registrySyncRes.exitCode !== 0) {
-        const regSyncErr = registrySyncRes.stderr ? String(registrySyncRes.stderr).trim() : '';
-        if (isL0Context) {
-            console.error(`${RED}❌ Skill registry sync failed (exit ${registrySyncRes.exitCode}) — fatal in L0 context.${RESET}`);
-            if (regSyncErr) console.error(regSyncErr);
-            if (import.meta.main) {
-                process.exit(1);
-            }
-        } else {
-            console.warn(`${YELLOW}⚠️  Skill registry sync failed (exit ${registrySyncRes.exitCode}) — continuing sync${RESET}`);
-            if (regSyncErr) console.warn(regSyncErr);
-        }
+if (isWorkspaceRoot && fs.existsSync("scripts/sync-skill-registries.ts")) {
+  console.log("📋 Step 4.63: Syncing skill registries to SKILL.md frontmatter...");
+  const registrySyncRes = await $`bun scripts/sync-skill-registries.ts`.nothrow();
+  if (registrySyncRes.exitCode !== 0) {
+    const regSyncErr = registrySyncRes.stderr ? String(registrySyncRes.stderr).trim() : "";
+    if (isL0Context) {
+      console.error(
+        `${RED}❌ Skill registry sync failed (exit ${registrySyncRes.exitCode}) — fatal in L0 context.${RESET}`,
+      );
+      if (regSyncErr) console.error(regSyncErr);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    } else {
+      console.warn(
+        `${YELLOW}⚠️  Skill registry sync failed (exit ${registrySyncRes.exitCode}) — continuing sync${RESET}`,
+      );
+      if (regSyncErr) console.warn(regSyncErr);
     }
+  }
 }
 
 // 4.65 Skill Graph Gate — generates and verifies skill relationship graph (ADR-0060
@@ -1581,72 +1698,74 @@ if (isWorkspaceRoot && fs.existsSync('scripts/sync-skill-registries.ts')) {
 //     graph is emitted by the same guarded calls below (run-context auto-detection
 //     tags project assets L3). Must run BEFORE VERSION_MANIFEST generation so graph
 //     files are committed.
-if (fs.existsSync('scripts/generate-skill-graph.ts')) {
-    console.log('📋 Step 4.65: Skill relationship graph gate...');
-    const graphGenRes = await $`bun scripts/generate-skill-graph.ts`.nothrow();
-    if (graphGenRes.exitCode !== 0) {
-        console.error(`${RED}❌ Skill graph generation failed.${RESET}`);
-        console.error(`${YELLOW}   Run manually: bun scripts/generate-skill-graph.ts${RESET}`);
-        if (import.meta.main) {
-            process.exit(1);
-        }
+if (fs.existsSync("scripts/generate-skill-graph.ts")) {
+  console.log("📋 Step 4.65: Skill relationship graph gate...");
+  const graphGenRes = await $`bun scripts/generate-skill-graph.ts`.nothrow();
+  if (graphGenRes.exitCode !== 0) {
+    console.error(`${RED}❌ Skill graph generation failed.${RESET}`);
+    console.error(`${YELLOW}   Run manually: bun scripts/generate-skill-graph.ts${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
+  }
 
-    const graphVerifyRes = await $`bun scripts/verify-skill-graph.ts`.nothrow();
-    if (graphVerifyRes.exitCode !== 0) {
-        console.error(`${RED}❌ Skill graph verification failed.${RESET}`);
-        console.error(`${YELLOW}   The committed skill graph does not match the current workspace state.${RESET}`);
-        console.error(`${YELLOW}   Fix: Review changes to skills/, agents/, or variant.json, then re-run: bun scripts/generate-skill-graph.ts${RESET}`);
-        if (import.meta.main) {
-            process.exit(1);
-        }
+  const graphVerifyRes = await $`bun scripts/verify-skill-graph.ts`.nothrow();
+  if (graphVerifyRes.exitCode !== 0) {
+    console.error(`${RED}❌ Skill graph verification failed.${RESET}`);
+    console.error(`${YELLOW}   The committed skill graph does not match the current workspace state.${RESET}`);
+    console.error(
+      `${YELLOW}   Fix: Review changes to skills/, agents/, or variant.json, then re-run: bun scripts/generate-skill-graph.ts${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
+  }
 
-    // Template scopes (workspace root only — projects have no templates/ directory).
-    if (fs.existsSync('templates/common')) {
-        const scopes = ['common'];
-        for (const entry of fs.readdirSync('templates', { withFileTypes: true })) {
-            if (entry.isDirectory() && entry.name.startsWith('co-')) scopes.push(entry.name);
-        }
-        for (const scope of scopes) {
-            const scopeGenRes = await $`bun scripts/generate-skill-graph.ts --scope ${scope}`.nothrow();
-            if (scopeGenRes.exitCode !== 0) {
-                console.error(`${RED}❌ Skill graph generation failed for scope: ${scope}.${RESET}`);
-                if (import.meta.main) {
-                    process.exit(1);
-                }
-            }
-            const scopeVerifyRes = await $`bun scripts/verify-skill-graph.ts --scope ${scope}`.nothrow();
-            if (scopeVerifyRes.exitCode !== 0) {
-                console.error(`${RED}❌ Skill graph verification failed for scope: ${scope}.${RESET}`);
-                console.error(`${YELLOW}   Fix: bun scripts/generate-skill-graph.ts --scope ${scope}${RESET}`);
-                if (import.meta.main) {
-                    process.exit(1);
-                }
-            }
-        }
-        console.log(`${GREEN}✓ Skill graph scope artifacts verified (${scopes.length} scopes)${RESET}`);
+  // Template scopes (workspace root only — projects have no templates/ directory).
+  if (fs.existsSync("templates/common")) {
+    const scopes = ["common"];
+    for (const entry of fs.readdirSync("templates", { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith("co-")) scopes.push(entry.name);
     }
-
-    console.log(`${GREEN}✓ Skill graph verification passed${RESET}`);
-} else {
-    console.log('📋 Step 4.65: skipped — skill graph generator not present in this context');
-}
-
-// 4.7 Generate VERSION_MANIFEST.md
-const genManifestTs = path.join('scripts', 'generate-version-manifest.ts');
-if (fs.existsSync(genManifestTs)) {
-    const genRes = await $`bun ${genManifestTs}`.quiet().nothrow();
-    if (genRes.exitCode !== 0) {
-        console.log(`${RED}❌ VERSION_MANIFEST.md generation failed${RESET}`);
-        console.log(`${RED}   ${genRes.stderr.toString().trim()}${RESET}`);
+    for (const scope of scopes) {
+      const scopeGenRes = await $`bun scripts/generate-skill-graph.ts --scope ${scope}`.nothrow();
+      if (scopeGenRes.exitCode !== 0) {
+        console.error(`${RED}❌ Skill graph generation failed for scope: ${scope}.${RESET}`);
         if (import.meta.main) {
           process.exit(1);
         }
+      }
+      const scopeVerifyRes = await $`bun scripts/verify-skill-graph.ts --scope ${scope}`.nothrow();
+      if (scopeVerifyRes.exitCode !== 0) {
+        console.error(`${RED}❌ Skill graph verification failed for scope: ${scope}.${RESET}`);
+        console.error(`${YELLOW}   Fix: bun scripts/generate-skill-graph.ts --scope ${scope}${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
+        }
+      }
     }
-    console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
+    console.log(`${GREEN}✓ Skill graph scope artifacts verified (${scopes.length} scopes)${RESET}`);
+  }
+
+  console.log(`${GREEN}✓ Skill graph verification passed${RESET}`);
 } else {
-    console.log('📋 Step 4.7: skipped — VERSION_MANIFEST generator not present in this context');
+  console.log("📋 Step 4.65: skipped — skill graph generator not present in this context");
+}
+
+// 4.7 Generate VERSION_MANIFEST.md
+const genManifestTs = path.join("scripts", "generate-version-manifest.ts");
+if (fs.existsSync(genManifestTs)) {
+  const genRes = await $`bun ${genManifestTs}`.quiet().nothrow();
+  if (genRes.exitCode !== 0) {
+    console.log(`${RED}❌ VERSION_MANIFEST.md generation failed${RESET}`);
+    console.log(`${RED}   ${genRes.stderr.toString().trim()}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+  console.log(`${GREEN}✓ VERSION_MANIFEST.md generated${RESET}`);
+} else {
+  console.log("📋 Step 4.7: skipped — VERSION_MANIFEST generator not present in this context");
 }
 
 // 4.85 Version-bump test gate (user directive 2026-10-08) — a staged version bump (SKILL.md
@@ -1655,52 +1774,58 @@ if (fs.existsSync(genManifestTs)) {
 //      current) and BEFORE the audit gate. FATAL on failure. Skipped when package.json has no
 //      `test:unit` script (L1+ projects). Detection: scripts/helpers/version-bump.ts.
 {
-    let stagedFiles: string[] = [];
-    try {
-        const stagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
-        if (stagedRes.exitCode === 0) stagedFiles = stagedRes.stdout.toString().split('\0').filter(Boolean);
-    } catch {
-        stagedFiles = [];
-    }
-    const diffCache = new Map<string, string>();
-    const bumps: ReturnType<typeof detectVersionBumps> = [];
-    for (const f of stagedFiles) {
-        // Only SKILL.md / scripts are versioned; fetch their diff lazily (git diff per candidate file).
-        const probe = detectVersionBumps([f], () => {
-            if (!diffCache.has(f)) {
-                const r = Bun.spawnSync(['git', 'diff', '--cached', '-U0', '--', f]);
-                diffCache.set(f, r.exitCode === 0 ? r.stdout.toString() : '');
-            }
-            return diffCache.get(f)!;
-        });
-        bumps.push(...probe);
-    }
-    if (bumps.length === 0) {
-        console.log('🧪 Step 4.85: no staged version bump — unit-test gate not required');
+  let stagedFiles: string[] = [];
+  try {
+    const stagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
+    if (stagedRes.exitCode === 0) stagedFiles = stagedRes.stdout.toString().split("\0").filter(Boolean);
+  } catch {
+    stagedFiles = [];
+  }
+  const diffCache = new Map<string, string>();
+  const bumps: ReturnType<typeof detectVersionBumps> = [];
+  for (const f of stagedFiles) {
+    // Only SKILL.md / scripts are versioned; fetch their diff lazily (git diff per candidate file).
+    const probe = detectVersionBumps([f], () => {
+      if (!diffCache.has(f)) {
+        const r = Bun.spawnSync(["git", "diff", "--cached", "-U0", "--", f]);
+        diffCache.set(f, r.exitCode === 0 ? r.stdout.toString() : "");
+      }
+      return diffCache.get(f)!;
+    });
+    bumps.push(...probe);
+  }
+  if (bumps.length === 0) {
+    console.log("🧪 Step 4.85: no staged version bump — unit-test gate not required");
+  } else {
+    const pkgText = fs.existsSync("package.json") ? fs.readFileSync("package.json", "utf-8") : null;
+    if (!hasTestUnitScript(pkgText)) {
+      console.log(
+        `${YELLOW}🧪 Step 4.85: ${bumps.length} staged version bump(s) but package.json has no test:unit script — skipped${RESET}`,
+      );
     } else {
-        const pkgText = fs.existsSync('package.json') ? fs.readFileSync('package.json', 'utf-8') : null;
-        if (!hasTestUnitScript(pkgText)) {
-            console.log(`${YELLOW}🧪 Step 4.85: ${bumps.length} staged version bump(s) but package.json has no test:unit script — skipped${RESET}`);
-        } else {
-            console.log(`🧪 Step 4.85: ${bumps.length} staged version bump(s) — running bun run test:unit before the audit gate`);
-            for (const b of bumps.slice(0, 10)) console.log(`${DIM}   ${b.kind}: ${b.file}${RESET}`);
-            // gitCleanEnvForShell(): same reason as step 3.95 — test:unit spawns the
-            // upgrade-project engine fixtures, which must never inherit GIT_DIR
-            // (2026-11-09 rogue-commit incident). Full sanitized env, not an unset
-            // map: Bun Shell's `.env()` REPLACES the child environment.
-            const testRes = await $`bun run test:unit`.env(gitCleanEnvForShell()).quiet().nothrow();
-            if (testRes.exitCode !== 0) {
-                const out = (testRes.stdout.toString() + '\n' + testRes.stderr.toString()).trim().split('\n');
-                console.error(out.slice(-60).join('\n'));
-                console.error(`${RED}❌ Step 4.85: bun run test:unit FAILED with a staged version bump — fix the failing tests (or unstage the version change) and re-run /sync.${RESET}`);
-                if (import.meta.main) {
-                    process.exit(1);
-                }
-            } else {
-                console.log(`${GREEN}✓ Step 4.85: bun run test:unit passed${RESET}`);
-            }
+      console.log(
+        `🧪 Step 4.85: ${bumps.length} staged version bump(s) — running bun run test:unit before the audit gate`,
+      );
+      for (const b of bumps.slice(0, 10)) console.log(`${DIM}   ${b.kind}: ${b.file}${RESET}`);
+      // gitCleanEnvForShell(): same reason as step 3.95 — test:unit spawns the
+      // upgrade-project engine fixtures, which must never inherit GIT_DIR
+      // (2026-11-09 rogue-commit incident). Full sanitized env, not an unset
+      // map: Bun Shell's `.env()` REPLACES the child environment.
+      const testRes = await $`bun run test:unit`.env(gitCleanEnvForShell()).quiet().nothrow();
+      if (testRes.exitCode !== 0) {
+        const out = (testRes.stdout.toString() + "\n" + testRes.stderr.toString()).trim().split("\n");
+        console.error(out.slice(-60).join("\n"));
+        console.error(
+          `${RED}❌ Step 4.85: bun run test:unit FAILED with a staged version bump — fix the failing tests (or unstage the version change) and re-run /sync.${RESET}`,
+        );
+        if (import.meta.main) {
+          process.exit(1);
         }
+      } else {
+        console.log(`${GREEN}✓ Step 4.85: bun run test:unit passed${RESET}`);
+      }
     }
+  }
 }
 
 // 4.87 Agent frontmatter last_updated bump (U-20261104-003) — when a sync
@@ -1722,34 +1847,38 @@ if (fs.existsSync(genManifestTs)) {
 //     non-blocking — failures WARN and the lifecycle gates still see the
 //     stale dates, so nothing silently weakens.
 try {
-    const agentBumpStatus = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
-    if (agentBumpStatus.exitCode === 0) {
-        const changedPaths = parseStatusPorcelain(agentBumpStatus.stdout.toString());
-        const bumpDate = localDateISO();
-        let bumpedCount = 0;
-        for (const rel of changedPaths) {
-            if (!isAgentMdPath(rel)) continue;
-            let headText: string | null = null;
-            const headRef = 'HEAD:' + rel;
-            const headRes = await $`git show ${headRef}`.quiet().nothrow();
-            if (headRes.exitCode === 0) headText = headRes.stdout.toString();
-            // exitCode !== 0 → untracked/new file: not a mechanical rewrite of
-            // an existing agent, skip (a new file's date is authored content).
-            const worktreePath = path.resolve(rel);
-            if (!fs.existsSync(worktreePath)) continue;
-            const currentText = fs.readFileSync(worktreePath, 'utf8');
-            const result = bumpMechanicalLastUpdated(headText, currentText, bumpDate);
-            if (!result.bumped) continue;
-            fs.writeFileSync(worktreePath, result.text, 'utf8');
-            await $`git add -- ${rel}`.nothrow();
-            bumpedCount++;
-        }
-        if (bumpedCount > 0) {
-            console.log(`${GREEN}✅ Step 4.87: bumped frontmatter last_updated to ${bumpDate} on ${bumpedCount} mechanically rewritten agent file(s) (U-20261104-003)${RESET}`);
-        }
+  const agentBumpStatus = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+  if (agentBumpStatus.exitCode === 0) {
+    const changedPaths = parseStatusPorcelain(agentBumpStatus.stdout.toString());
+    const bumpDate = localDateISO();
+    let bumpedCount = 0;
+    for (const rel of changedPaths) {
+      if (!isAgentMdPath(rel)) continue;
+      let headText: string | null = null;
+      const headRef = "HEAD:" + rel;
+      const headRes = await $`git show ${headRef}`.quiet().nothrow();
+      if (headRes.exitCode === 0) headText = headRes.stdout.toString();
+      // exitCode !== 0 → untracked/new file: not a mechanical rewrite of
+      // an existing agent, skip (a new file's date is authored content).
+      const worktreePath = path.resolve(rel);
+      if (!fs.existsSync(worktreePath)) continue;
+      const currentText = fs.readFileSync(worktreePath, "utf8");
+      const result = bumpMechanicalLastUpdated(headText, currentText, bumpDate);
+      if (!result.bumped) continue;
+      fs.writeFileSync(worktreePath, result.text, "utf8");
+      await $`git add -- ${rel}`.nothrow();
+      bumpedCount++;
     }
+    if (bumpedCount > 0) {
+      console.log(
+        `${GREEN}✅ Step 4.87: bumped frontmatter last_updated to ${bumpDate} on ${bumpedCount} mechanically rewritten agent file(s) (U-20261104-003)${RESET}`,
+      );
+    }
+  }
 } catch (err) {
-    console.warn(`${YELLOW}⚠️  Step 4.87: agent frontmatter last_updated bump failed (non-blocking): ${String(err)}${RESET}`);
+  console.warn(
+    `${YELLOW}⚠️  Step 4.87: agent frontmatter last_updated bump failed (non-blocking): ${String(err)}${RESET}`,
+  );
 }
 
 // 4.88 Spawned-child integrity gate — TWO arms (blocking, placed after the last
@@ -1775,75 +1904,89 @@ try {
 //      fails, the run aborts — a gate that cannot establish a comparison base must not
 //      silently pass. There is NO environment skip path for either arm.
 if (configSnapshotAtStart) {
-    let configSnapshotAfter: RepoConfigSnapshot | null = null;
-    try {
-        configSnapshotAfter = snapshotRepoConfig(expectedRoot);
-    } catch (err) {
-        console.error(`${RED}❌ Step 4.88: repository config could not be re-read after the test steps — treating as FATAL: ${String(err)}${RESET}`);
-        if (import.meta.main) {
-            process.exit(1);
-        }
+  let configSnapshotAfter: RepoConfigSnapshot | null = null;
+  try {
+    configSnapshotAfter = snapshotRepoConfig(expectedRoot);
+  } catch (err) {
+    console.error(
+      `${RED}❌ Step 4.88: repository config could not be re-read after the test steps — treating as FATAL: ${String(err)}${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
-    if (configSnapshotAfter) {
-        // ── Arm 1: repository-config snapshot/compare (local + worktree scopes) ──
-        const configDelta = diffRepoConfig(configSnapshotAtStart.entries, configSnapshotAfter.entries);
-        const worktreeDelta = diffRepoConfig(configSnapshotAtStart.worktreeEntries, configSnapshotAfter.worktreeEntries);
-        const bareChanged = configSnapshotAtStart.coreBare !== configSnapshotAfter.coreBare;
-        if (!isEmptyRepoConfigDelta(configDelta) || !isEmptyRepoConfigDelta(worktreeDelta) || bareChanged) {
-            console.error(`${RED}❌ Step 4.88: FATAL — a spawned child mutated the REPOSITORY git config.${RESET}`);
-            console.error(`${YELLOW}   Report the delta below to the failing step's owner; the change is repo-wide because${RESET}`);
-            console.error(`${YELLOW}   worktrees share the main .git/config (2026-11-09 repository-config corruption incident).${RESET}`);
-            for (const line of configDelta.added) console.error(`${RED}   + ${line}${RESET}`);
-            for (const line of configDelta.removed) console.error(`${RED}   - ${line}${RESET}`);
-            for (const line of configDelta.changed) console.error(`${RED}   ~ ${line}${RESET}`);
-            // Per-worktree scope rows (v1.46.0): the `wt: ` prefix names the scope that moved.
-            for (const line of formatRepoConfigDeltaRows(worktreeDelta, 'wt: ')) {
-                console.error(`${RED}   ${line}${RESET}`);
-            }
-            if (bareChanged) {
-                console.error(`${RED}   ~ core.bare (effective): ${configSnapshotAtStart.coreBare ?? '(unset)'} → ${configSnapshotAfter.coreBare ?? '(unset)'}${RESET}`);
-            }
-            if (configSnapshotAfter.coreBare === 'true') {
-                console.error(`${YELLOW}   Repair: git config --local core.bare false${RESET}`);
-            }
-            console.error(`${YELLOW}   Fix the spawning test to run under scripts/lib/git-env.ts (gitCleanEnvForShell for Bun Shell,${RESET}`);
-            console.error(`${YELLOW}   gitCleanEnv for spawnSync), then re-run /sync. Spec: design §11.${RESET}`);
-            if (import.meta.main) {
-                process.exit(1);
-            }
-        } else {
-            console.log(`${GREEN}✓ Step 4.88: repository config unchanged across the test steps${RESET}`);
-        }
+  }
+  if (configSnapshotAfter) {
+    // ── Arm 1: repository-config snapshot/compare (local + worktree scopes) ──
+    const configDelta = diffRepoConfig(configSnapshotAtStart.entries, configSnapshotAfter.entries);
+    const worktreeDelta = diffRepoConfig(configSnapshotAtStart.worktreeEntries, configSnapshotAfter.worktreeEntries);
+    const bareChanged = configSnapshotAtStart.coreBare !== configSnapshotAfter.coreBare;
+    if (!isEmptyRepoConfigDelta(configDelta) || !isEmptyRepoConfigDelta(worktreeDelta) || bareChanged) {
+      console.error(`${RED}❌ Step 4.88: FATAL — a spawned child mutated the REPOSITORY git config.${RESET}`);
+      console.error(
+        `${YELLOW}   Report the delta below to the failing step's owner; the change is repo-wide because${RESET}`,
+      );
+      console.error(
+        `${YELLOW}   worktrees share the main .git/config (2026-11-09 repository-config corruption incident).${RESET}`,
+      );
+      for (const line of configDelta.added) console.error(`${RED}   + ${line}${RESET}`);
+      for (const line of configDelta.removed) console.error(`${RED}   - ${line}${RESET}`);
+      for (const line of configDelta.changed) console.error(`${RED}   ~ ${line}${RESET}`);
+      // Per-worktree scope rows (v1.46.0): the `wt: ` prefix names the scope that moved.
+      for (const line of formatRepoConfigDeltaRows(worktreeDelta, "wt: ")) {
+        console.error(`${RED}   ${line}${RESET}`);
+      }
+      if (bareChanged) {
+        console.error(
+          `${RED}   ~ core.bare (effective): ${configSnapshotAtStart.coreBare ?? "(unset)"} → ${configSnapshotAfter.coreBare ?? "(unset)"}${RESET}`,
+        );
+      }
+      if (configSnapshotAfter.coreBare === "true") {
+        console.error(`${YELLOW}   Repair: git config --local core.bare false${RESET}`);
+      }
+      console.error(
+        `${YELLOW}   Fix the spawning test to run under scripts/lib/git-env.ts (gitCleanEnvForShell for Bun Shell,${RESET}`,
+      );
+      console.error(`${YELLOW}   gitCleanEnv for spawnSync), then re-run /sync. Spec: design §11.${RESET}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    } else {
+      console.log(`${GREEN}✓ Step 4.88: repository config unchanged across the test steps${RESET}`);
+    }
 
-        // ── Arm 2 (v1.46.0): rogue-commit scan over base..HEAD (corruption mode 1) ──
-        const baseResolution = resolveRogueScanBase(expectedRoot);
-        if (!baseResolution.ok) {
-            console.error(`${RED}❌ Step 4.88: FATAL — ${baseResolution.reason}${RESET}`);
-            if (import.meta.main) {
-                process.exit(1);
-            }
-        } else {
-            const rogueScan = scanRogueCommits(baseResolution.base, expectedRoot);
-            if (!rogueScan.ok) {
-                console.error(`${RED}❌ Step 4.88: FATAL — the rogue-commit scan could not read git history: ${rogueScan.reason}${RESET}`);
-                console.error(`${YELLOW}   A gate that cannot read the history it must guard aborts instead of passing. Spec:${RESET}`);
-                console.error(`${YELLOW}   docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3.1-§3.3.${RESET}`);
-                if (import.meta.main) {
-                    process.exit(1);
-                }
-            } else if (rogueScan.commits.length > 0) {
-                console.error(`${RED}❌ Step 4.88: FATAL — a spawned test committed into THIS repository.${RESET}`);
-                for (const line of rogueScanRefusalLines(rogueScan.commits, `${baseResolution.base}..HEAD`)) {
-                    console.error(`${YELLOW}   ${line}${RESET}`);
-                }
-                if (import.meta.main) {
-                    process.exit(1);
-                }
-            } else {
-                console.log(`${GREEN}✓ Step 4.88: no rogue fixture-identity commits in ${baseResolution.base}..HEAD${RESET}`);
-            }
+    // ── Arm 2 (v1.46.0): rogue-commit scan over base..HEAD (corruption mode 1) ──
+    const baseResolution = resolveRogueScanBase(expectedRoot);
+    if (!baseResolution.ok) {
+      console.error(`${RED}❌ Step 4.88: FATAL — ${baseResolution.reason}${RESET}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    } else {
+      const rogueScan = scanRogueCommits(baseResolution.base, expectedRoot);
+      if (!rogueScan.ok) {
+        console.error(
+          `${RED}❌ Step 4.88: FATAL — the rogue-commit scan could not read git history: ${rogueScan.reason}${RESET}`,
+        );
+        console.error(
+          `${YELLOW}   A gate that cannot read the history it must guard aborts instead of passing. Spec:${RESET}`,
+        );
+        console.error(`${YELLOW}   docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3.1-§3.3.${RESET}`);
+        if (import.meta.main) {
+          process.exit(1);
         }
+      } else if (rogueScan.commits.length > 0) {
+        console.error(`${RED}❌ Step 4.88: FATAL — a spawned test committed into THIS repository.${RESET}`);
+        for (const line of rogueScanRefusalLines(rogueScan.commits, `${baseResolution.base}..HEAD`)) {
+          console.error(`${YELLOW}   ${line}${RESET}`);
+        }
+        if (import.meta.main) {
+          process.exit(1);
+        }
+      } else {
+        console.log(`${GREEN}✓ Step 4.88: no rogue fixture-identity commits in ${baseResolution.base}..HEAD${RESET}`);
+      }
     }
+  }
 }
 
 // 4.9 Audit gate — call audit.ts directly (platform-independent, no shell intermediary)
@@ -1853,84 +1996,101 @@ if (configSnapshotAtStart) {
 const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
-    if (import.meta.main) {
-      process.exit(1);
-    }
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 5. Branch -> commit -> push -> PR
 let currentBranch = "";
 try {
-    // T-20260926-031: `git rev-parse --abbrev-ref HEAD` fails on an unborn
-    // branch (fresh scaffold, zero commits) — the empty result skipped pr/*
-    // creation and committed straight onto main. `git symbolic-ref` resolves
-    // the checked-out branch even before the first commit; the rev-parse
-    // fallback keeps detached-HEAD semantics unchanged.
-    const symbolic = await $`git symbolic-ref --short -q HEAD`.quiet().nothrow();
-    if (symbolic.exitCode === 0) {
-        currentBranch = symbolic.stdout.toString().trim();
-    } else {
-        const { stdout } = await $`git rev-parse --abbrev-ref HEAD`.quiet().nothrow();
-        currentBranch = stdout.toString().trim();
-    }
+  // T-20260926-031: `git rev-parse --abbrev-ref HEAD` fails on an unborn
+  // branch (fresh scaffold, zero commits) — the empty result skipped pr/*
+  // creation and committed straight onto main. `git symbolic-ref` resolves
+  // the checked-out branch even before the first commit; the rev-parse
+  // fallback keeps detached-HEAD semantics unchanged.
+  const symbolic = await $`git symbolic-ref --short -q HEAD`.quiet().nothrow();
+  if (symbolic.exitCode === 0) {
+    currentBranch = symbolic.stdout.toString().trim();
+  } else {
+    const { stdout } = await $`git rev-parse --abbrev-ref HEAD`.quiet().nothrow();
+    currentBranch = stdout.toString().trim();
+  }
 } catch (err) {
   console.error(`[dev-sync] Error: ${err}`);
 }
 
 let branch = currentBranch;
 if (currentBranch === "main" || currentBranch === "master") {
-    let slug = msg.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-').toLowerCase().replace(/-$/, '');
-    slug = slug.substring(0, Math.min(40, slug.length));
-    
-    // yyyyMMdd-HHmmss
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    const d = new Date();
-    const timestamp = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
-    
-    branch = `pr/${timestamp}-${slug}`;
-    // Fail-closed branch gate (T-20260912-007): every command here runs under
-    // .nothrow(), so failures surface ONLY via .exitCode — the old try/catch was
-    // dead code, and a refused checkout (e.g. "local changes would be overwritten")
-    // fell through silently to staging + commit + push ON MAIN. Any non-zero exit
-    // now aborts BEFORE git add runs — same contract as the step 6 sensitive-file
-    // guard below.
-    const branchProbe = await $`git show-ref --verify refs/heads/${branch}`.quiet().nothrow();
-    const checkoutRes = branchProbe.exitCode === 0
-        ? await $`git checkout ${branch}`.nothrow()
-        : await $`git checkout -b ${branch}`.nothrow();
-    if (checkoutRes.exitCode !== 0) {
-        console.error(`${RED}❌ Failed to ${branchProbe.exitCode === 0 ? 'switch to' : 'create'} branch '${branch}' (exit ${checkoutRes.exitCode}) — aborting before staging/commit.${RESET}`);
-        const detail = checkoutRes.stderr.toString().trim() || checkoutRes.stdout.toString().trim();
-        if (detail) console.error(`   ${detail.split('\n')[0]}`);
-        console.error(`${YELLOW}   Resolve the git error (e.g. commit or stash conflicting local changes), then re-run /sync.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  let slug = msg
+    .replace(/[^a-z0-9]/gi, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase()
+    .replace(/-$/, "");
+  slug = slug.substring(0, Math.min(40, slug.length));
+
+  // yyyyMMdd-HHmmss
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const d = new Date();
+  const timestamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+
+  branch = `pr/${timestamp}-${slug}`;
+  // Fail-closed branch gate (T-20260912-007): every command here runs under
+  // .nothrow(), so failures surface ONLY via .exitCode — the old try/catch was
+  // dead code, and a refused checkout (e.g. "local changes would be overwritten")
+  // fell through silently to staging + commit + push ON MAIN. Any non-zero exit
+  // now aborts BEFORE git add runs — same contract as the step 6 sensitive-file
+  // guard below.
+  const branchProbe = await $`git show-ref --verify refs/heads/${branch}`.quiet().nothrow();
+  const checkoutRes =
+    branchProbe.exitCode === 0
+      ? await $`git checkout ${branch}`.nothrow()
+      : await $`git checkout -b ${branch}`.nothrow();
+  if (checkoutRes.exitCode !== 0) {
+    console.error(
+      `${RED}❌ Failed to ${branchProbe.exitCode === 0 ? "switch to" : "create"} branch '${branch}' (exit ${checkoutRes.exitCode}) — aborting before staging/commit.${RESET}`,
+    );
+    const detail = checkoutRes.stderr.toString().trim() || checkoutRes.stdout.toString().trim();
+    if (detail) console.error(`   ${detail.split("\n")[0]}`);
+    console.error(
+      `${YELLOW}   Resolve the git error (e.g. commit or stash conflicting local changes), then re-run /sync.${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
+  }
 } else {
-    // T-20261012-011: a branch whose PR was CLOSED unmerged is dead —
-    // committing a new sync onto it under-represents the review surface
-    // (PR #1509 closed with 45 files; the content re-landed via a 1-file PR
-    // #1510). Refuse before staging/commit.
-    const closedPrRes = await $`gh pr view ${branch} --json state --jq .state`.quiet().nothrow();
-    const prState = closedPrRes.exitCode === 0 ? closedPrRes.stdout.toString().trim() : '';
-    if (prState === 'CLOSED') {
-        console.error(`${RED}❌ Branch '${branch}' has a CLOSED (unmerged) PR — refusing to commit a new sync onto a dead branch.${RESET}`);
-        console.error(`${YELLOW}   Re-branch from main (git checkout main && git checkout -b pr/<new-slug>) and re-run /sync.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  // T-20261012-011: a branch whose PR was CLOSED unmerged is dead —
+  // committing a new sync onto it under-represents the review surface
+  // (PR #1509 closed with 45 files; the content re-landed via a 1-file PR
+  // #1510). Refuse before staging/commit.
+  const closedPrRes = await $`gh pr view ${branch} --json state --jq .state`.quiet().nothrow();
+  const prState = closedPrRes.exitCode === 0 ? closedPrRes.stdout.toString().trim() : "";
+  if (prState === "CLOSED") {
+    console.error(
+      `${RED}❌ Branch '${branch}' has a CLOSED (unmerged) PR — refusing to commit a new sync onto a dead branch.${RESET}`,
+    );
+    console.error(
+      `${YELLOW}   Re-branch from main (git checkout main && git checkout -b pr/<new-slug>) and re-run /sync.${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
-    // U-20261026-011 / T-20261026-003: MERGED joins CLOSED — a follow-up sync
-    // landed on an already-merged branch is orphaned off main.
-    if (prState === 'MERGED') {
-        console.error(`${RED}❌ Branch '${branch}' has an already-MERGED PR — refusing to land a follow-up sync here; the commits would be orphaned off main.${RESET}`);
-        console.error(`${YELLOW}   Re-branch from main (git checkout main && git checkout -b pr/<new-slug>) and re-run /sync.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  }
+  // U-20261026-011 / T-20261026-003: MERGED joins CLOSED — a follow-up sync
+  // landed on an already-merged branch is orphaned off main.
+  if (prState === "MERGED") {
+    console.error(
+      `${RED}❌ Branch '${branch}' has an already-MERGED PR — refusing to land a follow-up sync here; the commits would be orphaned off main.${RESET}`,
+    );
+    console.error(
+      `${YELLOW}   Re-branch from main (git checkout main && git checkout -b pr/<new-slug>) and re-run /sync.${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
-    console.log(`${CYAN}ℹ️  Already on branch '${branch}' - committing here without creating a new branch.${RESET}`);
+  }
+  console.log(`${CYAN}ℹ️  Already on branch '${branch}' - committing here without creating a new branch.${RESET}`);
 }
 
 // 5.5 Merge-in-progress gate — a pending `.git/MERGE_HEAD` means a prior
@@ -1941,47 +2101,50 @@ if (currentBranch === "main" || currentBranch === "master") {
 // and lets the standard gate battery + `git commit -m` produce the two-parent
 // merge commit (git attaches MERGE_HEAD as the second parent automatically).
 // Without the flag the gate stays fail-closed exactly as before.
-if (fs.existsSync('.git/MERGE_HEAD')) {
-    if (!concludeMerge) {
-        console.error(`${RED}❌ A merge is already in progress (unresolved MERGE_HEAD).${RESET}`);
-        console.error(`${YELLOW}   Resolve the conflicts, then re-run /sync --conclude-merge to finish it through the gates — or abort with 'git merge --abort' first.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+if (fs.existsSync(".git/MERGE_HEAD")) {
+  if (!concludeMerge) {
+    console.error(`${RED}❌ A merge is already in progress (unresolved MERGE_HEAD).${RESET}`);
+    console.error(
+      `${YELLOW}   Resolve the conflicts, then re-run /sync --conclude-merge to finish it through the gates — or abort with 'git merge --abort' first.${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
-    const unresolvedRes = await $`git diff --name-only --diff-filter=U`.quiet().nothrow();
-    const unresolved = parseUnresolvedConflicts(unresolvedRes.stdout.toString());
-    if (unresolved.length > 0) {
-        console.error(`${RED}❌ --conclude-merge: ${unresolved.length} unresolved conflict file(s):${RESET}`);
-        for (const f of unresolved) console.error(`   ${f}`);
-        console.error(`${YELLOW}   Resolve every conflict (git add <file>), then re-run /sync --conclude-merge.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  }
+  const unresolvedRes = await $`git diff --name-only --diff-filter=U`.quiet().nothrow();
+  const unresolved = parseUnresolvedConflicts(unresolvedRes.stdout.toString());
+  if (unresolved.length > 0) {
+    console.error(`${RED}❌ --conclude-merge: ${unresolved.length} unresolved conflict file(s):${RESET}`);
+    for (const f of unresolved) console.error(`   ${f}`);
+    console.error(`${YELLOW}   Resolve every conflict (git add <file>), then re-run /sync --conclude-merge.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
-    console.log(`${GREEN}✓ --conclude-merge: tree fully resolved — the merge commit follows the gate battery${RESET}`);
+  }
+  console.log(`${GREEN}✓ --conclude-merge: tree fully resolved — the merge commit follows the gate battery${RESET}`);
 }
 
 // 6. Guard against sensitive files — checks both new (untracked) and modified
 // (already-tracked) files, since an already-tracked secret-like file that gets
 // edited would otherwise slip past a check that only looked at untracked paths.
 try {
-    const untrackedRes = await $`git ls-files --others --exclude-standard`.quiet().nothrow();
-    const modifiedRes = await $`git diff --name-only HEAD`.quiet().nothrow();
-    const untracked = untrackedRes.stdout.toString().trim().split('\n').filter(Boolean);
-    const modified = modifiedRes.stdout.toString().trim().split('\n').filter(Boolean);
-    const candidates = [...new Set([...untracked, ...modified])];
-    const sensitivePattern = /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(?!\.(example|sample)$)(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/;
-    const sensitive = candidates.filter(f => sensitivePattern.test(f));
+  const untrackedRes = await $`git ls-files --others --exclude-standard`.quiet().nothrow();
+  const modifiedRes = await $`git diff --name-only HEAD`.quiet().nothrow();
+  const untracked = untrackedRes.stdout.toString().trim().split("\n").filter(Boolean);
+  const modified = modifiedRes.stdout.toString().trim().split("\n").filter(Boolean);
+  const candidates = [...new Set([...untracked, ...modified])];
+  const sensitivePattern =
+    /\.(pem|key|p12|pfx|jks|keystore)$|^\.env(?!\.(example|sample)$)(\.[^sa]|$)|credentials\.json|service.?account\.json|secrets\.ya?ml/;
+  const sensitive = candidates.filter((f) => sensitivePattern.test(f));
 
-    if (sensitive.length > 0) {
-        console.log(`${RED}❌ Potentially sensitive files detected (new or modified) - refusing git add -A:${RESET}`);
-        sensitive.forEach(s => console.log(`   ${s}`));
-        console.log(`${YELLOW}   Stage files explicitly with 'git add <file>' or add them to .gitignore.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  if (sensitive.length > 0) {
+    console.log(`${RED}❌ Potentially sensitive files detected (new or modified) - refusing git add -A:${RESET}`);
+    sensitive.forEach((s) => console.log(`   ${s}`));
+    console.log(`${YELLOW}   Stage files explicitly with 'git add <file>' or add them to .gitignore.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
+  }
 } catch (err) {
   // Fail-closed: an error while collecting guard data must abort BEFORE
   // `git add -A` runs — same contract as the other gates in this pipeline.
@@ -2003,32 +2166,36 @@ try {
 //     classifier is shared with scripts/check-workspace-hygiene.ts
 //     (scripts/lib/workspace-hygiene.ts — one derivation, two callers).
 try {
-    const hygieneRes = await $`git status --porcelain`.quiet().nothrow();
-    if (hygieneRes.exitCode !== 0) {
-        console.error(`${RED}❌ Step 6.4: git status failed (exit ${hygieneRes.exitCode}) — hygiene gate fail-closed.${RESET}`);
-        const hygieneDetail = hygieneRes.stderr.toString().trim();
-        if (hygieneDetail) console.error(`   ${hygieneDetail.split('\n')[0]}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
-    }
-    const residue = classifyWorkspaceHygieneResidue(hygieneRes.stdout.toString());
-    if (residue.length > 0) {
-        console.error(`${RED}❌ Step 6.4: workspace-hygiene residue gate FAILED — ${residue.length} untracked whole-directory entries:${RESET}`);
-        for (const r of residue) console.error(`   ?? ${r}`);
-        for (const line of formatHygieneResidueReport(residue)) console.error(`${YELLOW}   ${line}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
-    }
-    console.log(`${GREEN}✓ Step 6.4: workspace-hygiene residue gate passed${RESET}`);
-} catch (err) {
-    // Fail-closed: an error while reading the tree aborts BEFORE staging —
-    // same contract as the sensitive-file guard above.
-    console.error(`${RED}❌ Step 6.4: hygiene gate errored — refusing to proceed: ${err}${RESET}`);
+  const hygieneRes = await $`git status --porcelain`.quiet().nothrow();
+  if (hygieneRes.exitCode !== 0) {
+    console.error(
+      `${RED}❌ Step 6.4: git status failed (exit ${hygieneRes.exitCode}) — hygiene gate fail-closed.${RESET}`,
+    );
+    const hygieneDetail = hygieneRes.stderr.toString().trim();
+    if (hygieneDetail) console.error(`   ${hygieneDetail.split("\n")[0]}`);
     if (import.meta.main) {
       process.exit(1);
     }
+  }
+  const residue = classifyWorkspaceHygieneResidue(hygieneRes.stdout.toString());
+  if (residue.length > 0) {
+    console.error(
+      `${RED}❌ Step 6.4: workspace-hygiene residue gate FAILED — ${residue.length} untracked whole-directory entries:${RESET}`,
+    );
+    for (const r of residue) console.error(`   ?? ${r}`);
+    for (const line of formatHygieneResidueReport(residue)) console.error(`${YELLOW}   ${line}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+  console.log(`${GREEN}✓ Step 6.4: workspace-hygiene residue gate passed${RESET}`);
+} catch (err) {
+  // Fail-closed: an error while reading the tree aborts BEFORE staging —
+  // same contract as the sensitive-file guard above.
+  console.error(`${RED}❌ Step 6.4: hygiene gate errored — refusing to proceed: ${err}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 6.5 Scoped staging — decide what may join this commit. taskStaged is what the
@@ -2038,21 +2205,21 @@ try {
 // Design: docs/designs/2026-09-12-dev-sync-scoped-staging-design.md
 let s1Paths = new Set<string>();
 try {
-    const s1Res = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
-    if (s1Res.exitCode !== 0) throw new Error(s1Res.stderr.toString());
-    s1Paths = parseStatusPorcelain(s1Res.stdout.toString());
+  const s1Res = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+  if (s1Res.exitCode !== 0) throw new Error(s1Res.stderr.toString());
+  s1Paths = parseStatusPorcelain(s1Res.stdout.toString());
 } catch {
-    snapshotFailed = true;
+  snapshotFailed = true;
 }
 
 let taskStaged = new Set<string>();
 try {
-    const stagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
-    if (stagedRes.exitCode !== 0) throw new Error(stagedRes.stderr.toString());
-    taskStaged = new Set(stagedRes.stdout.toString().split('\0').filter(Boolean));
+  const stagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
+  if (stagedRes.exitCode !== 0) throw new Error(stagedRes.stderr.toString());
+  taskStaged = new Set(stagedRes.stdout.toString().split("\0").filter(Boolean));
 } catch (err) {
-    console.error(`[dev-sync] Error: ${err}`);
-    snapshotFailed = true;
+  console.error(`[dev-sync] Error: ${err}`);
+  snapshotFailed = true;
 }
 
 // U-20261107-003 (v1.43.0): content comparison for the S0∩S1 overlap — a
@@ -2062,96 +2229,110 @@ try {
 // the agent made before the run — kept out, per the scoped design.
 const s1Content = new Map<string, string>();
 for (const p of s1Paths) {
-    try { s1Content.set(p, fs.readFileSync(p, 'utf-8')); } catch { /* deleted at S1 */ }
+  try {
+    s1Content.set(p, fs.readFileSync(p, "utf-8"));
+  } catch {
+    /* deleted at S1 */
+  }
 }
 const pipelineOutputs = new Set([
-    ...[...s1Paths].filter(p => !s0Paths.has(p)),
-    ...[...s1Paths].filter(p => s0Paths.has(p) && s0Content.get(p) !== s1Content.get(p)),
+  ...[...s1Paths].filter((p) => !s0Paths.has(p)),
+  ...[...s1Paths].filter((p) => s0Paths.has(p) && s0Content.get(p) !== s1Content.get(p)),
 ]);
 const committable = new Set([...taskStaged, ...pipelineOutputs]);
-const residual = [...s1Paths].filter(p => !committable.has(p)).sort();
+const residual = [...s1Paths].filter((p) => !committable.has(p)).sort();
 
 if (residual.length > 0) {
-    const disposition = scopedStaging
-        ? 'left OUT of this commit by scoped staging'
-        : 'swept INTO this commit by git add -A (WARN-soak opt-out)';
-    console.log(`${YELLOW}⚠️  Scoped-staging check: ${residual.length} working-tree file(s) were neither staged for this task nor generated by the pipeline — ${disposition}:${RESET}`);
-    residual.forEach(f => console.log(`   ${f}`));
-    console.log(`${YELLOW}   Stage task files explicitly with 'git add <file>' before /sync, or gitignore scratch paths.${RESET}`);
-    if (!scopedStaging) {
-        console.log(`${YELLOW}   Exclusion is the default (T-20261001-015) — drop SYNC_SCOPED_STAGING=0 / --warn-staging to leave these out.${RESET}`);
-    }
+  const disposition = scopedStaging
+    ? "left OUT of this commit by scoped staging"
+    : "swept INTO this commit by git add -A (WARN-soak opt-out)";
+  console.log(
+    `${YELLOW}⚠️  Scoped-staging check: ${residual.length} working-tree file(s) were neither staged for this task nor generated by the pipeline — ${disposition}:${RESET}`,
+  );
+  residual.forEach((f) => console.log(`   ${f}`));
+  console.log(
+    `${YELLOW}   Stage task files explicitly with 'git add <file>' before /sync, or gitignore scratch paths.${RESET}`,
+  );
+  if (!scopedStaging) {
+    console.log(
+      `${YELLOW}   Exclusion is the default (T-20261001-015) — drop SYNC_SCOPED_STAGING=0 / --warn-staging to leave these out.${RESET}`,
+    );
+  }
 }
 
 if (scopedStaging) {
-    // Promotion preview: stage only declared + generated paths. A failed
-    // snapshot must abort here — an empty S0 would classify every agent file
-    // as pipeline output and silently commit it (fail-closed, same contract
-    // as the sensitive-file guard above).
-    if (snapshotFailed) {
-        console.log(`${RED}❌ Scoped staging could not snapshot the working tree — refusing to stage.${RESET}`);
-        console.log(`${YELLOW}   Re-run with --warn-staging to fall back to the WARN-soak behavior.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  // Promotion preview: stage only declared + generated paths. A failed
+  // snapshot must abort here — an empty S0 would classify every agent file
+  // as pipeline output and silently commit it (fail-closed, same contract
+  // as the sensitive-file guard above).
+  if (snapshotFailed) {
+    console.log(`${RED}❌ Scoped staging could not snapshot the working tree — refusing to stage.${RESET}`);
+    console.log(`${YELLOW}   Re-run with --warn-staging to fall back to the WARN-soak behavior.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
-    try {
-        if (committable.size > 0) {
-            // Staged-deletion handling (spec Amendment 2 §13,
-            // docs/designs/2026-09-24-constitution-s33-context-injection-design.md):
-            // a path the cached diff records as removed (`D`, or the SOURCE of a
-            // staged `R<score>` rename) exists in neither worktree nor index — a
-            // plain pathspec `git add` exits 128, and one poisoned pathspec makes
-            // the whole batch stage nothing. Those paths are skipped (the index
-            // already holds the desired state); present paths stage in one batch;
-            // every remaining absent path is attempted per-path — plain add still
-            // resolves while the index holds the path (staged-add-whose-worktree-
-            // file-vanished). A per-path failure is a true ghost: fail closed
-            // rather than silently under-deliver the commit.
-            const nsRes = await $`git diff --cached --name-status -z`.quiet().nothrow();
-            if (nsRes.exitCode !== 0) throw new Error(nsRes.stderr.toString());
-            const indexRemoved = parseCachedNameStatus(nsRes.stdout.toString());
-            const skip = [...committable].filter(p => indexRemoved.has(p)).sort();
-            if (skip.length > 0) {
-                console.log(`${DIM}   scoped staging: skipping ${skip.length} path(s) already removed in the index (staged deletion / rename source) — index state preserved${RESET}`);
-            }
-            const toStage = [...committable].filter(p => !indexRemoved.has(p)).sort();
-            const present = toStage.filter(p => fs.existsSync(p));
-            const absent = toStage.filter(p => !fs.existsSync(p));
-            if (present.length > 0) {
-                const addRes = await $`git add -- ${present}`.nothrow();
-                if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
-            }
-            for (const p of absent) {
-                const addRes = await $`git add -- ${p}`.nothrow();
-                if (addRes.exitCode !== 0) {
-                    console.log(`${RED}❌ git add failed for '${p}' — path matches neither the worktree nor the index (ghost path; possibly deleted mid-run after the scoped-staging snapshot).${RESET}`);
-                    console.error(addRes.stderr.toString());
-                    if (import.meta.main) {
-                      process.exit(1);
-                    }
-                }
-            }
-        }
-    } catch (e) {
-        console.log(`${RED}❌ git add failed: ${e}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
-    }
-} else {
-    // WARN soak (ADR-0055): keep git add -A so sync behavior is unchanged;
-    // the residual listing above is the audit trail of what promotion will
-    // start excluding.
-    try {
-        const addRes = await $`git add -A`.nothrow();
+  }
+  try {
+    if (committable.size > 0) {
+      // Staged-deletion handling (spec Amendment 2 §13,
+      // docs/designs/2026-09-24-constitution-s33-context-injection-design.md):
+      // a path the cached diff records as removed (`D`, or the SOURCE of a
+      // staged `R<score>` rename) exists in neither worktree nor index — a
+      // plain pathspec `git add` exits 128, and one poisoned pathspec makes
+      // the whole batch stage nothing. Those paths are skipped (the index
+      // already holds the desired state); present paths stage in one batch;
+      // every remaining absent path is attempted per-path — plain add still
+      // resolves while the index holds the path (staged-add-whose-worktree-
+      // file-vanished). A per-path failure is a true ghost: fail closed
+      // rather than silently under-deliver the commit.
+      const nsRes = await $`git diff --cached --name-status -z`.quiet().nothrow();
+      if (nsRes.exitCode !== 0) throw new Error(nsRes.stderr.toString());
+      const indexRemoved = parseCachedNameStatus(nsRes.stdout.toString());
+      const skip = [...committable].filter((p) => indexRemoved.has(p)).sort();
+      if (skip.length > 0) {
+        console.log(
+          `${DIM}   scoped staging: skipping ${skip.length} path(s) already removed in the index (staged deletion / rename source) — index state preserved${RESET}`,
+        );
+      }
+      const toStage = [...committable].filter((p) => !indexRemoved.has(p)).sort();
+      const present = toStage.filter((p) => fs.existsSync(p));
+      const absent = toStage.filter((p) => !fs.existsSync(p));
+      if (present.length > 0) {
+        const addRes = await $`git add -- ${present}`.nothrow();
         if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
-    } catch (e) {
-        console.log(`${RED}❌ git add failed: ${e}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
+      }
+      for (const p of absent) {
+        const addRes = await $`git add -- ${p}`.nothrow();
+        if (addRes.exitCode !== 0) {
+          console.log(
+            `${RED}❌ git add failed for '${p}' — path matches neither the worktree nor the index (ghost path; possibly deleted mid-run after the scoped-staging snapshot).${RESET}`,
+          );
+          console.error(addRes.stderr.toString());
+          if (import.meta.main) {
+            process.exit(1);
+          }
         }
+      }
     }
+  } catch (e) {
+    console.log(`${RED}❌ git add failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+} else {
+  // WARN soak (ADR-0055): keep git add -A so sync behavior is unchanged;
+  // the residual listing above is the audit trail of what promotion will
+  // start excluding.
+  try {
+    const addRes = await $`git add -A`.nothrow();
+    if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
+  } catch (e) {
+    console.log(`${RED}❌ git add failed: ${e}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
 }
 
 // ── Step 6.9 — final message composition (T-20261028-012, spec
@@ -2164,53 +2345,52 @@ if (scopedStaging) {
 // Invariant: nothing stages after this point (mirrors the step-1 snapshot
 // comment this step corrects).
 try {
-    const finalStagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
-    if (finalStagedRes.exitCode !== 0) throw new Error(finalStagedRes.stderr.toString());
-    const finalStagedPaths = finalStagedRes.stdout.toString().split('\0').filter(Boolean);
-    const finalMsg = composeCommitMessage(originalMsg, finalStagedPaths);
-    if (finalMsg !== msg) {
-        // Fail-closed language re-check — same gate wording as step 1 (derived
-        // messages are English by construction; caller-supplied ones already
-        // passed, so this only fires on a corrupted re-derivation).
-        if (hasNonEnglish(finalMsg)) {
-            console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
-            console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
-            if (import.meta.main) {
-              process.exit(1);
-            }
-        }
-        // (a) Rewrite today's session-summary header — anchor + escape pattern
-        // identical to the idempotency check in the memory-append block above.
-        const escapedEarlyMsg = msg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const summaryHeaderRe = new RegExp(
-            `(^## Session Summary\\s*\\n)${escapedEarlyMsg}(?=\\n|$)`,
-            'm'
+  const finalStagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
+  if (finalStagedRes.exitCode !== 0) throw new Error(finalStagedRes.stderr.toString());
+  const finalStagedPaths = finalStagedRes.stdout.toString().split("\0").filter(Boolean);
+  const finalMsg = composeCommitMessage(originalMsg, finalStagedPaths);
+  if (finalMsg !== msg) {
+    // Fail-closed language re-check — same gate wording as step 1 (derived
+    // messages are English by construction; caller-supplied ones already
+    // passed, so this only fires on a corrupted re-derivation).
+    if (hasNonEnglish(finalMsg)) {
+      console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
+      console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    }
+    // (a) Rewrite today's session-summary header — anchor + escape pattern
+    // identical to the idempotency check in the memory-append block above.
+    const escapedEarlyMsg = msg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const summaryHeaderRe = new RegExp(`(^## Session Summary\\s*\\n)${escapedEarlyMsg}(?=\\n|$)`, "m");
+    if (fs.existsSync(memoryFile)) {
+      const memoryBefore = fs.readFileSync(memoryFile, "utf-8");
+      const memoryAfter = memoryBefore.replace(
+        summaryHeaderRe,
+        (_match: string, header: string) => `${header}${finalMsg}`,
+      );
+      if (memoryAfter !== memoryBefore) {
+        fs.writeFileSync(memoryFile, memoryAfter, "utf8");
+        console.log(
+          `${CYAN}ℹ️  step 6.9: commit message re-derived from the final staged set — memory session-summary header updated ("${msg}" → "${finalMsg}")${RESET}`,
         );
-        if (fs.existsSync(memoryFile)) {
-            const memoryBefore = fs.readFileSync(memoryFile, 'utf-8');
-            const memoryAfter = memoryBefore.replace(
-                summaryHeaderRe,
-                (_match: string, header: string) => `${header}${finalMsg}`
-            );
-            if (memoryAfter !== memoryBefore) {
-                fs.writeFileSync(memoryFile, memoryAfter, 'utf8');
-                console.log(`${CYAN}ℹ️  step 6.9: commit message re-derived from the final staged set — memory session-summary header updated ("${msg}" → "${finalMsg}")${RESET}`);
-            }
-        }
-        // (b) Refresh the MEMORY.md index with the final message.
-        await $`bun run scripts/sync-md.ts ${date} "${finalMsg}"`;
-        // (c) Re-stage the corrected memory bytes (step 6.5 staged them as
-        // pipeline outputs; the index must carry the corrected content).
-        const restageRes = await $`git add -- ${memoryFile} memory/MEMORY.md`.nothrow();
-        if (restageRes.exitCode !== 0) throw new Error(restageRes.stderr.toString());
-        // (d) The commit and the PR title below proceed with the final message.
-        msg = finalMsg;
+      }
     }
+    // (b) Refresh the MEMORY.md index with the final message.
+    await $`bun run scripts/sync-md.ts ${date} "${finalMsg}"`;
+    // (c) Re-stage the corrected memory bytes (step 6.5 staged them as
+    // pipeline outputs; the index must carry the corrected content).
+    const restageRes = await $`git add -- ${memoryFile} memory/MEMORY.md`.nothrow();
+    if (restageRes.exitCode !== 0) throw new Error(restageRes.stderr.toString());
+    // (d) The commit and the PR title below proceed with the final message.
+    msg = finalMsg;
+  }
 } catch (e) {
-    console.log(`${RED}❌ step 6.9 (final message composition) failed: ${e}${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
-    }
+  console.log(`${RED}❌ step 6.9 (final message composition) failed: ${e}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const syncContext = crypto.randomUUID();
@@ -2218,7 +2398,7 @@ process.env.SYNC_ACTIVE = "1";
 process.env.DEV_SYNC_CONTEXT = syncContext;
 // Write to git repo root — hooks run from there, not from CWD
 const repoRootResult = await $`git rev-parse --show-toplevel`.quiet().nothrow();
-const repoRoot = repoRootResult?.stdout?.toString().trim() || '';
+const repoRoot = repoRootResult?.stdout?.toString().trim() || "";
 
 // Sweep stale sync-context files left behind by a killed/crashed run. Each run's
 // filename is unique (embeds its own UUID), so — unlike the old fixed-name scheme,
@@ -2226,16 +2406,18 @@ const repoRoot = repoRootResult?.stdout?.toString().trim() || '';
 // run's file is never reclaimed on its own and would otherwise accumulate forever.
 const STALE_MS = 60 * 60 * 1000; // 1 hour — generous margin over any real sync run
 try {
-    const sweepDir = repoRoot || '.';
-    for (const entry of fs.readdirSync(sweepDir)) {
-        if (!/^\.sync_context\..+\.tmp$/.test(entry)) continue;
-        const entryPath = path.join(sweepDir, entry);
-        try {
-            if (Date.now() - fs.statSync(entryPath).mtimeMs > STALE_MS) {
-                fs.unlinkSync(entryPath);
-            }
-        } catch { /* another process may have already removed it — ignore */ }
+  const sweepDir = repoRoot || ".";
+  for (const entry of fs.readdirSync(sweepDir)) {
+    if (!/^\.sync_context\..+\.tmp$/.test(entry)) continue;
+    const entryPath = path.join(sweepDir, entry);
+    try {
+      if (Date.now() - fs.statSync(entryPath).mtimeMs > STALE_MS) {
+        fs.unlinkSync(entryPath);
+      }
+    } catch {
+      /* another process may have already removed it — ignore */
     }
+  }
 } catch (err) {
   console.error(`[dev-sync] Error: ${err}`);
 }
@@ -2248,35 +2430,44 @@ process.env.DEV_SYNC_CONTEXT_FILE = tmpFileName;
 const tmpPath = repoRoot ? path.join(repoRoot, tmpFileName) : tmpFileName;
 fs.writeFileSync(tmpPath, syncContext);
 
-const cleanupTmp = () => { try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (err) {
-  console.error(`[dev-sync] Error: ${err}`);
-} };
-process.on('exit', cleanupTmp);
+const cleanupTmp = () => {
+  try {
+    if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+  } catch (err) {
+    console.error(`[dev-sync] Error: ${err}`);
+  }
+};
+process.on("exit", cleanupTmp);
 
 try {
-    const commitRes = await $`git commit -m ${msg}`.nothrow();
-    cleanupTmp();
-    if (commitRes.exitCode !== 0) throw new Error(commitRes.stderr.toString());
+  const commitRes = await $`git commit -m ${msg}`.nothrow();
+  cleanupTmp();
+  if (commitRes.exitCode !== 0) throw new Error(commitRes.stderr.toString());
 } catch (e) {
-    cleanupTmp();
-    console.log(`${RED}❌ git commit failed: ${e}${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
-    }
+  cleanupTmp();
+  console.log(`${RED}❌ git commit failed: ${e}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 const pushRetry = await withRetry(
-    () => $`git push -u origin ${branch}`.nothrow(),
-    { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0 },
-    'git push'
+  () => $`git push -u origin ${branch}`.nothrow(),
+  {
+    ...DEFAULT_CONFIG,
+    maxRetries: 3,
+    initialDelay: 1000,
+    isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0,
+  },
+  "git push",
 );
 const pushProc = pushRetry.result as { exitCode: number; stderr: { toString(): string } } | undefined;
 if (!pushRetry.success) {
-    const errMsg = pushProc?.stderr.toString().trim() || pushRetry.lastError?.message || 'unknown error';
-    console.log(`${RED}❌ git push failed: ${errMsg}${RESET}`);
-    if (import.meta.main) {
-      process.exit(1);
-    }
+  const errMsg = pushProc?.stderr.toString().trim() || pushRetry.lastError?.message || "unknown error";
+  console.log(`${RED}❌ git push failed: ${errMsg}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
+  }
 }
 
 // 6.7 Fresh-repo remote bootstrap (T-20260926-031, spec
@@ -2295,58 +2486,78 @@ if (!pushRetry.success) {
 const lsRemoteMain = await $`git ls-remote --heads origin main`.quiet().nothrow();
 const remoteMainExists = lsRemoteMain.exitCode === 0 && lsRemoteMain.stdout.toString().trim().length > 0;
 if (!remoteMainExists) {
-    console.log(`${CYAN}ℹ️  origin/main does not exist yet — running fresh-repo bootstrap (seed main, merge into '${branch}', re-push)${RESET}`);
-    const remoteUrlRes = await $`git remote get-url origin`.quiet().nothrow();
-    const remoteUrl = remoteUrlRes.stdout.toString().trim();
-    const slugMatch = remoteUrl.match(/github\.com[:/](.+\/.+?)(?:\.git)?$/i);
-    if (!slugMatch) {
-        console.error(`${RED}❌ Fresh-repo bootstrap failed: origin '${remoteUrl}' is not a GitHub slug, cannot seed origin/main.${RESET}`);
-        console.error(`${YELLOW}   Seed main manually (or point origin at GitHub), then re-run /sync to open the PR.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  console.log(
+    `${CYAN}ℹ️  origin/main does not exist yet — running fresh-repo bootstrap (seed main, merge into '${branch}', re-push)${RESET}`,
+  );
+  const remoteUrlRes = await $`git remote get-url origin`.quiet().nothrow();
+  const remoteUrl = remoteUrlRes.stdout.toString().trim();
+  const slugMatch = remoteUrl.match(/github\.com[:/](.+\/.+?)(?:\.git)?$/i);
+  if (!slugMatch) {
+    console.error(
+      `${RED}❌ Fresh-repo bootstrap failed: origin '${remoteUrl}' is not a GitHub slug, cannot seed origin/main.${RESET}`,
+    );
+    console.error(
+      `${YELLOW}   Seed main manually (or point origin at GitHub), then re-run /sync to open the PR.${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
-    const repoSlug = slugMatch![1];
-    const ghAuth = await $`gh auth status`.quiet().nothrow();
-    if (ghAuth.exitCode !== 0) {
-        console.error(`${RED}❌ Fresh-repo bootstrap failed: gh is not authenticated, cannot seed origin/main on ${repoSlug}.${RESET}`);
-        console.error(`${YELLOW}   Run 'gh auth login', or seed main manually, then re-run /sync.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  }
+  const repoSlug = slugMatch![1];
+  const ghAuth = await $`gh auth status`.quiet().nothrow();
+  if (ghAuth.exitCode !== 0) {
+    console.error(
+      `${RED}❌ Fresh-repo bootstrap failed: gh is not authenticated, cannot seed origin/main on ${repoSlug}.${RESET}`,
+    );
+    console.error(`${YELLOW}   Run 'gh auth login', or seed main manually, then re-run /sync.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
-    const repoName = repoSlug.split('/')[1] || repoSlug;
-    const seedB64 = Buffer.from(`# ${repoName}\n\nBootstrap seed commit created before the first /sync PR merged. See the PR history for the initial import.\n`).toString('base64');
-    const seedRes = await $`gh api repos/${repoSlug}/contents/README.md -X PUT -f message=${'chore: repo bootstrap seed (pre-first-sync)'} -f content=${seedB64} --jq .commit.sha`.quiet().nothrow();
-    if (seedRes.exitCode !== 0) {
-        console.error(`${RED}❌ Fresh-repo bootstrap failed: could not seed origin/main on ${repoSlug}.${RESET}`);
-        console.error(`${YELLOW}   ${seedRes.stderr.toString().trim().split('\n')[0] || 'gh api error'}${RESET}`);
-        console.error(`${YELLOW}   Seed main manually, then re-run /sync to open the PR.${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  }
+  const repoName = repoSlug.split("/")[1] || repoSlug;
+  const seedB64 = Buffer.from(
+    `# ${repoName}\n\nBootstrap seed commit created before the first /sync PR merged. See the PR history for the initial import.\n`,
+  ).toString("base64");
+  const seedRes =
+    await $`gh api repos/${repoSlug}/contents/README.md -X PUT -f message=${"chore: repo bootstrap seed (pre-first-sync)"} -f content=${seedB64} --jq .commit.sha`
+      .quiet()
+      .nothrow();
+  if (seedRes.exitCode !== 0) {
+    console.error(`${RED}❌ Fresh-repo bootstrap failed: could not seed origin/main on ${repoSlug}.${RESET}`);
+    console.error(`${YELLOW}   ${seedRes.stderr.toString().trim().split("\n")[0] || "gh api error"}${RESET}`);
+    console.error(`${YELLOW}   Seed main manually, then re-run /sync to open the PR.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
-    const fetchSeed = await $`git fetch origin main`.quiet().nothrow();
-    const mergeSeed = fetchSeed.exitCode === 0
-        ? await $`git merge origin/main --allow-unrelated-histories -X ours --no-edit`.nothrow()
-        : { exitCode: 1, stderr: fetchSeed.stderr };
-    if (mergeSeed.exitCode !== 0) {
-        console.error(`${RED}❌ Fresh-repo bootstrap failed: merging the seed into '${branch}' did not resolve cleanly.${RESET}`);
-        console.error(`${YELLOW}   ${(mergeSeed.stderr?.toString() ?? '').trim().split('\n')[0]}${RESET}`);
-        console.error(`${YELLOW}   Resolve the conflict on '${branch}', push, then re-run /sync (step 7 will open the PR).${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  }
+  const fetchSeed = await $`git fetch origin main`.quiet().nothrow();
+  const mergeSeed =
+    fetchSeed.exitCode === 0
+      ? await $`git merge origin/main --allow-unrelated-histories -X ours --no-edit`.nothrow()
+      : { exitCode: 1, stderr: fetchSeed.stderr };
+  if (mergeSeed.exitCode !== 0) {
+    console.error(
+      `${RED}❌ Fresh-repo bootstrap failed: merging the seed into '${branch}' did not resolve cleanly.${RESET}`,
+    );
+    console.error(`${YELLOW}   ${(mergeSeed.stderr?.toString() ?? "").trim().split("\n")[0]}${RESET}`);
+    console.error(
+      `${YELLOW}   Resolve the conflict on '${branch}', push, then re-run /sync (step 7 will open the PR).${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
     }
-    const rePush = await $`git push origin ${branch}`.nothrow();
-    if (rePush.exitCode !== 0) {
-        console.error(`${RED}❌ Fresh-repo bootstrap failed: re-push of '${branch}' was rejected.${RESET}`);
-        console.error(`${YELLOW}   ${rePush.stderr.toString().trim().split('\n')[0]}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
-        }
+  }
+  const rePush = await $`git push origin ${branch}`.nothrow();
+  if (rePush.exitCode !== 0) {
+    console.error(`${RED}❌ Fresh-repo bootstrap failed: re-push of '${branch}' was rejected.${RESET}`);
+    console.error(`${YELLOW}   ${rePush.stderr.toString().trim().split("\n")[0]}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
     }
-    console.log(`${GREEN}✓ Fresh-repo bootstrap complete: origin/main seeded, '${branch}' carries the seed merge — continuing to PR creation${RESET}`);
+  }
+  console.log(
+    `${GREEN}✓ Fresh-repo bootstrap complete: origin/main seeded, '${branch}' carries the seed merge — continuing to PR creation${RESET}`,
+  );
 }
 
 // 7. Generate PR body and open PR — but skip creation if an OPEN PR already exists
@@ -2358,136 +2569,160 @@ if (!remoteMainExists) {
 // on a reused branch name whose earlier PR was already MERGED/CLOSED, that lookup
 // still "succeeds" and this step would wrongly report "no new PR needed" while the
 // new commits sit with zero PR coverage. Must check state explicitly.
-const existingPrRes = await $`gh pr view ${branch} --json url,state --jq "if .state == \"OPEN\" then .url else \"\" end"`.quiet().nothrow();
-let existingPrUrl = existingPrRes.exitCode === 0 ? existingPrRes.stdout.toString().trim() : '';
+const existingPrRes =
+  await $`gh pr view ${branch} --json url,state --jq "if .state == \"OPEN\" then .url else \"\" end"`.quiet().nothrow();
+let existingPrUrl = existingPrRes.exitCode === 0 ? existingPrRes.stdout.toString().trim() : "";
 // REST fallback (promoted from Projects/co-abap's LOCAL-PATCH, lost in the 0.18.0
 // wave and re-landed here): cloud sessions return 403/GraphQL errors on
 // `gh pr view/create`, which would make this step read "no PR" and try to create
 // a duplicate. Detect the blocked shape and resolve the open PR via the REST API.
 const isGraphqlBlocked = (r: { exitCode: number; stderr: { toString(): string } } | null): boolean =>
-    !!r && r.exitCode !== 0 && /403|GraphQL/i.test(r.stderr.toString());
+  !!r && r.exitCode !== 0 && /403|GraphQL/i.test(r.stderr.toString());
 if (!existingPrUrl && isGraphqlBlocked(existingPrRes)) {
-    const originUrl = await $`git remote get-url origin`.quiet().nothrow();
-    const slugMatch = originUrl.stdout.toString().trim().match(/github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/);
-    if (slugMatch) {
-        const prsEndpoint = `repos/${slugMatch[1]}/pulls?head=${slugMatch[1].split('/')[0]}:${branch}&state=open`;
-        const prsJqExpr = '.[0].html_url // ""';
-        const rest = await $`gh api ${prsEndpoint} --jq ${prsJqExpr}`.quiet().nothrow();
-        if (rest.exitCode === 0) {
-            const restUrl = rest.stdout.toString().trim();
-            if (restUrl) {
-                console.log(`${YELLOW}⚠️  gh pr view blocked (403/GraphQL) — resolved via REST fallback${RESET}`);
-                existingPrUrl = restUrl;
-            }
-        }
+  const originUrl = await $`git remote get-url origin`.quiet().nothrow();
+  const slugMatch = originUrl.stdout
+    .toString()
+    .trim()
+    .match(/github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/);
+  if (slugMatch) {
+    const prsEndpoint = `repos/${slugMatch[1]}/pulls?head=${slugMatch[1].split("/")[0]}:${branch}&state=open`;
+    const prsJqExpr = '.[0].html_url // ""';
+    const rest = await $`gh api ${prsEndpoint} --jq ${prsJqExpr}`.quiet().nothrow();
+    if (rest.exitCode === 0) {
+      const restUrl = rest.stdout.toString().trim();
+      if (restUrl) {
+        console.log(`${YELLOW}⚠️  gh pr view blocked (403/GraphQL) — resolved via REST fallback${RESET}`);
+        existingPrUrl = restUrl;
+      }
     }
+  }
 }
 
 if (existingPrUrl) {
-    console.log(`${GREEN}✓ PR already exists for '${branch}' — commit pushed, no new PR needed:${RESET}`);
-    console.log(`  ${existingPrUrl}`);
+  console.log(`${GREEN}✓ PR already exists for '${branch}' — commit pushed, no new PR needed:${RESET}`);
+  console.log(`  ${existingPrUrl}`);
 } else {
-    // PR body selection:
-    //   1. --body-file provided by the agent (skills/sync/SKILL.md) → validate
-    //      English, submit via `gh pr create --body-file` (no shell escaping).
-    //   2. gen-pr-body.ts template fallback (commit message + file list).
-    //   3. .github/pull_request_template.md.
-    //   4. gh pr create --fill.
-    let prBody = "";
-    let bodySourceFile = "";
-    if (bodyFilePath) {
-        if (!fs.existsSync(bodyFilePath)) {
-            console.log(`${YELLOW}⚠️  --body-file not found (${bodyFilePath}) — falling back to template/--fill${RESET}`);
-        } else {
-            const agentBody = fs.readFileSync(bodyFilePath, 'utf-8').trim();
-            if (!agentBody) {
-                console.log(`${YELLOW}⚠️  --body-file is empty — falling back to template/--fill${RESET}`);
-            } else {
-                // Same English gate as the commit message above.
-                if (hasNonEnglish(agentBody)) {
-                    console.log(`${RED}❌ Agent-written PR body must be written in English (CONSTITUTION.md §3).${RESET}`);
-                    console.log(`${YELLOW}   Regenerate the body in English and re-run /sync.${RESET}`);
-                    if (import.meta.main) {
-                        process.exit(1);
-                    }
-                }
-                prBody = agentBody;
-                bodySourceFile = bodyFilePath;
-            }
-        }
-    }
-
-    if (!prBody) {
-        // Note: msg already passed the language gate above, so a non-zero exit here
-        // means gen-pr-body.ts hit a non-language failure — safe to fall back to the
-        // template/--fill paths below, but surface the reason instead of silently
-        // swallowing it.
-        try {
-            const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
-            if (genRes.exitCode !== 0) {
-                console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
-                console.log(genRes.stderr.toString().trim());
-            }
-            prBody = genRes.stdout.toString().trim();
-        } catch (err) {
-            console.error(`[dev-sync] Error: ${err}`);
-        }
-    }
-
-    // T-20261012-011: the PR title represents the FULL branch-vs-main
-    // surface — when the branch carries prior commits, the staged set
-    // under-represents it (PR #1509's 45-file branch re-landed via a
-    // 1-file PR #1510). If the caller message is weak, re-derive it from
-    // the full main...HEAD diff before creating the PR.
-    let prTitle = msg;
-    try {
-        const fullDiffRes = await $`git diff --name-only origin/main...HEAD -z`.quiet().nothrow();
-        if (fullDiffRes.exitCode === 0 && isWeakCommitMessage(prTitle)) {
-            const diffPaths = fullDiffRes.stdout.toString().split('\0').filter(Boolean);
-            if (diffPaths.length > 0) {
-                prTitle = deriveCommitMessage(diffPaths);
-                if (prTitle !== msg) {
-                    console.log(`${CYAN}ℹ️  PR title derived from the full branch-vs-main diff: ${prTitle}${RESET}`);
-                }
-            }
-        }
-    } catch (err) {
-        console.log(`${YELLOW}⚠️  full-diff title derivation skipped (${String(err).split('\n')[0]})${RESET}`);
-    }
-
-    let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
-    if (bodySourceFile) {
-        prCreateRetry = await withRetry(
-            () => $`gh pr create --title ${prTitle} --body-file ${bodySourceFile}`.nothrow(),
-            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0 },
-            'gh pr create'
-        );
-    } else if (prBody) {
-        prCreateRetry = await withRetry(
-            () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
-            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0 },
-            'gh pr create'
-        );
-    } else if (fs.existsSync(path.join('.github', 'pull_request_template.md'))) {
-        const prTpl = fs.readFileSync(path.join('.github', 'pull_request_template.md'), 'utf-8');
-        prCreateRetry = await withRetry(
-            () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
-            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0 },
-            'gh pr create'
-        );
+  // PR body selection:
+  //   1. --body-file provided by the agent (skills/sync/SKILL.md) → validate
+  //      English, submit via `gh pr create --body-file` (no shell escaping).
+  //   2. gen-pr-body.ts template fallback (commit message + file list).
+  //   3. .github/pull_request_template.md.
+  //   4. gh pr create --fill.
+  let prBody = "";
+  let bodySourceFile = "";
+  if (bodyFilePath) {
+    if (!fs.existsSync(bodyFilePath)) {
+      console.log(`${YELLOW}⚠️  --body-file not found (${bodyFilePath}) — falling back to template/--fill${RESET}`);
     } else {
-        prCreateRetry = await withRetry(
-            () => $`gh pr create --fill`.nothrow(),
-            { ...DEFAULT_CONFIG, maxRetries: 3, initialDelay: 1000, isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0 },
-            'gh pr create'
-        );
-    }
-
-    if (!prCreateRetry.success) {
-        const errMsg = prCreateRetry.lastError?.message || 'unknown error';
-        console.log(`${RED}❌ gh pr create failed: ${errMsg}${RESET}`);
-        if (import.meta.main) {
-          process.exit(1);
+      const agentBody = fs.readFileSync(bodyFilePath, "utf-8").trim();
+      if (!agentBody) {
+        console.log(`${YELLOW}⚠️  --body-file is empty — falling back to template/--fill${RESET}`);
+      } else {
+        // Same English gate as the commit message above.
+        if (hasNonEnglish(agentBody)) {
+          console.log(`${RED}❌ Agent-written PR body must be written in English (CONSTITUTION.md §3).${RESET}`);
+          console.log(`${YELLOW}   Regenerate the body in English and re-run /sync.${RESET}`);
+          if (import.meta.main) {
+            process.exit(1);
+          }
         }
+        prBody = agentBody;
+        bodySourceFile = bodyFilePath;
+      }
     }
+  }
+
+  if (!prBody) {
+    // Note: msg already passed the language gate above, so a non-zero exit here
+    // means gen-pr-body.ts hit a non-language failure — safe to fall back to the
+    // template/--fill paths below, but surface the reason instead of silently
+    // swallowing it.
+    try {
+      const genRes = await $`bun run scripts/gen-pr-body.ts "${msg}"`.quiet().nothrow();
+      if (genRes.exitCode !== 0) {
+        console.log(`${YELLOW}⚠️  gen-pr-body.ts failed — falling back to template/--fill:${RESET}`);
+        console.log(genRes.stderr.toString().trim());
+      }
+      prBody = genRes.stdout.toString().trim();
+    } catch (err) {
+      console.error(`[dev-sync] Error: ${err}`);
+    }
+  }
+
+  // T-20261012-011: the PR title represents the FULL branch-vs-main
+  // surface — when the branch carries prior commits, the staged set
+  // under-represents it (PR #1509's 45-file branch re-landed via a
+  // 1-file PR #1510). If the caller message is weak, re-derive it from
+  // the full main...HEAD diff before creating the PR.
+  let prTitle = msg;
+  try {
+    const fullDiffRes = await $`git diff --name-only origin/main...HEAD -z`.quiet().nothrow();
+    if (fullDiffRes.exitCode === 0 && isWeakCommitMessage(prTitle)) {
+      const diffPaths = fullDiffRes.stdout.toString().split("\0").filter(Boolean);
+      if (diffPaths.length > 0) {
+        prTitle = deriveCommitMessage(diffPaths);
+        if (prTitle !== msg) {
+          console.log(`${CYAN}ℹ️  PR title derived from the full branch-vs-main diff: ${prTitle}${RESET}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.log(`${YELLOW}⚠️  full-diff title derivation skipped (${String(err).split("\n")[0]})${RESET}`);
+  }
+
+  let prCreateRetry: Awaited<ReturnType<typeof withRetry>>;
+  if (bodySourceFile) {
+    prCreateRetry = await withRetry(
+      () => $`gh pr create --title ${prTitle} --body-file ${bodySourceFile}`.nothrow(),
+      {
+        ...DEFAULT_CONFIG,
+        maxRetries: 3,
+        initialDelay: 1000,
+        isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0,
+      },
+      "gh pr create",
+    );
+  } else if (prBody) {
+    prCreateRetry = await withRetry(
+      () => $`gh pr create --title ${msg} --body ${prBody}`.nothrow(),
+      {
+        ...DEFAULT_CONFIG,
+        maxRetries: 3,
+        initialDelay: 1000,
+        isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0,
+      },
+      "gh pr create",
+    );
+  } else if (fs.existsSync(path.join(".github", "pull_request_template.md"))) {
+    const prTpl = fs.readFileSync(path.join(".github", "pull_request_template.md"), "utf-8");
+    prCreateRetry = await withRetry(
+      () => $`gh pr create --title ${msg} --body ${prTpl}`.nothrow(),
+      {
+        ...DEFAULT_CONFIG,
+        maxRetries: 3,
+        initialDelay: 1000,
+        isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0,
+      },
+      "gh pr create",
+    );
+  } else {
+    prCreateRetry = await withRetry(
+      () => $`gh pr create --fill`.nothrow(),
+      {
+        ...DEFAULT_CONFIG,
+        maxRetries: 3,
+        initialDelay: 1000,
+        isSuccess: (r: unknown) => typeof r === "object" && r !== null && (r as { exitCode: number }).exitCode === 0,
+      },
+      "gh pr create",
+    );
+  }
+
+  if (!prCreateRetry.success) {
+    const errMsg = prCreateRetry.lastError?.message || "unknown error";
+    console.log(`${RED}❌ gh pr create failed: ${errMsg}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
 }

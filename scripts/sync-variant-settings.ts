@@ -51,12 +51,12 @@
 // Design: docs/designs/2026-10-17-pm-dispatch-gate-design.md §7 (v1.1.0);
 //         docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md §C2 (v1.0.0)
 
-import { existsSync, readFileSync, readdirSync, writeFileSync, renameSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync, readdirSync, writeFileSync, renameSync } from "node:fs";
+import { join, dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
-const WORKSPACE_ROOT = resolve(SCRIPT_DIR, '..');
+const WORKSPACE_ROOT = resolve(SCRIPT_DIR, "..");
 
 /**
  * The variant set this script syncs: every directory under `<rootDir>/templates` that
@@ -72,37 +72,54 @@ const WORKSPACE_ROOT = resolve(SCRIPT_DIR, '..');
  * settings management is a template concern; template-less projects must not enter it.
  */
 export function deriveVariants(rootDir: string): string[] {
-  const dir = join(rootDir, 'templates');
+  const dir = join(rootDir, "templates");
   if (!existsSync(dir)) return [];
   const out: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.isDirectory() && existsSync(join(dir, entry.name, 'variant.json'))) out.push(entry.name);
+    if (entry.isDirectory() && existsSync(join(dir, entry.name, "variant.json"))) out.push(entry.name);
   }
   return out.sort();
 }
 
-type Platform = 'claude' | 'gemini';
+type Platform = "claude" | "gemini";
 
 /** The events this script manages, per platform. A pair (platform, event) names one
  * managed channel: common's managed entries for that event are the sync source. */
 export const SYNC_TARGETS: ReadonlyArray<{ platform: Platform; event: string }> = [
-  { platform: 'claude', event: 'SessionStart' },
-  { platform: 'claude', event: 'PreToolUse' },
-  { platform: 'gemini', event: 'SessionStart' },
-  { platform: 'gemini', event: 'BeforeTool' },
+  { platform: "claude", event: "SessionStart" },
+  { platform: "claude", event: "PreToolUse" },
+  { platform: "gemini", event: "SessionStart" },
+  { platform: "gemini", event: "BeforeTool" },
 ];
 
 /** A variant hook entry is "managed" when its command contains one of these
  * substrings — the stable identity used to pair common and variant entries. */
-export const MANAGED_SUBSTRINGS: readonly string[] = ['pm-role-bootstrap', 'pm-dispatch-gate', 'delete-guard', 'trail/hook.cjs'];
+export const MANAGED_SUBSTRINGS: readonly string[] = [
+  "pm-role-bootstrap",
+  "pm-dispatch-gate",
+  "delete-guard",
+  "trail/hook.cjs",
+];
 
 export function isManaged(command: string): boolean {
   return MANAGED_SUBSTRINGS.some((s) => command.includes(s));
 }
 
-interface HookEntry { type?: string; command?: string; timeout?: number; [k: string]: unknown }
-interface HookGroup { matcher?: string; hooks?: HookEntry[]; [k: string]: unknown }
-interface Settings { hooks?: { [event: string]: unknown }; [k: string]: unknown }
+interface HookEntry {
+  type?: string;
+  command?: string;
+  timeout?: number;
+  [k: string]: unknown;
+}
+interface HookGroup {
+  matcher?: string;
+  hooks?: HookEntry[];
+  [k: string]: unknown;
+}
+interface Settings {
+  hooks?: { [event: string]: unknown };
+  [k: string]: unknown;
+}
 
 /** Managed hook entries living under one event channel of a settings file.
  * Only group-shaped entries (`hooks` array) are scanned: managed entries are
@@ -115,7 +132,7 @@ function managedEntries(settings: Settings, event: string): HookEntry[] {
   for (const group of list as HookGroup[]) {
     if (!Array.isArray(group.hooks)) continue; // flat entry — not a managed channel
     for (const hook of group.hooks) {
-      if (typeof hook.command === 'string' && isManaged(hook.command)) out.push(hook);
+      if (typeof hook.command === "string" && isManaged(hook.command)) out.push(hook);
     }
   }
   return out;
@@ -149,19 +166,21 @@ function sameFamily(wanted: string, seen: string): boolean {
 export function syncManagedEntries(common: Settings, variant: Settings, event: string): SyncResult {
   const wanted = managedEntries(common, event);
   const result: SyncResult = { changed: false, settings: variant, added: 0, updated: 0, removed: 0, pruned: 0 };
-  const hooks = variant.hooks ?? (variant.hooks = {});
-  const list: HookGroup[] = Array.isArray(hooks[event]) ? (hooks[event] as HookGroup[]) : (hooks[event] = []);
+  if (!variant.hooks) variant.hooks = {};
+  const hooks = variant.hooks;
+  if (!Array.isArray(hooks[event])) hooks[event] = [];
+  const list: HookGroup[] = hooks[event] as HookGroup[];
 
   for (const group of list) {
     if (!Array.isArray(group.hooks)) continue; // flat entry — preserve verbatim
     for (let i = group.hooks.length - 1; i >= 0; i--) {
       const hook = group.hooks[i];
-      if (typeof hook.command !== 'string' || !isManaged(hook.command)) continue;
+      if (typeof hook.command !== "string" || !isManaged(hook.command)) continue;
       const match = wanted.find((w) => JSON.stringify(w) === JSON.stringify(hook));
       if (match) {
         wanted.splice(wanted.indexOf(match), 1); // satisfied verbatim
-      } else if (wanted.some((w) => typeof w.command === 'string' && sameFamily(w.command!, hook.command!))) {
-        const w = wanted.find((x) => typeof x.command === 'string' && sameFamily(x.command!, hook.command!))!;
+      } else if (wanted.some((w) => typeof w.command === "string" && sameFamily(w.command!, hook.command!))) {
+        const w = wanted.find((x) => typeof x.command === "string" && sameFamily(x.command!, hook.command!))!;
         group.hooks[i] = w; // stale → replace in place
         wanted.splice(wanted.indexOf(w), 1);
         result.updated++;
@@ -191,31 +210,44 @@ export function syncManagedEntries(common: Settings, variant: Settings, event: s
 
 /** v1.0.0 API retained as a wrapper: managed SessionStart entries only. */
 export function syncManagedSessionStart(common: Settings, variant: Settings): SyncResult {
-  return syncManagedEntries(common, variant, 'SessionStart');
+  return syncManagedEntries(common, variant, "SessionStart");
 }
 
 function settingsPath(rootDir: string, variant: string, platform: Platform): string {
-  return join(rootDir, 'templates', variant, `.${platform}`, 'settings.json');
+  return join(rootDir, "templates", variant, `.${platform}`, "settings.json");
 }
 
 export function drifts(rootDir: string): string[] {
   const out: string[] = [];
   const variants = deriveVariants(rootDir);
-  for (const platform of ['claude', 'gemini'] as const) {
-    const commonPath = settingsPath(rootDir, 'common', platform);
-    if (!existsSync(commonPath)) { out.push(`templates/common/.${platform}/settings.json missing`); continue; }
-    const common = JSON.parse(readFileSync(commonPath, 'utf-8')) as Settings;
+  for (const platform of ["claude", "gemini"] as const) {
+    const commonPath = settingsPath(rootDir, "common", platform);
+    if (!existsSync(commonPath)) {
+      out.push(`templates/common/.${platform}/settings.json missing`);
+      continue;
+    }
+    const common = JSON.parse(readFileSync(commonPath, "utf-8")) as Settings;
     for (const v of variants) {
       const p = settingsPath(rootDir, v, platform);
-      if (!existsSync(p)) { out.push(`templates/${v}/.${platform}/settings.json missing`); continue; }
+      if (!existsSync(p)) {
+        out.push(`templates/${v}/.${platform}/settings.json missing`);
+        continue;
+      }
       let total = { added: 0, updated: 0, removed: 0, pruned: 0 };
-      const variant = JSON.parse(readFileSync(p, 'utf-8')) as Settings;
+      const variant = JSON.parse(readFileSync(p, "utf-8")) as Settings;
       for (const { event } of SYNC_TARGETS.filter((t) => t.platform === platform)) {
         const merged = syncManagedEntries(common, JSON.parse(JSON.stringify(variant)), event);
-        total = { added: total.added + merged.added, updated: total.updated + merged.updated, removed: total.removed + merged.removed, pruned: total.pruned + merged.pruned };
+        total = {
+          added: total.added + merged.added,
+          updated: total.updated + merged.updated,
+          removed: total.removed + merged.removed,
+          pruned: total.pruned + merged.pruned,
+        };
       }
       if (total.added + total.updated + total.removed + total.pruned > 0) {
-        out.push(`templates/${v}/.${platform}/settings.json drifts (added ${total.added}, updated ${total.updated}, removed ${total.removed}, pruned ${total.pruned})`);
+        out.push(
+          `templates/${v}/.${platform}/settings.json drifts (added ${total.added}, updated ${total.updated}, removed ${total.removed}, pruned ${total.pruned})`,
+        );
       }
     }
   }
@@ -224,50 +256,65 @@ export function drifts(rootDir: string): string[] {
 
 function main(): void {
   const root = process.env.TICKET_WORKSPACE_ROOT ?? WORKSPACE_ROOT; // test seam, same pattern as ticket.ts
-  if (process.argv.includes('--list')) {
+  if (process.argv.includes("--list")) {
     // v1.3.0: print the derived variant set without touching any file (verification path).
     for (const v of deriveVariants(root)) console.log(v);
     return;
   }
-  const check = process.argv.includes('--check');
+  const check = process.argv.includes("--check");
   if (check) {
     const found = drifts(root);
     if (found.length > 0) {
       console.error(`❌ variant settings.json managed-hook drift (${found.length}):`);
       for (const f of found) console.error(`   ${f}`);
-      console.error('   Remedy: bun scripts/sync-variant-settings.ts');
+      console.error("   Remedy: bun scripts/sync-variant-settings.ts");
       process.exit(1);
     }
-    console.log(`✅ variant settings.json managed hooks: ${deriveVariants(root).length} variants × ${SYNC_TARGETS.length} channels in sync with templates/common.`);
+    console.log(
+      `✅ variant settings.json managed hooks: ${deriveVariants(root).length} variants × ${SYNC_TARGETS.length} channels in sync with templates/common.`,
+    );
     return;
   }
   const variants = deriveVariants(root);
   let touched = 0;
-  for (const platform of ['claude', 'gemini'] as const) {
-    const commonPath = settingsPath(root, 'common', platform);
-    if (!existsSync(commonPath)) { console.log(`  ⚠️  templates/common/.${platform}/settings.json missing, skipping ${platform}`); continue; }
-    const common = JSON.parse(readFileSync(commonPath, 'utf-8')) as Settings;
+  for (const platform of ["claude", "gemini"] as const) {
+    const commonPath = settingsPath(root, "common", platform);
+    if (!existsSync(commonPath)) {
+      console.log(`  ⚠️  templates/common/.${platform}/settings.json missing, skipping ${platform}`);
+      continue;
+    }
+    const common = JSON.parse(readFileSync(commonPath, "utf-8")) as Settings;
     for (const v of variants) {
       const p = settingsPath(root, v, platform);
-      if (!existsSync(p)) { console.log(`  ⚠️  templates/${v}/.${platform}/settings.json missing, skipping`); continue; }
-      const variant = JSON.parse(readFileSync(p, 'utf-8')) as Settings;
+      if (!existsSync(p)) {
+        console.log(`  ⚠️  templates/${v}/.${platform}/settings.json missing, skipping`);
+        continue;
+      }
+      const variant = JSON.parse(readFileSync(p, "utf-8")) as Settings;
       let res = { added: 0, updated: 0, removed: 0, changed: false };
       for (const { event } of SYNC_TARGETS.filter((t) => t.platform === platform)) {
         const r = syncManagedEntries(common, variant, event);
-        res = { added: res.added + r.added, updated: res.updated + r.updated, removed: res.removed + r.removed, changed: res.changed || r.changed };
+        res = {
+          added: res.added + r.added,
+          updated: res.updated + r.updated,
+          removed: res.removed + r.removed,
+          changed: res.changed || r.changed,
+        };
       }
       if (res.changed) {
         const tmp = `${p}.tmp-${process.pid}`;
-        writeFileSync(tmp, JSON.stringify(variant, null, 2) + '\n', 'utf-8');
+        writeFileSync(tmp, JSON.stringify(variant, null, 2) + "\n", "utf-8");
         renameSync(tmp, p);
-        console.log(`  ✓ templates/${v}/.${platform}/settings.json — added ${res.added}, updated ${res.updated}, removed ${res.removed}`);
+        console.log(
+          `  ✓ templates/${v}/.${platform}/settings.json — added ${res.added}, updated ${res.updated}, removed ${res.removed}`,
+        );
         touched++;
       } else {
         console.log(`  —  templates/${v}/.${platform}/settings.json in sync`);
       }
     }
   }
-  console.log(`\n${touched === 0 ? 'All variant settings in sync.' : `${touched} variant file(s) updated.`}`);
+  console.log(`\n${touched === 0 ? "All variant settings in sync." : `${touched} variant file(s) updated.`}`);
 }
 
 if (import.meta.main) main();

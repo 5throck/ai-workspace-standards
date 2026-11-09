@@ -22,17 +22,17 @@
  *   Module import: import { safeValidateExtends } from './helpers/extends-validator.ts'
  */
 
-import { readFileSync, statSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { validateExtendsSecurity, SecurityValidationResult } from './security-validator.ts';
+import { readFileSync, statSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { validateExtendsSecurity, SecurityValidationResult } from "./security-validator.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants (ADR-0033 Security Limits)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const MAX_EXTENDS_DEPTH = 3;        // Maximum extends chain depth (L2→L1→L0)
-const MAX_FILE_SIZE = 100_000;      // 100KB maximum file size
-const MAX_PARSE_TIME = 5000;       // 5 seconds maximum parse time
+const MAX_EXTENDS_DEPTH = 3; // Maximum extends chain depth (L2→L1→L0)
+const MAX_FILE_SIZE = 100_000; // 100KB maximum file size
+const MAX_PARSE_TIME = 5000; // 5 seconds maximum parse time
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -40,7 +40,13 @@ const MAX_PARSE_TIME = 5000;       // 5 seconds maximum parse time
 
 export interface ExtendsValidationError {
   valid: false;
-  error_type: 'circular_reference' | 'depth_exceeded' | 'file_size_exceeded' | 'parse_timeout' | 'file_not_found' | 'security_violation';
+  error_type:
+    | "circular_reference"
+    | "depth_exceeded"
+    | "file_size_exceeded"
+    | "parse_timeout"
+    | "file_not_found"
+    | "security_violation";
   message: string;
   current_value: number | string;
   limit: number | string;
@@ -100,7 +106,7 @@ function parseFrontmatter(content: string): { frontmatter: Frontmatter; content:
 
     return {
       frontmatter,
-      content: match[2] ? match[2].trim() : ''
+      content: match[2] ? match[2].trim() : "",
     };
   } catch (error) {
     logWarning(`Failed to parse YAML frontmatter: ${(error as Error).message}`);
@@ -123,7 +129,7 @@ function validatePathSecurity(extendsPath: string, currentFilePath: string): { v
   if (!securityResult.valid) {
     return {
       valid: false,
-      error: `Security violation: ${securityResult.message} | Input: ${securityResult.malicious_input} | Remediation: ${securityResult.remediation}`
+      error: `Security violation: ${securityResult.message} | Input: ${securityResult.malicious_input} | Remediation: ${securityResult.remediation}`,
     };
   }
 
@@ -182,7 +188,7 @@ export function validateExtendsChain(
   filePath: string,
   visited: Set<string> = new Set(),
   currentDepth: number = 0,
-  startTime: number = Date.now()
+  startTime: number = Date.now(),
 ): ExtendsValidationResult {
   const chain = Array.from(visited);
 
@@ -192,30 +198,30 @@ export function validateExtendsChain(
   // Check 1: Circular reference detection
   if (visited.has(normalizedPath)) {
     logError(`Circular reference detected: ${normalizedPath}`);
-    logError(`Extends chain: ${chain.join(' → ')} → ${normalizedPath}`);
+    logError(`Extends chain: ${chain.join(" → ")} → ${normalizedPath}`);
 
     return {
       valid: false,
-      error_type: 'circular_reference',
+      error_type: "circular_reference",
       message: `Circular reference detected: ${normalizedPath} appears multiple times in extends chain`,
       current_value: normalizedPath,
-      limit: 'unique file path',
-      chain: [...chain, normalizedPath]
+      limit: "unique file path",
+      chain: [...chain, normalizedPath],
     };
   }
 
   // Check 2: Maximum depth enforcement
   if (currentDepth >= MAX_EXTENDS_DEPTH) {
     logError(`Maximum extends depth exceeded: ${currentDepth} >= ${MAX_EXTENDS_DEPTH}`);
-    logError(`Extends chain: ${chain.join(' → ')}`);
+    logError(`Extends chain: ${chain.join(" → ")}`);
 
     return {
       valid: false,
-      error_type: 'depth_exceeded',
+      error_type: "depth_exceeded",
       message: `Maximum extends depth (${MAX_EXTENDS_DEPTH}) exceeded. Current depth: ${currentDepth}`,
       current_value: currentDepth,
       limit: MAX_EXTENDS_DEPTH,
-      chain: [...chain, normalizedPath]
+      chain: [...chain, normalizedPath],
     };
   }
 
@@ -226,11 +232,11 @@ export function validateExtendsChain(
 
     return {
       valid: false,
-      error_type: 'file_size_exceeded',
+      error_type: "file_size_exceeded",
       message: `File size (${sizeCheck.size} bytes) exceeds maximum (${MAX_FILE_SIZE} bytes)`,
       current_value: sizeCheck.size,
       limit: MAX_FILE_SIZE,
-      chain: [...chain, normalizedPath]
+      chain: [...chain, normalizedPath],
     };
   }
 
@@ -241,28 +247,28 @@ export function validateExtendsChain(
 
     return {
       valid: false,
-      error_type: 'parse_timeout',
+      error_type: "parse_timeout",
       message: `Parse time (${timeCheck.elapsed}ms) exceeds maximum (${MAX_PARSE_TIME}ms)`,
       current_value: timeCheck.elapsed,
       limit: MAX_PARSE_TIME,
-      chain: [...chain, normalizedPath]
+      chain: [...chain, normalizedPath],
     };
   }
 
   // Read and parse the file
   let content: string;
   try {
-    content = readFileSync(normalizedPath, 'utf-8');
+    content = readFileSync(normalizedPath, "utf-8");
   } catch (error) {
     logError(`File not found: ${normalizedPath}`);
 
     return {
       valid: false,
-      error_type: 'file_not_found',
+      error_type: "file_not_found",
       message: `Extended file not found: ${normalizedPath}`,
       current_value: normalizedPath,
-      limit: 'existing file path',
-      chain: [...chain, normalizedPath]
+      limit: "existing file path",
+      chain: [...chain, normalizedPath],
     };
   }
 
@@ -274,7 +280,7 @@ export function validateExtendsChain(
     return {
       valid: true,
       chain: [...chain, normalizedPath],
-      depth: currentDepth
+      depth: currentDepth,
     };
   }
 
@@ -288,11 +294,11 @@ export function validateExtendsChain(
 
     return {
       valid: false,
-      error_type: 'security_violation',
-      message: securityCheck.error || 'Security validation failed',
+      error_type: "security_violation",
+      message: securityCheck.error || "Security validation failed",
       current_value: frontmatter.extends,
-      limit: 'safe extends path',
-      chain: [...chain, normalizedPath]
+      limit: "safe extends path",
+      chain: [...chain, normalizedPath],
     };
   }
 
@@ -323,11 +329,11 @@ export function safeValidateExtends(filePath: string): ExtendsValidationResult {
 
     return {
       valid: false,
-      error_type: 'parse_timeout',
+      error_type: "parse_timeout",
       message: `Unexpected error during validation: ${errorMessage}`,
-      current_value: 'unknown',
-      limit: 'successful validation',
-      chain: [filePath]
+      current_value: "unknown",
+      limit: "successful validation",
+      chain: [filePath],
     };
   }
 }
@@ -340,8 +346,8 @@ if (import.meta.main) {
   const args = process.argv.slice(2);
 
   if (args.length < 1) {
-    console.error('Usage: bun scripts/helpers/extends-validator.ts <file-path>');
-    console.error('  file-path: Path to the file to validate');
+    console.error("Usage: bun scripts/helpers/extends-validator.ts <file-path>");
+    console.error("  file-path: Path to the file to validate");
     process.exit(1);
   }
 
@@ -353,14 +359,14 @@ if (import.meta.main) {
   if (result.valid) {
     console.log(`✅ Validation passed`);
     console.log(`   Chain depth: ${result.depth}`);
-    console.log(`   Extends chain: ${result.chain.join(' → ')}`);
+    console.log(`   Extends chain: ${result.chain.join(" → ")}`);
   } else {
     console.error(`❌ Validation failed`);
     console.error(`   Error type: ${result.error_type}`);
     console.error(`   Message: ${result.message}`);
     console.error(`   Current value: ${result.current_value}`);
     console.error(`   Limit: ${result.limit}`);
-    console.error(`   Chain: ${result.chain.join(' → ')}`);
+    console.error(`   Chain: ${result.chain.join(" → ")}`);
     process.exit(1);
   }
 }

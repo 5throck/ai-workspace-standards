@@ -14,46 +14,46 @@
  */
 export const CAPABILITY_REGISTRY = {
   // Game Design
-  GAME_DESIGN:           'game-design',
-  GAME_LOOP:             'game-loop',
-  LEVEL_DESIGN:          'level-design',
-  ARCADE_MECHANICS:      'arcade-mechanics',
-  PUZZLE_MECHANICS:      'puzzle-mechanics',
+  GAME_DESIGN: "game-design",
+  GAME_LOOP: "game-loop",
+  LEVEL_DESIGN: "level-design",
+  ARCADE_MECHANICS: "arcade-mechanics",
+  PUZZLE_MECHANICS: "puzzle-mechanics",
 
   // Implementation
-  ENGINE_IMPLEMENTATION: 'engine-implementation',
-  ASSET_PIPELINE:        'asset-pipeline',
-  VISUAL_DESIGN:         'visual-design',
-  AUDIO_DESIGN:          'audio-design',
+  ENGINE_IMPLEMENTATION: "engine-implementation",
+  ASSET_PIPELINE: "asset-pipeline",
+  VISUAL_DESIGN: "visual-design",
+  AUDIO_DESIGN: "audio-design",
 
   // Quality
-  DEBUGGING:             'debugging',
-  TESTING:               'testing',
-  SECURITY:              'security',
+  DEBUGGING: "debugging",
+  TESTING: "testing",
+  SECURITY: "security",
 
   // Cross-cutting
-  ARCHITECTURE:          'architecture',
-  ENVIRONMENT_SETUP:     'environment-setup',
-  AUTHORIZATION_GATE:    'authorization-gate',
-  ESCALATION_PROTOCOL:   'escalation-protocol',
+  ARCHITECTURE: "architecture",
+  ENVIRONMENT_SETUP: "environment-setup",
+  AUTHORIZATION_GATE: "authorization-gate",
+  ESCALATION_PROTOCOL: "escalation-protocol",
 
   // Design & UX
-  SERVICE_DESIGN:        'service-design',
-  UI_UX_INTELLIGENCE:   'ui-ux-intelligence',
+  SERVICE_DESIGN: "service-design",
+  UI_UX_INTELLIGENCE: "ui-ux-intelligence",
 
   // Consulting
-  ENGAGEMENT_CONTEXT:    'engagement-context',
-  DELIVERABLE_STANDARDS: 'deliverable-standards',
-  CLIENT_ENGAGEMENT:     'client-engagement',
-  ANALYSIS:              'analysis',
-  REPORTING:             'reporting',
-  PRESENTATION:          'presentation',
+  ENGAGEMENT_CONTEXT: "engagement-context",
+  DELIVERABLE_STANDARDS: "deliverable-standards",
+  CLIENT_ENGAGEMENT: "client-engagement",
+  ANALYSIS: "analysis",
+  REPORTING: "reporting",
+  PRESENTATION: "presentation",
 
   // News (co-news newsroom workflow)
-  DOCUMENTATION:         'documentation',
-  KNOWLEDGE_SHARING:     'knowledge-sharing',
-  COMMUNICATION:         'communication',
-  TASK_MANAGEMENT:       'task-management',
+  DOCUMENTATION: "documentation",
+  KNOWLEDGE_SHARING: "knowledge-sharing",
+  COMMUNICATION: "communication",
+  TASK_MANAGEMENT: "task-management",
 } as const;
 
 /**

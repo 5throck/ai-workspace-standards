@@ -18,11 +18,11 @@
  * these by default, not by exception.
  */
 export const SHARED_PIPELINE_FILES: readonly string[] = [
-    'CHANGELOG.md',
-    'memory/MEMORY.md',
-    'docs/VERSION_MANIFEST.md',
-    'scripts/README.md',
-    'templates/common/scripts/README.md',
+  "CHANGELOG.md",
+  "memory/MEMORY.md",
+  "docs/VERSION_MANIFEST.md",
+  "scripts/README.md",
+  "templates/common/scripts/README.md",
 ];
 
 /**
@@ -31,8 +31,8 @@ export const SHARED_PIPELINE_FILES: readonly string[] = [
  * Windows separators are normalized before matching.
  */
 export function sharedPipelineFilesChanged(changedOnMain: string[]): string[] {
-    const set = new Set(changedOnMain.map((f) => f.replaceAll('\\', '/')));
-    return SHARED_PIPELINE_FILES.filter((f) => set.has(f));
+  const set = new Set(changedOnMain.map((f) => f.replaceAll("\\", "/")));
+  return SHARED_PIPELINE_FILES.filter((f) => set.has(f));
 }
 
 /**
@@ -40,8 +40,8 @@ export function sharedPipelineFilesChanged(changedOnMain: string[]): string[] {
  * conflict paths. Empty/whitespace lines are dropped; order is preserved.
  */
 export function parseUnresolvedConflicts(gitOutput: string): string[] {
-    return gitOutput
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean);
+  return gitOutput
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 }

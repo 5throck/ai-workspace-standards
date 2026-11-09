@@ -27,22 +27,34 @@
 // Test seam: UPSTREAM_INSTALL_HOME replaces the home directory for every target (and CODEX_HOME for
 // the codex child process), so tests never touch the real user configs.
 
-import { chmodSync, copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, unlinkSync, writeFileSync, renameSync } from 'node:fs';
-import { join, dirname, resolve, basename, isAbsolute } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { homedir, platform } from 'node:os';
-import { spawnSync } from 'node:child_process';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+  renameSync,
+} from "node:fs";
+import { join, dirname, resolve, basename, isAbsolute } from "node:path";
+import { fileURLToPath } from "node:url";
+import { homedir, platform } from "node:os";
+import { spawnSync } from "node:child_process";
 import {
   readHermesMcpEntry,
   setHermesMcpEntry,
   removeHermesMcpEntry,
   type McpStdioEntry,
-} from './helpers/mcp-config-edit.ts';
+} from "./helpers/mcp-config-edit.ts";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
-const WORKSPACE_ROOT = resolve(SCRIPT_DIR, '..');
-const SERVER_PATH = join(WORKSPACE_ROOT, 'scripts', 'mcp-upstream-server.ts');
-const SERVER_NAME = 'ai-workspace-upstream';
+const WORKSPACE_ROOT = resolve(SCRIPT_DIR, "..");
+const SERVER_PATH = join(WORKSPACE_ROOT, "scripts", "mcp-upstream-server.ts");
+const SERVER_NAME = "ai-workspace-upstream";
 
 // One target per config file, so a target covers every client that reads that file:
 //   claude         Claude Code CLI + Claude Code tab of the Claude Desktop App  (~/.claude.json)
@@ -51,26 +63,26 @@ const SERVER_NAME = 'ai-workspace-upstream';
 //   gemini         Gemini CLI                                                  (~/.gemini/settings.json)
 //   codex          Codex CLI + Codex Desktop App                               (~/.codex/config.toml, via `codex mcp`)
 //   hermes         Hermes Agent + Hermes CLI                                   (~/.hermes/config.yaml)
-type TargetId = 'claude' | 'claude-desktop' | 'antigravity' | 'gemini' | 'codex' | 'hermes';
-const ALL_TARGETS: TargetId[] = ['claude', 'claude-desktop', 'antigravity', 'gemini', 'codex', 'hermes'];
+type TargetId = "claude" | "claude-desktop" | "antigravity" | "gemini" | "codex" | "hermes";
+const ALL_TARGETS: TargetId[] = ["claude", "claude-desktop", "antigravity", "gemini", "codex", "hermes"];
 
 function findBun(): string {
   const base = basename(process.execPath).toLowerCase();
-  if (base === 'bun' || base === 'bun.exe') return process.execPath;
-  const found = Bun.which('bun');
+  if (base === "bun" || base === "bun.exe") return process.execPath;
+  const found = Bun.which("bun");
   if (found && isAbsolute(found)) return found;
-  throw new Error('bun not found: cannot determine an absolute path for the client config');
+  throw new Error("bun not found: cannot determine an absolute path for the client config");
 }
 
 function home(): string {
   if (process.env.UPSTREAM_INSTALL_HOME) return process.env.UPSTREAM_INSTALL_HOME;
-  if (platform() === 'win32') return process.env.USERPROFILE || homedir();
+  if (platform() === "win32") return process.env.USERPROFILE || homedir();
   return homedir();
 }
 
 function normalizePath(p: string): string {
   // On Windows, use forward slashes in client configs
-  return platform() === 'win32' ? p.replace(/\\/g, '/') : p;
+  return platform() === "win32" ? p.replace(/\\/g, "/") : p;
 }
 
 function sameEntry(a: McpStdioEntry, b: McpStdioEntry): boolean {
@@ -94,9 +106,15 @@ function pruneOldBackups(configPath: string): void {
       .filter((f) => f.startsWith(prefix))
       .sort((a, b) => a.localeCompare(b)); // timestamp suffix sorts lexicographically
     for (const f of backups.slice(0, Math.max(0, backups.length - KEEP_BACKUPS))) {
-      try { unlinkSync(join(dir, f)); } catch { /* best-effort pruning */ }
+      try {
+        unlinkSync(join(dir, f));
+      } catch {
+        /* best-effort pruning */
+      }
     }
-  } catch { /* best-effort pruning — never block the install */ }
+  } catch {
+    /* best-effort pruning — never block the install */
+  }
 }
 
 function backupAndWrite(path: string, content: string): void {
@@ -117,14 +135,14 @@ function backupAndWrite(path: string, content: string): void {
       fail(`config changed while installing (${path}) — a client wrote it concurrently; re-run the installer`);
     }
     const tmpPath = `${realPath}.tmp-${process.pid}-${Date.now()}`;
-    writeFileSync(tmpPath, content, { encoding: 'utf-8', mode });
+    writeFileSync(tmpPath, content, { encoding: "utf-8", mode });
     renameSync(tmpPath, realPath);
     return;
   }
   mkdirSync(dirname(path), { recursive: true });
   // New config files can end up holding env secrets — restrictive from birth.
   const tmpPath = `${path}.tmp-${process.pid}-${Date.now()}`;
-  writeFileSync(tmpPath, content, { encoding: 'utf-8', mode: 0o600 });
+  writeFileSync(tmpPath, content, { encoding: "utf-8", mode: 0o600 });
   renameSync(tmpPath, path);
 }
 
@@ -157,11 +175,11 @@ function jsonAdapter(opts: {
     // Never treat an unreadable config as empty: a real run would overwrite the user's settings.
     let parsed: unknown;
     try {
-      parsed = JSON.parse(readFileSync(p, 'utf-8'));
+      parsed = JSON.parse(readFileSync(p, "utf-8"));
     } catch (err) {
       fail(`Cannot parse ${p}: ${(err as Error).message}. Fix or restore the file, then re-run.`);
     }
-    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
       fail(`${p} is not a JSON object. Refusing to continue.`);
     }
     return parsed as Record<string, any>;
@@ -174,7 +192,7 @@ function jsonAdapter(opts: {
     read() {
       const e = load().mcpServers?.[SERVER_NAME];
       if (e === undefined || e === null) return null;
-      return { command: String(e.command ?? ''), args: Array.isArray(e.args) ? e.args.map(String) : [] };
+      return { command: String(e.command ?? ""), args: Array.isArray(e.args) ? e.args.map(String) : [] };
     },
     write(entry) {
       const cfg = load();
@@ -192,99 +210,99 @@ function jsonAdapter(opts: {
 }
 
 const claude = jsonAdapter({
-  id: 'claude',
-  label: 'Claude Code',
-  path: () => join(home(), '.claude.json'),
+  id: "claude",
+  label: "Claude Code",
+  path: () => join(home(), ".claude.json"),
   detect: () => null, // always applies; the file is created when missing (v1 behaviour)
-  buildEntry: (e) => ({ type: 'stdio', command: e.command, args: e.args }),
-  nextSteps: ['Restart your Claude client (close and reopen)', 'Verify with: claude mcp list'],
+  buildEntry: (e) => ({ type: "stdio", command: e.command, args: e.args }),
+  nextSteps: ["Restart your Claude client (close and reopen)", "Verify with: claude mcp list"],
 });
 
 // Documented for macOS and Windows only (modelcontextprotocol.io/docs/develop/connect-local-servers);
 // the Claude Desktop App has no Linux build, so Linux has no path.
 function claudeDesktopConfigPath(): string | null {
-  if (platform() === 'win32') {
+  if (platform() === "win32") {
     // With the test seam active, %APPDATA% must not leak the real user profile into a test run.
     const appData = process.env.UPSTREAM_INSTALL_HOME
-      ? join(home(), 'AppData', 'Roaming')
-      : process.env.APPDATA || join(home(), 'AppData', 'Roaming');
-    return join(appData, 'Claude', 'claude_desktop_config.json');
+      ? join(home(), "AppData", "Roaming")
+      : process.env.APPDATA || join(home(), "AppData", "Roaming");
+    return join(appData, "Claude", "claude_desktop_config.json");
   }
-  if (platform() === 'darwin') {
-    return join(home(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
+  if (platform() === "darwin") {
+    return join(home(), "Library", "Application Support", "Claude", "claude_desktop_config.json");
   }
   return null;
 }
 
 const claudeDesktop = jsonAdapter({
-  id: 'claude-desktop',
-  label: 'Claude Desktop App (chat)',
-  path: () => claudeDesktopConfigPath() ?? fail('Claude Desktop App has no config path on this platform'),
+  id: "claude-desktop",
+  label: "Claude Desktop App (chat)",
+  path: () => claudeDesktopConfigPath() ?? fail("Claude Desktop App has no config path on this platform"),
   // The file is machine-global and hand-written (docs/graft-platform-integration.md): edit it only when it exists.
   detect: () => {
     const p = claudeDesktopConfigPath();
-    if (!p) return 'the Claude Desktop App is available for macOS and Windows only';
+    if (!p) return "the Claude Desktop App is available for macOS and Windows only";
     return existsSync(p) ? null : `${p} not found`;
   },
   buildEntry: (e) => ({ command: e.command, args: e.args }),
-  nextSteps: ['Quit and reopen the Claude Desktop App'],
+  nextSteps: ["Quit and reopen the Claude Desktop App"],
 });
 
 const antigravity = jsonAdapter({
-  id: 'antigravity',
-  label: 'Antigravity IDE + CLI',
-  path: () => join(home(), '.gemini', 'config', 'mcp_config.json'),
+  id: "antigravity",
+  label: "Antigravity IDE + CLI",
+  path: () => join(home(), ".gemini", "config", "mcp_config.json"),
   // The registry path depends on the installed Antigravity version, so never create it
   // (docs/graft-platform-integration.md): use it only when Antigravity already wrote it.
   detect: () =>
-    existsSync(join(home(), '.gemini', 'config', 'mcp_config.json'))
+    existsSync(join(home(), ".gemini", "config", "mcp_config.json"))
       ? null
-      : 'no ~/.gemini/config/mcp_config.json (run `graft init --agents antigravity` once so Antigravity creates its registry)',
+      : "no ~/.gemini/config/mcp_config.json (run `graft init --agents antigravity` once so Antigravity creates its registry)",
   buildEntry: (e) => ({ command: e.command, args: e.args }),
-  nextSteps: ['Restart Antigravity (IDE and CLI)'],
+  nextSteps: ["Restart Antigravity (IDE and CLI)"],
 });
 
 const gemini = jsonAdapter({
-  id: 'gemini',
-  label: 'Gemini CLI',
-  path: () => join(home(), '.gemini', 'settings.json'),
+  id: "gemini",
+  label: "Gemini CLI",
+  path: () => join(home(), ".gemini", "settings.json"),
   detect: () =>
-    existsSync(join(home(), '.gemini', 'settings.json')) || Bun.which('gemini')
+    existsSync(join(home(), ".gemini", "settings.json")) || Bun.which("gemini")
       ? null
-      : 'no ~/.gemini/settings.json and no `gemini` on PATH',
+      : "no ~/.gemini/settings.json and no `gemini` on PATH",
   buildEntry: (e) => ({ command: e.command, args: e.args }),
-  nextSteps: ['Restart Gemini CLI', 'Verify with: gemini mcp list'],
+  nextSteps: ["Restart Gemini CLI", "Verify with: gemini mcp list"],
 });
 
 function codexEnv(): NodeJS.ProcessEnv {
   if (!process.env.UPSTREAM_INSTALL_HOME) return process.env;
   // The real codex refuses a CODEX_HOME that does not exist yet.
-  const codexHome = join(process.env.UPSTREAM_INSTALL_HOME, '.codex');
+  const codexHome = join(process.env.UPSTREAM_INSTALL_HOME, ".codex");
   mkdirSync(codexHome, { recursive: true });
   return { ...process.env, CODEX_HOME: codexHome };
 }
 
 function runCodex(args: string[]): { status: number | null; stdout: string; stderr: string } {
-  const bin = Bun.which('codex');
-  if (!bin) fail('`codex` not found on PATH');
-  const r = spawnSync(bin, args, { encoding: 'utf-8', env: codexEnv() });
-  return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
+  const bin = Bun.which("codex");
+  if (!bin) fail("`codex` not found on PATH");
+  const r = spawnSync(bin, args, { encoding: "utf-8", env: codexEnv() });
+  return { status: r.status, stdout: r.stdout ?? "", stderr: r.stderr ?? "" };
 }
 
 const codex: Adapter = {
-  id: 'codex',
-  label: 'Codex',
-  nextSteps: ['Restart Codex', 'Verify with: codex mcp list'],
-  detect: () => (Bun.which('codex') ? null : '`codex` not found on PATH'),
+  id: "codex",
+  label: "Codex",
+  nextSteps: ["Restart Codex", "Verify with: codex mcp list"],
+  detect: () => (Bun.which("codex") ? null : "`codex` not found on PATH"),
   read() {
-    const r = runCodex(['mcp', 'get', SERVER_NAME, '--json']);
+    const r = runCodex(["mcp", "get", SERVER_NAME, "--json"]);
     if (r.status !== 0) {
       if (/No MCP server named/i.test(`${r.stdout}${r.stderr}`)) return null;
       fail(`codex mcp get failed: ${(r.stderr || r.stdout).trim()}`);
     }
     const t = JSON.parse(r.stdout)?.transport;
-    if (t?.type !== 'stdio') return { command: `<${t?.type ?? 'unknown'} transport>`, args: [] };
-    return { command: String(t.command ?? ''), args: Array.isArray(t.args) ? t.args.map(String) : [] };
+    if (t?.type !== "stdio") return { command: `<${t?.type ?? "unknown"} transport>`, args: [] };
+    return { command: String(t.command ?? ""), args: Array.isArray(t.args) ? t.args.map(String) : [] };
   },
   write(entry) {
     // M9 (T-20261002-010): --force used to remove-then-add with no recovery — a failed
@@ -292,21 +310,24 @@ const codex: Adapter = {
     // restore it when the add fails.
     const previous = this.read();
     if (previous !== null) this.remove(); // replace (only reached with --force)
-    const r = runCodex(['mcp', 'add', SERVER_NAME, '--', entry.command, ...entry.args]);
+    const r = runCodex(["mcp", "add", SERVER_NAME, "--", entry.command, ...entry.args]);
     if (r.status !== 0) {
       if (previous !== null) {
-        const restore = runCodex(['mcp', 'add', SERVER_NAME, '--', previous.command, ...previous.args]);
-        const restoredNote = restore.status === 0 ? 'previous registration restored' : 'RESTORE FAILED — re-register the previous codex entry by hand';
+        const restore = runCodex(["mcp", "add", SERVER_NAME, "--", previous.command, ...previous.args]);
+        const restoredNote =
+          restore.status === 0
+            ? "previous registration restored"
+            : "RESTORE FAILED — re-register the previous codex entry by hand";
         fail(`codex mcp add failed (${(r.stderr || r.stdout).trim()}); ${restoredNote}`);
       }
       fail(`codex mcp add failed: ${(r.stderr || r.stdout).trim()}`);
     }
   },
   remove() {
-    const r = runCodex(['mcp', 'remove', SERVER_NAME]);
+    const r = runCodex(["mcp", "remove", SERVER_NAME]);
     if (r.status !== 0) fail(`codex mcp remove failed: ${(r.stderr || r.stdout).trim()}`);
   },
-  describe: (e) => `codex mcp add ${SERVER_NAME} -- ${[e.command, ...e.args].join(' ')}`,
+  describe: (e) => `codex mcp add ${SERVER_NAME} -- ${[e.command, ...e.args].join(" ")}`,
 };
 
 interface HermesPathOptions {
@@ -323,23 +344,23 @@ export function hermesConfigPath(opts?: HermesPathOptions): string {
   // Order per design §11 item 9:
   // 1. UPSTREAM_INSTALL_HOME (test seam) gives <UPSTREAM_INSTALL_HOME>/.hermes
   if (env.UPSTREAM_INSTALL_HOME) {
-    return join(env.UPSTREAM_INSTALL_HOME, '.hermes', 'config.yaml');
+    return join(env.UPSTREAM_INSTALL_HOME, ".hermes", "config.yaml");
   }
 
   // 2. HERMES_HOME, when set, is used as is
   if (env.HERMES_HOME) {
-    return join(env.HERMES_HOME, 'config.yaml');
+    return join(env.HERMES_HOME, "config.yaml");
   }
 
   // 3. ~/.hermes is used if ~/.hermes/config.yaml exists
-  const homeHermes = join(homeDir(), '.hermes', 'config.yaml');
+  const homeHermes = join(homeDir(), ".hermes", "config.yaml");
   if (existsSync(homeHermes)) {
     return homeHermes;
   }
 
   // 4. On win32 only, %LOCALAPPDATA%\hermes is used if %LOCALAPPDATA%\hermes\config.yaml exists
-  if (plat === 'win32' && env.LOCALAPPDATA) {
-    const localAppDataHermes = join(env.LOCALAPPDATA, 'hermes', 'config.yaml');
+  if (plat === "win32" && env.LOCALAPPDATA) {
+    const localAppDataHermes = join(env.LOCALAPPDATA, "hermes", "config.yaml");
     if (existsSync(localAppDataHermes)) {
       return localAppDataHermes;
     }
@@ -350,31 +371,35 @@ export function hermesConfigPath(opts?: HermesPathOptions): string {
 }
 
 const hermes: Adapter = {
-  id: 'hermes',
-  label: 'Hermes Agent',
-  nextSteps: ['Restart Hermes (gateway and desktop app)', `Check that ${SERVER_NAME} appears under mcp_servers in config.yaml`],
+  id: "hermes",
+  label: "Hermes Agent",
+  nextSteps: [
+    "Restart Hermes (gateway and desktop app)",
+    `Check that ${SERVER_NAME} appears under mcp_servers in config.yaml`,
+  ],
   detect: () => (existsSync(hermesConfigPath()) ? null : `${hermesConfigPath()} not found`),
   read() {
     try {
-      return readHermesMcpEntry(readFileSync(hermesConfigPath(), 'utf-8'), SERVER_NAME);
+      return readHermesMcpEntry(readFileSync(hermesConfigPath(), "utf-8"), SERVER_NAME);
     } catch (err) {
       return fail(`Cannot read ${hermesConfigPath()}: ${(err as Error).message}`);
     }
   },
   write(entry) {
     const p = hermesConfigPath();
-    backupAndWrite(p, setHermesMcpEntry(readFileSync(p, 'utf-8'), SERVER_NAME, entry));
+    backupAndWrite(p, setHermesMcpEntry(readFileSync(p, "utf-8"), SERVER_NAME, entry));
   },
   remove() {
     const p = hermesConfigPath();
-    backupAndWrite(p, removeHermesMcpEntry(readFileSync(p, 'utf-8'), SERVER_NAME));
+    backupAndWrite(p, removeHermesMcpEntry(readFileSync(p, "utf-8"), SERVER_NAME));
   },
-  describe: (e) => `mcp_servers.${SERVER_NAME}: command=${JSON.stringify(e.command)} args=${JSON.stringify(e.args)} enabled=true`,
+  describe: (e) =>
+    `mcp_servers.${SERVER_NAME}: command=${JSON.stringify(e.command)} args=${JSON.stringify(e.args)} enabled=true`,
 };
 
 const ADAPTERS: Record<TargetId, Adapter> = {
   claude,
-  'claude-desktop': claudeDesktop,
+  "claude-desktop": claudeDesktop,
   antigravity,
   gemini,
   codex,
@@ -383,48 +408,53 @@ const ADAPTERS: Record<TargetId, Adapter> = {
 
 // ---------- main ----------
 
-const KNOWN_FLAGS = new Set(['--target', '--dry-run', '--uninstall', '--force', '--apply']);
+const KNOWN_FLAGS = new Set(["--target", "--dry-run", "--uninstall", "--force", "--apply"]);
 
 function parseTargets(args: string[]): { targets: TargetId[]; explicit: boolean } {
   // T-20261002-006 (M4): unknown flags and a valueless trailing --target used to be
   // silently ignored — `--dryrun` or a dangling `--target` produced a REAL write to
   // every detected client. Both are hard errors now.
-  const unknown = args.filter((a) => a.startsWith('--') && !KNOWN_FLAGS.has(a) && !a.startsWith('--target='));
+  const unknown = args.filter((a) => a.startsWith("--") && !KNOWN_FLAGS.has(a) && !a.startsWith("--target="));
   if (unknown.length) {
-    console.error(`✗ Unknown flag(s): ${unknown.join(', ')} (known: ${[...KNOWN_FLAGS].join(', ')})`);
+    console.error(`✗ Unknown flag(s): ${unknown.join(", ")} (known: ${[...KNOWN_FLAGS].join(", ")})`);
     process.exit(2);
   }
   const values: string[] = [];
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--target') {
-      if (!args[i + 1] || args[i + 1].startsWith('--')) {
-        console.error('✗ --target requires a value (claude|claude-desktop|antigravity|gemini|codex|hermes|all)');
+    if (args[i] === "--target") {
+      if (!args[i + 1] || args[i + 1].startsWith("--")) {
+        console.error("✗ --target requires a value (claude|claude-desktop|antigravity|gemini|codex|hermes|all)");
         process.exit(2);
       }
-      values.push(...args[++i].split(','));
-    } else if (args[i].startsWith('--target=')) values.push(...args[i].slice('--target='.length).split(','));
+      values.push(...args[++i].split(","));
+    } else if (args[i].startsWith("--target=")) values.push(...args[i].slice("--target=".length).split(","));
   }
-  if (values.length === 0 || values.includes('all')) return { targets: ALL_TARGETS, explicit: values.length > 0 };
+  if (values.length === 0 || values.includes("all")) return { targets: ALL_TARGETS, explicit: values.length > 0 };
   const bad = values.filter((v) => !ALL_TARGETS.includes(v as TargetId));
   if (bad.length) {
-    console.error(`✗ Unknown --target: ${bad.join(', ')} (use ${ALL_TARGETS.join(', ')} or all)`);
+    console.error(`✗ Unknown --target: ${bad.join(", ")} (use ${ALL_TARGETS.join(", ")} or all)`);
     process.exit(2);
   }
   return { targets: [...new Set(values)] as TargetId[], explicit: true };
 }
 
-type Outcome = 'ok' | 'skipped' | 'failed';
+type Outcome = "ok" | "skipped" | "failed";
 
-function runTarget(a: Adapter, entry: McpStdioEntry, flags: { dryRun: boolean; uninstall: boolean; force: boolean }, explicit: boolean): Outcome {
+function runTarget(
+  a: Adapter,
+  entry: McpStdioEntry,
+  flags: { dryRun: boolean; uninstall: boolean; force: boolean },
+  explicit: boolean,
+): Outcome {
   console.log(`[${a.label}]`);
   const why = a.detect();
   if (why) {
     if (explicit) {
       console.log(`  ✗ Cannot use this target: ${why}`);
-      return 'failed';
+      return "failed";
     }
     console.log(`  - Skipped: ${why}`);
-    return 'skipped';
+    return "skipped";
   }
 
   const existing = a.read();
@@ -432,50 +462,50 @@ function runTarget(a: Adapter, entry: McpStdioEntry, flags: { dryRun: boolean; u
   if (flags.uninstall) {
     if (existing === null) {
       console.log(`  ✓ ${SERVER_NAME} is not registered.`);
-      return 'ok';
+      return "ok";
     }
     if (!flags.dryRun) a.remove();
-    console.log(`  ✓ ${flags.dryRun ? '[DRY RUN] Would remove' : 'Removed'} ${SERVER_NAME}.`);
-    return 'ok';
+    console.log(`  ✓ ${flags.dryRun ? "[DRY RUN] Would remove" : "Removed"} ${SERVER_NAME}.`);
+    return "ok";
   }
 
   if (existing && sameEntry(existing, entry)) {
     console.log(`  ✓ ${SERVER_NAME} is already registered with the correct configuration.`);
-    return 'ok';
+    return "ok";
   }
   if (existing && !flags.force) {
     console.log(`  Found different registration for ${SERVER_NAME}:`);
     console.log(`    Current: ${JSON.stringify(existing)}`);
     console.log(`    New:     ${JSON.stringify(entry)}`);
     console.log(`  Use --force to override.`);
-    return 'failed';
+    return "failed";
   }
   if (flags.dryRun) {
     console.log(`  [DRY RUN] Would register ${SERVER_NAME}: ${a.describe(entry)}`);
-    return 'ok';
+    return "ok";
   }
   a.write(entry);
   console.log(`  ✓ Registered ${SERVER_NAME}.`);
-  return 'ok';
+  return "ok";
 }
 
 function main(): void {
   const args = process.argv.slice(2);
   // T-20261002-006 (M4): writes REQUIRE --apply. A bare run (or --dry-run) is a
   // read-only summary exiting 2 — previously a bare run wrote to every detected client.
-  const apply = args.includes('--apply');
-  const dryRun = !apply || args.includes('--dry-run');
+  const apply = args.includes("--apply");
+  const dryRun = !apply || args.includes("--dry-run");
   const flags = {
     dryRun,
-    uninstall: args.includes('--uninstall'),
-    force: args.includes('--force'),
+    uninstall: args.includes("--uninstall"),
+    force: args.includes("--force"),
   };
   const { targets, explicit } = parseTargets(args);
 
   console.log(`Upstream MCP Server Installer v2.1.0`);
   console.log(`  Workspace: ${WORKSPACE_ROOT}`);
-  console.log(`  Mode:      ${apply ? 'APPLY (writes configs)' : 'DRY RUN (read-only — pass --apply to write)'}`);
-  console.log(`  Targets:   ${targets.join(', ')}`);
+  console.log(`  Mode:      ${apply ? "APPLY (writes configs)" : "DRY RUN (read-only — pass --apply to write)"}`);
+  console.log(`  Targets:   ${targets.join(", ")}`);
   console.log();
 
   const entry: McpStdioEntry = { command: normalizePath(findBun()), args: [normalizePath(SERVER_PATH)] };
@@ -486,26 +516,26 @@ function main(): void {
       results.set(id, runTarget(ADAPTERS[id], entry, flags, explicit));
     } catch (err) {
       console.log(`  ✗ ${(err as Error).message}`);
-      results.set(id, 'failed');
+      results.set(id, "failed");
     }
     console.log();
   }
 
-  const done = targets.filter((id) => results.get(id) === 'ok');
+  const done = targets.filter((id) => results.get(id) === "ok");
   if (!flags.uninstall && !flags.dryRun && done.length > 0) {
     console.log(`Next steps:`);
     for (const id of done) {
-      console.log(`  ${ADAPTERS[id].label}: ${ADAPTERS[id].nextSteps.join('; ')}`);
+      console.log(`  ${ADAPTERS[id].label}: ${ADAPTERS[id].nextSteps.join("; ")}`);
     }
   }
   if (!apply) {
     console.log(`Run again with --apply to write the configs.`);
     // A BARE run (no --apply, no --dry-run) exits 2 — the caller probably forgot the
     // flag. An explicit --dry-run is an intentional no-op and exits like a success.
-    process.exit(args.includes('--dry-run') ? [...results.values()].includes('failed') ? 1 : 0 : 2);
+    process.exit(args.includes("--dry-run") ? ([...results.values()].includes("failed") ? 1 : 0) : 2);
   }
 
-  process.exit([...results.values()].includes('failed') ? 1 : 0);
+  process.exit([...results.values()].includes("failed") ? 1 : 0);
 }
 
 // T-20261002-009 (M3): the CONSTITUTION-facing identity of every config file this
@@ -514,12 +544,12 @@ function main(): void {
 // target whose file is not in the §11.0 "Machine-global MCP config" column now
 // fails the surface registry check instead of shipping silently.
 export const TARGET_CONFIG_FILES: Record<TargetId, string> = {
-  'claude': '~/.claude.json',
-  'claude-desktop': 'claude_desktop_config.json',
-  'antigravity': '~/.gemini/config/mcp_config.json',
-  'gemini': '~/.gemini/settings.json', // legacy Google-family path (§11.0 trailing note)
-  'codex': '~/.codex/config.toml',
-  'hermes': '~/.hermes/config.yaml',
+  claude: "~/.claude.json",
+  "claude-desktop": "claude_desktop_config.json",
+  antigravity: "~/.gemini/config/mcp_config.json",
+  gemini: "~/.gemini/settings.json", // legacy Google-family path (§11.0 trailing note)
+  codex: "~/.codex/config.toml",
+  hermes: "~/.hermes/config.yaml",
 };
 
 if (import.meta.main) main();

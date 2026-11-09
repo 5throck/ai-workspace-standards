@@ -184,27 +184,27 @@
  * @license MIT
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Dirent } from 'node:fs';
-import { join, basename } from 'node:path';
-import { cwd } from 'node:process';
-import { createHash } from 'node:crypto';
-import { load as loadYaml } from 'js-yaml';
-import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
-import { parseIntentionalDuplicateLine } from './helpers/markers.ts';
-import { analyzeClaudeHookDrift } from './lib/hook-dedupe.ts';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
+import { join, basename } from "node:path";
+import { cwd } from "node:process";
+import { createHash } from "node:crypto";
+import { load as loadYaml } from "js-yaml";
+import { scrubConstitutionRefs } from "./lib/constitution-scrub.ts";
+import { parseIntentionalDuplicateLine } from "./helpers/markers.ts";
+import { analyzeClaudeHookDrift } from "./lib/hook-dedupe.ts";
 
 // ANSI colors for terminal output
 const colors = {
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  green: '\x1b[32m',
-  cyan: '\x1b[36m',
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
 };
 
 interface SyncIssue {
-  level: 'error' | 'warning';
+  level: "error" | "warning";
   file: string;
   message: string;
   fix?: string;
@@ -231,16 +231,16 @@ interface AuditResult {
 }
 
 const ROOT = cwd();
-const SCRIPTS_MD = join(ROOT, 'scripts', 'SCRIPTS.md');
-const TEMPLATE_SCRIPTS_MD = join(ROOT, 'templates', 'common', 'scripts', 'SCRIPTS.md');
+const SCRIPTS_MD = join(ROOT, "scripts", "SCRIPTS.md");
+const TEMPLATE_SCRIPTS_MD = join(ROOT, "templates", "common", "scripts", "SCRIPTS.md");
 
 // Detect workspace root by presence of context.md
-const IS_WORKSPACE_ROOT = existsSync(join(ROOT, 'CONSTITUTION.md'));
+const IS_WORKSPACE_ROOT = existsSync(join(ROOT, "CONSTITUTION.md"));
 
 interface RegistryEntry {
   version: string;
   /** Deployment layer: 'common' (both L0 + L1), 'L0-only' (workspace root only), 'L1-only' (generated projects only). Defaults to 'common' when column is absent. */
-  layer: 'common' | 'L0-only' | 'L1-only' | 'L0+L2';
+  layer: "common" | "L0-only" | "L1-only" | "L0+L2";
 }
 
 /**
@@ -249,22 +249,19 @@ interface RegistryEntry {
  * The table may optionally have a `layer` column (common / L0-only / L1-only).
  * Only includes rows with status 'active' or 'experimental' when activeOnly=true.
  */
-function parseScriptsMdRegistry(
-  filePath: string,
-  activeOnly = false,
-): Map<string, RegistryEntry> {
+function parseScriptsMdRegistry(filePath: string, activeOnly = false): Map<string, RegistryEntry> {
   const result = new Map<string, RegistryEntry>();
 
   if (!existsSync(filePath)) return result;
 
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
 
   // Extract section between ## Registry and the next ## header
   const registryMatch = content.match(/## Registry\r?\n([\s\S]*?)(?:\r?\n## |\s*$)/);
   if (!registryMatch) return result;
 
   const section = registryMatch[1];
-  const lines = section.split('\n');
+  const lines = section.split("\n");
 
   // Detect column positions from the header row
   // Expected columns (may vary): script | source | version | status  [| layer]
@@ -274,15 +271,15 @@ function parseScriptsMdRegistry(
   let layerColIdx = -1; // -1 = column absent; defaults to 'common'
 
   for (const line of lines) {
-    if (!line.startsWith('|')) continue;
-    const cols = line.split('|').map((c) => c.trim());
-    if (cols[1] === 'script') {
+    if (!line.startsWith("|")) continue;
+    const cols = line.split("|").map((c) => c.trim());
+    if (cols[1] === "script") {
       // Header row — detect column indices
       for (let i = 1; i < cols.length; i++) {
         const h = cols[i].toLowerCase();
-        if (h === 'version') versionColIdx = i;
-        else if (h === 'status') statusColIdx = i;
-        else if (h === 'layer') layerColIdx = i;
+        if (h === "version") versionColIdx = i;
+        else if (h === "status") statusColIdx = i;
+        else if (h === "layer") layerColIdx = i;
       }
       break;
     }
@@ -290,30 +287,30 @@ function parseScriptsMdRegistry(
 
   for (const line of lines) {
     // Data rows start with | and have a backtick-wrapped filename in column 1
-    if (!line.startsWith('|')) continue;
+    if (!line.startsWith("|")) continue;
 
-    const cols = line.split('|').map((c) => c.trim());
+    const cols = line.split("|").map((c) => c.trim());
     if (cols.length < 5) continue;
 
     const rawName = cols[1];
-    const version = cols[versionColIdx] ?? '';
-    const status = cols[statusColIdx] ?? '';
+    const version = cols[versionColIdx] ?? "";
+    const status = cols[statusColIdx] ?? "";
 
     // Skip header/separator rows
-    if (rawName === 'script' || rawName.startsWith('-')) continue;
-    if (!rawName.startsWith('`')) continue;
+    if (rawName === "script" || rawName.startsWith("-")) continue;
+    if (!rawName.startsWith("`")) continue;
 
-    const filename = rawName.replace(/`/g, '').trim();
+    const filename = rawName.replace(/`/g, "").trim();
     if (!filename) continue;
 
     // For Check A we only care about active/experimental
-    if (activeOnly && status !== 'active' && status !== 'experimental') continue;
+    if (activeOnly && status !== "active" && status !== "experimental") continue;
 
-    const rawLayer = layerColIdx >= 0 ? (cols[layerColIdx] ?? '') : '';
-    let layer: RegistryEntry['layer'] = 'common';
-    if (rawLayer === 'L0-only' || rawLayer === 'L0') layer = 'L0-only';
-    else if (rawLayer === 'L1-only') layer = 'L1-only';
-    else if (rawLayer === 'L0+L2') layer = 'L0+L2';
+    const rawLayer = layerColIdx >= 0 ? (cols[layerColIdx] ?? "") : "";
+    let layer: RegistryEntry["layer"] = "common";
+    if (rawLayer === "L0-only" || rawLayer === "L0") layer = "L0-only";
+    else if (rawLayer === "L1-only") layer = "L1-only";
+    else if (rawLayer === "L0+L2") layer = "L0+L2";
 
     result.set(filename, { version, layer });
   }
@@ -329,7 +326,7 @@ function extractFileVersion(filePath: string): string | null {
   if (!existsSync(filePath)) return null;
 
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const match = content.match(/@version\s+([\d.]+)/);
     return match ? match[1] : null;
   } catch {
@@ -348,9 +345,9 @@ function runCheckA(): SyncIssue[] {
 
   if (!existsSync(SCRIPTS_MD)) {
     issues.push({
-      level: 'error',
-      file: 'scripts/SCRIPTS.md',
-      message: 'scripts/SCRIPTS.md not found — cannot run Check A',
+      level: "error",
+      file: "scripts/SCRIPTS.md",
+      message: "scripts/SCRIPTS.md not found — cannot run Check A",
     });
     return issues;
   }
@@ -359,9 +356,9 @@ function runCheckA(): SyncIssue[] {
 
   for (const [filename, { version: registryVersion }] of registry) {
     // Only check .ts files (not .sh/.ps1)
-    if (!filename.endsWith('.ts')) continue;
+    if (!filename.endsWith(".ts")) continue;
 
-    const scriptPath = join(ROOT, 'scripts', filename);
+    const scriptPath = join(ROOT, "scripts", filename);
 
     // Skip if file doesn't exist on disk (may be template-only)
     if (!existsSync(scriptPath)) continue;
@@ -370,9 +367,12 @@ function runCheckA(): SyncIssue[] {
 
     // WARN: @version missing — SCRIPTS.md version cannot be validated against file
     if (fileVersion === null) {
-      if (!jsonMode) console.log(`\x1b[33m[WARN]\x1b[0m ${filename}: @version header missing — SCRIPTS.md version cannot be validated (add @version JSDoc to enable Check A)`);
+      if (!jsonMode)
+        console.log(
+          `\x1b[33m[WARN]\x1b[0m ${filename}: @version header missing — SCRIPTS.md version cannot be validated (add @version JSDoc to enable Check A)`,
+        );
       issues.push({
-        level: 'warning',
+        level: "warning",
         file: `scripts/${filename}`,
         message: `Check A: @version header missing in ${filename} — SCRIPTS.md version unvalidatable (add @version to enable Check A)`,
       });
@@ -381,7 +381,7 @@ function runCheckA(): SyncIssue[] {
 
     if (fileVersion !== registryVersion) {
       issues.push({
-        level: 'error',
+        level: "error",
         file: `scripts/${filename}`,
         message: `Check A: scripts/${filename} @version ${fileVersion} does not match SCRIPTS.md entry ${registryVersion}`,
         fix: `Update scripts/SCRIPTS.md version for ${filename} from ${registryVersion} to ${fileVersion}`,
@@ -406,7 +406,7 @@ export function parseSkillFrontmatter(content: string): { version?: string; owne
   if (!fmMatch) return {};
   try {
     const doc = loadYaml(fmMatch[1]) as Record<string, unknown> | null;
-    if (!doc || typeof doc !== 'object') return {};
+    if (!doc || typeof doc !== "object") return {};
     return {
       version: doc.version !== undefined ? String(doc.version).trim() : undefined,
       owner: doc.owner !== undefined ? String(doc.owner).trim() : undefined,
@@ -422,7 +422,7 @@ export function parseSkillFrontmatter(content: string): { version?: string; owne
  * convention is not a mismatch — there is nothing to compare).
  */
 export function extractRecordField(recordContent: string, field: string): string | undefined {
-  const match = new RegExp(`^\\s*-?\\s*\\*\\*${field}\\*\\*\\s*:\\s*(.+)$`, 'm').exec(recordContent);
+  const match = new RegExp(`^\\s*-?\\s*\\*\\*${field}\\*\\*\\s*:\\s*(.+)$`, "m").exec(recordContent);
   if (!match) return undefined;
   const value = match[1].trim();
   return value.length > 0 ? value : undefined;
@@ -448,10 +448,10 @@ export function runCheckC(): SyncIssue[] {
 
   if (!IS_WORKSPACE_ROOT) return issues;
 
-  const templateSkillsDir = join(ROOT, 'templates', 'common', 'skills');
+  const templateSkillsDir = join(ROOT, "templates", "common", "skills");
   if (!existsSync(templateSkillsDir)) return issues;
 
-  const rootSkillsDir = join(ROOT, 'skills');
+  const rootSkillsDir = join(ROOT, "skills");
   if (!existsSync(rootSkillsDir)) return issues;
 
   let checkedCount = 0;
@@ -462,28 +462,28 @@ export function runCheckC(): SyncIssue[] {
     if (!entry.isDirectory()) continue;
 
     const skillName = entry.name;
-    const rootSkillFile = join(rootSkillsDir, skillName, 'SKILL.md');
-    const templateSkillFile = join(templateSkillsDir, skillName, 'SKILL.md');
+    const rootSkillFile = join(rootSkillsDir, skillName, "SKILL.md");
+    const templateSkillFile = join(templateSkillsDir, skillName, "SKILL.md");
 
     if (!existsSync(rootSkillFile)) continue;
     if (!existsSync(templateSkillFile)) continue;
 
     checkedCount++;
 
-    const rootContent = readFileSync(rootSkillFile, 'utf-8');
-    const templateContent = readFileSync(templateSkillFile, 'utf-8');
+    const rootContent = readFileSync(rootSkillFile, "utf-8");
+    const templateContent = readFileSync(templateSkillFile, "utf-8");
 
     // Normalize L0 through the same scrub the propagator applies for this
     // source→target pair (idempotent; no-op when nothing matches).
     const normalizedRoot = scrubConstitutionRefs(rootContent, rootSkillFile, templateSkillFile);
 
-    const rootHash = createHash('sha256').update(normalizedRoot).digest('hex');
-    const templateHash = createHash('sha256').update(templateContent).digest('hex');
+    const rootHash = createHash("sha256").update(normalizedRoot).digest("hex");
+    const templateHash = createHash("sha256").update(templateContent).digest("hex");
 
     if (rootHash !== templateHash) {
       driftCount++;
       issues.push({
-        level: 'error',
+        level: "error",
         file: `skills/${skillName}/SKILL.md`,
         message: `Check C: skills/${skillName}/SKILL.md differs from templates/common/skills/${skillName}/SKILL.md beyond the intentional CONSTITUTION.md→context.md substitution`,
         fix: `First verify whether the L1 copy diverged intentionally; if the L0 version is canonical, re-sync it with 'bun scripts/propagate-to-templates.ts --apply --domain skills' — do not hand-edit the L1 mirror`,
@@ -493,7 +493,7 @@ export function runCheckC(): SyncIssue[] {
 
   if (!jsonMode && checkedCount > 0) {
     console.log(
-      `${colors.dim}Check C: checked ${checkedCount} skill(s) for content drift${driftCount > 0 ? ` — ${driftCount} real drift(s)` : ' (normalized; no drift)'}${colors.reset}`,
+      `${colors.dim}Check C: checked ${checkedCount} skill(s) for content drift${driftCount > 0 ? ` — ${driftCount} real drift(s)` : " (normalized; no drift)"}${colors.reset}`,
     );
   }
 
@@ -515,29 +515,29 @@ export function runCheckE(): SyncIssue[] {
 
   if (!IS_WORKSPACE_ROOT) return issues;
 
-  const lifecycleDir = join(ROOT, 'docs', 'lifecycle', 'skills');
+  const lifecycleDir = join(ROOT, "docs", "lifecycle", "skills");
   if (!existsSync(lifecycleDir)) return issues;
 
-  const rootSkillsDir = join(ROOT, 'skills');
+  const rootSkillsDir = join(ROOT, "skills");
   if (!existsSync(rootSkillsDir)) return issues;
 
   for (const entry of readdirSync(lifecycleDir)) {
-    if (!entry.endsWith('.md')) continue;
-    const skillName = entry.replace(/\.md$/, '');
-    const skillMdPath = join(rootSkillsDir, skillName, 'SKILL.md');
+    if (!entry.endsWith(".md")) continue;
+    const skillName = entry.replace(/\.md$/, "");
+    const skillMdPath = join(rootSkillsDir, skillName, "SKILL.md");
     if (!existsSync(skillMdPath)) continue; // record for a removed/renamed skill — not this check's concern
 
     const recordPath = join(lifecycleDir, entry);
-    const recordContent = readFileSync(recordPath, 'utf-8');
-    const frontmatter = parseSkillFrontmatter(readFileSync(skillMdPath, 'utf-8'));
+    const recordContent = readFileSync(recordPath, "utf-8");
+    const frontmatter = parseSkillFrontmatter(readFileSync(skillMdPath, "utf-8"));
 
-    const recordVersion = extractRecordField(recordContent, 'Version');
+    const recordVersion = extractRecordField(recordContent, "Version");
     if (recordVersion && frontmatter.version) {
-      const a = recordVersion.replace(/^v/i, '');
-      const b = frontmatter.version.replace(/^v/i, '');
+      const a = recordVersion.replace(/^v/i, "");
+      const b = frontmatter.version.replace(/^v/i, "");
       if (a !== b) {
         issues.push({
-          level: 'error',
+          level: "error",
           file: `docs/lifecycle/skills/${entry}`,
           message: `Check E: lifecycle record Version ${recordVersion} does not match skills/${skillName}/SKILL.md frontmatter version ${frontmatter.version}`,
           fix: `Update docs/lifecycle/skills/${entry} Version to ${frontmatter.version} (or fix the SKILL.md frontmatter if the record is correct)`,
@@ -549,17 +549,17 @@ export function runCheckE(): SyncIssue[] {
       // sat stale in exactly this blind spot. Warn so the field gets backfilled
       // (warning, not error: records predating the convention stay advisory).
       issues.push({
-        level: 'warning',
+        level: "warning",
         file: `docs/lifecycle/skills/${entry}`,
         message: `Check E: lifecycle record has no Version field but skills/${skillName}/SKILL.md frontmatter declares ${frontmatter.version}`,
         fix: `Add "- **Version**: ${frontmatter.version}" to docs/lifecycle/skills/${entry}`,
       });
     }
 
-    const recordOwner = extractRecordField(recordContent, 'Owner');
+    const recordOwner = extractRecordField(recordContent, "Owner");
     if (recordOwner && frontmatter.owner && recordOwner !== frontmatter.owner) {
       issues.push({
-        level: 'error',
+        level: "error",
         file: `docs/lifecycle/skills/${entry}`,
         message: `Check E: lifecycle record Owner "${recordOwner}" does not match skills/${skillName}/SKILL.md frontmatter owner "${frontmatter.owner}"`,
         fix: `Update docs/lifecycle/skills/${entry} Owner to ${frontmatter.owner} (or fix the SKILL.md frontmatter if the record is correct)`,
@@ -602,10 +602,10 @@ export function runCheckE(): SyncIssue[] {
  * lifecycle-manager / docs-writer workflows. Runs only at workspace root.
  */
 export type TierDecl =
-  | { kind: 'scalar'; tier: string }
-  | { kind: 'legacy'; block: Record<string, string>; uniform: boolean; value?: string }
-  | { kind: 'absent' }
-  | { kind: 'unparseable' };
+  | { kind: "scalar"; tier: string }
+  | { kind: "legacy"; block: Record<string, string>; uniform: boolean; value?: string }
+  | { kind: "absent" }
+  | { kind: "unparseable" };
 
 /**
  * Parse the tier declaration from agent frontmatter (ADR-0102): the scalar
@@ -615,27 +615,27 @@ export type TierDecl =
  */
 export function parseTierDeclaration(content: string): TierDecl {
   const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
-  if (!fm) return { kind: 'absent' };
+  if (!fm) return { kind: "absent" };
   let doc: Record<string, unknown> | null;
   try {
     doc = loadYaml(fm[1]) as Record<string, unknown> | null;
   } catch {
-    return { kind: 'unparseable' };
+    return { kind: "unparseable" };
   }
   const tier = doc?.tier;
-  if (tier === undefined || tier === null) return { kind: 'absent' };
-  if (typeof tier === 'string') {
-    return { kind: 'scalar', tier: tier.trim().toLowerCase() };
+  if (tier === undefined || tier === null) return { kind: "absent" };
+  if (typeof tier === "string") {
+    return { kind: "scalar", tier: tier.trim().toLowerCase() };
   }
-  if (typeof tier !== 'object') return { kind: 'absent' };
+  if (typeof tier !== "object") return { kind: "absent" };
   const block: Record<string, string> = {};
   for (const [platform, value] of Object.entries(tier as Record<string, unknown>)) {
     block[platform] = String(value).trim().toLowerCase();
   }
-  if (Object.keys(block).length === 0) return { kind: 'absent' };
+  if (Object.keys(block).length === 0) return { kind: "absent" };
   const distinct = new Set(Object.values(block));
   const uniform = distinct.size === 1;
-  return { kind: 'legacy', block, uniform, value: uniform ? [...distinct][0] : undefined };
+  return { kind: "legacy", block, uniform, value: uniform ? [...distinct][0] : undefined };
 }
 
 export function runCheckF(): SyncIssue[] {
@@ -643,7 +643,7 @@ export function runCheckF(): SyncIssue[] {
 
   if (!IS_WORKSPACE_ROOT) return issues;
 
-  const VALID_TIERS = new Set(['high', 'medium', 'low']);
+  const VALID_TIERS = new Set(["high", "medium", "low"]);
 
   /**
    * Validate one file's tier declaration form and return its canonical tier
@@ -652,20 +652,20 @@ export function runCheckF(): SyncIssue[] {
    */
   const readTierDecl = (content: string, relFile: string): { tier?: string; mixed: boolean } => {
     const decl = parseTierDeclaration(content);
-    if (decl.kind === 'unparseable') {
+    if (decl.kind === "unparseable") {
       issues.push({
-        level: 'error',
+        level: "error",
         file: relFile,
         message: `Check F: ${relFile} frontmatter is not parseable YAML — tier unverifiable`,
-        fix: 'Repair the YAML frontmatter',
+        fix: "Repair the YAML frontmatter",
       });
       return { mixed: false };
     }
-    if (decl.kind === 'absent') return { mixed: false }; // extends-only skeleton — shape validators own that
-    if (decl.kind === 'scalar') {
+    if (decl.kind === "absent") return { mixed: false }; // extends-only skeleton — shape validators own that
+    if (decl.kind === "scalar") {
       if (!VALID_TIERS.has(decl.tier)) {
         issues.push({
-          level: 'error',
+          level: "error",
           file: relFile,
           message: `Check F: ${relFile} tier value '${decl.tier}' is not one of high/medium/low`,
           fix: "Use the ADR-0102 scalar form: 'tier: high', 'tier: medium', or 'tier: low'",
@@ -677,14 +677,14 @@ export function runCheckF(): SyncIssue[] {
     // Legacy per-platform block (ADR-0102 transition).
     if (decl.uniform) {
       issues.push({
-        level: 'warning',
+        level: "warning",
         file: relFile,
         message: `Check F: ${relFile} uses a legacy per-platform tier block — normalize to 'tier: ${decl.value}' (ADR-0102)`,
         fix: `Replace the per-platform block with 'tier: ${decl.value}' (tests/apply-tier-normalization.ts)`,
       });
       if (decl.value === undefined || !VALID_TIERS.has(decl.value)) {
         issues.push({
-          level: 'error',
+          level: "error",
           file: relFile,
           message: `Check F: ${relFile} tier value '${decl.value}' is not one of high/medium/low`,
           fix: "Use the ADR-0102 scalar form: 'tier: high', 'tier: medium', or 'tier: low'",
@@ -694,39 +694,36 @@ export function runCheckF(): SyncIssue[] {
       return { tier: decl.value, mixed: false };
     }
     issues.push({
-      level: 'warning',
+      level: "warning",
       file: relFile,
       message: `Check F: ${relFile} uses a legacy per-platform tier block with mixed values — normalize to one scalar 'tier: <high|medium|low>'; cross-surface parity is skipped for this agent until normalized (ADR-0102)`,
-      fix: 'Normalize the tier block to a single scalar (the normalization pass collapses mixed blocks to the claude value)',
+      fix: "Normalize the tier block to a single scalar (the normalization pass collapses mixed blocks to the claude value)",
     });
     return { mixed: true };
   };
 
   // (a) L0 roster frontmatter — the tier declaration anchor.
-  const agentsDir = join(ROOT, 'agents');
+  const agentsDir = join(ROOT, "agents");
   if (!existsSync(agentsDir)) return issues;
   const declaredTiers = new Map<string, { tier?: string; mixed: boolean }>();
   for (const entry of readdirSync(agentsDir)) {
-    if (!entry.endsWith('.md') || entry.startsWith('README')) continue;
+    if (!entry.endsWith(".md") || entry.startsWith("README")) continue;
     const relFile = `agents/${entry}`;
-    declaredTiers.set(
-      entry.replace(/\.md$/, ''),
-      readTierDecl(readFileSync(join(agentsDir, entry), 'utf-8'), relFile),
-    );
+    declaredTiers.set(entry.replace(/\.md$/, ""), readTierDecl(readFileSync(join(agentsDir, entry), "utf-8"), relFile));
   }
 
   // (b) L1 common-template agents ↔ L0 counterpart tier (form validity only
   // for L1-only agents, which have no root counterpart to agree with).
-  const l1AgentsDir = join(ROOT, 'templates', 'common', 'agents');
+  const l1AgentsDir = join(ROOT, "templates", "common", "agents");
   if (existsSync(l1AgentsDir)) {
     for (const entry of readdirSync(l1AgentsDir)) {
-      if (!entry.endsWith('.md') || entry === '_COMMON.md' || entry.startsWith('README')) continue;
+      if (!entry.endsWith(".md") || entry === "_COMMON.md" || entry.startsWith("README")) continue;
       const relFile = `templates/common/agents/${entry}`;
-      const l1 = readTierDecl(readFileSync(join(l1AgentsDir, entry), 'utf-8'), relFile);
-      const l0 = declaredTiers.get(entry.replace(/\.md$/, ''));
+      const l1 = readTierDecl(readFileSync(join(l1AgentsDir, entry), "utf-8"), relFile);
+      const l0 = declaredTiers.get(entry.replace(/\.md$/, ""));
       if (l0 && l0.tier !== undefined && l1.tier !== undefined && l1.tier !== l0.tier) {
         issues.push({
-          level: 'error',
+          level: "error",
           file: relFile,
           message: `Check F: ${relFile} tier '${l1.tier}' does not match the L0 counterpart agents/${entry} tier '${l0.tier}'`,
           fix: `Update ${relFile} tier to '${l0.tier}' (or the root file, if the stub is correct)`,
@@ -739,22 +736,22 @@ export function runCheckF(): SyncIssue[] {
   // tables (headers `| Agent | File | Tier |…`), so execution-plan example
   // rows that merely mention agents/<name>.md in a Task cell cannot
   // false-positive.
-  const agentsMdPath = join(ROOT, 'AGENTS.md');
+  const agentsMdPath = join(ROOT, "AGENTS.md");
   if (existsSync(agentsMdPath)) {
-    const lines = readFileSync(agentsMdPath, 'utf-8').split('\n');
+    const lines = readFileSync(agentsMdPath, "utf-8").split("\n");
     const rosterRows: string[] = [];
     let inRosterTable = false;
     for (const line of lines) {
-      if (!line.trimStart().startsWith('|')) {
+      if (!line.trimStart().startsWith("|")) {
         inRosterTable = false;
         continue;
       }
-      const cells = line.split('|').map((c) => c.trim().toLowerCase());
-      if (cells.includes('agent') && cells.includes('file') && cells.includes('tier')) {
+      const cells = line.split("|").map((c) => c.trim().toLowerCase());
+      if (cells.includes("agent") && cells.includes("file") && cells.includes("tier")) {
         inRosterTable = true; // header row of a roster table
         continue;
       }
-      if (inRosterTable && cells.some((c) => c.includes('---'))) continue; // separator row
+      if (inRosterTable && cells.some((c) => c.includes("---"))) continue; // separator row
       if (inRosterTable) rosterRows.push(line);
     }
     for (const [agent, decl] of declaredTiers) {
@@ -764,20 +761,20 @@ export function runCheckF(): SyncIssue[] {
       const matchingRows = rosterRows.filter((row) => row.includes(needle));
       if (matchingRows.length === 0) {
         issues.push({
-          level: 'error',
-          file: 'AGENTS.md',
+          level: "error",
+          file: "AGENTS.md",
           message: `Check F: no AGENTS.md roster row references ${needle}`,
           fix: `Add '${agent}' to the §1 Agent Roster and §4.1 Subagent Roster tables`,
         });
         continue;
       }
       for (const row of matchingRows) {
-        const tierCell = (row.split('|')[3] ?? '').replace(/\*\*/g, '').trim();
+        const tierCell = (row.split("|")[3] ?? "").replace(/\*\*/g, "").trim();
         if (tierCell.toLowerCase() !== expectedTier) {
           issues.push({
-            level: 'error',
-            file: 'AGENTS.md',
-            message: `Check F: AGENTS.md roster row for '${agent}' shows tier '${tierCell || '(empty)'}' but agents/${agent}.md declares '${expectedTier}'`,
+            level: "error",
+            file: "AGENTS.md",
+            message: `Check F: AGENTS.md roster row for '${agent}' shows tier '${tierCell || "(empty)"}' but agents/${agent}.md declares '${expectedTier}'`,
             fix: `Update the row's Tier cell to ${expectedTier.charAt(0).toUpperCase() + expectedTier.slice(1)} (or fix the agent file's tier if the roster is correct)`,
           });
         }
@@ -789,12 +786,12 @@ export function runCheckF(): SyncIssue[] {
   for (const [agent, decl] of declaredTiers) {
     const expectedTier = decl.tier;
     if (expectedTier === undefined) continue; // mixed/invalid — already reported above
-    const recordPath = join(ROOT, 'docs', 'lifecycle', 'agents', `${agent}.md`);
+    const recordPath = join(ROOT, "docs", "lifecycle", "agents", `${agent}.md`);
     if (!existsSync(recordPath)) continue; // record existence is agent-lifecycle-audit's concern
-    const recordTier = extractRecordField(readFileSync(recordPath, 'utf-8'), 'Tier');
-    if (recordTier && recordTier.trim().replace(/\.$/, '').toLowerCase() !== expectedTier) {
+    const recordTier = extractRecordField(readFileSync(recordPath, "utf-8"), "Tier");
+    if (recordTier && recordTier.trim().replace(/\.$/, "").toLowerCase() !== expectedTier) {
       issues.push({
-        level: 'error',
+        level: "error",
         file: `docs/lifecycle/agents/${agent}.md`,
         message: `Check F: lifecycle record Tier '${recordTier.trim()}' does not match agents/${agent}.md tier '${expectedTier}'`,
         fix: `Update the docs/lifecycle/agents/${agent}.md **Tier** field to ${expectedTier} (or fix the agent file's tier if the record is correct)`,
@@ -807,42 +804,42 @@ export function runCheckF(): SyncIssue[] {
   // Records missing a field are skipped (predating the convention is not a
   // mismatch); both use extractRecordField like (d).
   const PHASE_TO_STATUS: Record<string, string> = {
-    production: 'active',
-    beta: 'active',
-    draft: 'experimental',
-    deprecated: 'deprecated',
-    archived: 'archived',
+    production: "active",
+    beta: "active",
+    draft: "experimental",
+    deprecated: "deprecated",
+    archived: "archived",
   };
-  const PHASE_STRICT = new Set(['production', 'deprecated', 'archived']);
+  const PHASE_STRICT = new Set(["production", "deprecated", "archived"]);
   for (const agent of declaredTiers.keys()) {
-    const agentPath = join(ROOT, 'agents', `${agent}.md`);
-    const recordPath = join(ROOT, 'docs', 'lifecycle', 'agents', `${agent}.md`);
+    const agentPath = join(ROOT, "agents", `${agent}.md`);
+    const recordPath = join(ROOT, "docs", "lifecycle", "agents", `${agent}.md`);
     if (!existsSync(agentPath) || !existsSync(recordPath)) continue; // absence handled by (a)/(d)
 
-    const fmMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(agentPath, 'utf-8'));
+    const fmMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(agentPath, "utf-8"));
     let status: string | undefined;
     let fmUpdated: string | undefined;
     if (fmMatch) {
       try {
         const doc = loadYaml(fmMatch[1]) as { status?: string; last_updated?: string | Date } | null;
-        status = typeof doc?.status === 'string' ? doc.status.trim().toLowerCase() : undefined;
+        status = typeof doc?.status === "string" ? doc.status.trim().toLowerCase() : undefined;
         const lu = doc?.last_updated;
         if (lu instanceof Date) fmUpdated = lu.toISOString().slice(0, 10);
-        else if (typeof lu === 'string') fmUpdated = lu.trim().slice(0, 10);
+        else if (typeof lu === "string") fmUpdated = lu.trim().slice(0, 10);
       } catch {
         // unparseable frontmatter already reported by (a)'s parseTierBlock
       }
     }
 
-    const recordContent = readFileSync(recordPath, 'utf-8');
+    const recordContent = readFileSync(recordPath, "utf-8");
 
-    const phase = extractRecordField(recordContent, 'Current Phase');
+    const phase = extractRecordField(recordContent, "Current Phase");
     if (status && phase) {
       const phaseNorm = phase.trim().toLowerCase();
       const expected = PHASE_TO_STATUS[phaseNorm];
       if (expected && expected !== status) {
         issues.push({
-          level: PHASE_STRICT.has(phaseNorm) ? 'error' : 'warning',
+          level: PHASE_STRICT.has(phaseNorm) ? "error" : "warning",
           file: `docs/lifecycle/agents/${agent}.md`,
           message: `Check F: ${agent} lifecycle record Current Phase '${phase.trim()}' does not match agents/${agent}.md frontmatter status '${status}'`,
           fix: `Reconcile the docs/lifecycle/agents/${agent}.md Current Phase field with agents/${agent}.md status`,
@@ -850,11 +847,11 @@ export function runCheckF(): SyncIssue[] {
       }
     }
 
-    const recordUpdated = extractRecordField(recordContent, 'Last Updated');
+    const recordUpdated = extractRecordField(recordContent, "Last Updated");
     const recordDate = recordUpdated ? /^(\d{4}-\d{2}-\d{2})/.exec(recordUpdated.trim())?.[1] : undefined;
     if (fmUpdated && recordDate && recordDate < fmUpdated) {
       issues.push({
-        level: 'error',
+        level: "error",
         file: `docs/lifecycle/agents/${agent}.md`,
         message: `Check F: lifecycle record Last Updated (${recordDate}) lags agents/${agent}.md frontmatter last_updated (${fmUpdated}) — the record was not refreshed after the agent changed`,
         fix: `Update the docs/lifecycle/agents/${agent}.md **Last Updated** field to ${fmUpdated} (with a short reason note)`,
@@ -864,7 +861,7 @@ export function runCheckF(): SyncIssue[] {
 
   if (!jsonMode) {
     console.log(
-      `${colors.dim}Check F: agent tier cross-surface parity (frontmatter anchor) — ${declaredTiers.size} agent(s)${issues.length > 0 ? `, ${issues.length} drift finding(s)` : ', all surfaces agree'}${colors.reset}`,
+      `${colors.dim}Check F: agent tier cross-surface parity (frontmatter anchor) — ${declaredTiers.size} agent(s)${issues.length > 0 ? `, ${issues.length} drift finding(s)` : ", all surfaces agree"}${colors.reset}`,
     );
   }
 
@@ -892,15 +889,15 @@ export function runCheckG(): SyncIssue[] {
 
   if (!IS_WORKSPACE_ROOT) return issues;
 
-  const l0Dir = join(ROOT, '.githooks');
-  const l1Dir = join(ROOT, 'templates', 'common', '.githooks');
+  const l0Dir = join(ROOT, ".githooks");
+  const l1Dir = join(ROOT, "templates", "common", ".githooks");
   if (!existsSync(l0Dir) || !existsSync(l1Dir)) return issues;
 
   const names = new Set([...readdirSync(l0Dir), ...readdirSync(l1Dir)]);
-  const normalize = (s: string): string => s.replace(/\r\n/g, '\n');
+  const normalize = (s: string): string => s.replace(/\r\n/g, "\n");
 
   for (const name of [...names].sort()) {
-    if (name.startsWith('.')) continue;
+    if (name.startsWith(".")) continue;
     const l0Path = join(l0Dir, name);
     const l1Path = join(l1Dir, name);
     const l0IsFile = existsSync(l0Path) && statSync(l0Path).isFile();
@@ -908,9 +905,9 @@ export function runCheckG(): SyncIssue[] {
 
     if (l0IsFile !== l1IsFile) {
       issues.push({
-        level: 'error',
+        level: "error",
         file: `.githooks/${name}`,
-        message: `Check G: hook '${name}' exists on ${l0IsFile ? 'L0 only' : 'templates/common (L1) only'} — mirror sets have diverged`,
+        message: `Check G: hook '${name}' exists on ${l0IsFile ? "L0 only" : "templates/common (L1) only"} — mirror sets have diverged`,
         fix: l0IsFile
           ? `Copy .githooks/${name} to templates/common/.githooks/${name} (or remove it from L0 if it is intentionally root-only)`
           : `Remove templates/common/.githooks/${name} (or add the hook to .githooks/ if projects need it)`,
@@ -919,9 +916,9 @@ export function runCheckG(): SyncIssue[] {
     }
     if (!l0IsFile) continue;
 
-    if (normalize(readFileSync(l0Path, 'utf-8')) !== normalize(readFileSync(l1Path, 'utf-8'))) {
+    if (normalize(readFileSync(l0Path, "utf-8")) !== normalize(readFileSync(l1Path, "utf-8"))) {
       issues.push({
-        level: 'error',
+        level: "error",
         file: `.githooks/${name}`,
         message: `Check G: hook mirror drift — .githooks/${name} differs from templates/common/.githooks/${name}`,
         fix: `Decide the canonical content, then make both copies byte-identical (CRLF-insensitive)`,
@@ -931,7 +928,7 @@ export function runCheckG(): SyncIssue[] {
 
   if (!jsonMode) {
     console.log(
-      `${colors.dim}Check G: .githooks mirror parity — ${names.size} entr(ies)${issues.length > 0 ? `, ${issues.length} drift finding(s)` : ', all mirrors in sync'}${colors.reset}`,
+      `${colors.dim}Check G: .githooks mirror parity — ${names.size} entr(ies)${issues.length > 0 ? `, ${issues.length} drift finding(s)` : ", all mirrors in sync"}${colors.reset}`,
     );
   }
 
@@ -953,18 +950,18 @@ export function compareScriptRecordVersion(
   recordVersion: string | undefined,
   scriptVersion: string,
   recordLabel: string,
-): { level: 'error' | 'warning'; message: string; fix: string } | null {
-  const normalize = (v: string): string => v.trim().replace(/^v/i, '');
-  if (recordVersion === undefined || recordVersion.trim() === '') {
+): { level: "error" | "warning"; message: string; fix: string } | null {
+  const normalize = (v: string): string => v.trim().replace(/^v/i, "");
+  if (recordVersion === undefined || recordVersion.trim() === "") {
     return {
-      level: 'warning',
+      level: "warning",
       message: `${recordLabel} has no Version field but the script's SCRIPTS.md entry declares ${scriptVersion}`,
       fix: `Add "- **Version**: ${scriptVersion}" to ${recordLabel}`,
     };
   }
   if (normalize(recordVersion) !== normalize(scriptVersion)) {
     return {
-      level: 'error',
+      level: "error",
       message: `${recordLabel} Version ${recordVersion} does not match the script's SCRIPTS.md entry ${scriptVersion}`,
       fix: `Update ${recordLabel} Version to ${scriptVersion} (with a Phase History catch-up row)`,
     };
@@ -981,15 +978,15 @@ export function listVersionedScripts(dir: string): string[] {
   const found: string[] = [];
   const walk = (current: string): void => {
     for (const entry of readdirSync(current, { withFileTypes: true })) {
-      if (entry.name === 'node_modules') continue;
+      if (entry.name === "node_modules") continue;
       const path = join(current, entry.name);
       if (entry.isDirectory()) {
         walk(path);
         continue;
       }
-      if (!entry.name.endsWith('.ts') || entry.name.endsWith('.d.ts')) continue;
-      if (/^\/\/\s*@version\s+\S+/m.test(readFileSync(path, 'utf-8'))) {
-        found.push(path.slice(dir.length + 1).replace(/\\/g, '/'));
+      if (!entry.name.endsWith(".ts") || entry.name.endsWith(".d.ts")) continue;
+      if (/^\/\/\s*@version\s+\S+/m.test(readFileSync(path, "utf-8"))) {
+        found.push(path.slice(dir.length + 1).replace(/\\/g, "/"));
       }
     }
   };
@@ -1021,7 +1018,7 @@ export function runCheckH(): SyncIssue[] {
   const issues: SyncIssue[] = [];
 
   if (!IS_WORKSPACE_ROOT) return issues;
-  const lifecycleScriptsDir = join(ROOT, 'docs', 'lifecycle', 'scripts');
+  const lifecycleScriptsDir = join(ROOT, "docs", "lifecycle", "scripts");
   if (!existsSync(lifecycleScriptsDir)) return issues;
   if (!existsSync(SCRIPTS_MD)) return issues;
 
@@ -1030,8 +1027,8 @@ export function runCheckH(): SyncIssue[] {
   const recordedScripts = new Set<string>();
 
   for (const entry of readdirSync(lifecycleScriptsDir)) {
-    if (!entry.endsWith('.md')) continue;
-    const recordName = entry.replace(/\.md$/, '');
+    if (!entry.endsWith(".md")) continue;
+    const recordName = entry.replace(/\.md$/, "");
     recordedScripts.add(`${recordName}.ts`);
 
     // Resolve the subject script's registry row (see docblock above).
@@ -1045,10 +1042,10 @@ export function runCheckH(): SyncIssue[] {
     if (!registryKey) continue; // no version source — records are opt-in
 
     const recordPath = join(lifecycleScriptsDir, entry);
-    const recordContent = readFileSync(recordPath, 'utf-8');
+    const recordContent = readFileSync(recordPath, "utf-8");
     const recordLabel = `docs/lifecycle/scripts/${entry}`;
     const verdict = compareScriptRecordVersion(
-      extractRecordField(recordContent, 'Version'),
+      extractRecordField(recordContent, "Version"),
       registry.get(registryKey)!.version,
       recordLabel,
     );
@@ -1064,23 +1061,24 @@ export function runCheckH(): SyncIssue[] {
 
   // Coverage arm (T-20260917-004): versioned scripts with no record — one
   // aggregated WARNING. Records stay opt-in; the point is visibility.
-  const unrecorded = listVersionedScripts(join(ROOT, 'scripts')).filter(
-    (rel) => !recordedScripts.has(basename(rel)),
-  );
+  const unrecorded = listVersionedScripts(join(ROOT, "scripts")).filter((rel) => !recordedScripts.has(basename(rel)));
   if (unrecorded.length > 0) {
-    const display = unrecorded.slice(0, 12).map((rel) => `scripts/${rel}`).join(', ')
-      + (unrecorded.length > 12 ? `, … +${unrecorded.length - 12} more` : '');
+    const display =
+      unrecorded
+        .slice(0, 12)
+        .map((rel) => `scripts/${rel}`)
+        .join(", ") + (unrecorded.length > 12 ? `, … +${unrecorded.length - 12} more` : "");
     issues.push({
-      level: 'warning',
-      file: 'docs/lifecycle/scripts/',
+      level: "warning",
+      file: "docs/lifecycle/scripts/",
       message: `Check H: ${unrecorded.length} versioned script(s) have no lifecycle record: ${display}`,
-      fix: 'Records are opt-in (SCRIPTS.md stays the lifecycle SSOT) — add docs/lifecycle/scripts/<name>.md for governance-critical scripts',
+      fix: "Records are opt-in (SCRIPTS.md stays the lifecycle SSOT) — add docs/lifecycle/scripts/<name>.md for governance-critical scripts",
     });
   }
 
   if (!jsonMode) {
     console.log(
-      `${colors.dim}Check H: script record versions vs SCRIPTS.md — ${checkedCount} finding(s)${issues.length > 0 ? '' : ', all records in sync'}${colors.reset}`,
+      `${colors.dim}Check H: script record versions vs SCRIPTS.md — ${checkedCount} finding(s)${issues.length > 0 ? "" : ", all records in sync"}${colors.reset}`,
     );
   }
 
@@ -1119,27 +1117,27 @@ export function runCheckH(): SyncIssue[] {
 export function runCheckI(): SyncIssue[] {
   const issues: SyncIssue[] = [];
 
-  const settingsPath = join(ROOT, '.claude', 'settings.json');
+  const settingsPath = join(ROOT, ".claude", "settings.json");
   if (!existsSync(settingsPath)) return issues;
 
   let local: unknown;
   try {
-    local = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+    local = JSON.parse(readFileSync(settingsPath, "utf-8"));
   } catch {
     issues.push({
-      level: 'warning',
-      file: '.claude/settings.json',
-      message: 'Check I: .claude/settings.json is not parseable JSON — hook drift unverifiable',
-      fix: 'Repair the JSON (settings.json is platform-managed; compare against templates/common/.claude/settings.json)',
+      level: "warning",
+      file: ".claude/settings.json",
+      message: "Check I: .claude/settings.json is not parseable JSON — hook drift unverifiable",
+      fix: "Repair the JSON (settings.json is platform-managed; compare against templates/common/.claude/settings.json)",
     });
     return issues;
   }
 
-  const templateSettingsPath = join(ROOT, 'templates', 'common', '.claude', 'settings.json');
+  const templateSettingsPath = join(ROOT, "templates", "common", ".claude", "settings.json");
   let template: unknown | null = null;
   if (existsSync(templateSettingsPath)) {
     try {
-      template = JSON.parse(readFileSync(templateSettingsPath, 'utf-8'));
+      template = JSON.parse(readFileSync(templateSettingsPath, "utf-8"));
     } catch {
       template = null; // unparseable template — arm (b) skipped, arm (a) still runs
     }
@@ -1149,24 +1147,24 @@ export function runCheckI(): SyncIssue[] {
 
   for (const dup of report.duplicates) {
     issues.push({
-      level: 'warning',
-      file: '.claude/settings.json',
-      message: `Check I: hooks.${dup.event} carries duplicated hook command(s): ${dup.commands.map((c) => `"${c}"`).join(', ')}`,
-      fix: 'Rerun upgrade-project (the JSON_MERGE pass collapses exact duplicates) or remove the duplicate entries manually — first occurrence wins',
+      level: "warning",
+      file: ".claude/settings.json",
+      message: `Check I: hooks.${dup.event} carries duplicated hook command(s): ${dup.commands.map((c) => `"${c}"`).join(", ")}`,
+      fix: "Rerun upgrade-project (the JSON_MERGE pass collapses exact duplicates) or remove the duplicate entries manually — first occurrence wins",
     });
   }
   for (const oc of report.overCount) {
     issues.push({
-      level: 'warning',
-      file: '.claude/settings.json',
-      message: `Check I: hooks.${oc.event} has ${oc.localCount} entr(ies) vs ${oc.templateCount} in templates/common/.claude/settings.json${oc.excessCommands.length > 0 ? ` — excess command(s): ${oc.excessCommands.map((c) => `"${c}"`).join(', ')}` : ''}`,
-      fix: 'Rerun upgrade-project (the JSON_MERGE pass collapses exact duplicates) or remove the excess hook entries manually',
+      level: "warning",
+      file: ".claude/settings.json",
+      message: `Check I: hooks.${oc.event} has ${oc.localCount} entr(ies) vs ${oc.templateCount} in templates/common/.claude/settings.json${oc.excessCommands.length > 0 ? ` — excess command(s): ${oc.excessCommands.map((c) => `"${c}"`).join(", ")}` : ""}`,
+      fix: "Rerun upgrade-project (the JSON_MERGE pass collapses exact duplicates) or remove the excess hook entries manually",
     });
   }
 
   if (!jsonMode) {
     console.log(
-      `${colors.dim}Check I: .claude/settings.json hook drift — ${issues.length} finding(s)${issues.length > 0 ? '' : ', hooks clean'}${colors.reset}`,
+      `${colors.dim}Check I: .claude/settings.json hook drift — ${issues.length} finding(s)${issues.length > 0 ? "" : ", hooks clean"}${colors.reset}`,
     );
   }
 
@@ -1196,15 +1194,15 @@ function runCheckB(): SyncIssue[] {
   for (const [filename, rootEntry] of rootRegistry) {
     const { version: rootVersion, layer } = rootEntry;
 
-    if (layer === 'L0-only' || layer === 'L0+L2') {
+    if (layer === "L0-only" || layer === "L0+L2") {
       continue; // legitimate (L0+L2 = variant-scoped, lives in templates/co-*) — L0-only scripts intentionally absent from templates
     }
 
     // layer === 'common' or 'L1-only': should exist in templates/common/
     if (!templateRegistry.has(filename)) {
       issues.push({
-        level: 'error',
-        file: 'scripts/SCRIPTS.md',
+        level: "error",
+        file: "scripts/SCRIPTS.md",
         message: `Check B: ${filename} (layer: ${layer}) registered in root SCRIPTS.md but missing from templates/common/scripts/SCRIPTS.md`,
         fix: `Add ${filename} entry to templates/common/scripts/SCRIPTS.md or copy the script file`,
       });
@@ -1212,10 +1210,10 @@ function runCheckB(): SyncIssue[] {
     }
 
     // Also check actual file existence in templates/common/scripts/
-    const templateScriptPath = join('templates', 'common', 'scripts', filename);
+    const templateScriptPath = join("templates", "common", "scripts", filename);
     if (!existsSync(join(ROOT, templateScriptPath))) {
       issues.push({
-        level: 'error',
+        level: "error",
         file: templateScriptPath,
         message: `Check B: ${filename} (layer: ${layer}) registered as ${layer} but file missing from templates/common/scripts/`,
         fix: `Copy scripts/${filename} to templates/common/scripts/${filename}`,
@@ -1226,8 +1224,8 @@ function runCheckB(): SyncIssue[] {
     const templateVersion = templateRegistry.get(filename)!.version;
     if (rootVersion !== templateVersion) {
       issues.push({
-        level: 'error',
-        file: 'scripts/SCRIPTS.md',
+        level: "error",
+        file: "scripts/SCRIPTS.md",
         message: `Check B: scripts/SCRIPTS.md version for ${filename} (${rootVersion}) differs from templates/common/scripts/SCRIPTS.md (${templateVersion})`,
         fix: `Run 'bun run propagate:apply' to sync or manually align versions`,
       });
@@ -1250,33 +1248,38 @@ function runCheckB(): SyncIssue[] {
  * generator is L0-only — an existsSync-guarded dynamic import lets the L1 copy
  * of this audit skip the arm cleanly where the generator is absent.
  */
-export function compareMirrorProjection(
-  expected: string | null,
-  actual: string | null,
-): SyncIssue[] {
+export function compareMirrorProjection(expected: string | null, actual: string | null): SyncIssue[] {
   if (expected === null) {
-    return [{
-      level: 'error',
-      file: 'scripts/SCRIPTS.md',
-      message: 'Check B projection: no `| script |` header row found in the root registry — cannot build the projection',
-      fix: 'bun scripts/generate-scripts-mirror.ts',
-    }];
+    return [
+      {
+        level: "error",
+        file: "scripts/SCRIPTS.md",
+        message:
+          "Check B projection: no `| script |` header row found in the root registry — cannot build the projection",
+        fix: "bun scripts/generate-scripts-mirror.ts",
+      },
+    ];
   }
   if (actual === null) {
-    return [{
-      level: 'error',
-      file: 'templates/common/scripts/SCRIPTS.md',
-      message: 'Check B projection: no `| script |` header row found in the mirror — cannot locate the generated span',
-      fix: 'bun scripts/generate-scripts-mirror.ts',
-    }];
+    return [
+      {
+        level: "error",
+        file: "templates/common/scripts/SCRIPTS.md",
+        message:
+          "Check B projection: no `| script |` header row found in the mirror — cannot locate the generated span",
+        fix: "bun scripts/generate-scripts-mirror.ts",
+      },
+    ];
   }
   if (actual !== expected) {
-    return [{
-      level: 'error',
-      file: 'templates/common/scripts/SCRIPTS.md',
-      message: `Check B projection: mirror registry span drifted from the generated projection (${expected.split('\n').length} expected lines vs ${actual.split('\n').length} on disk)`,
-      fix: 'bun scripts/generate-scripts-mirror.ts',
-    }];
+    return [
+      {
+        level: "error",
+        file: "templates/common/scripts/SCRIPTS.md",
+        message: `Check B projection: mirror registry span drifted from the generated projection (${expected.split("\n").length} expected lines vs ${actual.split("\n").length} on disk)`,
+        fix: "bun scripts/generate-scripts-mirror.ts",
+      },
+    ];
   }
   return [];
 }
@@ -1285,24 +1288,26 @@ export async function runCheckBProjection(): Promise<SyncIssue[]> {
   if (!IS_WORKSPACE_ROOT) return [];
   if (!existsSync(TEMPLATE_SCRIPTS_MD)) return [];
 
-  const generatorPath = join(ROOT, 'scripts', 'generate-scripts-mirror.ts');
+  const generatorPath = join(ROOT, "scripts", "generate-scripts-mirror.ts");
   if (!existsSync(generatorPath)) return [];
 
   try {
     const generator = await import(generatorPath);
     const expected: string = generator.buildMirrorRegistrySpan(
-      readFileSync(SCRIPTS_MD, 'utf-8'),
-      join(ROOT, 'templates', 'common', 'scripts'),
+      readFileSync(SCRIPTS_MD, "utf-8"),
+      join(ROOT, "templates", "common", "scripts"),
     );
-    const actual: string | null = generator.extractRegistrySpan(readFileSync(TEMPLATE_SCRIPTS_MD, 'utf-8'));
+    const actual: string | null = generator.extractRegistrySpan(readFileSync(TEMPLATE_SCRIPTS_MD, "utf-8"));
     return compareMirrorProjection(expected, actual);
   } catch (e) {
-    return [{
-      level: 'error',
-      file: 'scripts/generate-scripts-mirror.ts',
-      message: `Check B projection: generator import/build failed: ${e instanceof Error ? e.message : String(e)}`,
-      fix: 'Fix the generator error reported above',
-    }];
+    return [
+      {
+        level: "error",
+        file: "scripts/generate-scripts-mirror.ts",
+        message: `Check B projection: generator import/build failed: ${e instanceof Error ? e.message : String(e)}`,
+        fix: "Fix the generator error reported above",
+      },
+    ];
   }
 }
 
@@ -1317,35 +1322,35 @@ export async function runCheckBProjection(): Promise<SyncIssue[]> {
  * Format: 'l1-script-base:l0-script-base'
  */
 const INTENTIONAL_CROSS_REFS = new Set([
-  'audit:tag-template',                         // audit.ts: string mention in warning message only
-  'dev-sync:propagate-to-templates',            // dev-sync.ts: called only inside isL0Context guard
-  'audit:propagate-to-templates',               // audit.ts: comment reference only (replaced checkScriptSync)
-  'lifecycle-sync-audit:propagate-to-templates',  // lifecycle-sync-audit.ts: string mention in Check C fix hint only (re-sync advice; the hint never runs the L0 script)
-  'lifecycle-sync-audit:generate-scripts-mirror', // lifecycle-sync-audit.ts: string mention in Check B projection-arm fix hint only (v1.16.0); the arm itself is existsSync-guarded and the dynamic import runs only at L0 where the L0-only generator exists
-  'create-l3-scaffold:generate-version-manifest', // L0-workflow coordination; reference only in L1 copy
-  'list-template-versions:tag-template',        // L0-workflow coordination; reference only in L1 copy
-  'new-project:list-template-versions',         // L0-workflow coordination; reference only in L1 copy
-  'pre-commit:validate-templates',              // pre-commit.ts: guarded by existsSync — skipped when L0 script absent
-  'pre-commit:fix-script-versions',             // pre-commit.ts: guarded by existsSync — string in error hint only
-  'verify-skills:upgrade-project',              // verify-skills.ts: warning string mention only
-  'upgrade-project:helpers/write-scripts-snapshot',     // upgrade-project.ts: post-upgrade snapshot regeneration spawns the L0-only helper behind an existsSync guard (T-20261011-014 landing)
-  'audit:spec-register',                          // audit.ts: string mention in warning message only (--spec-check mode)
-  'audit:upgrade-project',
-  'audit:render-commands',                        // audit.ts: command-parity WARN hint names render-commands.ts, existsSync-guarded on the renderer file (T-20261013-009 phase 2; L0+L1 delivered so the reference resolves in generated projects)                        // audit.ts: guarded by existsSync('Projects') — checkProjectDocMarkerDrift skips entirely when Projects/ is absent (gitignored, L0-dev-machine-only directory; scaffolded/L1 projects have no Projects/ to check)
-  'audit:validate-ticket-doc-commands',           // audit.ts: spawnSync guarded by existsSync — skipped when the L0-only lint is absent (T-20261002-008)
-  'audit:sync-variant-settings',                  // audit.ts: spawnSync guarded by existsSync — skipped when the L0-only sync is absent (T-20261002-011)
-  'audit:test-platform-parity',                   // audit.ts: guarded by existsSync — skipped when L0 script absent (L3/L1 projects have no templates/ to test parity on)
-  'dev-sync:sync-skill-registries',               // dev-sync.ts step 4.63: guarded by isWorkspaceRoot + existsSync — registry convergence is workspace-root-only (W5, spec docs/designs/2026-09-25-registry-policy-completeness-design.md)
-  'validate-templates:sync-skill-registries',     // validate-templates.ts VA-08: string mention in the fix hint only (the L0-only remediation command; W5)
-  'dev-sync:verify-adr-governance',               // dev-sync.ts step 3.97: guarded by existsSync — skipped when L0 validator absent (ADR-0059 Stage 2 gate; scaffolded projects have no docs/adr corpus)
-  'dev-sync:generate-skill-graph',                // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 generator absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
-  'dev-sync:verify-skill-graph',                  // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 verifier absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
-  'dev-sync:sync-template-deps',                  // dev-sync.ts step 4.52: called only inside isWorkspaceRoot guard (same shape as dev-sync:propagate-to-templates; template dep mirror is L0-only tooling)
-  'dev-sync:skill-dependency-analysis',           // dev-sync.ts step 3.96c: full health report pass is non-fatal + existsSync-guarded; skill-session-review.ts itself is L0+L1 (ADR-0067) so needs no entry
-  'skill-session-review:skill-dependency-analysis', // skill-session-review.ts: per-skill re-analysis is existsSync-guarded (import.meta.dir sibling check) and skips in L1/L3 where the analyzer is absent (ADR-0067 §Decision 5)
-  'audit:sync-template-deps',                     // audit.ts: string mention in FAIL fix hint only; checkTemplateDependencyMirror skips entirely when templates/common/package.json is absent (L1/L3)
-  'upgrade-project:validate-variant-readiness',   // upgrade-project.ts: Variant Readiness Gate is existsSync-guarded — the gate runs only at a workspace root where the L0 validator exists (surfaced when the L1 copy caught up to v1.18.0)
-  'audit:check-upgrade-coverage',                 // audit.ts: upgrade coverage gate (ADR-0073) is existsSync-guarded — the checker is L0-only and the gate self-skips when scripts/check-upgrade-coverage.ts is absent (L1/L3 projects)
+  "audit:tag-template", // audit.ts: string mention in warning message only
+  "dev-sync:propagate-to-templates", // dev-sync.ts: called only inside isL0Context guard
+  "audit:propagate-to-templates", // audit.ts: comment reference only (replaced checkScriptSync)
+  "lifecycle-sync-audit:propagate-to-templates", // lifecycle-sync-audit.ts: string mention in Check C fix hint only (re-sync advice; the hint never runs the L0 script)
+  "lifecycle-sync-audit:generate-scripts-mirror", // lifecycle-sync-audit.ts: string mention in Check B projection-arm fix hint only (v1.16.0); the arm itself is existsSync-guarded and the dynamic import runs only at L0 where the L0-only generator exists
+  "create-l3-scaffold:generate-version-manifest", // L0-workflow coordination; reference only in L1 copy
+  "list-template-versions:tag-template", // L0-workflow coordination; reference only in L1 copy
+  "new-project:list-template-versions", // L0-workflow coordination; reference only in L1 copy
+  "pre-commit:validate-templates", // pre-commit.ts: guarded by existsSync — skipped when L0 script absent
+  "pre-commit:fix-script-versions", // pre-commit.ts: guarded by existsSync — string in error hint only
+  "verify-skills:upgrade-project", // verify-skills.ts: warning string mention only
+  "upgrade-project:helpers/write-scripts-snapshot", // upgrade-project.ts: post-upgrade snapshot regeneration spawns the L0-only helper behind an existsSync guard (T-20261011-014 landing)
+  "audit:spec-register", // audit.ts: string mention in warning message only (--spec-check mode)
+  "audit:upgrade-project",
+  "audit:render-commands", // audit.ts: command-parity WARN hint names render-commands.ts, existsSync-guarded on the renderer file (T-20261013-009 phase 2; L0+L1 delivered so the reference resolves in generated projects)                        // audit.ts: guarded by existsSync('Projects') — checkProjectDocMarkerDrift skips entirely when Projects/ is absent (gitignored, L0-dev-machine-only directory; scaffolded/L1 projects have no Projects/ to check)
+  "audit:validate-ticket-doc-commands", // audit.ts: spawnSync guarded by existsSync — skipped when the L0-only lint is absent (T-20261002-008)
+  "audit:sync-variant-settings", // audit.ts: spawnSync guarded by existsSync — skipped when the L0-only sync is absent (T-20261002-011)
+  "audit:test-platform-parity", // audit.ts: guarded by existsSync — skipped when L0 script absent (L3/L1 projects have no templates/ to test parity on)
+  "dev-sync:sync-skill-registries", // dev-sync.ts step 4.63: guarded by isWorkspaceRoot + existsSync — registry convergence is workspace-root-only (W5, spec docs/designs/2026-09-25-registry-policy-completeness-design.md)
+  "validate-templates:sync-skill-registries", // validate-templates.ts VA-08: string mention in the fix hint only (the L0-only remediation command; W5)
+  "dev-sync:verify-adr-governance", // dev-sync.ts step 3.97: guarded by existsSync — skipped when L0 validator absent (ADR-0059 Stage 2 gate; scaffolded projects have no docs/adr corpus)
+  "dev-sync:generate-skill-graph", // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 generator absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
+  "dev-sync:verify-skill-graph", // dev-sync.ts step 4.65: guarded by existsSync — skipped when L0 verifier absent (ADR-0060 skill graph gate; scaffolded projects ship no skill graph tooling)
+  "dev-sync:sync-template-deps", // dev-sync.ts step 4.52: called only inside isWorkspaceRoot guard (same shape as dev-sync:propagate-to-templates; template dep mirror is L0-only tooling)
+  "dev-sync:skill-dependency-analysis", // dev-sync.ts step 3.96c: full health report pass is non-fatal + existsSync-guarded; skill-session-review.ts itself is L0+L1 (ADR-0067) so needs no entry
+  "skill-session-review:skill-dependency-analysis", // skill-session-review.ts: per-skill re-analysis is existsSync-guarded (import.meta.dir sibling check) and skips in L1/L3 where the analyzer is absent (ADR-0067 §Decision 5)
+  "audit:sync-template-deps", // audit.ts: string mention in FAIL fix hint only; checkTemplateDependencyMirror skips entirely when templates/common/package.json is absent (L1/L3)
+  "upgrade-project:validate-variant-readiness", // upgrade-project.ts: Variant Readiness Gate is existsSync-guarded — the gate runs only at a workspace root where the L0 validator exists (surfaced when the L1 copy caught up to v1.18.0)
+  "audit:check-upgrade-coverage", // audit.ts: upgrade coverage gate (ADR-0073) is existsSync-guarded — the checker is L0-only and the gate self-skips when scripts/check-upgrade-coverage.ts is absent (L1/L3 projects)
 ]);
 
 function runCheckX(): SyncIssue[] {
@@ -1358,15 +1363,15 @@ function runCheckX(): SyncIssue[] {
   // Collect L0-only script base names (without extension)
   const l0OnlyScripts: string[] = [];
   for (const [filename, entry] of rootRegistry) {
-    if (entry.layer === 'L0-only') {
-      l0OnlyScripts.push(filename.replace(/\.(ts|sh|ps1)$/, ''));
+    if (entry.layer === "L0-only") {
+      l0OnlyScripts.push(filename.replace(/\.(ts|sh|ps1)$/, ""));
     }
   }
 
   if (l0OnlyScripts.length === 0) return issues;
 
   // Scan templates/common/scripts/ for references
-  const templateScriptsDir = join(ROOT, 'templates', 'common', 'scripts');
+  const templateScriptsDir = join(ROOT, "templates", "common", "scripts");
   if (!existsSync(templateScriptsDir)) return issues;
 
   // Recursively collect all .ts files under templateScriptsDir (including helpers/, hooks/, lib/, etc.)
@@ -1384,7 +1389,7 @@ function runCheckX(): SyncIssue[] {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
         result.push(...collectTsFiles(fullPath, depth + 1));
-      } else if (entry.isFile() && entry.name.endsWith('.ts')) {
+      } else if (entry.isFile() && entry.name.endsWith(".ts")) {
         result.push(fullPath);
       }
     }
@@ -1396,25 +1401,25 @@ function runCheckX(): SyncIssue[] {
   for (const file of tsFiles) {
     let content: string;
     try {
-      content = readFileSync(file, 'utf-8');
+      content = readFileSync(file, "utf-8");
     } catch {
       continue;
     }
     for (const scriptName of l0OnlyScripts) {
       // Match: bun run scripts/<name>, bun scripts/<name>, import from '.../<name>' or '.../<name>.js'
       const patterns = [
-        new RegExp(`bun\\s+(?:run\\s+)?scripts\\/${scriptName}`, 'g'),
-        new RegExp(`import.*from\\s+['"].*\\/${scriptName}(?:\\.js)?['"]`, 'g'),
+        new RegExp(`bun\\s+(?:run\\s+)?scripts\\/${scriptName}`, "g"),
+        new RegExp(`import.*from\\s+['"].*\\/${scriptName}(?:\\.js)?['"]`, "g"),
       ];
       for (const pattern of patterns) {
         if (pattern.test(content)) {
-          const relFile = file.replace(ROOT + '\\', '').replace(ROOT + '/', '');
-          const l1Base = basename(file).replace(/\.(ts|sh|ps1)$/, '');
+          const relFile = file.replace(ROOT + "\\", "").replace(ROOT + "/", "");
+          const l1Base = basename(file).replace(/\.(ts|sh|ps1)$/, "");
           // Self-reference: L1 copy of the same script referencing itself is expected
           if (l1Base === scriptName) break;
           if (INTENTIONAL_CROSS_REFS.has(`${l1Base}:${scriptName}`)) break;
           issues.push({
-            level: 'error',
+            level: "error",
             file: relFile,
             message: `Check X: L0-only script '${scriptName}' is referenced in ${relFile} — this script won't exist in generated projects`,
             fix: `Either promote '${scriptName}' to 'common' layer and copy to templates/common/scripts/, or remove the reference`,
@@ -1443,7 +1448,7 @@ function runCheckX(): SyncIssue[] {
  */
 function runCheckD(): DuplicateEntry[] {
   const entries: DuplicateEntry[] = [];
-  const EXCLUDED = ['node_modules', '.git', '_archive', 'memory'];
+  const EXCLUDED = ["node_modules", ".git", "_archive", "memory"];
   // Skip context.md itself (contains the annotation definition/example, not a real duplicate)
 
   function walkDir(dir: string, depth = 0): void {
@@ -1456,36 +1461,36 @@ function runCheckD(): DuplicateEntry[] {
     }
 
     for (const item of items) {
-      if (item.name.startsWith('.') || EXCLUDED.includes(item.name)) continue;
+      if (item.name.startsWith(".") || EXCLUDED.includes(item.name)) continue;
       if (item.isSymbolicLink()) continue; // never follow links: cycle-safe, no duplicate visits (T-20260910-026)
 
       const fullPath = join(dir, item.name);
 
       if (item.isDirectory()) {
         // Skip generated project directories (have AGENTS.md or variant.json)
-        if (existsSync(join(fullPath, 'AGENTS.md')) || existsSync(join(fullPath, 'variant.json'))) {
+        if (existsSync(join(fullPath, "AGENTS.md")) || existsSync(join(fullPath, "variant.json"))) {
           continue;
         }
         walkDir(fullPath, depth + 1);
-      } else if (item.isFile() && item.name.endsWith('.md')) {
+      } else if (item.isFile() && item.name.endsWith(".md")) {
         // Skip context.md (contains definition example, not a real duplicate)
-        if (item.name === 'CONSTITUTION.md') continue;
+        if (item.name === "CONSTITUTION.md") continue;
         let content: string;
         try {
-          content = readFileSync(fullPath, 'utf-8');
+          content = readFileSync(fullPath, "utf-8");
         } catch {
           continue;
         }
 
         // Per-line shared-parser scan (lines scanned in order, so `file`
         // remains a whole-file registry of marker lines).
-        for (const line of content.split('\n')) {
+        for (const line of content.split("\n")) {
           const parsed = parseIntentionalDuplicateLine(line);
           if (!parsed) continue;
           entries.push({
-            file: fullPath.replace(ROOT + '\\', '').replace(ROOT + '/', ''),
-            source: parsed.source ?? parsed.name ?? '',
-            reason: parsed.reason ?? parsed.name ?? '',
+            file: fullPath.replace(ROOT + "\\", "").replace(ROOT + "/", ""),
+            source: parsed.source ?? parsed.name ?? "",
+            reason: parsed.reason ?? parsed.name ?? "",
           });
         }
       }
@@ -1505,20 +1510,20 @@ function parseVariantScriptsMd(filePath: string): Map<string, string> {
   const result = new Map<string, string>();
   if (!existsSync(filePath)) return result;
 
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
   const registryMatch = content.match(/## Registry\r?\n([\s\S]*?)(?:\r?\n## |\s*$)/);
   if (!registryMatch) return result;
 
-  const lines = registryMatch[1].split('\n');
+  const lines = registryMatch[1].split("\n");
   for (const line of lines) {
-    if (!line.startsWith('|')) continue;
-    const cols = line.split('|').map(c => c.trim());
+    if (!line.startsWith("|")) continue;
+    const cols = line.split("|").map((c) => c.trim());
     if (cols.length < 4) continue;
     const rawName = cols[1];
-    if (!rawName.startsWith('`') || rawName === 'script') continue;
-    const filename = rawName.replace(/`/g, '').trim();
+    if (!rawName.startsWith("`") || rawName === "script") continue;
+    const filename = rawName.replace(/`/g, "").trim();
     const version = cols[2];
-    if (filename && version && version !== 'version' && !version.startsWith('-')) {
+    if (filename && version && version !== "version" && !version.startsWith("-")) {
       result.set(filename, version);
     }
   }
@@ -1536,26 +1541,26 @@ function runCheckV(): SyncIssue[] {
   const issues: SyncIssue[] = [];
   if (!IS_WORKSPACE_ROOT) return issues;
 
-  const templatesDir = join(ROOT, 'templates');
+  const templatesDir = join(ROOT, "templates");
   if (!existsSync(templatesDir)) return issues;
 
   let variantDirs: string[];
   try {
     variantDirs = readdirSync(templatesDir)
-      .filter(d => d.startsWith('co-'))
-      .map(d => join(templatesDir, d))
-      .filter(d => statSync(d).isDirectory());
+      .filter((d) => d.startsWith("co-"))
+      .map((d) => join(templatesDir, d))
+      .filter((d) => statSync(d).isDirectory());
   } catch {
     return issues;
   }
 
   for (const variantDir of variantDirs) {
-    const variantJsonPath = join(variantDir, 'variant.json');
+    const variantJsonPath = join(variantDir, "variant.json");
     if (!existsSync(variantJsonPath)) continue;
 
     let variantJson: { script_manifest?: { local?: Array<{ name: string; path: string }> } };
     try {
-      variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8'));
+      variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8"));
     } catch {
       continue;
     }
@@ -1565,7 +1570,7 @@ function runCheckV(): SyncIssue[] {
 
     const variantName = basename(variantDir); // e.g. 'co-deck'
     // variant SCRIPTS.md is at: templates/co-deck/scripts/co-deck/SCRIPTS.md
-    const variantScriptsMd = join(variantDir, 'scripts', variantName, 'SCRIPTS.md');
+    const variantScriptsMd = join(variantDir, "scripts", variantName, "SCRIPTS.md");
 
     // Parse variant registry (different column format from L1 SCRIPTS.md)
     const variantRegistry = parseVariantScriptsMd(variantScriptsMd);
@@ -1585,7 +1590,7 @@ function runCheckV(): SyncIssue[] {
 
       if (fileVersion === null) {
         issues.push({
-          level: 'warning',
+          level: "warning",
           file: `templates/${variantName}/${entry.path}`,
           message: `Check V: ${variantName}/${entry.path} — @version header missing (add @version to enable version tracking)`,
         });
@@ -1594,8 +1599,8 @@ function runCheckV(): SyncIssue[] {
 
       if (registryVersion === undefined) {
         issues.push({
-          level: 'warning',
-          file: variantScriptsMd.replace(ROOT + '/', '').replace(ROOT + '\\', ''),
+          level: "warning",
+          file: variantScriptsMd.replace(ROOT + "/", "").replace(ROOT + "\\", ""),
           message: `Check V: ${variantName}/${entry.path} declared in variant.json but not found in ${variantName}/scripts/${variantName}/SCRIPTS.md registry`,
           fix: `Add ${registryKey} to templates/${variantName}/scripts/${variantName}/SCRIPTS.md`,
         });
@@ -1604,7 +1609,7 @@ function runCheckV(): SyncIssue[] {
 
       if (fileVersion !== registryVersion) {
         issues.push({
-          level: 'error',
+          level: "error",
           file: `templates/${variantName}/${entry.path}`,
           message: `Check V: ${variantName}/${entry.path} @version ${fileVersion} does not match ${variantName}/SCRIPTS.md entry ${registryVersion}`,
           fix: `Update templates/${variantName}/scripts/${variantName}/SCRIPTS.md version for ${registryKey} from ${registryVersion} to ${fileVersion}`,
@@ -1627,7 +1632,7 @@ function applyFix(checkAIssues: SyncIssue[]): void {
     return;
   }
 
-  let content = readFileSync(SCRIPTS_MD, 'utf-8');
+  let content = readFileSync(SCRIPTS_MD, "utf-8");
 
   for (const issue of fixable) {
     const { scriptName, fileVersion, registryVersion } = issue.fixData!;
@@ -1635,9 +1640,9 @@ function applyFix(checkAIssues: SyncIssue[]): void {
     // Replace the version column in the registry row for this script.
     // Row format: | `scriptName` | source | version | ...
     // We use a regex to find the row and replace only the version column.
-    const escapedName = scriptName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedName = scriptName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const rowRegex = new RegExp(
-      `(\\|\\s*\`${escapedName}\`\\s*\\|[^|]+\\|\\s*)${registryVersion.replace(/\./g, '\\.')}(\\s*\\|)`,
+      `(\\|\\s*\`${escapedName}\`\\s*\\|[^|]+\\|\\s*)${registryVersion.replace(/\./g, "\\.")}(\\s*\\|)`,
     );
 
     if (rowRegex.test(content)) {
@@ -1646,13 +1651,11 @@ function applyFix(checkAIssues: SyncIssue[]): void {
         `${colors.green}✔ Fixed${colors.reset}: ${scriptName} — updated SCRIPTS.md entry ${registryVersion} → ${fileVersion}`,
       );
     } else {
-      console.log(
-        `${colors.yellow}⚠  Could not auto-fix${colors.reset}: ${scriptName} (row pattern not matched)`,
-      );
+      console.log(`${colors.yellow}⚠  Could not auto-fix${colors.reset}: ${scriptName} (row pattern not matched)`);
     }
   }
 
-  writeFileSync(SCRIPTS_MD, content, 'utf-8');
+  writeFileSync(SCRIPTS_MD, content, "utf-8");
 }
 
 /**
@@ -1662,40 +1665,18 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
   if (!jsonMode) {
     console.log(`${colors.cyan}🔍 Lifecycle Sync Audit${colors.reset}`);
     console.log(`${colors.cyan}========================${colors.reset}`);
-    console.log(
-      `${colors.dim}Check A: scripts @version vs SCRIPTS.md registry${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check B: scripts/SCRIPTS.md vs templates/common/scripts/SCRIPTS.md${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check C: skills/ vs templates/common/skills/ content${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check D: intentional-duplicate registry${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check X: templates/common/scripts/ references to L0-only scripts${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check V: variant scripts @version vs variant SCRIPTS.md registry${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check E: lifecycle records Version/Owner vs SKILL.md frontmatter${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check F: agent tier cross-surface parity (frontmatter anchor)${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check G: .githooks vs templates/common/.githooks mirror parity${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check H: script lifecycle record versions vs SCRIPTS.md${colors.reset}`,
-    );
-    console.log(
-      `${colors.dim}Check I: .claude/settings.json hook drift${colors.reset}`,
-    );
-    console.log('');
+    console.log(`${colors.dim}Check A: scripts @version vs SCRIPTS.md registry${colors.reset}`);
+    console.log(`${colors.dim}Check B: scripts/SCRIPTS.md vs templates/common/scripts/SCRIPTS.md${colors.reset}`);
+    console.log(`${colors.dim}Check C: skills/ vs templates/common/skills/ content${colors.reset}`);
+    console.log(`${colors.dim}Check D: intentional-duplicate registry${colors.reset}`);
+    console.log(`${colors.dim}Check X: templates/common/scripts/ references to L0-only scripts${colors.reset}`);
+    console.log(`${colors.dim}Check V: variant scripts @version vs variant SCRIPTS.md registry${colors.reset}`);
+    console.log(`${colors.dim}Check E: lifecycle records Version/Owner vs SKILL.md frontmatter${colors.reset}`);
+    console.log(`${colors.dim}Check F: agent tier cross-surface parity (frontmatter anchor)${colors.reset}`);
+    console.log(`${colors.dim}Check G: .githooks vs templates/common/.githooks mirror parity${colors.reset}`);
+    console.log(`${colors.dim}Check H: script lifecycle record versions vs SCRIPTS.md${colors.reset}`);
+    console.log(`${colors.dim}Check I: .claude/settings.json hook drift${colors.reset}`);
+    console.log("");
   }
 
   const checkAIssues = runCheckA();
@@ -1720,32 +1701,32 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
         console.log(`  · ${entry.file} → ${entry.source} (${entry.reason})`);
       }
     }
-    console.log('');
+    console.log("");
   }
 
   const allErrors = [
-    ...checkAIssues.filter((i) => i.level === 'error'),
-    ...checkBIssues.filter((i) => i.level === 'error'),
-    ...checkCIssues.filter((i) => i.level === 'error'),
-    ...checkXIssues.filter((i) => i.level === 'error'),
-    ...checkVIssues.filter((i) => i.level === 'error'),
-    ...checkEIssues.filter((i) => i.level === 'error'),
-    ...checkFIssues.filter((i) => i.level === 'error'),
-    ...checkGIssues.filter((i) => i.level === 'error'),
-    ...checkHIssues.filter((i) => i.level === 'error'),
-    ...checkIIssues.filter((i) => i.level === 'error'),
+    ...checkAIssues.filter((i) => i.level === "error"),
+    ...checkBIssues.filter((i) => i.level === "error"),
+    ...checkCIssues.filter((i) => i.level === "error"),
+    ...checkXIssues.filter((i) => i.level === "error"),
+    ...checkVIssues.filter((i) => i.level === "error"),
+    ...checkEIssues.filter((i) => i.level === "error"),
+    ...checkFIssues.filter((i) => i.level === "error"),
+    ...checkGIssues.filter((i) => i.level === "error"),
+    ...checkHIssues.filter((i) => i.level === "error"),
+    ...checkIIssues.filter((i) => i.level === "error"),
   ];
   const allWarnings = [
-    ...checkAIssues.filter((i) => i.level === 'warning'),
-    ...checkBIssues.filter((i) => i.level === 'warning'),
-    ...checkCIssues.filter((i) => i.level === 'warning'),
-    ...checkXIssues.filter((i) => i.level === 'warning'),
-    ...checkVIssues.filter((i) => i.level === 'warning'),
-    ...checkEIssues.filter((i) => i.level === 'warning'),
-    ...checkFIssues.filter((i) => i.level === 'warning'),
-    ...checkGIssues.filter((i) => i.level === 'warning'),
-    ...checkHIssues.filter((i) => i.level === 'warning'),
-    ...checkIIssues.filter((i) => i.level === 'warning'),
+    ...checkAIssues.filter((i) => i.level === "warning"),
+    ...checkBIssues.filter((i) => i.level === "warning"),
+    ...checkCIssues.filter((i) => i.level === "warning"),
+    ...checkXIssues.filter((i) => i.level === "warning"),
+    ...checkVIssues.filter((i) => i.level === "warning"),
+    ...checkEIssues.filter((i) => i.level === "warning"),
+    ...checkFIssues.filter((i) => i.level === "warning"),
+    ...checkGIssues.filter((i) => i.level === "warning"),
+    ...checkHIssues.filter((i) => i.level === "warning"),
+    ...checkIIssues.filter((i) => i.level === "warning"),
   ];
 
   return {
@@ -1761,45 +1742,45 @@ function printResults(result: AuditResult): void {
   for (const error of result.errors) {
     console.log(`${colors.red}✖ ERROR: ${error.message}${colors.reset}`);
     if (error.fix) console.log(`   Fix: ${error.fix}`);
-    console.log('');
+    console.log("");
   }
 
   for (const warning of result.warnings) {
     console.log(`${colors.yellow}⚠️  WARNING: ${warning.message}${colors.reset}`);
     if (warning.fix) console.log(`   Fix: ${warning.fix}`);
-    console.log('');
+    console.log("");
   }
 
   console.log(`${colors.cyan}========================${colors.reset}`);
   if (result.passed && result.warnings.length === 0) {
-    console.log(`${colors.green}✅ All lifecycle sync checks passed. (Check A: formal version consistency only — semantic content not verified)${colors.reset}`);
+    console.log(
+      `${colors.green}✅ All lifecycle sync checks passed. (Check A: formal version consistency only — semantic content not verified)${colors.reset}`,
+    );
   } else if (result.passed) {
     console.log(
       `${colors.green}✅ All lifecycle sync checks passed. (Check A: formal version consistency only — semantic content not verified)${colors.reset} ` +
         `${colors.yellow}(${result.warnings.length} warning(s))${colors.reset}`,
     );
   } else {
-    console.log(
-      `${colors.red}❌ ${result.errors.length} error(s) found.${colors.reset}`,
-    );
+    console.log(`${colors.red}❌ ${result.errors.length} error(s) found.${colors.reset}`);
   }
 }
 
 // CLI interface
 const args = process.argv.slice(2);
-const jsonMode = args.includes('--json');
-const fixMode = args.includes('--fix');
+const jsonMode = args.includes("--json");
+const fixMode = args.includes("--fix");
 
 if (import.meta.main) {
   if (fixMode) {
     // In fix mode: run Check A, apply fixes, then re-run full audit to report final state
     console.log(`${colors.cyan}🔧 Lifecycle Sync Audit — Fix Mode${colors.reset}`);
     console.log(`${colors.cyan}====================================${colors.reset}`);
-    console.log('');
+    console.log("");
 
     const checkAIssues = runCheckA();
-    applyFix(checkAIssues.filter((i) => i.level === 'error'));
-    console.log('');
+    applyFix(checkAIssues.filter((i) => i.level === "error"));
+    console.log("");
 
     // Report remaining issues after fix
     const result = await runAudit(false);
@@ -1824,4 +1805,3 @@ if (import.meta.main) {
     process.exit(result.errors.length > 0 ? 1 : 0);
   }
 }
-

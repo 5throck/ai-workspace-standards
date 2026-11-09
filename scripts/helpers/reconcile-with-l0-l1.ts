@@ -19,12 +19,12 @@
 // package.json, which is out of scope for this type-annotation-only pass. The import
 // is `any` here; only valid/gt/lt are used (version comparison, see compareVersions).
 // @ts-expect-error — semver has no bundled or installed type declarations
-import * as semver from 'semver';
-import { join, basename } from 'path';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { FileClassification, L3ScanResult } from './scan-l3-project.ts';
-import { fatalError, warningError, ErrorPhase } from '../lib/error-handling.ts';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
+import * as semver from "semver";
+import { join, basename } from "node:path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { FileClassification, L3ScanResult } from "./scan-l3-project.ts";
+import { fatalError, warningError, ErrorPhase } from "../lib/error-handling.ts";
+import { readUTF8File, writeUTF8File } from "../lib/encoding-utils.ts";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -61,16 +61,16 @@ export interface ReconciledFile {
   /** Hash for verification */
   hash?: string;
   /** Which layer this came from */
-  sourceLayer: 'L0' | 'L1' | 'L3';
+  sourceLayer: "L0" | "L1" | "L3";
 }
 
 export interface ConflictResolution {
   /** File path with conflict */
   filePath: string;
   /** Type of conflict */
-  conflict: 'version_mismatch' | 'content_divergence' | 'platform_parity' | 'circular_dependency';
+  conflict: "version_mismatch" | "content_divergence" | "platform_parity" | "circular_dependency";
   /** Resolution strategy */
-  resolution: 'keep_l3' | 'keep_l0' | 'keep_l1' | 'merge' | 'manual_review';
+  resolution: "keep_l3" | "keep_l0" | "keep_l1" | "merge" | "manual_review";
   /** Reason for resolution */
   reason: string;
   /** Versions involved */
@@ -89,7 +89,7 @@ export interface ConflictResolution {
 
 const ANTI_SWELLING_THRESHOLD = 0.5; // 50% override threshold
 const L0_ROOT = process.cwd();
-const L1_COMMON = join(L0_ROOT, 'templates', 'common');
+const L1_COMMON = join(L0_ROOT, "templates", "common");
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -122,42 +122,39 @@ function compareVersions(v1: string | undefined, v2: string | undefined): number
  * Determine if file should be moved to common based on override percentage
  * @version 1.1.0
  */
-function shouldMoveToCommon(
-  file: FileClassification,
-  totalFilesInCategory: number
-): { move: boolean; reason: string } {
+function shouldMoveToCommon(file: FileClassification, totalFilesInCategory: number): { move: boolean; reason: string } {
   // If file is new, doesn't apply
-  if (file.classification === 'new') {
-    return { move: false, reason: 'New file, no override' };
+  if (file.classification === "new") {
+    return { move: false, reason: "New file, no override" };
   }
 
   // If file only exists in L3, doesn't apply
   if (!file.existsInL0 && !file.existsInL1) {
-    return { move: false, reason: 'New file, no override' };
+    return { move: false, reason: "New file, no override" };
   }
 
   // Check if this is a common file that should not be overridden
   const commonFiles = [
-    'CLAUDE.md',
-    'GEMINI.md',
-    'README.md',
-    'package.json',
-    '.claude/settings.json',
-    '.gemini/settings.json',
+    "CLAUDE.md",
+    "GEMINI.md",
+    "README.md",
+    "package.json",
+    ".claude/settings.json",
+    ".gemini/settings.json",
   ];
 
-  const isCommonFile = commonFiles.some(cf => file.relativePath.endsWith(cf));
+  const isCommonFile = commonFiles.some((cf) => file.relativePath.endsWith(cf));
 
-  if (isCommonFile && file.classification === 'modified') {
+  if (isCommonFile && file.classification === "modified") {
     // Check override percentage (simplified - would need full scan in production)
     // For now, conservative approach: if modifying core config, flag for review
     return {
       move: true,
-      reason: 'Core configuration file modified - consider moving to common if used across variants',
+      reason: "Core configuration file modified - consider moving to common if used across variants",
     };
   }
 
-  return { move: false, reason: 'Variant-specific file' };
+  return { move: false, reason: "Variant-specific file" };
 }
 
 // ============================================================================
@@ -170,11 +167,11 @@ function shouldMoveToCommon(
  */
 function reconcileFile(
   file: FileClassification,
-  variantName: string
+  variantName: string,
 ): {
-  decision: 'keep' | 'move' | 'discard';
+  decision: "keep" | "move" | "discard";
   reason: string;
-  sourceLayer: 'L0' | 'L1' | 'L3';
+  sourceLayer: "L0" | "L1" | "L3";
   conflict?: ConflictResolution;
 } {
   const { relativePath, classification, l0Version, l1Version, l3Version, existsInL0, existsInL1 } = file;
@@ -184,63 +181,63 @@ function reconcileFile(
   // scaffolds and upgrades carry it; discarding the "identical to common" copy
   // during L3→variant promotion silently stripped the license from regenerated
   // variants (docs/designs/2026-08-28-agpl-license-template-rollout-design.md).
-  const normalizedPath = relativePath.replace(/\\/g, '/');
-  if (classification === 'identical' && normalizedPath === 'LICENSE') {
+  const normalizedPath = relativePath.replace(/\\/g, "/");
+  if (classification === "identical" && normalizedPath === "LICENSE") {
     return {
-      decision: 'keep',
-      reason: 'Governance artifact (LICENSE) — variants must ship their own copy even when identical to L1',
-      sourceLayer: 'L3',
+      decision: "keep",
+      reason: "Governance artifact (LICENSE) — variants must ship their own copy even when identical to L1",
+      sourceLayer: "L3",
     };
   }
 
   // Case 1: New file (only in L3)
-  if (classification === 'new') {
+  if (classification === "new") {
     return {
-      decision: 'keep',
+      decision: "keep",
       reason: `New file in ${variantName} variant`,
-      sourceLayer: 'L3',
+      sourceLayer: "L3",
     };
   }
 
   // Case 2: Identical to L0 or L1
-  if (classification === 'identical') {
+  if (classification === "identical") {
     return {
-      decision: 'discard',
-      reason: 'Identical to existing file in L0/L1 - no action needed',
-      sourceLayer: existsInL0 ? 'L0' : 'L1',
+      decision: "discard",
+      reason: "Identical to existing file in L0/L1 - no action needed",
+      sourceLayer: existsInL0 ? "L0" : "L1",
     };
   }
 
   // Case 3: Modified file
-  if (classification === 'modified') {
+  if (classification === "modified") {
     // Version comparison
     const versionComparison = compareVersions(l3Version, l0Version || l1Version);
 
     if (versionComparison === 1) {
       // L3 version is newer
       return {
-        decision: 'keep',
+        decision: "keep",
         reason: `L3 version (${l3Version}) is newer than L0/L1 (${l0Version || l1Version})`,
-        sourceLayer: 'L3',
+        sourceLayer: "L3",
       };
     } else if (versionComparison === -1) {
       // L0/L1 version is newer
       return {
-        decision: 'discard',
+        decision: "discard",
         reason: `L0/L1 version (${l0Version || l1Version}) is newer than L3 (${l3Version}) - use L0/L1 version`,
-        sourceLayer: existsInL0 ? 'L0' : 'L1',
+        sourceLayer: existsInL0 ? "L0" : "L1",
       };
     } else if (versionComparison === 0) {
       // Versions equal but content differs - conflict
       return {
-        decision: 'keep',
+        decision: "keep",
         reason: `Same version (${l3Version}) but different content - L3 project may have variant-specific changes`,
-        sourceLayer: 'L3',
+        sourceLayer: "L3",
         conflict: {
           filePath: relativePath,
-          conflict: 'content_divergence',
-          resolution: 'keep_l3',
-          reason: 'Same version but content differs - preserving L3 file for review',
+          conflict: "content_divergence",
+          resolution: "keep_l3",
+          reason: "Same version but content differs - preserving L3 file for review",
           versions: { l0: l0Version, l1: l1Version, l3: l3Version },
           requiresManualReview: true,
         },
@@ -249,19 +246,19 @@ function reconcileFile(
 
     // No version info - keep L3 for review
     return {
-      decision: 'keep',
-      reason: 'Modified file without version headers - preserving L3 file for manual review',
-      sourceLayer: 'L3',
+      decision: "keep",
+      reason: "Modified file without version headers - preserving L3 file for manual review",
+      sourceLayer: "L3",
     };
   }
 
   // Case 4: Conflict
-  if (classification === 'conflict') {
+  if (classification === "conflict") {
     const conflict: ConflictResolution = {
       filePath: relativePath,
-      conflict: 'content_divergence',
-      resolution: 'manual_review',
-      reason: 'L0 and L1 have diverged - requires manual reconciliation',
+      conflict: "content_divergence",
+      resolution: "manual_review",
+      reason: "L0 and L1 have diverged - requires manual reconciliation",
       versions: { l0: l0Version, l1: l1Version, l3: l3Version },
       requiresManualReview: true,
     };
@@ -273,60 +270,60 @@ function reconcileFile(
 
     // If L3 is newest, keep it
     if ((l3vsL0 === 1 || l3vsL0 === undefined) && (l3vsL1 === 1 || l3vsL1 === undefined)) {
-      conflict.resolution = 'keep_l3';
-      conflict.reason = 'L3 version is newest - keeping variant version';
+      conflict.resolution = "keep_l3";
+      conflict.reason = "L3 version is newest - keeping variant version";
       conflict.requiresManualReview = false;
 
       return {
-        decision: 'keep',
+        decision: "keep",
         reason: conflict.reason,
-        sourceLayer: 'L3',
+        sourceLayer: "L3",
         conflict,
       };
     }
 
     // If L0 is newest, use it
     if (l0vsL1 === 1 || (l0vsL1 === undefined && existsInL0)) {
-      conflict.resolution = 'keep_l0';
-      conflict.reason = 'L0 version is newest - using workspace version';
+      conflict.resolution = "keep_l0";
+      conflict.reason = "L0 version is newest - using workspace version";
       conflict.requiresManualReview = false;
 
       return {
-        decision: 'discard',
+        decision: "discard",
         reason: conflict.reason,
-        sourceLayer: 'L0',
+        sourceLayer: "L0",
         conflict,
       };
     }
 
     // If L1 is newest, use it
     if (l0vsL1 === -1 || (l0vsL1 === undefined && existsInL1)) {
-      conflict.resolution = 'keep_l1';
-      conflict.reason = 'L1 version is newest - using common template version';
+      conflict.resolution = "keep_l1";
+      conflict.reason = "L1 version is newest - using common template version";
       conflict.requiresManualReview = false;
 
       return {
-        decision: 'discard',
+        decision: "discard",
         reason: conflict.reason,
-        sourceLayer: 'L1',
+        sourceLayer: "L1",
         conflict,
       };
     }
 
     // Cannot auto-resolve - manual review required
     return {
-      decision: 'keep',
-      reason: 'Unresolvable conflict - requires manual review',
-      sourceLayer: 'L3',
+      decision: "keep",
+      reason: "Unresolvable conflict - requires manual review",
+      sourceLayer: "L3",
       conflict,
     };
   }
 
   // Fallback - keep L3
   return {
-    decision: 'keep',
-    reason: 'Default - preserving L3 file',
-    sourceLayer: 'L3',
+    decision: "keep",
+    reason: "Default - preserving L3 file",
+    sourceLayer: "L3",
   };
 }
 
@@ -336,7 +333,7 @@ function reconcileFile(
  */
 function applyAntiSwellingProtection(
   files: FileClassification[],
-  keepInVariant: ReconciledFile[]
+  keepInVariant: ReconciledFile[],
 ): { moveToCommon: ReconciledFile[]; warnings: string[] } {
   const moveToCommon: ReconciledFile[] = [];
   const warnings: string[] = [];
@@ -345,7 +342,7 @@ function applyAntiSwellingProtection(
   const byCategory = new Map<string, FileClassification[]>();
 
   for (const file of files) {
-    const category = file.relativePath.split('/')[0];
+    const category = file.relativePath.split("/")[0];
     if (!byCategory.has(category)) {
       byCategory.set(category, []);
     }
@@ -354,7 +351,7 @@ function applyAntiSwellingProtection(
 
   // Check each category for swelling
   for (const [category, categoryFiles] of byCategory.entries()) {
-    const modifiedCount = categoryFiles.filter(f => f.classification === 'modified').length;
+    const modifiedCount = categoryFiles.filter((f) => f.classification === "modified").length;
     const totalCount = categoryFiles.length;
 
     if (totalCount === 0) continue;
@@ -370,11 +367,11 @@ function applyAntiSwellingProtection(
 
       // Mark core files for move to common
       for (const file of categoryFiles) {
-        if (file.classification === 'modified') {
+        if (file.classification === "modified") {
           const moveCheck = shouldMoveToCommon(file, totalCount);
           if (moveCheck.move) {
             // Find in keepInVariant and move to moveToCommon
-            const index = keepInVariant.findIndex(f => f.targetPath === file.relativePath);
+            const index = keepInVariant.findIndex((f) => f.targetPath === file.relativePath);
             if (index !== -1) {
               const [fileToMove] = keepInVariant.splice(index, 1);
               moveToCommon.push({
@@ -405,7 +402,7 @@ function applyAntiSwellingProtection(
 function readSnapshotScriptVersion(snapshotPath: string, scriptName: string): string | null {
   if (!existsSync(snapshotPath)) return null;
   try {
-    const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf-8')) as {
+    const snapshot = JSON.parse(readFileSync(snapshotPath, "utf-8")) as {
       scripts?: Record<string, { version?: string }>;
     };
     return snapshot?.scripts?.[scriptName]?.version ?? null;
@@ -418,10 +415,7 @@ function readSnapshotScriptVersion(snapshotPath: string, scriptName: string): st
  * Reconcile L3 scan results with L0 and L1
  * @version 1.2.0
  */
-export async function reconcileWithL0L1(
-  scanResult: L3ScanResult,
-  variantName: string
-): Promise<ReconciledManifest> {
+export async function reconcileWithL0L1(scanResult: L3ScanResult, variantName: string): Promise<ReconciledManifest> {
   console.log(`\n=== Reconciling with L0/L1 ===`);
   console.log(`Variant: ${variantName}`);
   console.log(`Files to reconcile: ${scanResult.files.length}\n`);
@@ -433,8 +427,8 @@ export async function reconcileWithL0L1(
   // Reconcile each file
   for (const file of scanResult.files) {
     // Prevent modification of core scripts in L3 projects
-    const normalizedPath = file.relativePath.replace(/\\/g, '/');
-    if (normalizedPath === 'scripts/dev-sync.ts' || normalizedPath === 'scripts/audit.ts') {
+    const normalizedPath = file.relativePath.replace(/\\/g, "/");
+    if (normalizedPath === "scripts/dev-sync.ts" || normalizedPath === "scripts/audit.ts") {
       const isIdenticalToL0 = file.existsInL0 && file.hashL3 === file.hashL0;
       const isIdenticalToL1 = file.existsInL1 && file.hashL1 !== undefined && file.hashL3 === file.hashL1;
       if (!isIdenticalToL0 && !isIdenticalToL1) {
@@ -445,13 +439,17 @@ export async function reconcileWithL0L1(
         // project script still AT its scaffolded version is compliant (warn +
         // instruct an upgrade), while any other divergence stays a hard violation.
         const snapshotVersion = readSnapshotScriptVersion(
-          join(scanResult.scanMetadata.l3ProjectPath, 'scripts-snapshot.json'),
+          join(scanResult.scanMetadata.l3ProjectPath, "scripts-snapshot.json"),
           basename(normalizedPath),
         );
         if (snapshotVersion && file.l3Version && snapshotVersion === file.l3Version) {
-          console.log(`  ⚠️  CORE SCRIPT PROVENANCE OK: ${normalizedPath} @${file.l3Version} differs from current L0/L1 but matches the scaffold-time snapshot — run upgrade-project to receive the canonical current version before promoting`);
+          console.log(
+            `  ⚠️  CORE SCRIPT PROVENANCE OK: ${normalizedPath} @${file.l3Version} differs from current L0/L1 but matches the scaffold-time snapshot — run upgrade-project to receive the canonical current version before promoting`,
+          );
         } else {
-          throw new Error(`Integrity Violation: Core script '${normalizedPath}' differs from current L0/L1 and does not match its scaffold-time version${file.l3Version ? ` (project @${file.l3Version} vs snapshot @${snapshotVersion ?? 'none'})` : ''}. Run upgrade-project first; direct modifications to core scripts are forbidden — migrate variant-specific validations to 'scripts/audit-variant.ts' instead.`);
+          throw new Error(
+            `Integrity Violation: Core script '${normalizedPath}' differs from current L0/L1 and does not match its scaffold-time version${file.l3Version ? ` (project @${file.l3Version} vs snapshot @${snapshotVersion ?? "none"})` : ""}. Run upgrade-project first; direct modifications to core scripts are forbidden — migrate variant-specific validations to 'scripts/audit-variant.ts' instead.`,
+          );
         }
       }
     }
@@ -468,13 +466,13 @@ export async function reconcileWithL0L1(
     };
 
     switch (result.decision) {
-      case 'keep':
+      case "keep":
         keepInVariant.push(reconciledFile);
         break;
-      case 'discard':
+      case "discard":
         discard.push(reconciledFile);
         break;
-      case 'move':
+      case "move":
         // Will be handled by anti-swelling protection
         keepInVariant.push(reconciledFile);
         break;
@@ -490,7 +488,7 @@ export async function reconcileWithL0L1(
   const { moveToCommon, warnings } = applyAntiSwellingProtection(scanResult.files, keepInVariant);
 
   if (warnings.length > 0) {
-    console.warn('\n⚠️  Warnings:');
+    console.warn("\n⚠️  Warnings:");
     for (const warning of warnings) {
       console.warn(warning);
     }
@@ -498,7 +496,7 @@ export async function reconcileWithL0L1(
 
   // Remove moved files from keepInVariant
   for (const movedFile of moveToCommon) {
-    const index = keepInVariant.findIndex(f => f.targetPath === movedFile.targetPath);
+    const index = keepInVariant.findIndex((f) => f.targetPath === movedFile.targetPath);
     if (index !== -1) {
       keepInVariant.splice(index, 1);
     }
@@ -530,12 +528,12 @@ export async function reconcileWithL0L1(
   }
 
   // Save to state file
-  const stateDir = join(L0_ROOT, '.pipeline-state');
+  const stateDir = join(L0_ROOT, ".pipeline-state");
   if (!existsSync(stateDir)) {
     mkdirSync(stateDir, { recursive: true });
   }
 
-  const manifestPath = join(stateDir, 'reconciled-manifest.json');
+  const manifestPath = join(stateDir, "reconciled-manifest.json");
   const manifest: ReconciledManifest = {
     keepInVariant,
     moveToCommon,
@@ -556,23 +554,23 @@ export async function reconcileWithL0L1(
 
 async function main() {
   const args = process.argv.slice(2);
-  const scanResultArg = args.find(arg => arg.startsWith('--scan-result='))?.split('=')[1];
-  const variantArg = args.find(arg => arg.startsWith('--variant='))?.split('=')[1];
+  const scanResultArg = args.find((arg) => arg.startsWith("--scan-result="))?.split("=")[1];
+  const variantArg = args.find((arg) => arg.startsWith("--variant="))?.split("=")[1];
 
   if (!scanResultArg || !variantArg) {
-    console.error('Usage: bun scripts/helpers/reconcile-with-l0-l1.ts --scan-result=<path> --variant=<name>');
+    console.error("Usage: bun scripts/helpers/reconcile-with-l0-l1.ts --scan-result=<path> --variant=<name>");
     process.exit(1);
   }
 
   try {
-    const scanResultJson = readFileSync(scanResultArg, 'utf-8');
+    const scanResultJson = readFileSync(scanResultArg, "utf-8");
     const scanResult = JSON.parse(scanResultJson) as L3ScanResult;
 
     await reconcileWithL0L1(scanResult, variantArg);
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Reconciliation failed:');
+    console.error("\n❌ Reconciliation failed:");
     console.error(error);
     process.exit(1);
   }

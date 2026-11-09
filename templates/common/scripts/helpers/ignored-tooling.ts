@@ -16,7 +16,8 @@
  *   - drop everything else (logs, local docs, editor droppings).
  */
 
-const SKIP_DIR_PATTERN = /(^|\/)(node_modules|\.venv|venv|__pycache__|\.cache|dist|build|\.pytest_cache|\.mypy_cache)\//;
+const SKIP_DIR_PATTERN =
+  /(^|\/)(node_modules|\.venv|venv|__pycache__|\.cache|dist|build|\.pytest_cache|\.mypy_cache)\//;
 const BINARY_EXT_PATTERN = /\.(bin|exe|dll|so|dylib|app|wasm)$/i;
 // Leading-dot files have no extension dot in the basename sense (".DS_Store" is
 // one dot followed by "DS_Store") — they read as extensionless to the main
@@ -29,5 +30,5 @@ export function selectIgnoredToolingArtifacts(lines: string[]): string[] {
     .filter(Boolean)
     .filter((p) => !SKIP_DIR_PATTERN.test(p))
     .filter((p) => !JUNK_FILE_PATTERN.test(p))
-    .filter((p => BINARY_EXT_PATTERN.test(p) || !/\.[A-Za-z0-9]+$/.test(p)));
+    .filter((p) => BINARY_EXT_PATTERN.test(p) || !/\.[A-Za-z0-9]+$/.test(p));
 }

@@ -41,10 +41,10 @@
  * @license MIT
  */
 
-import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { scrubConstitutionRefs } from './constitution-scrub.ts';
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { scrubConstitutionRefs } from "./constitution-scrub.ts";
 
 /** Root-only test fixtures (hub-bootstrap v1.5.0): never delivered, excluded
  * from BOTH sides of every canonical comparison this lib performs. */
@@ -56,8 +56,8 @@ export const TEST_FIXTURE_RE = /^_test-.*\.ts$/;
  * unchanged; the code-file scrub rules leave functional string literals
  * untouched, so a real code change still fails the compare. */
 export function hookContentFingerprint(p: string): string {
-  const normalized = scrubConstitutionRefs(readFileSync(p, 'utf-8').replace(/\r\n/g, '\n'), p);
-  return createHash('sha256').update(normalized, 'utf-8').digest('hex');
+  const normalized = scrubConstitutionRefs(readFileSync(p, "utf-8").replace(/\r\n/g, "\n"), p);
+  return createHash("sha256").update(normalized, "utf-8").digest("hex");
 }
 
 /** Fingerprint a scripts/hooks/ dir into { posixKey → fingerprint }, with the
@@ -77,7 +77,7 @@ export function fingerprintHookDir(dir: string): Map<string, string> {
       else if (!TEST_FIXTURE_RE.test(key)) out.set(key, hookContentFingerprint(p));
     }
   };
-  walk(dir, '');
+  walk(dir, "");
   return out;
 }
 
@@ -87,7 +87,8 @@ export function fingerprintHookDir(dir: string): Map<string, string> {
 export function hookDirViolations(canonicalDir: string, deliveredDir: string): string[] {
   const violations: string[] = [];
   if (!existsSync(canonicalDir)) return [`canonical ${canonicalDir} is missing — cannot diff (refusing to validate)`];
-  if (!existsSync(deliveredDir)) return [`delivered tree carries no scripts/hooks/ directory — the canonical hooks must ship with the hub`];
+  if (!existsSync(deliveredDir))
+    return [`delivered tree carries no scripts/hooks/ directory — the canonical hooks must ship with the hub`];
   const a = fingerprintHookDir(canonicalDir);
   const b = fingerprintHookDir(deliveredDir);
   for (const [f, content] of a) {

@@ -73,7 +73,7 @@
 // All log lines are returned verbatim in `log` (4-space indented,
 // `[DRY RUN] ` tagged when dryRun) — callers print them and tests grep them.
 
-import { MANAGED_PATTERNS } from './managed-block-merge.ts';
+import { MANAGED_PATTERNS } from "./managed-block-merge.ts";
 
 /** G2 blast-radius cap: a drifted project span longer than this is never
  *  auto-replaced (skip + manual review). */
@@ -83,14 +83,14 @@ export const SKELETON_REPLACE_MAX_SPAN_LINES = 120;
  *  before the named heading when it exists and otherwise falls back to
  *  `beforeZoneContaining` — see the registry table in the design. */
 export type SkeletonAnchor =
-  | { kind: 'beforeZoneContaining'; heading: string }
-  | { kind: 'afterZoneContaining'; heading: string }
-  | { kind: 'beforeHeadingOrZone'; heading: string; fallbackHeading: string };
+  | { kind: "beforeZoneContaining"; heading: string }
+  | { kind: "afterZoneContaining"; heading: string }
+  | { kind: "beforeHeadingOrZone"; heading: string; fallbackHeading: string };
 
 export interface SkeletonSectionEntry {
   /** Stable registry id (log lines carry it). */
   id: string;
-  rel: 'CLAUDE.md' | 'GEMINI.md' | 'AGENTS.md' | 'CODEX.md' | 'HERMES.md';
+  rel: "CLAUDE.md" | "GEMINI.md" | "AGENTS.md" | "CODEX.md" | "HERMES.md";
   /** The exact heading line identifying the section (trimmed compare). */
   heading: string;
   anchor: SkeletonAnchor;
@@ -106,54 +106,54 @@ export interface SkeletonSectionEntry {
  */
 export const MANAGED_SKELETON_SECTIONS: SkeletonSectionEntry[] = [
   {
-    id: 'claude-s2',
-    rel: 'CLAUDE.md',
+    id: "claude-s2",
+    rel: "CLAUDE.md",
     // T-20261027-008: §2.5 (house-style N.M numbering, §4.5 precedent) — the
     // old `### 2. Native Slash Commands` collided with the old-vintage
     // `### 2. Pre-Edit Quality Gate (All Platforms)` still carried by
     // co-develop/co-consult/co-export/co-game/co-newbiz, silently skipping the
     // insert every wave. The template's Pre-Edit Quality Gate section was
     // renumbered to `### 2.` in lockstep.
-    heading: '### 2.5 Native Slash Commands',
+    heading: "### 2.5 Native Slash Commands",
     // Before §3's heading when §3 exists (it may have been inserted earlier in
     // this same run), else before the §4 zone-start marker.
     anchor: {
-      kind: 'beforeHeadingOrZone',
-      heading: '### 3. MCP Configurations & Absolute Resolving',
-      fallbackHeading: '### 4. Language Policy for Documentation',
+      kind: "beforeHeadingOrZone",
+      heading: "### 3. MCP Configurations & Absolute Resolving",
+      fallbackHeading: "### 4. Language Policy for Documentation",
     },
   },
   {
-    id: 'claude-s3',
-    rel: 'CLAUDE.md',
-    heading: '### 3. MCP Configurations & Absolute Resolving',
-    anchor: { kind: 'beforeZoneContaining', heading: '### 4. Language Policy for Documentation' },
+    id: "claude-s3",
+    rel: "CLAUDE.md",
+    heading: "### 3. MCP Configurations & Absolute Resolving",
+    anchor: { kind: "beforeZoneContaining", heading: "### 4. Language Policy for Documentation" },
   },
   {
-    id: 'claude-s45',
-    rel: 'CLAUDE.md',
-    heading: '### 4.5 Skill Resolution Priority',
-    anchor: { kind: 'afterZoneContaining', heading: '### 4. Language Policy for Documentation' },
+    id: "claude-s45",
+    rel: "CLAUDE.md",
+    heading: "### 4.5 Skill Resolution Priority",
+    anchor: { kind: "afterZoneContaining", heading: "### 4. Language Policy for Documentation" },
   },
   {
-    id: 'claude-s5',
-    rel: 'CLAUDE.md',
-    heading: '### 5. Agent Dispatch Rules',
-    anchor: { kind: 'beforeZoneContaining', heading: '## Execution Plan Boilerplate' },
+    id: "claude-s5",
+    rel: "CLAUDE.md",
+    heading: "### 5. Agent Dispatch Rules",
+    anchor: { kind: "beforeZoneContaining", heading: "## Execution Plan Boilerplate" },
   },
   {
-    id: 'claude-s6',
+    id: "claude-s6",
     // Heading line only — the section body is COMMON-CLAUDE zone content
     // delivered by the existing managed-block merge.
-    rel: 'CLAUDE.md',
-    heading: '### 6. Native Sub-agents (`Agent` Tool)',
-    anchor: { kind: 'afterZoneContaining', heading: '## Execution Plan Boilerplate' },
+    rel: "CLAUDE.md",
+    heading: "### 6. Native Sub-agents (`Agent` Tool)",
+    anchor: { kind: "afterZoneContaining", heading: "## Execution Plan Boilerplate" },
   },
   {
-    id: 'gemini-s5',
-    rel: 'GEMINI.md',
-    heading: '### 5. Agent Dispatch Rules',
-    anchor: { kind: 'beforeZoneContaining', heading: '## Execution Plan Boilerplate' },
+    id: "gemini-s5",
+    rel: "GEMINI.md",
+    heading: "### 5. Agent Dispatch Rules",
+    anchor: { kind: "beforeZoneContaining", heading: "## Execution Plan Boilerplate" },
   },
 ];
 
@@ -194,7 +194,7 @@ export interface SkeletonCensusGate {
 // ── Line/marker primitives ────────────────────────────────────────────────────
 
 function escapeLiteral(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /** True when the (trimmed) line opens any managed marker zone. */
@@ -211,7 +211,7 @@ function isManagedCloseLine(trimmed: string): boolean {
 function zoneSpans(content: string): Array<{ start: number; end: number }> {
   const spans: Array<{ start: number; end: number }> = [];
   for (const p of MANAGED_PATTERNS) {
-    const re = new RegExp(p.open.source + '[\\s\\S]*?' + escapeLiteral(p.close), 'g');
+    const re = new RegExp(p.open.source + "[\\s\\S]*?" + escapeLiteral(p.close), "g");
     for (const m of content.matchAll(re)) {
       spans.push({ start: m.index!, end: m.index! + m[0].length });
     }
@@ -238,7 +238,7 @@ export function headingLevel(line: string): number {
 
 /** True when the (trimmed) line is a single-line HTML comment opener. */
 function isCommentLine(trimmed: string): boolean {
-  return trimmed.startsWith('<!--');
+  return trimmed.startsWith("<!--");
 }
 
 function isStructuralLine(trimmed: string): boolean {
@@ -262,7 +262,7 @@ function findHeadingLineIndex(lines: string[], heading: string): number {
 /** Trim trailing blank lines from a line array (non-mutating). */
 function trimTrailingBlankLines(lines: string[]): string[] {
   const out = [...lines];
-  while (out.length > 0 && out[out.length - 1]!.trim() === '') out.pop();
+  while (out.length > 0 && out[out.length - 1]!.trim() === "") out.pop();
   return out;
 }
 
@@ -276,7 +276,7 @@ export interface ExtractedSkeletonSection {
 
 export type SkeletonSectionExtraction =
   | { ok: true; section: ExtractedSkeletonSection }
-  | { ok: false; reason: 'missing' | 'in-zone' };
+  | { ok: false; reason: "missing" | "in-zone" };
 
 /**
  * Extract a registered section from template lines by its exact heading line,
@@ -291,12 +291,12 @@ export function extractTemplateSkeletonSection(
   templateContent: string,
 ): SkeletonSectionExtraction {
   const start = findHeadingLineIndex(templateLines, heading);
-  if (start < 0) return { ok: false, reason: 'missing' };
+  if (start < 0) return { ok: false, reason: "missing" };
 
   // Zone membership: the heading's char offset must fall outside every zone.
   const offset = templateLines.slice(0, start).reduce((n, l) => n + l.length + 1, 0);
   if (zoneSpans(templateContent).some((z) => offset >= z.start && offset < z.end)) {
-    return { ok: false, reason: 'in-zone' };
+    return { ok: false, reason: "in-zone" };
   }
 
   const end = templateLines.findIndex(
@@ -316,9 +316,7 @@ interface ProjectSpan {
 /** Project span for a present heading: heading line up to (exclusive) the next
  *  registered heading or zone-start marker, trailing blank lines trimmed. */
 function extractProjectSpan(lines: string[], start: number, registeredHeadings: Set<string>): ProjectSpan {
-  const end = lines.findIndex(
-    (l, i) => i > start && (registeredHeadings.has(l.trim()) || isManagedOpenLine(l.trim())),
-  );
+  const end = lines.findIndex((l, i) => i > start && (registeredHeadings.has(l.trim()) || isManagedOpenLine(l.trim())));
   const spanEnd = end < 0 ? lines.length : end;
   return { start, lines: trimTrailingBlankLines(lines.slice(start, spanEnd)) };
 }
@@ -336,7 +334,7 @@ function foreignStructuralLines(projectSpan: string[], templateSpan: string[]): 
 function findNumberCollision(lines: string[], number: string, title: string): string | null {
   for (const line of lines) {
     const m = line.match(NUMBERED_HEADING_RE);
-    if (m && m[1] === number && (m[2] ?? '').trim() !== title) return line;
+    if (m && m[1] === number && (m[2] ?? "").trim() !== title) return line;
   }
   return null;
 }
@@ -352,16 +350,16 @@ interface ResolvedAnchor {
 }
 
 function resolveAnchorLineIndex(lines: string[], anchor: SkeletonAnchor): ResolvedAnchor | null {
-  if (anchor.kind === 'beforeHeadingOrZone') {
+  if (anchor.kind === "beforeHeadingOrZone") {
     const at = findHeadingLineIndex(lines, anchor.heading);
     if (at >= 0) return { index: at, leadBlank: false };
-    return resolveAnchorLineIndex(lines, { kind: 'beforeZoneContaining', heading: anchor.fallbackHeading });
+    return resolveAnchorLineIndex(lines, { kind: "beforeZoneContaining", heading: anchor.fallbackHeading });
   }
 
   const at = findHeadingLineIndex(lines, anchor.heading);
   if (at < 0) return null;
 
-  if (anchor.kind === 'beforeZoneContaining') {
+  if (anchor.kind === "beforeZoneContaining") {
     for (let i = at - 1; i >= 0; i--) {
       if (isManagedOpenLine(lines[i]!.trim())) return { index: i, leadBlank: false };
     }
@@ -396,7 +394,7 @@ export function mergeSkeletonSections(
   entries: SkeletonSectionEntry[] = MANAGED_SKELETON_SECTIONS,
   censusGate?: SkeletonCensusGate,
 ): SkeletonMergeResult {
-  const dryTag = dryRun ? '[DRY RUN] ' : '';
+  const dryTag = dryRun ? "[DRY RUN] " : "";
   const log: string[] = [];
   const snapshots: { rel: string; content: string }[] = [];
   const escalated: { rel: string; content: string }[] = [];
@@ -408,60 +406,74 @@ export function mergeSkeletonSections(
   }
 
   const registeredHeadings = new Set(relEntries.map((e) => e.heading));
-  const templateLines = templateContent.split('\n');
-  const lines = projectContent.split('\n');
+  const templateLines = templateContent.split("\n");
+  const lines = projectContent.split("\n");
 
   for (const entry of relEntries) {
     // 1. Template section must exist, out-of-zone (template rot → skip, no write).
     const tpl = extractTemplateSkeletonSection(templateLines, entry.heading, registeredHeadings, templateContent);
     if (!tpl.ok) {
-      log.push(`    ${dryTag}SKELETON ANCHOR NOT FOUND — skipped: ${entry.id} (${entry.heading}) — template ${rel} carries no out-of-zone section for it (${tpl.reason})`);
+      log.push(
+        `    ${dryTag}SKELETON ANCHOR NOT FOUND — skipped: ${entry.id} (${entry.heading}) — template ${rel} carries no out-of-zone section for it (${tpl.reason})`,
+      );
       continue;
     }
-    const tplText = tpl.section.lines.join('\n');
+    const tplText = tpl.section.lines.join("\n");
 
     // 2. Present path: exact heading line exists in the project.
     const at = findHeadingLineIndex(lines, entry.heading);
     if (at >= 0) {
       const span = extractProjectSpan(lines, at, registeredHeadings);
-      if (span.lines.join('\n') === tplText) continue; // byte-equal → no-op, no log (idempotency)
+      if (span.lines.join("\n") === tplText) continue; // byte-equal → no-op, no log (idempotency)
       const foreign = foreignStructuralLines(span.lines, tpl.section.lines);
       if (foreign.length > 0) {
-        log.push(`    ${dryTag}SKELETON REPLACE SKIPPED (project-local content): ${entry.id} in: ${rel} — guard G1 kept the section untouched (${foreign.length} project-only heading/comment line(s))`);
+        log.push(
+          `    ${dryTag}SKELETON REPLACE SKIPPED (project-local content): ${entry.id} in: ${rel} — guard G1 kept the section untouched (${foreign.length} project-only heading/comment line(s))`,
+        );
         continue;
       }
       if (span.lines.length > SKELETON_REPLACE_MAX_SPAN_LINES) {
-        log.push(`    ${dryTag}SKELETON REPLACE SKIPPED (span exceeds ${SKELETON_REPLACE_MAX_SPAN_LINES}-line cap — manual review): ${entry.id} in: ${rel} — guard G2 kept the section untouched`);
+        log.push(
+          `    ${dryTag}SKELETON REPLACE SKIPPED (span exceeds ${SKELETON_REPLACE_MAX_SPAN_LINES}-line cap — manual review): ${entry.id} in: ${rel} — guard G2 kept the section untouched`,
+        );
         continue;
       }
       // v1.2.0 (design D2 §4.2): after G1/G2, the census gates the replace —
       // a drifted span carrying project-authored content needs an explicit
       // --disposition adopt-template grant; without it the replace is blocked
       // and the engine records the CONFLICT (ERROR) row.
-      const spanText = span.lines.join('\n');
+      const spanText = span.lines.join("\n");
       const adapted = Boolean(censusGate && censusGate.divergent && censusGate.isSpanAdapted(spanText));
       if (adapted && censusGate && !censusGate.dispositionGranted) {
-        log.push(`    ${dryTag}SKELETON REPLACE BLOCKED (adapted span): ${entry.id} in: ${rel} — the instruction-region census found project-authored content in the section span; delivery SKIPPED (CONFLICT — ERROR, project copy preserved)`);
-        log.push('      proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump');
+        log.push(
+          `    ${dryTag}SKELETON REPLACE BLOCKED (adapted span): ${entry.id} in: ${rel} — the instruction-region census found project-authored content in the section span; delivery SKIPPED (CONFLICT — ERROR, project copy preserved)`,
+        );
+        log.push(
+          "      proceed with --disposition adopt-template[=glob], or port the content template-side per the adjudicated-port procedure (sync-overwrite-policy design §6): land it inside a managed zone or skeleton-registry section with a version bump",
+        );
         escalated.push({ rel, content: spanText });
         continue;
       }
       snapshots.push({ rel, content: spanText });
       if (adapted) adaptedReplaces++;
       lines.splice(span.start, span.lines.length, ...tpl.section.lines);
-      log.push(`    ${dryTag}SKELETON REPLACED ${entry.id}: ${entry.heading} in: ${rel}${adapted ? ' (adapted span — delivered via --disposition adopt-template)' : ''}`);
+      log.push(
+        `    ${dryTag}SKELETON REPLACED ${entry.id}: ${entry.heading} in: ${rel}${adapted ? " (adapted span — delivered via --disposition adopt-template)" : ""}`,
+      );
       continue;
     }
 
     // 3. Number-collision guard (insert path only).
     const num = headingNumber(entry.heading);
     if (num !== null) {
-      const clash = findNumberCollision(lines, num, headingTitle(entry.heading) ?? '');
+      const clash = findNumberCollision(lines, num, headingTitle(entry.heading) ?? "");
       if (clash) {
         // T-20261027-008: loud + named WARN (existing `WARN: ` log pattern)
         // instead of the quiet SKELETON DRIFT skip — a heading collision must
         // be visible in every wave summary until it is resolved.
-        log.push(`    ${dryTag}WARN: SKELETON HEADING COLLISION — insert skipped: ${entry.id} (${entry.heading}) in ${rel} — number ${num} is already used by "${clash.trim()}"; resolve on the template side or rename the project heading (T-20261027-008)`);
+        log.push(
+          `    ${dryTag}WARN: SKELETON HEADING COLLISION — insert skipped: ${entry.id} (${entry.heading}) in ${rel} — number ${num} is already used by "${clash.trim()}"; resolve on the template side or rename the project heading (T-20261027-008)`,
+        );
         continue;
       }
     }
@@ -472,12 +484,12 @@ export function mergeSkeletonSections(
       log.push(`    ${dryTag}SKELETON ANCHOR NOT FOUND — skipped: ${entry.id} (${entry.heading}) in ${rel}`);
       continue;
     }
-    const inserted = pos.leadBlank ? ['', ...tpl.section.lines] : [...tpl.section.lines, ''];
+    const inserted = pos.leadBlank ? ["", ...tpl.section.lines] : [...tpl.section.lines, ""];
     lines.splice(pos.index, 0, ...inserted);
     log.push(`    ${dryTag}SKELETON INSERTED ${entry.id}: ${entry.heading} in: ${rel}`);
   }
 
-  const content = lines.join('\n');
+  const content = lines.join("\n");
   return { content, merged: content !== projectContent, log, snapshots, escalated, adaptedReplaces };
 }
 
@@ -493,7 +505,7 @@ export function mergeSkeletonSections(
 export function validateSkeletonRegistry(templateContent: string, rel: string): string[] {
   const issues: string[] = [];
   const entries = MANAGED_SKELETON_SECTIONS.filter((e) => e.rel === rel);
-  const lines = templateContent.split('\n');
+  const lines = templateContent.split("\n");
   const spans = zoneSpans(templateContent);
 
   const offsetOfLine = (idx: number) => lines.slice(0, idx).reduce((n, l) => n + l.length + 1, 0);
@@ -509,19 +521,27 @@ export function validateSkeletonRegistry(templateContent: string, rel: string): 
       if (l.trim() === entry.heading) at.push(i);
     });
     if (at.length === 0) {
-      issues.push(`${rel}: skeleton-registry heading missing in templates/common/${rel}: "${entry.heading}" (${entry.id})`);
+      issues.push(
+        `${rel}: skeleton-registry heading missing in templates/common/${rel}: "${entry.heading}" (${entry.id})`,
+      );
       continue;
     }
     if (at.length > 1) {
-      issues.push(`${rel}: skeleton-registry heading occurs ${at.length}x in templates/common/${rel}: "${entry.heading}" (${entry.id}) — expected exactly once`);
+      issues.push(
+        `${rel}: skeleton-registry heading occurs ${at.length}x in templates/common/${rel}: "${entry.heading}" (${entry.id}) — expected exactly once`,
+      );
       continue;
     }
     if (inZone(at[0]!)) {
-      issues.push(`${rel}: skeleton-registry heading sits INSIDE a managed marker zone in templates/common/${rel}: "${entry.heading}" (${entry.id}) — registry sections must be out-of-zone`);
+      issues.push(
+        `${rel}: skeleton-registry heading sits INSIDE a managed marker zone in templates/common/${rel}: "${entry.heading}" (${entry.id}) — registry sections must be out-of-zone`,
+      );
       continue;
     }
     if (at[0]! <= lastIndex) {
-      issues.push(`${rel}: skeleton-registry heading out of registry order in templates/common/${rel}: "${entry.heading}" (${entry.id}) at line ${at[0]! + 1}, previous entry at line ${lastIndex + 1}`);
+      issues.push(
+        `${rel}: skeleton-registry heading out of registry order in templates/common/${rel}: "${entry.heading}" (${entry.id}) at line ${at[0]! + 1}, previous entry at line ${lastIndex + 1}`,
+      );
     }
     lastIndex = at[0]!;
   }
@@ -541,7 +561,9 @@ export function validateSkeletonRegistry(templateContent: string, rel: string): 
   });
   for (const [num, count] of [...numbers.entries()].sort()) {
     if (count > 1) {
-      issues.push(`${rel}: duplicate section number ${num} (${count}x) in the templates/common/${rel} skeleton — continuous numbering is broken`);
+      issues.push(
+        `${rel}: duplicate section number ${num} (${count}x) in the templates/common/${rel} skeleton — continuous numbering is broken`,
+      );
     }
   }
 

@@ -13,11 +13,7 @@
  *   3. Branch strategy mention (INFO) — branch strategy documentation
  */
 
-import type {
-  VariantPlugin,
-  ValidationContext,
-  ValidationIssue,
-} from './variant-plugin.ts';
+import type { VariantPlugin, ValidationContext, ValidationIssue } from "./variant-plugin.ts";
 
 /**
  * Plugin for the 'development' variant type.
@@ -40,7 +36,7 @@ import type {
  */
 export class DevelopmentPlugin implements VariantPlugin {
   /** The variant type this plugin handles. */
-  readonly type = 'development' as const;
+  readonly type = "development" as const;
 
   /**
    * Validates a development variant against development-specific requirements.
@@ -66,20 +62,13 @@ export class DevelopmentPlugin implements VariantPlugin {
     // Verify that agents collectively cover architecture-design, code-review,
     // testing, and ci-cd.
     // These are hard functional requirements — development variants cannot function without them.
-    const agentCapabilities = new Set(
-      ctx.agentFrontmatters.flatMap((a) => a.capabilities),
-    );
-    const expectedCapabilities = [
-      'architecture-design',
-      'code-review',
-      'testing',
-      'ci-cd',
-    ];
+    const agentCapabilities = new Set(ctx.agentFrontmatters.flatMap((a) => a.capabilities));
+    const expectedCapabilities = ["architecture-design", "code-review", "testing", "ci-cd"];
     for (const cap of expectedCapabilities) {
       if (!agentCapabilities.has(cap)) {
         issues.push({
-          severity: 'error',
-          category: 'capability-coverage',
+          severity: "error",
+          category: "capability-coverage",
           message: `Missing development capability: ${cap}`,
           capability: cap,
         });
@@ -90,28 +79,22 @@ export class DevelopmentPlugin implements VariantPlugin {
     // Development variants should reference a test-coverage target in their documentation.
     // Explicit coverage targets ensure quality standards are measurable and enforceable.
     const variantContent = JSON.stringify(ctx.variantJson);
-    if (
-      !variantContent.toLowerCase().includes('test-coverage')
-    ) {
+    if (!variantContent.toLowerCase().includes("test-coverage")) {
       issues.push({
-        severity: 'warning',
-        category: 'test-coverage',
-        message:
-          'Development variant should reference a test-coverage target',
+        severity: "warning",
+        category: "test-coverage",
+        message: "Development variant should reference a test-coverage target",
       });
     }
 
     // --- Check 3: Branch strategy mention ---
     // Standard branch strategy documentation for development contexts.
     // This is informational; not all development contexts require explicit branch strategy docs.
-    if (
-      !variantContent.toLowerCase().includes('branch strategy')
-    ) {
+    if (!variantContent.toLowerCase().includes("branch strategy")) {
       issues.push({
-        severity: 'info',
-        category: 'branch-strategy',
-        message:
-          'Consider documenting branch strategy patterns',
+        severity: "info",
+        category: "branch-strategy",
+        message: "Consider documenting branch strategy patterns",
       });
     }
 

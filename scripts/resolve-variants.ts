@@ -16,26 +16,26 @@
  * @phase L1-B: Variant Pre-Resolution
  */
 
-import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join, dirname, resolve as resolvePath } from 'path';
-import { load as yamlLoad, dump as yamlDump } from 'js-yaml';
-import { readUTF8File, writeUTF8File } from './lib/encoding-utils.ts';
+import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { join, dirname, resolve as resolvePath } from "node:path";
+import { load as yamlLoad, dump as yamlDump } from "js-yaml";
+import { readUTF8File, writeUTF8File } from "./lib/encoding-utils.ts";
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
-const WORKSPACE_ROOT = resolvePath(import.meta.dir, '..');
-const TEMPLATES_DIR = join(WORKSPACE_ROOT, 'templates');
-const COMMON_DIR = join(TEMPLATES_DIR, 'common');
-const RESOLVED_MARKER = '# @resolved-from:';
+const WORKSPACE_ROOT = resolvePath(import.meta.dir, "..");
+const TEMPLATES_DIR = join(WORKSPACE_ROOT, "templates");
+const COMMON_DIR = join(TEMPLATES_DIR, "common");
+const RESOLVED_MARKER = "# @resolved-from:";
 
 const ANSI = {
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  gray: '\x1b[90m',
-  reset: '\x1b[0m',
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  red: "\x1b[31m",
+  gray: "\x1b[90m",
+  reset: "\x1b[0m",
 };
 
 // ============================================================================
@@ -43,9 +43,9 @@ const ANSI = {
 // ============================================================================
 
 const args = process.argv.slice(2);
-const FORCE = args.includes('--force');
+const FORCE = args.includes("--force");
 const VARIANT_FILTER = (() => {
-  const idx = args.indexOf('--variant');
+  const idx = args.indexOf("--variant");
   return idx !== -1 ? args[idx + 1] : null;
 })();
 
@@ -53,10 +53,18 @@ const VARIANT_FILTER = (() => {
 // LOGGING
 // ============================================================================
 
-function pass(msg: string) { console.log(`${ANSI.green}[PASS]${ANSI.reset} ${msg}`); }
-function warn(msg: string) { console.log(`${ANSI.yellow}[WARN]${ANSI.reset} ${msg}`); }
-function fail(msg: string) { console.log(`${ANSI.red}[FAIL]${ANSI.reset} ${msg}`); }
-function info(msg: string) { console.log(`${ANSI.gray}      ${msg}${ANSI.reset}`); }
+function pass(msg: string) {
+  console.log(`${ANSI.green}[PASS]${ANSI.reset} ${msg}`);
+}
+function warn(msg: string) {
+  console.log(`${ANSI.yellow}[WARN]${ANSI.reset} ${msg}`);
+}
+function fail(msg: string) {
+  console.log(`${ANSI.red}[FAIL]${ANSI.reset} ${msg}`);
+}
+function info(msg: string) {
+  console.log(`${ANSI.gray}      ${msg}${ANSI.reset}`);
+}
 
 // ============================================================================
 // FRONTMATTER UTILITIES
@@ -88,24 +96,24 @@ function stringifyFrontmatter(fm: Record<string, unknown>, body: string): string
 }
 
 function stripVariantSectionMarkers(value: unknown): string {
-  if (value === undefined || value === null) return '';
-  const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  if (value === undefined || value === null) return "";
+  const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
   return text
-    .replace(/^\s*<!--\s*VARIANT-SECTION:\s*[\w-]+\s*-->\s*/gm, '')
-    .replace(/^\s*<!--\s*END VARIANT-SECTION\s*-->\s*/gm, '')
+    .replace(/^\s*<!--\s*VARIANT-SECTION:\s*[\w-]+\s*-->\s*/gm, "")
+    .replace(/^\s*<!--\s*END VARIANT-SECTION\s*-->\s*/gm, "")
     .trim();
 }
 
 function removeMarkdownSection(content: string, heading: string): string {
-  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const level = heading.match(/^#+/)?.[0].length ?? 2;
   const nextSameOrHigher = `\\n#{1,${level}}\\s+`;
-  return content.replace(new RegExp(`(^|\\n)${escaped}[\\s\\S]*?(?=${nextSameOrHigher}|$)`, 'm'), '\n');
+  return content.replace(new RegExp(`(^|\\n)${escaped}[\\s\\S]*?(?=${nextSameOrHigher}|$)`, "m"), "\n");
 }
 
 function resolvePmBody(baseBody: string, variantBody: string, mergedFm: Record<string, unknown>): string {
-  const overrides = (mergedFm['variant_overrides'] ?? {}) as Record<string, unknown>;
-  const removeSections = Array.isArray(mergedFm['remove_sections']) ? mergedFm['remove_sections'] as string[] : [];
+  const overrides = (mergedFm["variant_overrides"] ?? {}) as Record<string, unknown>;
+  const removeSections = Array.isArray(mergedFm["remove_sections"]) ? (mergedFm["remove_sections"] as string[]) : [];
   let body = baseBody;
 
   for (const section of removeSections) {
@@ -113,13 +121,13 @@ function resolvePmBody(baseBody: string, variantBody: string, mergedFm: Record<s
   }
 
   const injectedSections = [
-    stripVariantSectionMarkers(overrides['updated_role']),
-    stripVariantSectionMarkers(overrides['governance_workflow']),
-    stripVariantSectionMarkers(overrides['agent_roster']),
-    stripVariantSectionMarkers(overrides['dispatch_protocol']),
+    stripVariantSectionMarkers(overrides["updated_role"]),
+    stripVariantSectionMarkers(overrides["governance_workflow"]),
+    stripVariantSectionMarkers(overrides["agent_roster"]),
+    stripVariantSectionMarkers(overrides["dispatch_protocol"]),
   ].filter(Boolean);
 
-  return `${body.trim()}\n\n${injectedSections.join('\n\n')}\n`;
+  return `${body.trim()}\n\n${injectedSections.join("\n\n")}\n`;
 }
 
 // ============================================================================
@@ -140,7 +148,7 @@ function resolveExtendsFile(filePath: string): string | null {
 
   const { frontmatter: variantFm, body: variantBody } = parseFrontmatter(content);
 
-  const extendsPath = variantFm['extends'] as string | undefined;
+  const extendsPath = variantFm["extends"] as string | undefined;
   if (!extendsPath) return null;
 
   // Resolve skeleton path relative to this file
@@ -160,15 +168,15 @@ function resolveExtendsFile(filePath: string): string | null {
   let resolvedSkeletonBody = skeletonBody;
 
   // If skeleton has extends: (L1 → L0), merge L0 into skeleton first
-  if (resolvedSkeletonFm['extends']) {
-    const l0Path = resolvePath(dirname(skeletonAbs), resolvedSkeletonFm['extends'] as string);
+  if (resolvedSkeletonFm["extends"]) {
+    const l0Path = resolvePath(dirname(skeletonAbs), resolvedSkeletonFm["extends"] as string);
     if (existsSync(l0Path)) {
       const l0Content = readUTF8File(l0Path);
       const { frontmatter: l0Fm, body: l0Body } = parseFrontmatter(l0Content);
       resolvedSkeletonFm = { ...l0Fm, ...resolvedSkeletonFm };
       resolvedSkeletonBody = resolvedSkeletonBody || l0Body;
     }
-    delete resolvedSkeletonFm['extends'];
+    delete resolvedSkeletonFm["extends"];
   }
 
   // Merge: skeleton base + variant overrides (variant wins on conflict)
@@ -177,19 +185,21 @@ function resolveExtendsFile(filePath: string): string | null {
     ...variantFm,
   };
   // Remove extends: from merged result
-  delete mergedFm['extends'];
+  delete mergedFm["extends"];
 
   // Body: use skeleton body (full content), variant body is usually empty for skeletons.
   // PM variant_overrides are scaffold-time data; resolve them into real markdown
   // sections now so L2 pm.md files do not ship raw VARIANT-SECTION markers.
-  const isPmFile = filePath.replace(/\\/g, '/').endsWith('/agents/pm.md');
+  const isPmFile = filePath.replace(/\\/g, "/").endsWith("/agents/pm.md");
   const resolvedBody = isPmFile
     ? resolvePmBody(resolvedSkeletonBody, variantBody, mergedFm)
-    : (variantBody.trim() ? variantBody : resolvedSkeletonBody);
+    : variantBody.trim()
+      ? variantBody
+      : resolvedSkeletonBody;
 
   if (isPmFile) {
-    delete mergedFm['variant_overrides'];
-    delete mergedFm['remove_sections'];
+    delete mergedFm["variant_overrides"];
+    delete mergedFm["remove_sections"];
   }
 
   const yamlStr = yamlDump(mergedFm, { lineWidth: 120 }).trimEnd();
@@ -204,7 +214,7 @@ function resolveExtendsFile(filePath: string): string | null {
  * Process agents/pm.md: resolve extends: skeleton
  */
 function processPmMd(variantDir: string, variantName: string): boolean {
-  const pmPath = join(variantDir, 'agents', 'pm.md');
+  const pmPath = join(variantDir, "agents", "pm.md");
   if (!existsSync(pmPath)) {
     warn(`[${variantName}] agents/pm.md not found — skipping`);
     return false;
@@ -216,7 +226,7 @@ function processPmMd(variantDir: string, variantName: string): boolean {
     const content = readUTF8File(pmPath);
     if (content.includes(RESOLVED_MARKER)) {
       info(`[${variantName}] agents/pm.md already resolved — skip (use --force to re-resolve)`);
-    } else if (!content.includes('extends:')) {
+    } else if (!content.includes("extends:")) {
       info(`[${variantName}] agents/pm.md has no extends: — treating as already complete`);
     }
     return false;
@@ -231,34 +241,34 @@ function processPmMd(variantDir: string, variantName: string): boolean {
  * Process variant.json: fill agents[] and skills[] from actual file scan
  */
 function processVariantJson(variantDir: string, variantName: string): boolean {
-  const vjPath = join(variantDir, 'variant.json');
+  const vjPath = join(variantDir, "variant.json");
   if (!existsSync(vjPath)) return false;
 
   const vj = JSON.parse(readUTF8File(vjPath)) as Record<string, unknown>;
 
   // Scan agents/
-  const agentsDir = join(variantDir, 'agents');
+  const agentsDir = join(variantDir, "agents");
   const agentList: Array<{ name: string; file: string }> = [];
   if (existsSync(agentsDir)) {
     for (const f of readdirSync(agentsDir)) {
-      if (!f.endsWith('.md') || f.startsWith('README') || f === 'pm.md' || f.includes('handoff')) continue;
-      agentList.push({ name: f.replace('.md', ''), file: `agents/${f}` });
+      if (!f.endsWith(".md") || f.startsWith("README") || f === "pm.md" || f.includes("handoff")) continue;
+      agentList.push({ name: f.replace(".md", ""), file: `agents/${f}` });
     }
   }
 
   // Scan skills/ recursively. Some variants (for example co-safety) group
   // skills under category folders, so only directories that actually contain a
   // SKILL.md are manifest entries; aggregate category directories are not.
-  const skillsDir = join(variantDir, 'skills');
+  const skillsDir = join(variantDir, "skills");
   const skillList: Array<{ name: string; file: string }> = [];
   if (existsSync(skillsDir)) {
     const scanSkills = (dir: string): void => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         const fullPath = join(dir, entry.name);
         if (!entry.isDirectory()) continue;
-        const skillMd = join(fullPath, 'SKILL.md');
+        const skillMd = join(fullPath, "SKILL.md");
         if (existsSync(skillMd)) {
-          const relFile = skillMd.slice(variantDir.length + 1).replace(/\\/g, '/');
+          const relFile = skillMd.slice(variantDir.length + 1).replace(/\\/g, "/");
           const content = readUTF8File(skillMd);
           const nameMatch = /^name:\s*["']?([^"'\r\n]+)["']?\s*$/m.exec(content);
           skillList.push({ name: (nameMatch?.[1] ?? entry.name).trim(), file: relFile });
@@ -277,15 +287,15 @@ function processVariantJson(variantDir: string, variantName: string): boolean {
   }
 
   // Only update if arrays are empty or --force
-  const currentAgents = (vj['agents'] as unknown[]) ?? [];
-  const currentSkills = (vj['skills'] as unknown[]) ?? [];
+  const currentAgents = (vj["agents"] as unknown[]) ?? [];
+  const currentSkills = (vj["skills"] as unknown[]) ?? [];
   if (!FORCE && currentAgents.length > 0 && currentSkills.length > 0) {
     info(`[${variantName}] variant.json agents/skills already populated — skip`);
     return false;
   }
 
-  vj['agents'] = agentList;
-  vj['skills'] = skillList;
+  vj["agents"] = agentList;
+  vj["skills"] = skillList;
   writeUTF8File(vjPath, JSON.stringify(vj, null, 2));
   pass(`[${variantName}] variant.json updated (${agentList.length} agents, ${skillList.length} skills)`);
   return true;
@@ -296,7 +306,7 @@ function processVariantJson(variantDir: string, variantName: string): boolean {
 // ============================================================================
 
 async function main() {
-  console.log('\n=== resolve-variants.ts (L1-B Phase) ===\n');
+  console.log("\n=== resolve-variants.ts (L1-B Phase) ===\n");
   if (FORCE) console.log(`${ANSI.yellow}--force: re-resolving all files${ANSI.reset}\n`);
 
   // Discover variants
@@ -306,16 +316,16 @@ async function main() {
   }
 
   const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-    .filter(e => e.isDirectory() && e.name.startsWith('co-'))
-    .map(e => e.name)
-    .filter(name => !VARIANT_FILTER || name === VARIANT_FILTER);
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+    .map((e) => e.name)
+    .filter((name) => !VARIANT_FILTER || name === VARIANT_FILTER);
 
   if (variants.length === 0) {
-    warn('No variants found' + (VARIANT_FILTER ? ` matching --variant ${VARIANT_FILTER}` : ''));
+    warn("No variants found" + (VARIANT_FILTER ? ` matching --variant ${VARIANT_FILTER}` : ""));
     process.exit(0);
   }
 
-  console.log(`Variants: ${variants.join(', ')}\n`);
+  console.log(`Variants: ${variants.join(", ")}\n`);
 
   let totalResolved = 0;
 
@@ -337,8 +347,8 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error('\n❌ resolve-variants.ts failed:', err);
+main().catch((err) => {
+  console.error("\n❌ resolve-variants.ts failed:", err);
   if (import.meta.main) {
     process.exit(1);
   }

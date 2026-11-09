@@ -2,20 +2,20 @@
 // ingest-security-frameworks.ts - Phase 4 variant-specific security frameworks ingestion
 // @version 1.1.0
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { safeFetch, SSRFBlockedError } from './lib/ssrf.ts';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { safeFetch, SSRFBlockedError } from "./lib/ssrf.ts";
 
-const CYAN   = '\x1b[36m';
-const RED    = '\x1b[31m';
-const YELLOW = '\x1b[33m';
-const GREEN  = '\x1b[32m';
-const RESET  = '\x1b[0m';
+const CYAN = "\x1b[36m";
+const RED = "\x1b[31m";
+const YELLOW = "\x1b[33m";
+const GREEN = "\x1b[32m";
+const RESET = "\x1b[0m";
 
 console.log(`${CYAN}🚀 Ingesting Security Frameworks...${RESET}`);
 
-const workspaceRoot = path.resolve(import.meta.dir, '..');
-const templatesDir = path.resolve(path.join(workspaceRoot, 'templates'));
+const workspaceRoot = path.resolve(import.meta.dir, "..");
+const templatesDir = path.resolve(path.join(workspaceRoot, "templates"));
 
 function safeResolvePath(base: string, variant: string, ingestPath: string): string {
   const resolved = path.resolve(path.join(base, variant, ingestPath));
@@ -32,14 +32,14 @@ if (!fs.existsSync(templatesDir)) {
   }
 }
 
-const variants = fs.readdirSync(templatesDir).filter(dir => dir.startsWith('co-'));
+const variants = fs.readdirSync(templatesDir).filter((dir) => dir.startsWith("co-"));
 
 async function ingest() {
   for (const variant of variants) {
-    const variantJsonPath = path.join(templatesDir, variant, 'variant.json');
+    const variantJsonPath = path.join(templatesDir, variant, "variant.json");
     if (!fs.existsSync(variantJsonPath)) continue;
 
-    const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, 'utf-8'));
+    const variantJson = JSON.parse(fs.readFileSync(variantJsonPath, "utf-8"));
     const externalSecurity = variantJson.security_manifest?.external || [];
 
     for (const item of externalSecurity) {
@@ -59,7 +59,7 @@ async function ingest() {
             console.error(`${YELLOW}SSRF check blocked ${item.name}: ${err.reason}${RESET}`);
             continue;
           }
-          if (err instanceof DOMException && err.name === 'AbortError') {
+          if (err instanceof DOMException && err.name === "AbortError") {
             console.error(`${RED}Timeout fetching ${item.name} (30s)${RESET}`);
             continue;
           }
@@ -69,7 +69,7 @@ async function ingest() {
           console.error(`${RED}Failed to fetch ${item.source_url}: ${response.statusText}${RESET}`);
           continue;
         }
-        const contentLength = Number(response.headers.get('content-length'));
+        const contentLength = Number(response.headers.get("content-length"));
         if (contentLength > 10 * 1024 * 1024) {
           console.error(`${RED}Rejected ${item.name}: content-length ${contentLength} exceeds 10MB limit${RESET}`);
           continue;
@@ -83,7 +83,7 @@ async function ingest() {
           continue;
         }
         fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-        fs.writeFileSync(targetPath, content, 'utf-8');
+        fs.writeFileSync(targetPath, content, "utf-8");
         console.log(`${GREEN}Successfully ingested ${item.name} -> ${item.ingest_path}${RESET}`);
       } catch (e) {
         console.error(`${RED}Error ingesting ${item.name}: ${e}${RESET}`);

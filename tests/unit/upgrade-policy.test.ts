@@ -305,7 +305,7 @@ describe('upgrade-policy drift guard vs scripts/upgrade-project.ts literals', ()
   test('GOVERNANCE_FILES literal matches the lib inventory', () => {
     const m = src.match(/const GOVERNANCE_FILES = \[([^\]]*)\]/);
     expect(m).not.toBeNull();
-    const literal = [...m![1].matchAll(/'([^']+)'/g)].map(x => x[1]);
+    const literal = [...m![1].matchAll(/(['"])([^'"\n]*)\1/g)].map(x => x[2]);
     expect(literal).toEqual([...GOVERNANCE_FILES]);
   });
 
@@ -314,20 +314,20 @@ describe('upgrade-policy drift guard vs scripts/upgrade-project.ts literals', ()
   test('every MERGE_MANAGED_FILES member has a delivery site in the MERGE or DOCS_MERGE pass', () => {
     const pushed = new Set<string>();
     for (const m of src.matchAll(/MERGE_FILES\.push\(([\s\S]*?)\);/g)) {
-      for (const q of m[1].matchAll(/'([^']+)'/g)) pushed.add(q[1]);
+      for (const q of m[1].matchAll(/(['"])([^'"\n]*)\1/g)) pushed.add(q[2]);
     }
     const docsMerge = src.match(/const DOCS_MERGE_FILES: string\[\] = \[([^\]]*)\]/);
     expect(docsMerge).not.toBeNull();
-    for (const q of docsMerge![1].matchAll(/'([^']+)'/g)) pushed.add(q[1]);
+    for (const q of docsMerge![1].matchAll(/(['"])([^'"\n]*)\1/g)) pushed.add(q[2]);
     // The script names ci.yml through a const; resolve it for the comparison.
-    const ciConst = src.match(/const CI_WORKFLOW_REL = '([^']+)'/);
+    const ciConst = src.match(/const CI_WORKFLOW_REL = (['"])([^'\"]+)\1/);
     expect(ciConst).not.toBeNull();
-    if (/MERGE_FILES\.push\([^)]*CI_WORKFLOW_REL/.test(src)) pushed.add(ciConst![1]);
+    if (/MERGE_FILES\.push\([^)]*CI_WORKFLOW_REL/.test(src)) pushed.add(ciConst![2]);
 
     const platformGated = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md']);
     for (const f of MERGE_MANAGED_FILES) {
       if (platformGated.has(f)) {
-        expect(src).toContain(`MERGE_FILES.push('${f}')`);
+        expect(new RegExp(`MERGE_FILES\\.push\\(['\"]${f}['\"]\\)`).test(src)).toBe(true);
       } else {
         expect(pushed.has(f)).toBe(true);
       }

@@ -20,7 +20,7 @@
 //           "find the first ## Registry table, splice rows after its last row,
 //           write" mechanics; only the row format differed per call site.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from "node:fs";
 
 /**
  * Index AFTER the last table row of the registry region — from the exact
@@ -49,10 +49,10 @@ export function registryAppendIndex(lines: string[]): number {
  */
 export function appendRegistryRows(regPath: string, rows: string[]): boolean {
   if (rows.length === 0) return false;
-  const lines = readFileSync(regPath, 'utf-8').split('\n');
+  const lines = readFileSync(regPath, "utf-8").split("\n");
   const insertAt = registryAppendIndex(lines);
   if (insertAt <= 0) return false;
   lines.splice(insertAt, 0, ...rows);
-  writeFileSync(regPath, lines.join('\n'), 'utf-8');
+  writeFileSync(regPath, lines.join("\n"), "utf-8");
   return true;
 }

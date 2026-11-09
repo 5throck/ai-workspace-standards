@@ -26,17 +26,17 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, dirname, basename } from 'path';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { L3ScanResult } from './scan-l3-project.ts';
-import { readUTF8File, writeUTF8File } from '../lib/encoding-utils.ts';
-import { warningError, ErrorPhase } from '../lib/error-handling.ts';
+import { join, dirname, basename } from "node:path";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { L3ScanResult } from "./scan-l3-project.ts";
+import { readUTF8File, writeUTF8File } from "../lib/encoding-utils.ts";
+import { warningError, ErrorPhase } from "../lib/error-handling.ts";
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export type SkillConfidence = 'high' | 'medium' | 'low';
+export type SkillConfidence = "high" | "medium" | "low";
 
 export interface DetectedSkillPattern {
   /** Section header that triggered detection */
@@ -70,7 +70,7 @@ export interface NormalizedFile {
 }
 
 export interface NormalizationWarning {
-  level: 'warn' | 'info';
+  level: "warn" | "info";
   filePath: string;
   message: string;
 }
@@ -97,19 +97,8 @@ export interface NormalizationResult {
  * HIGH → auto-extract. MEDIUM → flag for approval. LOW → ignore.
  */
 const SKILL_PATTERNS: Record<SkillConfidence, RegExp[]> = {
-  high: [
-    /^## Step \d+/m,
-    /^## 절차/m,
-    /^## Process Steps/m,
-    /^## Execution Steps/m,
-    /Next Step:/m,
-    /^## Stage \d+/m,
-  ],
-  medium: [
-    /^## Process$/m,
-    /^## How To/m,
-    /^## Procedure/m,
-  ],
+  high: [/^## Step \d+/m, /^## 절차/m, /^## Process Steps/m, /^## Execution Steps/m, /Next Step:/m, /^## Stage \d+/m],
+  medium: [/^## Process$/m, /^## How To/m, /^## Procedure/m],
   low: [
     // LOW patterns are intentionally not auto-extracted
     /^## Tools$/m,
@@ -119,25 +108,20 @@ const SKILL_PATTERNS: Record<SkillConfidence, RegExp[]> = {
 /**
  * Section headers that are valid in BOTH agent and skill files — do not flag these.
  */
-const AMBIGUOUS_HEADERS = new Set([
-  '## Output Format',
-  '## Constraints',
-  '## Tools',
-  '## Related Skills',
-]);
+const AMBIGUOUS_HEADERS = new Set(["## Output Format", "## Constraints", "## Tools", "## Related Skills"]);
 
 /**
  * Canonical agent body sections (Layer 1) — must be present in agent files.
  * Source: docs/designs/variant-specialist-agent-structure.md
  */
 export const AGENT_REQUIRED_SECTIONS = [
-  '## Role',
-  '## ⚠️ PM-ONLY INVOCATION',
-  '## Responsibilities',
-  '## Output Format',
-  '## Constraints',
-  '## Meeting Participation',
-  '## Dispatch Protocol',
+  "## Role",
+  "## ⚠️ PM-ONLY INVOCATION",
+  "## Responsibilities",
+  "## Output Format",
+  "## Constraints",
+  "## Meeting Participation",
+  "## Dispatch Protocol",
 ];
 
 /**
@@ -145,11 +129,11 @@ export const AGENT_REQUIRED_SECTIONS = [
  * Source: docs/designs/variant-specialist-skill-structure.md
  */
 export const SKILL_REQUIRED_SECTIONS = [
-  '## Context',
-  '## When to Use',
-  '## Execution Steps',
-  '## Output Format',
-  '## Related Skills',
+  "## Context",
+  "## When to Use",
+  "## Execution Steps",
+  "## Output Format",
+  "## Related Skills",
 ];
 
 /**
@@ -157,15 +141,15 @@ export const SKILL_REQUIRED_SECTIONS = [
  */
 function detectSkillPatterns(body: string): DetectedSkillPattern[] {
   const detected: DetectedSkillPattern[] = [];
-  const lines = body.split('\n');
+  const lines = body.split("\n");
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (!line.startsWith('## ')) continue;
+    if (!line.startsWith("## ")) continue;
     if (AMBIGUOUS_HEADERS.has(line.trim())) continue;
 
     for (const [level, patterns] of Object.entries(SKILL_PATTERNS) as [SkillConfidence, RegExp[]][]) {
-      if (level === 'low') continue;
+      if (level === "low") continue;
       for (const pattern of patterns) {
         if (pattern.test(line)) {
           detected.push({ header: line.trim(), lineIndex: i, confidence: level });
@@ -195,7 +179,7 @@ function parseFrontmatter(content: string): ParsedFrontmatter | null {
   const [, fm, body] = match;
   const fields: Record<string, string> = {};
 
-  for (const line of fm.split('\n')) {
+  for (const line of fm.split("\n")) {
     const kv = line.match(/^([a-z_][a-z0-9_-]*):\s*(.*)$/);
     if (kv) fields[kv[1]] = kv[2].trim();
   }
@@ -206,14 +190,14 @@ function parseFrontmatter(content: string): ParsedFrontmatter | null {
 function rebuildFrontmatter(fields: Record<string, string>, raw: string, body: string): string {
   let fm = raw;
   for (const [key, value] of Object.entries(fields)) {
-    const linePattern = new RegExp(`^${key}:.*$`, 'm');
+    const linePattern = new RegExp(`^${key}:.*$`, "m");
     if (linePattern.test(fm)) {
       fm = fm.replace(linePattern, `${key}: ${value}`);
     } else {
       fm += `\n${key}: ${value}`;
     }
   }
-  return `---\n${fm.replace(/^\n+/, '').replace(/\n+$/, '')}\n---\n${body}`;
+  return `---\n${fm.replace(/^\n+/, "").replace(/\n+$/, "")}\n---\n${body}`;
 }
 
 // ============================================================================
@@ -244,7 +228,7 @@ function normalizeAgentFile(
   const warnings: NormalizationWarning[] = [];
 
   const fmMatch = content.match(/^(---\n[\s\S]*?\n---\n?)/);
-  const frontmatter = fmMatch ? fmMatch[1] : '';
+  const frontmatter = fmMatch ? fmMatch[1] : "";
   const body = fmMatch ? content.slice(frontmatter.length) : content;
 
   const detected = detectSkillPatterns(body);
@@ -252,9 +236,9 @@ function normalizeAgentFile(
   let modified = false;
 
   for (const pattern of detected) {
-    if (pattern.confidence === 'high' || (auto && pattern.confidence === 'medium')) {
+    if (pattern.confidence === "high" || (auto && pattern.confidence === "medium")) {
       // Extract section content
-      const lines = updatedBody.split('\n');
+      const lines = updatedBody.split("\n");
       const startIdx = pattern.lineIndex;
 
       // Find end of section (next ## at same or higher level, or EOF)
@@ -267,27 +251,27 @@ function normalizeAgentFile(
       }
 
       const sectionLines = lines.slice(startIdx, endIdx);
-      const sectionContent = sectionLines.join('\n').trimEnd();
+      const sectionContent = sectionLines.join("\n").trimEnd();
 
       // Derive skill slug from agent name
       const headerSlug = pattern.header
-        .replace(/^## /, '')
+        .replace(/^## /, "")
         .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
         .trim();
       const slug = `${agentName}-${headerSlug}`;
-      const targetPath = join(l3ProjectPath, 'skills', slug, 'SKILL.md');
+      const targetPath = join(l3ProjectPath, "skills", slug, "SKILL.md");
 
       const skillContent = `---
 name: ${slug}
 description: >
-  Extracted from ${agentName} agent. ${pattern.header.replace(/^## /, '')}.
+  Extracted from ${agentName} agent. ${pattern.header.replace(/^## /, "")}.
 version: 1.0.0
 status: active
 owner: ${agentName}
-last_reviewed: ${new Date().toISOString().split('T')[0]}
+last_reviewed: ${new Date().toISOString().split("T")[0]}
 prerequisites: none
 ---
 
@@ -322,12 +306,11 @@ ${sectionContent}
 
       // Remove extracted section from agent body; add reference pointer
       const pointer = `\nFull instructions: see \`skills/${slug}/SKILL.md\`.\n`;
-      const before = lines.slice(0, startIdx).join('\n');
-      const after = lines.slice(endIdx).join('\n');
+      const before = lines.slice(0, startIdx).join("\n");
+      const after = lines.slice(endIdx).join("\n");
       updatedBody = `${before}\n${pointer}\n${after}`;
       modified = true;
-
-    } else if (pattern.confidence === 'medium') {
+    } else if (pattern.confidence === "medium") {
       pending.push({ ...pattern, agentPath: filePath });
     }
   }
@@ -336,7 +319,7 @@ ${sectionContent}
   for (const section of AGENT_REQUIRED_SECTIONS) {
     if (!updatedBody.includes(section)) {
       warnings.push({
-        level: 'warn',
+        level: "warn",
         filePath,
         message: `Missing required agent section: "${section}"`,
       });
@@ -379,27 +362,22 @@ function normalizeSkillFile(
 
   if (parsed) {
     const additions: Record<string, string> = {};
-    if (!parsed.fields['status']) additions['status'] = 'active';
-    if (!parsed.fields['owner']) additions['owner'] = 'pm';
-    if (!parsed.fields['last_reviewed'])
-      additions['last_reviewed'] = new Date().toISOString().split('T')[0];
-    if (!parsed.fields['prerequisites']) additions['prerequisites'] = 'none';
+    if (!parsed.fields["status"]) additions["status"] = "active";
+    if (!parsed.fields["owner"]) additions["owner"] = "pm";
+    if (!parsed.fields["last_reviewed"]) additions["last_reviewed"] = new Date().toISOString().split("T")[0];
+    if (!parsed.fields["prerequisites"]) additions["prerequisites"] = "none";
 
     if (Object.keys(additions).length > 0) {
-      updatedContent = rebuildFrontmatter(
-        { ...parsed.fields, ...additions },
-        parsed.raw,
-        parsed.body,
-      );
+      updatedContent = rebuildFrontmatter({ ...parsed.fields, ...additions }, parsed.raw, parsed.body);
       modified = true;
     }
   }
 
   // Section header renaming
   const sectionRenames: [RegExp, string][] = [
-    [/^## Role$/m, '## Context'],
-    [/^## When to Invoke$/m, '## When to Use'],
-    [/^## When to Invoke \(.*?\)$/m, '## When to Use'],
+    [/^## Role$/m, "## Context"],
+    [/^## When to Invoke$/m, "## When to Use"],
+    [/^## When to Invoke \(.*?\)$/m, "## When to Use"],
   ];
 
   for (const [pattern, replacement] of sectionRenames) {
@@ -410,8 +388,8 @@ function normalizeSkillFile(
   }
 
   // Add ## Related Skills stub if absent
-  if (!updatedContent.includes('## Related Skills')) {
-    updatedContent = updatedContent.trimEnd() + '\n\n## Related Skills\n\n<!-- Link related skills here -->\n';
+  if (!updatedContent.includes("## Related Skills")) {
+    updatedContent = updatedContent.trimEnd() + "\n\n## Related Skills\n\n<!-- Link related skills here -->\n";
     modified = true;
   }
 
@@ -419,7 +397,7 @@ function normalizeSkillFile(
   for (const section of SKILL_REQUIRED_SECTIONS) {
     if (!updatedContent.includes(section)) {
       warnings.push({
-        level: 'warn',
+        level: "warn",
         filePath,
         message: `Missing required skill section: "${section}"`,
       });
@@ -462,12 +440,10 @@ export function normalizeAgentSkills(
   for (const file of scanResult.files) {
     const isAgentFile =
       file.relativePath.match(/^agents\//) &&
-      file.relativePath.endsWith('.md') &&
-      !['pm.md', 'README.md', 'README_ko.md'].includes(basename(file.relativePath));
+      file.relativePath.endsWith(".md") &&
+      !["pm.md", "README.md", "README_ko.md"].includes(basename(file.relativePath));
 
-    const isSkillFile =
-      file.relativePath.match(/^skills\//) &&
-      basename(file.relativePath) === 'SKILL.md';
+    const isSkillFile = file.relativePath.match(/^skills\//) && basename(file.relativePath) === "SKILL.md";
 
     // v1.2.0: resolve scan entries against the L3 PROJECT ROOT, not process.cwd().
     // relativePath is fixture-relative; resolving it against cwd made every pipeline
@@ -482,7 +458,7 @@ export function normalizeAgentSkills(
     const content = readUTF8File(absoluteFilePath);
 
     if (isAgentFile) {
-      const agentName = basename(file.relativePath, '.md');
+      const agentName = basename(file.relativePath, ".md");
       const { normalized, extracted, pending, warnings } = normalizeAgentFile(
         absoluteFilePath,
         content,
@@ -494,7 +470,6 @@ export function normalizeAgentSkills(
       result.extractedSkills.push(...extracted);
       result.pendingApprovals.push(...pending);
       result.warnings.push(...warnings);
-
     } else if (isSkillFile) {
       const { normalized, warnings } = normalizeSkillFile(absoluteFilePath, content);
       result.normalizedSkills.push(normalized);
@@ -529,41 +504,41 @@ export function normalizeAgentSkills(
  */
 export function formatNormalizationReport(result: NormalizationResult): string {
   const lines: string[] = [
-    '=== Wave 1.5 — Agent/Skill Normalization Report ===',
-    '',
+    "=== Wave 1.5 — Agent/Skill Normalization Report ===",
+    "",
     `Agent files processed : ${result.normalizedAgents.length}`,
-    `  Modified            : ${result.normalizedAgents.filter(f => f.modified).length}`,
+    `  Modified            : ${result.normalizedAgents.filter((f) => f.modified).length}`,
     `Skill files processed : ${result.normalizedSkills.length}`,
-    `  Modified            : ${result.normalizedSkills.filter(f => f.modified).length}`,
+    `  Modified            : ${result.normalizedSkills.filter((f) => f.modified).length}`,
     `Skills extracted      : ${result.extractedSkills.length}`,
     `Pending approvals     : ${result.pendingApprovals.length}`,
-    `Warnings              : ${result.warnings.filter(w => w.level === 'warn').length}`,
-    '',
+    `Warnings              : ${result.warnings.filter((w) => w.level === "warn").length}`,
+    "",
   ];
 
   if (result.extractedSkills.length > 0) {
-    lines.push('Extracted skills:');
+    lines.push("Extracted skills:");
     for (const s of result.extractedSkills) {
       lines.push(`  [${s.confidence.toUpperCase()}] ${s.slug} → ${s.targetPath}`);
     }
-    lines.push('');
+    lines.push("");
   }
 
   if (result.pendingApprovals.length > 0) {
-    lines.push('Pending user approval (MEDIUM confidence):');
+    lines.push("Pending user approval (MEDIUM confidence):");
     for (const p of result.pendingApprovals) {
       lines.push(`  ${p.agentPath}: "${p.header}" (line ${p.lineIndex})`);
     }
-    lines.push('  Re-run with --auto to extract these automatically.');
-    lines.push('');
+    lines.push("  Re-run with --auto to extract these automatically.");
+    lines.push("");
   }
 
   if (result.warnings.length > 0) {
-    lines.push('Warnings:');
+    lines.push("Warnings:");
     for (const w of result.warnings) {
       lines.push(`  [${w.level.toUpperCase()}] ${w.filePath}: ${w.message}`);
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

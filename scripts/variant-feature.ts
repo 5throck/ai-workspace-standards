@@ -21,18 +21,18 @@
  * Types: agent | skill | script | docs | all (default: all)
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { execFileSync } from "node:child_process";
 
-const GREEN = '\x1b[32m';
-const RED = '\x1b[31m';
-const YELLOW = '\x1b[33m';
-const CYAN = '\x1b[36m';
-const RESET = '\x1b[0m';
+const GREEN = "\x1b[32m";
+const RED = "\x1b[31m";
+const YELLOW = "\x1b[33m";
+const CYAN = "\x1b[36m";
+const RESET = "\x1b[0m";
 
-const WORKSPACE_ROOT = path.resolve(import.meta.dir, '..');
-const TODAY = new Date().toISOString().split('T')[0];
+const WORKSPACE_ROOT = path.resolve(import.meta.dir, "..");
+const TODAY = new Date().toISOString().split("T")[0];
 
 function fail(msg: string): never {
   console.error(`${RED}${msg}${RESET}`);
@@ -45,7 +45,7 @@ function writeStub(filePath: string, content: string): void {
     return;
   }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, content, 'utf-8');
+  fs.writeFileSync(filePath, content, "utf-8");
   console.log(`${GREEN}  Created: ${path.relative(WORKSPACE_ROOT, filePath)}${RESET}`);
 }
 
@@ -114,40 +114,43 @@ TODO: Define meeting persona.
 }
 
 function main(): void {
-
   const args = process.argv.slice(2);
-  const variant = getArg(args, '--variant');
-  const feature = getArg(args, '--feature');
-  const typeArg = getArg(args, '--type') ?? 'all';
+  const variant = getArg(args, "--variant");
+  const feature = getArg(args, "--feature");
+  const typeArg = getArg(args, "--type") ?? "all";
 
   if (!variant || !feature) {
-    fail('Usage: bun scripts/variant-feature.ts --variant <name> --feature <name> [--type agent|skill|script|docs|all]');
+    fail(
+      "Usage: bun scripts/variant-feature.ts --variant <name> --feature <name> [--type agent|skill|script|docs|all]",
+    );
   }
 
   if (!/^co-[a-z][a-z0-9-]{1,30}$/.test(variant)) fail(`Invalid variant name "${variant}".`);
   if (!/^[a-z][a-z0-9-]{0,50}$/.test(feature)) fail(`Invalid feature name "${feature}". Use lowercase kebab-case.`);
 
-  const variantDir = path.join(WORKSPACE_ROOT, 'templates', variant);
+  const variantDir = path.join(WORKSPACE_ROOT, "templates", variant);
   if (!fs.existsSync(variantDir)) fail(`Variant not found: templates/${variant}/`);
 
-  const types = typeArg === 'all' ? ['agent', 'skill', 'script', 'docs'] : typeArg.split(',').map(t => t.trim());
-  const validTypes = new Set(['agent', 'skill', 'script', 'docs']);
+  const types = typeArg === "all" ? ["agent", "skill", "script", "docs"] : typeArg.split(",").map((t) => t.trim());
+  const validTypes = new Set(["agent", "skill", "script", "docs"]);
   for (const t of types) if (!validTypes.has(t)) fail(`Invalid type "${t}".`);
 
   console.log(`${CYAN}=== variant-feature.ts -- adding "${feature}" to ${variant} ===${RESET}`);
-  console.log(`Types: ${types.join(', ')}\n`);
+  console.log(`Types: ${types.join(", ")}\n`);
 
   const createdFiles: string[] = [];
 
-  if (types.includes('agent')) {
-    const p = path.join(variantDir, 'agents', `${feature}.md`);
+  if (types.includes("agent")) {
+    const p = path.join(variantDir, "agents", `${feature}.md`);
     writeStub(p, agentStubContent(variant, feature, TODAY));
     createdFiles.push(p);
   }
 
-  if (types.includes('skill')) {
-    const p = path.join(variantDir, 'skills', feature, 'SKILL.md');
-    writeStub(p, `---
+  if (types.includes("skill")) {
+    const p = path.join(variantDir, "skills", feature, "SKILL.md");
+    writeStub(
+      p,
+      `---
   name: ${feature}
   status: active
   description: >
@@ -178,14 +181,17 @@ function main(): void {
   ## Expected Outputs
 
   TODO: Describe outputs.
-  `);
+  `,
+    );
     createdFiles.push(p);
   }
 
-  if (types.includes('script')) {
-    const scriptName = `${variant.replace('co-', '')}-${feature}.ts`;
-    const p = path.join(WORKSPACE_ROOT, 'scripts', scriptName);
-    writeStub(p, `// @version 0.1.0
+  if (types.includes("script")) {
+    const scriptName = `${variant.replace("co-", "")}-${feature}.ts`;
+    const p = path.join(WORKSPACE_ROOT, "scripts", scriptName);
+    writeStub(
+      p,
+      `// @version 0.1.0
   /**
    * ${scriptName}
    *
@@ -203,13 +209,16 @@ function main(): void {
 
   // TODO: Implement script logic
   console.log(\`\${GREEN}TODO: implement ${feature}\${RESET}\`);
-  `);
+  `,
+    );
     createdFiles.push(p);
   }
 
-  if (types.includes('docs')) {
-    const docPath = path.join(WORKSPACE_ROOT, 'docs', 'designs', `${TODAY}-${variant}-${feature}-design.md`);
-    writeStub(docPath, `# Design: ${feature} for ${variant}
+  if (types.includes("docs")) {
+    const docPath = path.join(WORKSPACE_ROOT, "docs", "designs", `${TODAY}-${variant}-${feature}-design.md`);
+    writeStub(
+      docPath,
+      `# Design: ${feature} for ${variant}
 
   **Date**: ${TODAY}
   **Variant**: ${variant}
@@ -234,16 +243,22 @@ function main(): void {
   | # | Criterion | Verification |
   |---|-----------|--------------|
   | 1 | TODO | TODO |
-  `);
+  `,
+    );
     createdFiles.push(docPath);
 
     // Register spec
-    const specRegister = path.join(WORKSPACE_ROOT, 'scripts', 'spec-register.ts');
+    const specRegister = path.join(WORKSPACE_ROOT, "scripts", "spec-register.ts");
     if (fs.existsSync(specRegister)) {
       try {
-        execFileSync(process.execPath, [specRegister, '--file', path.relative(WORKSPACE_ROOT, docPath), '--source', 'manual', '--status', 'draft'], {
-          cwd: WORKSPACE_ROOT, stdio: 'inherit',
-        });
+        execFileSync(
+          process.execPath,
+          [specRegister, "--file", path.relative(WORKSPACE_ROOT, docPath), "--source", "manual", "--status", "draft"],
+          {
+            cwd: WORKSPACE_ROOT,
+            stdio: "inherit",
+          },
+        );
       } catch {
         console.log(`${YELLOW}  spec-register.ts failed -- register manually${RESET}`);
       }
@@ -252,7 +267,6 @@ function main(): void {
 
   console.log(`\n${CYAN}Done: created ${createdFiles.length} stub(s) for "${feature}" in ${variant}.${RESET}`);
   console.log(`\nNext: fill in stubs, then run bun scripts/audit.ts`);
-
 }
 
 if (import.meta.main) main();

@@ -15,34 +15,28 @@
  *   1 if any required files are missing (prints list to stderr)
  */
 
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 const args = process.argv.slice(2);
 const variant = args[0];
 
 if (!variant) {
-  console.error('Usage: bun template-validation.ts <variant> [commonPath] [variantPath]');
+  console.error("Usage: bun template-validation.ts <variant> [commonPath] [variantPath]");
   if (import.meta.main) {
     process.exit(1);
   }
 }
 
 const workspaceRoot = process.cwd();
-const commonPath = args[1] || join(workspaceRoot, 'templates', 'common');
-const variantPath = args[2] || join(workspaceRoot, 'templates', variant);
+const commonPath = args[1] || join(workspaceRoot, "templates", "common");
+const variantPath = args[2] || join(workspaceRoot, "templates", variant);
 
 // Files required in templates/common/
-const commonRequired = [
-  '.gitignore',
-  '.githooks/pre-commit',
-];
+const commonRequired = [".gitignore", ".githooks/pre-commit"];
 
 // Files required in templates/<variant>/
-const variantRequired = [
-  'agents/pm.md',
-  'variant.json',
-];
+const variantRequired = ["agents/pm.md", "variant.json"];
 
 const missing: string[] = [];
 
@@ -61,7 +55,7 @@ for (const file of variantRequired) {
 }
 
 if (missing.length > 0) {
-  console.error(`Missing required template files: ${missing.join(', ')}`);
+  console.error(`Missing required template files: ${missing.join(", ")}`);
   if (import.meta.main) {
     process.exit(1);
   }

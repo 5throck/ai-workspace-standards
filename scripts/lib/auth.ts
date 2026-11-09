@@ -14,7 +14,7 @@
  * @security P1 — PBKDF2 hardening
  */
 
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 
 // ============================================================================
 // CONSTANTS
@@ -30,7 +30,7 @@ const SALT_LENGTH = 16;
 const KEY_LENGTH = 32;
 
 /** Hash algorithm */
-const HASH_ALGORITHM = 'sha256';
+const HASH_ALGORITHM = "sha256";
 
 // ============================================================================
 // TYPES
@@ -56,15 +56,12 @@ export interface HashResult {
  * @param iterations - Override iteration count (default: 210,000)
  * @returns HashResult containing salt, hash, and iteration count
  */
-export async function hashPassword(
-  password: string,
-  iterations: number = PBKDF2_ITERATIONS,
-): Promise<HashResult> {
+export async function hashPassword(password: string, iterations: number = PBKDF2_ITERATIONS): Promise<HashResult> {
   const salt = crypto.randomBytes(SALT_LENGTH);
   const hash = await asyncPbkdf2(password, salt, iterations);
   return {
-    salt: salt.toString('hex'),
-    hash: hash.toString('hex'),
+    salt: salt.toString("hex"),
+    hash: hash.toString("hex"),
     iterations,
   };
 }
@@ -76,13 +73,10 @@ export async function hashPassword(
  * @param hashResult - Stored HashResult containing salt, hash, and iterations
  * @returns true if password matches
  */
-export async function verifyPassword(
-  password: string,
-  hashResult: HashResult,
-): Promise<boolean> {
-  const salt = Buffer.from(hashResult.salt, 'hex');
+export async function verifyPassword(password: string, hashResult: HashResult): Promise<boolean> {
+  const salt = Buffer.from(hashResult.salt, "hex");
   const hash = await asyncPbkdf2(password, salt, hashResult.iterations);
-  return crypto.timingSafeEqual(hash, Buffer.from(hashResult.hash, 'hex'));
+  return crypto.timingSafeEqual(hash, Buffer.from(hashResult.hash, "hex"));
 }
 
 // ============================================================================
@@ -93,11 +87,7 @@ export async function verifyPassword(
  * Async PBKDF2 wrapper around Node.js crypto.pbkdf2.
  * Non-blocking — suitable for server environments.
  */
-function asyncPbkdf2(
-  password: string,
-  salt: Buffer,
-  iterations: number,
-): Promise<Buffer> {
+function asyncPbkdf2(password: string, salt: Buffer, iterations: number): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     crypto.pbkdf2(password, salt, iterations, KEY_LENGTH, HASH_ALGORITHM, (err, derivedKey) => {
       if (err) reject(err);

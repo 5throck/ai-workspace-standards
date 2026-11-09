@@ -4,7 +4,15 @@
 // Canonical source of the handbook toolkit (adapted from
 // Handbooks/multi-agent-harness-handbook/scripts/check-labels.ts).
 
-import { findAllHtmlFiles, readFile, extractChapterNav, resolveHref, extractTitle, extractH1, getDocsDir } from "./nav-utils.ts";
+import {
+  findAllHtmlFiles,
+  readFile,
+  extractChapterNav,
+  resolveHref,
+  extractTitle,
+  extractH1,
+  getDocsDir,
+} from "./nav-utils.ts";
 import { relative } from "node:path";
 
 export interface LabelError {

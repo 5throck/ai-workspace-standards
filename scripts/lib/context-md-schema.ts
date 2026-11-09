@@ -23,21 +23,21 @@ export interface Ws09Slot {
 }
 
 export const WS09_STRUCTURE_SCHEMA: readonly Ws09Slot[] = [
-  { slot: 'Stack', match: /^(Tool|Tech|Design) Stack$/, required: true },
-  { slot: 'Agents', match: /^Agents?\b/, required: true },
-  { slot: 'Skills', match: /^Skills$/, required: true },
-  { slot: 'Environment Setup', match: /^Environment Setup$/, required: false },
-  { slot: 'Development Workflow', match: /^(Development|Engagement) Workflow\b/, required: true },
-  { slot: 'Guidelines', match: /\bGuidelines$/, required: true },
-  { slot: 'File Organization Policy', match: /^File Organization Policy$/, required: true },
-  { slot: 'Domain Rules', match: /^Domain Rules$/, required: true },
+  { slot: "Stack", match: /^(Tool|Tech|Design) Stack$/, required: true },
+  { slot: "Agents", match: /^Agents?\b/, required: true },
+  { slot: "Skills", match: /^Skills$/, required: true },
+  { slot: "Environment Setup", match: /^Environment Setup$/, required: false },
+  { slot: "Development Workflow", match: /^(Development|Engagement) Workflow\b/, required: true },
+  { slot: "Guidelines", match: /\bGuidelines$/, required: true },
+  { slot: "File Organization Policy", match: /^File Organization Policy$/, required: true },
+  { slot: "Domain Rules", match: /^Domain Rules$/, required: true },
 ];
 
 // co-abap is a structurally distinct SAP/ABAP domain (30+ headings, no
 // Stack/Guidelines/File Organization Policy slots at all) — forcing it into this
 // skeleton would misrepresent its actual structure rather than standardize it.
 // Exempt rather than fail.
-export const WS09_EXEMPT_VARIANTS: ReadonlySet<string> = new Set(['co-abap']);
+export const WS09_EXEMPT_VARIANTS: ReadonlySet<string> = new Set(["co-abap"]);
 
 export interface Ws09Issue {
   /** Slot name that failed */
@@ -58,7 +58,7 @@ export interface Ws09CheckResult {
  * @version 1.0.0
  */
 export function checkContextMdStructure(content: string): Ws09CheckResult {
-  const headings = [...content.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
+  const headings = [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
 
   const issues: Ws09Issue[] = [];
   let lastMatchedIndex = -1;
@@ -70,7 +70,7 @@ export function checkContextMdStructure(content: string): Ws09CheckResult {
         issues.push({
           slot,
           message: `missing the required "${slot}" slot (or it appears before an earlier required slot)`,
-          fix: `Add a "## ${slot}" section (or matching domain-flavored heading) in the standard slot order: ${WS09_STRUCTURE_SCHEMA.map(s => s.slot).join(' → ')}`,
+          fix: `Add a "## ${slot}" section (or matching domain-flavored heading) in the standard slot order: ${WS09_STRUCTURE_SCHEMA.map((s) => s.slot).join(" → ")}`,
         });
       }
       continue;

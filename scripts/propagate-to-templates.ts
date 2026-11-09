@@ -195,15 +195,26 @@
  *                          resolved.
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync, cpSync } from 'node:fs';
-import { join, dirname, basename, extname, resolve, sep } from 'node:path';
-import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from './helpers/layer-filter.ts';
-import { scrubConstitutionRefs } from './lib/constitution-scrub.ts';
-import { isSelfManagedPath } from './lib/self-managed-tools.ts';
-import { die } from './lib/error-handling.ts';
-import * as yaml from 'js-yaml';
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+  copyFileSync,
+  rmSync,
+  cpSync,
+  type Stats,
+} from "node:fs";
+import { join, dirname, basename, extname, resolve, sep } from "node:path";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { parseScriptLayers, includeSkillInL1, includeScriptInL1 } from "./helpers/layer-filter.ts";
+import { scrubConstitutionRefs } from "./lib/constitution-scrub.ts";
+import { isSelfManagedPath } from "./lib/self-managed-tools.ts";
+import { die } from "./lib/error-handling.ts";
+import * as yaml from "js-yaml";
 import {
   findMarkerZones,
   extractMarkerZones,
@@ -214,38 +225,38 @@ import {
   applyIntentionalDuplicateRewrites,
   appendMissingZones,
   type MarkerZone,
-  type IntentionalDuplicateMarker
-} from './helpers/markers.ts';
+  type IntentionalDuplicateMarker,
+} from "./helpers/markers.ts";
 
 // ── ANSI colors ────────────────────────────────────────────────────────────────
 // Only emit escapes on a TTY: CI captures stdout into strings, where raw ESC
 // bytes break downstream grep-based drift filters (BSD sed cannot strip \x1b).
 const TTY = process.stdout.isTTY === true;
 const C = {
-  green:  TTY ? '\x1b[32m' : '',
-  yellow: TTY ? '\x1b[33m' : '',
-  red:    TTY ? '\x1b[31m' : '',
-  cyan:   TTY ? '\x1b[36m' : '',
-  dim:    TTY ? '\x1b[2m' : '',
-  reset:  TTY ? '\x1b[0m' : '',
+  green: TTY ? "\x1b[32m" : "",
+  yellow: TTY ? "\x1b[33m" : "",
+  red: TTY ? "\x1b[31m" : "",
+  cyan: TTY ? "\x1b[36m" : "",
+  dim: TTY ? "\x1b[2m" : "",
+  reset: TTY ? "\x1b[0m" : "",
 };
 
 // ── CLI flags ──────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
-const APPLY            = args.includes('--apply');
-const DRY_RUN          = args.includes('--dry-run') || !APPLY;
-const FORCE            = args.includes('--force');
-const SKIP_ENCODING    = args.includes('--skip-encoding-check');
-const GOVERNANCE_L1    = args.includes('--governance-l1');
-const DOCS             = args.includes('--docs');
-const CHECK_DRIFT      = args.includes('--check-drift');
-const JSON_OUTPUT      = args.includes('--json');
-const PRUNE            = args.includes('--prune');
-const MARKER_REWRITE   = args.includes('--marker-rewrite');
-const domainIdx        = args.indexOf('--domain');
+const APPLY = args.includes("--apply");
+const DRY_RUN = args.includes("--dry-run") || !APPLY;
+const FORCE = args.includes("--force");
+const SKIP_ENCODING = args.includes("--skip-encoding-check");
+const GOVERNANCE_L1 = args.includes("--governance-l1");
+const DOCS = args.includes("--docs");
+const CHECK_DRIFT = args.includes("--check-drift");
+const JSON_OUTPUT = args.includes("--json");
+const PRUNE = args.includes("--prune");
+const MARKER_REWRITE = args.includes("--marker-rewrite");
+const domainIdx = args.indexOf("--domain");
 const DOMAIN_FILTER: string | null = domainIdx !== -1 ? (args[domainIdx + 1] ?? null) : null;
-const INCLUDE_DISABLED = args.includes('--include-disabled');
-const workspaceRoot    = resolve(import.meta.dir, '..');
+const INCLUDE_DISABLED = args.includes("--include-disabled");
+const workspaceRoot = resolve(import.meta.dir, "..");
 
 // --include-disabled is inspection/report-only. collectDiffs() feeds both the
 // dry-run report AND the real --apply write step from the same array, so
@@ -254,7 +265,9 @@ const workspaceRoot    = resolve(import.meta.dir, '..');
 // which behavior the caller meant.
 if (INCLUDE_DISABLED && APPLY) {
   console.error(`${C.red}❌ --include-disabled cannot be combined with --apply.${C.reset}`);
-  console.error(`${C.yellow}   Disabled domains are dry-run/report inspection only. To actually activate one,${C.reset}`);
+  console.error(
+    `${C.yellow}   Disabled domains are dry-run/report inspection only. To actually activate one,${C.reset}`,
+  );
   console.error(`${C.yellow}   remove its "disabled": true entry in propagation-map.json first.${C.reset}`);
   process.exit(1);
 }
@@ -262,7 +275,9 @@ if (INCLUDE_DISABLED && APPLY) {
 // --check-drift is an independent read-only command. It cannot be combined with
 // write-mode flags (--apply, --governance-l1, --docs, --prune).
 if (CHECK_DRIFT && (APPLY || GOVERNANCE_L1 || DOCS || PRUNE)) {
-  console.error(`${C.red}❌ --check-drift cannot be combined with --apply, --governance-l1, --docs, or --prune.${C.reset}`);
+  console.error(
+    `${C.red}❌ --check-drift cannot be combined with --apply, --governance-l1, --docs, or --prune.${C.reset}`,
+  );
   console.error(`${C.yellow}   --check-drift is an independent read-only command.${C.reset}`);
   process.exit(1);
 }
@@ -311,26 +326,26 @@ interface FileDiff {
   relativePath: string;
   sourcePath: string;
   targetPath: string;
-  status: 'in-sync' | 'differs' | 'missing';
+  status: "in-sync" | "differs" | "missing";
 }
 
 // ── Encoding validation ────────────────────────────────────────────────────
 // Detects CP949/Windows code-page corruption in text files before publishing.
 // The most common artifact is '??' replacing em-dash (U+2014, UTF-8: E2 80 94)
 // when a file passes through a non-UTF-8 Windows terminal pipeline.
-const TEXT_EXTENSIONS = new Set(['.md', '.ts', '.sh', '.ps1', '.json', '.yaml', '.yml', '.toml', '.txt', '.sample']);
+const TEXT_EXTENSIONS = new Set([".md", ".ts", ".sh", ".ps1", ".json", ".yaml", ".yml", ".toml", ".txt", ".sample"]);
 
 // Known patterns that indicate CP949 encoding corruption.
 // NOTE: '??' is the TypeScript nullish-coalescing operator — only flag it in
 // documentation files (.md, .txt, .yaml, .toml) where it cannot be valid syntax.
-const DOC_ONLY_EXTENSIONS = new Set(['.md', '.txt', '.yaml', '.yml', '.toml', '.sample']);
+const DOC_ONLY_EXTENSIONS = new Set([".md", ".txt", ".yaml", ".yml", ".toml", ".sample"]);
 
 // U+FFFD constructed at runtime so the source file itself doesn't contain the literal byte.
-const REPLACEMENT_CHAR_RE = new RegExp(String.fromCodePoint(0xFFFD), 'g');
+const REPLACEMENT_CHAR_RE = new RegExp(String.fromCodePoint(0xfffd), "g");
 
 const ENCODING_CORRUPTION_PATTERNS: Array<{ pattern: RegExp; description: string; docOnly?: boolean }> = [
-  { pattern: /\?\?/g,          description: 'corrupted em-dash (—) or other multibyte UTF-8 char → ??', docOnly: true },
-  { pattern: REPLACEMENT_CHAR_RE, description: 'Unicode replacement character (U+FFFD) — raw non-UTF-8 byte survived' },
+  { pattern: /\?\?/g, description: "corrupted em-dash (—) or other multibyte UTF-8 char → ??", docOnly: true },
+  { pattern: REPLACEMENT_CHAR_RE, description: "Unicode replacement character (U+FFFD) — raw non-UTF-8 byte survived" },
 ];
 
 interface EncodingViolation {
@@ -346,18 +361,18 @@ export function checkFileEncoding(filePath: string): EncodingViolation[] {
   const isDocFile = DOC_ONLY_EXTENSIONS.has(ext);
   let content: string;
   try {
-    content = readFileSync(filePath, 'utf-8');
+    content = readFileSync(filePath, "utf-8");
   } catch {
     return []; // binary or unreadable — skip
   }
   const violations: EncodingViolation[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   for (const { pattern, description, docOnly } of ENCODING_CORRUPTION_PATTERNS) {
     if (docOnly && !isDocFile) continue; // skip ?? check in .ts/.sh/.ps1 (nullish coalescing)
     const lineNumbers: number[] = [];
     let count = 0;
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('encoding-check-ignore')) continue;
+      if (lines[i].includes("encoding-check-ignore")) continue;
       // v2.22.0: the doc-only ?? heuristic scans a code-span-stripped copy of
       // the line — quoted source (nullish coalescing inside backticks) is
       // legitimate documentation content, not CP949 debris. The U+FFFD
@@ -382,10 +397,10 @@ export function checkFileEncoding(filePath: string): EncodingViolation[] {
  *  (`a ?? b`) stop tripping the corruption detector. Non-greedy pairing
  *  mirrors stripCodeForLanguageScan (validate-md-language v1.14.0). */
 export function stripInlineCodeForEncodingCheck(line: string): string {
-  return line.replace(/`[^`]*`/g, (span) => '\u0000'.repeat(span.length));
+  return line.replace(/`[^`]*`/g, (span) => "\u0000".repeat(span.length));
 }
 
-const ENCODING_SKIP_DIRS = new Set(['node_modules', '.git', 'Projects', '.antigravitycli']);
+const ENCODING_SKIP_DIRS = new Set(["node_modules", ".git", "Projects", ".antigravitycli"]);
 
 function walkFilesForEncoding(dir: string): string[] {
   const results: string[] = [];
@@ -403,9 +418,9 @@ function walkFilesForEncoding(dir: string): string[] {
 
 // ── L0→L1 Helper Functions ─────────────────────────────────────────────────────
 function setExecutableBit(filePath: string) {
-  if (filePath.endsWith('.ts') || filePath.endsWith('.sh') || filePath.endsWith('.ps1')) {
+  if (filePath.endsWith(".ts") || filePath.endsWith(".sh") || filePath.endsWith(".ps1")) {
     try {
-      execFileSync('git', ['update-index', '--chmod=+x', filePath.replace(/\\/g, '/')]);
+      execFileSync("git", ["update-index", "--chmod=+x", filePath.replace(/\\/g, "/")]);
     } catch (e) {
       // Ignore if not tracked yet, dev-sync will handle it
     }
@@ -427,7 +442,7 @@ function safeCopyDir(srcDir: string, dstDir: string) {
     rmSync(dstDir, { recursive: true, force: true });
   }
   cpSync(srcDir, dstDir, { recursive: true });
-  
+
   const walk = (dir: string) => {
     for (const item of readdirSync(dir)) {
       const itemPath = join(dir, item);
@@ -443,7 +458,7 @@ function safeCopyDir(srcDir: string, dstDir: string) {
 
 // ── Core Helpers ─────────────────────────────────────────────────────────────────
 function sha256(content: string): string {
-  return createHash('sha256').update(content).digest('hex');
+  return createHash("sha256").update(content).digest("hex");
 }
 
 /**
@@ -462,7 +477,7 @@ export function extractSkillFrontmatterScope(content: string): string | undefine
 
   try {
     const doc = yaml.load(fmMatch[1]);
-    if (!doc || typeof doc !== 'object') return undefined;
+    if (!doc || typeof doc !== "object") return undefined;
     const scope = (doc as Record<string, unknown>).scope;
     return scope !== undefined ? String(scope).trim().toLowerCase() : undefined;
   } catch {
@@ -471,7 +486,7 @@ export function extractSkillFrontmatterScope(content: string): string | undefine
 }
 
 function padEnd(s: string, n: number): string {
-  return s.length >= n ? s : s + ' '.repeat(n - s.length);
+  return s.length >= n ? s : s + " ".repeat(n - s.length);
 }
 
 /**
@@ -494,17 +509,17 @@ function padEnd(s: string, n: number): string {
  */
 function globToRegExp(pattern: string): RegExp {
   const SPECIAL = /[.+^${}()|[\]\\]/;
-  let out = '';
+  let out = "";
   let i = 0;
   while (i < pattern.length) {
-    if (pattern.startsWith('**/', i)) {
-      out += '(?:.*/)?';
+    if (pattern.startsWith("**/", i)) {
+      out += "(?:.*/)?";
       i += 3;
-    } else if (pattern.startsWith('**', i)) {
-      out += '.*';
+    } else if (pattern.startsWith("**", i)) {
+      out += ".*";
       i += 2;
-    } else if (pattern[i] === '*') {
-      out += '[^/]*';
+    } else if (pattern[i] === "*") {
+      out += "[^/]*";
       i += 1;
     } else {
       out += SPECIAL.test(pattern[i]) ? `\\${pattern[i]}` : pattern[i];
@@ -525,7 +540,7 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
   if (!existsSync(dir)) return [];
 
   const results: string[] = [];
-  const patternNeedsRecursion = pattern.includes('/');
+  const patternNeedsRecursion = pattern.includes("/");
   const regex = globToRegExp(pattern);
 
   function walk(currentDir: string, relBase: string): void {
@@ -539,7 +554,7 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
     for (const entry of entries) {
       const fullPath = join(currentDir, entry);
       const relPath = relBase ? `${relBase}/${entry}` : entry;
-      let stat;
+      let stat: Stats;
       try {
         stat = statSync(fullPath);
       } catch {
@@ -558,22 +573,20 @@ function globFiles(dir: string, pattern: string, recursive: boolean): string[] {
     }
   }
 
-  walk(dir, '');
+  walk(dir, "");
   return results;
 }
 
 // ── Core logic ─────────────────────────────────────────────────────────────────
 function collectDiffs(mapPath: string): FileDiff[] {
-  const raw = readFileSync(mapPath, 'utf-8');
+  const raw = readFileSync(mapPath, "utf-8");
   const map: PropagationMap = JSON.parse(raw);
 
-  const scriptLayers = parseScriptLayers(join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
+  const scriptLayers = parseScriptLayers(join(workspaceRoot, "scripts", "SCRIPTS.md"));
 
   const diffs: FileDiff[] = [];
   const allDomains = DOMAIN_FILTER
-    ? Object.fromEntries(
-        Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER)
-      )
+    ? Object.fromEntries(Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER))
     : map.domains;
 
   // Exclude marker-inject domains — handled by publishDocs()
@@ -582,14 +595,18 @@ function collectDiffs(mapPath: string): FileDiff[] {
   // on what L0→L1 doc mirroring should actually include (see its `note` field).
   // --include-disabled is an explicit escape hatch for inspecting a disabled
   // domain's diff; it does not flip the map's own disabled flag.
-  const disabledSkipped = Object.entries(allDomains).filter(([_, d]) => d.mode !== 'marker-inject' && d.disabled === true);
+  const disabledSkipped = Object.entries(allDomains).filter(
+    ([_, d]) => d.mode !== "marker-inject" && d.disabled === true,
+  );
   if (disabledSkipped.length > 0 && !INCLUDE_DISABLED) {
     for (const [name, d] of disabledSkipped) {
-      console.log(`${C.dim}domain "${name}" is disabled — skipping (${d.note ?? 'see propagation-map.json'})${C.reset}`);
+      console.log(
+        `${C.dim}domain "${name}" is disabled — skipping (${d.note ?? "see propagation-map.json"})${C.reset}`,
+      );
     }
   }
   const domains = Object.fromEntries(
-    Object.entries(allDomains).filter(([_, d]) => d.mode !== 'marker-inject' && (!d.disabled || INCLUDE_DISABLED))
+    Object.entries(allDomains).filter(([_, d]) => d.mode !== "marker-inject" && (!d.disabled || INCLUDE_DISABLED)),
   );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
@@ -605,8 +622,12 @@ function collectDiffs(mapPath: string): FileDiff[] {
 
       // Check exclude list (matches on basename for flat patterns, full relPath for nested,
       // and first directory segment for recursive skills patterns like "local/my-skill/SKILL.md")
-      const skillDirSegment = relPath.split('/')[0].split('\\')[0];
-      if ((domain.exclude ?? []).includes(fileBasename) || (domain.exclude ?? []).includes(relPath) || (domain.exclude ?? []).includes(skillDirSegment)) {
+      const skillDirSegment = relPath.split("/")[0].split("\\")[0];
+      if (
+        (domain.exclude ?? []).includes(fileBasename) ||
+        (domain.exclude ?? []).includes(relPath) ||
+        (domain.exclude ?? []).includes(skillDirSegment)
+      ) {
         continue;
       }
 
@@ -616,16 +637,20 @@ function collectDiffs(mapPath: string): FileDiff[] {
         continue;
       }
 
-
       // For skills domain: skip workspace-scoped skills (scope: workspace in frontmatter)
-      if (domainName === 'skills') {
-        const skillName = relPath.split('/')[0].split('\\')[0];
+      if (domainName === "skills") {
+        const skillName = relPath.split("/")[0].split("\\")[0];
         if (!includeSkillInL1(skillName)) continue;
       }
 
       // Skip L0-only scripts — they must not propagate to L1
-      if (domainName === 'scripts' || domainName === 'scripts-helpers' || domainName === 'scripts-hooks' || domainName === 'scripts-lib') {
-        const domainSourceSegment = domain.source.replace(/^scripts\/?/, '');
+      if (
+        domainName === "scripts" ||
+        domainName === "scripts-helpers" ||
+        domainName === "scripts-hooks" ||
+        domainName === "scripts-lib"
+      ) {
+        const domainSourceSegment = domain.source.replace(/^scripts\/?/, "");
         const scriptKey = domainSourceSegment ? `${domainSourceSegment}/${relPath}` : relPath;
         if (!includeScriptInL1(scriptKey, scriptLayers)) continue;
       }
@@ -643,17 +668,20 @@ function collectDiffs(mapPath: string): FileDiff[] {
       const sourcePath = join(domain.source, relPath);
       const targetPath = join(domain.target, relPath);
 
-      let status: FileDiff['status'];
+      let status: FileDiff["status"];
       if (!existsSync(targetPath)) {
-        status = 'missing';
+        status = "missing";
       } else {
-        let srcContent = readFileSync(sourcePath, 'utf-8');
-        const isTemplateTarget = targetPath.includes('templates/') || targetPath.includes('templates\\') || targetPath.includes('templates' + sep);
-        if (isTemplateTarget && srcContent.includes('CONSTITUTION.md')) {
+        let srcContent = readFileSync(sourcePath, "utf-8");
+        const isTemplateTarget =
+          targetPath.includes("templates/") ||
+          targetPath.includes("templates\\") ||
+          targetPath.includes("templates" + sep);
+        if (isTemplateTarget && srcContent.includes("CONSTITUTION.md")) {
           srcContent = scrubConstitutionRefs(srcContent, sourcePath, targetPath);
         }
-        const tgtContent = readFileSync(targetPath, 'utf-8');
-        status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
+        const tgtContent = readFileSync(targetPath, "utf-8");
+        status = sha256(srcContent) === sha256(tgtContent) ? "in-sync" : "differs";
       }
 
       // T-20261002-001: self-managed tool surfaces are excluded at GENERATION
@@ -671,7 +699,7 @@ function collectDiffs(mapPath: string): FileDiff[] {
 // ── L1→L2 drift eligibility ───────────────────────────────────────────────────
 /** Returns true if a domain should participate in L1→L2 drift detection. */
 export function isL2DriftEligible(domain: Domain): boolean {
-  if (domain.mode === 'marker-inject') return false;
+  if (domain.mode === "marker-inject") return false;
   if (domain.disabled && !INCLUDE_DISABLED) return false;
   if (domain.l2_drift_eligible === false) return false;
   return true;
@@ -679,19 +707,17 @@ export function isL2DriftEligible(domain: Domain): boolean {
 
 // ── L1→L2 drift report (--check-drift) ──────────────────────────────────────────
 export function collectDiffsL1L2(mapPath: string): FileDiff[] {
-  const raw = readFileSync(mapPath, 'utf-8');
+  const raw = readFileSync(mapPath, "utf-8");
   const map: PropagationMap = JSON.parse(raw);
 
   const diffs: FileDiff[] = [];
   // Exclude marker-inject domains (governance-*) — those are handled by publishDocs()
   const allDomains = DOMAIN_FILTER
-    ? Object.fromEntries(
-        Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER)
-      )
+    ? Object.fromEntries(Object.entries(map.domains).filter(([k]) => k === DOMAIN_FILTER))
     : map.domains;
   // Filter domains: marker-inject, disabled, and l2_drift_eligible=false excluded.
   const domains = Object.fromEntries(
-    Object.entries(allDomains).filter(([_, d]: [string, Domain]) => isL2DriftEligible(d))
+    Object.entries(allDomains).filter(([_, d]: [string, Domain]) => isL2DriftEligible(d)),
   );
 
   if (DOMAIN_FILTER && Object.keys(domains).length === 0) {
@@ -699,10 +725,11 @@ export function collectDiffsL1L2(mapPath: string): FileDiff[] {
     process.exit(1);
   }
 
-  const templateVariants = readdirSync(join(workspaceRoot, 'templates'))
-    .filter(d => d.startsWith('co-') && statSync(join(workspaceRoot, 'templates', d)).isDirectory());
+  const templateVariants = readdirSync(join(workspaceRoot, "templates")).filter(
+    (d) => d.startsWith("co-") && statSync(join(workspaceRoot, "templates", d)).isDirectory(),
+  );
 
-  const scriptLayers = parseScriptLayers(join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
+  const scriptLayers = parseScriptLayers(join(workspaceRoot, "scripts", "SCRIPTS.md"));
 
   for (const [domainName, domain] of Object.entries(domains)) {
     // For L1 -> L2, the source is L1 (domain.target)
@@ -711,7 +738,7 @@ export function collectDiffsL1L2(mapPath: string): FileDiff[] {
     if (!existsSync(l1SourceDir)) continue;
 
     // Derive the SCRIPTS.md key prefix from domain source (strip leading "scripts/" segment)
-    const domainSourceSegment = domain.source.replace(/^scripts\/?/, '');
+    const domainSourceSegment = domain.source.replace(/^scripts\/?/, "");
 
     const files = globFiles(l1SourceDir, domain.include_pattern, domain.recursive);
 
@@ -735,28 +762,28 @@ export function collectDiffsL1L2(mapPath: string): FileDiff[] {
       }
 
       const l1SourcePath = join(l1SourceDir, relPath);
-      const srcContent = readFileSync(l1SourcePath, 'utf-8');
-      
+      const srcContent = readFileSync(l1SourcePath, "utf-8");
+
       for (const variant of templateVariants) {
         // The L2 target replaces 'templates/common' with 'templates/{variant}'
-        const variantTarget = domain.target.replace('templates/common', `templates/${variant}`);
+        const variantTarget = domain.target.replace("templates/common", `templates/${variant}`);
         const l2TargetDir = resolve(workspaceRoot, variantTarget);
         const l2TargetPath = join(l2TargetDir, relPath);
 
-        let status: FileDiff['status'];
+        let status: FileDiff["status"];
         if (!existsSync(l2TargetPath)) {
-          status = 'missing';
+          status = "missing";
         } else {
-          const tgtContent = readFileSync(l2TargetPath, 'utf-8');
-          status = sha256(srcContent) === sha256(tgtContent) ? 'in-sync' : 'differs';
+          const tgtContent = readFileSync(l2TargetPath, "utf-8");
+          status = sha256(srcContent) === sha256(tgtContent) ? "in-sync" : "differs";
         }
 
-        diffs.push({ 
-          domain: `${domainName} (${variant})`, 
-          relativePath: relPath, 
-          sourcePath: l1SourcePath, 
-          targetPath: l2TargetPath, 
-          status 
+        diffs.push({
+          domain: `${domainName} (${variant})`,
+          relativePath: relPath,
+          sourcePath: l1SourcePath,
+          targetPath: l2TargetPath,
+          status,
         });
       }
     }
@@ -787,7 +814,7 @@ export interface SettingsDriftDetail {
   /** claude_only keys present in either .gemini file */
   leakedClaudeOnlyKeys: string[];
   /** Which side failed JSON.parse */
-  parseError: 'L1' | 'L2' | null;
+  parseError: "L1" | "L2" | null;
   /** Informational: top-level keys present on one side only */
   variantOwnedKeys: string[];
   /** One human-readable finding per problem */
@@ -795,14 +822,14 @@ export interface SettingsDriftDetail {
 }
 
 export interface SettingsDriftClassification extends SettingsDriftDetail {
-  classification: 'tolerated' | 'unexpected';
+  classification: "tolerated" | "unexpected";
 }
 
 /** One FileDiff annotated with its semantic classification (in-sync diffs carry
  *  neither field). One classification pass produces these; the human and JSON
  *  renderers are two views over the same array (unified exit semantics). */
 export type ClassifiedDiff = FileDiff & {
-  classification?: 'tolerated' | 'unexpected';
+  classification?: "tolerated" | "unexpected";
   detail?: SettingsDriftDetail;
 };
 
@@ -812,10 +839,10 @@ export type ClassifiedDiff = FileDiff & {
  * another heavyweight checker entry module would invert the dependency direction.
  */
 function getNestedKey(obj: Record<string, unknown>, dotKey: string): unknown {
-  const parts = dotKey.split('.');
+  const parts = dotKey.split(".");
   let current: unknown = obj;
   for (const part of parts) {
-    if (current === null || typeof current !== 'object') return undefined;
+    if (current === null || typeof current !== "object") return undefined;
     current = (current as Record<string, unknown>)[part];
   }
   return current;
@@ -827,13 +854,13 @@ function getNestedKey(obj: Record<string, unknown>, dotKey: string): unknown {
  * [A, B] vs [B, A] is a mismatch.
  */
 function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'null';
-  if (Array.isArray(value)) return '[' + value.map(canonicalJson).join(',') + ']';
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
+  if (Array.isArray(value)) return "[" + value.map(canonicalJson).join(",") + "]";
   const record = value as Record<string, unknown>;
   const entries = Object.keys(record)
     .sort()
-    .map((k) => JSON.stringify(k) + ':' + canonicalJson(record[k]));
-  return '{' + entries.join(',') + '}';
+    .map((k) => JSON.stringify(k) + ":" + canonicalJson(record[k]));
+  return "{" + entries.join(",") + "}";
 }
 
 /**
@@ -854,7 +881,7 @@ function canonicalJson(value: unknown): string {
 export function classifySettingsDrift(
   l1Raw: string,
   l2Raw: string,
-  contract: PlatformSettingsContract | null
+  contract: PlatformSettingsContract | null,
 ): SettingsDriftClassification {
   const detail: SettingsDriftDetail = {
     mismatchedSharedKeys: [],
@@ -870,25 +897,25 @@ export function classifySettingsDrift(
   try {
     l1 = JSON.parse(l1Raw) as Record<string, unknown>;
   } catch {
-    detail.parseError = 'L1';
-    detail.reasons.push('L1 settings file is not valid JSON');
-    return { ...detail, classification: 'unexpected' };
+    detail.parseError = "L1";
+    detail.reasons.push("L1 settings file is not valid JSON");
+    return { ...detail, classification: "unexpected" };
   }
   try {
     l2 = JSON.parse(l2Raw) as Record<string, unknown>;
   } catch {
-    detail.parseError = 'L2';
-    detail.reasons.push('L2 settings file is not valid JSON');
-    return { ...detail, classification: 'unexpected' };
+    detail.parseError = "L2";
+    detail.reasons.push("L2 settings file is not valid JSON");
+    return { ...detail, classification: "unexpected" };
   }
 
   // 2. Shared-key contract — fail-closed when absent or empty.
   const sharedKeys = Object.keys(contract?.platform_settings?.shared?.keys ?? {});
   if (sharedKeys.length === 0) {
     detail.reasons.push(
-      'No shared keys declared in platform_settings.shared.keys — an empty contract cannot prove a byte difference is an intentional overlay (fail-closed)'
+      "No shared keys declared in platform_settings.shared.keys — an empty contract cannot prove a byte difference is an intentional overlay (fail-closed)",
     );
-    return { ...detail, classification: 'unexpected' };
+    return { ...detail, classification: "unexpected" };
   }
   const claudeOnlyKeys = Object.keys(contract?.platform_settings?.claude_only?.keys ?? {});
 
@@ -898,7 +925,7 @@ export function classifySettingsDrift(
     const v2 = getNestedKey(l2, key);
     if (v1 === undefined || v2 === undefined) {
       detail.mismatchedSharedKeys.push(key);
-      const side = v1 === undefined ? 'L1' : 'L2';
+      const side = v1 === undefined ? "L1" : "L2";
       detail.reasons.push(`Shared key '${key}' is missing from ${side} settings`);
     } else if (canonicalJson(v1) !== canonicalJson(v2)) {
       detail.mismatchedSharedKeys.push(key);
@@ -912,9 +939,7 @@ export function classifySettingsDrift(
     const inL2 = getNestedKey(l2, key);
     if (inL1 !== undefined || inL2 !== undefined) {
       detail.leakedClaudeOnlyKeys.push(key);
-      const sides = [inL1 !== undefined ? 'L1' : null, inL2 !== undefined ? 'L2' : null]
-        .filter(Boolean)
-        .join(' and ');
+      const sides = [inL1 !== undefined ? "L1" : null, inL2 !== undefined ? "L2" : null].filter(Boolean).join(" and ");
       detail.reasons.push(`claude-only key '${key}' must not appear in a .gemini settings file (present in ${sides})`);
     }
   }
@@ -928,9 +953,9 @@ export function classifySettingsDrift(
     .sort();
 
   if (detail.mismatchedSharedKeys.length > 0 || detail.leakedClaudeOnlyKeys.length > 0) {
-    return { ...detail, classification: 'unexpected' };
+    return { ...detail, classification: "unexpected" };
   }
-  return { ...detail, classification: 'tolerated' };
+  return { ...detail, classification: "tolerated" };
 }
 
 function printTable(diffs: FileDiff[]): void {
@@ -938,8 +963,8 @@ function printTable(diffs: FileDiff[]): void {
   const COL2 = 45;
   const COL3 = 12;
 
-  const header = `${padEnd('Domain', COL1)}  ${padEnd('File', COL2)}  ${padEnd('Status', COL3)}`;
-  const sep    = '-'.repeat(COL1 + COL2 + COL3 + 4);
+  const header = `${padEnd("Domain", COL1)}  ${padEnd("File", COL2)}  ${padEnd("Status", COL3)}`;
+  const sep = "-".repeat(COL1 + COL2 + COL3 + 4);
 
   console.log(`\n${C.cyan}${header}${C.reset}`);
   console.log(`${C.dim}${sep}${C.reset}`);
@@ -947,19 +972,19 @@ function printTable(diffs: FileDiff[]): void {
   for (const d of diffs) {
     let statusStr: string;
     let color: string;
-    if (d.status === 'in-sync') {
-      statusStr = '✅ in sync';
+    if (d.status === "in-sync") {
+      statusStr = "✅ in sync";
       color = C.green;
-    } else if (d.status === 'differs') {
-      statusStr = '⚠️  differs';
+    } else if (d.status === "differs") {
+      statusStr = "⚠️  differs";
       color = C.yellow;
     } else {
-      statusStr = '❌ missing';
+      statusStr = "❌ missing";
       color = C.red;
     }
 
     const domainCol = padEnd(d.domain, COL1);
-    const fileCol   = padEnd(d.relativePath, COL2);
+    const fileCol = padEnd(d.relativePath, COL2);
     console.log(`${color}${domainCol}  ${fileCol}  ${statusStr}${C.reset}`);
   }
 
@@ -991,18 +1016,18 @@ function applyDiffs(diffs: FileDiff[]): number {
         mkdirSync(targetDir, { recursive: true });
       }
 
-      let content = readFileSync(d.sourcePath, 'utf-8');
+      let content = readFileSync(d.sourcePath, "utf-8");
       // Scrub CONSTITUTION.md references when copying to templates/ (L1+).
-      const needsScrub = d.targetPath.includes('templates' + sep) && content.includes('CONSTITUTION.md');
+      const needsScrub = d.targetPath.includes("templates" + sep) && content.includes("CONSTITUTION.md");
       if (needsScrub) {
         content = scrubConstitutionRefs(content, d.sourcePath, d.targetPath);
       }
 
       // For in-sync files: still write if scrub changed the content.
-      if (d.status === 'in-sync' && !FORCE && !needsScrub) continue;
+      if (d.status === "in-sync" && !FORCE && !needsScrub) continue;
 
-      writeFileSync(d.targetPath, content, 'utf-8');
-      const label = (d.status === 'in-sync' && needsScrub) ? 'scrubbed' : 'copied';
+      writeFileSync(d.targetPath, content, "utf-8");
+      const label = d.status === "in-sync" && needsScrub ? "scrubbed" : "copied";
       console.log(`${C.green}  ${label}${C.reset}  ${d.sourcePath} → ${d.targetPath}`);
       copied++;
     } catch (err) {
@@ -1011,7 +1036,9 @@ function applyDiffs(diffs: FileDiff[]): number {
       // applying, report at the end, and fail the run via exit code. Targets are
       // git-tracked, so the partial state stays visible and re-running converges.
       failed++;
-      console.error(`${C.red}  FAILED  ${d.sourcePath} → ${d.targetPath}: ${err instanceof Error ? err.message : String(err)}${C.reset}`);
+      console.error(
+        `${C.red}  FAILED  ${d.sourcePath} → ${d.targetPath}: ${err instanceof Error ? err.message : String(err)}${C.reset}`,
+      );
     }
   }
   if (failed > 0) {
@@ -1022,10 +1049,10 @@ function applyDiffs(diffs: FileDiff[]): number {
 }
 
 // ── --docs: L1→L2 governance doc sync ────────────────────────────────────────────
-function extractCommonSections(content: string, marker: string): Array<{heading: string, fullBlock: string}> {
-  const sections: Array<{heading: string, fullBlock: string}> = [];
+function extractCommonSections(content: string, marker: string): Array<{ heading: string; fullBlock: string }> {
+  const sections: Array<{ heading: string; fullBlock: string }> = [];
   const startTag = `<!-- ${marker}:START -->`;
-  const endTag   = `<!-- ${marker}:END -->`;
+  const endTag = `<!-- ${marker}:END -->`;
 
   let pos = 0;
   while (true) {
@@ -1048,14 +1075,11 @@ function replaceCommonSection(
   variantContent: string,
   marker: string,
   section: { heading: string; fullBlock: string },
-  allowBareFallback = true
+  allowBareFallback = true,
 ): { content: string; changed: boolean; handled: boolean } {
   // Escape the heading for use in a regex
-  const headingEscaped = section.heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(
-    `<!-- ${marker}:START -->\\s*${headingEscaped}[\\s\\S]*?<!-- ${marker}:END -->`,
-    'm'
-  );
+  const headingEscaped = section.heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`<!-- ${marker}:START -->\\s*${headingEscaped}[\\s\\S]*?<!-- ${marker}:END -->`, "m");
 
   if (pattern.test(variantContent)) {
     const newContent = variantContent.replace(pattern, section.fullBlock);
@@ -1075,9 +1099,7 @@ function replaceCommonSection(
   // multiple sections, replacing the first bare zone could clobber a different
   // section's content (v2.15.1 guard).
   if (allowBareFallback) {
-    const barePattern = new RegExp(
-      `<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`
-    );
+    const barePattern = new RegExp(`<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`);
     if (barePattern.test(variantContent)) {
       const newContent = variantContent.replace(barePattern, section.fullBlock);
       return { content: newContent, changed: newContent !== variantContent, handled: true };
@@ -1088,9 +1110,9 @@ function replaceCommonSection(
   // fallback above is disabled, so a headingless section that ALREADY exists
   // verbatim in the variant (e.g. the seeded COMMON-CONTEXT coding-guidelines
   // zone) must count as in-sync instead of being appended a second time.
-  const normalize = (s: string) => s.replace(/\r\n/g, '\n').trim();
+  const normalize = (s: string) => s.replace(/\r\n/g, "\n").trim();
   const allZones = variantContent.match(
-    new RegExp(`<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`, 'g')
+    new RegExp(`<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`, "g"),
   );
   if (allZones && allZones.some((z) => normalize(z) === normalize(section.fullBlock))) {
     return { content: variantContent, changed: false, handled: true };
@@ -1101,17 +1123,19 @@ function replaceCommonSection(
 }
 
 function publishDocs(isDryRun: boolean, mapPath: string): void {
-  console.log(`\n${C.cyan}=== L1 → L2 publish: governance docs (CLAUDE.md, GEMINI.md, AGENTS.md) → templates/co-*/ ===${C.reset}`);
+  console.log(
+    `\n${C.cyan}=== L1 → L2 publish: governance docs (CLAUDE.md, GEMINI.md, AGENTS.md) → templates/co-*/ ===${C.reset}`,
+  );
   if (isDryRun) console.log(`${C.dim}(dry-run mode)${C.reset}`);
 
   // Read governance-* domains from propagation-map.json
-  const mapRaw = readFileSync(mapPath, 'utf-8');
+  const mapRaw = readFileSync(mapPath, "utf-8");
   const map = JSON.parse(mapRaw) as PropagationMap;
 
   const govDomains = Object.entries(map.domains)
-    .filter(([_, d]: [string, Domain]) => d.mode === 'marker-inject')
+    .filter(([_, d]: [string, Domain]) => d.mode === "marker-inject")
     .map(([_, d]: [string, Domain]) => ({
-      sourceFile: d.source_file as string,   // relative to workspaceRoot (L1 path)
+      sourceFile: d.source_file as string, // relative to workspaceRoot (L1 path)
       marker: d.marker as string,
       variants: d.target_variants as string[],
       // target_file template (e.g. "docs/{variant}.context.md") overrides the
@@ -1135,7 +1159,7 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
       continue;
     }
 
-    const sourceContent = readFileSync(sourcePath, 'utf-8');
+    const sourceContent = readFileSync(sourcePath, "utf-8");
     const sections = extractCommonSections(sourceContent, marker);
 
     if (sections.length === 0) {
@@ -1147,16 +1171,14 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
     // when declared (e.g. "docs/{variant}.context.md"), otherwise basename of source_file
     console.log(`\n  ${C.cyan}${sourceFile}${C.reset} — ${sections.length} common section(s) found`);
     for (const variant of variants) {
-      const targetFilename = targetFile
-        ? targetFile.replace('{variant}', variant)
-        : basename(sourceFile);
-      const variantPath = join(workspaceRoot, 'templates', variant, targetFilename);
+      const targetFilename = targetFile ? targetFile.replace("{variant}", variant) : basename(sourceFile);
+      const variantPath = join(workspaceRoot, "templates", variant, targetFilename);
       if (!existsSync(variantPath)) {
         console.log(`    ${C.yellow}⚠️  templates/${variant}/${targetFilename} not found, skipping${C.reset}`);
         continue;
       }
 
-      let variantContent = readFileSync(variantPath, 'utf-8');
+      let variantContent = readFileSync(variantPath, "utf-8");
       let fileUpdated = false;
 
       for (const section of sections) {
@@ -1177,10 +1199,15 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
           // instead of blindly appending after it.
           const footerMatch = variantContent.match(/\n---\n\n\*[^*\n]+version:[^*\n]+\*\s*$/);
           if (footerMatch && footerMatch.index !== undefined) {
-            variantContent = variantContent.slice(0, footerMatch.index) + '\n' + effectiveSection.fullBlock + '\n' + variantContent.slice(footerMatch.index);
+            variantContent =
+              variantContent.slice(0, footerMatch.index) +
+              "\n" +
+              effectiveSection.fullBlock +
+              "\n" +
+              variantContent.slice(footerMatch.index);
           } else {
-            const separator = variantContent.endsWith('\n') ? '\n' : '\n\n';
-            variantContent = variantContent.trimEnd() + separator + effectiveSection.fullBlock + '\n';
+            const separator = variantContent.endsWith("\n") ? "\n" : "\n\n";
+            variantContent = variantContent.trimEnd() + separator + effectiveSection.fullBlock + "\n";
           }
           fileUpdated = true;
         }
@@ -1188,9 +1215,11 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
 
       if (fileUpdated) {
         if (!isDryRun) {
-          writeFileSync(variantPath, variantContent, 'utf-8');
+          writeFileSync(variantPath, variantContent, "utf-8");
         }
-        console.log(`    ${C.green}✅ templates/${variant}/${targetFilename}${isDryRun ? ' [dry-run]' : ' updated'}${C.reset}`);
+        console.log(
+          `    ${C.green}✅ templates/${variant}/${targetFilename}${isDryRun ? " [dry-run]" : " updated"}${C.reset}`,
+        );
         totalUpdated++;
       } else {
         console.log(`    ${C.dim}—  templates/${variant}/${targetFilename} already in sync${C.reset}`);
@@ -1199,17 +1228,17 @@ function publishDocs(isDryRun: boolean, mapPath: string): void {
     }
   }
 
-  console.log('');
+  console.log("");
   console.log(`${C.green}Docs sync complete.${C.reset} Updated: ${totalUpdated}, Already in sync: ${totalSkipped}`);
 }
 
 // ── --governance-l1: L0→L1 governance file deployment ────────────────────────────
 const GOVERNANCE_L1_FILES = [
-  { src: 'CLAUDE.md',  dst: 'templates/common/CLAUDE.md'  },
-  { src: 'GEMINI.md',  dst: 'templates/common/GEMINI.md'  },
-  { src: 'AGENTS.md',  dst: 'templates/common/AGENTS.md'  },
-  { src: 'CODEX.md',   dst: 'templates/common/CODEX.md'   },
-  { src: 'HERMES.md',  dst: 'templates/common/HERMES.md'  },
+  { src: "CLAUDE.md", dst: "templates/common/CLAUDE.md" },
+  { src: "GEMINI.md", dst: "templates/common/GEMINI.md" },
+  { src: "AGENTS.md", dst: "templates/common/AGENTS.md" },
+  { src: "CODEX.md", dst: "templates/common/CODEX.md" },
+  { src: "HERMES.md", dst: "templates/common/HERMES.md" },
 ];
 
 // Reference transformation rules: CONSTITUTION.md → docs/context.md
@@ -1221,28 +1250,27 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
   content = scrubConstitutionRefs(content, undefined, targetPath);
 
   // ── Phase B: workspace root-specific content removal / replacement ────────
-  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md') {
-
+  if (filename === "CLAUDE.md" || filename === "GEMINI.md") {
     // B-1. Boilerplate table: "lifecycle-manager (workspace) / pm (variant)" → "pm"
-    content = content.replace(/lifecycle-manager \(workspace\) \/ pm \(variant\)/g, 'pm');
+    content = content.replace(/lifecycle-manager \(workspace\) \/ pm \(variant\)/g, "pm");
 
     // B-2. Boilerplate table: "auditor (workspace) / pm (variant)" → "pm"
-    content = content.replace(/auditor \(workspace\) \/ pm \(variant\)/g, 'pm');
+    content = content.replace(/auditor \(workspace\) \/ pm \(variant\)/g, "pm");
 
     // B-3. Rule line: "At **workspace root**, dispatch `lifecycle-manager` for N-1 and `auditor` for N"
-    content = content.replace(/^- At \*\*workspace root\*\*,.*\n/m, '');
+    content = content.replace(/^- At \*\*workspace root\*\*,.*\n/m, "");
 
     // B-4. Rule line: "In **variant projects**, PM handles both directly"
-    content = content.replace(/^- In \*\*variant projects\*\*, PM handles both directly\n/m, '');
+    content = content.replace(/^- In \*\*variant projects\*\*, PM handles both directly\n/m, "");
 
     // B-5. Rule line: dual-context declaration → L1-only variant declaration
     content = content.replace(
       /^- Always declare context above the execution plan table:.*\n/m,
-      '- Always declare context above the execution plan table: "**Context**: variant project — pm direct"\n'
+      '- Always declare context above the execution plan table: "**Context**: variant project — pm direct"\n',
     );
 
     // B-6. Platform Note line containing "L0-only task classification"
-    content = content.replace(/^\*\*Platform Note\*\*:.*L0-only task classification.*\n/m, '');
+    content = content.replace(/^\*\*Platform Note\*\*:.*L0-only task classification.*\n/m, "");
   }
 
   // B-7. Workspace & Template Boundary Policy section.
@@ -1263,48 +1291,47 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
   //                 Codex-hook sections STAY: they exist identically in the
   //                 L1 CLAUDE.md/GEMINI.md and are project-applicable.
   //      (Gate: own `if` — CODEX.md is included here but NOT in B-1..B-6 above.)
-  if (filename === 'CLAUDE.md') {
-      const boundaryStart = `<!-- COMMON-CLAUDE:START -->`;
-      const boundaryEnd   = `<!-- COMMON-CLAUDE:END -->`;
-      const boundaryPattern = new RegExp(
-        `${boundaryStart}\\s*###\\s*9\\.\\s*Workspace & Template Boundary Policy[\\s\\S]*?${boundaryEnd}`,
-        'g'
-      );
-      const l1BoundaryReplacement =
-        `${boundaryStart}\n` +
-        `### 9. Project Boundary Policy\n\n` +
-        `- **Strict Scope**: Work only within the current project directory.\n` +
-        `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
-        `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
-        `${boundaryEnd}`;
-      content = content.replace(boundaryPattern, l1BoundaryReplacement);
-    } else if (filename === 'GEMINI.md') {
-      const geminiBoundaryPattern =
-        /<!-- COMMON-GEMINI:START -->\s*### (\d+)\. Workspace & Template Boundary Policy[\s\S]*?<!-- COMMON-GEMINI:END -->/;
-      const geminiBoundaryReplacement = (n: string) =>
-        `<!-- COMMON-GEMINI:START -->\n` +
-        `### ${n}. Project Boundary Policy\n\n` +
-        `- **Strict Scope**: Work only within the current project directory.\n` +
-        `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
-        `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
-        `<!-- COMMON-GEMINI:END -->`;
-      content = content.replace(geminiBoundaryPattern, (_, n) => geminiBoundaryReplacement(n));
-    } else if (filename === 'CODEX.md' || filename === 'HERMES.md') {
-      // Matched heading-to-next-heading; the captured number keeps the section
-      // numbering stable. The trailing \n keeps the blank line before the next
-      // heading (the match consumes the section's own line terminator).
-      // HERMES.md joins in v2.19.0 (ADR-0093): its boundary section sits inside
-      // the single COMMON-HERMES zone — the same CODEX shape, so the branch
-      // (and its replacement body) is shared verbatim.
-      const codexBoundaryPattern =
-        /### (\d+)\. Workspace & Template Boundary Policy[\s\S]*?(?=\n### \d+\. )/;
-      const codexReplacement = (n: string) =>
-        `### ${n}. Project Boundary Policy\n\n` +
-        `- **Strict Scope**: Work only within the current project directory.\n` +
-        `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
-        `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management)\n`;
-      content = content.replace(codexBoundaryPattern, (_, n) => codexReplacement(n));
-    }
+  if (filename === "CLAUDE.md") {
+    const boundaryStart = `<!-- COMMON-CLAUDE:START -->`;
+    const boundaryEnd = `<!-- COMMON-CLAUDE:END -->`;
+    const boundaryPattern = new RegExp(
+      `${boundaryStart}\\s*###\\s*9\\.\\s*Workspace & Template Boundary Policy[\\s\\S]*?${boundaryEnd}`,
+      "g",
+    );
+    const l1BoundaryReplacement =
+      `${boundaryStart}\n` +
+      `### 9. Project Boundary Policy\n\n` +
+      `- **Strict Scope**: Work only within the current project directory.\n` +
+      `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
+      `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
+      `${boundaryEnd}`;
+    content = content.replace(boundaryPattern, l1BoundaryReplacement);
+  } else if (filename === "GEMINI.md") {
+    const geminiBoundaryPattern =
+      /<!-- COMMON-GEMINI:START -->\s*### (\d+)\. Workspace & Template Boundary Policy[\s\S]*?<!-- COMMON-GEMINI:END -->/;
+    const geminiBoundaryReplacement = (n: string) =>
+      `<!-- COMMON-GEMINI:START -->\n` +
+      `### ${n}. Project Boundary Policy\n\n` +
+      `- **Strict Scope**: Work only within the current project directory.\n` +
+      `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
+      `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).\n` +
+      `<!-- COMMON-GEMINI:END -->`;
+    content = content.replace(geminiBoundaryPattern, (_, n) => geminiBoundaryReplacement(n));
+  } else if (filename === "CODEX.md" || filename === "HERMES.md") {
+    // Matched heading-to-next-heading; the captured number keeps the section
+    // numbering stable. The trailing \n keeps the blank line before the next
+    // heading (the match consumes the section's own line terminator).
+    // HERMES.md joins in v2.19.0 (ADR-0093): its boundary section sits inside
+    // the single COMMON-HERMES zone — the same CODEX shape, so the branch
+    // (and its replacement body) is shared verbatim.
+    const codexBoundaryPattern = /### (\d+)\. Workspace & Template Boundary Policy[\s\S]*?(?=\n### \d+\. )/;
+    const codexReplacement = (n: string) =>
+      `### ${n}. Project Boundary Policy\n\n` +
+      `- **Strict Scope**: Work only within the current project directory.\n` +
+      `- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.\n\n` +
+      `> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management)\n`;
+    content = content.replace(codexBoundaryPattern, (_, n) => codexReplacement(n));
+  }
 
   // ── Phase B-8 (v2.17.0, D5): fatal guard — the boundary removal is a
   //    governance invariant. Bug 5's failure mode was a SILENT no-op (stale
@@ -1312,13 +1339,13 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
   //    fail loudly instead of shipping workspace policy into every scaffold.
   //    Scope: the platform docs only — AGENTS.md has no boundary section.
   //    HERMES.md joins in v2.19.0 (ADR-0093) as the fourth protected platform doc.
-  if (filename === 'CLAUDE.md' || filename === 'GEMINI.md' || filename === 'CODEX.md' || filename === 'HERMES.md') {
-    if (content.includes('Workspace & Template Boundary Policy')) {
+  if (filename === "CLAUDE.md" || filename === "GEMINI.md" || filename === "CODEX.md" || filename === "HERMES.md") {
+    if (content.includes("Workspace & Template Boundary Policy")) {
       die(
         `governance-l1: "${filename}" still carries the workspace-only "Workspace & Template Boundary Policy" ` +
-        `after the B-7 transform — the branch regex no longer matches the L0 structure. ` +
-        `Repair the pattern; never silently ship the workspace boundary policy to scaffolds ` +
-        `(spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D5).`
+          `after the B-7 transform — the branch regex no longer matches the L0 structure. ` +
+          `Repair the pattern; never silently ship the workspace boundary policy to scaffolds ` +
+          `(spec docs/designs/2026-09-24-platform-parity-p1-bugfixes-design.md D5).`,
       );
     }
   }
@@ -1341,41 +1368,41 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
   // T1 (AGENTS.md) — the "Read it before" mandate becomes an L0-only statement
   // retargeted to the delivered agents/pm.md.
   content = content.replace(
-    'The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries live in [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) — **Read it before dispatching specialists or adjudicating governance backlog items.**',
-    'The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries are workspace-root-only (L0) and are not delivered to projects; the core MUST policy in §3.1–§3.7 above plus [`agents/pm.md`](agents/pm.md) carry the project-applicable rules — **read them before dispatching specialists.**'
+    "The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries live in [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) — **Read it before dispatching specialists or adjudicating governance backlog items.**",
+    "The detailed phase protocol, permission-denial procedure, and ADR-0078/0079/0080 policy summaries are workspace-root-only (L0) and are not delivered to projects; the core MUST policy in §3.1–§3.7 above plus [`agents/pm.md`](agents/pm.md) carry the project-applicable rules — **read them before dispatching specialists.**",
   );
 
   // T2 (AGENTS.md) — Permission Denial Protocol anchor retarget. Anchor verified
   // against templates/common/agents/pm.md ("## Permission Denial Protocol").
   content = content.replace(
-    '[Permission Denial Protocol](docs/governance/agents/pm-gateway-workflow.md#38-permission-denial-protocol)',
-    '[Permission Denial Protocol](agents/pm.md#permission-denial-protocol)'
+    "[Permission Denial Protocol](docs/governance/agents/pm-gateway-workflow.md#38-permission-denial-protocol)",
+    "[Permission Denial Protocol](agents/pm.md#permission-denial-protocol)",
   );
 
   // T3 (AGENTS.md) — roster-detail pointer retarget.
   content = content.replace(
-    '*Role boundaries, dispatch-communication templates, and specialist-roster detail: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).*',
-    '*Role boundaries: [`agents/pm.md`](agents/pm.md); dispatch-communication templates and specialist-roster detail are workspace-root-only (L0).*'
+    "*Role boundaries, dispatch-communication templates, and specialist-roster detail: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md).*",
+    "*Role boundaries: [`agents/pm.md`](agents/pm.md); dispatch-communication templates and specialist-roster detail are workspace-root-only (L0).*",
   );
 
   // T4 (CLAUDE.md + GEMINI.md) — pointer-table line retarget to the AGENTS.md §3
   // anchor idiom (same shape agents/pm.md already uses: AGENTS.md#3-pm-gateway-workflow).
   content = content.replace(
-    '> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·',
-    '> > PM Gateway phase protocol & ADR policy summaries → [`AGENTS.md` §3](AGENTS.md#3-pm-gateway-workflow) ·'
+    "> > PM Gateway phase protocol & ADR policy summaries → [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md) ·",
+    "> > PM Gateway phase protocol & ADR policy summaries → [`AGENTS.md` §3](AGENTS.md#3-pm-gateway-workflow) ·",
   );
 
   // T5 (CLAUDE.md + GEMINI.md) — §3.1.3 detail pointer retargets to the DELIVERED
   // hook source (scripts/hooks/pm-dispatch-gate.ts ships in templates/common/scripts/hooks/).
   content = content.replace(
     /`docs\/governance\/agents\/pm-gateway-workflow\.md` §3\.1\.3/g,
-    '`scripts/hooks/pm-dispatch-gate.ts`'
+    "`scripts/hooks/pm-dispatch-gate.ts`",
   );
 
   // T6 (HERMES.md) — bootstrap-block protocol pointer retarget.
   content = content.replace(
-    'Full phase protocol: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md); mandatory criteria and plan format: `AGENTS.md` §5.',
-    'Full phase protocol and mandatory criteria: `AGENTS.md` §3 and §5.'
+    "Full phase protocol: [`docs/governance/agents/pm-gateway-workflow.md`](docs/governance/agents/pm-gateway-workflow.md); mandatory criteria and plan format: `AGENTS.md` §5.",
+    "Full phase protocol and mandatory criteria: `AGENTS.md` §3 and §5.",
   );
 
   // Phase B-PGW fatal guard (design §5.2, mandatory): the transform suite's own
@@ -1385,17 +1412,17 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
   // instead of regenerating a dangling pointer into every scaffold. Anchor-style
   // references (AGENTS.md#3-pm-gateway-workflow, CONSTITUTION-derived
   // context anchors) carry no ".md" after the literal and stay valid by design.
-  if (content.includes('pm-gateway-workflow.md')) {
+  if (content.includes("pm-gateway-workflow.md")) {
     die(
       `governance-l1: "${filename}" still references docs/governance/agents/pm-gateway-workflow.md after ` +
-      `the B-PGW transforms — a pointer sentence no longer matches the L0 source (regex rot, the B-7 failure class). ` +
-      `Add/repair the matching literal replace in Phase B-PGW; never silently ship a dangling link ` +
-      `(spec docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md §5.2).`
+        `the B-PGW transforms — a pointer sentence no longer matches the L0 source (regex rot, the B-7 failure class). ` +
+        `Add/repair the matching literal replace in Phase B-PGW; never silently ship a dangling link ` +
+        `(spec docs/designs/2026-10-28-l0-only-governance-doc-cleanup-design.md §5.2).`,
     );
   }
 
   // ── Phase B-AGENTS: AGENTS.md workspace roster replacement ──────────────
-  if (filename === 'AGENTS.md') {
+  if (filename === "AGENTS.md") {
     // B-A1. Replace §1 workspace agent roster (L0-specific agents: auditor, lifecycle-manager,
     //       architect, automation-engineer, etc.) with PM-only row + variant placeholder zone.
     const s1Pattern = /## §1: Agent Ecosystem Overview[\s\S]*?(?=\n---\n\n## §2:)/;
@@ -1427,89 +1454,92 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
     // B-AGENTS die-guard (ADR-0090 W0): if the §1/§2 structural anchors ever fail to
     // match (post-restructure heading drift), the placeholder zones above silently
     // vanish and regenerate-agents-md breaks downstream. Fail loud instead.
-    for (const marker of ['VARIANT-AGENTS-START', 'VARIANT-AGENT-DETAILS-START']) {
+    for (const marker of ["VARIANT-AGENTS-START", "VARIANT-AGENT-DETAILS-START"]) {
       if (!content.includes(marker)) {
-        die(`Phase B-AGENTS: structural anchor failed — '${marker}' not inserted into AGENTS.md. ` +
-            `The §1/§2 heading pattern no longer matches the workspace source; update the B-A1/B-A2 patterns.`);
+        die(
+          `Phase B-AGENTS: structural anchor failed — '${marker}' not inserted into AGENTS.md. ` +
+            `The §1/§2 heading pattern no longer matches the workspace source; update the B-A1/B-A2 patterns.`,
+        );
       }
     }
 
     // B-A3. Remove workspace-only agent rows from §3 3-tier dispatch table
     //       (lifecycle-manager, auditor are L0-only; variants route these phases through PM).
-    content = content.replace(/^\| \*\*lifecycle-manager\*\*[^\n]*\n/mg, '');
-    content = content.replace(/^\| \*\*auditor\*\*[^\n]*\n/mg, '');
+    content = content.replace(/^\| \*\*lifecycle-manager\*\*[^\n]*\n/gm, "");
+    content = content.replace(/^\| \*\*auditor\*\*[^\n]*\n/gm, "");
 
     // B-A4-sub. Remove L0-only agent rows from §4 Subagent Roster.
-    content = content.replace(/^\| Lifecycle Manager[^\n]*\n/mg, '');
-    content = content.replace(/^\| Consistency Auditor[^\n]*\n/mg, '');
+    content = content.replace(/^\| Lifecycle Manager[^\n]*\n/gm, "");
+    content = content.replace(/^\| Consistency Auditor[^\n]*\n/gm, "");
 
     // B-A5. Execution plan tables §5: lifecycle-manager/auditor → pm throughout.
     //       Variant projects route N-1 and N through PM directly (per CLAUDE.md B-1/B-2).
-    content = content.replace(/(\|[^|]+\|) lifecycle-manager (\|)/g, '$1 pm $2');
-    content = content.replace(/(\|[^|]+\|) auditor (\|)/g, '$1 pm $2');
+    content = content.replace(/(\|[^|]+\|) lifecycle-manager (\|)/g, "$1 pm $2");
+    content = content.replace(/(\|[^|]+\|) auditor (\|)/g, "$1 pm $2");
 
     // B-A5b. Prose owner lines: lifecycle-manager → pm.
-    content = content.replace(/\*\*Owner\*\*: lifecycle-manager/g, '**Owner**: pm');
+    content = content.replace(/\*\*Owner\*\*: lifecycle-manager/g, "**Owner**: pm");
 
     // B-A6. L0→L1→L2 architecture description in PM row → simplified L1 description.
     content = content.replace(
       /\[`agents\/pm\.md`\]\(agents\/pm\.md\) \(L0\) → \[`templates\/common\/agents\/pm\.md`\]\(templates\/common\/agents\/pm\.md\) \(L1\) → \[`templates\/<variant>\/agents\/pm\.md`\]\(templates\/co-design\/agents\/pm\.md\) \(L2\)/g,
-      '[`agents/pm.md`](agents/pm.md)'
+      "[`agents/pm.md`](agents/pm.md)",
     );
     content = content.replace(
       /Three-level inheritance architecture: L0 \(workspace root base\) → L1 \(common template pure-extends\) → L2 \(variant YAML overrides\)\. Orchestrates/g,
-      'Orchestrates'
+      "Orchestrates",
     );
-    content = content.replace(/See \[L0→L1→L2 PM Agent Architecture\][^\n]*/g, '');
+    content = content.replace(/See \[L0→L1→L2 PM Agent Architecture\][^\n]*/g, "");
 
     // B-A12. §5.3 Example Execution Plans: replace workspace agent names with generic roles.
     //        These are illustrative examples — variant projects should substitute their own agents.
     content = content.replace(
       /\| 1 \| Update agents\/pm\.md \| docs-writer \|/g,
-      '| 1 | Update agents/pm.md | `[docs specialist]` |'
+      "| 1 | Update agents/pm.md | `[docs specialist]` |",
     );
     content = content.replace(
       /\| 2 \| Update scripts\/audit\.ts \| automation-engineer \|/g,
-      '| 2 | Update scripts/audit.ts | `[implementation specialist]` |'
+      "| 2 | Update scripts/audit.ts | `[implementation specialist]` |",
     );
     content = content.replace(
       /\| 3 \| Update CLAUDE\.md §5 \| docs-writer \|/g,
-      '| 3 | Update CLAUDE.md §5 | `[docs specialist]` |'
+      "| 3 | Update CLAUDE.md §5 | `[docs specialist]` |",
     );
     content = content.replace(
       /\| 4 \| Update GEMINI\.md §5 \| docs-writer \|/g,
-      '| 4 | Update GEMINI.md §5 | `[docs specialist]` |'
+      "| 4 | Update GEMINI.md §5 | `[docs specialist]` |",
     );
     content = content.replace(
       /\| 1 \| Update project README introduction \| docs-writer \|/g,
-      '| 1 | Update project README introduction | `[docs specialist]` |'
+      "| 1 | Update project README introduction | `[docs specialist]` |",
     );
 
     // B-A7. §3.1 PM Direct Execution Scope prose: hardcoded workspace agent names → generic.
     content = content.replace(
       /dispatched to specialists \(docs-writer, architect, automation-engineer, auditor\)/g,
-      'dispatched to project specialists'
+      "dispatched to project specialists",
     );
     content = content.replace(
       /Must delegate to specialist \(docs-writer, architect, automation-engineer, auditor\)/g,
-      'Must delegate to project specialist'
+      "Must delegate to project specialist",
     );
     content = content.replace(
       /- Perform documentation updates \(delegate to docs-writer\)/g,
-      '- Perform documentation updates (delegate to `[docs specialist]`)'
+      "- Perform documentation updates (delegate to `[docs specialist]`)",
     );
     content = content.replace(
       /- Perform design work \(delegate to architect\)/g,
-      '- Perform design work (delegate to `[design specialist]`)'
+      "- Perform design work (delegate to `[design specialist]`)",
     );
     content = content.replace(
       /dispatches specialists \(executor: docs-writer\/architect\/automation-engineer\)/g,
-      'dispatches project specialists (executor: `[specialist agent]`)'
+      "dispatches project specialists (executor: `[specialist agent]`)",
     );
 
     // B-A8. §3.1.5 Specialist Agent Roster: replace workspace-specific agent dispatch table
     //       with variant placeholder. Variant projects define their own dispatch triggers in §1.
-    const specialistRosterPattern = /#### §3\.1\.5 Specialist Agent Roster \(PM-ONLY INVOCATION\)[\s\S]*?(?=\n\*\*⚠️ IMPORTANT\*\*: Do NOT invoke)/;
+    const specialistRosterPattern =
+      /#### §3\.1\.5 Specialist Agent Roster \(PM-ONLY INVOCATION\)[\s\S]*?(?=\n\*\*⚠️ IMPORTANT\*\*: Do NOT invoke)/;
     const specialistRosterReplacement =
       `#### §3.1.5 Specialist Agent Roster (PM-ONLY INVOCATION)\n\n` +
       `All specialist agents below are dispatched ONLY through PM:\n\n` +
@@ -1525,7 +1555,7 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
     // B-A9. Dispatch Rules #3: "Auditor owns Phase 6 QA gate" → PM-owned in variant context.
     content = content.replace(
       /3\. \*\*Independent QA Gate\*\* - Auditor owns Phase 6 QA gate autonomously[^\n]*/,
-      '3. **QA Gate** - PM executes qa scripts at Phase 6 (bun scripts/qa-gate.ts)'
+      "3. **QA Gate** - PM executes qa scripts at Phase 6 (bun scripts/qa-gate.ts)",
     );
 
     // B-A8. Subagent Roster: replace workspace-specific agent rows with variant placeholder.
@@ -1545,11 +1575,11 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
     // B-A9. §4.2 Harness Engineering Workflow: replace workspace agent names in phase descriptions.
     content = content.replace(
       /Phase 6 - Quality Assurance & Finalization \(specialist-autonomous in workspace, PM in variants\)\n  Auditor \(workspace\) executes bun scripts\/qa-gate\.ts autonomously\n  PM \(variants\) executes qa scripts/,
-      'Phase 6 - Quality Assurance & Finalization (PM-owned)\n  PM executes bun scripts/qa-gate.ts'
+      "Phase 6 - Quality Assurance & Finalization (PM-owned)\n  PM executes bun scripts/qa-gate.ts",
     );
     content = content.replace(
       /  Automation Engineer implements per approved plan\n  Documentation Writer updates docs as needed/,
-      '  `[implementation specialist]` implements per approved plan\n  `[docs specialist]` updates docs as needed'
+      "  `[implementation specialist]` implements per approved plan\n  `[docs specialist]` updates docs as needed",
     );
 
     // B-A10. §4.3 Role Boundary Matrix: replace workspace-specific agent rows with
@@ -1602,34 +1632,34 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
     // templates/common/AGENTS.md. Inject the zones at the anchors that exist in
     // the current root structure (end of §3 dispatch scope, before §5) —
     // guarded, so the injection is idempotent.
-    if (!content.includes('VARIANT-DISPATCH-TRIGGERS-START')) {
+    if (!content.includes("VARIANT-DISPATCH-TRIGGERS-START")) {
       content = content.replace(
-        '### §3.6 3-Tier Strategy',
+        "### §3.6 3-Tier Strategy",
         `<!-- VARIANT-DISPATCH-TRIGGERS-START -->\n` +
-        `<!-- Define project-specific agent dispatch triggers here. Format:\n` +
-        `     | Agent | Phase | Dispatch Trigger |\n` +
-        `     |-------|-------|------------------|\n` +
-        `     | \`[agent-name]\` | [phase] | "trigger keyword 1", "trigger keyword 2" |\n` +
-        `     See §1 for available agents. -->\n` +
-        `<!-- VARIANT-DISPATCH-TRIGGERS-END -->\n\n` +
-        `<!-- VARIANT-PHASE-GATE-START -->\n` +
-        `<!-- Map deliverable types to your project-specific agents from §1.\n` +
-        `     Example: | Feature implementation | Phase 4 | \`engineer\` | Low | | -->\n` +
-        `<!-- VARIANT-PHASE-GATE-END -->\n\n` +
-        `### §3.6 3-Tier Strategy`
+          `<!-- Define project-specific agent dispatch triggers here. Format:\n` +
+          `     | Agent | Phase | Dispatch Trigger |\n` +
+          `     |-------|-------|------------------|\n` +
+          `     | \`[agent-name]\` | [phase] | "trigger keyword 1", "trigger keyword 2" |\n` +
+          `     See §1 for available agents. -->\n` +
+          `<!-- VARIANT-DISPATCH-TRIGGERS-END -->\n\n` +
+          `<!-- VARIANT-PHASE-GATE-START -->\n` +
+          `<!-- Map deliverable types to your project-specific agents from §1.\n` +
+          `     Example: | Feature implementation | Phase 4 | \`engineer\` | Low | | -->\n` +
+          `<!-- VARIANT-PHASE-GATE-END -->\n\n` +
+          `### §3.6 3-Tier Strategy`,
       );
     }
-    if (!content.includes('VARIANT-SUBAGENT-ROSTER-START')) {
+    if (!content.includes("VARIANT-SUBAGENT-ROSTER-START")) {
       content = content.replace(
-        '## §5: Execution Plan Templates',
+        "## §5: Execution Plan Templates",
         `<!-- VARIANT-SUBAGENT-ROSTER-START -->\n` +
-        `<!-- Add project-specific specialist agents here. Format:\n` +
-        `     | Agent Name | \`agents/name.md\` | High/Medium/Low | parallel conditions | write scope |\n` +
-        `     See §1 for the agent roster and docs/context.md for frontmatter specification. -->\n` +
-        `<!-- VARIANT-SUBAGENT-ROSTER-END -->\n\n` +
-        `<!-- VARIANT-ROLE-BOUNDARY-START -->\n` +
-        `<!-- VARIANT-ROLE-BOUNDARY-END -->\n\n` +
-        `## §5: Execution Plan Templates`
+          `<!-- Add project-specific specialist agents here. Format:\n` +
+          `     | Agent Name | \`agents/name.md\` | High/Medium/Low | parallel conditions | write scope |\n` +
+          `     See §1 for the agent roster and docs/context.md for frontmatter specification. -->\n` +
+          `<!-- VARIANT-SUBAGENT-ROSTER-END -->\n\n` +
+          `<!-- VARIANT-ROLE-BOUNDARY-START -->\n` +
+          `<!-- VARIANT-ROLE-BOUNDARY-END -->\n\n` +
+          `## §5: Execution Plan Templates`,
       );
     }
     // B-A14 (v2.21.0, U-20261028-008 + T-20261028-015 d/f): workspace-root-scoped
@@ -1646,12 +1676,12 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
     //        mention (the §3.7.5 section itself is L0-scoped prose and stays).
     //        Covers T-015(f) for the co-abap delivery.
     content = content.replace(
-      'delivered to scaffolded projects via `docs/templates/common-contract.json`',
-      'delivered to scaffolded projects via the workspace delivery contract (workspace-root `docs/templates/common-contract.json`)'
+      "delivered to scaffolded projects via `docs/templates/common-contract.json`",
+      "delivered to scaffolded projects via the workspace delivery contract (workspace-root `docs/templates/common-contract.json`)",
     );
     content = content.replace(
-      '[docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md)',
-      '`docs/designs/2026-08-16-governance-backlog-design.md` (workspace-root-only design doc)'
+      "[docs/designs/2026-08-16-governance-backlog-design.md](docs/designs/2026-08-16-governance-backlog-design.md)",
+      "`docs/designs/2026-08-16-governance-backlog-design.md` (workspace-root-only design doc)",
     );
 
     // B-A15 (v2.21.0, T-20261028-015 a): the COMMON-AGENTS LLM Work Routing
@@ -1662,8 +1692,8 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
     //        points at the in-file policy anchor — the LLM Work Routing Policy
     //        section itself, the same anchor L1 agents/pm.md already cites.
     content = content.replace(
-      'see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.',
-      'see ADR-0078; the LLM Work Routing Policy section above is the project-applicable policy summary.'
+      "see ADR-0078 (workspace root, `docs/adr/0078-agent-mediated-llm-work-routing.md`) for the full decision.",
+      "see ADR-0078; the LLM Work Routing Policy section above is the project-applicable policy summary.",
     );
 
     // B-A16 (v2.23.0, T-20261106-004 class A — spec
@@ -1680,29 +1710,45 @@ export function applyGovernanceTransforms(content: string, filename: string, tar
     //        from this cleaned L1 base. Same-Night evidence: only the
     //        co-architect snapshot still carried the stale rows; its strip
     //        lands in the same PR so L0→L1→L2 converge.
-    content = content.replace(/^\| `create-variant` \| `skills\/create-variant\/` \| New variant scaffolding — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m, '');
-    content = content.replace(/^\| `promote-variant` \| `skills\/promote-variant\/` \| Variant promotion to official — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m, '');
-    content = content.replace(/^\| `simulate-pipeline` \| `skills\/simulate-pipeline\/` \| E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline \(merged skill\) — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m, '');
+    content = content.replace(
+      /^\| `create-variant` \| `skills\/create-variant\/` \| New variant scaffolding — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m,
+      "",
+    );
+    content = content.replace(
+      /^\| `promote-variant` \| `skills\/promote-variant\/` \| Variant promotion to official — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m,
+      "",
+    );
+    content = content.replace(
+      /^\| `simulate-pipeline` \| `skills\/simulate-pipeline\/` \| E2E smoke test for project creation and the L3 scaffold → variant promotion pipeline \(merged skill\) — workspace-root \(L0\) only, not shipped in scaffolds \|\n/m,
+      "",
+    );
 
     // B-A13 die-guard: the two injection anchors are structural — if either
     // drifts, the placeholder zones silently vanish again (the exact failure
     // mode the scaffold-marker-source check caught on 2026-09-27). Fail loud.
-    for (const marker of ['VARIANT-DISPATCH-TRIGGERS-START', 'VARIANT-PHASE-GATE-START', 'VARIANT-SUBAGENT-ROSTER-START', 'VARIANT-ROLE-BOUNDARY-START']) {
+    for (const marker of [
+      "VARIANT-DISPATCH-TRIGGERS-START",
+      "VARIANT-PHASE-GATE-START",
+      "VARIANT-SUBAGENT-ROSTER-START",
+      "VARIANT-ROLE-BOUNDARY-START",
+    ]) {
       if (!content.includes(marker)) {
-        die(`Phase B-A13: VARIANT placeholder zone '${marker}' missing after injection — ` +
+        die(
+          `Phase B-A13: VARIANT placeholder zone '${marker}' missing after injection — ` +
             `the '### §3.6 3-Tier Strategy' / '## §5: Execution Plan Templates' anchor no longer matches the root AGENTS.md. ` +
-            `Update the B-A13 anchor strings.`);
+            `Update the B-A13 anchor strings.`,
+        );
       }
     }
   }
 
   // ── Phase C: CLAUDE.md-only transforms ───────────────────────────────────
-  if (filename === 'CLAUDE.md') {
+  if (filename === "CLAUDE.md") {
     // C-1. Remove the /new-project slash command row from the commands table.
-    content = content.replace(/^\| `\/new-project[^|]*\|[^|]*\|[^\n]*\n/m, '');
+    content = content.replace(/^\| `\/new-project[^|]*\|[^|]*\|[^\n]*\n/m, "");
 
     // C-2. Update command count: "All 5 commands above" → "All 4 commands above"
-    content = content.replace(/All 5 commands above/g, 'All 4 commands above');
+    content = content.replace(/All 5 commands above/g, "All 4 commands above");
   }
 
   return content;
@@ -1724,13 +1770,15 @@ function publishGovernanceL1(isDryRun: boolean): void {
       continue;
     }
 
-    const original = readFileSync(srcPath, 'utf-8');
+    const original = readFileSync(srcPath, "utf-8");
     const transformed = applyGovernanceTransforms(original, src, dstPath);
 
     if (isDryRun) {
       const l0Refs = (original.match(/CONSTITUTION\.md/g) ?? []).length;
       if (l0Refs > 0) {
-        console.log(`  ${C.cyan}~  ${src} → ${dst}${C.reset} ${C.dim}(${l0Refs} CONSTITUTION.md refs → docs/context.md)${C.reset}`);
+        console.log(
+          `  ${C.cyan}~  ${src} → ${dst}${C.reset} ${C.dim}(${l0Refs} CONSTITUTION.md refs → docs/context.md)${C.reset}`,
+        );
       } else {
         console.log(`  ${C.dim}—  ${src} already has no CONSTITUTION.md references${C.reset}`);
       }
@@ -1738,25 +1786,27 @@ function publishGovernanceL1(isDryRun: boolean): void {
       continue;
     }
 
-    const existingDst = existsSync(dstPath) ? readFileSync(dstPath, 'utf-8') : '';
+    const existingDst = existsSync(dstPath) ? readFileSync(dstPath, "utf-8") : "";
     if (existingDst === transformed) {
       console.log(`  ${C.dim}—  ${dst} already in sync${C.reset}`);
       skipped++;
       continue;
     }
 
-    writeFileSync(dstPath, transformed, 'utf-8');
+    writeFileSync(dstPath, transformed, "utf-8");
     const refCount = (original.match(/CONSTITUTION\.md/g) ?? []).length;
     console.log(`  ${C.green}✅ ${dst} updated${C.reset} ${C.dim}(${refCount} refs transformed)${C.reset}`);
     updated++;
   }
 
-  console.log('');
+  console.log("");
   if (isDryRun) {
     console.log(`${C.cyan}Dry-run complete.${C.reset} Would update: ${updated} file(s)`);
   } else {
     console.log(`${C.green}Governance L1 sync complete.${C.reset} Updated: ${updated}, Already in sync: ${skipped}`);
-    console.log(`${C.dim}Note: templates/common/agents/pm.md skipped — L1 version uses extends: frontmatter and must not be overwritten.${C.reset}`);
+    console.log(
+      `${C.dim}Note: templates/common/agents/pm.md skipped — L1 version uses extends: frontmatter and must not be overwritten.${C.reset}`,
+    );
   }
 }
 
@@ -1791,11 +1841,11 @@ function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
   console.log(`\n${C.cyan}=== --prune: removing L0-only orphans from L1 script directories ===${C.reset}`);
   if (isDryRun) console.log(`${C.dim}(dry-run mode — no files will be deleted)${C.reset}`);
 
-  const raw = readFileSync(mapPath, 'utf-8');
+  const raw = readFileSync(mapPath, "utf-8");
   const map: PropagationMap = JSON.parse(raw);
-  const scriptLayers = parseScriptLayers(join(workspaceRoot, 'scripts', 'SCRIPTS.md'));
+  const scriptLayers = parseScriptLayers(join(workspaceRoot, "scripts", "SCRIPTS.md"));
 
-  const scriptDomains = ['scripts', 'scripts-helpers', 'scripts-hooks', 'scripts-lib'];
+  const scriptDomains = ["scripts", "scripts-helpers", "scripts-hooks", "scripts-lib"];
 
   let pruned = 0;
   let kept = 0;
@@ -1811,10 +1861,13 @@ function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
 
     for (const absPath of allFiles) {
       // Compute relative path from the target dir
-      const relFromTarget = absPath.slice(targetDir.length).replace(/^[\\/]/, '').replace(/\\/g, '/');
+      const relFromTarget = absPath
+        .slice(targetDir.length)
+        .replace(/^[\\/]/, "")
+        .replace(/\\/g, "/");
 
       // Build the script key as used in SCRIPTS.md (same logic as collectDiffs)
-      const domainSourceSegment = domain.source.replace(/^scripts\/?/, '');
+      const domainSourceSegment = domain.source.replace(/^scripts\/?/, "");
       const scriptKey = domainSourceSegment ? `${domainSourceSegment}/${relFromTarget}` : relFromTarget;
 
       if (!includeScriptInL1(scriptKey, scriptLayers)) {
@@ -1831,7 +1884,7 @@ function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
     }
   }
 
-  console.log('');
+  console.log("");
   if (isDryRun) {
     console.log(`${C.cyan}Prune dry-run complete.${C.reset} Would remove: ${pruned}, Would keep: ${kept}`);
   } else {
@@ -1844,12 +1897,12 @@ function pruneL1Scripts(mapPath: string, isDryRun: boolean): void {
  * Detect line ending style of a file (CRLF vs LF)
  * Returns 'crlf' if file contains CRLF, 'lf' otherwise
  */
-function detectLineEnding(filePath: string): 'crlf' | 'lf' {
-  const content = readFileSync(filePath, 'utf-8');
+function detectLineEnding(filePath: string): "crlf" | "lf" {
+  const content = readFileSync(filePath, "utf-8");
   // Check first 100 lines for CRLF
-  const lines = content.split('\n').slice(0, 100);
-  const crlfCount = lines.filter(line => line.endsWith('\r')).length;
-  return crlfCount > 0 ? 'crlf' : 'lf';
+  const lines = content.split("\n").slice(0, 100);
+  const crlfCount = lines.filter((line) => line.endsWith("\r")).length;
+  return crlfCount > 0 ? "crlf" : "lf";
 }
 
 /**
@@ -1861,13 +1914,13 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
   console.log(`\n${C.cyan}=== --marker-rewrite: Marker-based doc propagation ===${C.reset}`);
   if (isDryRun) console.log(`${C.dim}(dry-run mode — no files will be written)${C.reset}`);
 
-  const map: PropagationMap = JSON.parse(readFileSync(mapPath, 'utf-8'));
+  const map: PropagationMap = JSON.parse(readFileSync(mapPath, "utf-8"));
 
   // --domain validation: restrict the marker-inject loop to one domain, or fail
   // loudly on an unknown name (silently falling through to "all domains" hid typos).
   if (DOMAIN_FILTER !== null && !(DOMAIN_FILTER in map.domains)) {
     console.error(`${C.red}❌ Domain '${DOMAIN_FILTER}' not found in propagation-map.json.${C.reset}`);
-    console.error(`${C.yellow}   Available domains: ${Object.keys(map.domains).join(', ')}${C.reset}`);
+    console.error(`${C.yellow}   Available domains: ${Object.keys(map.domains).join(", ")}${C.reset}`);
     process.exit(1);
   }
 
@@ -1878,9 +1931,10 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
 
   // Process marker-inject domains (COMMON-<DOMAIN>:START/END zones)
   const markerInjectDomains = Object.entries(map.domains)
-    .filter(([name, d]: [string, Domain]) =>
-      d.mode === 'marker-inject' && d.source_file && d.marker &&
-      (DOMAIN_FILTER === null || name === DOMAIN_FILTER))
+    .filter(
+      ([name, d]: [string, Domain]) =>
+        d.mode === "marker-inject" && d.source_file && d.marker && (DOMAIN_FILTER === null || name === DOMAIN_FILTER),
+    )
     .map(([_, d]: [string, Domain]) => ({
       sourceFile: d.source_file as string,
       targetFile: (d as any).target_file as string | undefined,
@@ -1891,14 +1945,22 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       anchorMarker: (d as any).insert_after_marker as string | undefined,
     }));
 
-  for (const { sourceFile, targetFile, marker, variants, scrub, appendOnMissing, anchorMarker } of markerInjectDomains) {
+  for (const {
+    sourceFile,
+    targetFile,
+    marker,
+    variants,
+    scrub,
+    appendOnMissing,
+    anchorMarker,
+  } of markerInjectDomains) {
     const sourcePath = join(workspaceRoot, sourceFile);
     if (!existsSync(sourcePath)) {
       console.log(`  ${C.yellow}⚠️  ${sourceFile} not found, skipping${C.reset}`);
       continue;
     }
 
-    const sourceContent = readFileSync(sourcePath, 'utf-8');
+    const sourceContent = readFileSync(sourcePath, "utf-8");
     const sourceSections = extractMarkerZones(sourceContent, marker);
 
     if (sourceSections.length === 0) {
@@ -1910,10 +1972,8 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
 
     for (const variant of variants) {
       // Use target_file if specified, otherwise basename of source_file
-      const targetFilename = targetFile
-        ? targetFile.replace('{variant}', variant)
-        : basename(sourceFile);
-      const variantPath = join(workspaceRoot, 'templates', variant, targetFilename);
+      const targetFilename = targetFile ? targetFile.replace("{variant}", variant) : basename(sourceFile);
+      const variantPath = join(workspaceRoot, "templates", variant, targetFilename);
       if (!existsSync(variantPath)) {
         console.log(`    ${C.yellow}⚠️  templates/${variant}/${basename(sourceFile)} not found, skipping${C.reset}`);
         totalSkipped++;
@@ -1926,31 +1986,34 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       // domain) so target-aware scrub rules see each variant's own target path;
       // the transform is idempotent, so per-variant application is safe.
       const variantSections = scrub
-        ? sourceSections.map(s =>
-            ({ ...s, fullBlock: scrubConstitutionRefs(s.fullBlock, sourceFile, variantPath) }))
+        ? sourceSections.map((s) => ({ ...s, fullBlock: scrubConstitutionRefs(s.fullBlock, sourceFile, variantPath) }))
         : sourceSections;
 
       const lineEnding = detectLineEnding(variantPath);
       const variantLabel = `templates/${variant}/${targetFilename}`;
-      let variantContent = readFileSync(variantPath, 'utf-8');
+      let variantContent = readFileSync(variantPath, "utf-8");
       let fileOverwritten = false;
 
       // Only zones carrying THIS domain's marker belong to this pass — a target
       // file can host zones from several domains (templates/common/docs/context.md
       // carries both COMMON-CONSTITUTION and COMMON-CONTEXT), and cross-domain
       // zones would always report "no matching source section".
-      const existingZones = findMarkerZones(variantPath).filter(z => z.marker === marker);
+      const existingZones = findMarkerZones(variantPath).filter((z) => z.marker === marker);
 
       if (existingZones.length === 0 && !appendOnMissing) {
         // Truthful skip (v2.18.0, D4): the old message promised injection on
         // --apply, which never happened. Flag-off domains skip with remediation.
-        console.log(`    ${C.dim}—  ${variantLabel}: no ${marker} zones present — append-on-missing not enabled for this domain; add the zone manually or set append_on_missing in propagation-map.json${C.reset}`);
+        console.log(
+          `    ${C.dim}—  ${variantLabel}: no ${marker} zones present — append-on-missing not enabled for this domain; add the zone manually or set append_on_missing in propagation-map.json${C.reset}`,
+        );
         totalSkipped++;
         continue;
       }
 
       if (existingZones.length > sourceSections.length) {
-        console.log(`    ${C.yellow}⚠️  ${variantLabel}: ${existingZones.length} ${marker} zone(s) but only ${sourceSections.length} in source — extra zone(s) skipped${C.reset}`);
+        console.log(
+          `    ${C.yellow}⚠️  ${variantLabel}: ${existingZones.length} ${marker} zone(s) but only ${sourceSections.length} in source — extra zone(s) skipped${C.reset}`,
+        );
       }
 
       // Rewrite each existing zone, bottom-up so a splice cannot shift the
@@ -1967,23 +2030,27 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
 
         // Compare CRLF-normalized blocks — source and target may use different
         // line-ending styles without that counting as drift.
-        const norm = (s: string) => s.replace(/\r\n/g, '\n');
+        const norm = (s: string) => s.replace(/\r\n/g, "\n");
         if (sha256(norm(matchingSection.fullBlock)) === sha256(norm(zone.fullBlock))) {
-          console.log(`    ${C.dim}✓  ${variantLabel} zone "${marker}" (${zone.startLine}-${zone.endLine}): in sync${C.reset}`);
+          console.log(
+            `    ${C.dim}✓  ${variantLabel} zone "${marker}" (${zone.startLine}-${zone.endLine}): in sync${C.reset}`,
+          );
           totalInSync++;
           continue;
         }
 
         // Zone has drifted - replace it
-        const lines = variantContent.split('\n');
+        const lines = variantContent.split("\n");
         const zoneLineCount = zone.endLine - zone.startLine + 1;
 
         // Replace the zone lines
-        const newZoneLines = norm(matchingSection.fullBlock).split('\n');
+        const newZoneLines = norm(matchingSection.fullBlock).split("\n");
         lines.splice(zone.startLine - 1, zoneLineCount, ...newZoneLines);
 
-        variantContent = lines.join('\n');
-        console.log(`    ${C.green}✓  Overwrote ${variantLabel} zone "${marker}" (${zone.startLine}-${zone.endLine}): ${newZoneLines.length - zoneLineCount > 0 ? '+' : ''}${newZoneLines.length - zoneLineCount} lines${C.reset}`);
+        variantContent = lines.join("\n");
+        console.log(
+          `    ${C.green}✓  Overwrote ${variantLabel} zone "${marker}" (${zone.startLine}-${zone.endLine}): ${newZoneLines.length - zoneLineCount > 0 ? "+" : ""}${newZoneLines.length - zoneLineCount} lines${C.reset}`,
+        );
         fileOverwritten = true;
         totalOverwritten++;
       }
@@ -1995,24 +2062,28 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       // valid — the append shifts only lines BELOW the insertion point.
       if (appendOnMissing && existingZones.length < sourceSections.length) {
         const result = appendMissingZones(variantContent, existingZones, variantSections, marker, { anchorMarker });
-        if (result.placement === 'none' || result.appended === 0) {
+        if (result.placement === "none" || result.appended === 0) {
           // Anchor declared but unresolvable → fail-safe skip (R5). No
           // end-of-file fallback — a wrong anchor name degrades to a skip.
           if (existingZones.length === 0) {
-            console.log(`    ${C.yellow}⚠️  ${variantLabel}: no ${marker} zones present and anchor ${anchorMarker} not found — skipped (no placement derived)${C.reset}`);
+            console.log(
+              `    ${C.yellow}⚠️  ${variantLabel}: no ${marker} zones present and anchor ${anchorMarker} not found — skipped (no placement derived)${C.reset}`,
+            );
           } else {
-            console.log(`    ${C.yellow}⚠️  ${variantLabel}: ${existingZones.length} existing ${marker} zone(s) but anchor ${anchorMarker} not found — skipped (no placement derived)${C.reset}`);
+            console.log(
+              `    ${C.yellow}⚠️  ${variantLabel}: ${existingZones.length} existing ${marker} zone(s) but anchor ${anchorMarker} not found — skipped (no placement derived)${C.reset}`,
+            );
           }
           totalSkipped++;
         } else if (result.appended > 0) {
           variantContent = result.content;
           fileOverwritten = true;
           totalAppended += result.appended;
-          const where = result.placement === 'after-anchor'
-            ? `(after ${anchorMarker} zone)`
-            : '(at end-of-file)';
+          const where = result.placement === "after-anchor" ? `(after ${anchorMarker} zone)` : "(at end-of-file)";
           if (isDryRun) {
-            console.log(`    ${C.cyan}[dry-run] would append ${result.appended} zone(s) to ${variantLabel} ${where}${C.reset}`);
+            console.log(
+              `    ${C.cyan}[dry-run] would append ${result.appended} zone(s) to ${variantLabel} ${where}${C.reset}`,
+            );
           } else {
             console.log(`    ${C.green}✅ appended ${result.appended} zone(s) to ${variantLabel} ${where}${C.reset}`);
           }
@@ -2023,10 +2094,10 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       // detected ending so CRLF files never end up with \r\r\n.
       if (fileOverwritten && !isDryRun) {
         const normalizedContent = variantContent
-          .replace(/\r\n/g, '\n')
-          .replace(/\n/g, lineEnding === 'crlf' ? '\r\n' : '\n');
+          .replace(/\r\n/g, "\n")
+          .replace(/\n/g, lineEnding === "crlf" ? "\r\n" : "\n");
 
-        writeFileSync(variantPath, normalizedContent, 'utf-8');
+        writeFileSync(variantPath, normalizedContent, "utf-8");
         console.log(`    ${C.green}✅ ${variantLabel} updated${C.reset}`);
       } else if (fileOverwritten && isDryRun) {
         console.log(`    ${C.cyan}[dry-run] ${variantLabel} would be updated${C.reset}`);
@@ -2073,12 +2144,12 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       }
 
       // Resolve source file
-      const resolvedSource = marker.source.startsWith('docs/')
-        ? join(workspaceRoot, marker.source)
-        : marker.source;
+      const resolvedSource = marker.source.startsWith("docs/") ? join(workspaceRoot, marker.source) : marker.source;
 
       if (!existsSync(resolvedSource)) {
-        console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: source missing: ${marker.source}${C.reset}`);
+        console.log(
+          `    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: source missing: ${marker.source}${C.reset}`,
+        );
         totalSkipped++;
         continue;
       }
@@ -2086,7 +2157,9 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       // Compute current hash
       const currentHash = computeSectionHash(resolvedSource);
       if (!currentHash) {
-        console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to compute hash for ${marker.source}${C.reset}`);
+        console.log(
+          `    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to compute hash for ${marker.source}${C.reset}`,
+        );
         totalSkipped++;
         continue;
       }
@@ -2101,13 +2174,17 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       // Extract current section content
       const sectionContent = extractSectionContent(resolvedSource);
       if (!sectionContent) {
-        console.log(`    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to extract section from ${marker.source}${C.reset}`);
+        console.log(
+          `    ${C.yellow}⚠️  Marker at ${marker.file}:${marker.line}: failed to extract section from ${marker.source}${C.reset}`,
+        );
         totalSkipped++;
         continue;
       }
 
       if (isDryRun) {
-        console.log(`    ${C.cyan}[dry-run] Would overwrite marker at ${marker.file}:${marker.line} (§${marker.section}): hash ${marker.hash} → ${currentHash}${C.reset}`);
+        console.log(
+          `    ${C.cyan}[dry-run] Would overwrite marker at ${marker.file}:${marker.line} (§${marker.section}): hash ${marker.hash} → ${currentHash}${C.reset}`,
+        );
         totalOverwritten++;
         continue;
       }
@@ -2115,26 +2192,25 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
       rewrites.push({
         marker,
         lineIndex: marker.line - 1, // 0-indexed
-        newSectionLines: sectionContent.split('\n'),
+        newSectionLines: sectionContent.split("\n"),
         newHash: currentHash,
       });
     }
 
     // Pass 2 — apply this file's rewrites in one bottom-up splice, write once.
     if (rewrites.length > 0) {
-      let content = readFileSync(markerFile, 'utf-8');
-      const originalLines = content.split('\n');
+      let content = readFileSync(markerFile, "utf-8");
+      const originalLines = content.split("\n");
       const newLines = applyIntentionalDuplicateRewrites(originalLines, rewrites);
 
       // Write back — normalize to LF first, then re-apply the detected ending
       // so CRLF files never end up with \r\r\n
-      content = newLines.join('\n');
+      content = newLines.join("\n");
       const lineEnding = detectLineEnding(markerFile);
-      const normalizedContent = lineEnding === 'crlf'
-        ? content.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n')
-        : content.replace(/\r\n/g, '\n');
+      const normalizedContent =
+        lineEnding === "crlf" ? content.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n") : content.replace(/\r\n/g, "\n");
 
-      writeFileSync(markerFile, normalizedContent, 'utf-8');
+      writeFileSync(markerFile, normalizedContent, "utf-8");
 
       for (const r of rewrites) {
         // Log against the ORIGINAL region extent (next marker line - 1 or EOF,
@@ -2147,250 +2223,281 @@ function runMarkerRewrite(mapPath: string, isDryRun: boolean): void {
           sectionEnd = i;
         }
         const delta = r.newSectionLines.length - (sectionEnd - sectionStart + 1);
-        console.log(`    ${C.green}✓  Overwrote marker at ${r.marker.file}:${r.marker.line} (§${r.marker.section}): ${delta > 0 ? '+' : ''}${delta} lines, hash ${r.marker.hash} → ${r.newHash}${C.reset}`);
+        console.log(
+          `    ${C.green}✓  Overwrote marker at ${r.marker.file}:${r.marker.line} (§${r.marker.section}): ${delta > 0 ? "+" : ""}${delta} lines, hash ${r.marker.hash} → ${r.newHash}${C.reset}`,
+        );
         totalOverwritten++;
       }
     }
   }
 
-  console.log(`\n${C.green}Marker rewrite complete.${C.reset} ${isDryRun ? 'Would overwrite' : 'Overwritten'}: ${totalOverwritten}, ${isDryRun ? 'Would append' : 'Appended'}: ${totalAppended}, In sync: ${totalInSync}, Skipped: ${totalSkipped}`);
+  console.log(
+    `\n${C.green}Marker rewrite complete.${C.reset} ${isDryRun ? "Would overwrite" : "Overwritten"}: ${totalOverwritten}, ${isDryRun ? "Would append" : "Appended"}: ${totalAppended}, In sync: ${totalInSync}, Skipped: ${totalSkipped}`,
+  );
 }
 
 // ── Main dispatch ──────────────────────────────────────────────────────────────
 if (import.meta.main) {
-const MAP_PATH = join('scripts', 'propagation-map.json');
+  const MAP_PATH = join("scripts", "propagation-map.json");
 
-if (!existsSync(MAP_PATH)) {
-  console.error(`${C.red}Error: propagation-map.json not found at ${MAP_PATH}${C.reset}`);
-  process.exit(1);
-}
-
-// Encoding gate — on every --apply mode except dry-run and --check-drift. Governance
-// and docs modes were exempt until the 2026-09-21 review (M-14) flagged the gap: those
-// modes write the Korean-heavy governance docs, exactly the CP949-corruption risk class.
-// Only scan git-tracked files — skip untracked local directories
-if (APPLY && !SKIP_ENCODING && !CHECK_DRIFT) {
-  const gitLsResult = execFileSync('git', ['ls-files', '--cached'], { encoding: 'utf-8' });
-  const trackedFiles = new Set(gitLsResult.trim().split('\n').filter(Boolean));
-  const scanDirs = ['.', join('templates')];
-  const allViolations: EncodingViolation[] = [];
-  for (const scanDir of scanDirs) {
-    if (existsSync(scanDir)) {
-      for (const file of walkFilesForEncoding(scanDir)) {
-        if (!trackedFiles.has(file.replace(/\\/g, '/'))) continue; // skip untracked
-        allViolations.push(...checkFileEncoding(file));
-      }
-    }
-  }
-  if (allViolations.length > 0) {
-    console.error(`${C.red}❌ Encoding corruption — ${allViolations.length} violation(s). Fix before publishing.${C.reset}`);
-    for (const v of allViolations) {
-      console.log(`   ${v.file}  [${v.count}×] ${v.pattern}`);
-    }
+  if (!existsSync(MAP_PATH)) {
+    console.error(`${C.red}Error: propagation-map.json not found at ${MAP_PATH}${C.reset}`);
     process.exit(1);
   }
-}
 
-if (CHECK_DRIFT) {
-  runCheckDrift(MAP_PATH);
-} else if (MARKER_REWRITE) {
-  runMarkerRewrite(MAP_PATH, DRY_RUN);
-} else {
-  runL0L1Sync(MAP_PATH);
-  // Side-commands: can combine with --apply or --dry-run
-  if (GOVERNANCE_L1) publishGovernanceL1(DRY_RUN);
-  if (DOCS) publishDocs(DRY_RUN, MAP_PATH);
-  if (PRUNE) pruneL1Scripts(MAP_PATH, DRY_RUN);
-}
-
-// ── runCheckDrift: independent L1→L2 drift report ─────────────────────────────
-/**
- * T-20260912-028: drift classification is semantic, not whole-domain.
- * gemini-settings pairs run through classifySettingsDrift() against the
- * platform-settings contract (docs/templates/common-contract.json): a byte
- * difference is a tolerated intentional overlay only when the contract's
- * shared keys are present and deep-equal on both sides and no claude-only key
- * leaked into a .gemini file. Parse failures, a missing/empty shared-key
- * contract, and any non-gemini-settings domain drift are unexpected
- * (fail-closed). One classification pass feeds BOTH the human and JSON
- * renderers; exit codes are identical in both modes:
- * 0 = clean, 1 = tolerated-only, 2 = unexpected.
- */
-function runCheckDrift(mapPath: string): void {
-  // Ineligible-domain early UX: if the user filtered to a non-drift-eligible
-  // domain, explain instead of returning silently with 0 results (human mode)
-  // or an empty result set (JSON mode).
-  if (DOMAIN_FILTER) {
-    const map: PropagationMap = JSON.parse(readFileSync(mapPath, 'utf-8'));
-    const filteredDomain = map.domains[DOMAIN_FILTER];
-    if (filteredDomain && !isL2DriftEligible(filteredDomain)) {
-      if (JSON_OUTPUT) {
-        console.log(JSON.stringify({
-          results: [],
-          summary: { total: 0, inSync: 0, toleratedDrift: 0, unexpectedDrift: 0 },
-          note: `Domain "${DOMAIN_FILTER}" is not eligible for L2 drift checking (Fork Model — ADR-0031); L2 variants receive this content through scaffolding/promotion, not ongoing sync.`,
-        }, null, 2));
-        process.exit(0);
-      }
-      console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
-      console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
-      console.log(`${C.dim}ℹ️  Domain "${DOMAIN_FILTER}" is not eligible for L2 drift checking (Fork Model — ADR-0031).${C.reset}`);
-      console.log(`${C.dim}    L2 variants receive this content through scaffolding/promotion, not ongoing sync.${C.reset}`);
-      console.log(`\nTotal checked: 0, Out of sync: 0`);
-      return; // exit 0 — not an error, just not applicable
-    }
-  }
-
-  const drifts = collectDiffsL1L2(mapPath);
-  const outOfSync = drifts.filter(d => d.status !== 'in-sync');
-
-  // One classification pass (T-20260912-028): human and JSON are two views over
-  // this array. The contract SSOT is read by the caller, not the classifier.
-  let contract: PlatformSettingsContract | null = null;
-  const contractPath = join(workspaceRoot, 'docs', 'templates', 'common-contract.json');
-  if (existsSync(contractPath)) {
-    try {
-      contract = JSON.parse(readFileSync(contractPath, 'utf-8')) as PlatformSettingsContract;
-    } catch {
-      contract = null; // fail-closed: the classifier treats null as unexpected
-    }
-  }
-  const readRaw = (p: string): string => {
-    try {
-      return readFileSync(p, 'utf-8');
-    } catch {
-      return ''; // unreadable/missing side → JSON.parse fails → parseError (fail-closed)
-    }
-  };
-
-  const classified: ClassifiedDiff[] = drifts.map((d): ClassifiedDiff => {
-    if (d.status === 'in-sync') return d;
-    if (d.domain.split(' ')[0] !== 'gemini-settings') {
-      // No classifier for this domain — identical to the old non-gemini
-      // fallback: fail-closed unexpected.
-      return {
-        ...d,
-        classification: 'unexpected',
-        detail: {
-          mismatchedSharedKeys: [],
-          leakedClaudeOnlyKeys: [],
-          parseError: null,
-          variantOwnedKeys: [],
-          reasons: [`Drift in domain '${d.domain.split(' ')[0]}' has no semantic classifier (fail-closed)`],
-        },
-      };
-    }
-    const result = classifySettingsDrift(readRaw(d.sourcePath), readRaw(d.targetPath), contract);
-    return { ...d, classification: result.classification, detail: result };
-  });
-
-  const toleratedCount = classified.filter(c => c.classification === 'tolerated').length;
-  const unexpectedCount = classified.filter(c => c.classification === 'unexpected').length;
-
-  if (JSON_OUTPUT) {
-    // Machine-readable mode (T-20260912-016, extended additively by
-    // T-20260912-028): stable contract for CI. exit 0 = clean,
-    // 1 = only tolerated drift, 2 = unexpected drift. Drifted entries gain
-    // classification/detail; in-sync entries and the summary keys are unchanged.
-    console.log(JSON.stringify({
-      results: classified.map(d => {
-        if (d.status === 'in-sync' || !d.classification || !d.detail) {
-          return { domain: d.domain, file: d.relativePath, status: d.status };
+  // Encoding gate — on every --apply mode except dry-run and --check-drift. Governance
+  // and docs modes were exempt until the 2026-09-21 review (M-14) flagged the gap: those
+  // modes write the Korean-heavy governance docs, exactly the CP949-corruption risk class.
+  // Only scan git-tracked files — skip untracked local directories
+  if (APPLY && !SKIP_ENCODING && !CHECK_DRIFT) {
+    const gitLsResult = execFileSync("git", ["ls-files", "--cached"], { encoding: "utf-8" });
+    const trackedFiles = new Set(gitLsResult.trim().split("\n").filter(Boolean));
+    const scanDirs = [".", join("templates")];
+    const allViolations: EncodingViolation[] = [];
+    for (const scanDir of scanDirs) {
+      if (existsSync(scanDir)) {
+        for (const file of walkFilesForEncoding(scanDir)) {
+          if (!trackedFiles.has(file.replace(/\\/g, "/"))) continue; // skip untracked
+          allViolations.push(...checkFileEncoding(file));
         }
+      }
+    }
+    if (allViolations.length > 0) {
+      console.error(
+        `${C.red}❌ Encoding corruption — ${allViolations.length} violation(s). Fix before publishing.${C.reset}`,
+      );
+      for (const v of allViolations) {
+        console.log(`   ${v.file}  [${v.count}×] ${v.pattern}`);
+      }
+      process.exit(1);
+    }
+  }
+
+  if (CHECK_DRIFT) {
+    runCheckDrift(MAP_PATH);
+  } else if (MARKER_REWRITE) {
+    runMarkerRewrite(MAP_PATH, DRY_RUN);
+  } else {
+    runL0L1Sync(MAP_PATH);
+    // Side-commands: can combine with --apply or --dry-run
+    if (GOVERNANCE_L1) publishGovernanceL1(DRY_RUN);
+    if (DOCS) publishDocs(DRY_RUN, MAP_PATH);
+    if (PRUNE) pruneL1Scripts(MAP_PATH, DRY_RUN);
+  }
+
+  // ── runCheckDrift: independent L1→L2 drift report ─────────────────────────────
+  /**
+   * T-20260912-028: drift classification is semantic, not whole-domain.
+   * gemini-settings pairs run through classifySettingsDrift() against the
+   * platform-settings contract (docs/templates/common-contract.json): a byte
+   * difference is a tolerated intentional overlay only when the contract's
+   * shared keys are present and deep-equal on both sides and no claude-only key
+   * leaked into a .gemini file. Parse failures, a missing/empty shared-key
+   * contract, and any non-gemini-settings domain drift are unexpected
+   * (fail-closed). One classification pass feeds BOTH the human and JSON
+   * renderers; exit codes are identical in both modes:
+   * 0 = clean, 1 = tolerated-only, 2 = unexpected.
+   */
+  function runCheckDrift(mapPath: string): void {
+    // Ineligible-domain early UX: if the user filtered to a non-drift-eligible
+    // domain, explain instead of returning silently with 0 results (human mode)
+    // or an empty result set (JSON mode).
+    if (DOMAIN_FILTER) {
+      const map: PropagationMap = JSON.parse(readFileSync(mapPath, "utf-8"));
+      const filteredDomain = map.domains[DOMAIN_FILTER];
+      if (filteredDomain && !isL2DriftEligible(filteredDomain)) {
+        if (JSON_OUTPUT) {
+          console.log(
+            JSON.stringify(
+              {
+                results: [],
+                summary: { total: 0, inSync: 0, toleratedDrift: 0, unexpectedDrift: 0 },
+                note: `Domain "${DOMAIN_FILTER}" is not eligible for L2 drift checking (Fork Model — ADR-0031); L2 variants receive this content through scaffolding/promotion, not ongoing sync.`,
+              },
+              null,
+              2,
+            ),
+          );
+          process.exit(0);
+        }
+        console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
+        console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
+        console.log(
+          `${C.dim}ℹ️  Domain "${DOMAIN_FILTER}" is not eligible for L2 drift checking (Fork Model — ADR-0031).${C.reset}`,
+        );
+        console.log(
+          `${C.dim}    L2 variants receive this content through scaffolding/promotion, not ongoing sync.${C.reset}`,
+        );
+        console.log(`\nTotal checked: 0, Out of sync: 0`);
+        return; // exit 0 — not an error, just not applicable
+      }
+    }
+
+    const drifts = collectDiffsL1L2(mapPath);
+    const outOfSync = drifts.filter((d) => d.status !== "in-sync");
+
+    // One classification pass (T-20260912-028): human and JSON are two views over
+    // this array. The contract SSOT is read by the caller, not the classifier.
+    let contract: PlatformSettingsContract | null = null;
+    const contractPath = join(workspaceRoot, "docs", "templates", "common-contract.json");
+    if (existsSync(contractPath)) {
+      try {
+        contract = JSON.parse(readFileSync(contractPath, "utf-8")) as PlatformSettingsContract;
+      } catch {
+        contract = null; // fail-closed: the classifier treats null as unexpected
+      }
+    }
+    const readRaw = (p: string): string => {
+      try {
+        return readFileSync(p, "utf-8");
+      } catch {
+        return ""; // unreadable/missing side → JSON.parse fails → parseError (fail-closed)
+      }
+    };
+
+    const classified: ClassifiedDiff[] = drifts.map((d): ClassifiedDiff => {
+      if (d.status === "in-sync") return d;
+      if (d.domain.split(" ")[0] !== "gemini-settings") {
+        // No classifier for this domain — identical to the old non-gemini
+        // fallback: fail-closed unexpected.
         return {
-          domain: d.domain,
-          file: d.relativePath,
-          status: d.status,
-          classification: d.classification,
+          ...d,
+          classification: "unexpected",
           detail: {
-            mismatchedSharedKeys: d.detail.mismatchedSharedKeys,
-            leakedClaudeOnlyKeys: d.detail.leakedClaudeOnlyKeys,
-            parseError: d.detail.parseError,
-            variantOwnedKeys: d.detail.variantOwnedKeys,
-            reasons: d.detail.reasons,
+            mismatchedSharedKeys: [],
+            leakedClaudeOnlyKeys: [],
+            parseError: null,
+            variantOwnedKeys: [],
+            reasons: [`Drift in domain '${d.domain.split(" ")[0]}' has no semantic classifier (fail-closed)`],
           },
         };
-      }),
-      summary: {
-        total: drifts.length,
-        inSync: drifts.length - outOfSync.length,
-        toleratedDrift: toleratedCount,
-        unexpectedDrift: unexpectedCount,
-      },
-    }, null, 2));
-    process.exit(unexpectedCount > 0 ? 2 : toleratedCount > 0 ? 1 : 0);
-  }
-
-  console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
-  if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
-  printTable(drifts);
-
-  // Per drifted pair: distinguish intentional overlays from semantic drift
-  // (parity with the JSON mode's classification field).
-  for (const d of classified) {
-    if (d.status === 'in-sync' || !d.classification || !d.detail) continue;
-    if (d.classification === 'tolerated') {
-      const owned = d.detail.variantOwnedKeys.length > 0
-        ? `variant-owned keys differ: ${d.detail.variantOwnedKeys.join(', ')}`
-        : 'variant-owned/nested keys differ';
-      console.log(`${C.yellow}⚠️  ${d.domain}: intentional overlay — shared keys verified; ${owned}${C.reset}`);
-    } else {
-      const problems = d.detail.reasons.length > 0 ? d.detail.reasons.join('; ') : 'semantic drift detected';
-      console.log(`${C.red}✖  ${d.domain}: semantic drift — ${problems}${C.reset}`);
-    }
-  }
-
-  console.log(`\nTotal checked: ${drifts.length}, In sync: ${drifts.length - outOfSync.length}, Tolerated overlay: ${toleratedCount}, Unexpected: ${unexpectedCount}`);
-  if (unexpectedCount > 0) {
-    console.log(`\nℹ️  Unexpected drift: a shared key or the platform-settings contract is violated. Align L1/L2 before synchronizing.`);
-    process.exitCode = 2;
-  } else if (toleratedCount > 0) {
-    console.log(`\nℹ️  Tolerated drift only: every drifted pair verified as an intentional overlay (shared keys intact). Review whether this change is intentional before synchronizing.`);
-    process.exitCode = 1;
-  }
-}
-
-// ── runL0L1Sync: L0→L1 dry-run or apply ──────────────────────────────────────
-function runL0L1Sync(mapPath: string): void {
-  console.log(`${C.cyan}=== propagate-to-templates.ts — L0→L1 sync ===${C.reset}`);
-  if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
-  console.log(`${C.dim}Mode: ${APPLY ? 'apply' : 'dry-run'}${FORCE ? ' (--force)' : ''}${C.reset}`);
-
-  const diffs = collectDiffs(mapPath);
-  printTable(diffs);
-
-  const outOfSync = diffs.filter(d => d.status !== 'in-sync');
-  const inSync    = diffs.filter(d => d.status === 'in-sync');
-
-  console.log(`Total files checked : ${diffs.length}`);
-  console.log(`${C.green}In sync             : ${inSync.length}${C.reset}`);
-  console.log(`${outOfSync.length > 0 ? C.yellow : C.green}Out of sync         : ${outOfSync.length}${C.reset}`);
-
-  if (APPLY) {
-    // Check if any in-sync files need CONSTITUTION scrubbing.
-    const needsScrubInSync = inSync.filter(d => {
-      if (!d.targetPath.includes('templates' + sep)) return false;
-      try {
-        return readFileSync(d.sourcePath, 'utf-8').includes('CONSTITUTION.md');
-      } catch { return false; }
+      }
+      const result = classifySettingsDrift(readRaw(d.sourcePath), readRaw(d.targetPath), contract);
+      return { ...d, classification: result.classification, detail: result };
     });
-    if (outOfSync.length === 0 && needsScrubInSync.length === 0 && !FORCE) {
-      console.log(`\n${C.green}Nothing to apply — all files in sync.${C.reset}`);
-    } else {
-      const toApply = FORCE ? diffs : outOfSync;
-      const total = toApply.length + needsScrubInSync.length;
-      console.log(`\n${C.cyan}Applying ${total} file(s)...${C.reset}`);
-      const copied = applyDiffs(diffs);
-      console.log(`\n${C.green}Done. ${copied} file(s) copied.${C.reset}`);
+
+    const toleratedCount = classified.filter((c) => c.classification === "tolerated").length;
+    const unexpectedCount = classified.filter((c) => c.classification === "unexpected").length;
+
+    if (JSON_OUTPUT) {
+      // Machine-readable mode (T-20260912-016, extended additively by
+      // T-20260912-028): stable contract for CI. exit 0 = clean,
+      // 1 = only tolerated drift, 2 = unexpected drift. Drifted entries gain
+      // classification/detail; in-sync entries and the summary keys are unchanged.
+      console.log(
+        JSON.stringify(
+          {
+            results: classified.map((d) => {
+              if (d.status === "in-sync" || !d.classification || !d.detail) {
+                return { domain: d.domain, file: d.relativePath, status: d.status };
+              }
+              return {
+                domain: d.domain,
+                file: d.relativePath,
+                status: d.status,
+                classification: d.classification,
+                detail: {
+                  mismatchedSharedKeys: d.detail.mismatchedSharedKeys,
+                  leakedClaudeOnlyKeys: d.detail.leakedClaudeOnlyKeys,
+                  parseError: d.detail.parseError,
+                  variantOwnedKeys: d.detail.variantOwnedKeys,
+                  reasons: d.detail.reasons,
+                },
+              };
+            }),
+            summary: {
+              total: drifts.length,
+              inSync: drifts.length - outOfSync.length,
+              toleratedDrift: toleratedCount,
+              unexpectedDrift: unexpectedCount,
+            },
+          },
+          null,
+          2,
+        ),
+      );
+      process.exit(unexpectedCount > 0 ? 2 : toleratedCount > 0 ? 1 : 0);
     }
-  } else {
-    // dry-run mode
-    if (outOfSync.length > 0) {
-      console.log(`\n${C.yellow}Run with --apply to sync these files.${C.reset}`);
+
+    console.log(`${C.cyan}=== --check-drift: L1 vs L2 drift report (read-only) ===${C.reset}`);
+    if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
+    printTable(drifts);
+
+    // Per drifted pair: distinguish intentional overlays from semantic drift
+    // (parity with the JSON mode's classification field).
+    for (const d of classified) {
+      if (d.status === "in-sync" || !d.classification || !d.detail) continue;
+      if (d.classification === "tolerated") {
+        const owned =
+          d.detail.variantOwnedKeys.length > 0
+            ? `variant-owned keys differ: ${d.detail.variantOwnedKeys.join(", ")}`
+            : "variant-owned/nested keys differ";
+        console.log(`${C.yellow}⚠️  ${d.domain}: intentional overlay — shared keys verified; ${owned}${C.reset}`);
+      } else {
+        const problems = d.detail.reasons.length > 0 ? d.detail.reasons.join("; ") : "semantic drift detected";
+        console.log(`${C.red}✖  ${d.domain}: semantic drift — ${problems}${C.reset}`);
+      }
+    }
+
+    console.log(
+      `\nTotal checked: ${drifts.length}, In sync: ${drifts.length - outOfSync.length}, Tolerated overlay: ${toleratedCount}, Unexpected: ${unexpectedCount}`,
+    );
+    if (unexpectedCount > 0) {
+      console.log(
+        `\nℹ️  Unexpected drift: a shared key or the platform-settings contract is violated. Align L1/L2 before synchronizing.`,
+      );
+      process.exitCode = 2;
+    } else if (toleratedCount > 0) {
+      console.log(
+        `\nℹ️  Tolerated drift only: every drifted pair verified as an intentional overlay (shared keys intact). Review whether this change is intentional before synchronizing.`,
+      );
       process.exitCode = 1;
-    } else {
-      console.log(`\n${C.green}All files in sync.${C.reset}`);
     }
   }
-}
+
+  // ── runL0L1Sync: L0→L1 dry-run or apply ──────────────────────────────────────
+  function runL0L1Sync(mapPath: string): void {
+    console.log(`${C.cyan}=== propagate-to-templates.ts — L0→L1 sync ===${C.reset}`);
+    if (DOMAIN_FILTER) console.log(`${C.dim}Domain filter: ${DOMAIN_FILTER}${C.reset}`);
+    console.log(`${C.dim}Mode: ${APPLY ? "apply" : "dry-run"}${FORCE ? " (--force)" : ""}${C.reset}`);
+
+    const diffs = collectDiffs(mapPath);
+    printTable(diffs);
+
+    const outOfSync = diffs.filter((d) => d.status !== "in-sync");
+    const inSync = diffs.filter((d) => d.status === "in-sync");
+
+    console.log(`Total files checked : ${diffs.length}`);
+    console.log(`${C.green}In sync             : ${inSync.length}${C.reset}`);
+    console.log(`${outOfSync.length > 0 ? C.yellow : C.green}Out of sync         : ${outOfSync.length}${C.reset}`);
+
+    if (APPLY) {
+      // Check if any in-sync files need CONSTITUTION scrubbing.
+      const needsScrubInSync = inSync.filter((d) => {
+        if (!d.targetPath.includes("templates" + sep)) return false;
+        try {
+          return readFileSync(d.sourcePath, "utf-8").includes("CONSTITUTION.md");
+        } catch {
+          return false;
+        }
+      });
+      if (outOfSync.length === 0 && needsScrubInSync.length === 0 && !FORCE) {
+        console.log(`\n${C.green}Nothing to apply — all files in sync.${C.reset}`);
+      } else {
+        const toApply = FORCE ? diffs : outOfSync;
+        const total = toApply.length + needsScrubInSync.length;
+        console.log(`\n${C.cyan}Applying ${total} file(s)...${C.reset}`);
+        const copied = applyDiffs(diffs);
+        console.log(`\n${C.green}Done. ${copied} file(s) copied.${C.reset}`);
+      }
+    } else {
+      // dry-run mode
+      if (outOfSync.length > 0) {
+        console.log(`\n${C.yellow}Run with --apply to sync these files.${C.reset}`);
+        process.exitCode = 1;
+      } else {
+        console.log(`\n${C.green}All files in sync.${C.reset}`);
+      }
+    }
+  }
 } // end import.meta.main

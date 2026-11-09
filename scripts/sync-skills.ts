@@ -72,11 +72,11 @@
  * @version 1.9.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
-const scriptDir     = import.meta.dir;
-const workspaceRoot = path.resolve(scriptDir, '..');
+const scriptDir = import.meta.dir;
+const workspaceRoot = path.resolve(scriptDir, "..");
 
 /**
  * Resolves the target roots from argv. Exported for unit tests.
@@ -88,47 +88,48 @@ const workspaceRoot = path.resolve(scriptDir, '..');
  * exist before writing (done in the CLI entry point).
  */
 export function resolveTargetRoots(argv: string[] = process.argv.slice(2)): string[] {
-    const dirArgIndex = argv.indexOf('--dir');
-    if (dirArgIndex !== -1) {
-        const dirValue = argv[dirArgIndex + 1];
-        if (!dirValue || dirValue.startsWith('--')) {
-            throw new Error("--dir requires a path argument (e.g. `bun scripts/sync-skills.ts --dir templates/co-consult`)");
-        }
-        return [path.resolve(workspaceRoot, dirValue)];
+  const dirArgIndex = argv.indexOf("--dir");
+  if (dirArgIndex !== -1) {
+    const dirValue = argv[dirArgIndex + 1];
+    if (!dirValue || dirValue.startsWith("--")) {
+      throw new Error("--dir requires a path argument (e.g. `bun scripts/sync-skills.ts --dir templates/co-consult`)");
     }
-    if (argv.includes('--all-variants')) {
-        const templatesDir = path.join(workspaceRoot, 'templates');
-        const variants = fs.readdirSync(templatesDir, { withFileTypes: true })
-            .filter(d => d.isDirectory() && d.name.startsWith('co-'))
-            .map(d => path.join(templatesDir, d.name));
-        return [...variants, path.join(templatesDir, 'common')];
-    }
-    return [workspaceRoot];
+    return [path.resolve(workspaceRoot, dirValue)];
+  }
+  if (argv.includes("--all-variants")) {
+    const templatesDir = path.join(workspaceRoot, "templates");
+    const variants = fs
+      .readdirSync(templatesDir, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && d.name.startsWith("co-"))
+      .map((d) => path.join(templatesDir, d.name));
+    return [...variants, path.join(templatesDir, "common")];
+  }
+  return [workspaceRoot];
 }
 
 function dirsFor(root: string): SkillSyncDirs {
-    return {
-        ssotSkills:   path.join(root, 'skills'),
-        claudeSkills: path.join(root, '.claude', 'skills'),
-        geminiSkills: path.join(root, '.gemini', 'skills'),
-        agentsSkills: path.join(root, '.agents', 'skills'),
-        codexSkills:  path.join(root, '.codex', 'skills'),
-        hermesSkills: path.join(root, '.hermes', 'skills'),
-    };
+  return {
+    ssotSkills: path.join(root, "skills"),
+    claudeSkills: path.join(root, ".claude", "skills"),
+    geminiSkills: path.join(root, ".gemini", "skills"),
+    agentsSkills: path.join(root, ".agents", "skills"),
+    codexSkills: path.join(root, ".codex", "skills"),
+    hermesSkills: path.join(root, ".hermes", "skills"),
+  };
 }
 
 export interface SkillSyncDirs {
-    ssotSkills: string;
-    claudeSkills: string;
-    geminiSkills: string;
-    agentsSkills: string;
-    codexSkills: string;
-    hermesSkills: string;
+  ssotSkills: string;
+  claudeSkills: string;
+  geminiSkills: string;
+  agentsSkills: string;
+  codexSkills: string;
+  hermesSkills: string;
 }
 
 export interface SyncSkillsOptions {
-    /** Overridable for tests; defaults to an idempotent (compare-then-copy) real fs copy. */
-    copyDir?: (src: string, dest: string) => void;
+  /** Overridable for tests; defaults to an idempotent (compare-then-copy) real fs copy. */
+  copyDir?: (src: string, dest: string) => void;
 }
 
 /**
@@ -140,16 +141,20 @@ export interface SyncSkillsOptions {
  * never a truncated destination.
  */
 export function defaultCopyDir(src: string, dest: string): void {
-    const tmpDest = `${dest}.tmp-${process.pid}-${Date.now()}`;
+  const tmpDest = `${dest}.tmp-${process.pid}-${Date.now()}`;
+  try {
+    fs.cpSync(src, tmpDest, { recursive: true });
+    if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true });
+    fs.renameSync(tmpDest, dest);
+  } catch (err) {
+    // Never leave staging debris behind on failure.
     try {
-        fs.cpSync(src, tmpDest, { recursive: true });
-        if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true });
-        fs.renameSync(tmpDest, dest);
-    } catch (err) {
-        // Never leave staging debris behind on failure.
-        try { fs.rmSync(tmpDest, { recursive: true, force: true }); } catch { /* best effort */ }
-        throw err;
+      fs.rmSync(tmpDest, { recursive: true, force: true });
+    } catch {
+      /* best effort */
     }
+    throw err;
+  }
 }
 
 /**
@@ -171,68 +176,67 @@ const DIRS_EQUAL_MAX_DEPTH = 64;
  * spurious content mismatch.
  */
 export function dirsEqual(a: string, b: string, depth: number = 0): boolean {
-    if (depth > DIRS_EQUAL_MAX_DEPTH) return false;
-    if (!fs.existsSync(a) || !fs.existsSync(b)) return false;
+  if (depth > DIRS_EQUAL_MAX_DEPTH) return false;
+  if (!fs.existsSync(a) || !fs.existsSync(b)) return false;
 
-    const statA = fs.lstatSync(a);
-    const statB = fs.lstatSync(b);
+  const statA = fs.lstatSync(a);
+  const statB = fs.lstatSync(b);
 
-    // Symlink vs symlink: equal iff identical target strings; symlink vs
-    // anything else: not equal (copyDir will replace the target with real
-    // content, so treating it as "already equal" would leak the link).
-    if (statA.isSymbolicLink() || statB.isSymbolicLink()) {
-        return statA.isSymbolicLink() && statB.isSymbolicLink()
-            && fs.readlinkSync(a) === fs.readlinkSync(b);
+  // Symlink vs symlink: equal iff identical target strings; symlink vs
+  // anything else: not equal (copyDir will replace the target with real
+  // content, so treating it as "already equal" would leak the link).
+  if (statA.isSymbolicLink() || statB.isSymbolicLink()) {
+    return statA.isSymbolicLink() && statB.isSymbolicLink() && fs.readlinkSync(a) === fs.readlinkSync(b);
+  }
+
+  if (statA.isDirectory() !== statB.isDirectory()) return false;
+
+  if (statA.isDirectory()) {
+    const entriesA = fs.readdirSync(a).sort();
+    const entriesB = fs.readdirSync(b).sort();
+    if (entriesA.length !== entriesB.length) return false;
+    for (let i = 0; i < entriesA.length; i++) {
+      if (entriesA[i] !== entriesB[i]) return false;
+      if (!dirsEqual(path.join(a, entriesA[i]), path.join(b, entriesB[i]), depth + 1)) return false;
     }
+    return true;
+  }
 
-    if (statA.isDirectory() !== statB.isDirectory()) return false;
-
-    if (statA.isDirectory()) {
-        const entriesA = fs.readdirSync(a).sort();
-        const entriesB = fs.readdirSync(b).sort();
-        if (entriesA.length !== entriesB.length) return false;
-        for (let i = 0; i < entriesA.length; i++) {
-            if (entriesA[i] !== entriesB[i]) return false;
-            if (!dirsEqual(path.join(a, entriesA[i]), path.join(b, entriesB[i]), depth + 1)) return false;
-        }
-        return true;
-    }
-
-    return fs.readFileSync(a).equals(fs.readFileSync(b));
+  return fs.readFileSync(a).equals(fs.readFileSync(b));
 }
 
 /** Provenance record of the skills this tool mirrored (lives in the skills/ SSOT dir). */
-const MANAGED_MIRRORS_FILE = '.sync-skills-managed.json';
+const MANAGED_MIRRORS_FILE = ".sync-skills-managed.json";
 
 /**
  * Reads the managed-mirror manifest. Missing or unreadable → empty set (nothing is
  * considered ours, so nothing is ever removed on that basis); unreadable also warns.
  */
 function readManagedMirrors(manifestPath: string, warnings: string[]): Set<string> {
-    if (!fs.existsSync(manifestPath)) return new Set();
-    try {
-        const parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')) as { mirrored?: unknown };
-        if (!Array.isArray(parsed.mirrored)) throw new Error('"mirrored" is not an array');
-        return new Set(parsed.mirrored.filter((n): n is string => typeof n === 'string'));
-    } catch (err) {
-        const msg = (err instanceof Error) ? err.message : String(err);
-        warnings.push(`${MANAGED_MIRRORS_FILE} unreadable (${msg}) — treating every platform skill as user-owned this run`);
-        console.warn(`  ⚠️  ${MANAGED_MIRRORS_FILE} unreadable (${msg}) — no mirrors will be removed this run`);
-        return new Set();
-    }
+  if (!fs.existsSync(manifestPath)) return new Set();
+  try {
+    const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as { mirrored?: unknown };
+    if (!Array.isArray(parsed.mirrored)) throw new Error('"mirrored" is not an array');
+    return new Set(parsed.mirrored.filter((n): n is string => typeof n === "string"));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    warnings.push(`${MANAGED_MIRRORS_FILE} unreadable (${msg}) — treating every platform skill as user-owned this run`);
+    console.warn(`  ⚠️  ${MANAGED_MIRRORS_FILE} unreadable (${msg}) — no mirrors will be removed this run`);
+    return new Set();
+  }
 }
 
 /** Records the skills mirrored by this run; rewrites only when the content changes. */
 function writeManagedMirrors(manifestPath: string, mirrored: Set<string>, warnings: string[]): void {
-    const content = JSON.stringify({ version: 1, mirrored: [...mirrored].sort() }, null, 2) + '\n';
-    try {
-        if (fs.existsSync(manifestPath) && fs.readFileSync(manifestPath, 'utf-8') === content) return;
-        fs.writeFileSync(manifestPath, content, 'utf-8');
-    } catch (err) {
-        const msg = (err instanceof Error) ? err.message : String(err);
-        warnings.push(`could not write ${MANAGED_MIRRORS_FILE}: ${msg}`);
-        console.warn(`  ⚠️  Could not write ${MANAGED_MIRRORS_FILE}: ${msg}`);
-    }
+  const content = JSON.stringify({ version: 1, mirrored: [...mirrored].sort() }, null, 2) + "\n";
+  try {
+    if (fs.existsSync(manifestPath) && fs.readFileSync(manifestPath, "utf-8") === content) return;
+    fs.writeFileSync(manifestPath, content, "utf-8");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    warnings.push(`could not write ${MANAGED_MIRRORS_FILE}: ${msg}`);
+    console.warn(`  ⚠️  Could not write ${MANAGED_MIRRORS_FILE}: ${msg}`);
+  }
 }
 
 /**
@@ -241,204 +245,214 @@ function writeManagedMirrors(manifestPath: string, mirrored: Set<string>, warnin
  * is wrapped independently in try/catch (M2): a failure on one item is
  * collected and reported, and does not abort processing of the rest.
  */
-export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = {}): Promise<{ errors: string[]; warnings: string[] }> {
-    const copyDir = opts.copyDir ?? defaultCopyDir;
-    const { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills } = dirs;
-    const root = path.dirname(ssotSkills);
+export async function syncSkills(
+  dirs: SkillSyncDirs,
+  opts: SyncSkillsOptions = {},
+): Promise<{ errors: string[]; warnings: string[] }> {
+  const copyDir = opts.copyDir ?? defaultCopyDir;
+  const { ssotSkills, claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills } = dirs;
+  const root = path.dirname(ssotSkills);
 
-    fs.mkdirSync(claudeSkills, { recursive: true });
-    fs.mkdirSync(geminiSkills, { recursive: true });
-    fs.mkdirSync(agentsSkills, { recursive: true });
-    fs.mkdirSync(codexSkills, { recursive: true });
-    fs.mkdirSync(hermesSkills, { recursive: true });
+  fs.mkdirSync(claudeSkills, { recursive: true });
+  fs.mkdirSync(geminiSkills, { recursive: true });
+  fs.mkdirSync(agentsSkills, { recursive: true });
+  fs.mkdirSync(codexSkills, { recursive: true });
+  fs.mkdirSync(hermesSkills, { recursive: true });
 
-    const errors: string[] = [];
-    const warnings: string[] = [];
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
-    if (!fs.existsSync(ssotSkills)) {
-        return { errors, warnings };
-    }
-
-    // --- Phase 2 pre-flight: SSOT-divergence visibility (T-20260912-017) ---
-    // Premise fix: the old hardcoded SHORTCUT_SKILLS list ('sync', 'meeting',
-    // 'source-command-commit-push-pr') claimed those items "only exist in
-    // .agents/skills/ (not in SSOT)" — but 'sync' and 'source-command-commit-push-pr'
-    // DO exist in the SSOT (skills/), and 'meeting' is stale (the SSOT skill is
-    // meeting-facilitation; the `meeting` command is a commands mirror handled in
-    // Phase 1). Because Phase 1 overwrites .agents/skills/<name> from the SSOT and
-    // Phase 2 then back-synced those same names, any hand-edit in .agents was
-    // silently clobbered and the clobbered copy propagated to .claude/.gemini.
-    //
-    // Semantics chosen:
-    //   * The divergence scan runs BEFORE Phase 1 overwrites anything — comparing
-    //     after Phase 1 could never fire, since SSOT and .agents are identical by
-    //     then. A WARN here means a hand-edit exists that this run is about to
-    //     overwrite with the SSOT copy (visible instead of silent).
-    //   * Back-sync (Phase 2 proper, below) applies ONLY to genuinely .agents-only
-    //     skill dirs (absent from the SSOT) — the mechanism is kept for such items,
-    //     discovered dynamically instead of via a rotting hardcoded list.
-    //   * This is a single-source-of-truth pipeline, not a merge tool — SSOT wins.
-    if (fs.existsSync(agentsSkills)) {
-        for (const item of fs.readdirSync(agentsSkills)) {
-            try {
-                const source = path.join(agentsSkills, item);
-                if (!fs.statSync(source).isDirectory()) continue;
-                const ssotCounterpart = path.join(ssotSkills, item);
-                if (fs.existsSync(ssotCounterpart) && fs.statSync(ssotCounterpart).isDirectory()
-                    && !dirsEqual(source, ssotCounterpart)) {
-                    warnings.push(`shortcut ${item} in .agents/skills/ diverges from its SSOT counterpart (skills/${item}) — SSOT wins; hand-edits in .agents are overwritten by Phase 1`);
-                    console.warn(`  ⚠️  Shortcut ${item} diverges from SSOT (skills/${item}) — SSOT wins, hand-edit overwritten`);
-                }
-            } catch (err) {
-                const msg = (err instanceof Error) ? err.message : String(err);
-                errors.push(`Phase 2 pre-flight: ${item}: ${msg}`);
-                console.error(`  ❌ Error inspecting shortcut ${item}: ${msg}`);
-            }
-        }
-    }
-
-    // --- Phase 1: Distribute SSOT skills to all three platform directories ---
-    // Names this run mirrored; recorded in the managed-mirror manifest for Phase 1c.
-    const mirrored = new Set<string>();
-    for (const item of fs.readdirSync(ssotSkills)) {
-        try {
-            const itemPath = path.join(ssotSkills, item);
-            const stat = fs.statSync(itemPath);
-            if (!stat.isDirectory()) continue;
-            const skillMdSrc = path.join(itemPath, 'SKILL.md');
-            // Skip non-skill files (README.md, SKILLS.md, etc.)
-            if (!fs.existsSync(skillMdSrc)) continue;
-
-            // `security-gate: true` skills are a platform-neutral-only hard gate
-            // (validate-templates.ts Check B-03) — they must never be mirrored into
-            // .claude/skills/, .gemini/skills/, .agents/skills/, .codex/skills/, or
-            // .hermes/skills/, only skills/.
-            if (/^security-gate:\s*true\b/m.test(fs.readFileSync(skillMdSrc, 'utf-8'))) {
-                continue;
-            }
-
-            // `mirror: false` skills are agent-dispatched only (PM-gateway fleet
-            // skills such as the domain planners) — they live in skills/ but are
-            // never mirrored into the platform directories.
-            if (/^mirror:\s*false\b/m.test(fs.readFileSync(skillMdSrc, 'utf-8'))) {
-                continue;
-            }
-
-            mirrored.add(item);
-            for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
-                const target = path.join(targetDir, item);
-                if (dirsEqual(itemPath, target)) {
-                    continue; // idempotent skip — content already matches
-                }
-                copyDir(itemPath, target);
-                console.log(`  -> Synced ${item} to ${path.relative(root, targetDir)}/`);
-            }
-
-        } catch (err) {
-            const msg = (err instanceof Error) ? err.message : String(err);
-            errors.push(`Phase 1: ${item}: ${msg}`);
-            console.error(`  ❌ Error syncing ${item}: ${msg}`);
-        }
-    }
-
-    // --- Phase 1c: Remove retired platform mirrors (project contexts only) ---
-    // A mirror this tool itself created earlier (recorded in the managed-mirror
-    // manifest) whose skills/ SSOT counterpart has since been retired is a stale
-    // ghost: left alone it drifts per-project. Ownership is provenance-based —
-    // a platform skill directory that was never mirrored by sync-skills (a skill
-    // the project's user added, or anything unknown) is NEVER removed here, and
-    // with no manifest yet (first run, fresh clone, corrupt file) nothing is
-    // removed. Workspace-only skills leaked by older scaffolds are handled by
-    // upgrade-project's WORKSPACE-ONLY SKILL SWEEP, which has its own
-    // stock-copy/CONFLICT safety. Gated to project contexts — the workspace root
-    // is the one place platform-only skill directories are legitimate.
-    // Platform-independent marker (2026-10-01): project-root template-version.txt,
-    // legacy .claude/template-version.txt accepted for pre-move projects.
-    const isProjectContext = fs.existsSync(path.join(root, 'template-version.txt'))
-      || fs.existsSync(path.join(root, '.claude', 'template-version.txt'));
-    if (isProjectContext) {
-        const manifestPath = path.join(ssotSkills, MANAGED_MIRRORS_FILE);
-        const previouslyMirrored = readManagedMirrors(manifestPath, warnings);
-        let retiredCount = 0;
-        for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
-            if (!fs.existsSync(targetDir)) continue;
-            for (const item of fs.readdirSync(targetDir)) {
-                const target = path.join(targetDir, item);
-                if (!fs.statSync(target).isDirectory()) continue;
-                if (fs.existsSync(path.join(ssotSkills, item))) continue;
-                if (!previouslyMirrored.has(item)) continue; // not ours — user-added or unknown
-                fs.rmSync(target, { recursive: true, force: true });
-                retiredCount++;
-                console.log(`  -> Removed retired platform mirror ${path.relative(root, target)}/ (its skills/ SSOT skill no longer exists)`);
-            }
-        }
-        if (retiredCount === 0) console.log('  -> No retired platform mirrors found');
-        writeManagedMirrors(manifestPath, mirrored, warnings);
-    }
-
-    // --- Phase 1b: Mirror .claude/commands/*.md to .codex/prompts/ (ADR-0077 D4) ---
-    // Codex consumes slash-style workflows as custom prompts. `.claude/commands/` is the
-    // commands SSOT; this mirror is per-file idempotent. Project-level prompt support on
-    // Codex is verified live in W5 — an unsupported result demotes this mirror to a
-    // documented no-op rather than a silent gap.
-    const claudeCmdSource = path.join(root, '.claude', 'commands');
-    const codexPromptsDir = path.join(root, '.codex', 'prompts');
-    if (fs.existsSync(claudeCmdSource)) {
-        fs.mkdirSync(codexPromptsDir, { recursive: true });
-        for (const cmdFile of fs.readdirSync(claudeCmdSource)) {
-            try {
-                if (!cmdFile.endsWith('.md')) continue;
-                const src = path.join(claudeCmdSource, cmdFile);
-                if (!fs.statSync(src).isFile()) continue;
-                const dst = path.join(codexPromptsDir, cmdFile);
-                if (dirsEqual(src, dst)) continue;
-                fs.copyFileSync(src, dst);
-                console.log(`  -> Mirrored command ${cmdFile} to .codex/prompts/`);
-            } catch (err) {
-                const msg = (err instanceof Error) ? err.message : String(err);
-                errors.push(`Phase 1b: ${cmdFile}: ${msg}`);
-                console.error(`  ❌ Error mirroring ${cmdFile}: ${msg}`);
-            }
-        }
-    }
-
-    // --- Phase 2: Back-sync genuinely .agents-only shortcuts (T-20260912-017) ---
-    // Divergence visibility for .agents dirs that DO exist in the SSOT happened in
-    // the pre-flight above (it must run before Phase 1 overwrites, or it could never
-    // fire). Here only genuinely .agents-only skill dirs — absent from the SSOT —
-    // are back-synced to .claude and .gemini, discovered dynamically instead of via
-    // the old rotting SHORTCUT_SKILLS hardcoded list.
-    if (fs.existsSync(agentsSkills)) {
-        for (const item of fs.readdirSync(agentsSkills)) {
-            try {
-                const source = path.join(agentsSkills, item);
-                if (!fs.statSync(source).isDirectory()) continue;
-                const ssotCounterpart = path.join(ssotSkills, item);
-                if (fs.existsSync(ssotCounterpart)) continue; // SSOT-derived — Phase 1 owns it
-
-                // Genuinely .agents-only: back-sync to all five platform mirrors.
-                // .codex was added in the 2026-09-21 review (M-19), .hermes in
-                // ADR-0088 W1 — without them the five-mirror parity principle
-                // breaks for exactly the skills that only exist via back-sync.
-                if (!fs.existsSync(path.join(source, 'SKILL.md'))) continue;
-
-                for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
-                    const target = path.join(targetDir, item);
-                    if (dirsEqual(source, target)) {
-                        continue; // idempotent skip
-                    }
-                    copyDir(source, target);
-                    console.log(`  -> Synced shortcut ${item} to ${path.relative(root, targetDir)}/`);
-                }
-            } catch (err) {
-                const msg = (err instanceof Error) ? err.message : String(err);
-                errors.push(`Phase 2: ${item}: ${msg}`);
-                console.error(`  ❌ Error syncing shortcut ${item}: ${msg}`);
-            }
-        }
-    }
-
+  if (!fs.existsSync(ssotSkills)) {
     return { errors, warnings };
+  }
+
+  // --- Phase 2 pre-flight: SSOT-divergence visibility (T-20260912-017) ---
+  // Premise fix: the old hardcoded SHORTCUT_SKILLS list ('sync', 'meeting',
+  // 'source-command-commit-push-pr') claimed those items "only exist in
+  // .agents/skills/ (not in SSOT)" — but 'sync' and 'source-command-commit-push-pr'
+  // DO exist in the SSOT (skills/), and 'meeting' is stale (the SSOT skill is
+  // meeting-facilitation; the `meeting` command is a commands mirror handled in
+  // Phase 1). Because Phase 1 overwrites .agents/skills/<name> from the SSOT and
+  // Phase 2 then back-synced those same names, any hand-edit in .agents was
+  // silently clobbered and the clobbered copy propagated to .claude/.gemini.
+  //
+  // Semantics chosen:
+  //   * The divergence scan runs BEFORE Phase 1 overwrites anything — comparing
+  //     after Phase 1 could never fire, since SSOT and .agents are identical by
+  //     then. A WARN here means a hand-edit exists that this run is about to
+  //     overwrite with the SSOT copy (visible instead of silent).
+  //   * Back-sync (Phase 2 proper, below) applies ONLY to genuinely .agents-only
+  //     skill dirs (absent from the SSOT) — the mechanism is kept for such items,
+  //     discovered dynamically instead of via a rotting hardcoded list.
+  //   * This is a single-source-of-truth pipeline, not a merge tool — SSOT wins.
+  if (fs.existsSync(agentsSkills)) {
+    for (const item of fs.readdirSync(agentsSkills)) {
+      try {
+        const source = path.join(agentsSkills, item);
+        if (!fs.statSync(source).isDirectory()) continue;
+        const ssotCounterpart = path.join(ssotSkills, item);
+        if (
+          fs.existsSync(ssotCounterpart) &&
+          fs.statSync(ssotCounterpart).isDirectory() &&
+          !dirsEqual(source, ssotCounterpart)
+        ) {
+          warnings.push(
+            `shortcut ${item} in .agents/skills/ diverges from its SSOT counterpart (skills/${item}) — SSOT wins; hand-edits in .agents are overwritten by Phase 1`,
+          );
+          console.warn(`  ⚠️  Shortcut ${item} diverges from SSOT (skills/${item}) — SSOT wins, hand-edit overwritten`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`Phase 2 pre-flight: ${item}: ${msg}`);
+        console.error(`  ❌ Error inspecting shortcut ${item}: ${msg}`);
+      }
+    }
+  }
+
+  // --- Phase 1: Distribute SSOT skills to all three platform directories ---
+  // Names this run mirrored; recorded in the managed-mirror manifest for Phase 1c.
+  const mirrored = new Set<string>();
+  for (const item of fs.readdirSync(ssotSkills)) {
+    try {
+      const itemPath = path.join(ssotSkills, item);
+      const stat = fs.statSync(itemPath);
+      if (!stat.isDirectory()) continue;
+      const skillMdSrc = path.join(itemPath, "SKILL.md");
+      // Skip non-skill files (README.md, SKILLS.md, etc.)
+      if (!fs.existsSync(skillMdSrc)) continue;
+
+      // `security-gate: true` skills are a platform-neutral-only hard gate
+      // (validate-templates.ts Check B-03) — they must never be mirrored into
+      // .claude/skills/, .gemini/skills/, .agents/skills/, .codex/skills/, or
+      // .hermes/skills/, only skills/.
+      if (/^security-gate:\s*true\b/m.test(fs.readFileSync(skillMdSrc, "utf-8"))) {
+        continue;
+      }
+
+      // `mirror: false` skills are agent-dispatched only (PM-gateway fleet
+      // skills such as the domain planners) — they live in skills/ but are
+      // never mirrored into the platform directories.
+      if (/^mirror:\s*false\b/m.test(fs.readFileSync(skillMdSrc, "utf-8"))) {
+        continue;
+      }
+
+      mirrored.add(item);
+      for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
+        const target = path.join(targetDir, item);
+        if (dirsEqual(itemPath, target)) {
+          continue; // idempotent skip — content already matches
+        }
+        copyDir(itemPath, target);
+        console.log(`  -> Synced ${item} to ${path.relative(root, targetDir)}/`);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`Phase 1: ${item}: ${msg}`);
+      console.error(`  ❌ Error syncing ${item}: ${msg}`);
+    }
+  }
+
+  // --- Phase 1c: Remove retired platform mirrors (project contexts only) ---
+  // A mirror this tool itself created earlier (recorded in the managed-mirror
+  // manifest) whose skills/ SSOT counterpart has since been retired is a stale
+  // ghost: left alone it drifts per-project. Ownership is provenance-based —
+  // a platform skill directory that was never mirrored by sync-skills (a skill
+  // the project's user added, or anything unknown) is NEVER removed here, and
+  // with no manifest yet (first run, fresh clone, corrupt file) nothing is
+  // removed. Workspace-only skills leaked by older scaffolds are handled by
+  // upgrade-project's WORKSPACE-ONLY SKILL SWEEP, which has its own
+  // stock-copy/CONFLICT safety. Gated to project contexts — the workspace root
+  // is the one place platform-only skill directories are legitimate.
+  // Platform-independent marker (2026-10-01): project-root template-version.txt,
+  // legacy .claude/template-version.txt accepted for pre-move projects.
+  const isProjectContext =
+    fs.existsSync(path.join(root, "template-version.txt")) ||
+    fs.existsSync(path.join(root, ".claude", "template-version.txt"));
+  if (isProjectContext) {
+    const manifestPath = path.join(ssotSkills, MANAGED_MIRRORS_FILE);
+    const previouslyMirrored = readManagedMirrors(manifestPath, warnings);
+    let retiredCount = 0;
+    for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
+      if (!fs.existsSync(targetDir)) continue;
+      for (const item of fs.readdirSync(targetDir)) {
+        const target = path.join(targetDir, item);
+        if (!fs.statSync(target).isDirectory()) continue;
+        if (fs.existsSync(path.join(ssotSkills, item))) continue;
+        if (!previouslyMirrored.has(item)) continue; // not ours — user-added or unknown
+        fs.rmSync(target, { recursive: true, force: true });
+        retiredCount++;
+        console.log(
+          `  -> Removed retired platform mirror ${path.relative(root, target)}/ (its skills/ SSOT skill no longer exists)`,
+        );
+      }
+    }
+    if (retiredCount === 0) console.log("  -> No retired platform mirrors found");
+    writeManagedMirrors(manifestPath, mirrored, warnings);
+  }
+
+  // --- Phase 1b: Mirror .claude/commands/*.md to .codex/prompts/ (ADR-0077 D4) ---
+  // Codex consumes slash-style workflows as custom prompts. `.claude/commands/` is the
+  // commands SSOT; this mirror is per-file idempotent. Project-level prompt support on
+  // Codex is verified live in W5 — an unsupported result demotes this mirror to a
+  // documented no-op rather than a silent gap.
+  const claudeCmdSource = path.join(root, ".claude", "commands");
+  const codexPromptsDir = path.join(root, ".codex", "prompts");
+  if (fs.existsSync(claudeCmdSource)) {
+    fs.mkdirSync(codexPromptsDir, { recursive: true });
+    for (const cmdFile of fs.readdirSync(claudeCmdSource)) {
+      try {
+        if (!cmdFile.endsWith(".md")) continue;
+        const src = path.join(claudeCmdSource, cmdFile);
+        if (!fs.statSync(src).isFile()) continue;
+        const dst = path.join(codexPromptsDir, cmdFile);
+        if (dirsEqual(src, dst)) continue;
+        fs.copyFileSync(src, dst);
+        console.log(`  -> Mirrored command ${cmdFile} to .codex/prompts/`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`Phase 1b: ${cmdFile}: ${msg}`);
+        console.error(`  ❌ Error mirroring ${cmdFile}: ${msg}`);
+      }
+    }
+  }
+
+  // --- Phase 2: Back-sync genuinely .agents-only shortcuts (T-20260912-017) ---
+  // Divergence visibility for .agents dirs that DO exist in the SSOT happened in
+  // the pre-flight above (it must run before Phase 1 overwrites, or it could never
+  // fire). Here only genuinely .agents-only skill dirs — absent from the SSOT —
+  // are back-synced to .claude and .gemini, discovered dynamically instead of via
+  // the old rotting SHORTCUT_SKILLS hardcoded list.
+  if (fs.existsSync(agentsSkills)) {
+    for (const item of fs.readdirSync(agentsSkills)) {
+      try {
+        const source = path.join(agentsSkills, item);
+        if (!fs.statSync(source).isDirectory()) continue;
+        const ssotCounterpart = path.join(ssotSkills, item);
+        if (fs.existsSync(ssotCounterpart)) continue; // SSOT-derived — Phase 1 owns it
+
+        // Genuinely .agents-only: back-sync to all five platform mirrors.
+        // .codex was added in the 2026-09-21 review (M-19), .hermes in
+        // ADR-0088 W1 — without them the five-mirror parity principle
+        // breaks for exactly the skills that only exist via back-sync.
+        if (!fs.existsSync(path.join(source, "SKILL.md"))) continue;
+
+        for (const targetDir of [claudeSkills, geminiSkills, agentsSkills, codexSkills, hermesSkills]) {
+          const target = path.join(targetDir, item);
+          if (dirsEqual(source, target)) {
+            continue; // idempotent skip
+          }
+          copyDir(source, target);
+          console.log(`  -> Synced shortcut ${item} to ${path.relative(root, targetDir)}/`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`Phase 2: ${item}: ${msg}`);
+        console.error(`  ❌ Error syncing shortcut ${item}: ${msg}`);
+      }
+    }
+  }
+
+  return { errors, warnings };
 }
 
 // ── Concurrency guard (T-20260912-017) ────────────────────────────────────────
@@ -451,106 +465,118 @@ export async function syncSkills(dirs: SkillSyncDirs, opts: SyncSkillsOptions = 
 // stale-lock pattern as .githooks/post-checkout. A second concurrent run fails
 // fast with a clear message. CLI-only: the library entry (syncSkills) stays
 // unguarded for testability.
-const LOCK_FILE = path.join(workspaceRoot, '.sync-skills.lock');
+const LOCK_FILE = path.join(workspaceRoot, ".sync-skills.lock");
 
 function writeLock(): void {
-    fs.writeFileSync(LOCK_FILE, `${process.pid}\n${new Date().toISOString()}\n`, { flag: 'wx' });
+  fs.writeFileSync(LOCK_FILE, `${process.pid}\n${new Date().toISOString()}\n`, { flag: "wx" });
 }
 
 function pidAlive(pid: number): boolean {
-    try {
-        process.kill(pid, 0);
-        return true;
-    } catch (err) {
-        // EPERM means the process exists but is owned by another user — alive.
-        return (err as NodeJS.ErrnoException)?.code === 'EPERM';
-    }
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    // EPERM means the process exists but is owned by another user — alive.
+    return (err as NodeJS.ErrnoException)?.code === "EPERM";
+  }
 }
 
 function installLockRelease(): void {
-    const release = () => {
-        try { fs.rmSync(LOCK_FILE, { force: true }); } catch { /* best effort */ }
-    };
-    process.on('exit', release);
-    for (const sig of ['SIGINT', 'SIGTERM'] as const) {
-        process.on(sig, () => {
-            release();
-            process.exit(1);
-        });
+  const release = () => {
+    try {
+      fs.rmSync(LOCK_FILE, { force: true });
+    } catch {
+      /* best effort */
     }
+  };
+  process.on("exit", release);
+  for (const sig of ["SIGINT", "SIGTERM"] as const) {
+    process.on(sig, () => {
+      release();
+      process.exit(1);
+    });
+  }
 }
 
 function acquireLock(): void {
+  try {
+    // 'wx' fails when the file already exists — the closest thing to an
+    // atomic O_CREAT|O_EXCL lock without native modules.
+    writeLock();
+  } catch {
+    // Lock present (or raced): validate the recorded owner before failing.
+    let lockPid = NaN;
     try {
-        // 'wx' fails when the file already exists — the closest thing to an
-        // atomic O_CREAT|O_EXCL lock without native modules.
-        writeLock();
+      lockPid = parseInt(fs.readFileSync(LOCK_FILE, "utf-8").split("\n")[0].trim(), 10);
     } catch {
-        // Lock present (or raced): validate the recorded owner before failing.
-        let lockPid = NaN;
-        try {
-            lockPid = parseInt(fs.readFileSync(LOCK_FILE, 'utf-8').split('\n')[0].trim(), 10);
-        } catch { /* unreadable lock treated as stale below */ }
-
-        if (Number.isInteger(lockPid) && lockPid !== process.pid && pidAlive(lockPid)) {
-            console.error(`❌ Another sync-skills run appears active (pid ${lockPid}; lock: ${LOCK_FILE}).`);
-            console.error('   Wait for it to finish, or remove the lock file if that process is gone.');
-            process.exit(1);
-        }
-        // Stale (owner dead / unreadable / our own leftover) — recover and retry once.
-        console.warn(`⚠️  Removing stale sync-skills lock (pid ${Number.isNaN(lockPid) ? 'unknown' : lockPid} is gone).`);
-        try { fs.rmSync(LOCK_FILE, { force: true }); } catch { /* fall through to retry */ }
-        try {
-            writeLock();
-        } catch {
-            console.error(`❌ Could not acquire the sync-skills lock (${LOCK_FILE}) after stale-lock recovery — another run may be starting right now.`);
-            process.exit(1);
-        }
+      /* unreadable lock treated as stale below */
     }
-    installLockRelease();
+
+    if (Number.isInteger(lockPid) && lockPid !== process.pid && pidAlive(lockPid)) {
+      console.error(`❌ Another sync-skills run appears active (pid ${lockPid}; lock: ${LOCK_FILE}).`);
+      console.error("   Wait for it to finish, or remove the lock file if that process is gone.");
+      process.exit(1);
+    }
+    // Stale (owner dead / unreadable / our own leftover) — recover and retry once.
+    console.warn(`⚠️  Removing stale sync-skills lock (pid ${Number.isNaN(lockPid) ? "unknown" : lockPid} is gone).`);
+    try {
+      fs.rmSync(LOCK_FILE, { force: true });
+    } catch {
+      /* fall through to retry */
+    }
+    try {
+      writeLock();
+    } catch {
+      console.error(
+        `❌ Could not acquire the sync-skills lock (${LOCK_FILE}) after stale-lock recovery — another run may be starting right now.`,
+      );
+      process.exit(1);
+    }
+  }
+  installLockRelease();
 }
 
 if (import.meta.main) {
-    let targetRoots: string[];
-    try {
-        targetRoots = resolveTargetRoots();
-    } catch (err) {
-        console.error(`❌ ${(err instanceof Error) ? err.message : err}`);
-        process.exit(1);
+  let targetRoots: string[];
+  try {
+    targetRoots = resolveTargetRoots();
+  } catch (err) {
+    console.error(`❌ ${err instanceof Error ? err.message : err}`);
+    process.exit(1);
+  }
+  // Reject nonexistent targets BEFORE any writes (T-20260912-017): a typo'd
+  // --dir path must not have its four platform directories created at the
+  // wrong root as a side effect of running the sync.
+  for (const root of targetRoots) {
+    if (!fs.existsSync(root)) {
+      console.error(`❌ Target root does not exist: ${root}`);
+      process.exit(1);
     }
-    // Reject nonexistent targets BEFORE any writes (T-20260912-017): a typo'd
-    // --dir path must not have its four platform directories created at the
-    // wrong root as a side effect of running the sync.
-    for (const root of targetRoots) {
-        if (!fs.existsSync(root)) {
-            console.error(`❌ Target root does not exist: ${root}`);
-            process.exit(1);
-        }
-    }
+  }
 
-    acquireLock();
+  acquireLock();
 
-    const allErrors: string[] = [];
-    const allWarnings: string[] = [];
+  const allErrors: string[] = [];
+  const allWarnings: string[] = [];
 
-    for (const root of targetRoots) {
-        const dirs = dirsFor(root);
-        console.log(`Syncing skills from SSOT (${dirs.ssotSkills})...`);
-        const { errors, warnings } = await syncSkills(dirs);
-        allErrors.push(...errors);
-        allWarnings.push(...warnings);
-    }
+  for (const root of targetRoots) {
+    const dirs = dirsFor(root);
+    console.log(`Syncing skills from SSOT (${dirs.ssotSkills})...`);
+    const { errors, warnings } = await syncSkills(dirs);
+    allErrors.push(...errors);
+    allWarnings.push(...warnings);
+  }
 
-    if (allWarnings.length > 0) {
-        console.warn(`\n⚠️  ${allWarnings.length} divergence warning(s):`);
-        for (const w of allWarnings) console.warn(`  - ${w}`);
-    }
+  if (allWarnings.length > 0) {
+    console.warn(`\n⚠️  ${allWarnings.length} divergence warning(s):`);
+    for (const w of allWarnings) console.warn(`  - ${w}`);
+  }
 
-    if (allErrors.length > 0) {
-        console.error(`\n❌ ${allErrors.length} error(s) during skill synchronization:`);
-        for (const e of allErrors) console.error(`  - ${e}`);
-        process.exitCode = 1;
-    }
+  if (allErrors.length > 0) {
+    console.error(`\n❌ ${allErrors.length} error(s) during skill synchronization:`);
+    for (const e of allErrors) console.error(`  - ${e}`);
+    process.exitCode = 1;
+  }
 
-    console.log('Skill synchronization complete!');
+  console.log("Skill synchronization complete!");
 }

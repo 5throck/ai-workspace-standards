@@ -53,36 +53,37 @@
 //       (the engine has an exit-0 abort path at its missing-marker prompt).
 //     - No auto-commit; guided recovery = recorded HEAD SHA + backup dir.
 
+import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, readdirSync, statSync, chmodSync } from "node:fs";
+import { basename, dirname, join, relative, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
-  existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, readdirSync, statSync, chmodSync,
-} from 'node:fs';
-import { basename, dirname, join, relative, resolve } from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import {
-  buildAdoptionPlan, detectHookManagerConflicts, findSecretShapedFiles, type AdoptionPlan,
-} from './helpers/adopt-plan.ts';
-import { resolveAgentExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
-import { isCanonicalPmStubBody } from './helpers/scaffold-markers.ts';
-import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
-import { substituteFiles } from './helpers/substitute-placeholders.ts';
-import { blankL0Refs } from './helpers/l0-ref-policy.ts';
-import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
-import { exclusionForName } from './lib/fleet.ts';
-import { setStateFile, resetStateFile, saveState, loadState, type PipelineState } from './lib/pipeline-state.ts';
+  buildAdoptionPlan,
+  detectHookManagerConflicts,
+  findSecretShapedFiles,
+  type AdoptionPlan,
+} from "./helpers/adopt-plan.ts";
+import { resolveAgentExtendsStub, stripL1BMetadata } from "./helpers/resolve-pm-stub.ts";
+import { isCanonicalPmStubBody } from "./helpers/scaffold-markers.ts";
+import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from "./helpers/template-utils.ts";
+import { substituteFiles } from "./helpers/substitute-placeholders.ts";
+import { blankL0Refs } from "./helpers/l0-ref-policy.ts";
+import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, parsePlatformList, type PlatformProfile } from "./lib/platforms.ts";
+import { exclusionForName } from "./lib/fleet.ts";
+import { setStateFile, resetStateFile, saveState, loadState, type PipelineState } from "./lib/pipeline-state.ts";
 
-const GREEN = '\x1b[32m';
-const RED = '\x1b[31m';
-const YELLOW = '\x1b[33m';
-const CYAN = '\x1b[36m';
-const RESET = '\x1b[0m';
+const GREEN = "\x1b[32m";
+const RED = "\x1b[31m";
+const YELLOW = "\x1b[33m";
+const CYAN = "\x1b[36m";
+const RESET = "\x1b[0m";
 
-const WORKSPACE_ROOT = resolve(import.meta.dir, '..');
-const TEMPLATES_DIR = join(WORKSPACE_ROOT, 'templates');
-const COMMON_DIR = join(TEMPLATES_DIR, 'common');
+const WORKSPACE_ROOT = resolve(import.meta.dir, "..");
+const TEMPLATES_DIR = join(WORKSPACE_ROOT, "templates");
+const COMMON_DIR = join(TEMPLATES_DIR, "common");
 const VARIANT_NAME_RE = /^co-[a-z][a-z0-9-]{1,30}$/;
-const GOVERNED_PLATFORM_TWINS = ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md']; // HERMES.md joins per ADR-0093
-const GOVERNED_GITHOOKS = new Set(['pre-commit', 'pre-push', 'commit-msg', 'post-checkout', 'pre-rebase', 'README.md']);
+const GOVERNED_PLATFORM_TWINS = ["CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md"]; // HERMES.md joins per ADR-0093
+const GOVERNED_GITHOOKS = new Set(["pre-commit", "pre-push", "commit-msg", "post-checkout", "pre-rebase", "README.md"]);
 
 function fail(msg: string): never {
   console.error(`${RED}${msg}${RESET}`);
@@ -90,15 +91,15 @@ function fail(msg: string): never {
 }
 
 function git(cwd: string, ...args: string[]): { status: number; out: string } {
-  const r = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8' });
-  return { status: r.status ?? 1, out: (r.stdout || '').trim() };
+  const r = spawnSync("git", ["-C", cwd, ...args], { encoding: "utf8" });
+  return { status: r.status ?? 1, out: (r.stdout || "").trim() };
 }
 
 function walkFiles(dir: string): string[] {
   const out: string[] = [];
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === 'node_modules' || entry.name === '.git') continue;
+    if (entry.name === "node_modules" || entry.name === ".git") continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) out.push(...walkFiles(full));
     else if (entry.isFile()) out.push(full);
@@ -115,17 +116,21 @@ function getArg(flag: string): string | undefined {
   }
   return undefined;
 }
-const VALUE_FLAGS = new Set(['--variant', '--platform', '--project']);
-const DRY_RUN = args.includes('--dry-run');
-const YES = args.includes('--yes') || args.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';
-let platform = getArg('--platform') ?? 'all';
+const VALUE_FLAGS = new Set(["--variant", "--platform", "--project"]);
+const DRY_RUN = args.includes("--dry-run");
+const YES = args.includes("--yes") || args.includes("-y") || process.env.CI === "true" || process.env.CI === "1";
+let platform = getArg("--platform") ?? "all";
 let selectedProfiles: PlatformProfile[] = [...PLATFORM_PROFILES];
-let variant = getArg('--variant') ?? '';
-const positional = args.find((a, i) => !a.startsWith('--') && (i === 0 || args[i - 1]?.startsWith('--') !== true || !VALUE_FLAGS.has(args[i - 1])));
-const projectArg = getArg('--project') ?? positional;
+let variant = getArg("--variant") ?? "";
+const positional = args.find(
+  (a, i) => !a.startsWith("--") && (i === 0 || args[i - 1]?.startsWith("--") !== true || !VALUE_FLAGS.has(args[i - 1])),
+);
+const projectArg = getArg("--project") ?? positional;
 
 if (!projectArg) {
-  console.error('Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--dry-run] [--yes]');
+  console.error(
+    "Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--dry-run] [--yes]",
+  );
   process.exit(1);
 }
 try {
@@ -146,16 +151,19 @@ console.log(`\n${CYAN}=== adopt-project: convert an existing project to the work
 console.log(`Project: ${projectDir}`);
 
 if (!existsSync(projectDir) || !statSync(projectDir).isDirectory()) fail(`Project directory not found: ${projectDir}`);
-if (projectDir === WORKSPACE_ROOT) fail('Target is the workspace root — adoption needs a project directory.');
+if (projectDir === WORKSPACE_ROOT) fail("Target is the workspace root — adoption needs a project directory.");
 
-const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8' });
+const bunCheck = spawnSync("bun", ["--version"], { encoding: "utf8" });
 if (bunCheck.status !== 0) {
   console.error(`${RED}[FAIL] bun not found.${RESET} Every workspace script and the pre-commit hook require bun.`);
-  console.error('       Install bun first:  curl -fsSL https://bun.sh/install | bash   (or: brew install oven-sh/bun/bun)');
+  console.error(
+    "       Install bun first:  curl -fsSL https://bun.sh/install | bash   (or: brew install oven-sh/bun/bun)",
+  );
   process.exit(1);
 }
 
-if (git(projectDir, 'rev-parse', '--git-dir').status !== 0) fail('Not a git repository — adoption requires git (history preservation is the rollback story).');
+if (git(projectDir, "rev-parse", "--git-dir").status !== 0)
+  fail("Not a git repository — adoption requires git (history preservation is the rollback story).");
 
 // Adoption-state detection runs BEFORE the clean-tree check: a freshly adopted (not yet
 // committed) project has a dirty tree by design, and the operator must be told the
@@ -163,101 +171,138 @@ if (git(projectDir, 'rev-parse', '--git-dir').status !== 0) fail('Not a git repo
 // Platform-independent marker (2026-10-01): canonical at the project root; the
 // pre-move .claude/template-version.txt is still recognized for state detection
 // and the country rewrite below.
-const markerPath = existsSync(join(projectDir, 'template-version.txt'))
-  ? join(projectDir, 'template-version.txt')
-  : join(projectDir, '.claude', 'template-version.txt');
-const ctxCommonPath = join(projectDir, 'docs', 'context.md');
-const stateFile = join(WORKSPACE_ROOT, 'tests', '.temp', `adopt-project-state-${createHash('sha256').update(projectDir).digest('hex').slice(0, 12)}.json`);
+const markerPath = existsSync(join(projectDir, "template-version.txt"))
+  ? join(projectDir, "template-version.txt")
+  : join(projectDir, ".claude", "template-version.txt");
+const ctxCommonPath = join(projectDir, "docs", "context.md");
+const stateFile = join(
+  WORKSPACE_ROOT,
+  "tests",
+  ".temp",
+  `adopt-project-state-${createHash("sha256").update(projectDir).digest("hex").slice(0, 12)}.json`,
+);
 const resuming = existsSync(stateFile);
 
 if (!resuming && existsSync(markerPath)) {
-  const ctxVariantExists = existsSync(join(projectDir, 'docs', `${variant || readMarkerVariant(markerPath)}.context.md`));
+  const ctxVariantExists = existsSync(
+    join(projectDir, "docs", `${variant || readMarkerVariant(markerPath)}.context.md`),
+  );
   if (existsSync(ctxCommonPath) && ctxVariantExists) {
-    fail('This project is already adopted (marker + context files all present).\n'
-      + '       Use the maintenance path instead: bun scripts/upgrade-project.ts <project-path> --variant <v>');
+    fail(
+      "This project is already adopted (marker + context files all present).\n" +
+        "       Use the maintenance path instead: bun scripts/upgrade-project.ts <project-path> --variant <v>",
+    );
   }
-  console.log(`${YELLOW}⚠️  Partial provenance detected (marker without full context files) — repair path: adopt will rewrite provenance and deliver what is missing.${RESET}`);
+  console.log(
+    `${YELLOW}⚠️  Partial provenance detected (marker without full context files) — repair path: adopt will rewrite provenance and deliver what is missing.${RESET}`,
+  );
 }
 
-const porcelain = git(projectDir, 'status', '--porcelain').out;
+const porcelain = git(projectDir, "status", "--porcelain").out;
 if (porcelain && !resuming) {
-  fail('Working tree is not clean. Commit or stash everything first — adoption needs a clean baseline for its rollback story.\n'
-    + `  ${YELLOW}git -C ${projectDir} status --porcelain${RESET}`);
+  fail(
+    "Working tree is not clean. Commit or stash everything first — adoption needs a clean baseline for its rollback story.\n" +
+      `  ${YELLOW}git -C ${projectDir} status --porcelain${RESET}`,
+  );
 }
 
 // GitHub baseline advisory (v1.1.0): adoption preserves history locally, but an
 // off-machine copy should exist BEFORE migrating. Non-fatal — the operator decides.
-if (!git(projectDir, 'remote', '-v').out.includes('github.com')) {
+if (!git(projectDir, "remote", "-v").out.includes("github.com")) {
   console.log(`${YELLOW}⚠️  No GitHub remote configured — migrate only after the history is safe off-machine.${RESET}`);
-  console.log(`       Run first:  bun scripts/ensure-github-repo.ts ${projectDir}   (checks, creates, pushes, verifies)`);
+  console.log(
+    `       Run first:  bun scripts/ensure-github-repo.ts ${projectDir}   (checks, creates, pushes, verifies)`,
+  );
 }
 
-const headSha = git(projectDir, 'rev-parse', 'HEAD');
-const head = headSha.status === 0 ? headSha.out : '';
+const headSha = git(projectDir, "rev-parse", "HEAD");
+const head = headSha.status === 0 ? headSha.out : "";
 
 function readMarkerVariant(marker: string): string {
   try {
-    return (readFileSync(marker, 'utf8').match(/^variant=(.*)$/m)?.[1] ?? '').trim();
-  } catch { return ''; }
+    return (readFileSync(marker, "utf8").match(/^variant=(.*)$/m)?.[1] ?? "").trim();
+  } catch {
+    return "";
+  }
 }
 
 // Refusal-grade: secret-shaped TRACKED files (their content enters engine stashes/backup scope).
-const trackedFiles = git(projectDir, 'ls-files').out ? git(projectDir, 'ls-files').out.split('\n').filter(Boolean) : [];
+const trackedFiles = git(projectDir, "ls-files").out ? git(projectDir, "ls-files").out.split("\n").filter(Boolean) : [];
 const secretFiles = findSecretShapedFiles(trackedFiles);
 if (secretFiles.length > 0) {
-  fail(`Refusing: secret-shaped files are tracked in this repo (--yes cannot bypass this):\n`
-    + secretFiles.map(f => `       - ${f}`).join('\n')
-    + `\n       Remove them from tracking (git rm --cached) or relocate before adopting.\n`
-    + `       The delivered .gitignore + pre-commit gates will keep them out afterwards.`);
+  fail(
+    `Refusing: secret-shaped files are tracked in this repo (--yes cannot bypass this):\n` +
+      secretFiles.map((f) => `       - ${f}`).join("\n") +
+      `\n       Remove them from tracking (git rm --cached) or relocate before adopting.\n` +
+      `       The delivered .gitignore + pre-commit gates will keep them out afterwards.`,
+  );
 }
 const hookFindings = detectHookManagerConflicts(projectDir);
 if (hookFindings.length > 0) {
-  fail(`Refusing: competing hook managers detected (--yes cannot bypass this):\n`
-    + hookFindings.map(f => `       - [${f.kind}] ${f.detail}`).join('\n')
-    + `\n       Adopt installs .githooks/ + core.hooksPath enforcement; remove or migrate the\n`
-    + `       hook managers above first (their prepare scripts would silently re-disable the\n`
-    + `       workspace gates on the next bun install).`);
+  fail(
+    `Refusing: competing hook managers detected (--yes cannot bypass this):\n` +
+      hookFindings.map((f) => `       - [${f.kind}] ${f.detail}`).join("\n") +
+      `\n       Adopt installs .githooks/ + core.hooksPath enforcement; remove or migrate the\n` +
+      `       hook managers above first (their prepare scripts would silently re-disable the\n` +
+      `       workspace gates on the next bun install).`,
+  );
 }
 
-console.log(`${GREEN}✅ Pre-flight OK${RESET}${head ? ` (HEAD ${head.slice(0, 10)})` : ' (no commits yet)'}`);
+console.log(`${GREEN}✅ Pre-flight OK${RESET}${head ? ` (HEAD ${head.slice(0, 10)})` : " (no commits yet)"}`);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PHASE 2 — VARIANT SELECTION
 // ═══════════════════════════════════════════════════════════════════════════════
 const availableVariants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
-  .filter(e => e.isDirectory() && e.name.startsWith('co-'))
-  .map(e => e.name)
+  .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+  .map((e) => e.name)
   .sort();
 
 if (!variant) {
   console.log(`\nNo --variant given. Valid variants:`);
   for (const v of availableVariants) {
-    let status = '';
-    try { status = JSON.parse(readFileSync(join(TEMPLATES_DIR, v, 'variant.json'), 'utf8')).status ?? ''; } catch { /* stub */ }
-    console.log(`  - ${v}${status ? `  (${status})` : ''}`);
+    let status = "";
+    try {
+      status = JSON.parse(readFileSync(join(TEMPLATES_DIR, v, "variant.json"), "utf8")).status ?? "";
+    } catch {
+      /* stub */
+    }
+    console.log(`  - ${v}${status ? `  (${status})` : ""}`);
   }
   process.exit(1);
 }
 if (!VARIANT_NAME_RE.test(variant)) fail(`Invalid variant name '${variant}' (expected co-<slug>).`);
 const variantDir = join(TEMPLATES_DIR, variant);
-if (!existsSync(variantDir)) fail(`Variant template not found: templates/${variant}\n       Valid variants: ${availableVariants.join(', ')}`);
+if (!existsSync(variantDir))
+  fail(`Variant template not found: templates/${variant}\n       Valid variants: ${availableVariants.join(", ")}`);
 
-let variantStatus = '';
-try { variantStatus = JSON.parse(readFileSync(join(variantDir, 'variant.json'), 'utf8')).status ?? ''; } catch { /* none */ }
-if (variantStatus && variantStatus !== 'stable') {
+let variantStatus = "";
+try {
+  variantStatus = JSON.parse(readFileSync(join(variantDir, "variant.json"), "utf8")).status ?? "";
+} catch {
+  /* none */
+}
+if (variantStatus && variantStatus !== "stable") {
   if (YES) {
-    console.log(`${YELLOW}⚠️  Variant '${variant}' status is '${variantStatus}' (non-stable) — proceeding via --yes/CI (documented new-project parity).${RESET}`);
+    console.log(
+      `${YELLOW}⚠️  Variant '${variant}' status is '${variantStatus}' (non-stable) — proceeding via --yes/CI (documented new-project parity).${RESET}`,
+    );
   } else {
-    const answer = prompt(`Variant '${variant}' status is '${variantStatus}' (non-stable). Proceed? [y/N] `) ?? '';
-    if (!['y', 'Y'].includes(answer)) { console.log('Aborted.'); process.exit(0); }
+    const answer = prompt(`Variant '${variant}' status is '${variantStatus}' (non-stable). Proceed? [y/N] `) ?? "";
+    if (!["y", "Y"].includes(answer)) {
+      console.log("Aborted.");
+      process.exit(0);
+    }
   }
 }
 
 // Adoption's own target policy (outside-Projects consent is NOT laundered through --yes).
-const projectsRoot = join(WORKSPACE_ROOT, 'Projects');
+const projectsRoot = join(WORKSPACE_ROOT, "Projects");
 if (!projectDir.startsWith(projectsRoot) && !YES) {
-  fail(`Target is outside Projects/ (${relative(WORKSPACE_ROOT, projectDir) || projectDir}).\n`
-    + `       Pass --yes to adopt a project outside the canonical Projects/ layout.`);
+  fail(
+    `Target is outside Projects/ (${relative(WORKSPACE_ROOT, projectDir) || projectDir}).\n` +
+      `       Pass --yes to adopt a project outside the canonical Projects/ layout.`,
+  );
 }
 
 // Fleet membership SSOT guard (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
@@ -271,15 +316,21 @@ const adoptExclusion = (() => {
   try {
     return exclusionForName(adoptTargetName, WORKSPACE_ROOT);
   } catch (err) {
-    fail(`Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`);
+    fail(
+      `Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 })();
 if (adoptExclusion) {
   if (!YES) {
-    fail(`'${adoptTargetName}' is an EXCLUDED fleet member (docs/fleet-membership.json, ${adoptExclusion.decision_ref}) — refusing to adopt: the decision record rules it out of the template fleet.\n`
-      + `       Remove the exclusion row from docs/fleet-membership.json first (the sanctioned reversal path), or pass --yes to override.`);
+    fail(
+      `'${adoptTargetName}' is an EXCLUDED fleet member (docs/fleet-membership.json, ${adoptExclusion.decision_ref}) — refusing to adopt: the decision record rules it out of the template fleet.\n` +
+        `       Remove the exclusion row from docs/fleet-membership.json first (the sanctioned reversal path), or pass --yes to override.`,
+    );
   }
-  console.warn(`⚠️  adopt-project: --yes override — adopting '${adoptTargetName}' although it carries an exclusion record (docs/fleet-membership.json, ${adoptExclusion.decision_ref}).`);
+  console.warn(
+    `⚠️  adopt-project: --yes override — adopting '${adoptTargetName}' although it carries an exclusion record (docs/fleet-membership.json, ${adoptExclusion.decision_ref}).`,
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -287,7 +338,13 @@ if (adoptExclusion) {
 // ═══════════════════════════════════════════════════════════════════════════════
 const projectName = basename(projectDir);
 const plan: AdoptionPlan = buildAdoptionPlan({
-  variant, platform, projectName, commonDir: COMMON_DIR, variantDir, projectDir, trackedFiles,
+  variant,
+  platform,
+  projectName,
+  commonDir: COMMON_DIR,
+  variantDir,
+  projectDir,
+  trackedFiles,
 });
 
 console.log(`\n${CYAN}--- Adoption plan ---${RESET}`);
@@ -295,7 +352,9 @@ console.log(`Delivered paths (effective template tree): ${plan.deliveredPathCoun
 console.log(`Colliding foreign files (preserved to scripts/_legacy/): ${plan.collisions.length}`);
 for (const c of plan.collisions.slice(0, 20)) console.log(`  ⚠️  ${c.rel}  [${c.claimPass}]`);
 if (plan.collisions.length > 20) console.log(`  … and ${plan.collisions.length - 20} more`);
-console.log(`Retained foreign scripts (will be registered in scripts/SCRIPTS.md): ${plan.retainedForeignScripts.length}`);
+console.log(
+  `Retained foreign scripts (will be registered in scripts/SCRIPTS.md): ${plan.retainedForeignScripts.length}`,
+);
 for (const s of plan.retainedForeignScripts) console.log(`  + ${s}`);
 console.log(`Foreign skills (protected via variant.json skill_manifest seed): ${plan.foreignSkills.length}`);
 for (const s of plan.foreignSkills) console.log(`  🛡️  ${s}`);
@@ -308,25 +367,28 @@ console.log(`  Existing traces above are PRESERVED; platform twins get workspace
 console.log(`  no CI file is overwritten without its own backup entry.`);
 
 let declinedAgents: string[] = [];
-let selectedCountry = '';
+let selectedCountry = "";
 if (!YES) {
-  const proceed = prompt('Proceed with adoption as planned? [Y/n] ') ?? '';
-  if (['n', 'N'].includes(proceed)) { console.log('Aborted.'); process.exit(0); }
+  const proceed = prompt("Proceed with adoption as planned? [Y/n] ") ?? "";
+  if (["n", "N"].includes(proceed)) {
+    console.log("Aborted.");
+    process.exit(0);
+  }
 
   if (plan.roster.length > 0) {
-    const all = prompt(`Adopt the full variant agent roster (${plan.roster.join(', ')})? [Y/n] `) ?? '';
-    if (['n', 'N'].includes(all)) {
+    const all = prompt(`Adopt the full variant agent roster (${plan.roster.join(", ")})? [Y/n] `) ?? "";
+    if (["n", "N"].includes(all)) {
       for (const agent of plan.roster) {
-        const keep = prompt(`  adopt agent '${agent}'? [Y/n] `) ?? '';
-        if (['n', 'N'].includes(keep)) declinedAgents.push(agent);
+        const keep = prompt(`  adopt agent '${agent}'? [Y/n] `) ?? "";
+        if (["n", "N"].includes(keep)) declinedAgents.push(agent);
       }
     }
   }
 
   const countryCfg = readCountryConfig(variantDir);
   if (countryCfg.countries.length > 0) {
-    console.log(`Available jurisdictions: ${countryCfg.countries.join(', ')} (empty = region-neutral)`);
-    const answer = (prompt('Target jurisdiction [region-neutral]: ') ?? '').trim();
+    console.log(`Available jurisdictions: ${countryCfg.countries.join(", ")} (empty = region-neutral)`);
+    const answer = (prompt("Target jurisdiction [region-neutral]: ") ?? "").trim();
     if (answer) selectedCountry = answer;
   }
 } else {
@@ -335,21 +397,25 @@ if (!YES) {
 
 function readCountryConfig(vDir: string): { profilesDir: string; countries: string[] } {
   try {
-    const cfg = JSON.parse(readFileSync(join(vDir, 'variant.json'), 'utf8')).country_config ?? {};
-    const profilesDir = (cfg.profiles_dir as string) ?? 'docs/countries';
+    const cfg = JSON.parse(readFileSync(join(vDir, "variant.json"), "utf8")).country_config ?? {};
+    const profilesDir = (cfg.profiles_dir as string) ?? "docs/countries";
     const pDir = join(vDir, profilesDir);
     const countries = existsSync(pDir)
-      ? readdirSync(pDir, { withFileTypes: true }).filter(e => e.isDirectory() && e.name !== 'ACTIVE.md').map(e => e.name)
+      ? readdirSync(pDir, { withFileTypes: true })
+          .filter((e) => e.isDirectory() && e.name !== "ACTIVE.md")
+          .map((e) => e.name)
       : [];
     return { profilesDir, countries };
-  } catch { return { profilesDir: 'docs/countries', countries: [] }; }
+  } catch {
+    return { profilesDir: "docs/countries", countries: [] };
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PHASE 4 — PRE-DELIVERY SAFETY (tree stays porcelain-clean)
 // ═══════════════════════════════════════════════════════════════════════════════
 const startedAt = new Date().toISOString();
-const backupDir = join(WORKSPACE_ROOT, 'tests', '.temp', `adopt-backup-${Date.now()}`);
+const backupDir = join(WORKSPACE_ROOT, "tests", ".temp", `adopt-backup-${Date.now()}`);
 let state: PipelineState | null = null;
 if (!DRY_RUN) {
   // State lives OUTSIDE the project repo during the run — a state file inside the
@@ -357,13 +423,22 @@ if (!DRY_RUN) {
   // (meeting P0-3). On success it is removed; on failure it drives resume.
   setStateFile(stateFile);
   state = loadState() ?? {
-    status: 'in_progress', currentPhase: 'adopt_preflight', startedAt, variantName: variant,
-    l3ProjectPath: projectDir, rollbackActions: [], context: {},
+    status: "in_progress",
+    currentPhase: "adopt_preflight",
+    startedAt,
+    variantName: variant,
+    l3ProjectPath: projectDir,
+    rollbackActions: [],
+    context: {},
   };
-  state.currentPhase = 'adopt_predelivery';
+  state.currentPhase = "adopt_predelivery";
   state.context = {
     ...(state.context as Record<string, unknown>),
-    projectDir, backupDir, platform, selectedCountry, declinedAgents,
+    projectDir,
+    backupDir,
+    platform,
+    selectedCountry,
+    declinedAgents,
     deliveryDone: (state.context as Record<string, unknown>).deliveryDone ?? false,
     predeliveryDone: true,
   };
@@ -383,52 +458,78 @@ if (!DRY_RUN) {
   }
   // Foreign-skill manifest seed — invisible to git status and to `stash -u` via info/exclude.
   if (plan.foreignSkills.length > 0) {
-    const tplVariantJson = JSON.parse(readFileSync(join(variantDir, 'variant.json'), 'utf8')) as Record<string, unknown>;
+    const tplVariantJson = JSON.parse(readFileSync(join(variantDir, "variant.json"), "utf8")) as Record<
+      string,
+      unknown
+    >;
     const manifest = (tplVariantJson.skill_manifest ?? {}) as Record<string, unknown>;
-    const existing = Array.isArray(manifest.variant_specific) ? manifest.variant_specific as Array<Record<string, unknown>> : [];
-    const have = new Set(existing.map(e => String(e.name ?? '')));
-    const merged = [...existing, ...plan.foreignSkills.filter(s => !have.has(s)).map(s => ({ name: s, reason: 'adopted foreign skill (adopt-project)' }))];
+    const existing = Array.isArray(manifest.variant_specific)
+      ? (manifest.variant_specific as Array<Record<string, unknown>>)
+      : [];
+    const have = new Set(existing.map((e) => String(e.name ?? "")));
+    const merged = [
+      ...existing,
+      ...plan.foreignSkills
+        .filter((s) => !have.has(s))
+        .map((s) => ({ name: s, reason: "adopted foreign skill (adopt-project)" })),
+    ];
     const seeded = { ...tplVariantJson, skill_manifest: { ...manifest, variant_specific: merged } };
-    writeFileSync(join(projectDir, 'variant.json'), JSON.stringify(seeded, null, 2) + '\n');
-    appendInfoExclude(projectDir, 'variant.json');
-    console.log(`  🛡️  seeded variant.json skill_manifest with ${plan.foreignSkills.length} foreign skill(s) (info/exclude-protected)`);
+    writeFileSync(join(projectDir, "variant.json"), JSON.stringify(seeded, null, 2) + "\n");
+    appendInfoExclude(projectDir, "variant.json");
+    console.log(
+      `  🛡️  seeded variant.json skill_manifest with ${plan.foreignSkills.length} foreign skill(s) (info/exclude-protected)`,
+    );
   }
 }
 
 function appendInfoExclude(project: string, line: string): void {
-  const excludePath = join(project, '.git', 'info', 'exclude');
+  const excludePath = join(project, ".git", "info", "exclude");
   mkdirSync(dirname(excludePath), { recursive: true });
-  let content = '';
-  try { content = readFileSync(excludePath, 'utf8'); } catch { /* new file */ }
+  let content = "";
+  try {
+    content = readFileSync(excludePath, "utf8");
+  } catch {
+    /* new file */
+  }
   const marker = `# adopt-project: ${line}`;
   if (!content.includes(marker)) {
-    writeFileSync(excludePath, content.trimEnd() + (content.trim() ? '\n' : '') + `${marker}\n${line}\n`);
+    writeFileSync(excludePath, content.trimEnd() + (content.trim() ? "\n" : "") + `${marker}\n${line}\n`);
   }
 }
 
 function removeInfoExclude(project: string, line: string): void {
-  const excludePath = join(project, '.git', 'info', 'exclude');
+  const excludePath = join(project, ".git", "info", "exclude");
   if (!existsSync(excludePath)) return;
-  const lines = readFileSync(excludePath, 'utf8').split('\n');
+  const lines = readFileSync(excludePath, "utf8").split("\n");
   const kept = lines.filter((l, i) => {
     if (l === line) return false;
     if (l === `# adopt-project: ${line}` && lines[i + 1] === line) return false;
     return true;
   });
-  writeFileSync(excludePath, kept.join('\n'));
+  writeFileSync(excludePath, kept.join("\n"));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PHASE 5 — DELIVERY (upgrade-project subprocess)
 // ═══════════════════════════════════════════════════════════════════════════════
-const manifestPath = join(projectDir, '.claude', 'last-upgrade-delivery.json');
+const manifestPath = join(projectDir, ".claude", "last-upgrade-delivery.json");
 const manifestMtimeBefore = existsSync(manifestPath) ? statSync(manifestPath).mtimeMs : 0;
 
 console.log(`\n${CYAN}--- Delivery (upgrade-project engine) ---${RESET}`);
-const engine = spawnSync(process.execPath, [
-  join(WORKSPACE_ROOT, 'scripts', 'upgrade-project.ts'),
-  projectDir, '--variant', variant, '--platform', platform, '--yes', ...(DRY_RUN ? ['--dry-run'] : []),
-], { stdio: 'inherit', cwd: WORKSPACE_ROOT });
+const engine = spawnSync(
+  process.execPath,
+  [
+    join(WORKSPACE_ROOT, "scripts", "upgrade-project.ts"),
+    projectDir,
+    "--variant",
+    variant,
+    "--platform",
+    platform,
+    "--yes",
+    ...(DRY_RUN ? ["--dry-run"] : []),
+  ],
+  { stdio: "inherit", cwd: WORKSPACE_ROOT },
+);
 
 if (DRY_RUN) {
   console.log(`\n${CYAN}--- Planned settling pass (skipped in --dry-run) ---${RESET}`);
@@ -446,7 +547,9 @@ if (DRY_RUN) {
 
 const manifestFresh = existsSync(manifestPath) && statSync(manifestPath).mtimeMs > manifestMtimeBefore;
 if (engine.status !== 0 || !manifestFresh) {
-  console.error(`\n${RED}Delivery did not complete (engine exit ${engine.status}${manifestFresh ? '' : ', no fresh delivery manifest'}).${RESET}`);
+  console.error(
+    `\n${RED}Delivery did not complete (engine exit ${engine.status}${manifestFresh ? "" : ", no fresh delivery manifest"}).${RESET}`,
+  );
   console.error(`Guided recovery (never automatic):`);
   if (head) console.error(`  git -C ${projectDir} reset --hard ${head} && git -C ${projectDir} clean -fd`);
   console.error(`  Collision backups: ${backupDir}`);
@@ -454,8 +557,8 @@ if (engine.status !== 0 || !manifestFresh) {
   process.exit(1);
 }
 console.log(`${GREEN}✅ Delivery complete.${RESET}`);
-if (!state) fail('Internal: state missing after delivery (non-dry-run path).');
-state.currentPhase = 'adopt_settling';
+if (!state) fail("Internal: state missing after delivery (non-dry-run path).");
+state.currentPhase = "adopt_settling";
 state.context = { ...(state.context as Record<string, unknown>), deliveryDone: true, headAtDelivery: head };
 saveState(state);
 
@@ -470,11 +573,11 @@ const report = {
   seeds: [] as string[],
   substituted: [] as string[],
   platformRemoved: [] as string[],
-  country: selectedCountry || 'region-neutral',
-  env: { hooksPath: false, bunInstall: false, graft: false, gitleaksFindings: -1, auditSmoke: 'not-run' },
+  country: selectedCountry || "region-neutral",
+  env: { hooksPath: false, bunInstall: false, graft: false, gitleaksFindings: -1, auditSmoke: "not-run" },
 };
 
-const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { files?: string[] };
+const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { files?: string[] };
 report.deliveredManifest = manifest.files ?? [];
 const deliveredSet = new Set(report.deliveredManifest);
 
@@ -482,54 +585,61 @@ const deliveredSet = new Set(report.deliveredManifest);
 for (const c of plan.collisions) {
   const backupFile = join(backupDir, c.rel);
   if (!existsSync(backupFile)) continue;
-  const relUnderLegacy = c.rel.startsWith('scripts/') ? c.rel.slice('scripts/'.length) : c.rel.replace(/^\//, '');
-  const dest = join(projectDir, 'scripts', '_legacy', relUnderLegacy);
+  const relUnderLegacy = c.rel.startsWith("scripts/") ? c.rel.slice("scripts/".length) : c.rel.replace(/^\//, "");
+  const dest = join(projectDir, "scripts", "_legacy", relUnderLegacy);
   mkdirSync(dirname(dest), { recursive: true });
   writeFileSync(dest, readFileSync(backupFile));
-  try { chmodSync(dest, 0o644); } catch { /* non-executable by default on this FS */ }
+  try {
+    chmodSync(dest, 0o644);
+  } catch {
+    /* non-executable by default on this FS */
+  }
   report.restoredToLegacy.push(relative(projectDir, dest));
 }
-if (report.restoredToLegacy.length > 0) console.log(`  🗄️  ${report.restoredToLegacy.length} foreign file(s) archived under scripts/_legacy/`);
+if (report.restoredToLegacy.length > 0)
+  console.log(`  🗄️  ${report.restoredToLegacy.length} foreign file(s) archived under scripts/_legacy/`);
 
 // 2. Register retained foreign scripts (audit's registry-consistency gate needs rows).
 // The engine never delivers scripts/SCRIPTS.md (registry is scaffold-time) — seed the
 // project's copy from templates/common first so registration has a table to append to.
-const projScriptsMd = join(projectDir, 'scripts', 'SCRIPTS.md');
-if (!existsSync(projScriptsMd) && existsSync(join(COMMON_DIR, 'scripts', 'SCRIPTS.md'))) {
+const projScriptsMd = join(projectDir, "scripts", "SCRIPTS.md");
+if (!existsSync(projScriptsMd) && existsSync(join(COMMON_DIR, "scripts", "SCRIPTS.md"))) {
   mkdirSync(dirname(projScriptsMd), { recursive: true });
-  writeFileSync(projScriptsMd, readFileSync(join(COMMON_DIR, 'scripts', 'SCRIPTS.md'), 'utf8'));
-  report.seeds.push('scripts/SCRIPTS.md');
-  console.log('  📋 scripts/SCRIPTS.md seeded from templates/common (project registry snapshot)');
+  writeFileSync(projScriptsMd, readFileSync(join(COMMON_DIR, "scripts", "SCRIPTS.md"), "utf8"));
+  report.seeds.push("scripts/SCRIPTS.md");
+  console.log("  📋 scripts/SCRIPTS.md seeded from templates/common (project registry snapshot)");
 }
 if (plan.retainedForeignScripts.length > 0 && existsSync(projScriptsMd)) {
-  let registry = readFileSync(projScriptsMd, 'utf8');
-  const registryHeaderEnd = registry.indexOf('\n## ', registry.indexOf('## Registry'));
+  let registry = readFileSync(projScriptsMd, "utf8");
+  const registryHeaderEnd = registry.indexOf("\n## ", registry.indexOf("## Registry"));
   for (const rel of plan.retainedForeignScripts) {
     const abs = join(projectDir, rel);
-    let content = readFileSync(abs, 'utf8');
+    let content = readFileSync(abs, "utf8");
     if (!/@version\s+\d+\.\d+\.\d+/.test(content)) {
       content = `// @version 0.0.1\n` + content;
       writeFileSync(abs, content);
     }
-    const name = rel.slice('scripts/'.length);
+    const name = rel.slice("scripts/".length);
     if (!registry.includes(`\`${name}\``)) {
       const row = `| \`${name}\` | L0 | 0.0.1 | active | Adopted foreign script (adopt-project 2026-09-23) | —| L0 | —|\n`;
-      registry = registryHeaderEnd === -1
-        ? registry.trimEnd() + '\n' + row
-        : registry.slice(0, registryHeaderEnd).trimEnd() + '\n' + row + registry.slice(registryHeaderEnd);
+      registry =
+        registryHeaderEnd === -1
+          ? registry.trimEnd() + "\n" + row
+          : registry.slice(0, registryHeaderEnd).trimEnd() + "\n" + row + registry.slice(registryHeaderEnd);
       report.registeredScripts.push(name);
     }
   }
   writeFileSync(projScriptsMd, registry);
-  if (report.registeredScripts.length > 0) console.log(`  📋 ${report.registeredScripts.length} retained foreign script(s) registered in scripts/SCRIPTS.md`);
+  if (report.registeredScripts.length > 0)
+    console.log(`  📋 ${report.registeredScripts.length} retained foreign script(s) registered in scripts/SCRIPTS.md`);
 }
 
 // 3. Remove the seeded variant.json (scaffold parity) + its info/exclude entry.
-const seededVariantJson = join(projectDir, 'variant.json');
+const seededVariantJson = join(projectDir, "variant.json");
 if (existsSync(seededVariantJson) && plan.foreignSkills.length > 0) {
   rmSync(seededVariantJson);
-  removeInfoExclude(projectDir, 'variant.json');
-  console.log('  🗑️  variant.json seed removed (scaffold parity)');
+  removeInfoExclude(projectDir, "variant.json");
+  console.log("  🗑️  variant.json seed removed (scaffold parity)");
 }
 
 // 4. agents/*.md: self-contained (extends-stub resolution) + pm L1-B strip.
@@ -538,27 +648,31 @@ if (existsSync(seededVariantJson) && plan.foreignSkills.length > 0) {
 // stubs resolve here too); pm.md keeps the H12 canonical-prose check injected.
 let pmResolvedAsStub = false;
 {
-  const projAgentsDir = join(projectDir, 'agents');
+  const projAgentsDir = join(projectDir, "agents");
   if (existsSync(projAgentsDir)) {
-    for (const fname of readdirSync(projAgentsDir).filter(f => f.endsWith('.md')).sort()) {
+    for (const fname of readdirSync(projAgentsDir)
+      .filter((f) => f.endsWith(".md"))
+      .sort()) {
       const agentPath = join(projAgentsDir, fname);
       const stub = resolveAgentExtendsStub(
         agentPath,
-        join(COMMON_DIR, 'agents', fname),
+        join(COMMON_DIR, "agents", fname),
         variant,
-        fname === 'pm.md' ? { isCanonicalStubBody: isCanonicalPmStubBody } : undefined,
+        fname === "pm.md" ? { isCanonicalStubBody: isCanonicalPmStubBody } : undefined,
       );
       if (stub.resolved) {
-        if (fname === 'pm.md') pmResolvedAsStub = true;
-        console.log(`  ✅ agents/${fname}: extends-stub resolved against templates/common body${stub.nonCanonical ? ' (H12: non-canonical prose body discarded — see transcript)' : ''}`);
+        if (fname === "pm.md") pmResolvedAsStub = true;
+        console.log(
+          `  ✅ agents/${fname}: extends-stub resolved against templates/common body${stub.nonCanonical ? " (H12: non-canonical prose body discarded — see transcript)" : ""}`,
+        );
       }
     }
   }
 }
-const projPmMd = join(projectDir, 'agents', 'pm.md');
+const projPmMd = join(projectDir, "agents", "pm.md");
 if (existsSync(projPmMd)) {
   stripL1BMetadata(projPmMd);
-  if (!pmResolvedAsStub) console.log('  ✅ agents/pm.md: L1-B metadata stripped');
+  if (!pmResolvedAsStub) console.log("  ✅ agents/pm.md: L1-B metadata stripped");
 }
 
 // 4b. Generate platform agent mirrors (design
@@ -567,12 +681,18 @@ if (existsSync(projPmMd)) {
 // projects get conforming .claude/agents mirrors from minute zero, so the
 // parity gate is green on the project's first audit.
 {
-  const mirrorGenerator = join(WORKSPACE_ROOT, 'scripts', 'sync-agent-mirrors.ts');
+  const mirrorGenerator = join(WORKSPACE_ROOT, "scripts", "sync-agent-mirrors.ts");
   if (existsSync(mirrorGenerator)) {
-    console.log('🪞 Generating platform agent mirrors (.claude/agents)...');
-    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir, '--templates-root', join(WORKSPACE_ROOT, 'templates')], { stdio: 'inherit' });
+    console.log("🪞 Generating platform agent mirrors (.claude/agents)...");
+    const mirrorResult = spawnSync(
+      process.execPath,
+      [mirrorGenerator, "--dir", projectDir, "--templates-root", join(WORKSPACE_ROOT, "templates")],
+      { stdio: "inherit" },
+    );
     if (mirrorResult.status !== 0) {
-      console.error(`❌ Agent-mirror generation failed — the project is adopted but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`);
+      console.error(
+        `❌ Agent-mirror generation failed — the project is adopted but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`,
+      );
       if (import.meta.main) {
         process.exit(1);
       }
@@ -581,30 +701,38 @@ if (existsSync(projPmMd)) {
 }
 
 // 5. docs/<variant>.context.md + Template Provenance footer.
-const ctxVariantPath = join(projectDir, 'docs', `${variant}.context.md`);
-const version = readFileSync(join(TEMPLATES_DIR, 'VERSION'), 'utf8').trim();
-if (!existsSync(ctxVariantPath) && existsSync(join(COMMON_DIR, 'docs', 'variant.context.template.md'))) {
-  applyContextTemplate(join(COMMON_DIR, 'docs', 'variant.context.template.md'), ctxVariantPath, {
+const ctxVariantPath = join(projectDir, "docs", `${variant}.context.md`);
+const version = readFileSync(join(TEMPLATES_DIR, "VERSION"), "utf8").trim();
+if (!existsSync(ctxVariantPath) && existsSync(join(COMMON_DIR, "docs", "variant.context.template.md"))) {
+  applyContextTemplate(join(COMMON_DIR, "docs", "variant.context.template.md"), ctxVariantPath, {
     variantName: variant,
     version,
-    pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[variant] ?? 'Workflow management, dispatch, quality gates',
+    pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[variant] ?? "Workflow management, dispatch, quality gates",
   });
   console.log(`  ✅ docs/${variant}.context.md generated from the canonical template`);
 }
-if (existsSync(ctxVariantPath) && !readFileSync(ctxVariantPath, 'utf8').includes('Template-Version:')) {
-  const jurisdiction = selectedCountry ? `- **Target-Jurisdiction**: ${selectedCountry}\n` : '- **Target-Jurisdiction**: region-neutral\n';
-  appendFile(ctxVariantPath, `\n## Template Provenance\n\n- **Template-Version**: ${version}\n- **Template-Variant**: ${variant}\n${jurisdiction}`);
+if (existsSync(ctxVariantPath) && !readFileSync(ctxVariantPath, "utf8").includes("Template-Version:")) {
+  const jurisdiction = selectedCountry
+    ? `- **Target-Jurisdiction**: ${selectedCountry}\n`
+    : "- **Target-Jurisdiction**: region-neutral\n";
+  appendFile(
+    ctxVariantPath,
+    `\n## Template Provenance\n\n- **Template-Version**: ${version}\n- **Template-Variant**: ${variant}\n${jurisdiction}`,
+  );
   console.log(`  ✅ Template Provenance footer appended to docs/${variant}.context.md`);
 }
 
 // 6-8. Add-if-missing seeds: memory index, docs README pair, CHANGELOG.
-seedIfMissing(join(projectDir, 'memory', 'MEMORY.md'),
-  `# Memory Index\n\n## Sessions\n\n| Date | Summary |\n|------|---------|\n\n## Meetings\n\n| Date | Topic | File |\n|------|-------|------|\n\n## ADRs\n\n| Date | ADR | Decision |\n|------|-----|----------|\n`, 'memory/MEMORY.md');
-for (const doc of ['docs/README.md', 'docs/README_ko.md']) {
-  const src = join(COMMON_DIR, 'docs', '_common', basename(doc));
-  if (existsSync(src)) seedIfMissing(join(projectDir, doc), readFileSync(src, 'utf8'), doc);
+seedIfMissing(
+  join(projectDir, "memory", "MEMORY.md"),
+  `# Memory Index\n\n## Sessions\n\n| Date | Summary |\n|------|---------|\n\n## Meetings\n\n| Date | Topic | File |\n|------|-------|------|\n\n## ADRs\n\n| Date | ADR | Decision |\n|------|-----|----------|\n`,
+  "memory/MEMORY.md",
+);
+for (const doc of ["docs/README.md", "docs/README_ko.md"]) {
+  const src = join(COMMON_DIR, "docs", "_common", basename(doc));
+  if (existsSync(src)) seedIfMissing(join(projectDir, doc), readFileSync(src, "utf8"), doc);
 }
-seedIfMissing(join(projectDir, 'CHANGELOG.md'), readFileSync(join(COMMON_DIR, 'CHANGELOG.md'), 'utf8'), 'CHANGELOG.md');
+seedIfMissing(join(projectDir, "CHANGELOG.md"), readFileSync(join(COMMON_DIR, "CHANGELOG.md"), "utf8"), "CHANGELOG.md");
 
 function seedIfMissing(dest: string, content: string, label: string): void {
   if (existsSync(dest)) return;
@@ -612,58 +740,68 @@ function seedIfMissing(dest: string, content: string, label: string): void {
   writeFileSync(dest, content);
   report.seeds.push(label);
 }
-if (report.seeds.length > 0) console.log(`  🌱 seeded (add-if-missing): ${report.seeds.join(', ')}`);
+if (report.seeds.length > 0) console.log(`  🌱 seeded (add-if-missing): ${report.seeds.join(", ")}`);
 
 function appendFile(path: string, text: string): void {
-  writeFileSync(path, readFileSync(path, 'utf8').trimEnd() + text);
+  writeFileSync(path, readFileSync(path, "utf8").trimEnd() + text);
 }
 
 // 9. blankL0Refs sweep — scoped to delivered .md files.
 let blanked = 0;
 for (const rel of deliveredSet) {
-  if (!rel.endsWith('.md')) continue;
+  if (!rel.endsWith(".md")) continue;
   const abs = join(projectDir, rel);
   if (!existsSync(abs)) continue;
-  const original = readFileSync(abs, 'utf8');
+  const original = readFileSync(abs, "utf8");
   const cleaned = blankL0Refs(original);
-  if (cleaned !== original) { writeFileSync(abs, cleaned); blanked++; }
+  if (cleaned !== original) {
+    writeFileSync(abs, cleaned);
+    blanked++;
+  }
 }
 if (blanked > 0) console.log(`  🧹 blanked L0 CONSTITUTION references in ${blanked} delivered file(s)`);
 
 // 10. Scoped placeholder substitution (delivery-manifest files only).
-const substituted = substituteFiles([...deliveredSet].filter(rel => existsSync(join(projectDir, rel))), projectDir, {
-  projectName, description: 'An adopted project', characteristics: '', variantName: variant,
-  countryDisplayName: selectedCountry || '',
-});
+const substituted = substituteFiles(
+  [...deliveredSet].filter((rel) => existsSync(join(projectDir, rel))),
+  projectDir,
+  {
+    projectName,
+    description: "An adopted project",
+    characteristics: "",
+    variantName: variant,
+    countryDisplayName: selectedCountry || "",
+  },
+);
 report.substituted = substituted;
 if (substituted.length > 0) console.log(`  🔤 placeholders substituted in ${substituted.length} delivered file(s)`);
 
 // 11. .gitattributes merge=ours rule (scaffold parity; guarded append).
-const gitattributesPath = join(projectDir, '.gitattributes');
+const gitattributesPath = join(projectDir, ".gitattributes");
 if (existsSync(gitattributesPath)) {
-  const ga = readFileSync(gitattributesPath, 'utf8');
-  if (!ga.includes('docs/context.md')) {
-    appendFile(gitattributesPath, '\ndocs/context.md merge=ours\n');
-    console.log('  📎 docs/context.md merge=ours appended to .gitattributes');
+  const ga = readFileSync(gitattributesPath, "utf8");
+  if (!ga.includes("docs/context.md")) {
+    appendFile(gitattributesPath, "\ndocs/context.md merge=ours\n");
+    console.log("  📎 docs/context.md merge=ours appended to .gitattributes");
   }
 }
 
 // 13. Country: ACTIVE.md + marker rewrite (marker country= beats ACTIVE.md — repair trap).
 if (selectedCountry) {
   const cfg = readCountryConfig(variantDir);
-  const activeSrc = join(variantDir, cfg.profilesDir, selectedCountry, 'ACTIVE.md');
-  const activeDest = join(projectDir, cfg.profilesDir, 'ACTIVE.md');
+  const activeSrc = join(variantDir, cfg.profilesDir, selectedCountry, "ACTIVE.md");
+  const activeDest = join(projectDir, cfg.profilesDir, "ACTIVE.md");
   if (existsSync(activeSrc)) {
     mkdirSync(dirname(activeDest), { recursive: true });
-    writeFileSync(activeDest, readFileSync(activeSrc, 'utf8'));
+    writeFileSync(activeDest, readFileSync(activeSrc, "utf8"));
     console.log(`  🌍 ACTIVE.md → ${selectedCountry} (${cfg.profilesDir}/ACTIVE.md)`);
   }
   if (existsSync(markerPath)) {
     // Adopt owns the provenance rewrite: the engine detected 'none' because no country
     // carrier existed pre-delivery, and a 'country=none' marker would defeat ACTIVE.md
     // on every future upgrade (detection precedence — meeting Scaffolding R2).
-    const markerContent = readFileSync(markerPath, 'utf8');
-    if (!markerContent.match(new RegExp(`^country=${selectedCountry}$`, 'm'))) {
+    const markerContent = readFileSync(markerPath, "utf8");
+    if (!markerContent.match(new RegExp(`^country=${selectedCountry}$`, "m"))) {
       writeFileSync(markerPath, markerContent.replace(/^country=.*$/m, `country=${selectedCountry}`));
     }
   }
@@ -681,39 +819,44 @@ settlePackageJson(projectDir, COMMON_DIR, report);
  * (refusal-grade conflicts were already handled pre-flight; this is belt-and-suspenders).
  * `workspace-scripts` is never written into a foreign file (project-ownership marker).
  */
-function settlePackageJson(
-  project: string,
-  commonDir: string,
-  report: { seeds: string[] },
-): void {
-  const tplPkgPath = join(commonDir, 'package.json');
-  const projPkgPath = join(project, 'package.json');
+function settlePackageJson(project: string, commonDir: string, report: { seeds: string[] }): void {
+  const tplPkgPath = join(commonDir, "package.json");
+  const projPkgPath = join(project, "package.json");
   if (!existsSync(tplPkgPath)) return;
-  const tpl = JSON.parse(readFileSync(tplPkgPath, 'utf8')) as Record<string, any>;
+  const tpl = JSON.parse(readFileSync(tplPkgPath, "utf8")) as Record<string, any>;
   if (!existsSync(projPkgPath)) {
-    const seeded = { ...tpl, name: projectName.toLowerCase().replace(/[^a-z0-9-]+/g, '-') };
-    delete (seeded as Record<string, unknown>)['workspace-scripts'];
-    writeFileSync(projPkgPath, JSON.stringify(seeded, null, 2) + '\n');
-    report.seeds.push('package.json');
+    const seeded = { ...tpl, name: projectName.toLowerCase().replace(/[^a-z0-9-]+/g, "-") };
+    delete (seeded as Record<string, unknown>)["workspace-scripts"];
+    writeFileSync(projPkgPath, JSON.stringify(seeded, null, 2) + "\n");
+    report.seeds.push("package.json");
     return;
   }
-  const proj = JSON.parse(readFileSync(projPkgPath, 'utf8')) as Record<string, any>;
+  const proj = JSON.parse(readFileSync(projPkgPath, "utf8")) as Record<string, any>;
   proj.scripts = { ...(tpl.scripts ?? {}), ...(proj.scripts ?? {}) };
   if (proj.scripts.prepare && /husky|simple-git-hooks|lefthook/.test(String(proj.scripts.prepare))) {
     delete proj.scripts.prepare;
   }
-  for (const depKey of ['dependencies', 'devDependencies']) {
+  for (const depKey of ["dependencies", "devDependencies"]) {
     if (tpl[depKey]) proj[depKey] = { ...tpl[depKey], ...(proj[depKey] ?? {}) };
   }
   if (tpl.overrides) proj.overrides = { ...tpl.overrides, ...(proj.overrides ?? {}) };
   if (tpl.engines && !proj.engines) proj.engines = tpl.engines;
-  writeFileSync(projPkgPath, JSON.stringify(proj, null, 2) + '\n');
-  console.log('  🔧 package.json merged (project keys kept; workspace script surface added)');
+  writeFileSync(projPkgPath, JSON.stringify(proj, null, 2) + "\n");
+  console.log("  🔧 package.json merged (project keys kept; workspace script surface added)");
 }
 
 // 15. scripts-snapshot.json (version map baseline for future upgrades).
-spawnSync(process.execPath, [join(WORKSPACE_ROOT, 'scripts', 'helpers', 'write-scripts-snapshot.ts'),
-  projectDir, new Date().toISOString().slice(0, 10), variant, join(COMMON_DIR, 'scripts')], { stdio: 'inherit', cwd: WORKSPACE_ROOT });
+spawnSync(
+  process.execPath,
+  [
+    join(WORKSPACE_ROOT, "scripts", "helpers", "write-scripts-snapshot.ts"),
+    projectDir,
+    new Date().toISOString().slice(0, 10),
+    variant,
+    join(COMMON_DIR, "scripts"),
+  ],
+  { stdio: "inherit", cwd: WORKSPACE_ROOT },
+);
 
 // 16. Platform profile — root twins + .codex only (never platform skill mirrors).
 for (const p of PLATFORM_PROFILES) {
@@ -721,14 +864,17 @@ for (const p of PLATFORM_PROFILES) {
   for (const rel of PROFILE_OWNED_PATHS[p]) removeOwnedIfDelivered(rel);
 }
 for (const f of walkFiles(projectDir)) {
-  if (f.endsWith('.cmd')) rmSync(f);
+  if (f.endsWith(".cmd")) rmSync(f);
 }
 // Dir-owned entries (e.g. .codex): remove only the files this adoption delivered, so a
 // pre-existing user-owned dir keeps everything the workspace did not deliver.
 function removeOwnedIfDelivered(rel: string): void {
-  if (deliveredSet.has(rel)) { removeIfDelivered(rel); return; }
+  if (deliveredSet.has(rel)) {
+    removeIfDelivered(rel);
+    return;
+  }
   for (const d of deliveredSet) {
-    if (d.startsWith(rel + '/')) removeIfDelivered(d);
+    if (d.startsWith(rel + "/")) removeIfDelivered(d);
   }
 }
 function removeIfDelivered(rel: string): void {
@@ -738,60 +884,89 @@ function removeIfDelivered(rel: string): void {
     report.platformRemoved.push(rel);
   }
 }
-if (report.platformRemoved.length > 0) console.log(`  🧹 platform profile removed: ${report.platformRemoved.join(', ')}`);
+if (report.platformRemoved.length > 0)
+  console.log(`  🧹 platform profile removed: ${report.platformRemoved.join(", ")}`);
 
 // 17. Skill-table injection into docs/<variant>.context.md (non-fatal no-op without markers).
-spawnSync(process.execPath, [join(WORKSPACE_ROOT, 'scripts', 'helpers', 'inject-skills.ts'), projectDir], { stdio: 'inherit', cwd: WORKSPACE_ROOT });
+spawnSync(process.execPath, [join(WORKSPACE_ROOT, "scripts", "helpers", "inject-skills.ts"), projectDir], {
+  stdio: "inherit",
+  cwd: WORKSPACE_ROOT,
+});
 
 // 19-20. bun install, then hooksPath re-assert (belt-and-suspenders, meeting Security #2).
-console.log('  📦 bun install…');
-const install = spawnSync('bun', ['install'], { stdio: 'inherit', cwd: projectDir });
+console.log("  📦 bun install…");
+const install = spawnSync("bun", ["install"], { stdio: "inherit", cwd: projectDir });
 report.env.bunInstall = install.status === 0;
-if (install.status !== 0) console.log(`${YELLOW}  ⚠️  bun install failed (non-fatal) — run it manually in the project.${RESET}`);
-git(projectDir, 'config', 'core.hooksPath', '.githooks');
-report.env.hooksPath = git(projectDir, 'config', 'core.hooksPath').out.includes('.githooks');
-console.log(`  🪝 core.hooksPath = .githooks ${report.env.hooksPath ? 'verified' : '(NOT set — check manually)'}`);
+if (install.status !== 0)
+  console.log(`${YELLOW}  ⚠️  bun install failed (non-fatal) — run it manually in the project.${RESET}`);
+git(projectDir, "config", "core.hooksPath", ".githooks");
+report.env.hooksPath = git(projectDir, "config", "core.hooksPath").out.includes(".githooks");
+console.log(`  🪝 core.hooksPath = .githooks ${report.env.hooksPath ? "verified" : "(NOT set — check manually)"}`);
 
 // 21. graft build chain (global binary → bunx fallback; non-fatal).
-console.log('  🌱 graft build…');
-const graftDirect = spawnSync('graft', ['build'], { stdio: 'inherit', cwd: projectDir });
+console.log("  🌱 graft build…");
+const graftDirect = spawnSync("graft", ["build"], { stdio: "inherit", cwd: projectDir });
 if (graftDirect.status !== 0) {
-  const graftBunx = spawnSync('bunx', ['@nanonets/graft', 'build'], { stdio: 'inherit', cwd: projectDir });
+  const graftBunx = spawnSync("bunx", ["@nanonets/graft", "build"], { stdio: "inherit", cwd: projectDir });
   report.env.graft = graftBunx.status === 0;
-  if (graftBunx.status !== 0) console.log(`${YELLOW}  ⚠️  graft build unavailable (non-fatal) — run 'graft build' in the project later.${RESET}`);
+  if (graftBunx.status !== 0)
+    console.log(`${YELLOW}  ⚠️  graft build unavailable (non-fatal) — run 'graft build' in the project later.${RESET}`);
 } else {
   report.env.graft = true;
 }
 
 // 22. gitleaks scan of pre-existing content (report-only; refusal-grade scan happens pre-flight when available).
-console.log('  🔒 gitleaks working-tree scan…');
-const gitleaks = spawnSync('gitleaks', ['detect', '--no-git', '--redact'], { cwd: projectDir, stdio: 'inherit' });
-if (gitleaks.status === 0) { report.env.gitleaksFindings = 0; console.log('  🔒 gitleaks working-tree scan: clean'); }
-else if (gitleaks.status === 1) { report.env.gitleaksFindings = -2; console.log(`${YELLOW}  ⚠️  gitleaks found potential secrets in pre-existing content — review before pushing.${RESET}`); }
-else console.log(`${YELLOW}  ⚠️  gitleaks binary unavailable — history/worktree scan skipped (install gitleaks for full coverage).${RESET}`);
+console.log("  🔒 gitleaks working-tree scan…");
+const gitleaks = spawnSync("gitleaks", ["detect", "--no-git", "--redact"], { cwd: projectDir, stdio: "inherit" });
+if (gitleaks.status === 0) {
+  report.env.gitleaksFindings = 0;
+  console.log("  🔒 gitleaks working-tree scan: clean");
+} else if (gitleaks.status === 1) {
+  report.env.gitleaksFindings = -2;
+  console.log(
+    `${YELLOW}  ⚠️  gitleaks found potential secrets in pre-existing content — review before pushing.${RESET}`,
+  );
+} else
+  console.log(
+    `${YELLOW}  ⚠️  gitleaks binary unavailable — history/worktree scan skipped (install gitleaks for full coverage).${RESET}`,
+  );
 
 // 23. Audit smoke — the project's own gate, proving the delivered scripts run.
-console.log('  🩺 audit smoke (bun scripts/audit.ts --skip-memory)…');
-const smoke = spawnSync(process.execPath, ['scripts/audit.ts', '--skip-memory'], { cwd: projectDir, stdio: 'inherit' });
-report.env.auditSmoke = smoke.status === 0 ? 'pass' : 'fail';
+console.log("  🩺 audit smoke (bun scripts/audit.ts --skip-memory)…");
+const smoke = spawnSync(process.execPath, ["scripts/audit.ts", "--skip-memory"], { cwd: projectDir, stdio: "inherit" });
+report.env.auditSmoke = smoke.status === 0 ? "pass" : "fail";
 if (smoke.status !== 0) {
-  console.log(`${YELLOW}  ⚠️  audit smoke FAILED — review the output above; likely pre-existing foreign content to reconcile.${RESET}`);
+  console.log(
+    `${YELLOW}  ⚠️  audit smoke FAILED — review the output above; likely pre-existing foreign content to reconcile.${RESET}`,
+  );
 } else {
-  console.log('  ✅ audit smoke passed');
+  console.log("  ✅ audit smoke passed");
 }
 
 // 24. Decisions record (post-delivery — outside the engine's stash window).
-const decisionsDir = join(projectDir, '.claude');
+const decisionsDir = join(projectDir, ".claude");
 mkdirSync(decisionsDir, { recursive: true });
-writeFileSync(join(decisionsDir, 'adopt-project-decisions.json'), JSON.stringify({
-  timestamp: new Date().toISOString(), variant, platform, projectName,
-  plan, declinedAgents, selectedCountry: selectedCountry || null,
-  report,
-}, null, 2) + '\n');
+writeFileSync(
+  join(decisionsDir, "adopt-project-decisions.json"),
+  JSON.stringify(
+    {
+      timestamp: new Date().toISOString(),
+      variant,
+      platform,
+      projectName,
+      plan,
+      declinedAgents,
+      selectedCountry: selectedCountry || null,
+      report,
+    },
+    null,
+    2,
+  ) + "\n",
+);
 
 // 25. Complete + clear the outside state file.
 if (state) {
-  state.status = 'completed';
+  state.status = "completed";
   state.completedAt = new Date().toISOString();
   saveState(state);
   rmSync(stateFile, { force: true });
@@ -807,9 +982,11 @@ console.log(`Archived to _legacy  : ${report.restoredToLegacy.length}`);
 console.log(`Registered scripts   : ${report.registeredScripts.length}`);
 console.log(`Seeds (add-if-missing): ${report.seeds.length}`);
 console.log(`Country              : ${report.country}`);
-console.log(`Env                  : bun-install=${report.env.bunInstall ? 'ok' : 'failed'} hooksPath=${report.env.hooksPath ? 'ok' : 'unset'} graft=${report.env.graft ? 'ok' : 'skipped'} audit-smoke=${report.env.auditSmoke}`);
+console.log(
+  `Env                  : bun-install=${report.env.bunInstall ? "ok" : "failed"} hooksPath=${report.env.hooksPath ? "ok" : "unset"} graft=${report.env.graft ? "ok" : "skipped"} audit-smoke=${report.env.auditSmoke}`,
+);
 console.log(`\nNext steps:`);
 console.log(`  1. Review:  git -C ${projectDir} diff HEAD`);
 if (plan.collisions.length > 0) console.log(`  2. Archived originals: scripts/_legacy/ (de-executed) + ${backupDir}`);
-console.log(`  ${plan.collisions.length > 0 ? '3' : '2'}. Commit when satisfied (adoption never commits for you).`);
+console.log(`  ${plan.collisions.length > 0 ? "3" : "2"}. Commit when satisfied (adoption never commits for you).`);
 console.log(`  Future maintenance: bun scripts/upgrade-project.ts <project-path>`);

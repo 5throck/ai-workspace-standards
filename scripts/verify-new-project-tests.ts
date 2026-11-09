@@ -20,11 +20,11 @@
  *   1 = one or more errors found
  */
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from "node:fs";
 
-const SH_PATH   = 'scripts/new-project.sh';
-const PS1_PATH  = 'scripts/new-project.ps1';
-const TEST_PATH = 'scripts/test-new-project.ts';
+const SH_PATH = "scripts/new-project.sh";
+const PS1_PATH = "scripts/new-project.ps1";
+const TEST_PATH = "scripts/test-new-project.ts";
 
 // Extract TEST: numbers from a script file
 // Matches lines like: # ── step name ─── # TEST: Test N
@@ -32,18 +32,18 @@ const TEST_PATH = 'scripts/test-new-project.ts';
 // or: # ── step name ─── # TEST: none
 function extractTestTags(content: string): { step: string; testNum: number | null; line: number }[] {
   const results: { step: string; testNum: number | null; line: number }[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const match = line.match(/^#\s*[-─]+\s*(.+?)\s*#\s*TEST:\s*(.+)/i);
     if (!match) continue;
-    const step = match[1].replace(/─+/g, '').trim();
-    const tag  = match[2].trim();
+    const step = match[1].replace(/─+/g, "").trim();
+    const tag = match[2].trim();
     if (/^none$/i.test(tag)) {
       results.push({ step, testNum: null, line: i + 1 });
     } else {
       // Support "Test N" or "Test N, Test M" (comma-separated)
-      const nums = [...tag.matchAll(/Test\s*(\d+)/gi)].map(m => parseInt(m[1]));
+      const nums = [...tag.matchAll(/Test\s*(\d+)/gi)].map((m) => parseInt(m[1]));
       for (const num of nums) {
         results.push({ step, testNum: num, line: i + 1 });
       }
@@ -56,7 +56,7 @@ function extractTestTags(content: string): { step: string; testNum: number | nul
 // Matches lines like: // ── Test N: description [maps to: ...]
 function extractTestHeaders(content: string): Set<number> {
   const nums = new Set<number>();
-  for (const line of content.split('\n')) {
+  for (const line of content.split("\n")) {
     const match = line.match(/\/\/\s*──\s*Test\s+(\d+):/i);
     if (match) nums.add(parseInt(match[1]));
   }
@@ -66,12 +66,18 @@ function extractTestHeaders(content: string): Set<number> {
 // Check for steps without any TEST: comment
 function extractUnlinkedSteps(content: string): { step: string; line: number }[] {
   const results: { step: string; line: number }[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     // Step comment without TEST: tag
-    if (/^#\s*──\s*.+────/.test(line) && !line.includes('# TEST:')) {
-      results.push({ step: line.replace(/^#\s*──\s*/, '').replace(/─+/g, '').trim(), line: i + 1 });
+    if (/^#\s*──\s*.+────/.test(line) && !line.includes("# TEST:")) {
+      results.push({
+        step: line
+          .replace(/^#\s*──\s*/, "")
+          .replace(/─+/g, "")
+          .trim(),
+        line: i + 1,
+      });
     }
   }
   return results;
@@ -80,7 +86,7 @@ function extractUnlinkedSteps(content: string): { step: string; line: number }[]
 let errors = 0;
 let warnings = 0;
 
-console.log('=== verify-new-project-tests.ts ===\n');
+console.log("=== verify-new-project-tests.ts ===\n");
 
 // Load files
 if (!existsSync(SH_PATH) || !existsSync(PS1_PATH) || !existsSync(TEST_PATH)) {
@@ -90,36 +96,38 @@ if (!existsSync(SH_PATH) || !existsSync(PS1_PATH) || !existsSync(TEST_PATH)) {
   }
 }
 
-const shContent   = readFileSync(SH_PATH, 'utf-8');
-const ps1Content  = readFileSync(PS1_PATH, 'utf-8');
-const testContent = readFileSync(TEST_PATH, 'utf-8');
+const shContent = readFileSync(SH_PATH, "utf-8");
+const ps1Content = readFileSync(PS1_PATH, "utf-8");
+const testContent = readFileSync(TEST_PATH, "utf-8");
 
-const shTags   = extractTestTags(shContent);
-const ps1Tags  = extractTestTags(ps1Content);
+const shTags = extractTestTags(shContent);
+const ps1Tags = extractTestTags(ps1Content);
 const testNums = extractTestHeaders(testContent);
 
 // Rule 1: Every TEST: Test N in sh must exist in test-new-project.ts
-console.log('Check 1: sh TEST: numbers exist in test-new-project.ts');
-const shTestNums = new Set(shTags.filter(t => t.testNum !== null).map(t => t.testNum as number));
+console.log("Check 1: sh TEST: numbers exist in test-new-project.ts");
+const shTestNums = new Set(shTags.filter((t) => t.testNum !== null).map((t) => t.testNum as number));
 for (const num of [...shTestNums].sort((a, b) => a - b)) {
   if (!testNums.has(num)) {
-    console.error(`  ❌ new-project.sh references Test ${num} but no "// ── Test ${num}:" found in test-new-project.ts`);
+    console.error(
+      `  ❌ new-project.sh references Test ${num} but no "// ── Test ${num}:" found in test-new-project.ts`,
+    );
     errors++;
   }
 }
 if (errors === 0) console.log(`  ✅ All ${shTestNums.size} TEST: references found in test-new-project.ts`);
 
 // Rule 2: sh and ps1 TEST: numbers must match
-console.log('\nCheck 2: sh and ps1 TEST: numbers are identical');
-const ps1TestNums = new Set(ps1Tags.filter(t => t.testNum !== null).map(t => t.testNum as number));
-const onlyInSh  = [...shTestNums].filter(n => !ps1TestNums.has(n));
-const onlyInPs1 = [...ps1TestNums].filter(n => !shTestNums.has(n));
+console.log("\nCheck 2: sh and ps1 TEST: numbers are identical");
+const ps1TestNums = new Set(ps1Tags.filter((t) => t.testNum !== null).map((t) => t.testNum as number));
+const onlyInSh = [...shTestNums].filter((n) => !ps1TestNums.has(n));
+const onlyInPs1 = [...ps1TestNums].filter((n) => !shTestNums.has(n));
 if (onlyInSh.length > 0) {
-  console.error(`  ❌ TEST: numbers in sh but not ps1: ${onlyInSh.join(', ')}`);
+  console.error(`  ❌ TEST: numbers in sh but not ps1: ${onlyInSh.join(", ")}`);
   errors++;
 }
 if (onlyInPs1.length > 0) {
-  console.error(`  ❌ TEST: numbers in ps1 but not sh: ${onlyInPs1.join(', ')}`);
+  console.error(`  ❌ TEST: numbers in ps1 but not sh: ${onlyInPs1.join(", ")}`);
   errors++;
 }
 if (onlyInSh.length === 0 && onlyInPs1.length === 0) {
@@ -127,7 +135,7 @@ if (onlyInSh.length === 0 && onlyInPs1.length === 0) {
 }
 
 // Rule 3: Unlinked steps (steps without TEST: tag) — warning
-console.log('\nCheck 3: Steps without TEST: comment (unlinked steps)');
+console.log("\nCheck 3: Steps without TEST: comment (unlinked steps)");
 const unlinked = extractUnlinkedSteps(shContent);
 if (unlinked.length > 0) {
   for (const u of unlinked) {
@@ -135,11 +143,11 @@ if (unlinked.length > 0) {
     warnings++;
   }
 } else {
-  console.log('  ✅ All steps have TEST: comments');
+  console.log("  ✅ All steps have TEST: comments");
 }
 
 // Summary
-console.log(`\n${'─'.repeat(40)}`);
+console.log(`\n${"─".repeat(40)}`);
 if (errors > 0) {
   console.error(`❌ ${errors} error(s), ${warnings} warning(s) — pre-commit blocked`);
   if (import.meta.main) {

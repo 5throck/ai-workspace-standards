@@ -32,10 +32,10 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { join, relative } from 'path';
-import { existsSync, readFileSync, readdirSync } from 'fs';
-import { readUTF8File } from '../lib/encoding-utils.ts';
-import { ErrorPhase, fatalError } from '../lib/error-handling.ts';
+import { join, relative } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { readUTF8File } from "../lib/encoding-utils.ts";
+import { ErrorPhase, fatalError } from "../lib/error-handling.ts";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -58,19 +58,19 @@ export interface ParityValidationResult {
 export interface ParityViolation {
   /** Violation type */
   type:
-    | 'claude_only'
-    | 'gemini_only'
-    | 'agents_only'
-    | 'codex_only'
-    | 'schema_mismatch'
-    | 'content_divergence'
-    | 'missing_gemini_parity_skip';
+    | "claude_only"
+    | "gemini_only"
+    | "agents_only"
+    | "codex_only"
+    | "schema_mismatch"
+    | "content_divergence"
+    | "missing_gemini_parity_skip";
   /** File path relative to variant root */
   filePath: string;
   /** Which platform has the file (single mirror) or 'both' for schema issues */
-  platform: 'claude' | 'gemini' | 'agents' | 'codex' | 'both';
+  platform: "claude" | "gemini" | "agents" | "codex" | "both";
   /** Severity */
-  severity: 'fatal' | 'warning' | 'info';
+  severity: "fatal" | "warning" | "info";
   /** Description of the violation */
   description: string;
   /** Suggested remediation */
@@ -79,7 +79,7 @@ export interface ParityViolation {
 
 /** Per-mirror comparison outcome against the .claude/ reference tree. */
 interface MirrorManifest {
-  platform: 'gemini' | 'agents' | 'codex';
+  platform: "gemini" | "agents" | "codex";
   /** Claude-side relative paths missing from this mirror */
   missingFromMirror: string[];
   /** Mirror-side relative paths with no .claude/ counterpart */
@@ -105,20 +105,26 @@ export interface PlatformFileManifest {
 const WORKSPACE_ROOT = process.cwd();
 const SETTINGS_JSON_SCHEMA = {
   // Common tier (shared) - must be present in both .claude/settings.json and .gemini/settings.json
-  shared: ['mcpServers', 'hooks.SessionStart'],
+  shared: ["mcpServers", "hooks.SessionStart"],
   // Claude-only tier (no .gemini parity required)
   // PostToolUse moved from shared: Gemini CLI uses AfterTool instead
   // PreToolUse, PreCompact, WorktreeCreate are Claude Code-only events
   claude_only: [
-    'permissions', 'env', 'teammateMode',
-    'hooks.PreToolUse', 'hooks.PostToolUse', 'hooks.PreCompact',
-    'hooks.TeammateIdle', 'hooks.TaskCreated', 'hooks.TaskCompleted',
-    'hooks.WorktreeCreate',
+    "permissions",
+    "env",
+    "teammateMode",
+    "hooks.PreToolUse",
+    "hooks.PostToolUse",
+    "hooks.PreCompact",
+    "hooks.TeammateIdle",
+    "hooks.TaskCreated",
+    "hooks.TaskCompleted",
+    "hooks.WorktreeCreate",
   ],
   // Gemini-only tier (no .claude parity required)
   // Gemini CLI hook events: BeforeTool=PreToolUse, AfterTool=PostToolUse, PreCompress=PreCompact
   // Note: Antigravity (VS Code extension) does NOT fire hooks despite sharing .gemini/settings.json
-  gemini_only: ['hooks.BeforeTool', 'hooks.AfterTool', 'hooks.PreCompress'],
+  gemini_only: ["hooks.BeforeTool", "hooks.AfterTool", "hooks.PreCompress"],
 };
 
 // ============================================================================
@@ -143,14 +149,14 @@ function scanDirectoryRecursively(dirPath: string, extensions: string[] = []): s
 
     if (entry.isDirectory()) {
       // Skip node_modules and .git
-      if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === '__MACOSX') {
+      if (entry.name === "node_modules" || entry.name === ".git" || entry.name === "__MACOSX") {
         continue;
       }
       // Recurse into subdirectory
       files.push(...scanDirectoryRecursively(fullPath, extensions));
     } else if (entry.isFile()) {
       // Filter by extension if specified
-      if (extensions.length === 0 || extensions.some(ext => entry.name.endsWith(ext))) {
+      if (extensions.length === 0 || extensions.some((ext) => entry.name.endsWith(ext))) {
         files.push(fullPath);
       }
     }
@@ -181,20 +187,17 @@ function hasMirrorParitySkip(filePath: string): boolean {
  * gemini/agents map 1:1 (agents/commands excluded — Finding D).
  * @version 1.2.0
  */
-function mirrorToClaudeRelative(
-  platform: 'gemini' | 'agents' | 'codex',
-  relativePath: string,
-): string | null {
-  if (platform === 'codex') {
-    if (relativePath.startsWith('skills/') || relativePath.startsWith('agents/')) {
+function mirrorToClaudeRelative(platform: "gemini" | "agents" | "codex", relativePath: string): string | null {
+  if (platform === "codex") {
+    if (relativePath.startsWith("skills/") || relativePath.startsWith("agents/")) {
       return relativePath;
     }
-    if (relativePath.startsWith('prompts/')) {
-      return `commands/${relativePath.slice('prompts/'.length)}`;
+    if (relativePath.startsWith("prompts/")) {
+      return `commands/${relativePath.slice("prompts/".length)}`;
     }
     return null; // config.toml and other codex-native files: out of scope
   }
-  if (platform === 'agents' && relativePath.startsWith('commands/')) {
+  if (platform === "agents" && relativePath.startsWith("commands/")) {
     return null; // .agents/commands ungoverned surface (Finding D exclusion)
   }
   return relativePath;
@@ -209,9 +212,9 @@ function mirrorToClaudeRelative(
  * @version 1.2.0
  */
 function buildPlatformManifest(variantPath: string): PlatformFileManifest {
-  const claudePath = join(variantPath, '.claude');
+  const claudePath = join(variantPath, ".claude");
 
-  const makeMirror = (platform: 'gemini' | 'agents' | 'codex'): MirrorManifest => ({
+  const makeMirror = (platform: "gemini" | "agents" | "codex"): MirrorManifest => ({
     platform,
     missingFromMirror: [],
     mirrorOnly: [],
@@ -220,23 +223,23 @@ function buildPlatformManifest(variantPath: string): PlatformFileManifest {
   });
 
   const manifest: PlatformFileManifest = {
-    gemini: makeMirror('gemini'),
-    agents: makeMirror('agents'),
-    codex: makeMirror('codex'),
+    gemini: makeMirror("gemini"),
+    agents: makeMirror("agents"),
+    codex: makeMirror("codex"),
     both: [],
   };
 
   if (!existsSync(claudePath)) return manifest;
 
-  const mirrors: ReadonlyArray<readonly ['gemini' | 'agents' | 'codex', MirrorManifest]> = [
-    ['gemini', manifest.gemini],
-    ['agents', manifest.agents],
-    ['codex', manifest.codex],
+  const mirrors: ReadonlyArray<readonly ["gemini" | "agents" | "codex", MirrorManifest]> = [
+    ["gemini", manifest.gemini],
+    ["agents", manifest.agents],
+    ["codex", manifest.codex],
   ];
   const mirrorRoots = new Map(mirrors.map(([p]) => [p, join(variantPath, `.${p}`)]));
 
   // Reference side: every .claude file maps into each mirror's namespace
-  const claudeFiles = scanDirectoryRecursively(claudePath, ['.md', '.json']);
+  const claudeFiles = scanDirectoryRecursively(claudePath, [".md", ".json"]);
   for (const claudeFile of claudeFiles) {
     const relativePath = relative(claudePath, claudeFile);
     if (hasMirrorParitySkip(claudeFile)) {
@@ -258,7 +261,7 @@ function buildPlatformManifest(variantPath: string): PlatformFileManifest {
   for (const [platform, m] of mirrors) {
     const mirrorRoot = mirrorRoots.get(platform)!;
     if (!existsSync(mirrorRoot)) continue;
-    const mirrorFiles = scanDirectoryRecursively(mirrorRoot, ['.md', '.json']);
+    const mirrorFiles = scanDirectoryRecursively(mirrorRoot, [".md", ".json"]);
     for (const mirrorFile of mirrorFiles) {
       const mirrorRelative = relative(mirrorRoot, mirrorFile);
       const claudeRelative = mirrorToClaudeRelative(platform, mirrorRelative);
@@ -281,8 +284,8 @@ function buildPlatformManifest(variantPath: string): PlatformFileManifest {
 function validateSettingsParity(variantPath: string): ParityViolation[] {
   const violations: ParityViolation[] = [];
 
-  const claudeSettingsPath = join(variantPath, '.claude', 'settings.json');
-  const geminiSettingsPath = join(variantPath, '.gemini', 'settings.json');
+  const claudeSettingsPath = join(variantPath, ".claude", "settings.json");
+  const geminiSettingsPath = join(variantPath, ".gemini", "settings.json");
 
   // Both settings.json must exist
   if (!existsSync(claudeSettingsPath) && !existsSync(geminiSettingsPath)) {
@@ -292,24 +295,24 @@ function validateSettingsParity(variantPath: string): ParityViolation[] {
 
   if (existsSync(claudeSettingsPath) && !existsSync(geminiSettingsPath)) {
     violations.push({
-      type: 'claude_only',
-      filePath: '.claude/settings.json',
-      platform: 'claude',
-      severity: 'fatal',
-      description: '.claude/settings.json exists but .gemini/settings.json is missing',
-      remediation: 'Create .gemini/settings.json with shared tier settings from .claude/settings.json',
+      type: "claude_only",
+      filePath: ".claude/settings.json",
+      platform: "claude",
+      severity: "fatal",
+      description: ".claude/settings.json exists but .gemini/settings.json is missing",
+      remediation: "Create .gemini/settings.json with shared tier settings from .claude/settings.json",
     });
     return violations;
   }
 
   if (!existsSync(claudeSettingsPath) && existsSync(geminiSettingsPath)) {
     violations.push({
-      type: 'gemini_only',
-      filePath: '.gemini/settings.json',
-      platform: 'gemini',
-      severity: 'fatal',
-      description: '.gemini/settings.json exists but .claude/settings.json is missing',
-      remediation: 'Create .claude/settings.json with shared tier settings from .gemini/settings.json',
+      type: "gemini_only",
+      filePath: ".gemini/settings.json",
+      platform: "gemini",
+      severity: "fatal",
+      description: ".gemini/settings.json exists but .claude/settings.json is missing",
+      remediation: "Create .claude/settings.json with shared tier settings from .gemini/settings.json",
     });
     return violations;
   }
@@ -324,22 +327,22 @@ function validateSettingsParity(variantPath: string): ParityViolation[] {
 
     for (const mismatch of schemaMismatches) {
       violations.push({
-        type: 'schema_mismatch',
-        filePath: '.claude/settings.json <-> .gemini/settings.json',
-        platform: 'both',
-        severity: 'fatal',
+        type: "schema_mismatch",
+        filePath: ".claude/settings.json <-> .gemini/settings.json",
+        platform: "both",
+        severity: "fatal",
         description: mismatch,
-        remediation: 'Ensure shared tier settings (mcpServers, hooks.SessionStart) are identical in both files',
+        remediation: "Ensure shared tier settings (mcpServers, hooks.SessionStart) are identical in both files",
       });
     }
   } catch (error) {
     violations.push({
-      type: 'schema_mismatch',
-      filePath: '.claude/settings.json <-> .gemini/settings.json',
-      platform: 'both',
-      severity: 'fatal',
+      type: "schema_mismatch",
+      filePath: ".claude/settings.json <-> .gemini/settings.json",
+      platform: "both",
+      severity: "fatal",
       description: `Failed to parse settings.json: ${error instanceof Error ? error.message : String(error)}`,
-      remediation: 'Ensure both settings.json files are valid JSON',
+      remediation: "Ensure both settings.json files are valid JSON",
     });
   }
 
@@ -348,7 +351,7 @@ function validateSettingsParity(variantPath: string): ParityViolation[] {
 
 function compareSharedSettingsSchema(
   claudeSettings: Record<string, any>,
-  geminiSettings: Record<string, any>
+  geminiSettings: Record<string, any>,
 ): string[] {
   const mismatches: string[] = [];
 
@@ -358,10 +361,7 @@ function compareSharedSettingsSchema(
     const geminiValue = JSON.stringify(geminiSettings[key]);
 
     if (claudeValue !== geminiValue) {
-      mismatches.push(
-        `Shared tier setting '${key}' differs: ` +
-        `claude=${claudeValue}, gemini=${geminiValue}`
-      );
+      mismatches.push(`Shared tier setting '${key}' differs: ` + `claude=${claudeValue}, gemini=${geminiValue}`);
     }
   }
 
@@ -380,31 +380,32 @@ function validateCommandParity(manifest: PlatformFileManifest): ParityViolation[
   const violations: ParityViolation[] = [];
 
   for (const m of [manifest.gemini, manifest.agents, manifest.codex]) {
-    const soak = m.platform !== 'gemini'; // TODO(promotion): flip to fatal after soak
-    const severity = soak ? 'warning' : 'fatal';
-    const soakNote = soak ? ' (soak: WARN until promotion)' : '';
+    const soak = m.platform !== "gemini"; // TODO(promotion): flip to fatal after soak
+    const severity = soak ? "warning" : "fatal";
+    const soakNote = soak ? " (soak: WARN until promotion)" : "";
 
     for (const rel of m.missingFromMirror) {
-      if (!rel.startsWith('commands/') || !rel.endsWith('.md')) continue;
+      if (!rel.startsWith("commands/") || !rel.endsWith(".md")) continue;
       if (m.skipped.includes(rel)) continue;
       violations.push({
-        type: 'claude_only',
+        type: "claude_only",
         filePath: `.claude/${rel}`,
-        platform: 'claude',
+        platform: "claude",
         severity,
         description: `Command file exists only in .claude/ — no .${m.platform}/ counterpart: ${rel}${soakNote}`,
-        remediation: m.platform === 'codex'
-          ? `Run sync-skills (Phase 1b mirrors .claude/commands to .codex/prompts unconditionally)`
-          : `Create corresponding file in .${m.platform}/commands/ or add 'mirror-parity: skip' to frontmatter`,
+        remediation:
+          m.platform === "codex"
+            ? `Run sync-skills (Phase 1b mirrors .claude/commands to .codex/prompts unconditionally)`
+            : `Create corresponding file in .${m.platform}/commands/ or add 'mirror-parity: skip' to frontmatter`,
       });
     }
 
     for (const rel of m.mirrorOnly) {
-      if (!rel.endsWith('.md')) continue;
-      const isCommand = rel.startsWith('commands/') || rel.startsWith('prompts/');
+      if (!rel.endsWith(".md")) continue;
+      const isCommand = rel.startsWith("commands/") || rel.startsWith("prompts/");
       if (!isCommand) continue;
       violations.push({
-        type: `${m.platform}_only` as ParityViolation['type'],
+        type: `${m.platform}_only` as ParityViolation["type"],
         filePath: `.${m.platform}/${rel}`,
         platform: m.platform,
         severity,
@@ -428,17 +429,17 @@ function validateSkillParity(manifest: PlatformFileManifest): ParityViolation[] 
   const violations: ParityViolation[] = [];
 
   for (const m of [manifest.gemini, manifest.agents, manifest.codex]) {
-    const soak = m.platform !== 'gemini'; // TODO(promotion): flip to fatal after soak
-    const severity = soak ? 'warning' : 'fatal';
-    const soakNote = soak ? ' (soak: WARN until promotion)' : '';
+    const soak = m.platform !== "gemini"; // TODO(promotion): flip to fatal after soak
+    const severity = soak ? "warning" : "fatal";
+    const soakNote = soak ? " (soak: WARN until promotion)" : "";
 
     for (const rel of m.missingFromMirror) {
-      if (!rel.startsWith('skills/') || !rel.endsWith('SKILL.md')) continue;
+      if (!rel.startsWith("skills/") || !rel.endsWith("SKILL.md")) continue;
       if (m.skipped.includes(rel)) continue;
       violations.push({
-        type: 'claude_only',
+        type: "claude_only",
         filePath: `.claude/${rel}`,
-        platform: 'claude',
+        platform: "claude",
         severity,
         description: `Skill exists only in .claude/ — no .${m.platform}/ counterpart: ${rel}${soakNote}`,
         remediation: `Create corresponding skill in .${m.platform}/skills/ or add 'mirror-parity: skip' to frontmatter`,
@@ -446,9 +447,9 @@ function validateSkillParity(manifest: PlatformFileManifest): ParityViolation[] 
     }
 
     for (const rel of m.mirrorOnly) {
-      if (!rel.startsWith('skills/') || !rel.endsWith('SKILL.md')) continue;
+      if (!rel.startsWith("skills/") || !rel.endsWith("SKILL.md")) continue;
       violations.push({
-        type: `${m.platform}_only` as ParityViolation['type'],
+        type: `${m.platform}_only` as ParityViolation["type"],
         filePath: `.${m.platform}/${rel}`,
         platform: m.platform,
         severity,
@@ -471,24 +472,24 @@ function validateAgentParity(manifest: PlatformFileManifest): ParityViolation[] 
 
   for (const m of [manifest.gemini, manifest.agents, manifest.codex]) {
     for (const rel of m.missingFromMirror) {
-      if (!rel.startsWith('agents/') || !rel.endsWith('.md')) continue;
+      if (!rel.startsWith("agents/") || !rel.endsWith(".md")) continue;
       violations.push({
-        type: 'claude_only',
+        type: "claude_only",
         filePath: `.claude/${rel}`,
-        platform: 'claude',
-        severity: 'warning',
+        platform: "claude",
+        severity: "warning",
         description: `Agent file exists only in .claude/ — no .${m.platform}/ counterpart: ${rel}`,
         remediation: `Create corresponding agent in .${m.platform}/agents/ if applicable to the platform`,
       });
     }
 
     for (const rel of m.mirrorOnly) {
-      if (!rel.startsWith('agents/') || !rel.endsWith('.md')) continue;
+      if (!rel.startsWith("agents/") || !rel.endsWith(".md")) continue;
       violations.push({
-        type: `${m.platform}_only` as ParityViolation['type'],
+        type: `${m.platform}_only` as ParityViolation["type"],
         filePath: `.${m.platform}/${rel}`,
         platform: m.platform,
-        severity: 'warning',
+        severity: "warning",
         description: `Agent file exists only in .${m.platform}/: ${rel}`,
         remediation: `Create corresponding agent in .claude/agents/ if applicable to Claude platform`,
       });
@@ -513,10 +514,10 @@ export async function validatePlatformParity(variantPath: string): Promise<Parit
   if (!existsSync(variantPath)) {
     throw fatalError(
       ErrorPhase.VALIDATION,
-      'VARIANT_NOT_FOUND',
+      "VARIANT_NOT_FOUND",
       `Variant path does not exist: ${variantPath}`,
       undefined,
-      'Verify the variant path is correct'
+      "Verify the variant path is correct",
     );
   }
 
@@ -525,9 +526,15 @@ export async function validatePlatformParity(variantPath: string): Promise<Parit
   // Build platform file manifest
   console.log(`=== Building Platform Manifest (.claude/ reference ↔ .gemini/.agents/.codex mirrors) ===`);
   const manifest = buildPlatformManifest(variantPath);
-  console.log(`Gemini — missing: ${manifest.gemini.missingFromMirror.length}, mirror-only: ${manifest.gemini.mirrorOnly.length}, skipped: ${manifest.gemini.skipped.length}`);
-  console.log(`Agents — missing: ${manifest.agents.missingFromMirror.length}, mirror-only: ${manifest.agents.mirrorOnly.length}, skipped: ${manifest.agents.skipped.length}`);
-  console.log(`Codex (mapping-aware) — missing: ${manifest.codex.missingFromMirror.length}, mirror-only: ${manifest.codex.mirrorOnly.length}, skipped: ${manifest.codex.skipped.length}`);
+  console.log(
+    `Gemini — missing: ${manifest.gemini.missingFromMirror.length}, mirror-only: ${manifest.gemini.mirrorOnly.length}, skipped: ${manifest.gemini.skipped.length}`,
+  );
+  console.log(
+    `Agents — missing: ${manifest.agents.missingFromMirror.length}, mirror-only: ${manifest.agents.mirrorOnly.length}, skipped: ${manifest.agents.skipped.length}`,
+  );
+  console.log(
+    `Codex (mapping-aware) — missing: ${manifest.codex.missingFromMirror.length}, mirror-only: ${manifest.codex.mirrorOnly.length}, skipped: ${manifest.codex.skipped.length}`,
+  );
   console.log(`Files in both .claude/ and .gemini/: ${manifest.both.length}`);
 
   // Validate settings.json parity (claude↔gemini — see module header)
@@ -562,17 +569,17 @@ export async function validatePlatformParity(variantPath: string): Promise<Parit
     totalViolations: violations.length,
   };
 
-  const hasParityViolations = violations.some(v => v.severity === 'fatal');
+  const hasParityViolations = violations.some((v) => v.severity === "fatal");
 
   console.log(`\n=== Platform Parity Validation Complete ===`);
   console.log(`Total violations: ${summary.totalViolations}`);
-  console.log(`Fatal violations: ${violations.filter(v => v.severity === 'fatal').length}`);
-  console.log(`Warnings: ${violations.filter(v => v.severity === 'warning').length}`);
+  console.log(`Fatal violations: ${violations.filter((v) => v.severity === "fatal").length}`);
+  console.log(`Warnings: ${violations.filter((v) => v.severity === "warning").length}`);
 
   if (violations.length > 0) {
     console.log(`\n⚠️  Violations:`);
     for (const violation of violations) {
-      const icon = violation.severity === 'fatal' ? '❌' : '⚠️ ';
+      const icon = violation.severity === "fatal" ? "❌" : "⚠️ ";
       console.log(`${icon} [${violation.type}] ${violation.filePath}`);
       console.log(`   ${violation.description}`);
       console.log(`   Remediation: ${violation.remediation}`);
@@ -594,27 +601,27 @@ export async function validatePlatformParity(variantPath: string): Promise<Parit
 
 async function main() {
   const args = process.argv.slice(2);
-  const variantPathArg = args.find(arg => arg.startsWith('--variant-path='));
+  const variantPathArg = args.find((arg) => arg.startsWith("--variant-path="));
 
   if (!variantPathArg) {
-    console.error('Usage: bun scripts/helpers/validate-platform-parity.ts --variant-path=<path-to-variant>');
+    console.error("Usage: bun scripts/helpers/validate-platform-parity.ts --variant-path=<path-to-variant>");
     process.exit(1);
   }
 
-  const variantPath = variantPathArg.split('=')[1];
+  const variantPath = variantPathArg.split("=")[1];
 
   try {
     const result = await validatePlatformParity(variantPath);
 
     if (result.hasParityViolations) {
-      console.log('\n❌ Platform parity validation failed');
+      console.log("\n❌ Platform parity validation failed");
       process.exit(1);
     } else {
-      console.log('\n✅ Platform parity validation passed');
+      console.log("\n✅ Platform parity validation passed");
       process.exit(0);
     }
   } catch (error) {
-    console.error('\n❌ Platform parity validation failed:');
+    console.error("\n❌ Platform parity validation failed:");
     console.error(error);
     process.exit(1);
   }

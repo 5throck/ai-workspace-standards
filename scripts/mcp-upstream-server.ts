@@ -159,27 +159,46 @@
 // v1.0.0 (2026-10-01): Stdio MCP server (newline-delimited JSON-RPC 2.0, zero dependencies)
 //          exposing two tools: upstream_request_create and upstream_request_status.
 
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto";
 import {
-  existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, realpathSync,
-  renameSync, appendFileSync, linkSync, unlinkSync, statSync, lstatSync, rmSync,
-  openSync, writeSync, closeSync,
-} from 'node:fs';
-import { join, dirname, resolve, basename, isAbsolute, sep } from 'node:path';
-import { createInterface } from 'node:readline';
-import { fileURLToPath } from 'node:url';
-import { load, dump, JSON_SCHEMA } from 'js-yaml';
-import { withTicketLock, readTicket, reprioritizeTicket, loadKanbanAliases } from './helpers/ticket-store.ts';
-import { kstDate, kstIso } from './helpers/kst-time.ts';
-import { upstreamIdentitySource, resolvePriorityInput, type UpstreamIdentitySource } from './helpers/ticket-schema.ts';
-import { ReprioritizeRefusedError, type ReprioritizeActor } from './helpers/reprioritize.ts';
-import { loadTenantLoopRegistry, tenantLoopRegistryPath, TENANT_ID_RE, type LoadTenantLoopRegistryResult, type TenantLoopTenant } from './lib/fleet.ts';
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  realpathSync,
+  renameSync,
+  appendFileSync,
+  linkSync,
+  unlinkSync,
+  statSync,
+  lstatSync,
+  rmSync,
+  openSync,
+  writeSync,
+  closeSync,
+} from "node:fs";
+import { join, dirname, resolve, basename, isAbsolute, sep } from "node:path";
+import { createInterface } from "node:readline";
+import { fileURLToPath } from "node:url";
+import { load, dump, JSON_SCHEMA } from "js-yaml";
+import { withTicketLock, readTicket, reprioritizeTicket, loadKanbanAliases } from "./helpers/ticket-store.ts";
+import { kstDate, kstIso } from "./helpers/kst-time.ts";
+import { upstreamIdentitySource, resolvePriorityInput, type UpstreamIdentitySource } from "./helpers/ticket-schema.ts";
+import { ReprioritizeRefusedError, type ReprioritizeActor } from "./helpers/reprioritize.ts";
+import {
+  loadTenantLoopRegistry,
+  tenantLoopRegistryPath,
+  TENANT_ID_RE,
+  type LoadTenantLoopRegistryResult,
+  type TenantLoopTenant,
+} from "./lib/fleet.ts";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = '1.15.1';
+export const SERVER_VERSION = "1.15.1";
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -188,50 +207,50 @@ export const SERVER_VERSION = '1.15.1';
 // scripts/propagation-map.json all derive from it. Production client configs never set it.
 function resolveWorkspaceRoot(): string {
   const override = process.env.UPSTREAM_WORKSPACE_ROOT;
-  if (override !== undefined && override !== '') {
+  if (override !== undefined && override !== "") {
     if (isAbsolute(override)) return resolve(override);
-    console.error('[mcp-upstream-server] UPSTREAM_WORKSPACE_ROOT must be an absolute path; ignoring');
+    console.error("[mcp-upstream-server] UPSTREAM_WORKSPACE_ROOT must be an absolute path; ignoring");
   }
-  return resolve(SCRIPT_DIR, '..');
+  return resolve(SCRIPT_DIR, "..");
 }
 
 const WORKSPACE_ROOT = resolveWorkspaceRoot();
-const FALLBACK_PROTOCOL_VERSION = '2024-11-05';
+const FALLBACK_PROTOCOL_VERSION = "2024-11-05";
 
 const REQUESTER_NAME_RE = /^co-[a-z0-9-]{1,40}$/;
 // Identity marker is platform-independent: the canonical location is the project root,
 // with the pre-2026-10-01 `.claude/template-version.txt` kept as a legacy fallback so
 // projects scaffolded before the move keep filing without a migration (fixed order,
 // first hit wins).
-const IDENTITY_PATHS = ['template-version.txt', join('.claude', 'template-version.txt')] as const;
+const IDENTITY_PATHS = ["template-version.txt", join(".claude", "template-version.txt")] as const;
 const REGISTRATION_RULE = `unregistered working directory: requester must be a direct child of Projects/ matching ^co-[a-z0-9-]{1,40}$ with template-version.txt at the project root (legacy .claude/template-version.txt accepted) (only co-* projects may file in v1)`;
-const PROJECTS_DIR = resolve(WORKSPACE_ROOT, 'Projects');
-const TEMPLATES_DIR = resolve(WORKSPACE_ROOT, 'templates');
-const PROPAGATION_MAP = resolve(WORKSPACE_ROOT, 'scripts', 'propagation-map.json');
+const PROJECTS_DIR = resolve(WORKSPACE_ROOT, "Projects");
+const TEMPLATES_DIR = resolve(WORKSPACE_ROOT, "templates");
+const PROPAGATION_MAP = resolve(WORKSPACE_ROOT, "scripts", "propagation-map.json");
 
 function readCap(name: string, fallback: number): number {
   const raw = process.env[name];
-  if (raw === undefined || raw === '') return fallback;
+  if (raw === undefined || raw === "") return fallback;
   if (/^\d{1,6}$/.test(raw.trim()) && parseInt(raw, 10) > 0) return parseInt(raw, 10);
   console.error(`[mcp-upstream-server] invalid ${name}=${JSON.stringify(raw)}; using default ${fallback}`);
   return fallback;
 }
 
-const UPSTREAM_SOFT_CAP = readCap('UPSTREAM_SOFT_CAP', 10);
-const UPSTREAM_HARD_CAP = readCap('UPSTREAM_HARD_CAP', 30);
-const UPSTREAM_GLOBAL_READY_CAP = readCap('UPSTREAM_GLOBAL_READY_CAP', 40);
+const UPSTREAM_SOFT_CAP = readCap("UPSTREAM_SOFT_CAP", 10);
+const UPSTREAM_HARD_CAP = readCap("UPSTREAM_HARD_CAP", 30);
+const UPSTREAM_GLOBAL_READY_CAP = readCap("UPSTREAM_GLOBAL_READY_CAP", 40);
 
 // Design Appendix E.6: the client_roots tier is live by default (Phase B); the env switch
 // UPSTREAM_CLIENT_ROOTS=0 returns the server to Phase A (log-only: client_init and
 // roots_probe lines are still written, identity resolution and instruction text are the
 // pre-roots behavior).
-const ENABLE_CLIENT_ROOTS = process.env.UPSTREAM_CLIENT_ROOTS !== '0';
+const ENABLE_CLIENT_ROOTS = process.env.UPSTREAM_CLIENT_ROOTS !== "0";
 
 // Design Appendix E.3.17: roots/list timeout. Test seam UPSTREAM_ROOTS_TIMEOUT_MS accepts an
 // integer 100..10000; anything else warns and keeps the 2 s default.
 const ROOTS_TIMEOUT_MS = (() => {
   const raw = process.env.UPSTREAM_ROOTS_TIMEOUT_MS;
-  if (raw === undefined || raw === '') return 2000;
+  if (raw === undefined || raw === "") return 2000;
   if (/^\d{3,5}$/.test(raw.trim())) {
     const n = parseInt(raw, 10);
     if (n >= 100 && n <= 10000) return n;
@@ -245,10 +264,10 @@ const MAX_ROOTS = 32;
 // retarget UPSTREAM_WORKSPACE_ROOT after another test file has already loaded
 // this module — load-order no longer pins the tickets directory.
 function ticketsDir(): string {
-  return join(WORKSPACE_ROOT, 'tickets', 'governance');
+  return join(WORKSPACE_ROOT, "tickets", "governance");
 }
-const LOGS_DIR = join(WORKSPACE_ROOT, 'logs', 'upstream-intake');
-const KNOWN_PROJECTS_FILE = join(LOGS_DIR, 'known-projects.json');
+const LOGS_DIR = join(WORKSPACE_ROOT, "logs", "upstream-intake");
+const KNOWN_PROJECTS_FILE = join(LOGS_DIR, "known-projects.json");
 
 const PATH_RE = /^(?!\/)(?!.*\.\.)[A-Za-z0-9._\-/]+$/;
 const MAX_TOTAL_BYTES = 16 * 1024;
@@ -269,7 +288,7 @@ const STRIP_RE = /[\p{Cf}\p{Cc}\p{Co}\p{Cs}\p{Cn}\u00AD\u061C]/gu;
 
 // Heuristic families (§9 L1). Matching flags the request for human review; it never rejects.
 // `scope: 'diff'` patterns apply only to local_workaround_diff; `outsideDiff` only to prose.
-const HEURISTICS: Array<{ pattern: RegExp; scope?: 'diff' | 'prose' }> = [
+const HEURISTICS: Array<{ pattern: RegExp; scope?: "diff" | "prose" }> = [
   // instruction override
   { pattern: /\bignore\s+(?:all|any|previous|prior|above|the)\b[\w\s,]{0,40}\b(?:instructions?|rules?)\b/i },
   { pattern: /\bdisregard\b/i },
@@ -289,36 +308,40 @@ const HEURISTICS: Array<{ pattern: RegExp; scope?: 'diff' | 'prose' }> = [
   { pattern: /\bmerge\s+(?:this|the)\s+PR\b/i },
   { pattern: /\bgh\s+pr\s+merge\b/i },
   // exfil / urgency
-  { pattern: /https?:\/\//i, scope: 'prose' },
+  { pattern: /https?:\/\//i, scope: "prose" },
   { pattern: /\b(?:curl|wget)\b/i },
   { pattern: /\bbase64\b/i },
   { pattern: /\b(?:urgent|immediately|pre-?authori[sz]ed)\b/i },
   // governance-control paths touched by a diff
-  { pattern: /\.githooks\/|\.claude\/settings\.json|scripts\/hooks\/|CONSTITUTION\.md|agents\/pm\.md/i, scope: 'diff' },
+  { pattern: /\.githooks\/|\.claude\/settings\.json|scripts\/hooks\/|CONSTITUTION\.md|agents\/pm\.md/i, scope: "diff" },
 ];
 
 function sanitize(s: string): string {
-  return s.normalize('NFC').replace(STRIP_RE, (ch) => (ch === '\n' || ch === '\t' ? ch : ''));
+  return s.normalize("NFC").replace(STRIP_RE, (ch) => (ch === "\n" || ch === "\t" ? ch : ""));
 }
 
 /** NFKC-folded copy (fullwidth/compatibility forms) for matching only; storage stays NFC. */
 function fold(s: string): string {
-  return s.normalize('NFKC').replace(STRIP_RE, (ch) => (ch === '\n' || ch === '\t' ? ch : ''));
+  return s.normalize("NFKC").replace(STRIP_RE, (ch) => (ch === "\n" || ch === "\t" ? ch : ""));
 }
 
 function checkInjection(raw: { symptom: string; repro?: string; diff?: string }): boolean {
-  const fields = { symptom: fold(raw.symptom), repro: raw.repro === undefined ? undefined : fold(raw.repro), diff: raw.diff === undefined ? undefined : fold(raw.diff) };
-  const prose = [fields.symptom, fields.repro ?? ''];
-  const diff = fields.diff ?? '';
+  const fields = {
+    symptom: fold(raw.symptom),
+    repro: raw.repro === undefined ? undefined : fold(raw.repro),
+    diff: raw.diff === undefined ? undefined : fold(raw.diff),
+  };
+  const prose = [fields.symptom, fields.repro ?? ""];
+  const diff = fields.diff ?? "";
   return HEURISTICS.some((h) => {
-    if (h.scope === 'diff') return h.pattern.test(diff);
-    if (h.scope === 'prose') return prose.some((t) => h.pattern.test(t));
+    if (h.scope === "diff") return h.pattern.test(diff);
+    if (h.scope === "prose") return prose.some((t) => h.pattern.test(t));
     return prose.some((t) => h.pattern.test(t)) || h.pattern.test(diff);
   });
 }
 
 interface UpstreamRequest {
-  suspected_layer: 'L1' | 'L2' | 'unsure';
+  suspected_layer: "L1" | "L2" | "unsure";
   symptom: string;
   affected_paths: string[];
   local_workaround_diff?: string;
@@ -331,8 +354,8 @@ type KnownProjects = Map<string, { first_seen: string; first_id: string }>;
 function loadKnownProjects(): KnownProjects {
   if (!existsSync(KNOWN_PROJECTS_FILE)) return new Map();
   try {
-    const data = JSON.parse(readFileSync(KNOWN_PROJECTS_FILE, 'utf-8'));
-    if (typeof data !== 'object' || data === null || Array.isArray(data)) return new Map();
+    const data = JSON.parse(readFileSync(KNOWN_PROJECTS_FILE, "utf-8"));
+    if (typeof data !== "object" || data === null || Array.isArray(data)) return new Map();
     return new Map(Object.entries(data));
   } catch {
     return new Map();
@@ -342,11 +365,16 @@ function loadKnownProjects(): KnownProjects {
 function saveKnownProjects(m: KnownProjects): void {
   mkdirSync(dirname(KNOWN_PROJECTS_FILE), { recursive: true });
   const tmpPath = `${KNOWN_PROJECTS_FILE}.tmp-${process.pid}-${Date.now()}`;
-  writeFileSync(tmpPath, JSON.stringify(Object.fromEntries(m)), 'utf-8');
+  writeFileSync(tmpPath, JSON.stringify(Object.fromEntries(m)), "utf-8");
   renameSync(tmpPath, KNOWN_PROJECTS_FILE);
 }
 
-interface ProjectIdentity { name: string; path: string; variant: string; version: string | null }
+interface ProjectIdentity {
+  name: string;
+  path: string;
+  variant: string;
+  version: string | null;
+}
 
 // v1.15.0 (design 2026-11-08-gw-tenant-loop-and-hardening-design §3.3): the explicit
 // tenant-branch rejection. States WHICH rule failed — a tenant cwd that cannot be
@@ -384,15 +412,19 @@ function resolveTenantProject(cwd: string): ProjectIdentity | string | null {
     // malformed as a result, not a throw) — keep the fail-closed contract even
     // if a future loader revision starts throwing.
     const detail = err instanceof Error ? err.message : String(err);
-    console.error(`[mcp-upstream-server] tenant-loop registry unusable for identity (${tenantLoopRegistryPath(WORKSPACE_ROOT)}): ${detail}`);
+    console.error(
+      `[mcp-upstream-server] tenant-loop registry unusable for identity (${tenantLoopRegistryPath(WORKSPACE_ROOT)}): ${detail}`,
+    );
     return tenantRuleMessage(realCwd);
   }
   if (!load.ok) {
-    if (load.error === 'malformed') {
+    if (load.error === "malformed") {
       // The registry EXISTS but is unusable: a tenant cwd can no longer be
       // distinguished from a non-tenant one, so fail closed on the EXPLICIT
       // tenant rule (never the generic rule, never a guess). Detail → logs.
-      console.error(`[mcp-upstream-server] tenant-loop registry unusable for identity (${tenantLoopRegistryPath(WORKSPACE_ROOT)}): ${load.detail}`);
+      console.error(
+        `[mcp-upstream-server] tenant-loop registry unusable for identity (${tenantLoopRegistryPath(WORKSPACE_ROOT)}): ${load.detail}`,
+      );
       return tenantRuleMessage(realCwd);
     }
     return null; // absent-file / stale / schema-major → behave as absent (§3.1)
@@ -426,18 +458,18 @@ function resolveTenantProject(cwd: string): ProjectIdentity | string | null {
   const t = match.tenant;
   // Registered but suspended, or upstream filing scoped off: the explicit rule
   // message verbatim (design §3.3), not the generic REGISTRATION_RULE.
-  if (t.status !== 'active' || t.scopes.upstreamFile !== true) return tenantRuleMessage(realCwd);
+  if (t.status !== "active" || t.scopes.upstreamFile !== true) return tenantRuleMessage(realCwd);
   // Same nested-repo suspicion as the Projects/ rule: the tenant root itself
   // must be a real git repo (a .git FILE means worktree/submodule), and no
   // nested .git may sit between the cwd and the tenant root.
   try {
-    if (!lstatSync(join(t.projectDir, '.git')).isDirectory()) return tenantRuleMessage(realCwd);
+    if (!lstatSync(join(t.projectDir, ".git")).isDirectory()) return tenantRuleMessage(realCwd);
   } catch {
     return tenantRuleMessage(realCwd);
   }
   let dir = realCwd;
   while (dir !== match.realDir) {
-    if (existsSync(join(dir, '.git'))) return tenantRuleMessage(realCwd);
+    if (existsSync(join(dir, ".git"))) return tenantRuleMessage(realCwd);
     const parent = dirname(dir);
     if (parent === dir) return tenantRuleMessage(realCwd);
     dir = parent;
@@ -447,7 +479,7 @@ function resolveTenantProject(cwd: string): ProjectIdentity | string | null {
   for (const rel of IDENTITY_PATHS) {
     const tvFile = join(t.projectDir, rel);
     if (existsSync(tvFile)) {
-      const verm = /^version=(\S+)\s*$/m.exec(readFileSync(tvFile, 'utf-8'));
+      const verm = /^version=(\S+)\s*$/m.exec(readFileSync(tvFile, "utf-8"));
       version = verm ? verm[1] : null;
       break;
     }
@@ -460,9 +492,9 @@ function resolveProject(cwd: string): ProjectIdentity | string {
   // raw string BEFORE any filesystem call: realpathSync on a UNC path can stall on the network
   // and leak SMB credentials (T-20261003-004; the roots/list tier already drops these in E.4 —
   // this guards the cwd, the tenant branch and self-declared project_root entrances alike).
-  if (cwd.startsWith('\\\\')) return REGISTRATION_RULE;
+  if (cwd.startsWith("\\\\")) return REGISTRATION_RULE;
   const projectsResult = resolveCoProject(cwd);
-  if (typeof projectsResult !== 'string') return projectsResult;
+  if (typeof projectsResult !== "string") return projectsResult;
   // v1.15.0: tenant branch — checked ONLY when the Projects/ rule did not match
   // (design §3.3.1); its verdict (identity / tenant rule / fall-through) decides.
   const tenantResult = resolveTenantProject(cwd);
@@ -482,7 +514,7 @@ function resolveCoProject(cwd: string): ProjectIdentity | string {
     // project root exclusive) is a nested repo or worktree: reject.
     let dir = realCwd;
     while (dirname(dir) !== realProjectsDir) {
-      if (existsSync(join(dir, '.git'))) return REGISTRATION_RULE;
+      if (existsSync(join(dir, ".git"))) return REGISTRATION_RULE;
       const parent = dirname(dir);
       if (parent === dir) return REGISTRATION_RULE;
       dir = parent;
@@ -491,14 +523,14 @@ function resolveCoProject(cwd: string): ProjectIdentity | string {
     const name = basename(root);
     if (!REQUESTER_NAME_RE.test(name)) return REGISTRATION_RULE;
     // .git must be a real directory (a .git file means worktree/submodule).
-    const g = lstatSync(join(root, '.git'));
+    const g = lstatSync(join(root, ".git"));
     if (!g.isDirectory()) return REGISTRATION_RULE;
 
     let text: string | null = null;
     for (const rel of IDENTITY_PATHS) {
       const tvFile = join(root, rel);
       if (existsSync(tvFile)) {
-        text = readFileSync(tvFile, 'utf-8');
+        text = readFileSync(tvFile, "utf-8");
         break;
       }
     }
@@ -525,36 +557,53 @@ function isFileInside(base: string, candidate: string): boolean {
 }
 
 function globToRegex(glob: string): RegExp {
-  let re = '';
+  let re = "";
   for (let i = 0; i < glob.length; i++) {
     const c = glob[i];
-    if (c === '*' && glob[i + 1] === '*' && glob[i + 2] === '/') { re += '(?:.*/)?'; i += 2; }
-    else if (c === '*') re += '[^/]*';
-    else re += c.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+    if (c === "*" && glob[i + 1] === "*" && glob[i + 2] === "/") {
+      re += "(?:.*/)?";
+      i += 2;
+    } else if (c === "*") re += "[^/]*";
+    else re += c.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
   }
   return new RegExp(`^${re}$`);
 }
 
 interface PropagationDomain {
-  source?: string; target?: string; include_pattern?: string; recursive?: boolean;
-  exclude?: unknown; disabled?: boolean;
+  source?: string;
+  target?: string;
+  include_pattern?: string;
+  recursive?: boolean;
+  exclude?: unknown;
+  disabled?: boolean;
 }
 
 /** §7.3: returns the L0 source path when `path` falls under a propagation-map target. */
 function propagationOrigin(path: string): string | null {
   let map: { domains?: Record<string, PropagationDomain> };
-  try { map = JSON.parse(readFileSync(PROPAGATION_MAP, 'utf-8')); } catch { return null; }
-  const commonPrefix = 'templates/common/';
+  try {
+    map = JSON.parse(readFileSync(PROPAGATION_MAP, "utf-8"));
+  } catch {
+    return null;
+  }
+  const commonPrefix = "templates/common/";
   for (const dom of Object.values(map.domains ?? {})) {
-    if (!dom || dom.disabled || typeof dom.source !== 'string' || typeof dom.target !== 'string' || typeof dom.include_pattern !== 'string') continue;
+    if (
+      !dom ||
+      dom.disabled ||
+      typeof dom.source !== "string" ||
+      typeof dom.target !== "string" ||
+      typeof dom.include_pattern !== "string"
+    )
+      continue;
     if (!dom.target.startsWith(commonPrefix)) continue;
     const targetRel = dom.target.slice(commonPrefix.length);
-    if (!path.startsWith(targetRel + '/')) continue;
+    if (!path.startsWith(targetRel + "/")) continue;
     const rest = path.slice(targetRel.length + 1);
-    if (!dom.recursive && rest.includes('/')) continue;
+    if (!dom.recursive && rest.includes("/")) continue;
     if (!globToRegex(dom.include_pattern).test(rest)) continue;
-    const excludes = Array.isArray(dom.exclude) ? dom.exclude.filter((e): e is string => typeof e === 'string') : [];
-    if (excludes.includes(rest) || excludes.includes(rest.split('/')[0])) continue;
+    const excludes = Array.isArray(dom.exclude) ? dom.exclude.filter((e): e is string => typeof e === "string") : [];
+    if (excludes.includes(rest) || excludes.includes(rest.split("/")[0])) continue;
     return `${dom.source}/${rest}`;
   }
   return null;
@@ -562,30 +611,40 @@ function propagationOrigin(path: string): string | null {
 
 /** §7 checks in order: L2 template file, L1 template file, L0->L1 propagation target. */
 function templateManagement(path: string, variant: string): { managed: boolean; l0Origin: string | null } {
-  if (existsSync(join(TEMPLATES_DIR, variant)) && isFileInside(join(TEMPLATES_DIR, variant), resolve(TEMPLATES_DIR, variant, path))) return { managed: true, l0Origin: null };
-  if (isFileInside(join(TEMPLATES_DIR, 'common'), resolve(TEMPLATES_DIR, 'common', path))) return { managed: true, l0Origin: null };
+  if (
+    existsSync(join(TEMPLATES_DIR, variant)) &&
+    isFileInside(join(TEMPLATES_DIR, variant), resolve(TEMPLATES_DIR, variant, path))
+  )
+    return { managed: true, l0Origin: null };
+  if (isFileInside(join(TEMPLATES_DIR, "common"), resolve(TEMPLATES_DIR, "common", path)))
+    return { managed: true, l0Origin: null };
   const origin = propagationOrigin(path);
   return origin ? { managed: true, l0Origin: origin } : { managed: false, l0Origin: null };
 }
 
 function deliveredFiles(projectPath: string): Set<string> {
   try {
-    const d = JSON.parse(readFileSync(join(projectPath, '.claude', 'last-upgrade-delivery.json'), 'utf-8'));
-    return new Set(Array.isArray(d.files) ? d.files.filter((f: unknown): f is string => typeof f === 'string') : []);
+    const d = JSON.parse(readFileSync(join(projectPath, ".claude", "last-upgrade-delivery.json"), "utf-8"));
+    return new Set(Array.isArray(d.files) ? d.files.filter((f: unknown): f is string => typeof f === "string") : []);
   } catch {
     return new Set();
   }
 }
 
 function dedupeKey(paths: string[], symptom: string): string {
-  const sorted = [...new Set(paths)].sort().join('\n');
-  const normalized = fold(symptom).toLowerCase().replace(/\s+/g, ' ')
-    .replace(/\b[0-9a-f]{7,}\b/g, '').replace(/\d+/g, '').replace(/\s+/g, ' ').trim();
-  return createHash('sha256').update(`${sorted}\n${normalized}`, 'utf-8').digest('hex');
+  const sorted = [...new Set(paths)].sort().join("\n");
+  const normalized = fold(symptom)
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/\b[0-9a-f]{7,}\b/g, "")
+    .replace(/\d+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return createHash("sha256").update(`${sorted}\n${normalized}`, "utf-8").digest("hex");
 }
 
 function todayPrefix(): string {
-  return `U-${kstDate().replace(/-/g, '')}`;
+  return `U-${kstDate().replace(/-/g, "")}`;
 }
 
 function nextSeqForToday(): number {
@@ -612,7 +671,11 @@ let publishTmpCounter = 0;
 function defaultPublish(ticket: Record<string, unknown>, id: string): void {
   const ticketPath = join(ticketsDir(), `${id}.yaml`);
   const tmpPath = `${ticketPath}.tmp-${process.pid}-${Date.now()}-${publishTmpCounter++}`;
-  withFsRetry(() => writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8'), 3, 'ticket tmp write');
+  withFsRetry(
+    () => writeFileSync(tmpPath, dump(ticket, { schema: JSON_SCHEMA, lineWidth: -1 }), "utf-8"),
+    3,
+    "ticket tmp write",
+  );
   try {
     // T-20261005-001: hard-link publication is atomic on POSIX but fails EPERM on
     // Windows under file-system filter/AV pressure — the 2026-10-05 windows-latest
@@ -625,11 +688,15 @@ function defaultPublish(ticket: Record<string, unknown>, id: string): void {
       return;
     } catch (err) {
       const code = (err as NodeJS.ErrnoException).code;
-      if (code === 'EEXIST') throw err; // id taken — caller retries with the next candidate
-      if (code !== 'EPERM') throw err;
+      if (code === "EEXIST") throw err; // id taken — caller retries with the next candidate
+      if (code !== "EPERM") throw err;
       try {
-        const fd = withFsRetry(() => openSync(ticketPath, 'wx'), 3, 'ticket wx fallback');
-        try { writeSync(fd, readFileSync(tmpPath)); } finally { closeSync(fd); }
+        const fd = withFsRetry(() => openSync(ticketPath, "wx"), 3, "ticket wx fallback");
+        try {
+          writeSync(fd, readFileSync(tmpPath));
+        } finally {
+          closeSync(fd);
+        }
         return;
       } catch (err2) {
         // EEXIST from the wx fallback is the same collision — surface it as such
@@ -637,7 +704,11 @@ function defaultPublish(ticket: Record<string, unknown>, id: string): void {
       }
     }
   } finally {
-    try { withFsRetry(() => unlinkSync(tmpPath), 2, 'ticket tmp consumed'); } catch { /* consumed by a successful publish */ }
+    try {
+      withFsRetry(() => unlinkSync(tmpPath), 2, "ticket tmp consumed");
+    } catch {
+      /* consumed by a successful publish */
+    }
   }
 }
 
@@ -660,17 +731,17 @@ export function publishTicketWithRetry(
   const seqBase = nextSeqForToday();
   const prefix = todayPrefix();
   for (let attempt = 0; attempt < 20; attempt++) {
-    const id = `${prefix}-${String(seqBase + attempt).padStart(3, '0')}`;
+    const id = `${prefix}-${String(seqBase + attempt).padStart(3, "0")}`;
     const ticket = buildTicket(id);
     try {
       publish(ticket, id);
       return id;
     } catch (err) {
-      if ((err as NodeJS.ErrnoException)?.code !== 'EEXIST') throw err;
+      if ((err as NodeJS.ErrnoException)?.code !== "EEXIST") throw err;
       // id taken — next attempt moves to exactly the next candidate
     }
   }
-  throw new Error('could not allocate a ticket id');
+  throw new Error("could not allocate a ticket id");
 }
 
 /** T-20261022-022 follow-through: windows filter/AV pressure surfaces as EBUSY/EPERM on
@@ -692,7 +763,9 @@ function withFsRetry<T>(fn: () => T, attempts = 3, what: string, transient: Set<
       lastErr = err;
       if (!transient.has(code)) throw err;
       const waitMs = 25 * (attempt + 1);
-      console.error(`[mcp-upstream-server] transient fs ${code} on ${what} (attempt ${attempt + 1}/${attempts}) — retrying in ${waitMs}ms`);
+      console.error(
+        `[mcp-upstream-server] transient fs ${code} on ${what} (attempt ${attempt + 1}/${attempts}) — retrying in ${waitMs}ms`,
+      );
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, waitMs);
     }
   }
@@ -701,7 +774,16 @@ function withFsRetry<T>(fn: () => T, attempts = 3, what: string, transient: Set<
 
 function appendAuditLog(entry: Record<string, unknown>): void {
   mkdirSync(LOGS_DIR, { recursive: true });
-  withFsRetry(() => appendFileSync(join(LOGS_DIR, `${kstDate()}.jsonl`), JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n', 'utf-8'), 3, 'audit append');
+  withFsRetry(
+    () =>
+      appendFileSync(
+        join(LOGS_DIR, `${kstDate()}.jsonl`),
+        JSON.stringify({ ts: new Date().toISOString(), ...entry }) + "\n",
+        "utf-8",
+      ),
+    3,
+    "audit append",
+  );
 }
 
 // M6 (T-20261002-010): reject-path audit lines are written OUTSIDE the intake lock by
@@ -719,7 +801,7 @@ export function _resetRejectAuditForTests(): void {
 
 function appendRejectAudit(project: string, entry: Record<string, unknown>): void {
   const day = kstDate();
-  const key = project || '(unregistered)';
+  const key = project || "(unregistered)";
   const rec = rejectAuditCounts.get(key);
   const count = rec && rec.day === day ? rec.count : 0;
   if (count >= REJECT_AUDIT_CAP) return;
@@ -731,9 +813,13 @@ function readTodayAudit(): Array<{ project?: string; outcome?: string; triage?: 
   const todayLog = join(LOGS_DIR, `${kstDate()}.jsonl`);
   if (!existsSync(todayLog)) return [];
   const out: Array<{ project?: string; outcome?: string; triage?: string }> = [];
-  for (const line of readFileSync(todayLog, 'utf-8').split('\n')) {
+  for (const line of readFileSync(todayLog, "utf-8").split("\n")) {
     if (!line.trim()) continue;
-    try { out.push(JSON.parse(line)); } catch { /* skip torn line */ }
+    try {
+      out.push(JSON.parse(line));
+    } catch {
+      /* skip torn line */
+    }
   }
   return out;
 }
@@ -744,14 +830,14 @@ function readTodayAudit(): Array<{ project?: string; outcome?: string; triage?: 
  * on every filesystem; a crashed server's stale lock is taken over after 30s, and a deadline
  * of UPSTREAM_LOCK_TIMEOUT_MS (default 5s, 0 disables waiting) falls OPEN to the previous
  * single-instance behavior rather than refusing service. */
-const INTAKE_LOCK_DIR = join(LOGS_DIR, '.intake-lock');
+const INTAKE_LOCK_DIR = join(LOGS_DIR, ".intake-lock");
 const INTAKE_LOCK_STALE_MS = 30_000;
 
 function intakeLockTimeoutMs(): number {
   // NOT readCap: the caps must stay positive, but a 0 lock deadline is the
   // documented fail-open switch (tests / operators who prefer availability).
   const raw = process.env.UPSTREAM_LOCK_TIMEOUT_MS;
-  if (raw === undefined || raw === '') return 5000;
+  if (raw === undefined || raw === "") return 5000;
   if (/^\d{1,6}$/.test(raw.trim())) return parseInt(raw, 10);
   console.error(`[mcp-upstream-server] invalid UPSTREAM_LOCK_TIMEOUT_MS=${JSON.stringify(raw)}; using default 5000`);
   return 5000;
@@ -764,7 +850,7 @@ class IntakeLockTimeoutError extends Error {}
  * real win32 FS race cannot be reproduced on demand). Unset/'0' = disabled. */
 function lockMkdirFaultCount(): number {
   const raw = process.env.UPSTREAM_FAULT_LOCK_MKDIR;
-  if (raw === undefined || raw === '') return 0;
+  if (raw === undefined || raw === "") return 0;
   if (/^\d{1,6}$/.test(raw.trim())) return parseInt(raw, 10);
   console.error(`[mcp-upstream-server] invalid UPSTREAM_FAULT_LOCK_MKDIR=${JSON.stringify(raw)}; seam disabled`);
   return 0;
@@ -773,73 +859,93 @@ function lockMkdirFaultCount(): number {
 function withIntakeLock<T>(fn: () => T): T {
   // The LOGS_DIR creation is itself a win32 EPERM site under the same pressure —
   // same treatment as the audit append (v1.10.1), under the lock-scoped transient set.
-  withFsRetry(() => mkdirSync(LOGS_DIR, { recursive: true }), 3, 'lock logs dir', LOCK_TRANSIENT);
-  const token = createHash('sha256').update(`${process.pid}-${Date.now()}-${Math.random()}`).digest('hex').slice(0, 16);
+  withFsRetry(() => mkdirSync(LOGS_DIR, { recursive: true }), 3, "lock logs dir", LOCK_TRANSIENT);
+  const token = createHash("sha256").update(`${process.pid}-${Date.now()}-${Math.random()}`).digest("hex").slice(0, 16);
   const deadline = Date.now() + intakeLockTimeoutMs();
   let faultMkdirRemaining = lockMkdirFaultCount();
-  let lastTransientCode = '';
+  let lastTransientCode = "";
   const transientLogged = new Set<string>();
   for (;;) {
     try {
       if (faultMkdirRemaining > 0) {
         faultMkdirRemaining--;
-        const fault: NodeJS.ErrnoException = Object.assign(new Error(`synthetic EPERM (UPSTREAM_FAULT_LOCK_MKDIR)`), { code: 'EPERM' });
+        const fault: NodeJS.ErrnoException = Object.assign(new Error(`synthetic EPERM (UPSTREAM_FAULT_LOCK_MKDIR)`), {
+          code: "EPERM",
+        });
         throw fault;
       }
       mkdirSync(INTAKE_LOCK_DIR);
       break;
     } catch (err) {
-      const code = (err as NodeJS.ErrnoException)?.code ?? '';
+      const code = (err as NodeJS.ErrnoException)?.code ?? "";
       // T-20261105-001: transient win32 FS codes (EPERM under filter/AV pressure) are a
       // FAILED ACQUISITION, not a fatal condition — wait inside the existing deadline
       // loop and retry. FAIL-CLOSED unchanged: deadline expiry still throws
       // IntakeLockTimeoutError (converted to retryable -32000 by the caller).
-      if (code !== 'EEXIST' && LOCK_TRANSIENT.has(code)) {
+      if (code !== "EEXIST" && LOCK_TRANSIENT.has(code)) {
         lastTransientCode = code;
         if (!transientLogged.has(code)) {
           transientLogged.add(code);
-          console.error(`[mcp-upstream-server] transient fs ${code} on .intake-lock mkdir — retrying until lock deadline`);
+          console.error(
+            `[mcp-upstream-server] transient fs ${code} on .intake-lock mkdir — retrying until lock deadline`,
+          );
         }
         if (Date.now() >= deadline) {
-          throw new IntakeLockTimeoutError(`intake lock busy after ${intakeLockTimeoutMs()}ms — last fs error ${lastTransientCode || code} on .intake-lock mkdir; retry shortly`);
+          throw new IntakeLockTimeoutError(
+            `intake lock busy after ${intakeLockTimeoutMs()}ms — last fs error ${lastTransientCode || code} on .intake-lock mkdir; retry shortly`,
+          );
         }
         Bun.sleepSync(25);
         continue;
       }
-      if (code !== 'EEXIST') throw err;
+      if (code !== "EEXIST") throw err;
       // M5: stale takeover via ATOMIC RENAME — exactly one waiter wins; the old
       // rmSync-then-retry let two waiters both "remove" the same stale lock.
       let stale = false;
       try {
         stale = Date.now() - statSync(INTAKE_LOCK_DIR).mtimeMs > INTAKE_LOCK_STALE_MS;
-      } catch { /* vanished between EEXIST and stat — loop and retry mkdir */ }
+      } catch {
+        /* vanished between EEXIST and stat — loop and retry mkdir */
+      }
       if (stale) {
         try {
           const stalePath = `${INTAKE_LOCK_DIR}.stale-${process.pid}-${Date.now()}`;
           renameSync(INTAKE_LOCK_DIR, stalePath);
           rmSync(stalePath, { recursive: true, force: true });
           continue;
-        } catch { /* another waiter won the rename — wait */ }
+        } catch {
+          /* another waiter won the rename — wait */
+        }
       }
       // M5: FAIL CLOSED. The old fail-open let a contended lock silently degrade to
       // the pre-lock race (double-spent caps, double first-seen). Callers convert
       // IntakeLockTimeoutError into a retryable -32000 answer.
       if (Date.now() >= deadline) {
-        throw new IntakeLockTimeoutError(`intake lock busy after ${intakeLockTimeoutMs()}ms — another server instance is mid-intake; retry shortly`);
+        throw new IntakeLockTimeoutError(
+          `intake lock busy after ${intakeLockTimeoutMs()}ms — another server instance is mid-intake; retry shortly`,
+        );
       }
       Bun.sleepSync(25);
     }
   }
   try {
-    writeFileSync(join(INTAKE_LOCK_DIR, 'owner'), JSON.stringify({ pid: process.pid, token, at: new Date().toISOString() }), 'utf-8');
-  } catch { /* stolen between mkdir and owner write — release below is a no-op */ }
+    writeFileSync(
+      join(INTAKE_LOCK_DIR, "owner"),
+      JSON.stringify({ pid: process.pid, token, at: new Date().toISOString() }),
+      "utf-8",
+    );
+  } catch {
+    /* stolen between mkdir and owner write — release below is a no-op */
+  }
   try {
     return fn();
   } finally {
     try {
-      const owner = JSON.parse(readFileSync(join(INTAKE_LOCK_DIR, 'owner'), 'utf-8')) as { token?: string };
+      const owner = JSON.parse(readFileSync(join(INTAKE_LOCK_DIR, "owner"), "utf-8")) as { token?: string };
       if (owner.token === token) rmSync(INTAKE_LOCK_DIR, { recursive: true, force: true });
-    } catch { /* lock already gone (stale-taken) — nothing to release */ }
+    } catch {
+      /* lock already gone (stale-taken) — nothing to release */
+    }
   }
 }
 
@@ -861,31 +967,44 @@ function pruneOldLogs(now = Date.now()): number {
         pruned++;
       }
     }
-  } catch { /* retention is best-effort — never block intake */ }
+  } catch {
+    /* retention is best-effort — never block intake */
+  }
   return pruned;
 }
 
 // M11: stdin line cap enforced before JSON.parse (see the request loop).
 const MAX_LINE_BYTES = 1_000_000;
 
-const ALLOWED_KEYS = new Set(['suspected_layer', 'symptom', 'affected_paths', 'local_workaround_diff', 'repro', 'project_root']);
+const ALLOWED_KEYS = new Set([
+  "suspected_layer",
+  "symptom",
+  "affected_paths",
+  "local_workaround_diff",
+  "repro",
+  "project_root",
+]);
 
 type Validation = { valid: false; error: string } | { valid: true; req: UpstreamRequest };
 
 /** Shape check, then sanitization of EVERY string field, then length/pattern/cap checks
  * against the sanitized text (so hidden characters cannot pad or evade a limit). */
 function validateUpstreamRequest(params: unknown): Validation {
-  if (typeof params !== 'object' || params === null || Array.isArray(params)) return { valid: false, error: 'invalid params: arguments must be an object' };
+  if (typeof params !== "object" || params === null || Array.isArray(params))
+    return { valid: false, error: "invalid params: arguments must be an object" };
   const p = params as Record<string, unknown>;
   for (const key of Object.keys(p)) {
     if (!ALLOWED_KEYS.has(key)) return { valid: false, error: `invalid params: extra key "${key}"` };
   }
 
-  if (p.suspected_layer !== 'L1' && p.suspected_layer !== 'L2' && p.suspected_layer !== 'unsure') return { valid: false, error: 'invalid params: suspected_layer' };
-  if (typeof p.symptom !== 'string') return { valid: false, error: 'invalid params: symptom' };
-  if (!Array.isArray(p.affected_paths) || p.affected_paths.some((x) => typeof x !== 'string')) return { valid: false, error: 'invalid params: affected_paths' };
-  if (p.local_workaround_diff !== undefined && typeof p.local_workaround_diff !== 'string') return { valid: false, error: 'invalid params: local_workaround_diff' };
-  if (p.repro !== undefined && typeof p.repro !== 'string') return { valid: false, error: 'invalid params: repro' };
+  if (p.suspected_layer !== "L1" && p.suspected_layer !== "L2" && p.suspected_layer !== "unsure")
+    return { valid: false, error: "invalid params: suspected_layer" };
+  if (typeof p.symptom !== "string") return { valid: false, error: "invalid params: symptom" };
+  if (!Array.isArray(p.affected_paths) || p.affected_paths.some((x) => typeof x !== "string"))
+    return { valid: false, error: "invalid params: affected_paths" };
+  if (p.local_workaround_diff !== undefined && typeof p.local_workaround_diff !== "string")
+    return { valid: false, error: "invalid params: local_workaround_diff" };
+  if (p.repro !== undefined && typeof p.repro !== "string") return { valid: false, error: "invalid params: repro" };
 
   const symptom = sanitize(p.symptom);
   const paths = (p.affected_paths as string[]).map(sanitize);
@@ -893,24 +1012,38 @@ function validateUpstreamRequest(params: unknown): Validation {
   const repro = p.repro === undefined ? undefined : sanitize(p.repro as string);
   const projectRoot = p.project_root === undefined ? undefined : sanitize(p.project_root as string);
 
-  if (symptom.length < 20 || symptom.length > 2000) return { valid: false, error: 'invalid params: symptom' };
-  if (paths.length < 1 || paths.length > 10) return { valid: false, error: 'invalid params: affected_paths' };
+  if (symptom.length < 20 || symptom.length > 2000) return { valid: false, error: "invalid params: symptom" };
+  if (paths.length < 1 || paths.length > 10) return { valid: false, error: "invalid params: affected_paths" };
   for (const path of paths) {
-    if (path.length > 200 || !PATH_RE.test(path)) return { valid: false, error: 'invalid params: affected_paths' };
+    if (path.length > 200 || !PATH_RE.test(path)) return { valid: false, error: "invalid params: affected_paths" };
   }
-  if (diff !== undefined && diff.length > 8000) return { valid: false, error: 'invalid params: local_workaround_diff' };
-  if (repro !== undefined && repro.length > 2000) return { valid: false, error: 'invalid params: repro' };
-  if (projectRoot !== undefined && (projectRoot.length === 0 || projectRoot.length > 200)) return { valid: false, error: 'invalid params: project_root' };
+  if (diff !== undefined && diff.length > 8000) return { valid: false, error: "invalid params: local_workaround_diff" };
+  if (repro !== undefined && repro.length > 2000) return { valid: false, error: "invalid params: repro" };
+  if (projectRoot !== undefined && (projectRoot.length === 0 || projectRoot.length > 200))
+    return { valid: false, error: "invalid params: project_root" };
 
-  const totalBytes = Buffer.byteLength(symptom + paths.join('') + (diff ?? '') + (repro ?? '') + (projectRoot ?? ''), 'utf-8');
-  if (totalBytes > MAX_TOTAL_BYTES) return { valid: false, error: 'invalid params: total request exceeds 16 KB' };
+  const totalBytes = Buffer.byteLength(
+    symptom + paths.join("") + (diff ?? "") + (repro ?? "") + (projectRoot ?? ""),
+    "utf-8",
+  );
+  if (totalBytes > MAX_TOTAL_BYTES) return { valid: false, error: "invalid params: total request exceeds 16 KB" };
 
-  return { valid: true, req: { suspected_layer: p.suspected_layer, symptom, affected_paths: paths, local_workaround_diff: diff, repro, project_root: projectRoot } };
+  return {
+    valid: true,
+    req: {
+      suspected_layer: p.suspected_layer,
+      symptom,
+      affected_paths: paths,
+      local_workaround_diff: diff,
+      repro,
+      project_root: projectRoot,
+    },
+  };
 }
 
 function writeYamlAtomic(path: string, obj: unknown): void {
   const tmpPath = `${path}.tmp-${process.pid}-${Date.now()}`;
-  writeFileSync(tmpPath, dump(obj, { schema: JSON_SCHEMA, lineWidth: -1 }), 'utf-8');
+  writeFileSync(tmpPath, dump(obj, { schema: JSON_SCHEMA, lineWidth: -1 }), "utf-8");
   renameSync(tmpPath, path);
 }
 
@@ -920,9 +1053,11 @@ function loadUpstreamTickets(): Array<{ file: string; ticket: any }> {
   for (const f of readdirSync(ticketsDir()).sort()) {
     if (!/^U-\d{8}-\d{3,4}\.yaml$/.test(f)) continue;
     try {
-      const ticket = load(readFileSync(join(ticketsDir(), f), 'utf-8'), { schema: JSON_SCHEMA }) as any;
+      const ticket = load(readFileSync(join(ticketsDir(), f), "utf-8"), { schema: JSON_SCHEMA }) as any;
       if (ticket && ticket.upstream) out.push({ file: f, ticket });
-    } catch { /* unreadable ticket: skip */ }
+    } catch {
+      /* unreadable ticket: skip */
+    }
   }
   return out;
 }
@@ -933,14 +1068,18 @@ type Outcome = { result: unknown } | { error: { code: number; message: string } 
 // Client-attested identity via MCP roots/list (design Appendix E).
 // ---------------------------------------------------------------------------------------
 
-interface ClientState { rootsSupported: boolean; rootsListChanged: boolean; clientName: string }
-const clientState: ClientState = { rootsSupported: false, rootsListChanged: false, clientName: '' };
+interface ClientState {
+  rootsSupported: boolean;
+  rootsListChanged: boolean;
+  clientName: string;
+}
+const clientState: ClientState = { rootsSupported: false, rootsListChanged: false, clientName: "" };
 
 interface RootsCache {
-  state: 'ok' | 'failed';
+  state: "ok" | "failed";
   uris: string[];
   latencyMs: number;
-  failReason?: 'timeout' | 'error' | 'malformed' | 'too_many';
+  failReason?: "timeout" | "error" | "malformed" | "too_many";
 }
 let rootsCache: RootsCache | null = null;
 let rootsInflight: Promise<RootsCache> | null = null;
@@ -949,22 +1088,29 @@ let rootsRetryUsed = false;
 let srvSeq = 0;
 
 /** E.3.7: server-originated requests awaiting a client response, keyed by srv- prefixed id. */
-const pendingServerRequests = new Map<string, { timer: ReturnType<typeof setTimeout>; resolve: (msg: JsonRpcMessage) => void }>();
+const pendingServerRequests = new Map<
+  string,
+  { timer: ReturnType<typeof setTimeout>; resolve: (msg: JsonRpcMessage) => void }
+>();
 
 function hash16(s: string): string {
-  return createHash('sha256').update(s, 'utf-8').digest('hex').slice(0, 16);
+  return createHash("sha256").update(s, "utf-8").digest("hex").slice(0, 16);
 }
 
-function parseRootsResponse(msg: JsonRpcMessage): { state: 'ok'; uris: string[] } | { state: 'failed'; failReason: 'error' | 'malformed' | 'too_many' } {
-  if (msg.error !== undefined) return { state: 'failed', failReason: 'error' };
+function parseRootsResponse(
+  msg: JsonRpcMessage,
+): { state: "ok"; uris: string[] } | { state: "failed"; failReason: "error" | "malformed" | "too_many" } {
+  if (msg.error !== undefined) return { state: "failed", failReason: "error" };
   const r = msg.result as { roots?: unknown } | null | undefined;
-  if (typeof r !== 'object' || r === null || !Array.isArray(r.roots)) return { state: 'failed', failReason: 'malformed' };
-  if (r.roots.length > MAX_ROOTS) return { state: 'failed', failReason: 'too_many' };
+  if (typeof r !== "object" || r === null || !Array.isArray(r.roots))
+    return { state: "failed", failReason: "malformed" };
+  if (r.roots.length > MAX_ROOTS) return { state: "failed", failReason: "too_many" };
   const uris: string[] = [];
   for (const item of r.roots) {
-    if (typeof item === 'object' && item !== null && typeof (item as { uri?: unknown }).uri === 'string') uris.push((item as { uri: string }).uri);
+    if (typeof item === "object" && item !== null && typeof (item as { uri?: unknown }).uri === "string")
+      uris.push((item as { uri: string }).uri);
   }
-  return { state: 'ok', uris };
+  return { state: "ok", uris };
 }
 
 /** Sends one roots/list request and resolves with the parsed outcome. Never rejects. */
@@ -975,18 +1121,20 @@ function fetchRoots(): Promise<RootsCache> {
     const latency = () => Date.now() - started;
     const timer = setTimeout(() => {
       pendingServerRequests.delete(id);
-      res({ state: 'failed', uris: [], latencyMs: latency(), failReason: 'timeout' });
+      res({ state: "failed", uris: [], latencyMs: latency(), failReason: "timeout" });
     }, ROOTS_TIMEOUT_MS);
     pendingServerRequests.set(id, {
       timer,
       resolve: (msg) => {
         const parsed = parseRootsResponse(msg);
-        res(parsed.state === 'ok'
-          ? { state: 'ok', uris: parsed.uris, latencyMs: latency() }
-          : { state: 'failed', uris: [], latencyMs: latency(), failReason: parsed.failReason });
+        res(
+          parsed.state === "ok"
+            ? { state: "ok", uris: parsed.uris, latencyMs: latency() }
+            : { state: "failed", uris: [], latencyMs: latency(), failReason: parsed.failReason },
+        );
       },
     });
-    console.log(JSON.stringify({ jsonrpc: '2.0', id, method: 'roots/list' }));
+    console.log(JSON.stringify({ jsonrpc: "2.0", id, method: "roots/list" }));
   });
 }
 
@@ -1000,14 +1148,16 @@ function rootCandidates(uris: string[]): ProjectIdentity[] {
       // Fail closed on non-local hosts: on Windows fileURLToPath turns file://host/share into a
       // UNC path, and realpathSync on it would open a network connection (stall + credential leak).
       const host = new URL(uri).hostname;
-      if (host !== '' && host.toLowerCase() !== 'localhost') continue;
+      if (host !== "" && host.toLowerCase() !== "localhost") continue;
       p = fileURLToPath(uri);
-    } catch { continue; }
+    } catch {
+      continue;
+    }
     if (/^[\\/]{2}/.test(p)) continue; // UNC / network-style path, never a project root
     p = sanitize(p);
     if (p.length === 0 || p.length > 200) continue;
     const r = resolveProject(p);
-    if (typeof r === 'string') continue;
+    if (typeof r === "string") continue;
     if (!byName.has(r.name)) byName.set(r.name, r);
   }
   return [...byName.values()];
@@ -1016,21 +1166,28 @@ function rootCandidates(uris: string[]): ProjectIdentity[] {
 function logRootsProbe(c: RootsCache): void {
   try {
     const cands = rootCandidates(c.uris);
-    appendRejectAudit('(roots_probe)', {
-      outcome: 'roots_probe', root_count: c.uris.length, candidate_count: cands.length,
-      would_resolve: cands.length === 1, latency_ms: c.latencyMs, state: c.state,
-      ...(c.failReason ? { fail_reason: c.failReason } : {}), root_hashes: c.uris.map(hash16),
+    appendRejectAudit("(roots_probe)", {
+      outcome: "roots_probe",
+      root_count: c.uris.length,
+      candidate_count: cands.length,
+      would_resolve: cands.length === 1,
+      latency_ms: c.latencyMs,
+      state: c.state,
+      ...(c.failReason ? { fail_reason: c.failReason } : {}),
+      root_hashes: c.uris.map(hash16),
     });
-  } catch { /* the probe log is best-effort and must never affect serving */ }
+  } catch {
+    /* the probe log is best-effort and must never affect serving */
+  }
 }
 
 /** E.3.11/14/20: cached roots; starts one request when none is cached or in flight; a failed
  * state is retried at most once per session. Returns null when the client has no roots capability. */
 function ensureRoots(): Promise<RootsCache> | null {
   if (!clientState.rootsSupported) return null;
-  if (rootsCache && rootsCache.state === 'ok') return Promise.resolve(rootsCache);
+  if (rootsCache && rootsCache.state === "ok") return Promise.resolve(rootsCache);
   if (rootsInflight) return rootsInflight;
-  if (rootsCache && rootsCache.state === 'failed') {
+  if (rootsCache && rootsCache.state === "failed") {
     if (rootsRetryUsed) return Promise.resolve(rootsCache);
     rootsRetryUsed = true;
   }
@@ -1057,10 +1214,10 @@ function onRootsListChanged(): void {
 
 /** E.3.8-10: route a client response to the matching pending server request; never reply. */
 function handleClientResponse(msg: JsonRpcMessage): void {
-  const key = typeof msg.id === 'string' ? msg.id : undefined;
+  const key = typeof msg.id === "string" ? msg.id : undefined;
   const pending = key === undefined ? undefined : pendingServerRequests.get(key);
   if (!pending || key === undefined) {
-    console.error('[mcp-upstream-server] dropped a client response with an unknown id');
+    console.error("[mcp-upstream-server] dropped a client response with an unknown id");
     return;
   }
   clearTimeout(pending.timer);
@@ -1074,7 +1231,9 @@ interface ResolvedIdentity {
   projectRootIgnored: boolean;
   rootHashes: string[];
 }
-type IdentityResult = { ok: true; id: ResolvedIdentity } | { ok: false; error: { code: number; message: string }; unregistered: boolean };
+type IdentityResult =
+  | { ok: true; id: ResolvedIdentity }
+  | { ok: false; error: { code: number; message: string }; unregistered: boolean };
 
 function unregisteredMessage(rule: string): string {
   return ENABLE_CLIENT_ROOTS
@@ -1085,22 +1244,22 @@ function unregisteredMessage(rule: string): string {
 /** Identity tiers (E.2): cwd > client_roots > self_declared. A lower tier never overrides a higher one. */
 async function resolveIdentity(params: unknown, cwd: string): Promise<IdentityResult> {
   const cwdResult = resolveProject(cwd);
-  if (typeof cwdResult !== 'string') {
-    return { ok: true, id: { project: cwdResult, source: 'cwd', projectRootIgnored: false, rootHashes: [] } };
+  if (typeof cwdResult !== "string") {
+    return { ok: true, id: { project: cwdResult, source: "cwd", projectRootIgnored: false, rootHashes: [] } };
   }
 
   let declaredResult: ProjectIdentity | string | undefined;
-  if (typeof params === 'object' && params !== null && !Array.isArray(params)) {
+  if (typeof params === "object" && params !== null && !Array.isArray(params)) {
     const raw = (params as Record<string, unknown>).project_root;
-    if (typeof raw === 'string' && raw.length > 0) declaredResult = resolveProject(sanitize(raw));
+    if (typeof raw === "string" && raw.length > 0) declaredResult = resolveProject(sanitize(raw));
   }
-  const declaredOk = typeof declaredResult === 'object' ? declaredResult : undefined;
+  const declaredOk = typeof declaredResult === "object" ? declaredResult : undefined;
 
   if (ENABLE_CLIENT_ROOTS) {
     const pending = ensureRoots();
     if (pending) {
       const roots = await pending;
-      const cands = roots.state === 'ok' ? rootCandidates(roots.uris) : [];
+      const cands = roots.state === "ok" ? rootCandidates(roots.uris) : [];
       // Q10: with 0 or 2+ candidates the server cannot tell which project the model works in,
       // and project_root does not narrow — fall through to the self-declared tier.
       if (cands.length === 1) {
@@ -1108,27 +1267,49 @@ async function resolveIdentity(params: unknown, cwd: string): Promise<IdentityRe
         const candidate = cands[0];
         if (declaredOk && declaredOk.name !== candidate.name) {
           appendRejectAudit(candidate.name, {
-            project: candidate.name, outcome: 'reject_identity_conflict', identity_source: 'client_roots',
-            declared_project: declaredOk.name, root_hashes: rootHashes,
+            project: candidate.name,
+            outcome: "reject_identity_conflict",
+            identity_source: "client_roots",
+            declared_project: declaredOk.name,
+            root_hashes: rootHashes,
           });
-          return { ok: false, unregistered: false, error: { code: -32602, message: 'identity conflict: project_root does not match the client-attested workspace root' } };
+          return {
+            ok: false,
+            unregistered: false,
+            error: {
+              code: -32602,
+              message: "identity conflict: project_root does not match the client-attested workspace root",
+            },
+          };
         }
         // Same project: client_roots wins, project_root is ignored. Unresolvable project_root: ignored too.
-        return { ok: true, id: { project: candidate, source: 'client_roots', projectRootIgnored: declaredResult !== undefined, rootHashes } };
+        return {
+          ok: true,
+          id: {
+            project: candidate,
+            source: "client_roots",
+            projectRootIgnored: declaredResult !== undefined,
+            rootHashes,
+          },
+        };
       }
     }
   }
 
-  if (declaredOk) return { ok: true, id: { project: declaredOk, source: 'self_declared', projectRootIgnored: false, rootHashes: [] } };
+  if (declaredOk)
+    return {
+      ok: true,
+      id: { project: declaredOk, source: "self_declared", projectRootIgnored: false, rootHashes: [] },
+    };
   return { ok: false, unregistered: true, error: { code: -32602, message: unregisteredMessage(cwdResult) } };
 }
 
 function identityAuditFields(id: ResolvedIdentity): Record<string, unknown> {
   return {
-    identity: id.source === 'self_declared' ? 'declared' : 'cwd', // legacy key, kept for one minor version
+    identity: id.source === "self_declared" ? "declared" : "cwd", // legacy key, kept for one minor version
     identity_source: id.source,
     ...(id.projectRootIgnored ? { project_root_ignored: true } : {}),
-    ...(id.source === 'client_roots' ? { root_hashes: id.rootHashes } : {}),
+    ...(id.source === "client_roots" ? { root_hashes: id.rootHashes } : {}),
   };
 }
 
@@ -1139,16 +1320,16 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
   if (!identity.ok) {
     if (identity.unregistered) {
       // Raw cwd is never stored: it may contain arbitrary user paths.
-      appendRejectAudit('', { cwd_hash: hash16(cwd), outcome: 'reject_unregistered' });
+      appendRejectAudit("", { cwd_hash: hash16(cwd), outcome: "reject_unregistered" });
     }
     return { error: identity.error };
   }
   const resolvedId = identity.id;
-  const declared = resolvedId.source === 'self_declared';
+  const declared = resolvedId.source === "self_declared";
   const { name: project, variant, version, path: projectPath } = resolvedId.project;
   const valResult = validateUpstreamRequest(params);
   if (!valResult.valid) {
-    appendRejectAudit(project, { project, outcome: 'reject_invalid' });
+    appendRejectAudit(project, { project, outcome: "reject_invalid" });
     return { error: { code: -32602, message: valResult.error } };
   }
 
@@ -1156,10 +1337,18 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
   // M12 (T-20261002-010): the hash covers exactly the STORED request fields — the old
   // JSON.stringify(req) included project_root, which the ticket never stores, so the
   // digest could not be recomputed from the ticket for the audit-immutability check.
-  const requestHash = createHash('sha256').update(JSON.stringify({
-    suspected_layer: req.suspected_layer, symptom: req.symptom, affected_paths: req.affected_paths,
-    local_workaround_diff: req.local_workaround_diff, repro: req.repro,
-  }), 'utf-8').digest('hex');
+  const requestHash = createHash("sha256")
+    .update(
+      JSON.stringify({
+        suspected_layer: req.suspected_layer,
+        symptom: req.symptom,
+        affected_paths: req.affected_paths,
+        local_workaround_diff: req.local_workaround_diff,
+        repro: req.repro,
+      }),
+      "utf-8",
+    )
+    .digest("hex");
   const dedupeHash = dedupeKey(req.affected_paths, req.symptom);
 
   let flagged = checkInjection({ symptom: req.symptom, repro: req.repro, diff: req.local_workaround_diff });
@@ -1170,127 +1359,194 @@ function handleCreateRequest(params: unknown, cwd: string, identity: IdentityRes
   // lock so parallel server instances serialize (id allocation itself stays EEXIST-retried).
   try {
     return withIntakeLock(() => {
-    // Caps: hard cap counts accepted tickets AND merges; soft cap counts new tickets only.
-    // v1.15.0 (design §3.3): `project` is the resolved name opaquely — for a
-    // tenant filing that is the tenant id (gw-<12hex>), so the per-project caps
-    // and every audit-bucket below key on tenant ids with no special-casing.
-    const audit = readTodayAudit();
-    const projectAccepted = audit.filter((e) => e.project === project && e.outcome === 'accepted').length;
-    const projectMerged = audit.filter((e) => e.project === project && e.outcome === 'merged').length;
-    if (projectAccepted + projectMerged >= UPSTREAM_HARD_CAP) {
-      appendAuditLog({ project, outcome: 'reject_hard_cap', flagged, dedupe_key: dedupeHash, request_sha256: requestHash });
-      return { error: { code: -32000, message: `rate_limited: per-project hard cap reached (${projectAccepted + projectMerged}/${UPSTREAM_HARD_CAP}/day)` } };
-    }
-
-    // C5: merge into an open duplicate. A merge never changes the existing ticket's triage.
-    // T-20261002-005 (H4): the read-modify-write of the ticket file runs under the
-    // SHARED ticket lock so a concurrent PM triage/resolve (ticket-store) cannot be
-    // silently overwritten. Always nested INSIDE the intake lock (ordering
-    // intake -> ticket is never inverted, so no deadlock).
-    const dup = withTicketLock(ticketsDir(), `merge:${dedupeHash.slice(0, 8)}`, () => {
-      const found = loadUpstreamTickets().find(({ ticket }) => ticket.status !== 'done' && ticket.upstream.dedupe_key === dedupeHash);
-      if (!found) return null;
-      const entry: Record<string, unknown> = { project, at: new Date().toISOString() };
-      if (flagged) entry.flagged = true;
-      found.ticket.upstream.duplicates = [...(found.ticket.upstream.duplicates ?? []), entry];
-      writeYamlAtomic(join(ticketsDir(), found.file), found.ticket);
-      return found;
-    });
-    if (dup) {
-      appendAuditLog({ project, outcome: 'merged', id: dup.ticket.id, flagged, ...identityAuditFields(resolvedId), reasons: flagged ? ['needs_human_review'] : [], dedupe_key: dedupeHash, request_sha256: requestHash });
-      if (dup.ticket.upstream.project !== project) {
-        // Cross-project merge: acknowledge only. The foreign ticket's id/status/triage stay private.
-        return { result: { merged: true, flagged, reasons: flagged ? ['needs_human_review'] : [] } };
+      // Caps: hard cap counts accepted tickets AND merges; soft cap counts new tickets only.
+      // v1.15.0 (design §3.3): `project` is the resolved name opaquely — for a
+      // tenant filing that is the tenant id (gw-<12hex>), so the per-project caps
+      // and every audit-bucket below key on tenant ids with no special-casing.
+      const audit = readTodayAudit();
+      const projectAccepted = audit.filter((e) => e.project === project && e.outcome === "accepted").length;
+      const projectMerged = audit.filter((e) => e.project === project && e.outcome === "merged").length;
+      if (projectAccepted + projectMerged >= UPSTREAM_HARD_CAP) {
+        appendAuditLog({
+          project,
+          outcome: "reject_hard_cap",
+          flagged,
+          dedupe_key: dedupeHash,
+          request_sha256: requestHash,
+        });
+        return {
+          error: {
+            code: -32000,
+            message: `rate_limited: per-project hard cap reached (${projectAccepted + projectMerged}/${UPSTREAM_HARD_CAP}/day)`,
+          },
+        };
       }
+
+      // C5: merge into an open duplicate. A merge never changes the existing ticket's triage.
+      // T-20261002-005 (H4): the read-modify-write of the ticket file runs under the
+      // SHARED ticket lock so a concurrent PM triage/resolve (ticket-store) cannot be
+      // silently overwritten. Always nested INSIDE the intake lock (ordering
+      // intake -> ticket is never inverted, so no deadlock).
+      const dup = withTicketLock(ticketsDir(), `merge:${dedupeHash.slice(0, 8)}`, () => {
+        const found = loadUpstreamTickets().find(
+          ({ ticket }) => ticket.status !== "done" && ticket.upstream.dedupe_key === dedupeHash,
+        );
+        if (!found) return null;
+        const entry: Record<string, unknown> = { project, at: new Date().toISOString() };
+        if (flagged) entry.flagged = true;
+        found.ticket.upstream.duplicates = [...(found.ticket.upstream.duplicates ?? []), entry];
+        writeYamlAtomic(join(ticketsDir(), found.file), found.ticket);
+        return found;
+      });
+      if (dup) {
+        appendAuditLog({
+          project,
+          outcome: "merged",
+          id: dup.ticket.id,
+          flagged,
+          ...identityAuditFields(resolvedId),
+          reasons: flagged ? ["needs_human_review"] : [],
+          dedupe_key: dedupeHash,
+          request_sha256: requestHash,
+        });
+        if (dup.ticket.upstream.project !== project) {
+          // Cross-project merge: acknowledge only. The foreign ticket's id/status/triage stay private.
+          return { result: { merged: true, flagged, reasons: flagged ? ["needs_human_review"] : [] } };
+        }
+        return {
+          result: {
+            id: dup.ticket.id,
+            status: dup.ticket.status,
+            triage: dup.ticket.upstream.triage,
+            merged_into: dup.ticket.id,
+            flagged,
+            reasons: flagged ? ["needs_human_review"] : [],
+            marker: `LOCAL-PATCH(upstream-request: ${dup.ticket.id})`,
+          },
+        };
+      }
+
+      // Evaluate every auto-ready condition so triage_reasons is complete (§8).
+      const failReasons: string[] = [];
+      const info: string[] = [];
+      if (flagged) failReasons.push("needs_human_review");
+      if (declared) failReasons.push("identity:self_declared");
+      // E.5: a client_roots identity is not auto-ready until the project has at least one
+      // PM-resolved ticket that itself came from a cwd or client_roots identity (a project
+      // trusted only through self_declared tickets does not unlock it).
+      if (resolvedId.source === "client_roots") {
+        const clientRootsTrusted = loadUpstreamTickets().some(
+          ({ ticket }) =>
+            ticket.upstream.project === project &&
+            ticket.upstream.resolution &&
+            (ticket.upstream.resolution.outcome === "fixed" || ticket.upstream.resolution.outcome === "local-only") &&
+            upstreamIdentitySource(ticket.upstream) !== "self_declared",
+        );
+        if (!clientRootsTrusted) failReasons.push("identity:client_roots_untrusted");
+      }
+      if (projectAccepted >= UPSTREAM_SOFT_CAP) failReasons.push("project_soft_cap");
+
+      const delivered = deliveredFiles(projectPath);
+      for (const path of req.affected_paths) {
+        const m = templateManagement(path, variant);
+        if (!m.managed) failReasons.push(`path_not_template_managed: ${path}`);
+        if (m.l0Origin) info.push(`info:l0_origin ${path} <- ${m.l0Origin}`);
+        info.push(`info:in_last_delivery ${path}=${delivered.has(path)}`);
+      }
+
+      const knownProjects = loadKnownProjects();
+      // v1.15.0 (design §3.3): known-projects.json also records tenants (keys
+      // gw-<hex> alongside co-* names, same shape) — a first filing from an
+      // unknown tenant is forced to triage:inbox exactly like a co-* first-seen.
+      // M7 (T-20261002-010): the first-request gate is a TRUST-BUILDING gate, not a
+      // permanent label — a project whose ticket the PM resolved as fixed|local-only has
+      // earned trust, so its NEXT genuine defect is not auto-demoted to inbox.
+      const trustedByResolution = loadUpstreamTickets().some(
+        ({ ticket }) =>
+          ticket.upstream.project === project &&
+          ticket.upstream.resolution &&
+          (ticket.upstream.resolution.outcome === "fixed" || ticket.upstream.resolution.outcome === "local-only"),
+      );
+      const isFirstRequest = !knownProjects.has(project) && !trustedByResolution;
+      if (!knownProjects.has(project) && !trustedByResolution) failReasons.push("first_request_from_project");
+
+      const globalReady = audit.filter((e) => e.outcome === "accepted" && e.triage === "ready").length;
+      if (globalReady >= UPSTREAM_GLOBAL_READY_CAP) failReasons.push("global_ready_cap");
+
+      const triage: "inbox" | "ready" = failReasons.length === 0 ? "ready" : "inbox";
+      const status = triage === "ready" ? "waiting" : "backlog";
+      const now = kstIso();
+
+      const upstreamBlock: Record<string, unknown> = {
+        project,
+        variant,
+        template_version: version,
+        source: `project/${project}`,
+        trust: "untrusted",
+        suspected_layer: req.suspected_layer,
+        symptom: req.symptom,
+        affected_paths: req.affected_paths,
+        identity_source: resolvedId.source,
+      };
+      if (req.local_workaround_diff !== undefined) upstreamBlock.local_workaround_diff = req.local_workaround_diff;
+      if (req.repro !== undefined) upstreamBlock.repro = req.repro;
+      Object.assign(upstreamBlock, {
+        triage,
+        flagged,
+        triage_reasons: [...failReasons, ...info],
+        dedupe_key: dedupeHash,
+        // Seeded with the originating report so `duplicates` lists every report (design §13 test 8).
+        duplicates: [{ project, at: now }],
+      });
+
+      // T-20261026-009 (finding #29): allocation + publication moved into
+      // publishTicketWithRetry (exported for unit tests) — the retry loop used to
+      // re-read the directory sequence AND add the attempt counter, double-counting
+      // any concurrent publication and skipping an id.
+      const id = publishTicketWithRetry((allocatedId) => ({
+        schemaVersion: 1,
+        id: allocatedId,
+        kind: "manual",
+        title: `Upstream request from ${project}`,
+        priority: "normal",
+        status,
+        attempts: 0,
+        created_at: now,
+        history: [{ at: now, from: null, to: status }],
+        result: null,
+        error: null,
+        upstream: upstreamBlock,
+      }));
+
+      // known-projects.json is updated only after the ticket write succeeded.
+      if (isFirstRequest) {
+        knownProjects.set(project, { first_seen: now, first_id: id });
+        saveKnownProjects(knownProjects);
+      }
+
+      appendAuditLog({
+        project,
+        outcome: "accepted",
+        id,
+        flagged,
+        triage,
+        ...identityAuditFields(resolvedId),
+        reasons: failReasons,
+        dedupe_key: dedupeHash,
+        request_sha256: requestHash,
+      });
+
       return {
         result: {
-          id: dup.ticket.id, status: dup.ticket.status, triage: dup.ticket.upstream.triage,
-          merged_into: dup.ticket.id, flagged, reasons: flagged ? ['needs_human_review'] : [],
-          marker: `LOCAL-PATCH(upstream-request: ${dup.ticket.id})`,
+          id,
+          status,
+          triage,
+          merged_into: null,
+          flagged,
+          reasons: failReasons,
+          marker: `LOCAL-PATCH(upstream-request: ${id})`,
         },
       };
-    }
-
-    // Evaluate every auto-ready condition so triage_reasons is complete (§8).
-    const failReasons: string[] = [];
-    const info: string[] = [];
-    if (flagged) failReasons.push('needs_human_review');
-    if (declared) failReasons.push('identity:self_declared');
-    // E.5: a client_roots identity is not auto-ready until the project has at least one
-    // PM-resolved ticket that itself came from a cwd or client_roots identity (a project
-    // trusted only through self_declared tickets does not unlock it).
-    if (resolvedId.source === 'client_roots') {
-      const clientRootsTrusted = loadUpstreamTickets().some(({ ticket }) =>
-        ticket.upstream.project === project &&
-        ticket.upstream.resolution &&
-        (ticket.upstream.resolution.outcome === 'fixed' || ticket.upstream.resolution.outcome === 'local-only') &&
-        upstreamIdentitySource(ticket.upstream) !== 'self_declared');
-      if (!clientRootsTrusted) failReasons.push('identity:client_roots_untrusted');
-    }
-    if (projectAccepted >= UPSTREAM_SOFT_CAP) failReasons.push('project_soft_cap');
-
-    const delivered = deliveredFiles(projectPath);
-    for (const path of req.affected_paths) {
-      const m = templateManagement(path, variant);
-      if (!m.managed) failReasons.push(`path_not_template_managed: ${path}`);
-      if (m.l0Origin) info.push(`info:l0_origin ${path} <- ${m.l0Origin}`);
-      info.push(`info:in_last_delivery ${path}=${delivered.has(path)}`);
-    }
-
-    const knownProjects = loadKnownProjects();
-    // v1.15.0 (design §3.3): known-projects.json also records tenants (keys
-    // gw-<hex> alongside co-* names, same shape) — a first filing from an
-    // unknown tenant is forced to triage:inbox exactly like a co-* first-seen.
-    // M7 (T-20261002-010): the first-request gate is a TRUST-BUILDING gate, not a
-    // permanent label — a project whose ticket the PM resolved as fixed|local-only has
-    // earned trust, so its NEXT genuine defect is not auto-demoted to inbox.
-    const trustedByResolution = loadUpstreamTickets().some(({ ticket }) =>
-      ticket.upstream.project === project &&
-      ticket.upstream.resolution &&
-      (ticket.upstream.resolution.outcome === 'fixed' || ticket.upstream.resolution.outcome === 'local-only'));
-    const isFirstRequest = !knownProjects.has(project) && !trustedByResolution;
-    if (!knownProjects.has(project) && !trustedByResolution) failReasons.push('first_request_from_project');
-
-    const globalReady = audit.filter((e) => e.outcome === 'accepted' && e.triage === 'ready').length;
-    if (globalReady >= UPSTREAM_GLOBAL_READY_CAP) failReasons.push('global_ready_cap');
-
-    const triage: 'inbox' | 'ready' = failReasons.length === 0 ? 'ready' : 'inbox';
-    const status = triage === 'ready' ? 'waiting' : 'backlog';
-    const now = kstIso();
-
-    const upstreamBlock: Record<string, unknown> = {
-      project, variant, template_version: version, source: `project/${project}`,
-      trust: 'untrusted', suspected_layer: req.suspected_layer, symptom: req.symptom,
-      affected_paths: req.affected_paths, identity_source: resolvedId.source,
-    };
-    if (req.local_workaround_diff !== undefined) upstreamBlock.local_workaround_diff = req.local_workaround_diff;
-    if (req.repro !== undefined) upstreamBlock.repro = req.repro;
-    Object.assign(upstreamBlock, {
-      triage, flagged, triage_reasons: [...failReasons, ...info], dedupe_key: dedupeHash,
-      // Seeded with the originating report so `duplicates` lists every report (design §13 test 8).
-      duplicates: [{ project, at: now }],
-    });
-
-    // T-20261026-009 (finding #29): allocation + publication moved into
-    // publishTicketWithRetry (exported for unit tests) — the retry loop used to
-    // re-read the directory sequence AND add the attempt counter, double-counting
-    // any concurrent publication and skipping an id.
-    const id = publishTicketWithRetry((allocatedId) => ({
-      schemaVersion: 1, id: allocatedId, kind: 'manual', title: `Upstream request from ${project}`, priority: 'normal',
-      status, attempts: 0, created_at: now,
-      history: [{ at: now, from: null, to: status }],
-      result: null, error: null, upstream: upstreamBlock,
-    }));
-
-    // known-projects.json is updated only after the ticket write succeeded.
-    if (isFirstRequest) {
-      knownProjects.set(project, { first_seen: now, first_id: id });
-      saveKnownProjects(knownProjects);
-    }
-
-    appendAuditLog({ project, outcome: 'accepted', id, flagged, triage, ...identityAuditFields(resolvedId), reasons: failReasons, dedupe_key: dedupeHash, request_sha256: requestHash });
-
-    return { result: { id, status, triage, merged_into: null, flagged, reasons: failReasons, marker: `LOCAL-PATCH(upstream-request: ${id})` } };
     });
   } catch (err) {
     if (err instanceof IntakeLockTimeoutError) {
@@ -1304,25 +1560,29 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
   // Same identity tiers as create (cwd > client_roots > self_declared project_root).
   if (!identity.ok) return { error: identity.error };
   const resolvedId = identity.id;
-  const declared = resolvedId.source === 'self_declared';
+  const declared = resolvedId.source === "self_declared";
   const project = resolvedId.project.name;
 
   const p = (params ?? {}) as Record<string, unknown>;
-  if (typeof p !== 'object' || Array.isArray(p)) return { error: { code: -32602, message: 'invalid params: arguments must be an object' } };
+  if (typeof p !== "object" || Array.isArray(p))
+    return { error: { code: -32602, message: "invalid params: arguments must be an object" } };
   for (const key of Object.keys(p)) {
-    if (key !== 'id' && key !== 'limit' && key !== 'project_root') return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
+    if (key !== "id" && key !== "limit" && key !== "project_root")
+      return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
   }
-  if (p.id !== undefined && (typeof p.id !== 'string' || !TICKET_ID_RE.test(p.id))) return { error: { code: -32602, message: 'invalid params: id' } };
+  if (p.id !== undefined && (typeof p.id !== "string" || !TICKET_ID_RE.test(p.id)))
+    return { error: { code: -32602, message: "invalid params: id" } };
   let limit = 20;
   if (p.limit !== undefined) {
-    if (typeof p.limit !== 'number' || !Number.isInteger(p.limit) || p.limit < 1 || p.limit > 50) return { error: { code: -32602, message: 'invalid params: limit must be an integer 1-50' } };
+    if (typeof p.limit !== "number" || !Number.isInteger(p.limit) || p.limit < 1 || p.limit > 50)
+      return { error: { code: -32602, message: "invalid params: limit must be an integer 1-50" } };
     limit = p.limit;
   }
 
   // T-20261002-004 (H3): every status call is audit-logged, and a DECLARED identity
   // (self-declared project_root — unverified until PM review) gets redacted results:
   // ids + status/triage only, never another project's resolution summary or PR URL.
-  appendAuditLog({ project, outcome: 'status', ...identityAuditFields(resolvedId) });
+  appendAuditLog({ project, outcome: "status", ...identityAuditFields(resolvedId) });
 
   // v1.13.0 (ADR-0103 F3): delegation read-back. A T- id is answered from the shared
   // root store with the NARROW kanban field set only (no result/error content — the
@@ -1336,21 +1596,23 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
     try {
       t = readTicket(ticketsDir(), p.id);
     } catch {
-      return { error: { code: -32602, message: 'not found' } };
+      return { error: { code: -32602, message: "not found" } };
     }
     return {
       result: {
-        requests: [{
-          id: t.id,
-          ...(t.title !== undefined ? { title: t.title } : {}),
-          status: t.status,
-          // triage lives in the upstream block, which the schema forbids on T- ids —
-          // kept conditional per the F3 field contract ("triage if present").
-          ...(t.upstream?.triage !== undefined ? { triage: t.upstream.triage } : {}),
-          priority: t.priority,
-          ...(t.sev !== undefined ? { sev: t.sev } : {}),
-          delegation: true,
-        }],
+        requests: [
+          {
+            id: t.id,
+            ...(t.title !== undefined ? { title: t.title } : {}),
+            status: t.status,
+            // triage lives in the upstream block, which the schema forbids on T- ids —
+            // kept conditional per the F3 field contract ("triage if present").
+            ...(t.upstream?.triage !== undefined ? { triage: t.upstream.triage } : {}),
+            priority: t.priority,
+            ...(t.sev !== undefined ? { sev: t.sev } : {}),
+            delegation: true,
+          },
+        ],
       },
     };
   }
@@ -1358,7 +1620,10 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
   const mine = loadUpstreamTickets()
     .filter(({ ticket }) => ticket.upstream.project === project && (p.id === undefined || ticket.id === p.id))
     .map(({ ticket }) => ({
-      id: ticket.id, status: ticket.status, triage: ticket.upstream.triage, created_at: ticket.created_at,
+      id: ticket.id,
+      status: ticket.status,
+      triage: ticket.upstream.triage,
+      created_at: ticket.created_at,
       // v1.12.0 (hub-consolidation §5.3): read-only priority (and sev when set) join
       // the status payload for the delegation kanban view.
       priority: ticket.priority,
@@ -1369,7 +1634,7 @@ function handleStatusRequest(params: unknown, identity: IdentityResult): Outcome
     .slice(0, limit);
 
   // Same answer for "does not exist" and "belongs to another project".
-  if (p.id !== undefined && mine.length === 0) return { error: { code: -32602, message: 'not found' } };
+  if (p.id !== undefined && mine.length === 0) return { error: { code: -32602, message: "not found" } };
   return { result: { requests: mine } };
 }
 
@@ -1384,28 +1649,47 @@ function handleReprioritizeRequest(params: unknown, identity: IdentityResult): O
   // filing a flagged ticket, but an unattested caller cannot WRITE priority.
   if (!identity.ok) return { error: identity.error };
   const resolvedId = identity.id;
-  if (resolvedId.source === 'self_declared') {
-    return { error: { code: -32602, message: 'reprioritize requires an attested identity (working directory or client workspace roots) — self-declared project_root callers cannot write priority' } };
+  if (resolvedId.source === "self_declared") {
+    return {
+      error: {
+        code: -32602,
+        message:
+          "reprioritize requires an attested identity (working directory or client workspace roots) — self-declared project_root callers cannot write priority",
+      },
+    };
   }
   const project = resolvedId.project.name;
 
   const p = (params ?? {}) as Record<string, unknown>;
-  if (typeof p !== 'object' || Array.isArray(p)) return { error: { code: -32602, message: 'invalid params: arguments must be an object' } };
+  if (typeof p !== "object" || Array.isArray(p))
+    return { error: { code: -32602, message: "invalid params: arguments must be an object" } };
   for (const key of Object.keys(p)) {
-    if (key !== 'id' && key !== 'priority') return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
+    if (key !== "id" && key !== "priority")
+      return { error: { code: -32602, message: `invalid params: extra key "${key}"` } };
   }
-  if (typeof p.id !== 'string' || !TICKET_ID_RE.test(p.id)) return { error: { code: -32602, message: 'invalid params: id' } };
-  if (typeof p.priority !== 'string') return { error: { code: -32602, message: 'invalid params: priority' } };
+  if (typeof p.id !== "string" || !TICKET_ID_RE.test(p.id))
+    return { error: { code: -32602, message: "invalid params: id" } };
+  if (typeof p.priority !== "string") return { error: { code: -32602, message: "invalid params: priority" } };
 
   // Alias mapping through the kanban alias table (P0-P3 or the canonical enum).
   const aliases = loadKanbanAliases(WORKSPACE_ROOT);
   const to = resolvePriorityInput(p.priority, aliases);
   if (!to) {
-    return { error: { code: -32602, message: `invalid params: priority must be a kanban alias (${Object.keys(aliases.priorityAliases).join('|')}) or a canonical priority (got: ${p.priority})` } };
+    return {
+      error: {
+        code: -32602,
+        message: `invalid params: priority must be a kanban alias (${Object.keys(aliases.priorityAliases).join("|")}) or a canonical priority (got: ${p.priority})`,
+      },
+    };
   }
   // P0 is impossible via MCP by design (design §5.2): typed error, no strike recorded.
-  if (to === 'urgent') {
-    return { error: { code: -32602, message: 'P0 requires user action via ticket.ts — upstream_request_reprioritize cannot set urgent' } };
+  if (to === "urgent") {
+    return {
+      error: {
+        code: -32602,
+        message: "P0 requires user action via ticket.ts — upstream_request_reprioritize cannot set urgent",
+      },
+    };
   }
 
   // Ownership: "not found" for a missing ticket AND for another project's ticket
@@ -1426,23 +1710,38 @@ function handleReprioritizeRequest(params: unknown, identity: IdentityResult): O
   try {
     before = readTicket(ticketsDir(), p.id);
   } catch {
-    return { error: { code: -32602, message: 'not found' } };
+    return { error: { code: -32602, message: "not found" } };
   }
   const actor: ReprioritizeActor = TENANT_ID_RE.test(project) ? `spoke-tenant:${project}` : `spoke-pm:${project}`;
 
   try {
     const t = reprioritizeTicket(ticketsDir(), p.id, to, actor, {
-      stateDir: join(WORKSPACE_ROOT, '.pipeline-state'),
+      stateDir: join(WORKSPACE_ROOT, ".pipeline-state"),
       ...(DELEGATION_ID_RE.test(p.id) ? {} : { ownerProject: project }),
     });
-    appendAuditLog({ project, outcome: 'reprioritize', id: t.id, from: before.priority, to, priority_from: before.priority, priority_to: t.priority, ...identityAuditFields(resolvedId) });
+    appendAuditLog({
+      project,
+      outcome: "reprioritize",
+      id: t.id,
+      from: before.priority,
+      to,
+      priority_from: before.priority,
+      priority_to: t.priority,
+      ...identityAuditFields(resolvedId),
+    });
     return { result: { id: t.id, priority: t.priority, status: t.status } };
   } catch (err) {
     if (err instanceof ReprioritizeRefusedError) {
       // Typed policy refusal (cap / raise-window / frozen). Refusals are audit-logged
       // via the capped reject path; cap violations were already recorded in the
       // 3-strike ledger by the store.
-      appendRejectAudit(project, { project, outcome: 'reject_reprioritize', id: p.id, code: err.code, reason: err.message });
+      appendRejectAudit(project, {
+        project,
+        outcome: "reject_reprioritize",
+        id: p.id,
+        code: err.code,
+        reason: err.message,
+      });
       return { error: { code: -32602, message: err.message } };
     }
     throw err;
@@ -1459,85 +1758,143 @@ interface JsonRpcMessage {
 }
 
 function sendResponse(id: string | number | null, result?: unknown, error?: { code: number; message: string }): void {
-  const msg: Record<string, unknown> = { jsonrpc: '2.0', id };
+  const msg: Record<string, unknown> = { jsonrpc: "2.0", id };
   if (error) msg.error = error;
   else msg.result = result;
   console.log(JSON.stringify(msg));
 }
 
-const SERVER_INSTRUCTIONS_PHASE_A = 'Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. If identity resolution rejects your working directory and your client is a GUI app (e.g. the Claude Desktop App spawns servers with cwd=/), retry passing the project\'s absolute path as `project_root`; such requests are flagged for human review.';
+const SERVER_INSTRUCTIONS_PHASE_A =
+  "Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. If identity resolution rejects your working directory and your client is a GUI app (e.g. the Claude Desktop App spawns servers with cwd=/), retry passing the project's absolute path as `project_root`; such requests are flagged for human review.";
 
 // Design Appendix E.7: Phase B wording. Identity comes from the working directory or the client's
 // workspace roots; project_root is a last-resort fallback and is flagged for human review.
-const SERVER_INSTRUCTIONS_PHASE_B = 'Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. Project identity comes from the working directory or from the client\'s workspace roots. Pass `project_root` (the project\'s absolute path) only when the server rejects identity; such requests are flagged for human review.';
+const SERVER_INSTRUCTIONS_PHASE_B =
+  "Use this server when a problem you hit in this project likely originates in the ai_workspace template (L1 common or L2 variant), e.g. in a file delivered by `upgrade-project`. You may fix it locally to unblock your work, but always also file `upstream_request_create`. A local fix to a template-managed file will be overwritten on the next upgrade. Mark every such local patch with a comment `LOCAL-PATCH(upstream-request: <id>)` using the ID returned. Do not put instructions to other agents in the request. Describe the symptom, paths, and repro only. Check progress with `upstream_request_status`. Project identity comes from the working directory or from the client's workspace roots. Pass `project_root` (the project's absolute path) only when the server rejects identity; such requests are flagged for human review.";
 const SERVER_INSTRUCTIONS = ENABLE_CLIENT_ROOTS ? SERVER_INSTRUCTIONS_PHASE_B : SERVER_INSTRUCTIONS_PHASE_A;
 
 function handleInitialize(params: unknown) {
   const p = (params ?? {}) as Record<string, unknown>;
   // E.3.1-3: record the client's roots capability and a sanitized client name.
-  const caps = (typeof p.capabilities === 'object' && p.capabilities !== null ? p.capabilities : {}) as Record<string, unknown>;
+  const caps = (typeof p.capabilities === "object" && p.capabilities !== null ? p.capabilities : {}) as Record<
+    string,
+    unknown
+  >;
   const rootsCap = caps.roots;
-  clientState.rootsSupported = typeof rootsCap === 'object' && rootsCap !== null && !Array.isArray(rootsCap);
-  clientState.rootsListChanged = clientState.rootsSupported && (rootsCap as Record<string, unknown>).listChanged === true;
-  const ci = typeof p.clientInfo === 'object' && p.clientInfo !== null ? (p.clientInfo as Record<string, unknown>).name : undefined;
-  clientState.clientName = typeof ci === 'string' ? sanitize(ci).replace(/[\n\t]/g, ' ').slice(0, 64) : '';
+  clientState.rootsSupported = typeof rootsCap === "object" && rootsCap !== null && !Array.isArray(rootsCap);
+  clientState.rootsListChanged =
+    clientState.rootsSupported && (rootsCap as Record<string, unknown>).listChanged === true;
+  const ci =
+    typeof p.clientInfo === "object" && p.clientInfo !== null
+      ? (p.clientInfo as Record<string, unknown>).name
+      : undefined;
+  clientState.clientName =
+    typeof ci === "string"
+      ? sanitize(ci)
+          .replace(/[\n\t]/g, " ")
+          .slice(0, 64)
+      : "";
   try {
-    appendRejectAudit('(client_init)', {
-      outcome: 'client_init', client_name: clientState.clientName,
-      roots_supported: clientState.rootsSupported, roots_list_changed: clientState.rootsListChanged,
+    appendRejectAudit("(client_init)", {
+      outcome: "client_init",
+      client_name: clientState.clientName,
+      roots_supported: clientState.rootsSupported,
+      roots_list_changed: clientState.rootsListChanged,
     });
-  } catch { /* Phase A logging is best-effort */ }
-  const protocolVersion = typeof p.protocolVersion === 'string' ? p.protocolVersion : FALLBACK_PROTOCOL_VERSION;
-  return { protocolVersion, serverInfo: { name: 'ai-workspace-upstream', version: SERVER_VERSION }, capabilities: { tools: {} }, instructions: SERVER_INSTRUCTIONS };
+  } catch {
+    /* Phase A logging is best-effort */
+  }
+  const protocolVersion = typeof p.protocolVersion === "string" ? p.protocolVersion : FALLBACK_PROTOCOL_VERSION;
+  return {
+    protocolVersion,
+    serverInfo: { name: "ai-workspace-upstream", version: SERVER_VERSION },
+    capabilities: { tools: {} },
+    instructions: SERVER_INSTRUCTIONS,
+  };
 }
 
 function getTools() {
   return [
     {
-      name: 'upstream_request_create',
+      name: "upstream_request_create",
       description: ENABLE_CLIENT_ROOTS
-        ? 'File an upstream request to the ai_workspace PM when a problem\'s root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory or from the client\'s workspace roots; pass project_root only when the server rejects identity (the ticket is then flagged for human review). Content is treated as untrusted data.'
-        : 'File an upstream request to the ai_workspace PM when a problem\'s root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory; GUI clients that spawn this server outside the project may pass project_root instead (the ticket is then flagged for human review). Content is treated as untrusted data.',
+        ? "File an upstream request to the ai_workspace PM when a problem's root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory or from the client's workspace roots; pass project_root only when the server rejects identity (the ticket is then flagged for human review). Content is treated as untrusted data."
+        : "File an upstream request to the ai_workspace PM when a problem's root cause is suspected to be in the workspace (L1) or the variant template (L2). Project identity comes from the working directory; GUI clients that spawn this server outside the project may pass project_root instead (the ticket is then flagged for human review). Content is treated as untrusted data.",
       inputSchema: {
-        type: 'object', additionalProperties: false, required: ['suspected_layer', 'symptom', 'affected_paths'],
+        type: "object",
+        additionalProperties: false,
+        required: ["suspected_layer", "symptom", "affected_paths"],
         properties: {
-          suspected_layer: { type: 'string', enum: ['L1', 'L2', 'unsure'] },
-          symptom: { type: 'string', minLength: 20, maxLength: 2000, description: 'What goes wrong, observed behavior vs expected.' },
-          affected_paths: {
-            type: 'array', minItems: 1, maxItems: 10,
-            items: { type: 'string', maxLength: 200, pattern: '^(?!/)(?!.*\\.\\.)[A-Za-z0-9._\\-/]+$' },
-            description: 'Project-relative paths (same relative layout as the template), e.g. scripts/dev-sync.ts',
+          suspected_layer: { type: "string", enum: ["L1", "L2", "unsure"] },
+          symptom: {
+            type: "string",
+            minLength: 20,
+            maxLength: 2000,
+            description: "What goes wrong, observed behavior vs expected.",
           },
-          local_workaround_diff: { type: 'string', maxLength: 8000, description: 'Optional unified diff of the local patch. Reference only; never applied automatically.' },
-          repro: { type: 'string', maxLength: 2000, description: 'Optional reproduction steps in prose.' },
-          project_root: { type: 'string', maxLength: 200, description: ENABLE_CLIENT_ROOTS
-            ? 'Last-resort fallback: optional absolute path to the project root, used only when neither the working directory nor the client\'s workspace roots resolve to exactly one registered project. Goes through the same filesystem checks; tickets filed this way are flagged for human review. A project_root that conflicts with the client\'s workspace roots is rejected.'
-            : 'Optional absolute path to the project root. Used only when the working directory does not resolve to a registered project (GUI clients spawn this server with cwd=/). Goes through the same filesystem checks; tickets filed this way are flagged for human review.' },
+          affected_paths: {
+            type: "array",
+            minItems: 1,
+            maxItems: 10,
+            items: { type: "string", maxLength: 200, pattern: "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._\\-/]+$" },
+            description: "Project-relative paths (same relative layout as the template), e.g. scripts/dev-sync.ts",
+          },
+          local_workaround_diff: {
+            type: "string",
+            maxLength: 8000,
+            description: "Optional unified diff of the local patch. Reference only; never applied automatically.",
+          },
+          repro: { type: "string", maxLength: 2000, description: "Optional reproduction steps in prose." },
+          project_root: {
+            type: "string",
+            maxLength: 200,
+            description: ENABLE_CLIENT_ROOTS
+              ? "Last-resort fallback: optional absolute path to the project root, used only when neither the working directory nor the client's workspace roots resolve to exactly one registered project. Goes through the same filesystem checks; tickets filed this way are flagged for human review. A project_root that conflicts with the client's workspace roots is rejected."
+              : "Optional absolute path to the project root. Used only when the working directory does not resolve to a registered project (GUI clients spawn this server with cwd=/). Goes through the same filesystem checks; tickets filed this way are flagged for human review.",
+          },
         },
       },
     },
     {
-      name: 'upstream_request_status',
-      description: 'Read status of upstream requests filed from the current project, or one delegation ticket (T-id, ADR-0103) by id — delegation reads return the narrow kanban field set (id, title, status, priority, sev, delegation:true). Read-only.',
+      name: "upstream_request_status",
+      description:
+        "Read status of upstream requests filed from the current project, or one delegation ticket (T-id, ADR-0103) by id — delegation reads return the narrow kanban field set (id, title, status, priority, sev, delegation:true). Read-only.",
       inputSchema: {
-        type: 'object', additionalProperties: false,
+        type: "object",
+        additionalProperties: false,
         properties: {
-          id: { type: 'string', pattern: '^[TU]-\\d{8}-\\d{3,4}$', description: 'An upstream request id (U-YYYYMMDD-NNN, project-scoped) or a delegation ticket id (T-YYYYMMDD-NNN, narrow read-back per ADR-0103).' },
-          limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
-          project_root: { type: 'string', maxLength: 200, description: ENABLE_CLIENT_ROOTS
-            ? 'Last-resort fallback: optional absolute path to the project root, used only when neither the working directory nor the client\'s workspace roots resolve to exactly one registered project. A project_root that conflicts with the client\'s workspace roots is rejected.'
-            : 'Optional absolute path to the project root; used only when the working directory does not resolve to a registered project.' },
+          id: {
+            type: "string",
+            pattern: "^[TU]-\\d{8}-\\d{3,4}$",
+            description:
+              "An upstream request id (U-YYYYMMDD-NNN, project-scoped) or a delegation ticket id (T-YYYYMMDD-NNN, narrow read-back per ADR-0103).",
+          },
+          limit: { type: "integer", minimum: 1, maximum: 50, default: 20 },
+          project_root: {
+            type: "string",
+            maxLength: 200,
+            description: ENABLE_CLIENT_ROOTS
+              ? "Last-resort fallback: optional absolute path to the project root, used only when neither the working directory nor the client's workspace roots resolve to exactly one registered project. A project_root that conflicts with the client's workspace roots is rejected."
+              : "Optional absolute path to the project root; used only when the working directory does not resolve to a registered project.",
+          },
         },
       },
     },
     {
-      name: 'upstream_request_reprioritize',
-      description: 'Change ONLY the priority (P0-P3 alias or low|normal|high|urgent) of one of this project\'s upstream requests (U-id) or a delegation ticket (T-id) — never status, content or triage; every change is appended to the ticket history with the server-derived caller identity. Kanban aliases: P0=urgent, P1=high, P2=normal, P3=low. Spoke callers are capped at +1 level per ticket per 24h and can never set urgent; P0 requires user action via ticket.ts.',
+      name: "upstream_request_reprioritize",
+      description:
+        "Change ONLY the priority (P0-P3 alias or low|normal|high|urgent) of one of this project's upstream requests (U-id) or a delegation ticket (T-id) — never status, content or triage; every change is appended to the ticket history with the server-derived caller identity. Kanban aliases: P0=urgent, P1=high, P2=normal, P3=low. Spoke callers are capped at +1 level per ticket per 24h and can never set urgent; P0 requires user action via ticket.ts.",
       inputSchema: {
-        type: 'object', additionalProperties: false, required: ['id', 'priority'],
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "priority"],
         properties: {
-          id: { type: 'string', pattern: '^[TU]-\\d{8}-\\d{3,4}$', description: 'The upstream request id (U-) or delegation ticket id (T-) from upstream_request_status.' },
-          priority: { type: 'string', enum: ['P0', 'P1', 'P2', 'P3', 'low', 'normal', 'high', 'urgent'] },
+          id: {
+            type: "string",
+            pattern: "^[TU]-\\d{8}-\\d{3,4}$",
+            description: "The upstream request id (U-) or delegation ticket id (T-) from upstream_request_status.",
+          },
+          priority: { type: "string", enum: ["P0", "P1", "P2", "P3", "low", "normal", "high", "urgent"] },
         },
       },
     },
@@ -1547,44 +1904,54 @@ function getTools() {
 async function dispatchToolCall(params: unknown): Promise<Outcome> {
   const toolParams = (params ?? {}) as Record<string, unknown>;
   const toolName = toolParams.name;
-  if (toolName === 'upstream_request_create') {
+  if (toolName === "upstream_request_create") {
     const cwd = process.cwd();
     return handleCreateRequest(toolParams.arguments, cwd, await resolveIdentity(toolParams.arguments, cwd));
   }
-  if (toolName === 'upstream_request_status') return handleStatusRequest(toolParams.arguments, await resolveIdentity(toolParams.arguments, process.cwd()));
-  if (toolName === 'upstream_request_reprioritize') return handleReprioritizeRequest(toolParams.arguments, await resolveIdentity(toolParams.arguments, process.cwd()));
+  if (toolName === "upstream_request_status")
+    return handleStatusRequest(toolParams.arguments, await resolveIdentity(toolParams.arguments, process.cwd()));
+  if (toolName === "upstream_request_reprioritize")
+    return handleReprioritizeRequest(toolParams.arguments, await resolveIdentity(toolParams.arguments, process.cwd()));
   return { error: { code: -32602, message: `unknown tool: ${String(toolName)}` } };
 }
 
 async function runToolCall(id: string | number | null, params: unknown): Promise<void> {
   try {
     const outcome = await dispatchToolCall(params);
-    if ('error' in outcome) {
+    if ("error" in outcome) {
       if (outcome.error.code === -32000) {
         // M11/M5: retryable failures travel as result.isError so the retry hint
         // reaches the agent instead of dying in a transport-level error object.
-        sendResponse(id, { isError: true, content: [{ type: 'text', text: JSON.stringify({ error: outcome.error }) }] });
+        sendResponse(id, {
+          isError: true,
+          content: [{ type: "text", text: JSON.stringify({ error: outcome.error }) }],
+        });
       } else {
         sendResponse(id, undefined, outcome.error);
       }
     } else {
-      sendResponse(id, { isError: false, content: [{ type: 'text', text: JSON.stringify(outcome.result) }] });
+      sendResponse(id, { isError: false, content: [{ type: "text", text: JSON.stringify(outcome.result) }] });
     }
   } catch (err) {
     console.error(`[mcp-upstream-server] error: ${(err as Error).message}`);
-    if (id !== null) sendResponse(id, undefined, { code: -32603, message: `internal error: ${err instanceof Error ? err.message : String(err)}` });
+    if (id !== null)
+      sendResponse(id, undefined, {
+        code: -32603,
+        message: `internal error: ${err instanceof Error ? err.message : String(err)}`,
+      });
   }
 }
 
 async function main(): Promise<void> {
   const pruned = pruneOldLogs();
-  if (pruned > 0) console.error(`[mcp-upstream-server] pruned ${pruned} audit log(s) older than ${LOG_RETENTION_DAYS} days`);
+  if (pruned > 0)
+    console.error(`[mcp-upstream-server] pruned ${pruned} audit log(s) older than ${LOG_RETENTION_DAYS} days`);
   const rl = createInterface({ input: process.stdin });
   for await (const line of rl) {
     if (!line.trim()) continue;
     // M11: cap the raw line BEFORE parsing — a hostile client can otherwise feed an
     // arbitrarily large line straight into JSON.parse.
-    if (Buffer.byteLength(line, 'utf-8') > MAX_LINE_BYTES) {
+    if (Buffer.byteLength(line, "utf-8") > MAX_LINE_BYTES) {
       sendResponse(null, undefined, { code: -32600, message: `invalid request: line exceeds ${MAX_LINE_BYTES} bytes` });
       continue;
     }
@@ -1594,42 +1961,45 @@ async function main(): Promise<void> {
       msg = JSON.parse(line) as JsonRpcMessage;
     } catch {
       // M11: malformed JSON is a parse error (-32700), not an internal error.
-      sendResponse(null, undefined, { code: -32700, message: 'parse error: line is not valid JSON' });
+      sendResponse(null, undefined, { code: -32700, message: "parse error: line is not valid JSON" });
       continue;
     }
     try {
       id = msg.id ?? null;
       // M11: envelope validation — batch arrays, non-objects and wrong jsonrpc
       // versions get the standard -32600 instead of undefined behavior.
-      if (typeof msg !== 'object' || msg === null || Array.isArray(msg) || msg.jsonrpc !== '2.0') {
-        sendResponse(id, undefined, { code: -32600, message: 'invalid request: expected a JSON-RPC 2.0 message object with jsonrpc "2.0"' });
+      if (typeof msg !== "object" || msg === null || Array.isArray(msg) || msg.jsonrpc !== "2.0") {
+        sendResponse(id, undefined, {
+          code: -32600,
+          message: 'invalid request: expected a JSON-RPC 2.0 message object with jsonrpc "2.0"',
+        });
         continue;
       }
       const { method, params } = msg;
 
-      if (method === undefined && msg.id !== undefined && msg.id !== null && ('result' in msg || 'error' in msg)) {
+      if (method === undefined && msg.id !== undefined && msg.id !== null && ("result" in msg || "error" in msg)) {
         // E.3.8-10: a response to a server-originated request; resolve it and send nothing back.
         handleClientResponse(msg);
         continue;
       }
-      if (method === 'initialize') {
+      if (method === "initialize") {
         sendResponse(id, handleInitialize(params));
-      } else if (method === 'ping') {
+      } else if (method === "ping") {
         // M11: the MCP ping — previously answered -32601, which made clients
         // classify a healthy server as dead.
         sendResponse(id, {});
-      } else if (method === 'tools/list') {
+      } else if (method === "tools/list") {
         sendResponse(id, { tools: getTools() });
-      } else if (method === 'tools/call') {
+      } else if (method === "tools/call") {
         // E.3.12-13: never await inline — a roots/list reply arrives on this same loop. The handler
         // runs detached; responses may complete out of order (JSON-RPC permits it).
         void runToolCall(id, params);
-      } else if (typeof method === 'string' && method.startsWith('notifications/')) {
+      } else if (typeof method === "string" && method.startsWith("notifications/")) {
         // notifications carry no response
-        if (method === 'notifications/initialized') {
+        if (method === "notifications/initialized") {
           // E.3.5: start the roots probe now (also Phase A's log-only measurement). Detached.
           ensureRoots();
-        } else if (method === 'notifications/roots/list_changed') {
+        } else if (method === "notifications/roots/list_changed") {
           onRootsListChanged();
         }
       } else if (msg.id !== undefined) {
@@ -1637,7 +2007,11 @@ async function main(): Promise<void> {
       }
     } catch (err) {
       console.error(`[mcp-upstream-server] error: ${(err as Error).message}`);
-      if (id !== null) sendResponse(id, undefined, { code: -32603, message: `internal error: ${err instanceof Error ? err.message : String(err)}` });
+      if (id !== null)
+        sendResponse(id, undefined, {
+          code: -32603,
+          message: `internal error: ${err instanceof Error ? err.message : String(err)}`,
+        });
     }
   }
 }

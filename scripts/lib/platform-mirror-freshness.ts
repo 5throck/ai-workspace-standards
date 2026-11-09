@@ -29,9 +29,9 @@
  * inside functions. Unit tests drive it against scratch dirs in os.tmpdir().
  */
 
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { PLATFORM_MIRROR_DIRS } from './platforms.ts';
+import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { PLATFORM_MIRROR_DIRS } from "./platforms.ts";
 
 // Back-compat re-export: the definition lives in lib/platforms.ts; the two
 // historical importers (validate-templates.ts, tests/unit/platform-mirror-
@@ -46,7 +46,7 @@ export { PLATFORM_MIRROR_DIRS };
 export function extractSkillVersion(skillMdText: string): string | null {
   // Strip a UTF-8 BOM first — `^` in the multiline regex would not match a
   // `version:` line sitting behind a BOM, silently skipping the skill.
-  const m = skillMdText.replace(/^\uFEFF/, '').match(/^version:\s*"?([^"\n]+)"?\s*$/m);
+  const m = skillMdText.replace(/^\uFEFF/, "").match(/^version:\s*"?([^"\n]+)"?\s*$/m);
   return m ? m[1].trim() : null;
 }
 
@@ -86,8 +86,8 @@ export function collectMirrorFreshnessDrift(opts: {
       continue;
     }
     for (const skill of entries) {
-      const ssotText = readSkillMd(join(opts.ssotSkillsDir, skill, 'SKILL.md'));
-      const mirrorText = readSkillMd(join(mirrorDir, skill, 'SKILL.md'));
+      const ssotText = readSkillMd(join(opts.ssotSkillsDir, skill, "SKILL.md"));
+      const mirrorText = readSkillMd(join(mirrorDir, skill, "SKILL.md"));
       if (ssotText === null || mirrorText === null) continue; // no SSOT counterpart (L1-only) or unreadable
       const ssotVersion = extractSkillVersion(ssotText);
       const mirrorVersion = extractSkillVersion(mirrorText);
@@ -103,7 +103,7 @@ export function collectMirrorFreshnessDrift(opts: {
 function readSkillMd(path: string): string | null {
   if (!existsSync(path)) return null;
   try {
-    return readFileSync(path, 'utf-8');
+    return readFileSync(path, "utf-8");
   } catch {
     return null;
   }

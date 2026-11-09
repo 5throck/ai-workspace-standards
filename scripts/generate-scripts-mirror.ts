@@ -50,9 +50,9 @@
  *                                                    # drift (summary printed)
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
-import { join, relative, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync, writeFileSync, existsSync, readdirSync, type Dirent } from "node:fs";
+import { join, relative, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -60,12 +60,12 @@ const ROOT = resolveRoot(__dirname);
 
 function resolveRoot(dir: string): string {
   // The script lives at scripts/generate-scripts-mirror.ts → root is one up.
-  return join(dir, '..');
+  return join(dir, "..");
 }
 
-const MIRROR_PATH = join(ROOT, 'templates', 'common', 'scripts', 'SCRIPTS.md');
-const ROOT_SCRIPTS_MD = join(ROOT, 'scripts', 'SCRIPTS.md');
-const TEMPLATE_SCRIPTS_DIR = join(ROOT, 'templates', 'common', 'scripts');
+const MIRROR_PATH = join(ROOT, "templates", "common", "scripts", "SCRIPTS.md");
+const ROOT_SCRIPTS_MD = join(ROOT, "scripts", "SCRIPTS.md");
+const TEMPLATE_SCRIPTS_DIR = join(ROOT, "templates", "common", "scripts");
 
 // ============================================================================
 // PURE BUILDER (exported for lifecycle-sync-audit Check B projection arm)
@@ -93,15 +93,15 @@ export interface RegistryTable {
  * Pure: no filesystem access.
  */
 export function extractRegistrySpan(content: string): string | null {
-  const lines = content.split('\n');
-  const start = lines.findIndex((l) => l.startsWith('| script |'));
+  const lines = content.split("\n");
+  const start = lines.findIndex((l) => l.startsWith("| script |"));
   if (start === -1) return null;
   let end = start; // inclusive index of the last table row
   for (let i = start + 1; i < lines.length; i++) {
-    if (lines[i].startsWith('|')) end = i;
+    if (lines[i].startsWith("|")) end = i;
     else break;
   }
-  return lines.slice(start, end + 1).join('\n');
+  return lines.slice(start, end + 1).join("\n");
 }
 
 /**
@@ -112,30 +112,30 @@ export function extractRegistrySpan(content: string): string | null {
  * Pure: no filesystem access.
  */
 export function parseRegistryTable(content: string): RegistryTable | null {
-  const lines = content.split('\n');
-  const start = lines.findIndex((l) => l.startsWith('| script |'));
+  const lines = content.split("\n");
+  const start = lines.findIndex((l) => l.startsWith("| script |"));
   if (start === -1) return null;
 
   const header = lines[start];
-  const separator = lines[start + 1] ?? '';
-  if (!separator.startsWith('|')) return null;
+  const separator = lines[start + 1] ?? "";
+  if (!separator.startsWith("|")) return null;
 
   // Dynamic column resolution from the header row (same convention as
   // lifecycle-sync-audit parseScriptsMdRegistry).
-  const headerCols = header.split('|').map((c) => c.trim());
+  const headerCols = header.split("|").map((c) => c.trim());
   let layerColIdx = -1;
   for (let i = 1; i < headerCols.length; i++) {
-    if (headerCols[i].toLowerCase() === 'layer') layerColIdx = i;
+    if (headerCols[i].toLowerCase() === "layer") layerColIdx = i;
   }
 
   const rows: RegistryRow[] = [];
   for (let i = start + 2; i < lines.length; i++) {
     const line = lines[i];
-    if (!line.startsWith('|')) break; // end of the contiguous table
-    const cells = line.split('|').map((c) => c.trim());
-    const rawName = cells[1] ?? '';
-    if (!rawName.startsWith('`')) continue; // not a data row
-    rows.push({ key: rawName.replace(/`/g, '').trim(), line });
+    if (!line.startsWith("|")) break; // end of the contiguous table
+    const cells = line.split("|").map((c) => c.trim());
+    const rawName = cells[1] ?? "";
+    if (!rawName.startsWith("`")) continue; // not a data row
+    rows.push({ key: rawName.replace(/`/g, "").trim(), line });
     void layerColIdx; // layer read happens per-row below
   }
   return { header, separator, rows };
@@ -143,21 +143,21 @@ export function parseRegistryTable(content: string): RegistryTable | null {
 
 /** Read a row's layer cell and normalize it (layer-filter.ts semantics). */
 function normalizeLayer(rowLine: string): string {
-  const cells = rowLine.split('|').map((c) => c.trim());
+  const cells = rowLine.split("|").map((c) => c.trim());
   // Fixed layout per the registry contract: [ '', script, source, version,
   // status, removal-date, security-advisory, layer, pair, '' ].
-  const raw = cells[7] ?? '';
-  if (raw === 'L0' || raw === 'L0-only') return 'L0';
+  const raw = cells[7] ?? "";
+  if (raw === "L0" || raw === "L0-only") return "L0";
   return raw; // L0+L1 / L0+L1+L2 / common — anything non-L0 mirrors (R1)
 }
 
 /** Extract the version from a `// @version X.Y.Z` header. Hard error if absent. */
 function requireFileVersion(filePath: string, key: string): string {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
   const match = content.match(/@version\s+([\d.]+)/);
   if (!match) {
     throw new Error(
-      `[generate-scripts-mirror] template-tree file has no parseable '// @version' header: ${key} (${filePath}) — add the header or register the script in scripts/SCRIPTS.md`
+      `[generate-scripts-mirror] template-tree file has no parseable '// @version' header: ${key} (${filePath}) — add the header or register the script in scripts/SCRIPTS.md`,
     );
   }
   return match[1];
@@ -166,7 +166,7 @@ function requireFileVersion(filePath: string, key: string): string {
 /** Recursively collect template-tree .ts keys (R3 scan; `_`-prefixed excluded). */
 function collectTemplateTsKeys(dir: string, baseDir: string, out: string[], depth = 0): void {
   if (depth > 8) return; // runaway-recursion bound (T-20260910-026 convention)
-  let entries;
+  let entries: Dirent[];
   try {
     entries = readdirSync(dir, { withFileTypes: true });
   } catch {
@@ -177,9 +177,9 @@ function collectTemplateTsKeys(dir: string, baseDir: string, out: string[], dept
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       collectTemplateTsKeys(fullPath, baseDir, out, depth + 1);
-    } else if (entry.isFile() && entry.name.endsWith('.ts')) {
-      if (entry.name.startsWith('_')) continue; // R17: test-fixture policy
-      out.push(relative(baseDir, fullPath).split('\\').join('/'));
+    } else if (entry.isFile() && entry.name.endsWith(".ts")) {
+      if (entry.name.startsWith("_")) continue; // R17: test-fixture policy
+      out.push(relative(baseDir, fullPath).split("\\").join("/"));
     }
   }
 }
@@ -202,19 +202,17 @@ export function synthesizeMirrorRow(key: string, version: string): string {
 export function buildMirrorRegistrySpan(rootContent: string, templateScriptsDir: string): string {
   const table = parseRegistryTable(rootContent);
   if (!table) {
-    throw new Error('[generate-scripts-mirror] no `| script |` header row found in root SCRIPTS.md content');
+    throw new Error("[generate-scripts-mirror] no `| script |` header row found in root SCRIPTS.md content");
   }
 
   // R1-rule + R2-rule: keep non-L0 root rows byte-for-byte, in root file order.
-  const surviving: RegistryRow[] = table.rows.filter((r) => !['L0', 'L0+L2'].includes(normalizeLayer(r.line)));
+  const surviving: RegistryRow[] = table.rows.filter((r) => !["L0", "L0+L2"].includes(normalizeLayer(r.line)));
   const rootKeys = new Set(table.rows.map((r) => r.key));
 
   // R3-rule: template-tree .ts files with no root registry row → synthesized rows.
   const templateKeys: string[] = [];
   collectTemplateTsKeys(templateScriptsDir, templateScriptsDir, templateKeys);
-  const mirrorOnly = templateKeys
-    .filter((k) => !rootKeys.has(k))
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const mirrorOnly = templateKeys.filter((k) => !rootKeys.has(k)).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   const synthesized: RegistryRow[] = mirrorOnly.map((k) => ({
     key: k,
     line: synthesizeMirrorRow(k, requireFileVersion(join(templateScriptsDir, k), k)),
@@ -230,7 +228,7 @@ export function buildMirrorRegistrySpan(rootContent: string, templateScriptsDir:
     result.splice(at, 0, ...synthesized);
   }
 
-  return [table.header, table.separator, ...result.map((r) => r.line)].join('\n');
+  return [table.header, table.separator, ...result.map((r) => r.line)].join("\n");
 }
 
 // ============================================================================
@@ -252,20 +250,21 @@ interface DriftSummary {
 function summarizeDrift(actual: string, expected: string): DriftSummary {
   const rowsOf = (span: string): Map<string, string> => {
     const map = new Map<string, string>();
-    for (const line of span.split('\n')) {
-      const cells = line.split('|').map((c) => c.trim());
-      const raw = cells[1] ?? '';
-      if (raw.startsWith('`')) map.set(raw.replace(/`/g, '').trim(), line);
+    for (const line of span.split("\n")) {
+      const cells = line.split("|").map((c) => c.trim());
+      const raw = cells[1] ?? "";
+      if (raw.startsWith("`")) map.set(raw.replace(/`/g, "").trim(), line);
     }
     return map;
   };
   const orderOf = (span: string): string[] =>
-    span.split('\n')
+    span
+      .split("\n")
       .map((line) => {
-        const raw = line.split('|')[1]?.trim() ?? '';
-        return raw.startsWith('`') ? raw.replace(/`/g, '').trim() : '';
+        const raw = line.split("|")[1]?.trim() ?? "";
+        return raw.startsWith("`") ? raw.replace(/`/g, "").trim() : "";
       })
-      .filter((k) => k !== '' && k !== 'script');
+      .filter((k) => k !== "" && k !== "script");
   const a = rowsOf(actual);
   const e = rowsOf(expected);
   const removed: string[] = [];
@@ -276,22 +275,29 @@ function summarizeDrift(actual: string, expected: string): DriftSummary {
   }
   const added = [...e.keys()].filter((k) => !a.has(k));
   const reordered =
-    removed.length === 0 && added.length === 0 && modified.length === 0 &&
-    orderOf(actual).join('\u0000') !== orderOf(expected).join('\u0000');
+    removed.length === 0 &&
+    added.length === 0 &&
+    modified.length === 0 &&
+    orderOf(actual).join("\u0000") !== orderOf(expected).join("\u0000");
   return { changed: actual !== expected, removed, added, modified, reordered };
 }
 
 function printDriftSummary(summary: DriftSummary): void {
-  const cap = (keys: string[]) => keys.slice(0, 10).join(', ') + (keys.length > 10 ? `, … +${keys.length - 10} more` : '');
-  console.error(`Registry span drift: ${summary.removed.length} row(s) on disk not in projection, ${summary.added.length} row(s) in projection not on disk, ${summary.modified.length} modified row(s)${summary.reordered ? ', row order differs (relocation pending)' : ''}.`);
+  const cap = (keys: string[]) =>
+    keys.slice(0, 10).join(", ") + (keys.length > 10 ? `, … +${keys.length - 10} more` : "");
+  console.error(
+    `Registry span drift: ${summary.removed.length} row(s) on disk not in projection, ${summary.added.length} row(s) in projection not on disk, ${summary.modified.length} modified row(s)${summary.reordered ? ", row order differs (relocation pending)" : ""}.`,
+  );
   if (summary.removed.length > 0) console.error(`  on-disk only (${summary.removed.length}): ${cap(summary.removed)}`);
   if (summary.added.length > 0) console.error(`  projection only (${summary.added.length}): ${cap(summary.added)}`);
   if (summary.modified.length > 0) console.error(`  modified (${summary.modified.length}): ${cap(summary.modified)}`);
-  console.error(`Drift region: the | script | registry-table span of templates/common/scripts/SCRIPTS.md (header row through the last table row).`);
+  console.error(
+    `Drift region: the | script | registry-table span of templates/common/scripts/SCRIPTS.md (header row through the last table row).`,
+  );
 }
 
 export async function runCli(args: string[]): Promise<number> {
-  const checkOnly = args.includes('--check');
+  const checkOnly = args.includes("--check");
 
   if (!existsSync(ROOT_SCRIPTS_MD)) {
     console.error(`[generate-scripts-mirror] root registry not found: ${ROOT_SCRIPTS_MD}`);
@@ -302,7 +308,7 @@ export async function runCli(args: string[]): Promise<number> {
     return 1;
   }
 
-  const rootContent = readFileSync(ROOT_SCRIPTS_MD, 'utf-8');
+  const rootContent = readFileSync(ROOT_SCRIPTS_MD, "utf-8");
   let expected: string;
   try {
     expected = buildMirrorRegistrySpan(rootContent, TEMPLATE_SCRIPTS_DIR);
@@ -315,15 +321,19 @@ export async function runCli(args: string[]): Promise<number> {
     console.error(`[generate-scripts-mirror] mirror not found: ${MIRROR_PATH}`);
     return 1;
   }
-  const mirrorContent = readFileSync(MIRROR_PATH, 'utf-8');
+  const mirrorContent = readFileSync(MIRROR_PATH, "utf-8");
   const actual = extractRegistrySpan(mirrorContent);
   if (actual === null) {
-    console.error(`[generate-scripts-mirror] no \`| script |\` header row found in ${MIRROR_PATH} — cannot locate the generated span`);
+    console.error(
+      `[generate-scripts-mirror] no \`| script |\` header row found in ${MIRROR_PATH} — cannot locate the generated span`,
+    );
     return 1;
   }
 
   if (actual === expected) {
-    console.log(`✓ templates/common/scripts/SCRIPTS.md registry span matches the projection (${expected.split('\n').length - 2} rows)${checkOnly ? '' : ' — nothing to write'}`);
+    console.log(
+      `✓ templates/common/scripts/SCRIPTS.md registry span matches the projection (${expected.split("\n").length - 2} rows)${checkOnly ? "" : " — nothing to write"}`,
+    );
     return 0;
   }
 
@@ -337,16 +347,18 @@ export async function runCli(args: string[]): Promise<number> {
 
   // Write mode: splice the generated span in place of the actual span,
   // preserving every byte outside it (prose sections stay hand-maintained).
-  const lines = mirrorContent.split('\n');
-  const start = lines.findIndex((l) => l.startsWith('| script |'));
+  const lines = mirrorContent.split("\n");
+  const start = lines.findIndex((l) => l.startsWith("| script |"));
   let end = start;
   for (let i = start + 1; i < lines.length; i++) {
-    if (lines[i].startsWith('|')) end = i;
+    if (lines[i].startsWith("|")) end = i;
     else break;
   }
-  lines.splice(start, end - start + 1, ...expected.split('\n'));
-  writeFileSync(MIRROR_PATH, lines.join('\n'), 'utf-8');
-  console.log(`✅ templates/common/scripts/SCRIPTS.md registry span regenerated: ${summary.removed.length} removed, ${summary.added.length} added, ${summary.modified.length} modified row(s) → ${expected.split('\n').length - 2} rows`);
+  lines.splice(start, end - start + 1, ...expected.split("\n"));
+  writeFileSync(MIRROR_PATH, lines.join("\n"), "utf-8");
+  console.log(
+    `✅ templates/common/scripts/SCRIPTS.md registry span regenerated: ${summary.removed.length} removed, ${summary.added.length} added, ${summary.modified.length} modified row(s) → ${expected.split("\n").length - 2} rows`,
+  );
   return 0;
 }
 

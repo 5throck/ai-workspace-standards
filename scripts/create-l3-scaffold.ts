@@ -71,22 +71,22 @@ import * as fs from "node:fs";
 import { rollbackPartialProject } from "./helpers/rollback-partial-project.ts";
 import * as path from "node:path";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { includeScriptInL3, parseScriptLayers } from './helpers/layer-filter.ts';
-import { parsePmMd, extractVariantOverrides } from './helpers/pm-md-parser.ts';
-import { generateReadme, generateReadmeKo, type VariantMetadata } from './helpers/generate-variant.ts';
-import { isVariantType } from './helpers/registries/variant-type-registry.ts';
+import { includeScriptInL3, parseScriptLayers } from "./helpers/layer-filter.ts";
+import { parsePmMd, extractVariantOverrides } from "./helpers/pm-md-parser.ts";
+import { generateReadme, generateReadmeKo, type VariantMetadata } from "./helpers/generate-variant.ts";
+import { isVariantType } from "./helpers/registries/variant-type-registry.ts";
 import {
   COMMON_AGENTS_START,
   COMMON_AGENTS_END,
   L3_COMMON_OVERLAY_EXCLUDE,
   VARIANT_SCAFFOLD_MARKER_NAMES,
-} from './helpers/scaffold-markers.ts';
-import { readTemplateVersion } from './helpers/template-version.ts';
-import { exclusionForName } from './lib/fleet.ts';
+} from "./helpers/scaffold-markers.ts";
+import { readTemplateVersion } from "./helpers/template-version.ts";
+import { exclusionForName } from "./lib/fleet.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -99,7 +99,6 @@ const TODAY = new Date().toISOString().split("T")[0];
 // Workaround: Bun 1.3.14 cannot parse escaped backticks (\`) inside template literals.
 // Use \` interpolation instead of inline backtick characters in markdown content.
 const BT = "`";
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -188,11 +187,7 @@ function readProvenanceVersion(): string {
 }
 
 /** Run an external command without a shell (injection-safe). */
-function runNoShell(
-  cmd: string,
-  cmdArgs: string[],
-  opts: { cwd: string; quiet?: boolean },
-): void {
+function runNoShell(cmd: string, cmdArgs: string[], opts: { cwd: string; quiet?: boolean }): void {
   execFileSync(cmd, cmdArgs, {
     cwd: opts.cwd,
     stdio: opts.quiet ? "ignore" : "inherit",
@@ -228,12 +223,16 @@ function parseArgs(argv: string[]): Args {
       country = argv[++i] ?? "";
       // Validate country pattern
       if (country && !/^[A-Z]{2,4}$/.test(country)) {
-        fail(`Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`);
+        fail(
+          `Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`,
+        );
       }
     } else if (a.startsWith("--country=")) {
       country = a.split("=")[1] ?? "";
       if (country && !/^[A-Z]{2,4}$/.test(country)) {
-        fail(`Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`);
+        fail(
+          `Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`,
+        );
       }
     } else if (!a.startsWith("--")) {
       if (!variant) variant = a;
@@ -248,10 +247,7 @@ function parseArgs(argv: string[]): Args {
   }
 
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(variant)) {
-    fail(
-      `Invalid variant-name "${variant}". Use lowercase alphanumerics and hyphens only ` +
-        `(e.g. "safety-os").`,
-    );
+    fail(`Invalid variant-name "${variant}". Use lowercase alphanumerics and hyphens only ` + `(e.g. "safety-os").`);
   }
 
   return { variant, domain, country, dryRun };
@@ -295,11 +291,11 @@ function copyCommonOverlay(projectDir: string): void {
   // §5.7). templates/common/.gitattributes doesn't carry this rule itself — it's
   // scaffold-time-only, since it only makes sense once docs/context.md actually exists
   // in the project — so every scaffolding path has to add it explicitly.
-  const gitattributesPath = path.join(projectDir, '.gitattributes');
-  const gaRule = 'docs/context.md merge=ours\n';
+  const gitattributesPath = path.join(projectDir, ".gitattributes");
+  const gaRule = "docs/context.md merge=ours\n";
   if (fs.existsSync(gitattributesPath)) {
-    const ga = fs.readFileSync(gitattributesPath, 'utf8');
-    if (!ga.includes('docs/context.md')) {
+    const ga = fs.readFileSync(gitattributesPath, "utf8");
+    if (!ga.includes("docs/context.md")) {
       fs.appendFileSync(gitattributesPath, `\n${gaRule}`);
     }
   } else {
@@ -330,34 +326,63 @@ function copyCommonOverlay(projectDir: string): void {
     let removed = 0;
 
     for (const line of lines) {
-      if (/^## Registry/.test(line)) { inRegistry = true; headerParsed = false; out.push(line); continue; }
-      if (inRegistry && /^## /.test(line)) { inRegistry = false; out.push(line); continue; }
+      if (/^## Registry/.test(line)) {
+        inRegistry = true;
+        headerParsed = false;
+        out.push(line);
+        continue;
+      }
+      if (inRegistry && /^## /.test(line)) {
+        inRegistry = false;
+        out.push(line);
+        continue;
+      }
       if (inRegistry) {
         const trimmed = line.trim();
-        if (trimmed.startsWith("|-")) { out.push(line); continue; }
-        if (!trimmed.startsWith("|")) { out.push(line); continue; }
-        const cols = trimmed.split("|").slice(1, -1).map((c: string) => c.trim());
-        if (cols.length < 6) { out.push(line); continue; }
-        if (!headerParsed) { headerParsed = true; out.push(line); continue; }
+        if (trimmed.startsWith("|-")) {
+          out.push(line);
+          continue;
+        }
+        if (!trimmed.startsWith("|")) {
+          out.push(line);
+          continue;
+        }
+        const cols = trimmed
+          .split("|")
+          .slice(1, -1)
+          .map((c: string) => c.trim());
+        if (cols.length < 6) {
+          out.push(line);
+          continue;
+        }
+        if (!headerParsed) {
+          headerParsed = true;
+          out.push(line);
+          continue;
+        }
         const scriptName = cols[0].replace(/`/g, "");
         const layer = layers.get(scriptName) ?? "L0+L1";
-        if (layer === "L0") { removed++; continue; }
+        if (layer === "L0") {
+          removed++;
+          continue;
+        }
       }
       out.push(line);
     }
 
-    const rewritten = out.join("\n")
+    const rewritten = out
+      .join("\n")
       .replace(
         "> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).\n" +
-        "> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run propagate:apply`.\n" +
-        "> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.",
+          "> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run propagate:apply`.\n" +
+          "> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.",
         "> This file is a **project-level snapshot** (Tier 3) of the scripts that were scaffolded\n" +
-        "> from the common template. L0-only entries have been stripped.\n" +
-        "> For the authoritative registry, see the workspace root `scripts/SCRIPTS.md`."
+          "> from the common template. L0-only entries have been stripped.\n" +
+          "> For the authoritative registry, see the workspace root `scripts/SCRIPTS.md`.",
       )
       .replace(
         "*SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*",
-        "*SCRIPTS.md — project snapshot (auto-generated at scaffold time)*"
+        "*SCRIPTS.md — project snapshot (auto-generated at scaffold time)*",
       );
 
     fs.writeFileSync(projectScriptsMd, rewritten, "utf-8");
@@ -380,12 +405,7 @@ function copyRootSkills(projectDir: string): void {
 // Step 5: Generate stub files
 // ─────────────────────────────────────────────────────────────────────────────
 
-function generateStubs(
-  projectDir: string,
-  variant: string,
-  domain: string | null,
-  commonVersion: string,
-): void {
+function generateStubs(projectDir: string, variant: string, domain: string | null, commonVersion: string): void {
   log("📝 Generating stub files…");
   const displayName = toDisplayName(variant);
 
@@ -414,35 +434,44 @@ function generateStubs(
       stablePromotedOn: null,
     },
     // Lecture-type extension fields
-    ...(domain === 'lecture' ? {
-      agent_manifest: {
-        variant_agents_dir: "agents",
-        pipeline_order: ["version", "research", "source-verifier", "storyline", "design", "image-curator", "html-build", "measure", "pdf-export"],
-        optional: ["source-verifier", "image-curator"],
-        notes: "source-verifier: skip with --skip-verify. image-curator: skip if all slides use image_role: none."
-      },
-      theme_manifest: {
-        themes_dir: "docs/html-themes",
-        base_css: "docs/html-themes/base/base.css",
-        available: ["classic", "minimal", "visual-heavy", "academic"],
-        default: "classic",
-        overrides_dir: "docs/html-themes/overrides",
-        notes: "CSS variable override themes. DOM structure immutable across themes."
-      },
-      lecture_profile: {
-        template_path: "docs/lecture-profile.md",
-        required_fields: ["title", "audience", "level"],
-        notes: "Scaffolded on new-project creation. Agents load this file at stage start."
-      }
-    } : {}),
+    ...(domain === "lecture"
+      ? {
+          agent_manifest: {
+            variant_agents_dir: "agents",
+            pipeline_order: [
+              "version",
+              "research",
+              "source-verifier",
+              "storyline",
+              "design",
+              "image-curator",
+              "html-build",
+              "measure",
+              "pdf-export",
+            ],
+            optional: ["source-verifier", "image-curator"],
+            notes: "source-verifier: skip with --skip-verify. image-curator: skip if all slides use image_role: none.",
+          },
+          theme_manifest: {
+            themes_dir: "docs/html-themes",
+            base_css: "docs/html-themes/base/base.css",
+            available: ["classic", "minimal", "visual-heavy", "academic"],
+            default: "classic",
+            overrides_dir: "docs/html-themes/overrides",
+            notes: "CSS variable override themes. DOM structure immutable across themes.",
+          },
+          lecture_profile: {
+            template_path: "docs/lecture-profile.md",
+            required_fields: ["title", "audience", "level"],
+            notes: "Scaffolded on new-project creation. Agents load this file at stage start.",
+          },
+        }
+      : {}),
     created_at: TODAY,
     phaseAComplete: false,
     promotionChecklist: "PROMOTION_CHECKLIST.md",
   };
-  writeFile(
-    path.join(projectDir, "variant.json"),
-    JSON.stringify(variantJson, null, 2) + "\n",
-  );
+  writeFile(path.join(projectDir, "variant.json"), JSON.stringify(variantJson, null, 2) + "\n");
 
   // docs/<variant>.context.md stub
   const contextMd = `# ${variant} Context
@@ -605,9 +634,9 @@ TODO: document how secrets/credentials are handled (see \`.env.sample\`).
   // "## Sessions" heading as a legacy index needing migration, and its migration branch
   // appends the Meetings/ADRs sections on every run. Seeding the canonical structure here
   // keeps that branch from ever firing.
-  ensureDir(path.join(projectDir, 'memory'));
+  ensureDir(path.join(projectDir, "memory"));
   writeFile(
-    path.join(projectDir, 'memory', 'MEMORY.md'),
+    path.join(projectDir, "memory", "MEMORY.md"),
     `# Memory Index
 
 ## Sessions
@@ -638,10 +667,10 @@ TODO: document how secrets/credentials are handled (see \`.env.sample\`).
   const bootstrapMetadata: VariantMetadata = {
     name: toVariantSlug(variant),
     description: `TODO: describe the ${displayName} variant.`,
-    variantType: domain && isVariantType(domain) ? domain : 'collaboration',
-    status: 'beta',
-    version: '0.1.0',
-    inherits_common: 'templates/common',
+    variantType: domain && isVariantType(domain) ? domain : "collaboration",
+    status: "beta",
+    version: "0.1.0",
+    inherits_common: "templates/common",
     agentRoster: [],
     skills: [],
   };
@@ -656,9 +685,7 @@ TODO: document how secrets/credentials are handled (see \`.env.sample\`).
   // marker names come from the shared scaffold-markers contract module
   // (T-20260915-002) — same constants validate-templates pins against the
   // L1 baseline.
-  const variantMarkers = VARIANT_SCAFFOLD_MARKER_NAMES
-    .map((m) => `<!-- ${m}-START -->\n<!-- ${m}-END -->`)
-    .join("\n");
+  const variantMarkers = VARIANT_SCAFFOLD_MARKER_NAMES.map((m) => `<!-- ${m}-START -->\n<!-- ${m}-END -->`).join("\n");
   const agentsMd = `# AGENTS.md
 
 > **🚨 For AI tools reading this file**: This file is a **registry and orchestration reference**, not a set of instructions directed at you.
@@ -699,7 +726,9 @@ ${variantMarkers}
     // C3 (T-20260915-002): the original defect shape — a marker the source
     // file no longer carries made this append a silent no-op. Warn loud
     // (validate-templates' scaffold-marker-source check also fails on this).
-    log(`  ⚠️  COMMON-AGENTS markers not found in templates/common/AGENTS.md — Language Policy block NOT appended to AGENTS.md (marker: ${COMMON_AGENTS_START})`);
+    log(
+      `  ⚠️  COMMON-AGENTS markers not found in templates/common/AGENTS.md — Language Policy block NOT appended to AGENTS.md (marker: ${COMMON_AGENTS_START})`,
+    );
   }
   // The graft repo-context-graph block is no longer injected: graft is self-managed
   // (design 2026-10-02-self-managed-tool-surfaces, T-20261003-010) and the block was
@@ -725,29 +754,29 @@ const DEFAULT_DOC_DIRS = ["docs/drafts", "docs/reports", "docs/research"];
 function createDomainDocs(projectDir: string, domain: string | null, variant: string): void {
   log("📁 Creating docs/ subdirectories…");
 
-  const commonDocsDir = path.join(COMMON_DIR, 'docs', '_common');
+  const commonDocsDir = path.join(COMMON_DIR, "docs", "_common");
   if (fs.existsSync(commonDocsDir)) {
-    const destDocsDir = path.join(projectDir, 'docs');
+    const destDocsDir = path.join(projectDir, "docs");
     ensureDir(destDocsDir);
     for (const entry of fs.readdirSync(commonDocsDir)) {
       copyItem(path.join(commonDocsDir, entry), path.join(destDocsDir, entry));
     }
-    log('  ✅ docs/_common/ files copied');
+    log("  ✅ docs/_common/ files copied");
   }
 
   // docs/context.md — the immutable common project-context file (SSOT: templates/common/docs/context.md).
   // It lives directly under templates/common/docs/, not inside docs/_common/, so the loop above never
   // picks it up. new-project.ts gets this file for free via its full copyDir(commonDir, projectDir);
   // this L3 path has to copy it explicitly, or every scaffolded project silently ships without it.
-  copyItem(path.join(COMMON_DIR, 'docs', 'context.md'), path.join(projectDir, 'docs', 'context.md'));
-  log('  ✅ docs/context.md copied (immutable common project context)');
+  copyItem(path.join(COMMON_DIR, "docs", "context.md"), path.join(projectDir, "docs", "context.md"));
+  log("  ✅ docs/context.md copied (immutable common project context)");
 
   // docs/standards/ — governed doctrine shipped with every project (ADR-0098): the
   // LLM Interaction Standard lands at docs/standards/ so the AGENTS.md pointer and
   // context.md references resolve project-locally. Recursive copy keeps the door
   // open for future standards; upgrades refresh the tree via the docs/ SYNC claim.
-  copyItem(path.join(COMMON_DIR, 'docs', 'standards'), path.join(projectDir, 'docs', 'standards'));
-  log('  ✅ docs/standards/ copied (LLM Interaction Standard, ADR-0098)');
+  copyItem(path.join(COMMON_DIR, "docs", "standards"), path.join(projectDir, "docs", "standards"));
+  log("  ✅ docs/standards/ copied (LLM Interaction Standard, ADR-0098)");
 
   // docs/workspace-schema.json — the locale/country registry SSOT the project-side
   // validate-md-language.ts resolves at <project>/docs/workspace-schema.json. Without it
@@ -755,8 +784,11 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
   // zones in fresh drafts (2026-09-21 review M-22 / H-2 minimum fix). Same delivery rule
   // as context.md: top-level docs/ file copied explicitly because the loop above only
   // walks docs/_common/.
-  copyItem(path.join(COMMON_DIR, 'docs', 'workspace-schema.json'), path.join(projectDir, 'docs', 'workspace-schema.json'));
-  log('  ✅ docs/workspace-schema.json copied (i18n locale_codes + country_scoped_assets registry)');
+  copyItem(
+    path.join(COMMON_DIR, "docs", "workspace-schema.json"),
+    path.join(projectDir, "docs", "workspace-schema.json"),
+  );
+  log("  ✅ docs/workspace-schema.json copied (i18n locale_codes + country_scoped_assets registry)");
 
   // The copy above is still the raw common template — [Project Name] / <variant-name> / <variant>
   // placeholders unresolved. new-project.ts's substitute-placeholders.ts helper would do this,
@@ -765,14 +797,15 @@ function createDomainDocs(projectDir: string, domain: string | null, variant: st
   // <variant> token as illustrative doc text, not a placeholder, and would get corrupted.
   // Scope the substitution to just the one file that actually needs it.
   const slug = toVariantSlug(variant);
-  const contextMdPath = path.join(projectDir, 'docs', 'context.md');
+  const contextMdPath = path.join(projectDir, "docs", "context.md");
   if (fs.existsSync(contextMdPath)) {
-    const substituted = fs.readFileSync(contextMdPath, 'utf8')
+    const substituted = fs
+      .readFileSync(contextMdPath, "utf8")
       .replace(/\[Project Name\]/g, slug)
       .replace(/<variant-name>/g, slug)
       .replace(/`([^`]*)<variant>([^`]*)`/g, `\`$1${slug}$2\``);
-    fs.writeFileSync(contextMdPath, substituted, 'utf8');
-    log('  ✅ docs/context.md placeholders substituted ([Project Name], <variant-name>, <variant>)');
+    fs.writeFileSync(contextMdPath, substituted, "utf8");
+    log("  ✅ docs/context.md placeholders substituted ([Project Name], <variant-name>, <variant>)");
   }
 
   const dirs = (domain && DOMAIN_DOC_DIRS[domain]) || DEFAULT_DOC_DIRS;
@@ -940,9 +973,7 @@ function initGit(projectDir: string): void {
     log("✅ git repository initialized, .githooks configured");
   } catch (e) {
     log(`⚠️  git init failed: ${(e as Error).message}`);
-    log(
-      `    Manual retry: cd ${projectDir} && git init && git config core.hooksPath .githooks`,
-    );
+    log(`    Manual retry: cd ${projectDir} && git init && git config core.hooksPath .githooks`);
   }
 }
 
@@ -1013,7 +1044,6 @@ function writePackageJson(projectDir: string, variant: string): void {
   );
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Step 10: Completion summary
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1029,25 +1059,20 @@ function printSummary(variant: string): void {
   log("  3. Edit AGENTS.md  → add variant-specific agent entries");
   log("  4. Create agents/<name>.md files (3-Section: Legal Basis / Role / Protocols)");
   log("  5. Create domain-specific skills in skills/<domain-skill>/SKILL.md");
-  log("  6. Regenerate README.md/README_ko.md  → bun scripts/generate-l3-readme.ts (re-run after any agent/skill change)");
+  log(
+    "  6. Regenerate README.md/README_ko.md  → bun scripts/generate-l3-readme.ts (re-run after any agent/skill change)",
+  );
   log("  7. Complete variant.json (description, type, agent_overrides, skill_manifest)");
   log("  8. Define PROMOTION_CHECKLIST.md conditions for your domain");
   log("");
   log("⚠️  Git hooks active — run commits via /sync pipeline only");
-  log(
-    "⚠️  CLAUDE.md/GEMINI.md must differ from workspace root (add variant section) for Phase B reconcile survival",
-  );
+  log("⚠️  CLAUDE.md/GEMINI.md must differ from workspace root (add variant section) for Phase B reconcile survival");
 }
 
 function createLectureScaffold(projectDir: string): void {
   log("🎨 Creating lecture-specific scaffold (docs/html-themes/, presentations/)…");
   // html-themes directory structure
-  for (const dir of [
-    "docs/html-themes",
-    "docs/html-themes/base",
-    "docs/html-themes/overrides",
-    "presentations",
-  ]) {
+  for (const dir of ["docs/html-themes", "docs/html-themes/base", "docs/html-themes/overrides", "presentations"]) {
     ensureDir(path.join(projectDir, dir));
   }
   // presentations/.gitkeep so the folder is tracked
@@ -1091,13 +1116,17 @@ function main(): void {
     try {
       return exclusionForName(args.variant, WORKSPACE_ROOT);
     } catch (err) {
-      return new Error(`Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`);
+      return new Error(
+        `Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   })();
   if (nameExclusion instanceof Error) fail(nameExclusion.message);
   if (nameExclusion) {
-    fail(`Project name '${args.variant}' matches an excluded fleet member (docs/fleet-membership.json, ${nameExclusion.decision_ref}).\n`
-      + `       Choose a different name — or remove the exclusion row first if the project is rejoining the fleet (the record is the reversal path).`);
+    fail(
+      `Project name '${args.variant}' matches an excluded fleet member (docs/fleet-membership.json, ${nameExclusion.decision_ref}).\n` +
+        `       Choose a different name — or remove the exclusion row first if the project is rejoining the fleet (the record is the reversal path).`,
+    );
   }
   if (fs.existsSync(templateVariantDir)) {
     log(`⚠️  templates/${toVariantSlug(args.variant)}/ already exists — proceeding with L3 scaffold anyway.`);
@@ -1150,7 +1179,10 @@ function main(): void {
   if (fs.existsSync(pruneHelper)) {
     const country = args.country || "none";
     log(`🌐 Pruning country-scoped assets${args.country ? ` for ${args.country}` : " (region-neutral)"}…`);
-    runNoShell(process.execPath, [pruneHelper, projectDir, country, args.variant || 'none'], { cwd: WORKSPACE_ROOT, quiet: false });
+    runNoShell(process.execPath, [pruneHelper, projectDir, country, args.variant || "none"], {
+      cwd: WORKSPACE_ROOT,
+      quiet: false,
+    });
   } else {
     log("⚠️  prune-country-scoped-assets.ts not found — skipping country-scoped asset pruning");
   }
@@ -1163,7 +1195,7 @@ function main(): void {
   createDomainDocs(projectDir, args.domain, args.variant);
 
   // Step 6.5: lecture-type specific setup (html-themes + presentations/)
-  if (args.domain === 'lecture') {
+  if (args.domain === "lecture") {
     createLectureScaffold(projectDir);
   }
 
@@ -1176,9 +1208,11 @@ function main(): void {
   const scaffoldCountry = args.country || "none";
   fs.writeFileSync(
     path.join(projectDir, "template-version.txt"),
-    `variant=${toVariantSlug(args.variant)}\nversion=${templateVersion}\nplatform=both\ncountry=${scaffoldCountry}\ncreated=${new Date().toISOString()}\n`
+    `variant=${toVariantSlug(args.variant)}\nversion=${templateVersion}\nplatform=both\ncountry=${scaffoldCountry}\ncreated=${new Date().toISOString()}\n`,
   );
-  log(`🧾 Wrote template-version.txt (variant=${toVariantSlug(args.variant)}, version=${templateVersion}, country=${scaffoldCountry})`);
+  log(
+    `🧾 Wrote template-version.txt (variant=${toVariantSlug(args.variant)}, version=${templateVersion}, country=${scaffoldCountry})`,
+  );
 
   // Step 7: git init
   initGit(projectDir);
@@ -1209,10 +1243,10 @@ function main(): void {
   // by design (agents/pm.md placeholders, etc.), so failures here are informational.
   log("\nRunning post-scaffold audit…");
   try {
-    runNoShell('bun', [path.join(projectDir, 'scripts', 'audit.ts'), '--skip-memory'], { cwd: projectDir });
+    runNoShell("bun", [path.join(projectDir, "scripts", "audit.ts"), "--skip-memory"], { cwd: projectDir });
     log(`\n✅ Project scaffold verified: Projects/${args.variant}/`);
   } catch {
-    log('\n⚠️  Project scaffolded but audit found issues — review above before continuing.');
+    log("\n⚠️  Project scaffolded but audit found issues — review above before continuing.");
   }
 
   // Step 9b: skill/scripts layout guard — detect foreign-variant skills and recursive

@@ -28,10 +28,10 @@
  * Integrated with ADR-0033 circular reference prevention via extends-validator.ts
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { resolve, dirname, normalize } from 'path';
-import { load, dump } from 'js-yaml';
-import { safeValidateExtends, ExtendsValidationResult } from './extends-validator.ts';
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve, dirname, normalize } from "node:path";
+import { load, dump } from "js-yaml";
+import { safeValidateExtends, ExtendsValidationResult } from "./extends-validator.ts";
 
 /**
  * Error type classification for error recovery strategy
@@ -44,7 +44,7 @@ enum ErrorType {
   // Recoverable (warning) - attempt fallback
   MISSING_FILE = "missing_file",
   MISSING_SECTION = "missing_section",
-  INVALID_YAML = "invalid_yaml"
+  INVALID_YAML = "invalid_yaml",
 }
 
 /**
@@ -77,7 +77,17 @@ You ARE the PM agent for this session. Load and follow \`agents/pm.md\` at all t
 /**
  * Security: Allowed base paths for extends resolution
  */
-const ALLOWED_PATHS = new Set(["agents/", "templates/", "vendors/", "scripts/", "docs/", "skills/", ".claude/", ".gemini/", "tests/fixtures/"]);
+const ALLOWED_PATHS = new Set([
+  "agents/",
+  "templates/",
+  "vendors/",
+  "scripts/",
+  "docs/",
+  "skills/",
+  ".claude/",
+  ".gemini/",
+  "tests/fixtures/",
+]);
 
 /**
  * Security: Maximum extends chain depth to prevent infinite recursion
@@ -127,18 +137,24 @@ function classifyError(error: Error, filePath: string): ResolutionError {
       path: filePath,
       message: error.message,
       recoverable: false,
-      suggestion: "Check extends paths for cycles and fix circular references in the chain"
+      suggestion: "Check extends paths for cycles and fix circular references in the chain",
     };
   }
 
   // Security violation - unrecoverable
-  if (message.includes("security") || message.includes("whitelist") || message.includes("protocol") || message.includes("traversal")) {
+  if (
+    message.includes("security") ||
+    message.includes("whitelist") ||
+    message.includes("protocol") ||
+    message.includes("traversal")
+  ) {
     return {
       type: ErrorType.SECURITY_VIOLATION,
       path: filePath,
       message: error.message,
       recoverable: false,
-      suggestion: "Review security configuration: check extends path is within allowed directories and contains no protocol injection or path traversal"
+      suggestion:
+        "Review security configuration: check extends path is within allowed directories and contains no protocol injection or path traversal",
     };
   }
 
@@ -149,7 +165,7 @@ function classifyError(error: Error, filePath: string): ResolutionError {
       path: filePath,
       message: error.message,
       recoverable: true,
-      suggestion: "Create missing file, fix extends path, or continue with default L0 fallback"
+      suggestion: "Create missing file, fix extends path, or continue with default L0 fallback",
     };
   }
 
@@ -160,7 +176,7 @@ function classifyError(error: Error, filePath: string): ResolutionError {
       path: filePath,
       message: error.message,
       recoverable: true,
-      suggestion: "Check YAML syntax and fix formatting errors, or continue with partial content"
+      suggestion: "Check YAML syntax and fix formatting errors, or continue with partial content",
     };
   }
 
@@ -171,7 +187,7 @@ function classifyError(error: Error, filePath: string): ResolutionError {
       path: filePath,
       message: error.message,
       recoverable: true,
-      suggestion: "Section not found - continuing without it (may affect content structure)"
+      suggestion: "Section not found - continuing without it (may affect content structure)",
     };
   }
 
@@ -181,7 +197,7 @@ function classifyError(error: Error, filePath: string): ResolutionError {
     path: filePath,
     message: error.message,
     recoverable: false,
-    suggestion: "Review error details - unknown error type treated as unrecoverable for safety"
+    suggestion: "Review error details - unknown error type treated as unrecoverable for safety",
   };
 }
 
@@ -191,9 +207,9 @@ function classifyError(error: Error, filePath: string): ResolutionError {
 function getDefaultL0Content(): { frontmatter: Frontmatter; content: string } {
   return {
     frontmatter: {
-      extends: null
+      extends: null,
     },
-    content: DEFAULT_L0_BODY
+    content: DEFAULT_L0_BODY,
   };
 }
 
@@ -224,11 +240,11 @@ function validateYAMLSecurity(config: any, basePath: string): void {
 
     // 1.3 Whitelist-based path validation (AFTER security checks)
     const resolvedPath = resolve(basePath, config.extends);
-    const normalizedPath = normalize(resolvedPath).replace(/\\/g, '/');
+    const normalizedPath = normalize(resolvedPath).replace(/\\/g, "/");
 
     // Check if path contains allowed directories (handle both forward and backslashes)
-    const isAllowed = Array.from(ALLOWED_PATHS).some(allowed => {
-      const normalizedAllowed = allowed.replace(/\\/g, '/');
+    const isAllowed = Array.from(ALLOWED_PATHS).some((allowed) => {
+      const normalizedAllowed = allowed.replace(/\\/g, "/");
       return normalizedPath.includes(normalizedAllowed);
     });
 
@@ -245,21 +261,20 @@ function validateYAMLSecurity(config: any, basePath: string): void {
       for (const agentRaw of agentsList) {
         if (!agentRaw) continue;
 
-        const agentStr = typeof agentRaw === 'string' ? agentRaw : agentRaw.name || '';
+        const agentStr = typeof agentRaw === "string" ? agentRaw : agentRaw.name || "";
         const agentPath = extractAgentPath(agentStr);
 
         if (agentPath) {
           // Validate agent path is within allowed directories
-          const isAllowed = agentPath.startsWith("agents/") ||
-                          agentPath.startsWith("vendors/") ||
-                          agentPath.startsWith("templates/");
+          const isAllowed =
+            agentPath.startsWith("agents/") || agentPath.startsWith("vendors/") || agentPath.startsWith("templates/");
 
           if (!isAllowed) {
             throw new Error(`Security: invalid agent path: ${agentPath}`);
           }
 
           // Check for path traversal in agent paths
-          if (agentPath.includes('..')) {
+          if (agentPath.includes("..")) {
             throw new Error(`Security: path traversal not allowed in agent path: ${agentPath}`);
           }
         }
@@ -293,7 +308,7 @@ function parseVariantSections(config: any): VariantSection[] {
     return config.variant_overrides.remove_sections.map((section: string) => ({
       section,
       action: "prepend" as const,
-      content: null
+      content: null,
     }));
   }
 
@@ -307,15 +322,14 @@ function parseVariantSections(config: any): VariantSection[] {
       // Validate action
       if (!["prepend", "replace", "append"].includes(action)) {
         throw new Error(
-          `Invalid action "${action}" for section "${s.section}". ` +
-          `Valid actions: prepend, replace, append`
+          `Invalid action "${action}" for section "${s.section}". ` + `Valid actions: prepend, replace, append`,
         );
       }
 
       const variantSection: VariantSection = {
         section: s.section,
         action: action as "prepend" | "replace" | "append",
-        content: s.content || null
+        content: s.content || null,
       };
 
       // Detect conflicting actions
@@ -323,7 +337,7 @@ function parseVariantSections(config: any): VariantSection[] {
         const existing = sectionMap.get(s.section)!;
         if (existing.action !== action) {
           console.warn(
-            `⚠️  Conflicting actions for section "${s.section}": "${existing.action}" vs "${action}". Using last action: "${action}"`
+            `⚠️  Conflicting actions for section "${s.section}": "${existing.action}" vs "${action}". Using last action: "${action}"`,
           );
         }
       }
@@ -350,11 +364,11 @@ function parseFrontmatter(content: string): ParsedFile {
     const frontmatter = load(match[1]) as Frontmatter;
     return {
       frontmatter,
-      content: match[2] ? match[2].trim() : '',
-      raw: content
+      content: match[2] ? match[2].trim() : "",
+      raw: content,
     };
   } catch (error) {
-    console.error('Failed to parse YAML:', error);
+    console.error("Failed to parse YAML:", error);
     return { frontmatter: {}, content: content, raw: content };
   }
 }
@@ -371,7 +385,7 @@ function parseFrontmatter(content: string): ParsedFile {
 function resolveExtendsRecursively(
   filePath: string,
   visited = new Set<string>(),
-  depth = 0
+  depth = 0,
 ): { frontmatter: Frontmatter; content: string } {
   // Check circular reference
   const normalizedPath = normalize(resolve(filePath));
@@ -388,13 +402,13 @@ function resolveExtendsRecursively(
   visited.add(normalizedPath);
 
   const absolutePath = resolve(filePath);
-  const content = readFileSync(absolutePath, 'utf-8');
+  const content = readFileSync(absolutePath, "utf-8");
   const parsed = parseFrontmatter(content);
 
   if (!parsed.frontmatter.extends) {
     return {
       frontmatter: parsed.frontmatter,
-      content: parsed.content
+      content: parsed.content,
     };
   }
 
@@ -410,7 +424,7 @@ function resolveExtendsRecursively(
     // Merge skeleton resolved frontmatter and current frontmatter
     const mergedFrontmatter = { ...skeletonResolved.frontmatter };
     for (const key of Object.keys(parsed.frontmatter)) {
-      if (key !== 'extends') {
+      if (key !== "extends") {
         mergedFrontmatter[key] = parsed.frontmatter[key];
       }
     }
@@ -422,7 +436,7 @@ function resolveExtendsRecursively(
 
     return {
       frontmatter: mergedFrontmatter,
-      content: finalContent
+      content: finalContent,
     };
   } catch (error) {
     if (error instanceof Error) {
@@ -436,11 +450,7 @@ function resolveExtendsRecursively(
  * Resolve extends with error recovery strategy
  * Returns structured result with errors, warnings, and fallback content
  */
-function resolveExtendsWithRecovery(
-  filePath: string,
-  visited = new Set<string>(),
-  depth = 0
-): ResolutionResult {
+function resolveExtendsWithRecovery(filePath: string, visited = new Set<string>(), depth = 0): ResolutionResult {
   const errors: ResolutionError[] = [];
   const warnings: string[] = [];
 
@@ -454,9 +464,8 @@ ${dump(result.frontmatter).trim()}
 
 ${result.content}`,
       errors,
-      warnings
+      warnings,
     };
-
   } catch (error) {
     const resolutionError = classifyError(error as Error, filePath);
     errors.push(resolutionError);
@@ -482,15 +491,15 @@ ${dump(fallback.frontmatter).trim()}
 
 ${fallback.content}`,
           errors,
-          warnings
+          warnings,
         };
       } catch (fallbackError) {
         // Fallback failed - return original error
         return {
           success: false,
-          content: '',
+          content: "",
           errors,
-          warnings: ['Fallback recovery failed - returning original error']
+          warnings: ["Fallback recovery failed - returning original error"],
         };
       }
     }
@@ -499,9 +508,9 @@ ${fallback.content}`,
     console.error(`🚨 Unrecoverable error - cannot continue`);
     return {
       success: false,
-      content: '',
+      content: "",
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -512,32 +521,36 @@ ${fallback.content}`,
 function removeSections(content: string, sectionsToRemove: string[]): string {
   if (!sectionsToRemove || sectionsToRemove.length === 0) return content;
 
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const headingRegex = /^(#{1,6})\s+(.+)$/;
 
-  const toRemove = sectionsToRemove.map(s => {
-    const trimmed = s.trim().replace(/\s+/g, ' ');
-    const spaceIdx = trimmed.indexOf(' ');
+  const toRemove = sectionsToRemove.map((s) => {
+    const trimmed = s.trim().replace(/\s+/g, " ");
+    const spaceIdx = trimmed.indexOf(" ");
     return {
       hashes: spaceIdx >= 0 ? trimmed.slice(0, spaceIdx) : trimmed,
-      prefix: spaceIdx >= 0 ? trimmed.slice(spaceIdx + 1).toLowerCase() : ''
+      prefix: spaceIdx >= 0 ? trimmed.slice(spaceIdx + 1).toLowerCase() : "",
     };
   });
 
   function cleanText(str: string): string {
     return str
-      .replace(/[^a-zA-Z0-9\s]/g, '')
-      .replace(/\s+/g, ' ')
+      .replace(/[^a-zA-Z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
       .trim()
       .toLowerCase();
   }
 
   function shouldRemove(hashes: string, title: string): boolean {
     const cleanTitle = cleanText(title);
-    return toRemove.some(r => {
+    return toRemove.some((r) => {
       if (r.hashes !== hashes) return false;
       const cleanPrefix = cleanText(r.prefix);
-      return cleanTitle === cleanPrefix || cleanTitle.startsWith(cleanPrefix + ' ') || cleanTitle.startsWith(cleanPrefix + '(');
+      return (
+        cleanTitle === cleanPrefix ||
+        cleanTitle.startsWith(cleanPrefix + " ") ||
+        cleanTitle.startsWith(cleanPrefix + "(")
+      );
     });
   }
 
@@ -569,14 +582,17 @@ function removeSections(content: string, sectionsToRemove: string[]): string {
     }
   }
 
-  return result.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  return result
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 /**
  * Clean text for robust matching of sections
  */
 function cleanSectionName(str: string): string {
-  return str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  return str.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 }
 
 /**
@@ -587,7 +603,7 @@ function cleanSectionName(str: string): string {
  * - Empty section: returns empty string (no warning)
  */
 function extractSection(content: string, headingTitle: string): string {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const headingRegex = /^(#{1,6})\s+(.+)$/;
   let sectionLines: string[] = [];
   let found = false;
@@ -623,40 +639,40 @@ function extractSection(content: string, headingTitle: string): string {
     console.warn(`⚠️  Section not found: "${headingTitle}" - returning empty content`);
   }
 
-  return sectionLines.join('\n').trim();
+  return sectionLines.join("\n").trim();
 }
 
 /**
  * Parse constraint subpoints (plan, version, strategy) from L0 Constraints section
  */
 function parseConstraintSubPoints(constraintsContent: string): { plan: string; version: string; strategy: string } {
-  const lines = constraintsContent.split('\n');
+  const lines = constraintsContent.split("\n");
   let planLines: string[] = [];
   let versionLines: string[] = [];
   let strategyLines: string[] = [];
-  
-  let current: 'plan' | 'version' | 'strategy' | 'none' = 'none';
+
+  let current: "plan" | "version" | "strategy" | "none" = "none";
 
   for (const line of lines) {
-    if (line.trim().startsWith('- **Mandatory Execution Plan')) {
-      current = 'plan';
-    } else if (line.trim().startsWith('- **Script modification')) {
-      current = 'version';
-    } else if (line.trim().startsWith('- **Mandatory 3-Tier')) {
-      current = 'strategy';
-    } else if (line.trim().startsWith('- **Phase Determination')) {
-      current = 'none';
+    if (line.trim().startsWith("- **Mandatory Execution Plan")) {
+      current = "plan";
+    } else if (line.trim().startsWith("- **Script modification")) {
+      current = "version";
+    } else if (line.trim().startsWith("- **Mandatory 3-Tier")) {
+      current = "strategy";
+    } else if (line.trim().startsWith("- **Phase Determination")) {
+      current = "none";
     }
 
-    if (current === 'plan') planLines.push(line);
-    if (current === 'version') versionLines.push(line);
-    if (current === 'strategy') strategyLines.push(line);
+    if (current === "plan") planLines.push(line);
+    if (current === "version") versionLines.push(line);
+    if (current === "strategy") strategyLines.push(line);
   }
 
   return {
-    plan: planLines.join('\n').trim(),
-    version: versionLines.join('\n').trim(),
-    strategy: strategyLines.join('\n').trim()
+    plan: planLines.join("\n").trim(),
+    version: versionLines.join("\n").trim(),
+    strategy: strategyLines.join("\n").trim(),
   };
 }
 
@@ -667,102 +683,102 @@ function getAgentScore(agentName: string, phase: string, group: string, target: 
   const name = agentName.toLowerCase();
   const p = phase.toLowerCase();
   const g = group.toLowerCase();
-  
+
   let score = 0;
 
   switch (target) {
-    case 'automation-engineer':
-      if (name === 'code-writer') score += 100;
-      if (name.includes('engineer')) score += 20;
-      if (name.includes('developer')) score += 15;
-      if (name.includes('specialist')) score += 10;
-      if (name.includes('patch')) score += 10;
-      if (name.includes('expert')) score += 5;
-      if (p.includes('implement')) score += 50;
-      if (p.includes('execute')) score += 40;
-      if (p.includes('prototype')) score += 30;
-      if (p.includes('remediation')) score += 20;
-      if (p.includes('tech')) score += 10;
-      if (g.includes('execution')) score += 30;
-      if (g.includes('tools')) score += 15;
+    case "automation-engineer":
+      if (name === "code-writer") score += 100;
+      if (name.includes("engineer")) score += 20;
+      if (name.includes("developer")) score += 15;
+      if (name.includes("specialist")) score += 10;
+      if (name.includes("patch")) score += 10;
+      if (name.includes("expert")) score += 5;
+      if (p.includes("implement")) score += 50;
+      if (p.includes("execute")) score += 40;
+      if (p.includes("prototype")) score += 30;
+      if (p.includes("remediation")) score += 20;
+      if (p.includes("tech")) score += 10;
+      if (g.includes("execution")) score += 30;
+      if (g.includes("tools")) score += 15;
       break;
 
-    case 'docs-writer':
-      if (name === 'code-writer') {
+    case "docs-writer":
+      if (name === "code-writer") {
         score = 0;
       } else {
-        if (name === 'docs-writer') score += 100;
-        if (name.includes('writer')) score += 30;
-        if (name.includes('storyteller')) score += 20;
-        if (name.includes('comm')) score += 15;
-        if (p.includes('document')) score += 50;
-        if (p.includes('content')) score += 40;
-        if (p.includes('report')) score += 30;
-        if (p.includes('technical')) score += 20;
-        if (p.includes('narrative')) score += 20;
-        if (g.includes('documentation')) score += 30;
-        if (g.includes('content')) score += 20;
+        if (name === "docs-writer") score += 100;
+        if (name.includes("writer")) score += 30;
+        if (name.includes("storyteller")) score += 20;
+        if (name.includes("comm")) score += 15;
+        if (p.includes("document")) score += 50;
+        if (p.includes("content")) score += 40;
+        if (p.includes("report")) score += 30;
+        if (p.includes("technical")) score += 20;
+        if (p.includes("narrative")) score += 20;
+        if (g.includes("documentation")) score += 30;
+        if (g.includes("content")) score += 20;
       }
       break;
 
-    case 'auditor':
-      if (name === 'auditor') score += 100;
-      if (name.includes('test')) score += 30;
-      if (name.includes('runner')) score += 25;
-      if (name.includes('analyst')) score += 20;
-      if (name.includes('researcher')) score += 15;
-      if (p.includes('qa') || p.includes('verification')) score += 50;
-      if (p.includes('test')) score += 40;
-      if (p.includes('audit')) score += 30;
-      if (p.includes('analysis')) score += 20;
-      if (p.includes('research')) score += 15;
-      if (g.includes('analysis')) score += 30;
-      if (g.includes('qa')) score += 30;
+    case "auditor":
+      if (name === "auditor") score += 100;
+      if (name.includes("test")) score += 30;
+      if (name.includes("runner")) score += 25;
+      if (name.includes("analyst")) score += 20;
+      if (name.includes("researcher")) score += 15;
+      if (p.includes("qa") || p.includes("verification")) score += 50;
+      if (p.includes("test")) score += 40;
+      if (p.includes("audit")) score += 30;
+      if (p.includes("analysis")) score += 20;
+      if (p.includes("research")) score += 15;
+      if (g.includes("analysis")) score += 30;
+      if (g.includes("qa")) score += 30;
       break;
 
-    case 'architect':
-      if (name === 'architect') score += 100;
-      if (name.includes('architect')) score += 50;
-      if (name.includes('designer')) score += 30;
-      if (name.includes('lead')) score += 25;
-      if (name.includes('coordinator')) score += 20;
-      if (name.includes('manager')) score += 15;
-      if (p.includes('design')) score += 50;
-      if (p.includes('architect')) score += 40;
-      if (p.includes('direction')) score += 30;
-      if (p.includes('consult')) score += 20;
-      if (p.includes('coordination')) score += 15;
-      if (g.includes('design')) score += 30;
-      if (g.includes('architecture')) score += 30;
-      if (g.includes('strategy')) score += 20;
+    case "architect":
+      if (name === "architect") score += 100;
+      if (name.includes("architect")) score += 50;
+      if (name.includes("designer")) score += 30;
+      if (name.includes("lead")) score += 25;
+      if (name.includes("coordinator")) score += 20;
+      if (name.includes("manager")) score += 15;
+      if (p.includes("design")) score += 50;
+      if (p.includes("architect")) score += 40;
+      if (p.includes("direction")) score += 30;
+      if (p.includes("consult")) score += 20;
+      if (p.includes("coordination")) score += 15;
+      if (g.includes("design")) score += 30;
+      if (g.includes("architecture")) score += 30;
+      if (g.includes("strategy")) score += 20;
       break;
 
-    case 'security-expert':
-      if (name === 'security-expert') score += 100;
-      if (name.includes('security')) score += 50;
-      if (name.includes('pentester')) score += 40;
-      if (name.includes('threat')) score += 30;
-      if (name.includes('patch')) score += 20;
-      if (name.includes('red-team') || name.includes('blue-team')) score += 20;
-      if (p.includes('security')) score += 50;
-      if (p.includes('threat')) score += 40;
-      if (p.includes('penetration')) score += 30;
-      if (g.includes('security')) score += 30;
-      if (g.includes('red team') || g.includes('blue team')) score += 30;
+    case "security-expert":
+      if (name === "security-expert") score += 100;
+      if (name.includes("security")) score += 50;
+      if (name.includes("pentester")) score += 40;
+      if (name.includes("threat")) score += 30;
+      if (name.includes("patch")) score += 20;
+      if (name.includes("red-team") || name.includes("blue-team")) score += 20;
+      if (p.includes("security")) score += 50;
+      if (p.includes("threat")) score += 40;
+      if (p.includes("penetration")) score += 30;
+      if (g.includes("security")) score += 30;
+      if (g.includes("red team") || g.includes("blue team")) score += 30;
       break;
 
-    case 'scaffolding-expert':
-      if (name === 'scaffolding-expert') score += 100;
-      if (name.includes('scaffold')) score += 50;
-      if (name.includes('setup')) score += 40;
-      if (name.includes('installer')) score += 20;
-      if (name.includes('specialist')) score += 15;
-      if (p.includes('setup')) score += 50;
-      if (p.includes('scaffold')) score += 40;
-      if (p.includes('environment')) score += 30;
-      if (p.includes('delivery')) score += 20;
-      if (g.includes('setup')) score += 30;
-      if (g.includes('infrastructure')) score += 20;
+    case "scaffolding-expert":
+      if (name === "scaffolding-expert") score += 100;
+      if (name.includes("scaffold")) score += 50;
+      if (name.includes("setup")) score += 40;
+      if (name.includes("installer")) score += 20;
+      if (name.includes("specialist")) score += 15;
+      if (p.includes("setup")) score += 50;
+      if (p.includes("scaffold")) score += 40;
+      if (p.includes("environment")) score += 30;
+      if (p.includes("delivery")) score += 20;
+      if (g.includes("setup")) score += 30;
+      if (g.includes("infrastructure")) score += 20;
       break;
   }
 
@@ -774,12 +790,12 @@ function getAgentScore(agentName: string, phase: string, group: string, target: 
  */
 function buildSubstitutionMap(agentRoster: any[]): Record<string, string> {
   const l0Agents = [
-    'automation-engineer',
-    'docs-writer',
-    'auditor',
-    'architect',
-    'security-expert',
-    'scaffolding-expert'
+    "automation-engineer",
+    "docs-writer",
+    "auditor",
+    "architect",
+    "security-expert",
+    "scaffolding-expert",
   ];
 
   const map: Record<string, string> = {};
@@ -789,13 +805,13 @@ function buildSubstitutionMap(agentRoster: any[]): Record<string, string> {
     let maxScore = 0;
 
     for (const entry of agentRoster) {
-      const phase = entry.phase || '';
-      const group = entry.group || '';
+      const phase = entry.phase || "";
+      const group = entry.group || "";
       const agentsList = Array.isArray(entry.agents) ? entry.agents : [entry.agents];
 
       for (const agentRaw of agentsList) {
         if (!agentRaw) continue;
-        const name = typeof agentRaw === 'string' ? agentRaw : agentRaw.name || '';
+        const name = typeof agentRaw === "string" ? agentRaw : agentRaw.name || "";
         if (!name) continue;
 
         const score = getAgentScore(name, phase, group, l0);
@@ -819,7 +835,7 @@ function substituteAgentNames(text: string, map: Record<string, string>): string
   let result = text;
   for (const [l0Agent, varAgent] of Object.entries(map)) {
     if (l0Agent === varAgent) continue;
-    
+
     const replaceAll = (t: string, from: string, to: string) => t.split(from).join(to);
 
     // 1. Lowercase hyphenated
@@ -829,21 +845,27 @@ function substituteAgentNames(text: string, map: Record<string, string>): string
     const varCap = varAgent.charAt(0).toUpperCase() + varAgent.slice(1);
     result = replaceAll(result, l0Cap, varCap);
     // 3. Fully Capitalized hyphenated
-    const l0FullCap = l0Agent.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
-    const varFullCap = varAgent.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+    const l0FullCap = l0Agent
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join("-");
+    const varFullCap = varAgent
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join("-");
     result = replaceAll(result, l0FullCap, varFullCap);
 
     // 4. Space separated versions
-    const l0Space = l0Agent.replace(/-/g, ' ');
-    const varSpace = varAgent.replace(/-/g, ' ');
+    const l0Space = l0Agent.replace(/-/g, " ");
+    const varSpace = varAgent.replace(/-/g, " ");
     result = replaceAll(result, l0Space, varSpace);
-    
-    const l0SpaceCap = l0Cap.replace(/-/g, ' ');
-    const varSpaceCap = varCap.replace(/-/g, ' ');
+
+    const l0SpaceCap = l0Cap.replace(/-/g, " ");
+    const varSpaceCap = varCap.replace(/-/g, " ");
     result = replaceAll(result, l0SpaceCap, varSpaceCap);
-    
-    const l0SpaceFullCap = l0FullCap.replace(/-/g, ' ');
-    const varSpaceFullCap = varFullCap.replace(/-/g, ' ');
+
+    const l0SpaceFullCap = l0FullCap.replace(/-/g, " ");
+    const varSpaceFullCap = varFullCap.replace(/-/g, " ");
     result = replaceAll(result, l0SpaceFullCap, varSpaceFullCap);
   }
   return result;
@@ -854,26 +876,26 @@ function substituteAgentNames(text: string, map: Record<string, string>): string
  */
 function parseAgent(agent: any): { name: string; file: string; responsibility: string } {
   const defaultRespMap: Record<string, string> = {
-    'architect': 'Architecture design',
-    'code-writer': 'Code implementation',
-    'test-runner': 'QA and verification',
-    'stack-setup': 'Environment setup',
-    'security-monitor': 'Security monitoring'
+    architect: "Architecture design",
+    "code-writer": "Code implementation",
+    "test-runner": "QA and verification",
+    "stack-setup": "Environment setup",
+    "security-monitor": "Security monitoring",
   };
 
-  if (typeof agent === 'string') {
+  if (typeof agent === "string") {
     return {
       name: agent,
       file: `agents/${agent}.md`,
-      responsibility: defaultRespMap[agent] || ''
+      responsibility: defaultRespMap[agent] || "",
     };
-  } else if (agent && typeof agent === 'object') {
-    const name = agent.name || '';
+  } else if (agent && typeof agent === "object") {
+    const name = agent.name || "";
     const file = agent.file || `agents/${name}.md`;
-    const responsibility = agent.responsibility || defaultRespMap[name] || '';
+    const responsibility = agent.responsibility || defaultRespMap[name] || "";
     return { name, file, responsibility };
   }
-  return { name: '', file: '', responsibility: '' };
+  return { name: "", file: "", responsibility: "" };
 }
 
 /**
@@ -891,10 +913,10 @@ function generateAgentRosterTable(agentRoster: any[]): string {
     for (const agentRaw of agentsList) {
       if (!agentRaw) continue;
       const agent = parseAgent(agentRaw);
-      lines.push(`| ${entry.phase ?? ''} | ${entry.group ?? ''} | \`${agent.file}\` | ${agent.responsibility} |`);
+      lines.push(`| ${entry.phase ?? ""} | ${entry.group ?? ""} | \`${agent.file}\` | ${agent.responsibility} |`);
     }
   }
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 interface InjectedSections {
@@ -910,11 +932,11 @@ interface InjectedSections {
  */
 function injectVariantSections(variantOverrides: Record<string, any> | undefined, variant: string): InjectedSections {
   const result: InjectedSections = {
-    role: '',
-    agentRoster: '',
-    constraints: '',
-    governanceWorkflow: '',
-    dispatchProtocol: ''
+    role: "",
+    agentRoster: "",
+    constraints: "",
+    governanceWorkflow: "",
+    dispatchProtocol: "",
   };
 
   if (!variantOverrides || Object.keys(variantOverrides).length === 0) return result;
@@ -925,7 +947,7 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
     const lines = [`## Role`];
     if (r.description) lines.push(``, r.description);
     if (r.scope) lines.push(``, `**Scope**: ${r.scope}`);
-    result.role = lines.join('\n');
+    result.role = lines.join("\n");
   }
 
   // 2. ## Agent Roster
@@ -942,7 +964,7 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
       `- \`memory/*.md\` (session logs)`,
       `- \`CHANGELOG.md\` (sync pipeline only)`,
       ``,
-      `**MANDATORY**: All file modifications MUST be dispatched to:`
+      `**MANDATORY**: All file modifications MUST be dispatched to:`,
     ];
 
     const agentMap = new Map<string, { groups: Set<string>; phases: Set<string> }>();
@@ -951,7 +973,7 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
       const agentsList = Array.isArray(entry.agents) ? entry.agents : [entry.agents];
       for (const agent of agentsList) {
         if (!agent) continue;
-        const agentName = typeof agent === 'string' ? agent : agent.name || '';
+        const agentName = typeof agent === "string" ? agent : agent.name || "";
         if (!agentName) continue;
         if (!agentMap.has(agentName)) {
           agentMap.set(agentName, { groups: new Set<string>(), phases: new Set<string>() });
@@ -963,9 +985,9 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
     }
 
     for (const [agentName, info] of agentMap.entries()) {
-      const groupsStr = Array.from(info.groups).join(', ');
-      const phasesStr = Array.from(info.phases).join(', ');
-      let taskDesc = '';
+      const groupsStr = Array.from(info.groups).join(", ");
+      const phasesStr = Array.from(info.phases).join(", ");
+      let taskDesc = "";
       if (groupsStr && phasesStr) {
         taskDesc = `Dispatch for ${groupsStr} / ${phasesStr} tasks`;
       } else if (groupsStr) {
@@ -980,9 +1002,9 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
 
     lines.push(
       ``,
-      `**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns.`
+      `**Rationale**: PM is orchestrator, not executor. Direct execution violates governance separation of concerns.`,
     );
-    result.constraints = lines.join('\n');
+    result.constraints = lines.join("\n");
   }
 
   // 4. ## Governance Workflow
@@ -990,12 +1012,12 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
     const g = variantOverrides.governance_workflow;
     const lines = [`## Governance Workflow`];
     if (Array.isArray(g.phases) && g.phases.length > 0) {
-      lines.push(``, `**Orchestrated Phases**: ${g.phases.map((p: number) => `Phase ${p}`).join(', ')}`);
+      lines.push(``, `**Orchestrated Phases**: ${g.phases.map((p: number) => `Phase ${p}`).join(", ")}`);
     }
-    if (typeof g.triage_required === 'boolean') {
-      lines.push(``, `**Triage Required**: ${g.triage_required ? 'Yes' : 'No'}`);
+    if (typeof g.triage_required === "boolean") {
+      lines.push(``, `**Triage Required**: ${g.triage_required ? "Yes" : "No"}`);
     }
-    result.governanceWorkflow = lines.join('\n');
+    result.governanceWorkflow = lines.join("\n");
   }
 
   // 5. ## Dispatch Protocol
@@ -1003,17 +1025,17 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
     const d = variantOverrides.dispatch_protocol;
     const lines = [`## Dispatch Protocol`];
     if (Array.isArray(d.can_lead_phases)) {
-      lines.push(``, `**Can Lead Phases**: [${d.can_lead_phases.join(', ')}]`);
+      lines.push(``, `**Can Lead Phases**: [${d.can_lead_phases.join(", ")}]`);
     }
     if (Array.isArray(d.can_support_in) && d.can_support_in.length > 0) {
-      lines.push(`**Can Support In**: [${d.can_support_in.join(', ')}]`);
+      lines.push(`**Can Support In**: [${d.can_support_in.join(", ")}]`);
     }
     if (Array.isArray(d.auto_dispatch_to) && d.auto_dispatch_to.length > 0) {
-      lines.push(`**Auto-Dispatch To**: ${d.auto_dispatch_to.map((a: string) => `\`${a}\``).join(', ')}`);
+      lines.push(`**Auto-Dispatch To**: ${d.auto_dispatch_to.map((a: string) => `\`${a}\``).join(", ")}`);
     }
     if (d.tier) lines.push(`**Tier**: ${d.tier}`);
     if (d.communication_style) lines.push(`**Communication Style**: ${d.communication_style}`);
-    result.dispatchProtocol = lines.join('\n');
+    result.dispatchProtocol = lines.join("\n");
   }
 
   return result;
@@ -1028,9 +1050,14 @@ function injectVariantSections(variantOverrides: Record<string, any> | undefined
  * - Extends validation failure: falls back to original content
  * - Missing/invalid files: uses recovery strategy with fallback
  */
-function processFile(filePath: string, explicitSkeletonPath?: string, originalContextPath?: string, explicitVariantLevel?: string): string {
+function processFile(
+  filePath: string,
+  explicitSkeletonPath?: string,
+  originalContextPath?: string,
+  explicitVariantLevel?: string,
+): string {
   const absolutePath = resolve(filePath);
-  const content = readFileSync(absolutePath, 'utf-8');
+  const content = readFileSync(absolutePath, "utf-8");
   const parsed = parseFrontmatter(content);
 
   if (!parsed.frontmatter.extends) {
@@ -1092,7 +1119,7 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
     // Merge: variant frontmatter overrides the resolved skeleton frontmatter
     const mergedFrontmatter = { ...skeletonResolved.frontmatter };
     for (const key of Object.keys(parsed.frontmatter)) {
-      if (key !== 'extends') {
+      if (key !== "extends") {
         mergedFrontmatter[key] = parsed.frontmatter[key];
       }
     }
@@ -1102,8 +1129,8 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
     let baseContent = useCurrentContent ? parsed.content : skeletonResolved.content;
 
     const variantOverrides = mergedFrontmatter.variant_overrides;
-    if (variantOverrides && typeof variantOverrides === 'object') {
-      if (variantOverrides.frontmatter_overrides && typeof variantOverrides.frontmatter_overrides === 'object') {
+    if (variantOverrides && typeof variantOverrides === "object") {
+      if (variantOverrides.frontmatter_overrides && typeof variantOverrides.frontmatter_overrides === "object") {
         for (const [k, v] of Object.entries(variantOverrides.frontmatter_overrides)) {
           mergedFrontmatter[k] = v;
         }
@@ -1115,21 +1142,21 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
     if (variantOverrides?.variant_sections) {
       const parsedSections = parseVariantSections({ variant_overrides: variantOverrides });
       for (const section of parsedSections) {
-        if (section.action === 'replace') {
+        if (section.action === "replace") {
           const sectionExists = extractSection(baseContent, section.section).length > 0;
           if (!sectionExists) {
             console.warn(
-              `⚠️  Replace action for missing section "${section.section}" - section may not exist in base content`
+              `⚠️  Replace action for missing section "${section.section}" - section may not exist in base content`,
             );
           }
         }
       }
     }
 
-    const isPMFile = filePath.toLowerCase().endsWith('agents/pm.md');
+    const isPMFile = filePath.toLowerCase().endsWith("agents/pm.md");
 
-    let prependContent = '';
-    let appendContent = '';
+    let prependContent = "";
+    let appendContent = "";
 
     // Use explicit variant level if provided, otherwise determine from path
     const currentVariantLevel = determineVariantLevel(filePath, explicitVariantLevel);
@@ -1139,7 +1166,7 @@ function processFile(filePath: string, explicitSkeletonPath?: string, originalCo
     console.error(`[DEBUG 1135] currentVariantLevel: ${currentVariantLevel}`);
     console.error(`[DEBUG 1135] isPMFile: ${isPMFile}`);
 
-    if (isPMFile && currentVariantLevel === 'L2') {
+    if (isPMFile && currentVariantLevel === "L2") {
       // For L2 PM files, use reconstructPMLayout to remove L0 content
       return reconstructPMLayout(mergedFrontmatter, baseContent, currentVariantLevel);
     }
@@ -1171,9 +1198,9 @@ ${substituteAgentNames(subpoints.version, map)}
 - **Phase Determination (Deliverable-Type Gate)**:
   Before assigning an agent to any task, PM MUST classify the deliverable type and assign the correct Phase:
 
-  ${generatePhaseDeterminationTable(variantOverrides, mergedFrontmatter.variant || 'unknown')}
+  ${generatePhaseDeterminationTable(variantOverrides, mergedFrontmatter.variant || "unknown")}
 
-  **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. \`${map['automation-engineer']}\` is always Low — assigning it High is a governance violation.
+  **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. \`${map["automation-engineer"]}\` is always Low — assigning it High is a governance violation.
 
 **Platform Note**: The execution plan table format has been simplified to remove the \`Platform\` column. PM will still internally manage the L0-only task classification.
 
@@ -1189,13 +1216,13 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
         "## Updated Role",
         "## Agent Roster",
         "## Dispatch Protocol",
-        "## Constraints"
+        "## Constraints",
       ];
 
       // For L2 variants, add additional sections to remove
       const currentVariantLevel = determineVariantLevel(filePath, explicitVariantLevel);
       console.log(`[DEBUG] PM file processing - variant level: ${currentVariantLevel}`);
-      if (currentVariantLevel === 'L2') {
+      if (currentVariantLevel === "L2") {
         console.log(`[DEBUG] Applying L2-specific section removal`);
         forceRemove.push(
           "## Consensus-Driven Facilitation Model",
@@ -1205,7 +1232,7 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
           "## Required Tools",
           "## ⚠️ CRITICAL: PM Direct Execution Constraints",
           "## Task Tracking vs Execution",
-          "## User Communication for Specialist Tasks"
+          "## User Communication for Specialist Tasks",
         );
         console.log(`🔪 L2 variant: additional ${forceRemove.length - 10} sections marked for removal`);
       } else {
@@ -1222,19 +1249,21 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
         const lines = [`## Role`];
         if (r.description) lines.push(``, r.description);
         if (r.scope) lines.push(``, `**Scope**: ${r.scope}`);
-        prependParts.push(lines.join('\n'));
+        prependParts.push(lines.join("\n"));
       }
       if (roleClarificationText) {
         prependParts.push(`## ⚠️ ROLE CLARIFICATION\n\n${substituteAgentNames(roleClarificationText, substitutionMap)}`);
       }
       if (singleEntryPointText) {
-        prependParts.push(`## 🚨 YOU ARE THE SINGLE ENTRY POINT\n\n${substituteAgentNames(singleEntryPointText, substitutionMap)}`);
+        prependParts.push(
+          `## 🚨 YOU ARE THE SINGLE ENTRY POINT\n\n${substituteAgentNames(singleEntryPointText, substitutionMap)}`,
+        );
       }
       if (variantOverrides?.agent_roster) {
         prependParts.push(generateAgentRosterTable(variantOverrides.agent_roster));
       }
       prependParts.push(constraintsSection);
-      prependContent = prependParts.join('\n\n');
+      prependContent = prependParts.join("\n\n");
 
       // 7. Append parts assembly
       const appendParts: string[] = [];
@@ -1242,78 +1271,81 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
         const g = variantOverrides.governance_workflow;
         const lines = [`## Governance Workflow`];
         if (Array.isArray(g.phases) && g.phases.length > 0) {
-          lines.push(``, `**Orchestrated Phases**: ${g.phases.map((p: number) => `Phase ${p}`).join(', ')}`);
+          lines.push(``, `**Orchestrated Phases**: ${g.phases.map((p: number) => `Phase ${p}`).join(", ")}`);
         }
-        if (typeof g.triage_required === 'boolean') {
-          lines.push(``, `**Triage Required**: ${g.triage_required ? 'Yes' : 'No'}`);
+        if (typeof g.triage_required === "boolean") {
+          lines.push(``, `**Triage Required**: ${g.triage_required ? "Yes" : "No"}`);
         }
-        appendParts.push(lines.join('\n'));
+        appendParts.push(lines.join("\n"));
       }
       if (variantOverrides?.dispatch_protocol) {
         const d = variantOverrides.dispatch_protocol;
         const lines = [`## Dispatch Protocol`];
         if (Array.isArray(d.can_lead_phases)) {
-          lines.push(``, `**Can Lead Phases**: [${d.can_lead_phases.join(', ')}]`);
+          lines.push(``, `**Can Lead Phases**: [${d.can_lead_phases.join(", ")}]`);
         }
         if (Array.isArray(d.can_support_in) && d.can_support_in.length > 0) {
-          lines.push(`**Can Support In**: [${d.can_support_in.join(', ')}]`);
+          lines.push(`**Can Support In**: [${d.can_support_in.join(", ")}]`);
         }
         if (Array.isArray(d.auto_dispatch_to) && d.auto_dispatch_to.length > 0) {
-          const mappedAuto = d.auto_dispatch_to.map((a: string) => {
-            const mapped = substitutionMap[a] || a;
-            return `\`${mapped}\``;
-          }).join(', ');
+          const mappedAuto = d.auto_dispatch_to
+            .map((a: string) => {
+              const mapped = substitutionMap[a] || a;
+              return `\`${mapped}\``;
+            })
+            .join(", ");
           lines.push(`**Auto-Dispatch To**: ${mappedAuto}`);
         }
         if (d.tier) lines.push(`**Tier**: ${d.tier}`);
         if (d.communication_style) lines.push(`**Communication Style**: ${d.communication_style}`);
-        appendParts.push(lines.join('\n'));
+        appendParts.push(lines.join("\n"));
       }
-      appendContent = appendParts.join('\n\n');
-
+      appendContent = appendParts.join("\n\n");
     } else {
       // Normal skeleton section removal and fallback assembly
       let sectionsToRemove: string[] = mergedFrontmatter.remove_sections || [];
 
       // For L2 variants, merge remove_sections from L1 (skeleton) if available
       const variantLevel = determineVariantLevel(filePath, explicitVariantLevel);
-      if (variantLevel === 'L2' && skeletonResolved.frontmatter.remove_sections) {
+      if (variantLevel === "L2" && skeletonResolved.frontmatter.remove_sections) {
         const l1RemoveSections = skeletonResolved.frontmatter.remove_sections || [];
         const l2RemoveSections = mergedFrontmatter.remove_sections || [];
         sectionsToRemove = mergeRemoveSections(l1RemoveSections, l2RemoveSections);
-        console.log(`🔗 Merged remove_sections: L1 (${l1RemoveSections.length}) + L2 (${l2RemoveSections.length}) = ${sectionsToRemove.length} total`);
+        console.log(
+          `🔗 Merged remove_sections: L1 (${l1RemoveSections.length}) + L2 (${l2RemoveSections.length}) = ${sectionsToRemove.length} total`,
+        );
       }
 
       if (sectionsToRemove.length > 0) {
         baseContent = removeSections(baseContent, sectionsToRemove);
         if (baseContent !== (useCurrentContent ? parsed.content : skeletonResolved.content)) {
-          console.log(`✂️  Removed ${sectionsToRemove.length} section(s) from content: ${sectionsToRemove.join(', ')}`);
+          console.log(`✂️  Removed ${sectionsToRemove.length} section(s) from content: ${sectionsToRemove.join(", ")}`);
         }
       }
 
-      const variantName: string = mergedFrontmatter.variant || 'unknown';
+      const variantName: string = mergedFrontmatter.variant || "unknown";
       const sections = injectVariantSections(variantOverrides, variantName);
 
       const prependParts: string[] = [];
       if (sections.role) prependParts.push(sections.role);
       if (sections.agentRoster) prependParts.push(sections.agentRoster);
       if (sections.constraints) prependParts.push(sections.constraints);
-      prependContent = prependParts.join('\n\n');
+      prependContent = prependParts.join("\n\n");
 
       const appendParts: string[] = [];
       if (sections.governanceWorkflow) appendParts.push(sections.governanceWorkflow);
       if (sections.dispatchProtocol) appendParts.push(sections.dispatchProtocol);
-      appendContent = appendParts.join('\n\n');
+      appendContent = appendParts.join("\n\n");
     }
 
     // Combine final body content
-    let finalBody = '';
+    let finalBody = "";
     if (prependContent) {
-      finalBody += prependContent + '\n\n';
+      finalBody += prependContent + "\n\n";
     }
     finalBody += baseContent;
     if (appendContent) {
-      finalBody += '\n\n' + appendContent;
+      finalBody += "\n\n" + appendContent;
     }
 
     // Do not include remove_sections / extends directives in final output frontmatter
@@ -1325,10 +1357,10 @@ ${substituteAgentNames(subpoints.strategy, map)}`;
     let processedFinalBody = removeL0OnlyContent(finalBody, variantLevel);
 
     // Debug: Check if CONSTITUTION.md was removed
-    if (variantLevel === 'L2' && processedFinalBody.includes('CONSTITUTION.md')) {
-      console.warn('⚠️  CONSTITUTION.md still present after removeL0OnlyContent!');
-    } else if (variantLevel === 'L2') {
-      console.log('✅ CONSTITUTION.md successfully removed from L2 variant');
+    if (variantLevel === "L2" && processedFinalBody.includes("CONSTITUTION.md")) {
+      console.warn("⚠️  CONSTITUTION.md still present after removeL0OnlyContent!");
+    } else if (variantLevel === "L2") {
+      console.log("✅ CONSTITUTION.md successfully removed from L2 variant");
     }
 
     const result = `---
@@ -1355,7 +1387,7 @@ ${processedFinalBody}`;
 
         const mergedFrontmatter = { ...fallback.frontmatter };
         for (const key of Object.keys(parsed.frontmatter)) {
-          if (key !== 'extends') {
+          if (key !== "extends") {
             mergedFrontmatter[key] = parsed.frontmatter[key];
           }
         }
@@ -1367,7 +1399,9 @@ ${dump(mergedFrontmatter).trim()}
 
 ${fallback.content}`;
       } catch (fallbackError) {
-        console.error(`❌ Fallback recovery failed: ${fallbackError instanceof Error ? fallbackError.message : fallbackError}`);
+        console.error(
+          `❌ Fallback recovery failed: ${fallbackError instanceof Error ? fallbackError.message : fallbackError}`,
+        );
         console.warn(`⚠️  Falling back to safe default: returning original content`);
         return content;
       }
@@ -1392,22 +1426,22 @@ function determineVariantLevel(filePath: string, explicitLevel?: string): string
     return explicitLevel;
   }
 
-  const normalizedPath = filePath.replace(/\\/g, '/');
+  const normalizedPath = filePath.replace(/\\/g, "/");
 
   // L2 variants (co-*)
   // Check both absolute (with leading /) and relative paths (without leading /)
   // Also check for co-work variant directories (e.g., co-work/, co-creation/)
-  if (normalizedPath.includes('templates/co-') || normalizedPath.match(/\/co-[a-z]+\/agents\//)) {
-    return 'L2';
+  if (normalizedPath.includes("templates/co-") || normalizedPath.match(/\/co-[a-z]+\/agents\//)) {
+    return "L2";
   }
 
   // L1 variant (common)
-  if (normalizedPath.includes('templates/common/')) {
-    return 'L1';
+  if (normalizedPath.includes("templates/common/")) {
+    return "L1";
   }
 
   // L0 (workspace root)
-  return 'L0';
+  return "L0";
 }
 
 /**
@@ -1422,37 +1456,37 @@ interface GroupTypeMapping {
  * Default Group → Type mappings from specification
  */
 const DEFAULT_GROUP_TYPE_MAPPING: GroupTypeMapping = {
-  'Design': 'design',
-  'Direction': 'design',
-  'Visual': 'design',
-  'Typography': 'design',
-  'Service': 'design',
-  'Execution': 'execution',
-  'Prototype': 'execution',
-  'Implementation': 'execution',
-  'Analysis': 'qa',
-  'Research': 'qa',
-  'Subject Matter': 'qa',
-  'SME': 'qa',
-  'Data': 'qa',
-  'Strategy': 'qa',
-  'Coordination': 'pm',
-  'Management': 'pm',
-  'PMO': 'pm',
-  'Tools': 'infrastructure',
-  'Office': 'infrastructure',
-  'Tech': 'infrastructure',
-  'Technology': 'infrastructure',
-  'Architecture': 'infrastructure',
-  'Setup': 'infrastructure',
-  'Content': 'documentation',
-  'Narrative': 'documentation',
-  'Comm': 'documentation',
-  'Security': 'security',
-  'Red Team': 'security',
-  'Blue Team': 'security',
-  'Delivery': 'delivery',
-  'Workstream': 'delivery'
+  Design: "design",
+  Direction: "design",
+  Visual: "design",
+  Typography: "design",
+  Service: "design",
+  Execution: "execution",
+  Prototype: "execution",
+  Implementation: "execution",
+  Analysis: "qa",
+  Research: "qa",
+  "Subject Matter": "qa",
+  SME: "qa",
+  Data: "qa",
+  Strategy: "qa",
+  Coordination: "pm",
+  Management: "pm",
+  PMO: "pm",
+  Tools: "infrastructure",
+  Office: "infrastructure",
+  Tech: "infrastructure",
+  Technology: "infrastructure",
+  Architecture: "infrastructure",
+  Setup: "infrastructure",
+  Content: "documentation",
+  Narrative: "documentation",
+  Comm: "documentation",
+  Security: "security",
+  "Red Team": "security",
+  "Blue Team": "security",
+  Delivery: "delivery",
+  Workstream: "delivery",
 };
 
 /**
@@ -1460,14 +1494,14 @@ const DEFAULT_GROUP_TYPE_MAPPING: GroupTypeMapping = {
  * Based on specification document
  */
 const FALLBACK_HIERARCHY: Record<string, string[]> = {
-  'design': ['designer', 'architect'],
-  'execution': ['code-writer', 'prototype-engineer', 'automation-engineer'],
-  'qa': ['analyst', 'researcher', 'auditor'],
-  'pm': ['project-coordinator', 'delivery-manager', 'pm'],
-  'infrastructure': ['technology-specialist', 'solutions-architect', 'security-expert'],
-  'documentation': ['technical-writer', 'content-writer', 'docs-writer'],
-  'security': ['security-monitor', 'threat-modeler', 'security-expert'],
-  'delivery': ['delivery-manager', 'workstream-lead', 'pm']
+  design: ["designer", "architect"],
+  execution: ["code-writer", "prototype-engineer", "automation-engineer"],
+  qa: ["analyst", "researcher", "auditor"],
+  pm: ["project-coordinator", "delivery-manager", "pm"],
+  infrastructure: ["technology-specialist", "solutions-architect", "security-expert"],
+  documentation: ["technical-writer", "content-writer", "docs-writer"],
+  security: ["security-monitor", "threat-modeler", "security-expert"],
+  delivery: ["delivery-manager", "workstream-lead", "pm"],
 };
 
 /**
@@ -1485,7 +1519,7 @@ function extractAgentTypes(agentRoster: any[], variant: string): Record<string, 
     infrastructure: null,
     documentation: null,
     security: null,
-    delivery: null
+    delivery: null,
   };
 
   // Create a mapping of available agents
@@ -1498,23 +1532,23 @@ function extractAgentTypes(agentRoster: any[], variant: string): Record<string, 
     // Handle Strategy group context-aware classification
     let agentType = DEFAULT_GROUP_TYPE_MAPPING[group];
 
-    if (group === 'Strategy') {
+    if (group === "Strategy") {
       // Context-based override for Strategy group
-      if (variant === 'co-design') {
-        agentType = 'design'; // Design strategy
+      if (variant === "co-design") {
+        agentType = "design"; // Design strategy
       } else {
-        agentType = 'qa'; // Strategic analysis (default)
+        agentType = "qa"; // Strategic analysis (default)
       }
     }
 
     // Handle Analysis group in security context
-    if (group === 'Analysis' && phaseGroup.phase?.toLowerCase().includes('threat')) {
-      agentType = 'security';
+    if (group === "Analysis" && phaseGroup.phase?.toLowerCase().includes("threat")) {
+      agentType = "security";
     }
 
     // Map first agent in group to type
     if (agentType && agents && agents.length > 0) {
-      const agentName = typeof agents[0] === 'string' ? agents[0] : agents[0].name;
+      const agentName = typeof agents[0] === "string" ? agents[0] : agents[0].name;
 
       // Only assign if type not already assigned
       if (agentType && !types[agentType]) {
@@ -1522,7 +1556,7 @@ function extractAgentTypes(agentRoster: any[], variant: string): Record<string, 
       }
 
       // Track available agents for fallback
-      availableAgents[agentName] = agentType || 'unknown';
+      availableAgents[agentName] = agentType || "unknown";
     }
   }
 
@@ -1543,7 +1577,7 @@ function extractAgentTypes(agentRoster: any[], variant: string): Record<string, 
         for (const phaseGroup of agentRoster) {
           const agents = phaseGroup.agents || [];
           for (const agent of agents) {
-            const agentName = typeof agent === 'string' ? agent : agent.name;
+            const agentName = typeof agent === "string" ? agent : agent.name;
             if (agentName === fallbackAgent) {
               types[agentType] = fallbackAgent;
               console.warn(`⚠️  Using fallback from roster: ${fallbackAgent} for type ${agentType}`);
@@ -1560,7 +1594,9 @@ function extractAgentTypes(agentRoster: any[], variant: string): Record<string, 
       if (!types[agentType] && fallbackChain.length > 0) {
         const l0Agent = fallbackChain[fallbackChain.length - 1];
         types[agentType] = l0Agent;
-        console.warn(`🚨 L0 fallback used: ${l0Agent} for type ${agentType} - consider adding dedicated agent to roster`);
+        console.warn(
+          `🚨 L0 fallback used: ${l0Agent} for type ${agentType} - consider adding dedicated agent to roster`,
+        );
       }
     }
   }
@@ -1584,14 +1620,22 @@ function generatePhaseDeterminationTable(variantOverrides: any, variant: string)
 
   // Design type deliverables
   if (agentTypes.design) {
-    rows.push(`| New file design / schema definition / ADR | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
-    rows.push(`| New directory structure / template layout | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
-    rows.push(`| Cross-platform convention / naming standard | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`);
+    rows.push(
+      `| New file design / schema definition / ADR | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`,
+    );
+    rows.push(
+      `| New directory structure / template layout | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`,
+    );
+    rows.push(
+      `| Cross-platform convention / naming standard | Phase 1-2 | ${agentTypes.design} | High | Must precede implementation |`,
+    );
   }
 
   // Execution type deliverables
   if (agentTypes.execution) {
-    rows.push(`| Script implementation (approved plan exists) | Phase 4 | ${agentTypes.execution} | Low | Plan from design agent required |`);
+    rows.push(
+      `| Script implementation (approved plan exists) | Phase 4 | ${agentTypes.execution} | Low | Plan from design agent required |`,
+    );
   }
 
   // Documentation type deliverables
@@ -1628,10 +1672,10 @@ function generatePhaseDeterminationTable(variantOverrides: any, variant: string)
   const lines = [
     `| Deliverable Type | → Phase | → Required Agent | → Tier | Notes |`,
     `|------------------|---------|----------------|--------|-------|`,
-    ...rows
+    ...rows,
   ];
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -1647,7 +1691,7 @@ function reconstructPMLayout(yaml: any, baseContent: string, variantLevel: strin
   const substitutionMap = buildSubstitutionMap(variantOverrides?.agent_roster || []);
 
   // 2. For L2 variants, return ONLY YAML frontmatter (no body content)
-  if (variantLevel === 'L2') {
+  if (variantLevel === "L2") {
     return dump(yaml).trim();
   }
 
@@ -1679,32 +1723,26 @@ ${processedContent}`;
  * - Added L2-specific section removal in PM file handling
  */
 function removeL0OnlyContent(content: string, variantLevel: string): string {
-  if (variantLevel !== 'L2') {
+  if (variantLevel !== "L2") {
     return content;
   }
 
   let processed = content;
 
   // Remove lines containing CONSTITUTION.md or docs/constitution/ path references
-  processed = processed.replace(
-    /^.*(CONSTITUTION\.md|docs[\/\\]constitution[\/\\]).*$/gim,
-    ''
-  );
+  processed = processed.replace(/^.*(CONSTITUTION\.md|docs[\/\\]constitution[\/\\]).*$/gim, "");
 
   // Remove Platform Note about Platform column
   processed = processed.replace(
     /\*\*Platform Note\*\*: The execution plan table format has been simplified to remove the `Platform` column\. PM will still internally manage the L0-only task classification\.\n*/g,
-    ''
+    "",
   );
 
   // Replace "Root Configuration Changes" with "Configuration Changes"
-  processed = processed.replace(
-    /Root Configuration Changes/g,
-    'Configuration Changes'
-  );
+  processed = processed.replace(/Root Configuration Changes/g, "Configuration Changes");
 
   // Clean up multiple consecutive blank lines
-  processed = processed.replace(/\n{3,}/g, '\n\n');
+  processed = processed.replace(/\n{3,}/g, "\n\n");
 
   return processed;
 }
@@ -1720,7 +1758,7 @@ function mergeRemoveSections(l1RemoveSections: string[], l2RemoveSections: strin
   const merged = [...(l1RemoveSections || [])];
 
   // Add L2 sections that aren't already in the list
-  for (const section of (l2RemoveSections || [])) {
+  for (const section of l2RemoveSections || []) {
     if (!merged.includes(section)) {
       merged.push(section);
     }
@@ -1742,18 +1780,18 @@ export {
   extractAgentTypes,
   generatePhaseDeterminationTable,
   removeL0OnlyContent,
-  mergeRemoveSections
+  mergeRemoveSections,
 };
 
 // CLI interface (only run when executed directly, not when imported)
-if (process.argv[1] && process.argv[1].endsWith('merge-frontmatter.ts')) {
+if (process.argv[1] && process.argv[1].endsWith("merge-frontmatter.ts")) {
   const args = process.argv.slice(2);
   if (args.length < 1) {
-    console.error('Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path] [variant-level]');
-    console.error('  file-path: Path to the variant file with extends directive');
-    console.error('  skeleton-path: Optional absolute path to skeleton file');
-    console.error('  original-context-path: Optional path to the original context file for extends validation');
-    console.error('  variant-level: Optional explicit variant level (L0, L1, L2)');
+    console.error("Usage: merge-frontmatter.ts <file-path> [skeleton-path] [original-context-path] [variant-level]");
+    console.error("  file-path: Path to the variant file with extends directive");
+    console.error("  skeleton-path: Optional absolute path to skeleton file");
+    console.error("  original-context-path: Optional path to the original context file for extends validation");
+    console.error("  variant-level: Optional explicit variant level (L0, L1, L2)");
     if (import.meta.main) {
       process.exit(1);
     }
@@ -1770,6 +1808,6 @@ if (process.argv[1] && process.argv[1].endsWith('merge-frontmatter.ts')) {
   console.error(`[CLI DEBUG] explicitVariantLevel: ${explicitVariantLevel}`);
 
   const result = processFile(filePath, explicitSkeletonPath, originalContextPath, explicitVariantLevel);
-  writeFileSync(filePath, result, 'utf-8');
+  writeFileSync(filePath, result, "utf-8");
   console.log(`✅ Merged frontmatter for ${filePath}`);
 }
