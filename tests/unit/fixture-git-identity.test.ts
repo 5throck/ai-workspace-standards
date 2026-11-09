@@ -25,6 +25,22 @@
  * Every fixture git spawn runs under gitCleanEnv() (the 2026-11-09 incident's own
  * mechanism: an inherited GIT_DIR redirects fixture writes into the outer checkout).
  *
+ * v1.3.0 (2026-11-09, PR #1941 CI follow-up round 3 — terminal-pass design): the
+ *          canonical-containment describe was re-audited pin by pin for Windows
+ *          portability. Two pins failed on windows-latest and were REDESIGNED, not
+ *          conditionally patched: (a) the default-canonicalizer pin now feeds REAL
+ *          mkdtemp paths and asserts OS-invariants — separator-normalized fixed point,
+ *          idempotence, real containment true/false — because a POSIX-shaped synthetic
+ *          input (`/a/b/.git`) is not well-defined on Windows (drive-relative
+ *          resolution); (b) the FM2 seam-wiring double was platform-blind (it restyled
+ *          the raw 8.3-vs-long mismatch instead of resolving it) — it now canonicalizes
+ *          via canonicalizePath FIRST, then rebases by fixture basename, so the mapping
+ *          collapses both sides whatever shape they arrive in; the split-namespace pin
+ *          got the same canonicalize-first treatment for a deterministic refusal.
+ *          Helper side (fixture-git.ts v1.3.0): the `--show-toplevel` equality runs
+ *          through path.relative (=== '') like containment — win32's case-insensitive
+ *          comparison tolerates drive-letter case drift (`C:/` vs `c:/`) that string
+ *          equality would refuse. See the v1.3.0 audit table in this file's report.
  * v1.2.0 (2026-11-09, PR #1941 CI follow-up round 2): the two FM1 message-content pins
  *          (GIT_DIR leak, GIT_WORK_TREE-only leak) assert against
  *          canonicalizePath(outer) — the helper's canonical comparison form — instead
@@ -42,12 +58,12 @@
  *          the fail-closed direction (a differently-styled leak still refuses), and the
  *          both-sides seam wiring of both probes.
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 import { describe, expect, test, afterAll } from "bun:test";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, sep } from "node:path";
+import { basename, join, sep } from "node:path";
 import { spawnSync } from "node:child_process";
 import { gitCleanEnv } from "../../scripts/lib/git-env.ts";
 import {
@@ -270,26 +286,64 @@ describe("canonical containment (PR #1941 — Windows 8.3 short-name aliasing)",
     expect(isGitPathInsideFixture(other, SHORT_ROOT, fakeWindowsNative)).toBe(false);
   });
 
-  test("the default canonicalizer accepts the injected form for plain POSIX paths", () => {
-    const root = realpathSync(mkdtempSync(join(tmpdir(), "fixture-git-canonical-")));
+  test("default canonicalizer: normalized, idempotent, and containment holds on REAL paths", () => {
+    // REAL existing paths only, every assertion an OS-invariant (PR #1941 round 3): a
+    // POSIX-shaped synthetic input (`/a/b/.git`) is NOT well-defined on Windows, where
+    // realpathSync.native resolves it drive-relative — that platform-blind premise is
+    // exactly what failed the previous version of this pin on windows-latest. The raw
+    // mkdtemp output is fed in on purpose (no pre-realpath): canonicalizing must absorb
+    // whatever aliasing/casing the platform reports.
+    const root = mkdtempSync(join(tmpdir(), "fixture-git-canonical-"));
     tmpRoots.push(root);
+    expect(git(root, ["init", "-q", "."]).status).toBe(0); // make <root>/.git exist
+    const canonRoot = canonicalizePath(root);
+    // Invariant 1 — separator-normalized: the sep→'/' rewrite is a fixed point.
+    expect(canonRoot.split(sep).join("/")).toBe(canonRoot);
+    // Invariant 2 — idempotent: canonicalizing the canonical form returns it unchanged
+    // (POSIX: realpath(realpath(p)) === realpath(p); Windows: nothing left to expand or
+    // re-case). Holds on both OSes by construction.
+    expect(canonicalizePath(canonRoot)).toBe(canonRoot);
+    // Invariant 3 — containment semantics on real paths: the fixture's own .git is
+    // inside; a real sibling tmp directory is not.
     expect(isGitPathInsideFixture(join(root, ".git"), root)).toBe(true);
-    expect(isGitPathInsideFixture(join(root, "..", "elsewhere"), root)).toBe(false);
+    const sibling = mkdtempSync(join(tmpdir(), "fixture-git-canonical-sib-"));
+    tmpRoots.push(sibling);
+    expect(isGitPathInsideFixture(sibling, root)).toBe(false);
   });
 
   test("FM2 passes when the injectable canonicalizer maps BOTH sides into one namespace (seam wiring)", () => {
     const fixture = makeFixtureRepo("fixture-git-seam-");
-    const uniform = (p: string): string => `/canonical-ns${p.split(sep).join("/")}`;
+    // Shape-agnostic double (PR #1941 round 3): canonicalize FIRST — resolving whatever
+    // aliasing/drive-casing/separators the OS and git actually report — then rebase
+    // anything carrying the fixture basename into one synthetic namespace. The mapping
+    // keys on the basename found INSIDE the canonical text, so it works whatever shape
+    // the two sides arrive in (POSIX `/var/...`, Windows `C:\Users\RUNNER~1\...` vs
+    // git's `C:/Users/runneradmin/...`). Whether the probe CONSULTS the seam at all is
+    // pinned by the NEXT test: a double that sends the git-dir side elsewhere must
+    // cause a refusal — the default canonicalizer would silently pass it.
+    const base = basename(fixture);
+    const uniform = (p: string): string => {
+      const canon = canonicalizePath(p);
+      const at = canon.indexOf(base);
+      return at === -1 ? canon : `/canonical-ns/${base}${canon.slice(at + base.length)}`;
+    };
     expect(() => assertFixtureGitIdentity(fixture, cleanEnv, { canonicalize: uniform })).not.toThrow();
     expect(() => assertCallerEnvSafeForGitFixtures(fixture, cleanEnv, { canonicalize: uniform })).not.toThrow();
   });
 
   test("FM2 still refuses when the canonicalizer styles the git-dir side differently (fail-closed seam)", () => {
     const fixture = makeFixtureRepo("fixture-git-seam2-");
-    // Both reads flow through the seam; only the .git side lands in another namespace,
-    // so the containment must refuse — canonicalization may never paper over a real leak.
-    const splitNamespace = (p: string): string => (p.endsWith(".git") ? `/git-ns${p}` : `/fs-ns${p}`);
-    expect(() => assertFixtureGitIdentity(fixture, cleanEnv, { canonicalize: splitNamespace })).toThrow(/OUTSIDE/);
+    // Shape-agnostic AND deterministic (round 3): canonicalize FIRST so root and
+    // toplevel always collapse together, then send ONLY the git-dir side (a canonical
+    // `/.git` suffix) to another namespace — the refusal is therefore always the
+    // --absolute-git-dir check, on every platform. Canonicalization may never paper
+    // over a real leak.
+    const splitNamespace = (p: string): string => {
+      const canon = canonicalizePath(p);
+      return canon.endsWith("/.git") ? `/git-ns${canon}` : `/fs-ns${canon}`;
+    };
+    expect(() => assertFixtureGitIdentity(fixture, cleanEnv, { canonicalize: splitNamespace }))
+      .toThrow(/absolute-git-dir resolves OUTSIDE/);
   });
 });
 

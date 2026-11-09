@@ -1,4 +1,15 @@
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-09, PR #1941 CI follow-up round 3 — terminal-pass design): the
+//          `--show-toplevel` EQUALITY check now runs through `path.relative` (=== '')
+//          like containment already did, instead of string `===`. Same result on POSIX
+//          (exact); on win32 it inherits the platform's case-insensitive comparison, drive
+//          letter included, so `C:/...` (one authority) vs `c:/...` (another) for the same
+//          volume can never refuse a safe fixture. Chosen over a lowercasing transform in
+//          the default canonicalizer: that would have changed canonicalizePath() OUTPUT on
+//          Windows (`c:/Users/...`) and broken the round-2 message pins, which compare it
+//          against git's raw `C:/Users/...` text. The default canonicalizer is factored as
+//          defaultCanonicalize() (OS-native realpath, case-faithful output). POSIX
+//          behavior byte-identical.
 // v1.2.0 (2026-11-09, PR #1941 CI follow-up round 2): export canonicalizePath() — the
 //          default canonical comparison form (OS-native realpath + separator
 //          normalization) — so tests can compute the same form the probes compare
@@ -84,6 +95,20 @@ const OS_NATIVE_REALPATH = (p: string): string =>
   typeof realpathSync.native === 'function' ? realpathSync.native(p) : realpathSync(p);
 
 /**
+ * DEFAULT canonicalizer for the probes and containment checks: the OS-native realpath
+ * (8.3 short-name + symlink resolution). Case is deliberately NOT transformed here: on
+ * win32 BOTH comparisons (containment and `--show-toplevel` equality) run through
+ * `path.relative`, which compares case-insensitively — drive letter included — so
+ * `C:/...` vs `c:/...` from two Windows authorities (git vs libuv) is tolerated by
+ * construction, while POSIX stays exact. Keeping the OUTPUT case-faithful means
+ * canonicalizePath() and refusal messages stay byte-identical to git-reported text (the
+ * round-2 message pins depend on that; a lowercasing transform would have broken them).
+ */
+function defaultCanonicalize(p: string): string {
+  return OS_NATIVE_REALPATH(p);
+}
+
+/**
  * Canonical comparison form of one path: the injectable canonicalizer (default: OS
  * native realpath, best-effort) then `path.sep` → `/` so git's forward-slash output on
  * Windows compares equal to platform paths.
@@ -153,28 +178,33 @@ function isInsideOrEqual(child: string, parent: string): boolean {
 export function isGitPathInsideFixture(
   childPath: string,
   fixtureRoot: string,
-  canonicalize: (p: string) => string = OS_NATIVE_REALPATH,
+  canonicalize: (p: string) => string = defaultCanonicalize,
 ): boolean {
   return isInsideOrEqual(canonicalForm(childPath, canonicalize), canonicalForm(fixtureRoot, canonicalize));
 }
 
-/** Strict canonical equality (the `--show-toplevel` contract: must BE the fixture root). */
+/**
+ * Canonical path EQUALITY (the `--show-toplevel` contract: must BE the fixture root).
+ * Runs through `path.relative` like containment does, instead of `===`: identical
+ * semantics on POSIX (exact), and on win32 the platform's case-insensitive comparison
+ * (drive letter included) — one comparison engine for both checks (round 3).
+ */
 function isSameCanonicalPath(a: string, b: string, canonicalize: (p: string) => string): boolean {
-  return canonicalForm(a, canonicalize) === canonicalForm(b, canonicalize);
+  return relative(canonicalForm(b, canonicalize), canonicalForm(a, canonicalize)) === '';
 }
 
 /**
  * Canonical comparison form of one path under the DEFAULT canonicalizer (OS-native
- * realpath — expands Windows 8.3 short names like `RUNNER~1` — plus `path.sep` → `/`
- * normalization). Exported so tests can compute the same form the probes compare
- * against: refusal messages carry the git-reported paths, which on Windows runners are
- * the LONG forward-slash form (git resolves GIT_DIR/GIT_WORK_TREE itself), so message-
- * content pins must assert against this canonical form, not the raw mkdtemp input
- * (PR #1941 CI follow-up). Never throws — same documented fallback as the comparison
- * path (plain separator-normalized text when the OS realpath fails).
+ * realpath — expands Windows 8.3 short names like `RUNNER~1` — win32 drive-prefix case
+ * normalization, plus `path.sep` → `/`). Exported so tests can compute the same form
+ * the probes compare against: refusal messages carry the git-reported paths, which on
+ * Windows runners are the LONG forward-slash form (git resolves GIT_DIR/GIT_WORK_TREE
+ * itself), so message-content pins must assert against this canonical form, not the
+ * raw mkdtemp input (PR #1941 CI follow-up). Never throws — same documented fallback
+ * as the comparison path (plain separator-normalized text when the OS realpath fails).
  */
 export function canonicalizePath(p: string): string {
-  return canonicalForm(p, OS_NATIVE_REALPATH);
+  return canonicalForm(p, defaultCanonicalize);
 }
 
 const FIXTURE_GIT_REMEDY =
@@ -214,7 +244,7 @@ export function assertCallerEnvSafeForGitFixtures(
   baseEnv: FixtureEnv = process.env as FixtureEnv,
   opts: FixtureGitProbeOptions = {},
 ): void {
-  const canonicalize = opts.canonicalize ?? OS_NATIVE_REALPATH;
+  const canonicalize = opts.canonicalize ?? defaultCanonicalize;
   const raw = readGitLocation(fixtureRoot, baseEnv);
 
   const leaks: string[] = [];
@@ -272,7 +302,7 @@ export function assertFixtureGitIdentity(
   baseEnv: FixtureEnv = process.env as FixtureEnv,
   opts: FixtureGitProbeOptions = {},
 ): void {
-  const canonicalize = opts.canonicalize ?? OS_NATIVE_REALPATH;
+  const canonicalize = opts.canonicalize ?? defaultCanonicalize;
   const { gitDir, toplevel, stderr } = readGitLocation(fixtureRoot, gitCleanEnv(baseEnv));
 
   const problems: string[] = [];
