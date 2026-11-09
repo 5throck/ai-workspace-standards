@@ -14,8 +14,8 @@
 //           and projects failed typecheck TS2307.
 // Pure and import-safe: no side effects, explicit root argument.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { readdirSync, readFileSync, statSync, type Dirent } from "node:fs";
+import { join, relative } from "node:path";
 
 export interface LocalPatchFinding {
   /** Project-relative path (forward slashes). */
@@ -27,13 +27,42 @@ export interface LocalPatchFinding {
 export const LOCAL_PATCH_RE = /LOCAL-PATCH\(upstream-request:\s*([A-Za-z0-9][A-Za-z0-9-]*)\)/g;
 
 const SKIP_DIRS = new Set([
-  'node_modules', '.git', '.next', '.venv', 'venv', '__pycache__',
-  'dist', 'build', 'coverage', 'Projects', '.sandbox', 'test-project',
+  "node_modules",
+  ".git",
+  ".next",
+  ".venv",
+  "venv",
+  "__pycache__",
+  "dist",
+  "build",
+  "coverage",
+  "Projects",
+  ".sandbox",
+  "test-project",
 ]);
 
 const TEXT_EXTS = new Set([
-  '.md', '.ts', '.js', '.mjs', '.cjs', '.jsx', '.tsx', '.json', '.yaml', '.yml',
-  '.toml', '.sh', '.ps1', '.txt', '.sample', '.html', '.css', '.py', '.rb', '.go', '.rs',
+  ".md",
+  ".ts",
+  ".js",
+  ".mjs",
+  ".cjs",
+  ".jsx",
+  ".tsx",
+  ".json",
+  ".yaml",
+  ".yml",
+  ".toml",
+  ".sh",
+  ".ps1",
+  ".txt",
+  ".sample",
+  ".html",
+  ".css",
+  ".py",
+  ".rb",
+  ".go",
+  ".rs",
 ]);
 
 const MAX_FILE_BYTES = 1_000_000;
@@ -43,16 +72,16 @@ const MAX_FILE_BYTES = 1_000_000;
  * (co-abap reported 27 markers, instruction-text class dominated, and the noise
  * is how real patches got dismissed during the 0.18.0 wave — T-20261013-006). */
 const SKIP_FILES = new Set([
-  'scripts/hooks/pre-commit.ts',
-  'scripts/helpers/local-patch-scan.ts',
-  'scripts/upgrade-project.ts',
-  'scripts/SCRIPTS.md',
+  "scripts/hooks/pre-commit.ts",
+  "scripts/helpers/local-patch-scan.ts",
+  "scripts/upgrade-project.ts",
+  "scripts/SCRIPTS.md",
 ]);
 
 /** Inline-code spans (`…`) carry protocol documentation, never live markers —
  * patches mark real content lines as plain comments. */
 function stripInlineCode(line: string): string {
-  return line.replace(/`[^`\n]*`/g, '``');
+  return line.replace(/`[^`\n]*`/g, "``");
 }
 
 /** Every LOCAL-PATCH marker in the tree at `rootDir` (one finding per marker
@@ -61,7 +90,7 @@ function stripInlineCode(line: string): string {
 export function scanLocalPatches(rootDir: string): LocalPatchFinding[] {
   const findings: LocalPatchFinding[] = [];
   const walk = (dir: string) => {
-    let entries;
+    let entries: Dirent[];
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
@@ -75,18 +104,18 @@ export function scanLocalPatches(rootDir: string): LocalPatchFinding[] {
         continue;
       }
       if (!entry.isFile()) continue;
-      const ext = entry.name.slice(entry.name.lastIndexOf('.')).toLowerCase();
+      const ext = entry.name.slice(entry.name.lastIndexOf(".")).toLowerCase();
       if (!TEXT_EXTS.has(ext)) continue;
       let content: string;
       try {
         if (statSync(full).size > MAX_FILE_BYTES) continue;
-        content = readFileSync(full, 'utf-8');
+        content = readFileSync(full, "utf-8");
       } catch {
         continue;
       }
-      const rel = relative(rootDir, full).replace(/\\/g, '/');
+      const rel = relative(rootDir, full).replace(/\\/g, "/");
       if (SKIP_FILES.has(rel)) continue;
-      for (const line of content.split('\n')) {
+      for (const line of content.split("\n")) {
         for (const m of stripInlineCode(line).matchAll(LOCAL_PATCH_RE)) {
           findings.push({ file: rel, id: m[1] });
         }

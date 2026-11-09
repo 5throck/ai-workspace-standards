@@ -31,7 +31,7 @@ const DEFAULT_CONFIG: RetryConfig = {
   maxRetries: 3,
   initialDelay: 1000,
   backoffMultiplier: 2,
-  maxDelay: 10000
+  maxDelay: 10000,
 };
 
 /**
@@ -40,7 +40,7 @@ const DEFAULT_CONFIG: RetryConfig = {
 async function withRetry<T>(
   fn: () => Promise<T>,
   config: RetryConfig = DEFAULT_CONFIG,
-  context?: string
+  context?: string,
 ): Promise<RetryResult & { result?: T }> {
   const startTime = Date.now();
   let lastError: Error | undefined;
@@ -48,11 +48,11 @@ async function withRetry<T>(
 
   for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
     if (config.signal?.aborted) {
-      throw (config.signal.reason ?? new DOMException("Aborted", "AbortError"));
+      throw config.signal.reason ?? new DOMException("Aborted", "AbortError");
     }
 
     try {
-      console.log(`${context ? `[${context}] ` : ''}Attempt ${attempt}/${config.maxRetries}`);
+      console.log(`${context ? `[${context}] ` : ""}Attempt ${attempt}/${config.maxRetries}`);
 
       const result = await fn();
 
@@ -61,25 +61,25 @@ async function withRetry<T>(
         // e.g. a Bun Shell .nothrow() result with a non-zero exit code. Synthesize an
         // Error and route it through the same failure handling a caught exception gets.
         const r = result as { stderr?: unknown; exitCode?: unknown } | undefined;
-        const stderrText = r?.stderr !== undefined ? String(r.stderr).trim() : '';
+        const stderrText = r?.stderr !== undefined ? String(r.stderr).trim() : "";
         const message = stderrText || `Command failed with exit code ${r?.exitCode}`;
         throw new Error(message);
       }
 
       const totalTime = Date.now() - startTime;
-      console.log(`${context ? `[${context}] ` : ''} Success on attempt ${attempt}`);
+      console.log(`${context ? `[${context}] ` : ""} Success on attempt ${attempt}`);
 
       return {
         success: true,
         attempts: attempt,
         totalTime,
-        result
+        result,
       };
     } catch (error) {
       lastError = error as Error;
-      console.error(`${context ? `[${context}] ` : ''}Attempt ${attempt} failed: ${lastError.message}`);
+      console.error(`${context ? `[${context}] ` : ""}Attempt ${attempt} failed: ${lastError.message}`);
 
-      if (config.isSuccess && classifyError(lastError) === 'tool') {
+      if (config.isSuccess && classifyError(lastError) === "tool") {
         // Non-retryable (e.g. permission/access-denied) — fail immediately without
         // consuming remaining attempts or entering the backoff delay.
         const totalTime = Date.now() - startTime;
@@ -87,15 +87,15 @@ async function withRetry<T>(
           success: false,
           attempts: attempt,
           lastError,
-          totalTime
+          totalTime,
         };
       }
 
       if (attempt < config.maxRetries) {
         const baseWait = Math.min(delay, config.maxDelay);
         const waitTime = config.jitter ? baseWait * (0.5 + Math.random() * 0.5) : baseWait;
-        console.log(`${context ? `[${context}] ` : ''}Waiting ${Math.round(waitTime)}ms before retry...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        console.log(`${context ? `[${context}] ` : ""}Waiting ${Math.round(waitTime)}ms before retry...`);
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
         delay = Math.floor(delay * config.backoffMultiplier);
       }
     }
@@ -106,7 +106,7 @@ async function withRetry<T>(
     success: false,
     attempts: config.maxRetries,
     lastError,
-    totalTime
+    totalTime,
   };
 }
 
@@ -138,33 +138,33 @@ Possible actions:
 /**
  * Classify error type for appropriate response
  */
-function classifyError(error: Error): 'tool' | 'context' | 'logic' | 'external' {
+function classifyError(error: Error): "tool" | "context" | "logic" | "external" {
   const message = error.message.toLowerCase();
 
-  if (message.includes('timeout') || message.includes('network') || message.includes('connection')) {
-    return 'external';
+  if (message.includes("timeout") || message.includes("network") || message.includes("connection")) {
+    return "external";
   }
-  if (message.includes('not found') || message.includes('does not exist')) {
-    return 'context';
+  if (message.includes("not found") || message.includes("does not exist")) {
+    return "context";
   }
   if (
-    message.includes('permission') ||
-    message.includes('access denied') ||
-    message.includes('bad credentials') ||
-    message.includes('http 401') ||
-    message.includes('http 403') ||
-    message.includes('401 unauthorized') ||
-    message.includes('403 forbidden')
+    message.includes("permission") ||
+    message.includes("access denied") ||
+    message.includes("bad credentials") ||
+    message.includes("http 401") ||
+    message.includes("http 403") ||
+    message.includes("401 unauthorized") ||
+    message.includes("403 forbidden")
   ) {
     // Non-retryable auth failures (e.g. `gh` CLI on an expired/invalid token) surface as
     // "Bad credentials" / "HTTP 401: Bad credentials" rather than "permission"/"access denied" —
     // observed empirically from `gh api` and `gh pr list` against the real GitHub API with an
     // invalid token. Matched as full phrases (not bare "401"/"403") to avoid misclassifying
     // retryable errors that happen to contain those digits incidentally.
-    return 'tool';
+    return "tool";
   }
 
-  return 'logic';
+  return "logic";
 }
 
 /**
@@ -175,7 +175,7 @@ function getRecoverySuggestion(errorType: string): string {
     tool: "Check tool permissions and configuration",
     context: "Verify all required files and context are provided",
     logic: "Review task logic and break into smaller steps",
-    external: "Check network connectivity and external services"
+    external: "Check network connectivity and external services",
   };
 
   return suggestions[errorType as keyof typeof suggestions] || "Unknown error type";

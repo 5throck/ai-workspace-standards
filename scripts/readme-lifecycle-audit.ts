@@ -22,12 +22,12 @@
  * @license MIT
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, dirname, basename } from 'node:path';
-import { cwd } from 'node:process';
+import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { join, relative, dirname, basename } from "node:path";
+import { cwd } from "node:process";
 
 interface ReadmeIssue {
-  level: 'error' | 'warning';
+  level: "error" | "warning";
   file: string;
   message: string;
   fix?: string;
@@ -49,26 +49,26 @@ interface AuditResult {
 
 // ANSI colors
 const colors = {
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  green: '\x1b[32m',
-  cyan: '\x1b[36m',
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
 };
 
 const ROOT = cwd();
-const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+const CONSTITUTION_FILE = join(ROOT, "CONSTITUTION.md");
 const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
 
 // Required sections for workspace root and templates
 const REQUIRED_SECTIONS_ROOT = [
-  'What Is This?',
-  'Quick Start',
-  'Repository Structure',
-  'Session Start Checklist',
-  'Multi-Agent Workflow',
-  'License',
+  "What Is This?",
+  "Quick Start",
+  "Repository Structure",
+  "Session Start Checklist",
+  "Multi-Agent Workflow",
+  "License",
 ];
 
 // Required sections for project READMEs — no required sections (projects define their own structure)
@@ -77,17 +77,17 @@ const REQUIRED_SECTIONS_PROJECT: string[] = [];
 // Platform detection
 const PLATFORM = detectPlatform();
 
-function detectPlatform(): 'claude-code' | 'antigravity' | 'unknown' {
-  if (existsSync(join(ROOT, 'GEMINI.md'))) return 'antigravity';
-  if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) return 'claude-code';
-  return 'unknown';
+function detectPlatform(): "claude-code" | "antigravity" | "unknown" {
+  if (existsSync(join(ROOT, "GEMINI.md"))) return "antigravity";
+  if (existsSync(join(ROOT, "CLAUDE.md")) || existsSync(join(ROOT, ".claude"))) return "claude-code";
+  return "unknown";
 }
 
 // Parse markdown sections
 function parseSections(filePath: string): Map<string, ReadmeSection> {
-  const content = readFileSync(filePath, 'utf-8').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const content = readFileSync(filePath, "utf-8").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const sections = new Map<string, ReadmeSection>();
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -105,15 +105,15 @@ function parseSections(filePath: string): Map<string, ReadmeSection> {
 // Extract sections by level for i18n comparison
 function getSectionsByLevel(sections: Map<string, ReadmeSection>, level: number): string[] {
   return Array.from(sections.values())
-    .filter(s => s.level === level)
-    .map(s => s.title);
+    .filter((s) => s.level === level)
+    .map((s) => s.title);
 }
 
 // Check if path is a project directory
 function isProjectDirectory(dir: string): boolean {
   // A project directory has docs/context.md or AGENTS.md or CLAUDE.md or GEMINI.md
-  const markers = ['docs/context.md', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'package.json'];
-  return markers.some(marker => existsSync(join(dir, marker)));
+  const markers = ["docs/context.md", "AGENTS.md", "CLAUDE.md", "GEMINI.md", "package.json"];
+  return markers.some((marker) => existsSync(join(dir, marker)));
 }
 
 // Find all README files
@@ -129,12 +129,20 @@ function findReadmeFiles(dir: string): string[] {
 
     if (entry.isDirectory()) {
       // Skip common non-project directories
-      if (entry.name === 'node_modules' || entry.name === '.git' ||
-          entry.name === 'archive' || entry.name === '_archive' ||
-          entry.name === '.venv' || entry.name === 'venv' ||
-          entry.name === 'target' || entry.name === 'dist' ||
-          entry.name === 'build' || entry.name === '.vscode' ||
-          entry.name === '.idea' || entry.name.startsWith('.')) {
+      if (
+        entry.name === "node_modules" ||
+        entry.name === ".git" ||
+        entry.name === "archive" ||
+        entry.name === "_archive" ||
+        entry.name === ".venv" ||
+        entry.name === "venv" ||
+        entry.name === "target" ||
+        entry.name === "dist" ||
+        entry.name === "build" ||
+        entry.name === ".vscode" ||
+        entry.name === ".idea" ||
+        entry.name.startsWith(".")
+      ) {
         continue;
       }
 
@@ -143,12 +151,12 @@ function findReadmeFiles(dir: string): string[] {
       // EN/KO parity) for templates/co-* variants is owned SOLELY by validate-templates.ts
       // Check WS-08 — see docs/governance/variant-contract.md "README Standard". This audit
       // intentionally skips templates/ to avoid a second, drifting copy of the header list.
-      if (IS_WORKSPACE_ROOT && dir.startsWith(join(ROOT, 'templates'))) {
+      if (IS_WORKSPACE_ROOT && dir.startsWith(join(ROOT, "templates"))) {
         continue;
       }
 
       readmes.push(...findReadmeFiles(fullPath));
-    } else if (entry.name === 'README.md' || entry.name === 'README_ko.md') {
+    } else if (entry.name === "README.md" || entry.name === "README_ko.md") {
       readmes.push(fullPath);
     }
   }
@@ -162,28 +170,26 @@ function findReadmeFiles(dir: string): string[] {
 // ('*최근 갱신: YYYY-MM-DD*' in the templates README_ko convention,
 // '*최근 업데이트: YYYY-MM-DD*' in project README_ko files). A localized footer
 // is a valid lifecycle footer.
-const LAST_UPDATED_LITERALS = ['Last Updated', '최근 갱신', '최근 업데이트'];
+const LAST_UPDATED_LITERALS = ["Last Updated", "최근 갱신", "최근 업데이트"];
 
 function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-const LAST_UPDATED_RE = new RegExp(
-  `(?:${LAST_UPDATED_LITERALS.map(escapeRegExp).join('|')}):\\s*\\d{4}-\\d{2}-\\d{2}`
-);
+const LAST_UPDATED_RE = new RegExp(`(?:${LAST_UPDATED_LITERALS.map(escapeRegExp).join("|")}):\\s*\\d{4}-\\d{2}-\\d{2}`);
 
 const LAST_UPDATED_CAPTURE_RE = new RegExp(
-  `(?:${LAST_UPDATED_LITERALS.map(escapeRegExp).join('|')}):\\s*(\\d{4}-\\d{2}-\\d{2})`
+  `(?:${LAST_UPDATED_LITERALS.map(escapeRegExp).join("|")}):\\s*(\\d{4}-\\d{2}-\\d{2})`,
 );
 
 function hasLastUpdated(filePath: string): boolean {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
   return LAST_UPDATED_RE.test(content);
 }
 
 // Check if date is recent (within 90 days)
 function isDateRecent(filePath: string): boolean {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
   const match = content.match(LAST_UPDATED_CAPTURE_RE);
   if (!match) return false;
 
@@ -194,8 +200,8 @@ function isDateRecent(filePath: string): boolean {
 
 // Check markdown link validity (basic)
 function checkLinks(filePath: string): { valid: number; invalid: Array<{ link: string; line: number }> } {
-  const content = readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
+  const content = readFileSync(filePath, "utf-8");
+  const lines = content.split("\n");
   const invalid: Array<{ link: string; line: number }> = [];
 
   for (let i = 0; i < lines.length; i++) {
@@ -206,7 +212,7 @@ function checkLinks(filePath: string): { valid: number; invalid: Array<{ link: s
       const line = i + 1;
 
       // Skip external links and anchors
-      if (link.startsWith('http') || link.startsWith('#')) continue;
+      if (link.startsWith("http") || link.startsWith("#")) continue;
 
       // Check relative reference links
       const targetPath = join(dirname(filePath), link);
@@ -224,14 +230,14 @@ function auditReadmes(jsonMode = false): AuditResult {
   const readmeFiles: string[] = [];
 
   // Always add workspace root READMEs
-  if (existsSync(join(ROOT, 'README.md'))) readmeFiles.push(join(ROOT, 'README.md'));
-  if (existsSync(join(ROOT, 'README_ko.md'))) readmeFiles.push(join(ROOT, 'README_ko.md'));
+  if (existsSync(join(ROOT, "README.md"))) readmeFiles.push(join(ROOT, "README.md"));
+  if (existsSync(join(ROOT, "README_ko.md"))) readmeFiles.push(join(ROOT, "README_ko.md"));
 
   // Add templates READMEs
-  const templatesDir = join(ROOT, 'templates');
+  const templatesDir = join(ROOT, "templates");
   if (IS_WORKSPACE_ROOT && existsSync(templatesDir)) {
-    if (existsSync(join(templatesDir, 'README.md'))) readmeFiles.push(join(templatesDir, 'README.md'));
-    if (existsSync(join(templatesDir, 'README_ko.md'))) readmeFiles.push(join(templatesDir, 'README_ko.md'));
+    if (existsSync(join(templatesDir, "README.md"))) readmeFiles.push(join(templatesDir, "README.md"));
+    if (existsSync(join(templatesDir, "README_ko.md"))) readmeFiles.push(join(templatesDir, "README_ko.md"));
   }
 
   // Note: Project subdirectory READMEs are excluded from automated audit
@@ -245,18 +251,18 @@ function auditReadmes(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 README Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}=========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
-    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? "workspace root" : "current project"}${colors.reset}`);
     console.log(`${colors.dim}READMEs found: ${readmeFiles.length}${colors.reset}`);
-    console.log('');
+    console.log("");
   }
 
   // Group files for i18n checking
   const readmeGroups = new Map<string, { en?: string; ko?: string }>();
 
   for (const readmeFile of readmeFiles) {
-    const relPath = relative(ROOT, readmeFile).replace(/\\/g, '/');
-    const isKorean = readmeFile.endsWith('README_ko.md');
-    const basePath = relPath.replace('_ko', '');
+    const relPath = relative(ROOT, readmeFile).replace(/\\/g, "/");
+    const isKorean = readmeFile.endsWith("README_ko.md");
+    const basePath = relPath.replace("_ko", "");
 
     if (!readmeGroups.has(basePath)) {
       readmeGroups.set(basePath, {});
@@ -271,28 +277,28 @@ function auditReadmes(jsonMode = false): AuditResult {
 
   // Audit each README
   for (const readmeFile of readmeFiles) {
-    const relPath = relative(ROOT, readmeFile).replace(/\\/g, '/');
-    const isKorean = readmeFile.endsWith('README_ko.md');
+    const relPath = relative(ROOT, readmeFile).replace(/\\/g, "/");
+    const isKorean = readmeFile.endsWith("README_ko.md");
     // Only the workspace-root EN README requires specific sections;
     // KO variants are checked via i18n consistency, templates/README.md has its own structure.
     // Gate on IS_WORKSPACE_ROOT (CONSTITUTION.md presence) too — relPath alone matches
     // any project's own root README.md, which wrongly pulled every L3 project's README
     // into the stricter workspace-root section requirements.
-    const isWorkspaceRoot = IS_WORKSPACE_ROOT && relPath === 'README.md';
+    const isWorkspaceRoot = IS_WORKSPACE_ROOT && relPath === "README.md";
     const sections = parseSections(readmeFile);
 
     // Check required sections (EN workspace root only — skip KO and templates/README)
     const requiredSections = isWorkspaceRoot ? REQUIRED_SECTIONS_ROOT : REQUIRED_SECTIONS_PROJECT;
     for (const section of requiredSections) {
-      if (!Array.from(sections.keys()).some(s => s.includes(section))) {
-        const level = isWorkspaceRoot ? 'error' : 'warning';
+      if (!Array.from(sections.keys()).some((s) => s.includes(section))) {
+        const level = isWorkspaceRoot ? "error" : "warning";
         const issue = {
-          level: level as 'error' | 'warning',
+          level: level as "error" | "warning",
           file: relPath,
           message: `Missing required section: ${section}`,
           fix: isWorkspaceRoot ? `Add '${section}' section to README` : `Consider adding '${section}' section`,
         };
-        if (level === 'error') {
+        if (level === "error") {
           errors.push(issue);
         } else {
           warnings.push(issue);
@@ -303,32 +309,32 @@ function auditReadmes(jsonMode = false): AuditResult {
     // Check for Last Updated (localized footer literals accepted — U-20261006-007)
     if (!hasLastUpdated(readmeFile)) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: `Missing "Last Updated" date (accepted literals: ${LAST_UPDATED_LITERALS.join(' / ')})`,
+        message: `Missing "Last Updated" date (accepted literals: ${LAST_UPDATED_LITERALS.join(" / ")})`,
         fix: `Add "*Last Updated: YYYY-MM-DD*" (or a localized twin, e.g. "*최근 갱신: YYYY-MM-DD*") at the end of the file`,
       });
     } else if (!isDateRecent(readmeFile)) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: 'Last Updated date is older than 90 days',
-        fix: 'Update the Last Updated date to today if content has changed',
+        message: "Last Updated date is older than 90 days",
+        fix: "Update the Last Updated date to today if content has changed",
       });
     }
 
     // Check for empty README
-    const content = readFileSync(readmeFile, 'utf-8');
+    const content = readFileSync(readmeFile, "utf-8");
     const visibleContent = content
-      .replace(/^---\n[\s\S]*?\n---/m, '') // Remove frontmatter
-      .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
-      .replace(/\s/g, ''); // Remove whitespace
+      .replace(/^---\n[\s\S]*?\n---/m, "") // Remove frontmatter
+      .replace(/<!--[\s\S]*?-->/g, "") // Remove HTML comments
+      .replace(/\s/g, ""); // Remove whitespace
     if (visibleContent.length < 50) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'README appears to be empty or minimal',
-        fix: 'Add substantive content to the README',
+        message: "README appears to be empty or minimal",
+        fix: "Add substantive content to the README",
       });
     }
   }
@@ -336,26 +342,26 @@ function auditReadmes(jsonMode = false): AuditResult {
   // Check i18n consistency for files that have both EN and KO versions
   for (const [basePath, group] of readmeGroups.entries()) {
     if (group.en && group.ko) {
-      const enSections = parseSections(join(ROOT, group.en.replace(/\\/g, '/')));
-      const koSections = parseSections(join(ROOT, group.ko.replace(/\\/g, '/')));
+      const enSections = parseSections(join(ROOT, group.en.replace(/\\/g, "/")));
+      const koSections = parseSections(join(ROOT, group.ko.replace(/\\/g, "/")));
 
       const enH2 = getSectionsByLevel(enSections, 2);
       const koH2 = getSectionsByLevel(koSections, 2);
 
       if (enH2.length !== koH2.length) {
         warnings.push({
-          level: 'warning',
+          level: "warning",
           file: `${group.en} ↔ ${group.ko}`,
           message: `Section count mismatch: EN has ${enH2.length}, KO has ${koH2.length}`,
-          fix: 'Ensure both versions have the same section structure',
+          fix: "Ensure both versions have the same section structure",
         });
       }
-    } else if (group.en && !group.ko && (basePath === 'README.md' || basePath === 'templates/README.md')) {
+    } else if (group.en && !group.ko && (basePath === "README.md" || basePath === "templates/README.md")) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: group.en,
-        message: 'Missing Korean version (README_ko.md)',
-        fix: 'Create README_ko.md with translated content',
+        message: "Missing Korean version (README_ko.md)",
+        fix: "Create README_ko.md with translated content",
       });
     }
   }
@@ -379,12 +385,14 @@ function generateSummary(scanned: number, errors: number, warnings: number): { c
     };
   }
   return {
-    colored: `${colors.green}✓ READMEs scanned: ${scanned}${colors.reset}` +
-      (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : '') +
-      (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ''),
-    clean: `READMEs scanned: ${scanned}` +
-      (warnings > 0 ? `, Warnings: ${warnings}` : '') +
-      (errors > 0 ? `, Errors: ${errors}` : ''),
+    colored:
+      `${colors.green}✓ READMEs scanned: ${scanned}${colors.reset}` +
+      (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : "") +
+      (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ""),
+    clean:
+      `READMEs scanned: ${scanned}` +
+      (warnings > 0 ? `, Warnings: ${warnings}` : "") +
+      (errors > 0 ? `, Errors: ${errors}` : ""),
   };
 }
 
@@ -393,14 +401,14 @@ function printResults(result: AuditResult): void {
     console.log(`${colors.red}✖ ERROR: ${error.message}${colors.reset}`);
     console.log(`   File: ${error.file}`);
     if (error.fix) console.log(`   Fix: ${error.fix}`);
-    console.log('');
+    console.log("");
   }
 
   for (const warning of result.warnings) {
     console.log(`${colors.yellow}⚠️  WARNING: ${warning.message}${colors.reset}`);
     console.log(`   File: ${warning.file}`);
     if (warning.fix) console.log(`   Fix: ${warning.fix}`);
-    console.log('');
+    console.log("");
   }
 
   console.log(`${colors.cyan}=========================${colors.reset}`);
@@ -413,8 +421,8 @@ function printJsonResults(result: AuditResult): void {
 
 // CLI interface
 const args = process.argv.slice(2);
-const jsonMode = args.includes('--json');
-const helpMode = args.includes('--help') || args.includes('-h');
+const jsonMode = args.includes("--json");
+const helpMode = args.includes("--help") || args.includes("-h");
 
 if (helpMode) {
   console.log(`

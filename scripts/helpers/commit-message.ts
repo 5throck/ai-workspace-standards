@@ -27,12 +27,12 @@ const WEAK_MESSAGE_RE = /^(?:chore: update|chore: (?:upgrade|resync|sync) templa
 const MAX_LENGTH = 72;
 
 export function isWeakCommitMessage(msg: string): boolean {
-  return msg.trim() === '' || WEAK_MESSAGE_RE.test(msg.trim());
+  return msg.trim() === "" || WEAK_MESSAGE_RE.test(msg.trim());
 }
 
 interface PathGroup {
   scope: string;
-  type: 'docs' | 'chore' | 'test' | 'ci';
+  type: "docs" | "chore" | "test" | "ci";
 }
 
 /**
@@ -41,31 +41,33 @@ interface PathGroup {
  * (it cites the spec id) before the generic `docs` group.
  */
 function classifyPath(norm: string): PathGroup | null {
-  if (norm.startsWith('tickets/')) return { scope: 'tickets', type: 'chore' };
-  if (norm.startsWith('docs/designs/')) return { scope: 'spec', type: 'docs' };
-  if (norm.startsWith('docs/')) return { scope: 'docs', type: 'docs' };
-  if (/^(AGENTS|CLAUDE|GEMINI|CODEX|HERMES|CONSTITUTION|README|CHANGELOG|SECURITY)\.md$/i.test(norm)) return { scope: 'docs', type: 'docs' };
-  if (norm.startsWith('scripts/')) return { scope: 'scripts', type: 'chore' };
-  if (norm.startsWith('templates/')) return { scope: 'templates', type: 'chore' };
-  if (norm.startsWith('skills/') || /^(\.claude|\.agents|\.codex|\.gemini|\.hermes|\.opencode)\/skills\//.test(norm)) return { scope: 'skills', type: 'docs' };
-  if (norm.startsWith('agents/')) return { scope: 'agents', type: 'docs' };
-  if (norm.startsWith('tests/')) return { scope: 'tests', type: 'test' };
-  if (norm.startsWith('.github/')) return { scope: 'ci', type: 'ci' };
-  if (norm.startsWith('schemas/')) return { scope: 'schemas', type: 'chore' };
+  if (norm.startsWith("tickets/")) return { scope: "tickets", type: "chore" };
+  if (norm.startsWith("docs/designs/")) return { scope: "spec", type: "docs" };
+  if (norm.startsWith("docs/")) return { scope: "docs", type: "docs" };
+  if (/^(AGENTS|CLAUDE|GEMINI|CODEX|HERMES|CONSTITUTION|README|CHANGELOG|SECURITY)\.md$/i.test(norm))
+    return { scope: "docs", type: "docs" };
+  if (norm.startsWith("scripts/")) return { scope: "scripts", type: "chore" };
+  if (norm.startsWith("templates/")) return { scope: "templates", type: "chore" };
+  if (norm.startsWith("skills/") || /^(\.claude|\.agents|\.codex|\.gemini|\.hermes|\.opencode)\/skills\//.test(norm))
+    return { scope: "skills", type: "docs" };
+  if (norm.startsWith("agents/")) return { scope: "agents", type: "docs" };
+  if (norm.startsWith("tests/")) return { scope: "tests", type: "test" };
+  if (norm.startsWith(".github/")) return { scope: "ci", type: "ci" };
+  if (norm.startsWith("schemas/")) return { scope: "schemas", type: "chore" };
   return null;
 }
 
 /** First `docs/designs/<spec-id>-design.md` id in the set, or null. */
 function findSpecId(paths: string[]): string | null {
   for (const raw of paths) {
-    const m = raw.replace(/\\/g, '/').match(/docs\/designs\/([a-z0-9][a-z0-9.-]*)-design\.md$/i);
+    const m = raw.replace(/\\/g, "/").match(/docs\/designs\/([a-z0-9][a-z0-9.-]*)-design\.md$/i);
     if (m) return m[1];
   }
   return null;
 }
 
 function plural(n: number): string {
-  return n === 1 ? 'file' : 'files';
+  return n === 1 ? "file" : "files";
 }
 
 /**
@@ -77,7 +79,7 @@ function plural(n: number): string {
  * `chore: workspace sync (<n> files)` — never the bare `chore: update`.
  */
 export function deriveCommitMessage(paths: string[]): string {
-  const norm = paths.map((p) => p.replace(/\\/g, '/'));
+  const norm = paths.map((p) => p.replace(/\\/g, "/"));
   const counts = new Map<string, { group: PathGroup; n: number }>();
   const order: string[] = [];
   for (const p of norm) {

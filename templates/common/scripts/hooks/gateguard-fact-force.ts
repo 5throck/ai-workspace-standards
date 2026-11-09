@@ -24,26 +24,24 @@
  * the bump. No behavior change.
  */
 
-import { readFileSync } from 'node:fs';
-import { basename } from 'node:path';
+import { readFileSync } from "node:fs";
+import { basename } from "node:path";
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const GATEKEEP_TAG = '[GATEGUARD]';
+const GATEKEEP_TAG = "[GATEGUARD]";
 
 // Paths that are safe to edit without importer investigation
-const SAFE_PATH_PREFIXES = ['memory/', 'CHANGELOG.md', '.git/', 'node_modules/'];
+const SAFE_PATH_PREFIXES = ["memory/", "CHANGELOG.md", ".git/", "node_modules/"];
 
 // High-value non-code files that should be gated via reference search.
 // Lighter gating: searches for filename references instead of importers.
-const GOVERNED_CONFIG_PATHS = [
-  'CLAUDE.md', 'GEMINI.md', 'AGENTS.md', 'CONSTITUTION.md', 'package.json',
-];
+const GOVERNED_CONFIG_PATHS = ["CLAUDE.md", "GEMINI.md", "AGENTS.md", "CONSTITUTION.md", "package.json"];
 
 // Glob patterns passed to git grep to limit file types
-const GIT_GREP_GLOBS = ['*.ts', '*.tsx', '*.js', '*.jsx'];
+const GIT_GREP_GLOBS = ["*.ts", "*.tsx", "*.js", "*.jsx"];
 
 // Timeout for git grep: 3 seconds
 const GREP_TIMEOUT_MS = 3000;
@@ -62,27 +60,27 @@ const _firstEditSeen = new Map<string, boolean>();
 
 /** Normalize Windows backslashes to forward slashes for consistent matching. */
 function normalizePath(p: string): string {
-  return p.replace(/\\/g, '/');
+  return p.replace(/\\/g, "/");
 }
 
 /** Extract basename without extension (e.g. "my-utils" from "/src/my-utils.ts"). */
 function moduleFromPath(filePath: string): string {
   const b = basename(filePath);
   // Strip all extensions: "my-utils.ts" → "my-utils", "index.test.ts" → "index.test"
-  const dotIdx = b.indexOf('.');
+  const dotIdx = b.indexOf(".");
   return dotIdx === -1 ? b : b.slice(0, dotIdx);
 }
 
 /** Check if the file path is in the safe-list and should not be gated. */
 function isSafePath(filePath: string): boolean {
   const normalized = normalizePath(filePath);
-  return SAFE_PATH_PREFIXES.some(prefix => normalized.startsWith(prefix));
+  return SAFE_PATH_PREFIXES.some((prefix) => normalized.startsWith(prefix));
 }
 
 /** Check if the file is a governed config file (non-code, reference-based gating). */
 function isGovernedConfig(filePath: string): boolean {
   const normalized = normalizePath(filePath);
-  return GOVERNED_CONFIG_PATHS.some(name => normalized.endsWith('/' + name) || normalized === name);
+  return GOVERNED_CONFIG_PATHS.some((name) => normalized.endsWith("/" + name) || normalized === name);
 }
 
 /**
@@ -100,16 +98,16 @@ function findImporters(moduleName: string): string[] {
     `|require\\(['\"].*${moduleName}(\\.[tj]sx?)?['\"]\\)` +
     `|import ['\"].*${moduleName}(\\.[tj]sx?)?['\"]`;
 
-  const args: string[] = ['grep', '-l', '-E', extRegex];
+  const args: string[] = ["grep", "-l", "-E", extRegex];
   for (const glob of GIT_GREP_GLOBS) {
-    args.push('--', glob);
+    args.push("--", glob);
   }
 
-  const result = Bun.spawnSync(['git', ...args], {
+  const result = Bun.spawnSync(["git", ...args], {
     cwd: process.cwd(),
     timeout: GREP_TIMEOUT_MS,
-    stdout: 'pipe',
-    stderr: 'pipe',
+    stdout: "pipe",
+    stderr: "pipe",
   });
 
   // git grep exit code 1 = no matches (valid, empty result).
@@ -128,9 +126,9 @@ function findImporters(moduleName: string): string[] {
 
   // git grep -l outputs one filepath per line (no colon-separated content).
   const importers = output
-    .split('\n')
+    .split("\n")
     .filter(Boolean)
-    .map(p => normalizePath(p));
+    .map((p) => normalizePath(p));
 
   return importers;
 }
@@ -143,18 +141,18 @@ function findImporters(moduleName: string): string[] {
 function findConfigReferences(filePath: string): string[] {
   const b = basename(filePath);
   // Remove extension for broader matching (e.g., "CONSTITUTION" not just "context.md")
-  const baseName = b.includes('.') ? b.slice(0, b.indexOf('.')) : b;
+  const baseName = b.includes(".") ? b.slice(0, b.indexOf(".")) : b;
 
-  const args: string[] = ['grep', '-l', '-F', b];
-  for (const glob of [...GIT_GREP_GLOBS, '*.md', '*.json', '*.yaml', '*.yml']) {
-    args.push('--', glob);
+  const args: string[] = ["grep", "-l", "-F", b];
+  for (const glob of [...GIT_GREP_GLOBS, "*.md", "*.json", "*.yaml", "*.yml"]) {
+    args.push("--", glob);
   }
 
-  const result = Bun.spawnSync(['git', ...args], {
+  const result = Bun.spawnSync(["git", ...args], {
     cwd: process.cwd(),
     timeout: GREP_TIMEOUT_MS,
-    stdout: 'pipe',
-    stderr: 'pipe',
+    stdout: "pipe",
+    stderr: "pipe",
   });
 
   if (!result.success) return [];
@@ -165,10 +163,10 @@ function findConfigReferences(filePath: string): string[] {
   if (!output.trim()) return [];
 
   return output
-    .split('\n')
+    .split("\n")
     .filter(Boolean)
-    .map(p => normalizePath(p))
-    .filter(p => normalizePath(p) !== normalizePath(filePath)); // Exclude self
+    .map((p) => normalizePath(p))
+    .filter((p) => normalizePath(p) !== normalizePath(filePath)); // Exclude self
 }
 
 // ---------------------------------------------------------------------------
@@ -178,17 +176,15 @@ function findConfigReferences(filePath: string): string[] {
 function main(): void {
   // 1. Determine platform and mode from CLI flags
   const args = process.argv.slice(2);
-  const platformIdx = args.indexOf('--platform');
-  const platform: 'claude' | 'gemini' =
-    platformIdx !== -1 && args[platformIdx + 1] === 'gemini' ? 'gemini' : 'claude';
-  const modeIdx = args.indexOf('--mode');
-  const mode: 'ask' | 'deny' =
-    modeIdx !== -1 && args[modeIdx + 1] === 'deny' ? 'deny' : 'ask';
+  const platformIdx = args.indexOf("--platform");
+  const platform: "claude" | "gemini" = platformIdx !== -1 && args[platformIdx + 1] === "gemini" ? "gemini" : "claude";
+  const modeIdx = args.indexOf("--mode");
+  const mode: "ask" | "deny" = modeIdx !== -1 && args[modeIdx + 1] === "deny" ? "deny" : "ask";
 
   // 2. Read all of stdin synchronously
   let stdinJson: string;
   try {
-    stdinJson = readFileSync(0, 'utf-8'); // fd 0 = stdin
+    stdinJson = readFileSync(0, "utf-8"); // fd 0 = stdin
   } catch {
     // Cannot read stdin — don't block
     process.exit(0);
@@ -209,7 +205,7 @@ function main(): void {
   const toolInput = data.tool_input ?? {};
   let filePath: string | undefined;
 
-  if (platform === 'claude') {
+  if (platform === "claude") {
     filePath = toolInput.file_path as string | undefined;
   } else {
     filePath = toolInput.path as string | undefined;
@@ -246,12 +242,12 @@ function main(): void {
   if (isConfig) {
     // Governed config file — use reference-based search
     references = findConfigReferences(normalizedFile);
-    refLabel = 'reference(s)';
+    refLabel = "reference(s)";
   } else {
     // Code file — use importer search
     const moduleName = moduleFromPath(normalizedFile);
     references = findImporters(moduleName);
-    refLabel = 'importer(s)';
+    refLabel = "importer(s)";
   }
 
   if (references.length === 0) {
@@ -261,20 +257,20 @@ function main(): void {
   }
 
   // 8. References found — block or ask depending on platform and mode
-  const refList = references.join(', ');
+  const refList = references.join(", ");
   const reason = `${GATEKEEP_TAG} First edit to '${normalizedFile}'. Found ${references.length} ${refLabel}: ${refList}. Investigate ${refLabel} before proceeding.`;
 
   // Gemini always uses deny mode regardless of --mode flag
   // Claude defaults to ask mode; --mode deny overrides to hard block
-  if (platform === 'gemini' || mode === 'deny') {
+  if (platform === "gemini" || mode === "deny") {
     // Hard block — output deny JSON to stdout, exit 2
-    const response = { decision: 'deny' as const, reason };
-    process.stdout.write(JSON.stringify(response) + '\n');
+    const response = { decision: "deny" as const, reason };
+    process.stdout.write(JSON.stringify(response) + "\n");
     process.exit(2);
   } else {
     // Claude ask mode (default) — output ask JSON to stdout, exit 0
-    const response = { decision: 'ask' as const, reason };
-    process.stdout.write(JSON.stringify(response) + '\n');
+    const response = { decision: "ask" as const, reason };
+    process.stdout.write(JSON.stringify(response) + "\n");
     process.exit(0);
   }
 }

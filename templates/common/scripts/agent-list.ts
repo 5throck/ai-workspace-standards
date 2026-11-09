@@ -33,7 +33,7 @@ interface AgentMetadata {
 function extractMetadata(content: string, filename: string): AgentMetadata {
   const metadata: AgentMetadata = {
     name: filename.replace(".md", ""),
-    path: path.join(agentsDir, filename)
+    path: path.join(agentsDir, filename),
   };
 
   // Extract role from first heading
@@ -59,8 +59,8 @@ function extractMetadata(content: string, filename: string): AgentMetadata {
   if (triggerSection) {
     const triggers = triggerSection[1]
       .split("\n")
-      .filter(line => line.trim().startsWith("-"))
-      .map(line => line.replace(/^[-*]\s*/, "").trim());
+      .filter((line) => line.trim().startsWith("-"))
+      .map((line) => line.replace(/^[-*]\s*/, "").trim());
     metadata.triggers = triggers;
   }
 
@@ -73,7 +73,7 @@ function extractMetadata(content: string, filename: string): AgentMetadata {
 async function listAgents(groupFilter?: string, verbose: boolean = false): Promise<void> {
   try {
     const files = await fs.readdir(agentsDir);
-    const agentFiles = files.filter(f => f.endsWith(".md") && f !== "handoff-spec.md");
+    const agentFiles = files.filter((f) => f.endsWith(".md") && f !== "handoff-spec.md");
 
     if (agentFiles.length === 0) {
       console.log("No agents found.");
@@ -93,7 +93,7 @@ async function listAgents(groupFilter?: string, verbose: boolean = false): Promi
 
     // Filter by group if specified
     const filteredAgents = groupFilter
-      ? agents.filter(a => a.group?.toLowerCase().includes(groupFilter.toLowerCase()))
+      ? agents.filter((a) => a.group?.toLowerCase().includes(groupFilter.toLowerCase()))
       : agents;
 
     if (filteredAgents.length === 0) {
@@ -125,7 +125,9 @@ async function listAgents(groupFilter?: string, verbose: boolean = false): Promi
             console.log(`  Last Updated: ${agent.lastUpdated}`);
           }
           if (agent.triggers && agent.triggers.length > 0) {
-            console.log(`  Triggers: ${agent.triggers.slice(0, 3).join(", ")}${agent.triggers.length > 3 ? "..." : ""}`);
+            console.log(
+              `  Triggers: ${agent.triggers.slice(0, 3).join(", ")}${agent.triggers.length > 3 ? "..." : ""}`,
+            );
           }
           console.log(`  Path: ${agent.path}`);
         }
@@ -191,7 +193,7 @@ async function main(): Promise<void> {
 }
 
 if (import.meta.main) {
-  main().catch(error => {
+  main().catch((error) => {
     die(`Fatal error: ${error instanceof Error ? error.message : String(error)}`, 1);
   });
 }

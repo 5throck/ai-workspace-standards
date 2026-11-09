@@ -42,23 +42,21 @@
 //          non-fatal post-upgrade step so relabeled provenance stays truthful after
 //          every future template delivery.
 
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { basename, dirname, join, resolve } from 'path';
-import { ErrorPhase, fatalError, logError } from './lib/error-handling.ts';
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
+import { ErrorPhase, fatalError, logError } from "./lib/error-handling.ts";
 
 const ARGS = process.argv.slice(2);
-const DRY = ARGS.includes('--dry');
-const STRICT = ARGS.includes('--strict');
-const rootIdx = ARGS.indexOf('--root');
-const PROJECT = rootIdx >= 0
-  ? resolve(ARGS[rootIdx + 1])
-  : resolve(process.cwd());
+const DRY = ARGS.includes("--dry");
+const STRICT = ARGS.includes("--strict");
+const rootIdx = ARGS.indexOf("--root");
+const PROJECT = rootIdx >= 0 ? resolve(ARGS[rootIdx + 1]) : resolve(process.cwd());
 
 // Locate the workspace root: nearest ancestor containing templates/common/scripts.
 function findWorkspaceRoot(start: string): string | null {
   let dir = start;
   for (let i = 0; i < 8; i++) {
-    if (existsSync(join(dir, 'templates', 'common', 'scripts'))) return dir;
+    if (existsSync(join(dir, "templates", "common", "scripts"))) return dir;
     const parent = dirname(dir);
     if (parent === dir) break;
     dir = parent;
@@ -68,32 +66,36 @@ function findWorkspaceRoot(start: string): string | null {
 
 const WS = findWorkspaceRoot(PROJECT);
 if (!WS) {
-  logError(fatalError(
-    ErrorPhase.CLI_PARSING,
-    'REGISTRY_PROVENANCE_NO_WORKSPACE_ROOT',
-    `cannot locate workspace root (templates/common/scripts) above ${PROJECT}`,
-    undefined,
-    'Run the script from inside the workspace (a directory whose ancestor contains templates/common/scripts).',
-  ));
+  logError(
+    fatalError(
+      ErrorPhase.CLI_PARSING,
+      "REGISTRY_PROVENANCE_NO_WORKSPACE_ROOT",
+      `cannot locate workspace root (templates/common/scripts) above ${PROJECT}`,
+      undefined,
+      "Run the script from inside the workspace (a directory whose ancestor contains templates/common/scripts).",
+    ),
+  );
   process.exit(1);
 }
 
-const REG = join(PROJECT, 'scripts', 'SCRIPTS.md');
+const REG = join(PROJECT, "scripts", "SCRIPTS.md");
 if (!existsSync(REG)) {
-  logError(fatalError(
-    ErrorPhase.FILE_IO,
-    'REGISTRY_PROVENANCE_NO_REGISTRY',
-    `no scripts/SCRIPTS.md at ${REG}`,
-    undefined,
-    'Pass --root <project-dir> pointing at a scaffolded variant project.',
-  ));
+  logError(
+    fatalError(
+      ErrorPhase.FILE_IO,
+      "REGISTRY_PROVENANCE_NO_REGISTRY",
+      `no scripts/SCRIPTS.md at ${REG}`,
+      undefined,
+      "Pass --root <project-dir> pointing at a scaffolded variant project.",
+    ),
+  );
   process.exit(1);
 }
 const variantName = basename(PROJECT); // e.g. co-deck
-const L1 = join(WS, 'templates', 'common', 'scripts');
-const L2v = join(WS, 'templates', variantName, 'scripts');
+const L1 = join(WS, "templates", "common", "scripts");
+const L2v = join(WS, "templates", variantName, "scripts");
 
-const lines = readFileSync(REG, 'utf-8').split('\n');
+const lines = readFileSync(REG, "utf-8").split("\n");
 let inRegistry = false;
 let changed = 0;
 const ghosts: string[] = [];
@@ -102,13 +104,19 @@ const nonstandard: string[] = [];
 const rowKeyCounts = new Map<string, number>();
 
 const out = lines.map((line) => {
-  if (/^## Registry/.test(line)) { inRegistry = true; return line; }
-  if (inRegistry && /^## /.test(line)) { inRegistry = false; return line; }
+  if (/^## Registry/.test(line)) {
+    inRegistry = true;
+    return line;
+  }
+  if (inRegistry && /^## /.test(line)) {
+    inRegistry = false;
+    return line;
+  }
   if (!inRegistry) return line;
 
   // Bookkeeping for every registry row (also rows this tool never edits)
   if (/^\| `[^`]+` \| /.test(line)) {
-    const key = line.split('|')[1].trim();
+    const key = line.split("|")[1].trim();
     rowKeyCounts.set(key, (rowKeyCounts.get(key) || 0) + 1);
   }
 
@@ -119,29 +127,32 @@ const out = lines.map((line) => {
       // Shape-valid row with nonstandard vocabulary (e.g. co-newbiz's
       // `co-newbiz | L3-only (<prose>)`) — a deliberate per-repo convention.
       // Leave untouched; report so the skip is a contract, not a regex accident.
-      nonstandard.push(line.split('|')[1].trim());
+      nonstandard.push(line.split("|")[1].trim());
     }
     return line;
   }
   const [, head, source, mid, layer, tail] = m;
-  const script = line.match(/^`([^`]+)`/)?.[1] || line.match(/`([^`]+)`/)?.[1] || '';
+  const script = line.match(/^`([^`]+)`/)?.[1] || line.match(/`([^`]+)`/)?.[1] || "";
   if (!script) return line;
 
   if (existsSync(join(L1, script))) return line; // rule 1: L1-delivered, stamp is correct
 
   const isVariantPath = new RegExp(`^${variantName}/`).test(script);
   const inVariantTemplate = existsSync(join(L2v, script));
-  const inProject = existsSync(join(PROJECT, 'scripts', script));
+  const inProject = existsSync(join(PROJECT, "scripts", script));
 
   let newSource = source;
   let newLayer = layer;
-  if (isVariantPath && inVariantTemplate) {           // rule 2
-    newSource = 'L2';
-    newLayer = 'L2-only';
-  } else if (inProject) {                              // rule 3
-    newSource = 'L3';
-    newLayer = 'L3';
-  } else {                                             // rule 4: ghost — no auto-edit
+  if (isVariantPath && inVariantTemplate) {
+    // rule 2
+    newSource = "L2";
+    newLayer = "L2-only";
+  } else if (inProject) {
+    // rule 3
+    newSource = "L3";
+    newLayer = "L3";
+  } else {
+    // rule 4: ghost — no auto-edit
     ghosts.push(script);
     return line;
   }
@@ -153,25 +164,31 @@ const out = lines.map((line) => {
   return `${head}${newSource}${mid}${newLayer}${tail}${line.slice(m[0].length)}`;
 });
 
-if (changed > 0 && !DRY) writeFileSync(REG, out.join('\n'));
+if (changed > 0 && !DRY) writeFileSync(REG, out.join("\n"));
 
-console.log(`${DRY ? '[DRY] ' : ''}${basename(PROJECT)}: ${changed} row(s) normalized, ${ghosts.length} ghost(s), ${nonstandard.length} nonstandard (left untouched)`);
+console.log(
+  `${DRY ? "[DRY] " : ""}${basename(PROJECT)}: ${changed} row(s) normalized, ${ghosts.length} ghost(s), ${nonstandard.length} nonstandard (left untouched)`,
+);
 for (const [s, from, to] of fixes.slice(0, 8)) console.log(`  ${s}: ${from} → ${to}`);
 if (fixes.length > 8) console.log(`  … +${fixes.length - 8} more`);
 for (const g of ghosts) console.log(`  ⚠️ ghost (exists nowhere): ${g}`);
 if (nonstandard.length > 0) {
-  console.log(`  ℹ️ nonstandard row shape (per-repo convention — left untouched, review separately): ${nonstandard.slice(0, 3).join(', ')}${nonstandard.length > 3 ? ` … +${nonstandard.length - 3} more` : ''}`);
+  console.log(
+    `  ℹ️ nonstandard row shape (per-repo convention — left untouched, review separately): ${nonstandard.slice(0, 3).join(", ")}${nonstandard.length > 3 ? ` … +${nonstandard.length - 3} more` : ""}`,
+  );
 }
 const dups = [...rowKeyCounts.entries()].filter(([, n]) => n > 1).map(([k]) => k);
-if (dups.length > 0) console.log(`  ⚠️ duplicate registry row(s) (report-only — dedup by hand): ${dups.join(', ')}`);
+if (dups.length > 0) console.log(`  ⚠️ duplicate registry row(s) (report-only — dedup by hand): ${dups.join(", ")}`);
 
 if (import.meta.main && STRICT && ghosts.length > 0) {
-  logError(fatalError(
-    ErrorPhase.AUDIT,
-    'REGISTRY_PROVENANCE_GHOST_ROWS',
-    `${ghosts.length} ghost row(s) exist in neither the workspace templates nor the project scripts tree`,
-    ghosts.join(', '),
-    'Prune the ghost rows by hand or restore the missing script files, then re-run.',
-  ));
+  logError(
+    fatalError(
+      ErrorPhase.AUDIT,
+      "REGISTRY_PROVENANCE_GHOST_ROWS",
+      `${ghosts.length} ghost row(s) exist in neither the workspace templates nor the project scripts tree`,
+      ghosts.join(", "),
+      "Prune the ghost rows by hand or restore the missing script files, then re-run.",
+    ),
+  );
   process.exit(1);
 }

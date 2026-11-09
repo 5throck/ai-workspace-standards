@@ -15,13 +15,13 @@
  * - lib/error-handling.ts (Error management)
  */
 
-import { ErrorPhase, fatalError, warningError } from '../lib/error-handling.ts';
-import type { VariantType } from './registries/variant-type-registry.ts';
-import { getPromotionPolicy } from './registries/promotion-policy.ts';
-import type { PromotionPolicy } from './registries/promotion-policy.ts';
+import { ErrorPhase, fatalError, warningError } from "../lib/error-handling.ts";
+import type { VariantType } from "./registries/variant-type-registry.ts";
+import { getPromotionPolicy } from "./registries/promotion-policy.ts";
+import type { PromotionPolicy } from "./registries/promotion-policy.ts";
 
 // Re-export for downstream consumers
-export type { VariantType } from './registries/variant-type-registry.ts';
+export type { VariantType } from "./registries/variant-type-registry.ts";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -87,7 +87,7 @@ export interface L1MajorReconciliationPlan {
   reconciliationSteps: Array<{
     order: number;
     variant: string;
-    action: 'reconcile' | 'skip' | 'manual_review';
+    action: "reconcile" | "skip" | "manual_review";
     reason: string;
     /** Mirrors the variant's allowsParallelReconciliation flag from the dependency graph */
     canParallel: boolean;
@@ -117,17 +117,17 @@ export function checkPromotionEligibility(
   variantType: VariantType,
   currentEngagements: number,
   betaStartDate: Date,
-  completedChecks: string[]
+  completedChecks: string[],
 ): PromotionEligibility {
   const criteria = getPromotionPolicy(variantType);
 
   if (!criteria) {
     throw fatalError(
       ErrorPhase.VALIDATION,
-      'UNKNOWN_VARIANT_TYPE',
+      "UNKNOWN_VARIANT_TYPE",
       `Unknown variant type: ${variantType}`,
       undefined,
-      'Variant type must be one of: security, development, design, consulting, collaboration'
+      "Variant type must be one of: security, development, design, consulting, collaboration",
     );
   }
 
@@ -140,7 +140,7 @@ export function checkPromotionEligibility(
   if (!engagementsMet) {
     reasons.push(
       `Engagement threshold not met: ${currentEngagements}/${criteria.minEngagements} ` +
-      `(${criteria.minEngagements - currentEngagements} more needed)`
+        `(${criteria.minEngagements - currentEngagements} more needed)`,
     );
   } else {
     reasons.push(`Engagement threshold met: ${currentEngagements}/${criteria.minEngagements}`);
@@ -154,7 +154,7 @@ export function checkPromotionEligibility(
   if (!betaMonthsMet) {
     reasons.push(
       `Beta duration not met: ${betaMonths.toFixed(1)}/${criteria.minBetaMonths} months ` +
-      `(${(criteria.minBetaMonths - betaMonths).toFixed(1)} months remaining)`
+        `(${(criteria.minBetaMonths - betaMonths).toFixed(1)} months remaining)`,
     );
   } else {
     reasons.push(`Beta duration met: ${betaMonths.toFixed(1)}/${criteria.minBetaMonths} months`);
@@ -171,9 +171,7 @@ export function checkPromotionEligibility(
   }
 
   if (additionalChecksFailed.length > 0) {
-    reasons.push(
-      `Additional checks not passed: ${additionalChecksFailed.length}/${additionalChecks.length}`
-    );
+    reasons.push(`Additional checks not passed: ${additionalChecksFailed.length}/${additionalChecks.length}`);
   } else {
     reasons.push(`All additional checks passed: ${additionalChecksPassed.length}/${additionalChecks.length}`);
   }
@@ -218,46 +216,46 @@ export function checkPromotionEligibility(
  */
 export const VARIANT_DEPENDENCY_GRAPH: VariantDependency[] = [
   {
-    variant: 'templates/common',
+    variant: "templates/common",
     dependsOn: [],
     reconciliationOrder: 0,
     allowsParallelReconciliation: true,
-    rationale: 'Common base template - no dependencies, always reconciled first',
+    rationale: "Common base template - no dependencies, always reconciled first",
   },
   {
-    variant: 'co-work',
-    dependsOn: ['templates/common'],
+    variant: "co-work",
+    dependsOn: ["templates/common"],
     reconciliationOrder: 1,
     allowsParallelReconciliation: true,
-    rationale: 'Foundational collaboration variant - depends only on common',
+    rationale: "Foundational collaboration variant - depends only on common",
   },
   {
-    variant: 'co-develop',
-    dependsOn: ['templates/common'],
+    variant: "co-develop",
+    dependsOn: ["templates/common"],
     reconciliationOrder: 1,
     allowsParallelReconciliation: true,
-    rationale: 'Development variant - depends only on common, independent of co-work',
+    rationale: "Development variant - depends only on common, independent of co-work",
   },
   {
-    variant: 'co-consult',
-    dependsOn: ['templates/common', 'co-work'],
+    variant: "co-consult",
+    dependsOn: ["templates/common", "co-work"],
     reconciliationOrder: 2,
     allowsParallelReconciliation: false,
-    rationale: 'Consulting variant - depends on co-work for collaboration foundations',
+    rationale: "Consulting variant - depends on co-work for collaboration foundations",
   },
   {
-    variant: 'co-security',
-    dependsOn: ['templates/common', 'co-work', 'co-develop'],
+    variant: "co-security",
+    dependsOn: ["templates/common", "co-work", "co-develop"],
     reconciliationOrder: 3,
     allowsParallelReconciliation: false,
-    rationale: 'Security variant - depends on co-work and co-develop for comprehensive coverage',
+    rationale: "Security variant - depends on co-work and co-develop for comprehensive coverage",
   },
   {
-    variant: 'co-design',
-    dependsOn: ['templates/common'],
+    variant: "co-design",
+    dependsOn: ["templates/common"],
     reconciliationOrder: 1,
     allowsParallelReconciliation: true,
-    rationale: 'Design variant - depends only on common, independent of other variants',
+    rationale: "Design variant - depends only on common, independent of other variants",
   },
 ];
 
@@ -283,7 +281,7 @@ function detectCircularDependencies(
   variant: string,
   dependencyMap: Map<string, VariantDependency>,
   visited: Set<string> = new Set(),
-  path: string[] = []
+  path: string[] = [],
 ): string[] | null {
   if (path.includes(variant)) {
     // Circular dependency found
@@ -373,7 +371,7 @@ export function getReconciliationOrder(variantNames: string[]): Array<{
   canParallel: boolean;
 }> {
   const dependencyMap = buildDependencyMap();
-  const orderedVariants = variantNames.map(variant => {
+  const orderedVariants = variantNames.map((variant) => {
     const dep = dependencyMap.get(variant);
     return {
       variant,
@@ -399,17 +397,17 @@ export function planL1MajorUpdate(newL1Version: string): L1MajorReconciliationPl
   const dependencyMap = buildDependencyMap();
 
   // Get all variants (excluding templates/common)
-  const variants = VARIANT_DEPENDENCY_GRAPH
-    .filter(d => d.variant !== 'templates/common')
-    .sort((a, b) => a.reconciliationOrder - b.reconciliationOrder);
+  const variants = VARIANT_DEPENDENCY_GRAPH.filter((d) => d.variant !== "templates/common").sort(
+    (a, b) => a.reconciliationOrder - b.reconciliationOrder,
+  );
 
   // Every affected variant is reconciled on an L1 MAJOR update; whether a step
   // can run in parallel with same-order steps comes from the dependency graph's
   // allowsParallelReconciliation flag (same mapping as getReconciliationOrder()).
-  const reconciliationSteps: L1MajorReconciliationPlan['reconciliationSteps'] = variants.map((variant) => ({
+  const reconciliationSteps: L1MajorReconciliationPlan["reconciliationSteps"] = variants.map((variant) => ({
     order: variant.reconciliationOrder,
     variant: variant.variant,
-    action: 'reconcile',
+    action: "reconcile",
     canParallel: variant.allowsParallelReconciliation,
     reason: variant.rationale,
   }));
@@ -422,16 +420,16 @@ export function planL1MajorUpdate(newL1Version: string): L1MajorReconciliationPl
 
   console.log(`Affected variants: ${variants.length}`);
   console.log(`Estimated duration: ${estimatedDuration}`);
-  console.log(`Requires rollback: ${requiresRollback ? 'Yes' : 'No'}\n`);
+  console.log(`Requires rollback: ${requiresRollback ? "Yes" : "No"}\n`);
 
   for (const step of reconciliationSteps) {
-    console.log(`  ${step.order}. ${step.variant}: ${step.action} (${step.canParallel ? 'parallel' : 'sequential'})`);
+    console.log(`  ${step.order}. ${step.variant}: ${step.action} (${step.canParallel ? "parallel" : "sequential"})`);
     console.log(`     Reason: ${step.reason}`);
   }
 
   return {
     l1Version: newL1Version,
-    affectedVariants: variants.map(v => v.variant),
+    affectedVariants: variants.map((v) => v.variant),
     reconciliationSteps,
     estimatedDuration,
     requiresRollback,
@@ -447,26 +445,20 @@ async function main() {
   const command = args[0];
 
   switch (command) {
-    case 'check-promotion': {
+    case "check-promotion": {
       const variantName = args[1];
       const variantType = args[2] as VariantType;
       const engagements = parseInt(args[3], 10);
       const betaStart = new Date(args[4]);
       const checks = args.slice(5);
 
-      const eligibility = checkPromotionEligibility(
-        variantName,
-        variantType,
-        engagements,
-        betaStart,
-        checks
-      );
+      const eligibility = checkPromotionEligibility(variantName, variantType, engagements, betaStart, checks);
 
-      console.log('\n=== Promotion Eligibility Check ===');
+      console.log("\n=== Promotion Eligibility Check ===");
       console.log(`Variant: ${variantName}`);
       console.log(`Type: ${variantType}`);
-      console.log(`Eligible: ${eligibility.eligible ? 'Yes' : 'No'}`);
-      console.log('\nReasons:');
+      console.log(`Eligible: ${eligibility.eligible ? "Yes" : "No"}`);
+      console.log("\nReasons:");
       for (const reason of eligibility.reasons) {
         console.log(`  - ${reason}`);
       }
@@ -477,25 +469,25 @@ async function main() {
       break;
     }
 
-    case 'validate-deps': {
+    case "validate-deps": {
       const variantName = args[1];
       const validation = validateDependencies(variantName);
 
-      console.log('\n=== Dependency Validation ===');
+      console.log("\n=== Dependency Validation ===");
       console.log(`Variant: ${variantName}`);
-      console.log(`Valid: ${validation.valid ? 'Yes' : 'No'}`);
+      console.log(`Valid: ${validation.valid ? "Yes" : "No"}`);
       console.log(`Reconciliation order: ${validation.reconciliationOrder}`);
-      console.log(`Can reconcile in parallel: ${validation.canReconcileInParallel ? 'Yes' : 'No'}`);
+      console.log(`Can reconcile in parallel: ${validation.canReconcileInParallel ? "Yes" : "No"}`);
 
       if (validation.circularDependencies.length > 0) {
-        console.log('\n⚠️  Circular dependencies detected:');
+        console.log("\n⚠️  Circular dependencies detected:");
         for (const cycle of validation.circularDependencies) {
-          console.log(`  - ${cycle.join(' → ')}`);
+          console.log(`  - ${cycle.join(" → ")}`);
         }
       }
 
       if (validation.missingDependencies.length > 0) {
-        console.log('\n⚠️  Missing dependencies:');
+        console.log("\n⚠️  Missing dependencies:");
         for (const missing of validation.missingDependencies) {
           console.log(`  - ${missing}`);
         }
@@ -507,21 +499,23 @@ async function main() {
       break;
     }
 
-    case 'plan-l1-major': {
+    case "plan-l1-major": {
       const newL1Version = args[1];
       const plan = planL1MajorUpdate(newL1Version);
 
-      console.log('\n✅ Reconciliation plan created');
+      console.log("\n✅ Reconciliation plan created");
       console.log(`Affected variants: ${plan.affectedVariants.length}`);
       console.log(`Estimated duration: ${plan.estimatedDuration}`);
       break;
     }
 
     default:
-      console.error('Usage:');
-      console.error('  bun scripts/helpers/variant-governance-rules.ts check-promotion <variant> <type> <engagements> <beta-start> <checks...>');
-      console.error('  bun scripts/helpers/variant-governance-rules.ts validate-deps <variant>');
-      console.error('  bun scripts/helpers/variant-governance-rules.ts plan-l1-major <new-l1-version>');
+      console.error("Usage:");
+      console.error(
+        "  bun scripts/helpers/variant-governance-rules.ts check-promotion <variant> <type> <engagements> <beta-start> <checks...>",
+      );
+      console.error("  bun scripts/helpers/variant-governance-rules.ts validate-deps <variant>");
+      console.error("  bun scripts/helpers/variant-governance-rules.ts plan-l1-major <new-l1-version>");
       process.exit(1);
   }
 

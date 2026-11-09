@@ -33,14 +33,14 @@
  *          exact acceptance conditions).
  */
 
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
-import { createHash } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join, resolve, dirname } from "node:path";
+import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ROOT = resolve(__dirname, '../..');
+const ROOT = resolve(__dirname, "../..");
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -132,8 +132,8 @@ export function extractMarkerZones(content: string, marker: string): ZoneExtract
 export function findMarkerZones(filePath: string): MarkerZone[] {
   if (!existsSync(filePath)) return [];
 
-  const content = readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
+  const content = readFileSync(filePath, "utf-8");
+  const lines = content.split("\n");
   const zones: MarkerZone[] = [];
 
   // Pattern for both START and END markers
@@ -143,7 +143,7 @@ export function findMarkerZones(filePath: string): MarkerZone[] {
     const line = lines[i];
     const match = line.match(markerPattern);
 
-    if (match && match[2] === 'START') {
+    if (match && match[2] === "START") {
       const marker = match[1];
       const startLine = i + 1; // 1-indexed
 
@@ -159,9 +159,9 @@ export function findMarkerZones(filePath: string): MarkerZone[] {
 
       if (endLine !== -1) {
         // Extract full block (including markers)
-        const fullBlock = lines.slice(i, endLine).join('\n');
+        const fullBlock = lines.slice(i, endLine).join("\n");
         // Extract inner content (excluding markers)
-        const innerContent = lines.slice(i + 1, endLine - 1).join('\n');
+        const innerContent = lines.slice(i + 1, endLine - 1).join("\n");
 
         zones.push({
           marker,
@@ -263,10 +263,10 @@ export function parseIntentionalDuplicateLine(line: string): IntentionalDuplicat
 
   const { source, hash } = parseMarkerFields(body);
 
-  const head = body.split(';')[0];
-  const dashIdx = head.indexOf(' — ');
+  const head = body.split(";")[0];
+  const dashIdx = head.indexOf(" — ");
   const name = dashIdx === -1 ? head.trim() : head.slice(0, dashIdx).trim();
-  const reason = dashIdx === -1 ? null : head.slice(dashIdx + ' — '.length).trim();
+  const reason = dashIdx === -1 ? null : head.slice(dashIdx + " — ".length).trim();
 
   return { name, reason, section, source, hash };
 }
@@ -276,20 +276,18 @@ export function parseIntentionalDuplicateLine(line: string): IntentionalDuplicat
  * Maps §3 -> docs/constitution/03-pr-workflow.md, §8 -> docs/constitution/08-coding-guidelines.md
  */
 export function resolveConstitutionSource(section: string): string | null {
-  const CONSTITUTION_DIR = join(ROOT, 'docs', 'constitution');
+  const CONSTITUTION_DIR = join(ROOT, "docs", "constitution");
 
   if (!existsSync(CONSTITUTION_DIR)) {
     return null;
   }
 
   // Zero-pad the section number (e.g., "3" -> "03", "8" -> "08")
-  const paddedSection = section.padStart(2, '0');
+  const paddedSection = section.padStart(2, "0");
 
   // Scan for files matching the pattern 0{section}-*.md
-  const entries = require('node:fs').readdirSync(CONSTITUTION_DIR);
-  const matching = entries.filter(
-    (entry: string) => entry.startsWith(`${paddedSection}-`) && entry.endsWith('.md')
-  );
+  const entries = require("node:fs").readdirSync(CONSTITUTION_DIR);
+  const matching = entries.filter((entry: string) => entry.startsWith(`${paddedSection}-`) && entry.endsWith(".md"));
 
   if (matching.length === 0) {
     return null; // Cannot resolve source
@@ -312,12 +310,12 @@ export function resolveConstitutionSource(section: string): string | null {
 export function computeSectionHash(filePath: string): string | null {
   if (!existsSync(filePath)) return null;
   try {
-    const content = readFileSync(filePath, 'utf-8');
-    const normalized = content.replace(/\r\n/g, '\n');
-    const lines = normalized.split('\n');
+    const content = readFileSync(filePath, "utf-8");
+    const normalized = content.replace(/\r\n/g, "\n");
+    const lines = normalized.split("\n");
     const headingIdx = lines.findIndex((line) => /^###\s/.test(line));
-    const slice = headingIdx >= 0 ? lines.slice(headingIdx).join('\n') : normalized;
-    const hash = createHash('sha256').update(slice, 'utf-8').digest('hex');
+    const slice = headingIdx >= 0 ? lines.slice(headingIdx).join("\n") : normalized;
+    const hash = createHash("sha256").update(slice, "utf-8").digest("hex");
     return hash.substring(0, 8);
   } catch {
     return null;
@@ -328,7 +326,7 @@ export function computeSectionHash(filePath: string): string | null {
  * Scan templates/ for intentional-duplicate markers
  */
 export function scanIntentionalDuplicateMarkers(): IntentionalDuplicateMarker[] {
-  const TEMPLATES_DIR = join(ROOT, 'templates');
+  const TEMPLATES_DIR = join(ROOT, "templates");
   const markers: IntentionalDuplicateMarker[] = [];
 
   if (!existsSync(TEMPLATES_DIR)) {
@@ -336,20 +334,20 @@ export function scanIntentionalDuplicateMarkers(): IntentionalDuplicateMarker[] 
   }
 
   // Recursively scan all .md files under templates/
-  const { readdirSync } = require('node:fs');
+  const { readdirSync } = require("node:fs");
   const entries = readdirSync(TEMPLATES_DIR, {
     recursive: true,
     withFileTypes: true,
   }) as any[];
 
   for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.md')) {
+    if (!entry.isFile() || !entry.name.endsWith(".md")) {
       continue;
     }
 
     const filePath = join(entry.path, entry.name);
-    const content = readFileSync(filePath, 'utf-8');
-    const lines = content.split('\n');
+    const content = readFileSync(filePath, "utf-8");
+    const lines = content.split("\n");
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -361,7 +359,7 @@ export function scanIntentionalDuplicateMarkers(): IntentionalDuplicateMarker[] 
 
       if (parsed) {
         const markerMatch = line.match(/<!--\s*intentional-duplicate:\s*([^>]+)-->/);
-        const markerText = markerMatch ? markerMatch[1] : '';
+        const markerText = markerMatch ? markerMatch[1] : "";
 
         markers.push({
           file: filePath,
@@ -385,13 +383,13 @@ export function scanIntentionalDuplicateMarkers(): IntentionalDuplicateMarker[] 
 export function extractSectionContent(filePath: string): string | null {
   if (!existsSync(filePath)) return null;
   try {
-    const content = readFileSync(filePath, 'utf-8');
-    const normalized = content.replace(/\r\n/g, '\n');
-    const lines = normalized.split('\n');
+    const content = readFileSync(filePath, "utf-8");
+    const normalized = content.replace(/\r\n/g, "\n");
+    const lines = normalized.split("\n");
     const headingIdx = lines.findIndex((line) => /^###\s/.test(line));
 
     if (headingIdx >= 0) {
-      return lines.slice(headingIdx).join('\n');
+      return lines.slice(headingIdx).join("\n");
     }
     return normalized;
   } catch {
@@ -408,7 +406,7 @@ export function extractSectionContent(filePath: string): string | null {
 // ============================================================================
 
 /** Where the appended block landed. 'none' = nothing appended (no placement). */
-export type AppendPlacement = 'after-anchor' | 'eof' | 'none';
+export type AppendPlacement = "after-anchor" | "eof" | "none";
 
 export interface AppendMissingZonesResult {
   /** Content after the append (byte-identical to the input when appended = 0). */
@@ -421,7 +419,7 @@ export interface AppendMissingZonesResult {
 
 /** Escape a string for literal use inside a RegExp. */
 function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -460,13 +458,16 @@ export function appendMissingZones(
   void marker; // reserved for interface symmetry with the rewrite engine
   const tail = sourceSections.slice(existingZones.length);
   if (tail.length === 0) {
-    return { content: variantContent, appended: 0, placement: 'none' };
+    return { content: variantContent, appended: 0, placement: "none" };
   }
 
-  const norm = (s: string) => s.replace(/\r\n/g, '\n');
+  const norm = (s: string) => s.replace(/\r\n/g, "\n");
   const working = norm(variantContent);
-  const lines = working.split('\n');
-  const blockLines = tail.map((s) => norm(s.fullBlock)).join('\n').split('\n');
+  const lines = working.split("\n");
+  const blockLines = tail
+    .map((s) => norm(s.fullBlock))
+    .join("\n")
+    .split("\n");
 
   let insertAfter: number;
   let placement: AppendPlacement;
@@ -480,21 +481,21 @@ export function appendMissingZones(
     if (lastAnchorEnd === -1) {
       // Anchor missing → no placement derivable. Fail-safe: return the input
       // unchanged so the CLI can skip the target truthfully (R5).
-      return { content: variantContent, appended: 0, placement: 'none' };
+      return { content: variantContent, appended: 0, placement: "none" };
     }
     insertAfter = lastAnchorEnd;
-    placement = 'after-anchor';
+    placement = "after-anchor";
   } else {
     let lastNonEmpty = -1;
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].trim() !== '') lastNonEmpty = i;
+      if (lines[i].trim() !== "") lastNonEmpty = i;
     }
     insertAfter = lastNonEmpty; // -1 on an empty file → insert at index 0
-    placement = 'eof';
+    placement = "eof";
   }
 
   lines.splice(insertAfter + 1, 0, ...blockLines);
-  return { content: lines.join('\n'), appended: tail.length, placement };
+  return { content: lines.join("\n"), appended: tail.length, placement };
 }
 
 /**
@@ -522,7 +523,7 @@ export function appendMissingZones(
  */
 export function applyIntentionalDuplicateRewrites(
   lines: string[],
-  rewrites: Array<{ lineIndex: number; newSectionLines: string[]; newHash: string }>
+  rewrites: Array<{ lineIndex: number; newSectionLines: string[]; newHash: string }>,
 ): string[] {
   const result = [...lines];
   const ordered = [...rewrites].sort((a, b) => b.lineIndex - a.lineIndex);
@@ -543,10 +544,7 @@ export function applyIntentionalDuplicateRewrites(
 
     // Update the marker line's hash in place; its position is unaffected
     // because the splice happens strictly below it (descending order).
-    result[lineIndex] = result[lineIndex].replace(
-      /hash:\s*[0-9a-f]{8}/,
-      `hash: ${rewrite.newHash}`
-    );
+    result[lineIndex] = result[lineIndex].replace(/hash:\s*[0-9a-f]{8}/, `hash: ${rewrite.newHash}`);
   }
 
   return result;

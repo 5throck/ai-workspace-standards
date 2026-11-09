@@ -38,16 +38,16 @@
  * @version 1.0.1
  */
 
-import { $ } from 'bun';
-import { writeFileSync, unlinkSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { $ } from "bun";
+import { writeFileSync, unlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-const RED = '\x1b[31m';
-const GREEN = '\x1b[32m';
-const YELLOW = '\x1b[33m';
-const CYAN = '\x1b[36m';
-const RESET = '\x1b[0m';
+const RED = "\x1b[31m";
+const GREEN = "\x1b[32m";
+const YELLOW = "\x1b[33m";
+const CYAN = "\x1b[36m";
+const RESET = "\x1b[0m";
 
 const args = process.argv.slice(2);
 const getArg = (name: string): string | undefined => {
@@ -62,18 +62,20 @@ const getRepeatedArg = (name: string): string[] => {
   }
   return values;
 };
-const isDryRun = args.includes('--dry-run');
+const isDryRun = args.includes("--dry-run");
 
 async function inferRepo(): Promise<string> {
-  const explicit = getArg('repo');
+  const explicit = getArg("repo");
   if (explicit) return explicit;
   const res = await $`git remote get-url origin`.quiet().nothrow();
   const url = res.stdout.toString().trim();
   const m = url.match(/[:/]([^/]+\/[^/]+?)(?:\.git)?$/);
   if (!m) {
-    console.error(`${RED}❌ Could not infer owner/repo from 'git remote get-url origin' (${url || 'no origin remote'}). Pass --repo owner/name.${RESET}`);
+    console.error(
+      `${RED}❌ Could not infer owner/repo from 'git remote get-url origin' (${url || "no origin remote"}). Pass --repo owner/name.${RESET}`,
+    );
     if (import.meta.main) process.exit(1);
-    return '';
+    return "";
   }
   return m[1];
 }
@@ -81,24 +83,24 @@ async function inferRepo(): Promise<string> {
 async function main() {
   const repo = await inferRepo();
   if (!repo) return;
-  const branch = getArg('branch') || 'main';
+  const branch = getArg("branch") || "main";
 
   // Slug validation — reject values that could traverse the gh api URL path
   const REPO_SLUG_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
   const BRANCH_RE = /^[a-zA-Z0-9_./-]+$/;
   if (!REPO_SLUG_RE.test(repo) || !BRANCH_RE.test(branch)) {
-    console.error('Invalid --repo (expected owner/name) or --branch slug — aborting.');
+    console.error("Invalid --repo (expected owner/name) or --branch slug — aborting.");
     if (import.meta.main) process.exit(1);
     return;
   }
-  const checks = getRepeatedArg('check');
+  const checks = getRepeatedArg("check");
 
-  console.log(`${CYAN}Repo: ${repo}  Branch: ${branch}${isDryRun ? '  (dry-run)' : ''}${RESET}`);
+  console.log(`${CYAN}Repo: ${repo}  Branch: ${branch}${isDryRun ? "  (dry-run)" : ""}${RESET}`);
 
   if (isDryRun) {
     console.log(`${YELLOW}Would set: delete_branch_on_merge=true, allow_auto_merge=true${RESET}`);
     if (checks.length > 0) {
-      console.log(`${YELLOW}Would require status checks on '${branch}': ${checks.join(', ')}${RESET}`);
+      console.log(`${YELLOW}Would require status checks on '${branch}': ${checks.join(", ")}${RESET}`);
     } else {
       console.log(`${YELLOW}No --check given — branch protection would NOT be touched (repo settings only).${RESET}`);
     }
@@ -106,7 +108,9 @@ async function main() {
   }
 
   // 1. Repo-level settings — idempotent PATCH, safe to re-run.
-  const patchRes = await $`gh api -X PATCH repos/${repo} -f delete_branch_on_merge=true -F allow_auto_merge=true`.quiet().nothrow();
+  const patchRes = await $`gh api -X PATCH repos/${repo} -f delete_branch_on_merge=true -F allow_auto_merge=true`
+    .quiet()
+    .nothrow();
   if (patchRes.exitCode !== 0) {
     console.error(`${RED}❌ Failed to update repo settings: ${patchRes.stderr.toString().trim()}${RESET}`);
     if (import.meta.main) process.exit(1);
@@ -116,13 +120,17 @@ async function main() {
 
   // 2. Branch protection — only touched when explicit check names are supplied.
   if (checks.length === 0) {
-    console.log(`${YELLOW}⚠️  No --check provided — skipping branch protection (repo settings above still applied).${RESET}`);
-    console.log(`${YELLOW}   Re-run with --check "job name" (repeatable) using this repo's actual CI check names.${RESET}`);
+    console.log(
+      `${YELLOW}⚠️  No --check provided — skipping branch protection (repo settings above still applied).${RESET}`,
+    );
+    console.log(
+      `${YELLOW}   Re-run with --check "job name" (repeatable) using this repo's actual CI check names.${RESET}`,
+    );
     return;
   }
 
   const payload = {
-    required_status_checks: { strict: false, checks: checks.map(context => ({ context })) },
+    required_status_checks: { strict: false, checks: checks.map((context) => ({ context })) },
     enforce_admins: false,
     required_pull_request_reviews: null,
     restrictions: null,
@@ -130,19 +138,25 @@ async function main() {
   const tmpPath = join(tmpdir(), `branch-protection-${crypto.randomUUID()}.json`);
   writeFileSync(tmpPath, JSON.stringify(payload));
   try {
-    const protectRes = await $`gh api -X PUT repos/${repo}/branches/${branch}/protection --input ${tmpPath}`.quiet().nothrow();
+    const protectRes = await $`gh api -X PUT repos/${repo}/branches/${branch}/protection --input ${tmpPath}`
+      .quiet()
+      .nothrow();
     if (protectRes.exitCode !== 0) {
       console.error(`${RED}❌ Failed to set branch protection: ${protectRes.stderr.toString().trim()}${RESET}`);
       if (import.meta.main) process.exit(1);
       return;
     }
   } finally {
-    try { unlinkSync(tmpPath); } catch { /* best-effort cleanup */ }
+    try {
+      unlinkSync(tmpPath);
+    } catch {
+      /* best-effort cleanup */
+    }
   }
-  console.log(`${GREEN}✓ Branch protection on '${branch}' requires: ${checks.join(', ')}${RESET}`);
+  console.log(`${GREEN}✓ Branch protection on '${branch}' requires: ${checks.join(", ")}${RESET}`);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(`${RED}❌ ${err}${RESET}`);
   if (import.meta.main) process.exit(1);
 });

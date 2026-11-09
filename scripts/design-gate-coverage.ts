@@ -71,30 +71,24 @@
  * Safety: report-only per ADR-0031 Principle 5.
  */
 
-import { existsSync, readFileSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 
-const workspaceRoot = join(import.meta.dir, '..');
-const REGISTRY_PATH = join(workspaceRoot, 'docs', 'specs', 'registry.json');
-const REPORTS_DIR = join(workspaceRoot, 'docs', 'reports');
+const workspaceRoot = join(import.meta.dir, "..");
+const REGISTRY_PATH = join(workspaceRoot, "docs", "specs", "registry.json");
+const REPORTS_DIR = join(workspaceRoot, "docs", "reports");
 
 /** Template/code surfaces whose window commits must resolve to Design-Gate
  *  paperwork (design D8 path set). */
 const TOUCH_PATH_PREFIXES = [
-  'templates/',
-  'scripts/',
-  '.agents/',
-  'docs/governance/',
-  'docs/standards/',
-  'agents/', // root agents/ instruction directory (agents/pm.md et al.)
+  "templates/",
+  "scripts/",
+  ".agents/",
+  "docs/governance/",
+  "docs/standards/",
+  "agents/", // root agents/ instruction directory (agents/pm.md et al.)
 ];
-const ROOT_INSTRUCTION_FILES = new Set([
-  'AGENTS.md',
-  'CLAUDE.md',
-  'GEMINI.md',
-  'CODEX.md',
-  'HERMES.md',
-]);
+const ROOT_INSTRUCTION_FILES = new Set(["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md"]);
 
 /** Ticket ids in commit messages, PR bodies, and tickets/ file paths. */
 const TICKET_ID_RE = /\b([TU]-\d{8}-\d{2,3})\b/g;
@@ -135,14 +129,16 @@ interface CoverageReport {
 }
 
 function usage(): never {
-  console.error('Usage: bun scripts/design-gate-coverage.ts [--since <rev|date>] [--until <rev|date>] [--json]');
+  console.error("Usage: bun scripts/design-gate-coverage.ts [--since <rev|date>] [--until <rev|date>] [--json]");
   process.exit(1);
 }
 
 function git(args: string[]): string {
-  const proc = Bun.spawnSync(['git', ...args], { cwd: workspaceRoot, stdout: 'pipe', stderr: 'pipe' });
+  const proc = Bun.spawnSync(["git", ...args], { cwd: workspaceRoot, stdout: "pipe", stderr: "pipe" });
   if (proc.exitCode !== 0) {
-    console.error(`git ${args.join(' ')} failed (exit ${proc.exitCode}): ${new TextDecoder().decode(proc.stderr).trim()}`);
+    console.error(
+      `git ${args.join(" ")} failed (exit ${proc.exitCode}): ${new TextDecoder().decode(proc.stderr).trim()}`,
+    );
     process.exit(1);
   }
   return new TextDecoder().decode(proc.stdout);
@@ -151,21 +147,21 @@ function git(args: string[]): string {
 /** Parse the "Window:" line of the newest project-review daily report — the
  *  "default = the review window" rule. Returns '' when nothing parses. */
 function defaultSinceFromReports(): string {
-  if (!existsSync(REPORTS_DIR)) return '';
+  if (!existsSync(REPORTS_DIR)) return "";
   const candidates = readdirSync(REPORTS_DIR)
-    .filter((f) => f.includes('project-review') && f.endsWith('.md'))
+    .filter((f) => f.includes("project-review") && f.endsWith(".md"))
     .sort();
   for (const name of candidates.reverse()) {
-    const text = readFileSync(join(REPORTS_DIR, name), 'utf8');
+    const text = readFileSync(join(REPORTS_DIR, name), "utf8");
     const m = text.match(/\*\*Window\*\*:\s*(\S+)\s*(?:→|->)\s*(\S+)/);
     if (m) return normalizeGitDate(m[1]);
   }
-  return '';
+  return "";
 }
 
 /** git accepts +0900; normalize a report timestamp so --since parses. */
 function normalizeGitDate(ts: string): string {
-  return ts.replace(/([+-]\d{2})(\d{2})$/, '$1:$2');
+  return ts.replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
 }
 
 export function extractTicketIds(text: string): string[] {
@@ -256,7 +252,7 @@ export function touchesTemplateSurface(paths: string[]): boolean {
 function loadRegistry(): Array<{ id: string; status: string; file: string }> {
   let registry: { specs?: Array<{ id: string; status: string; file: string }> };
   try {
-    registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
+    registry = JSON.parse(readFileSync(REGISTRY_PATH, "utf8"));
   } catch (err) {
     console.error(`unreadable spec registry (${REGISTRY_PATH}): ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
@@ -272,13 +268,13 @@ function loadRegisteredDocTexts(): Map<string, { status: string; file: string; t
     if (!spec?.file) continue;
     const abs = join(workspaceRoot, spec.file);
     if (!existsSync(abs)) continue; // registered but file pruned — contributes nothing to the join
-    let text = '';
+    let text = "";
     try {
-      text = readFileSync(abs, 'utf8');
+      text = readFileSync(abs, "utf8");
     } catch {
       continue;
     }
-    docs.set(spec.id, { status: spec.status ?? 'unknown', file: spec.file, text });
+    docs.set(spec.id, { status: spec.status ?? "unknown", file: spec.file, text });
   }
   return docs;
 }
@@ -289,21 +285,21 @@ function buildReport(since: string, until: string): CoverageReport {
   //    \x1e starts a record, \x1f separates sha/subject/body, and the trailing
   //    \x1f marks where the --name-only path list begins.
   const log = git([
-    'log',
-    '--no-merges',
+    "log",
+    "--no-merges",
     `--since=${since}`,
     `--until=${until}`,
-    '--name-only',
-    '--format=%x1e%h%x1f%s%x1f%b%x1f',
+    "--name-only",
+    "--format=%x1e%h%x1f%s%x1f%b%x1f",
   ]);
   const commits: CommitRecord[] = [];
-  for (const block of log.split('\x1e')) {
+  for (const block of log.split("\x1e")) {
     if (!block.trim()) continue;
-    const lastSep = block.lastIndexOf('\x1f');
+    const lastSep = block.lastIndexOf("\x1f");
     if (lastSep < 0) continue;
     const headAndBody = block.slice(0, lastSep);
     const pathsPart = block.slice(lastSep + 1);
-    const [sha, subject, ...bodyLines] = headAndBody.split('\x1f');
+    const [sha, subject, ...bodyLines] = headAndBody.split("\x1f");
     if (!sha) continue;
     commits.push({
       // Canonical report SHA: 8-char short SHA (the git-default human form).
@@ -311,13 +307,16 @@ function buildReport(since: string, until: string): CoverageReport {
       // chars for the same commit a local run printed 8 for — so the report
       // normalizes to exactly 8 to stay comparable across environments.
       sha: sha.trim().slice(0, 8),
-      subject: (subject ?? '').trim(),
-      body: bodyLines.join('\x1f').trim(),
-      paths: pathsPart.split('\n').map((s) => s.trim()).filter(Boolean),
+      subject: (subject ?? "").trim(),
+      body: bodyLines.join("\x1f").trim(),
+      paths: pathsPart
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
     });
   }
   // 2. Merge-commit bodies (PR titles ride the merge body in this repo's history).
-  const merges = git(['log', '--merges', `--since=${since}`, `--until=${until}`, '--format=%B']);
+  const merges = git(["log", "--merges", `--since=${since}`, `--until=${until}`, "--format=%B"]);
   const mergeTickets = new Set<string>(extractTicketIds(merges));
 
   // 3′. Registered spec docs (coverage SSOT = the registry; the docs are the
@@ -347,10 +346,16 @@ function buildReport(since: string, until: string): CoverageReport {
     const touching = touchesTemplateSurface(c.paths);
     const attributed = attributeTouchingCommit(
       `${c.subject}\n${c.body}`,
-      c.paths.filter((p) => p.startsWith('tickets/')).flatMap((p) => extractTicketIds(p)),
+      c.paths.filter((p) => p.startsWith("tickets/")).flatMap((p) => extractTicketIds(p)),
       specIds,
     );
-    report.commits.push({ sha: c.sha, subject: c.subject, tickets: attributed.tickets, touching, specs: attributed.specCites });
+    report.commits.push({
+      sha: c.sha,
+      subject: c.subject,
+      tickets: attributed.tickets,
+      touching,
+      specs: attributed.specCites,
+    });
     if (!touching) continue;
     report.touchingCommits++;
     if (attributed.specCovered) {
@@ -373,49 +378,55 @@ function buildReport(since: string, until: string): CoverageReport {
 function printReport(r: CoverageReport): void {
   console.log(`Design-Gate coverage — window ${r.window.since} → ${r.window.until}`);
   console.log(`commits scanned: ${r.scannedCommits} (non-merge), template-touching: ${r.touchingCommits}`);
-  console.log('');
+  console.log("");
   if (r.tickets.length > 0) {
-    console.log('Ticket coverage (registry-join over docs/specs/registry.json — registered design doc names the ticket):');
+    console.log(
+      "Ticket coverage (registry-join over docs/specs/registry.json — registered design doc names the ticket):",
+    );
     for (const t of r.tickets) {
       if (t.covered) {
-        const specs = t.specs.map((s) => `${s.id} [${s.status}]`).join(', ');
+        const specs = t.specs.map((s) => `${s.id} [${s.status}]`).join(", ");
         console.log(`  ✅ ${t.id}  covered-by-spec: ${specs}`);
       } else {
-        console.log(`  ❌ ${t.id}  UNCOVERED — no registered spec names this ticket (exemption candidate E1–E5 for the review to adjudicate)`);
+        console.log(
+          `  ❌ ${t.id}  UNCOVERED — no registered spec names this ticket (exemption candidate E1–E5 for the review to adjudicate)`,
+        );
       }
     }
-    console.log('');
+    console.log("");
   }
   if (r.specCitedCommits.length > 0) {
-    console.log('Template-touching commits covered by a registered spec-name citation (v1.1.0 join):');
-    for (const c of r.specCitedCommits) console.log(`  ✅ ${c.sha}  ${c.subject}  spec: ${c.specs.join(', ')}`);
-    console.log('');
+    console.log("Template-touching commits covered by a registered spec-name citation (v1.1.0 join):");
+    for (const c of r.specCitedCommits) console.log(`  ✅ ${c.sha}  ${c.subject}  spec: ${c.specs.join(", ")}`);
+    console.log("");
   }
   if (r.unattributedCommits.length > 0) {
-    console.log('Template-touching commits citing no ticket id (and no registered spec name):');
+    console.log("Template-touching commits citing no ticket id (and no registered spec name):");
     for (const c of r.unattributedCommits) console.log(`  ❌ ${c.sha}  ${c.subject}`);
-    console.log('');
+    console.log("");
   }
   const uncoveredCount = r.uncovered.length + r.unattributedCommits.length;
   if (uncoveredCount === 0) {
-    console.log('Result: fully covered — every template-touching commit resolves to a registered spec.');
+    console.log("Result: fully covered — every template-touching commit resolves to a registered spec.");
   } else {
-    console.log(`Result: ${uncoveredCount} uncovered row(s) — for review adjudication (E1–E5); nothing auto-closes (design D8).`);
+    console.log(
+      `Result: ${uncoveredCount} uncovered row(s) — for review adjudication (E1–E5); nothing auto-closes (design D8).`,
+    );
   }
 }
 
 function main(): void {
   const args = process.argv.slice(2);
-  if (args.includes('--help') || args.includes('-h')) usage();
-  const json = args.includes('--json');
+  if (args.includes("--help") || args.includes("-h")) usage();
+  const json = args.includes("--json");
   const get = (flag: string): string | undefined => {
     const i = args.indexOf(flag);
     return i >= 0 ? args[i + 1] : undefined;
   };
-  const sinceArg = get('--since');
-  const untilArg = get('--until');
-  if (args.includes('--since') && !sinceArg) usage();
-  let since = sinceArg ?? '';
+  const sinceArg = get("--since");
+  const untilArg = get("--until");
+  if (args.includes("--since") && !sinceArg) usage();
+  let since = sinceArg ?? "";
   if (!since) {
     // "default = the review window" (design D8): the newest project-review
     // daily report's declared window; last 24 hours when nothing parses.
@@ -425,7 +436,7 @@ function main(): void {
     since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     console.error(`no --since given and no review-report window parsed — defaulting to ${since}`);
   }
-  const until = untilArg ?? 'HEAD';
+  const until = untilArg ?? "HEAD";
   const report = buildReport(since, until);
   if (json) {
     console.log(JSON.stringify(report, null, 2));

@@ -11,7 +11,7 @@
 //
 // Pure and side-effect-free so tests can exercise the merge without scaffolding.
 
-const OBJECT_KEYS = ['scripts', 'dependencies', 'devDependencies', 'engines', 'peerDependencies'] as const;
+const OBJECT_KEYS = ["scripts", "dependencies", "devDependencies", "engines", "peerDependencies"] as const;
 
 export function mergePackageJson(
   base: Record<string, unknown>,
@@ -23,8 +23,8 @@ export function mergePackageJson(
     const o = overlay[key];
     if (o === undefined) continue;
     const bothPlainObjects =
-      b && o && typeof b === 'object' && typeof o === 'object' && !Array.isArray(b) && !Array.isArray(o);
-    const overlayPlainObject = !!o && typeof o === 'object' && !Array.isArray(o);
+      b && o && typeof b === "object" && typeof o === "object" && !Array.isArray(b) && !Array.isArray(o);
+    const overlayPlainObject = !!o && typeof o === "object" && !Array.isArray(o);
     if (bothPlainObjects) {
       merged[key] = { ...(b as Record<string, unknown>), ...(o as Record<string, unknown>) };
     } else if (overlayPlainObject) {
@@ -36,10 +36,10 @@ export function mergePackageJson(
   return merged;
 }
 
-export const TIER2_SCRIPTS = ['audit', 'dev-sync', 'sync-md'] as const;
+export const TIER2_SCRIPTS = ["audit", "dev-sync", "sync-md"] as const;
 
 export function hasTier2Scripts(scripts: unknown): boolean {
-  if (!scripts || typeof scripts !== 'object' || Array.isArray(scripts)) return false;
+  if (!scripts || typeof scripts !== "object" || Array.isArray(scripts)) return false;
   return TIER2_SCRIPTS.every((s) => s in (scripts as Record<string, unknown>));
 }
 
@@ -53,18 +53,25 @@ export function evaluateScaffoldPackageContract(
   variantPkg: { scripts?: unknown } | null,
 ): { ok: boolean; reason?: string } {
   if (!hasTier2Scripts(commonPkg?.scripts)) {
-    return { ok: false, reason: 'common package.json lost the Tier 2 trio (audit, dev-sync, sync-md)' };
+    return { ok: false, reason: "common package.json lost the Tier 2 trio (audit, dev-sync, sync-md)" };
   }
   if (!variantPkg) return { ok: true };
-  if (variantPkg.scripts !== undefined && (typeof variantPkg.scripts !== 'object' || Array.isArray(variantPkg.scripts))) {
-    return { ok: false, reason: 'variant scripts must be an object when present — the merge keeps the generated scripts only for object values' };
+  if (
+    variantPkg.scripts !== undefined &&
+    (typeof variantPkg.scripts !== "object" || Array.isArray(variantPkg.scripts))
+  ) {
+    return {
+      ok: false,
+      reason:
+        "variant scripts must be an object when present — the merge keeps the generated scripts only for object values",
+    };
   }
   const merged = {
     ...((commonPkg.scripts ?? {}) as Record<string, unknown>),
     ...((variantPkg.scripts ?? {}) as Record<string, unknown>),
   };
   if (!hasTier2Scripts(merged)) {
-    return { ok: false, reason: 'merged scripts lose the Tier 2 trio' };
+    return { ok: false, reason: "merged scripts lose the Tier 2 trio" };
   }
   return { ok: true };
 }

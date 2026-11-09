@@ -39,7 +39,7 @@ function getAgentTemplate(options: AgentOptions): string {
 
 > **Agent Type**: ${groupText}
 > **Auto-Dispatch**: No (dispatch via PM or manual)
-> **Last Updated**: ${new Date().toISOString().split('T')[0]}
+> **Last Updated**: ${new Date().toISOString().split("T")[0]}
 
 ---
 
@@ -184,7 +184,7 @@ Examples:
   }
 
   const options: AgentOptions = {
-    name: args[0]
+    name: args[0],
   };
 
   for (let i = 1; i < args.length; i++) {
@@ -216,7 +216,7 @@ async function main(): Promise<void> {
 }
 
 if (import.meta.main) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error("Error:", error);
     process.exit(1);
   });

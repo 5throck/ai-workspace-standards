@@ -24,15 +24,15 @@
  * design §7 — never fall back to a raw glob).
  */
 
-import { resolve } from 'node:path';
-import { excludedFleetIds, fleetExclusions, listFleetProjects } from './lib/fleet.ts';
+import { resolve } from "node:path";
+import { excludedFleetIds, fleetExclusions, listFleetProjects } from "./lib/fleet.ts";
 
 function parseArgs(argv: string[]): { json: boolean; root?: string; help: boolean } {
   const out: { json: boolean; root?: string; help: boolean } = { json: false, help: false };
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--json') out.json = true;
-    else if (argv[i] === '--root') out.root = argv[++i];
-    else if (argv[i] === '--help' || argv[i] === '-h') out.help = true;
+    if (argv[i] === "--json") out.json = true;
+    else if (argv[i] === "--root") out.root = argv[++i];
+    else if (argv[i] === "--help" || argv[i] === "-h") out.help = true;
     else {
       console.error(`fleet-list.ts: unknown argument '${argv[i]}' (accepted: --json, --root <path>, --help)`);
       process.exit(2);
@@ -43,7 +43,7 @@ function parseArgs(argv: string[]): { json: boolean; root?: string; help: boolea
 
 function main(): void {
   const { json, root: rootArg, help } = parseArgs(process.argv.slice(2));
-  const root = resolve(rootArg ?? resolve(import.meta.dir, '..'));
+  const root = resolve(rootArg ?? resolve(import.meta.dir, ".."));
   if (help) {
     console.log(`fleet-list.ts — fleet membership SSOT (docs/fleet-membership.json)
 

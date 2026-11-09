@@ -469,7 +469,7 @@ describe('13.2 identity', () => {
     const s = open(ws.root);
     const init = await s.send('initialize', { protocolVersion: '2025-06-18' });
     const header = readFileSync(serverPath, 'utf-8').match(/@version\s+([\d.]+)/)![1];
-    const constant = readFileSync(serverPath, 'utf-8').match(/export const SERVER_VERSION = '([\d.]+)'/)![1];
+    const constant = readFileSync(serverPath, 'utf-8').match(/export const SERVER_VERSION = ['\"]([\d.]+)['\"]/)![1];
     expect(constant).toBe(header);
     expect(init.result.serverInfo.version).toBe(header);
     s.child.kill();

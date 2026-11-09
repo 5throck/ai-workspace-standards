@@ -40,12 +40,12 @@
  *  outer blank lines trimmed. Comparison unit for content parity. */
 export function normalizeBlockContent(raw: string): string {
   return raw
-    .replace(/\r\n/g, '\n')
-    .split('\n')
-    .map((line) => line.replace(/\s+$/, ''))
-    .join('\n')
-    .replace(/^\n+/, '')
-    .replace(/\n+$/, '');
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.replace(/\s+$/, ""))
+    .join("\n")
+    .replace(/^\n+/, "")
+    .replace(/\n+$/, "");
 }
 
 /** Extract the inner content of a `<!-- WORKSPACE-MANAGED: <key> -->` block as
@@ -53,7 +53,7 @@ export function normalizeBlockContent(raw: string): string {
 export function parseManagedBlockOpen(line: string): string | null {
   const match = line.match(/^\s*<!--\s*WORKSPACE-MANAGED:\s*(.*?)\s*-->\s*$/);
   if (!match) return null;
-  return match[1].replace(/\s+/g, ' ').trim();
+  return match[1].replace(/\s+/g, " ").trim();
 }
 
 /**
@@ -65,11 +65,8 @@ export function parseManagedBlockOpen(line: string): string | null {
  * an open marker whose close marker never arrives. The validator surfaces
  * these as Errors instead of silently ignoring a truncated block.
  */
-export function extractKeyedBlocks(
-  content: string,
-  issues?: string[],
-): Map<string, string[]> {
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+export function extractKeyedBlocks(content: string, issues?: string[]): Map<string, string[]> {
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
   const result = new Map<string, string[]>();
   let openKey: string | null = null;
   let inner: string[] = [];
@@ -85,7 +82,7 @@ export function extractKeyedBlocks(
     }
     if (/^\s*<!--\s*\/WORKSPACE-MANAGED\s*-->\s*$/.test(line)) {
       const bucket = result.get(openKey) ?? [];
-      bucket.push(normalizeBlockContent(inner.join('\n')));
+      bucket.push(normalizeBlockContent(inner.join("\n")));
       result.set(openKey, bucket);
       openKey = null;
       inner = [];
@@ -104,7 +101,7 @@ export interface BlockParityViolation {
   /** The managed-block key the violation belongs to. */
   key: string;
   /** missing-key | missing-content | extra-content */
-  kind: 'missing-key' | 'missing-content' | 'extra-content';
+  kind: "missing-key" | "missing-content" | "extra-content";
   /** The offending/missing normalized content (empty for missing-key). */
   content: string;
 }
@@ -127,13 +124,13 @@ export function compareKeyedBlocks(
   for (const [key, commonContents] of common) {
     const variantContents = variant.get(key);
     if (!variantContents) {
-      violations.push({ key, kind: 'missing-key', content: '' });
+      violations.push({ key, kind: "missing-key", content: "" });
       continue;
     }
     const variantSet = new Set(variantContents);
     for (const content of commonContents) {
       if (!variantSet.has(content)) {
-        violations.push({ key, kind: 'missing-content', content });
+        violations.push({ key, kind: "missing-content", content });
       }
     }
   }
@@ -142,7 +139,7 @@ export function compareKeyedBlocks(
     const commonSet = new Set(common.get(key) ?? []);
     for (const content of variantContents) {
       if (!commonSet.has(content)) {
-        violations.push({ key, kind: 'extra-content', content });
+        violations.push({ key, kind: "extra-content", content });
       }
     }
   }
@@ -177,7 +174,7 @@ export function extractCommonAgentsBlock(content: string, issues?: string[]): st
   if (!open || open.index === undefined) return null;
   const closeMatch = content.slice(open.index).match(/<!--\s*\/?COMMON-AGENTS:END\s*-->/);
   if (!closeMatch || closeMatch.index === undefined) {
-    if (issues) issues.push('unterminated COMMON-AGENTS block (START without END)');
+    if (issues) issues.push("unterminated COMMON-AGENTS block (START without END)");
     return null;
   }
   const start = open.index + open[0].length;
@@ -189,10 +186,7 @@ export function extractCommonAgentsBlock(content: string, issues?: string[]): st
  *  Returns the violation kind, or null when parity holds:
  *  - 'missing'  — the variant file carries no COMMON-AGENTS block;
  *  - 'mismatch' — the block exists but its normalized content differs. */
-export function compareCommonAgentsBlock(
-  common: string,
-  variant: string | null,
-): 'missing' | 'mismatch' | null {
-  if (variant === null) return 'missing';
-  return normalizeBlockContent(common) === normalizeBlockContent(variant) ? null : 'mismatch';
+export function compareCommonAgentsBlock(common: string, variant: string | null): "missing" | "mismatch" | null {
+  if (variant === null) return "missing";
+  return normalizeBlockContent(common) === normalizeBlockContent(variant) ? null : "mismatch";
 }

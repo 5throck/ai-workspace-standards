@@ -18,15 +18,15 @@
  * @Risk #5: Rollback Capability (P1 - High)
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'fs';
-import { join, dirname } from 'path';
-import { ErrorPhase } from './error-handling';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { ErrorPhase } from "./error-handling";
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export type PipelineStatus = 'in_progress' | 'completed' | 'failed' | 'rolled_back';
+export type PipelineStatus = "in_progress" | "completed" | "failed" | "rolled_back";
 
 /** Phase names are pipeline-specific since v1.2.0 — ErrorPhase values still accepted. */
 export type PipelinePhase = ErrorPhase | string;
@@ -38,7 +38,7 @@ export interface RollbackAction {
   executed: boolean;
   timestamp: string;
   /** v1.2.0: file content captured BEFORE the destructive write — enables true undo. */
-  backup?: { encoding: 'utf8'; content: string };
+  backup?: { encoding: "utf8"; content: string };
 }
 
 export interface PipelineState {
@@ -56,8 +56,8 @@ export interface PipelineState {
 // STATE MANAGEMENT
 // ============================================================================
 
-const STATE_DIR = join(process.cwd(), '.pipeline-state');
-const STATE_FILE = join(STATE_DIR, 'current-state.json');
+const STATE_DIR = join(process.cwd(), ".pipeline-state");
+const STATE_FILE = join(STATE_DIR, "current-state.json");
 
 let stateFileOverride: string | null = null;
 
@@ -85,9 +85,13 @@ function resolveStateFile(): string {
  * Initialize pipeline state
  * @version 1.1.0
  */
-export function initializeState(variantName: string, l3ProjectPath?: string, currentPhase: PipelinePhase = 'adr_validation'): PipelineState {
+export function initializeState(
+  variantName: string,
+  l3ProjectPath?: string,
+  currentPhase: PipelinePhase = "adr_validation",
+): PipelineState {
   const state: PipelineState = {
-    status: 'in_progress',
+    status: "in_progress",
     currentPhase,
     startedAt: new Date().toISOString(),
     variantName,
@@ -111,7 +115,7 @@ export function saveState(state: PipelineState): void {
     mkdirSync(dirname(stateFile), { recursive: true });
   }
 
-  writeFileSync(stateFile, JSON.stringify(state, null, 2), 'utf-8');
+  writeFileSync(stateFile, JSON.stringify(state, null, 2), "utf-8");
 }
 
 /**
@@ -125,7 +129,7 @@ export function loadState(): PipelineState | null {
   }
 
   try {
-    const content = readFileSync(stateFile, 'utf-8');
+    const content = readFileSync(stateFile, "utf-8");
     return JSON.parse(content) as PipelineState;
   } catch {
     return null;
@@ -139,7 +143,7 @@ export function loadState(): PipelineState | null {
 export function updatePhase(phase: PipelinePhase): void {
   const state = loadState();
   if (!state) {
-    throw new Error('No active pipeline state found');
+    throw new Error("No active pipeline state found");
   }
 
   state.currentPhase = phase;
@@ -150,14 +154,10 @@ export function updatePhase(phase: PipelinePhase): void {
  * Add rollback action
  * @version 1.1.0
  */
-export function addRollbackAction(
-  phase: PipelinePhase,
-  action: string,
-  target: string
-): void {
+export function addRollbackAction(phase: PipelinePhase, action: string, target: string): void {
   const state = loadState();
   if (!state) {
-    throw new Error('No active pipeline state found');
+    throw new Error("No active pipeline state found");
   }
 
   state.rollbackActions.push({
@@ -176,19 +176,13 @@ export function addRollbackAction(
  * Call this BEFORE overwriting/moving/deleting `target` so the undo pass can
  * restore the exact prior content instead of warning "cannot restore".
  */
-export function addRollbackActionWithBackup(
-  phase: PipelinePhase,
-  action: string,
-  target: string
-): void {
+export function addRollbackActionWithBackup(phase: PipelinePhase, action: string, target: string): void {
   const state = loadState();
   if (!state) {
-    throw new Error('No active pipeline state found');
+    throw new Error("No active pipeline state found");
   }
 
-  const backup = existsSync(target)
-    ? { encoding: 'utf8' as const, content: readFileSync(target, 'utf8') }
-    : undefined;
+  const backup = existsSync(target) ? { encoding: "utf8" as const, content: readFileSync(target, "utf8") } : undefined;
 
   state.rollbackActions.push({
     phase,
@@ -209,10 +203,10 @@ export function addRollbackActionWithBackup(
 export function markRollbackExecuted(target: string): void {
   const state = loadState();
   if (!state) {
-    throw new Error('No active pipeline state found');
+    throw new Error("No active pipeline state found");
   }
 
-  const action = state.rollbackActions.find(a => a.target === target);
+  const action = state.rollbackActions.find((a) => a.target === target);
   if (action) {
     action.executed = true;
     saveState(state);
@@ -226,10 +220,10 @@ export function markRollbackExecuted(target: string): void {
 export function completePipeline(): void {
   const state = loadState();
   if (!state) {
-    throw new Error('No active pipeline state found');
+    throw new Error("No active pipeline state found");
   }
 
-  state.status = 'completed';
+  state.status = "completed";
   state.completedAt = new Date().toISOString();
   saveState(state);
 }
@@ -241,10 +235,10 @@ export function completePipeline(): void {
 export function failPipeline(): void {
   const state = loadState();
   if (!state) {
-    throw new Error('No active pipeline state found');
+    throw new Error("No active pipeline state found");
   }
 
-  state.status = 'failed';
+  state.status = "failed";
   state.completedAt = new Date().toISOString();
   saveState(state);
 }
@@ -256,10 +250,10 @@ export function failPipeline(): void {
 export function rollbackPipeline(): void {
   const state = loadState();
   if (!state) {
-    throw new Error('No active pipeline state found');
+    throw new Error("No active pipeline state found");
   }
 
-  state.status = 'rolled_back';
+  state.status = "rolled_back";
   state.completedAt = new Date().toISOString();
   saveState(state);
 }
@@ -275,7 +269,7 @@ export function rollbackPipeline(): void {
 export async function executeRollback(): Promise<boolean> {
   const state = loadState();
   if (!state) {
-    console.error('No active pipeline state found for rollback');
+    console.error("No active pipeline state found for rollback");
     return false;
   }
 
@@ -312,9 +306,9 @@ export async function executeRollback(): Promise<boolean> {
 
   if (success) {
     rollbackPipeline();
-    console.log('\n✅ Rollback complete');
+    console.log("\n✅ Rollback complete");
   } else {
-    console.log('\n⚠️  Rollback completed with errors');
+    console.log("\n⚠️  Rollback completed with errors");
   }
 
   return success;
@@ -328,38 +322,38 @@ async function executeRollbackAction(action: RollbackAction): Promise<void> {
   const { action: actionType, target } = action;
 
   switch (actionType) {
-    case 'create_file':
+    case "create_file":
       // Delete created file (force: missing-ok, same semantics as `rm -f`)
       rmSync(target, { force: true });
       break;
 
-    case 'create_directory':
+    case "create_directory":
       // Delete created directory (recursive+force, same semantics as `rm -rf`)
       rmSync(target, { recursive: true, force: true });
       break;
 
-    case 'copy_file':
+    case "copy_file":
       // Delete copied file (force: missing-ok, same semantics as `rm -f`)
       rmSync(target, { force: true });
       break;
 
-    case 'modify_file':
-    case 'delete_file':
-    case 'move_file':
+    case "modify_file":
+    case "delete_file":
+    case "move_file":
       // v1.2.0: restore the pre-destruction snapshot when one was recorded.
-      if (action.backup?.encoding === 'utf8') {
+      if (action.backup?.encoding === "utf8") {
         mkdirSync(dirname(target), { recursive: true });
-        writeFileSync(target, action.backup.content, 'utf8');
+        writeFileSync(target, action.backup.content, "utf8");
       } else {
         console.warn(`⚠️  Cannot restore file without backup: ${target}`);
       }
       break;
 
-    case 'update_registry':
+    case "update_registry":
       // Restore registry from backup
-      if (action.backup?.encoding === 'utf8') {
+      if (action.backup?.encoding === "utf8") {
         mkdirSync(dirname(target), { recursive: true });
-        writeFileSync(target, action.backup.content, 'utf8');
+        writeFileSync(target, action.backup.content, "utf8");
       } else {
         console.warn(`⚠️  Cannot restore registry without backup: ${target}`);
       }
@@ -402,5 +396,5 @@ export function getStateSummary(): string | null {
     `Rollback Actions: ${state.rollbackActions.length}`,
   ].filter(Boolean) as string[];
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

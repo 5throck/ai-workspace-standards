@@ -24,7 +24,7 @@ const G = "\x1b[32m"; // green
 const Y = "\x1b[33m"; // yellow
 const R = "\x1b[31m"; // red
 const C = "\x1b[36m"; // cyan
-const Z = "\x1b[0m";  // reset
+const Z = "\x1b[0m"; // reset
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 
@@ -113,27 +113,34 @@ interface TeamBuilderProposal {
   approvedAt: string;
 }
 
-function validateProposal(obj: unknown): { valid: true; proposal: TeamBuilderProposal } | { valid: false; errors: string[] } {
+function validateProposal(
+  obj: unknown,
+): { valid: true; proposal: TeamBuilderProposal } | { valid: false; errors: string[] } {
   const errors: string[] = [];
   if (typeof obj !== "object" || obj === null) {
     return { valid: false, errors: ["Root value must be an object"] };
   }
   const p = obj as Record<string, unknown>;
 
-  if (typeof p.version !== "string")       errors.push("Missing or invalid field: version (string)");
-  if (typeof p.timestamp !== "string")     errors.push("Missing or invalid field: timestamp (string)");
-  if (typeof p.teamName !== "string")      errors.push("Missing or invalid field: teamName (string)");
-  if (!Array.isArray(p.benchmarkSources))  errors.push("Missing or invalid field: benchmarkSources (array)");
-  if (typeof p.approvedBy !== "string")    errors.push("Missing or invalid field: approvedBy (string)");
-  if (typeof p.approvedAt !== "string")    errors.push("Missing or invalid field: approvedAt (string)");
+  if (typeof p.version !== "string") errors.push("Missing or invalid field: version (string)");
+  if (typeof p.timestamp !== "string") errors.push("Missing or invalid field: timestamp (string)");
+  if (typeof p.teamName !== "string") errors.push("Missing or invalid field: teamName (string)");
+  if (!Array.isArray(p.benchmarkSources)) errors.push("Missing or invalid field: benchmarkSources (array)");
+  if (typeof p.approvedBy !== "string") errors.push("Missing or invalid field: approvedBy (string)");
+  if (typeof p.approvedAt !== "string") errors.push("Missing or invalid field: approvedAt (string)");
 
   if (typeof p.changes !== "object" || p.changes === null) {
     errors.push("Missing or invalid field: changes (object)");
   } else {
     const c = p.changes as Record<string, unknown>;
     for (const key of [
-      "agentsToCreate", "agentsToConvert", "agentsToDelete",
-      "skillsToCreate", "skillsToModify", "skillsToReassign", "workflowPhases",
+      "agentsToCreate",
+      "agentsToConvert",
+      "agentsToDelete",
+      "skillsToCreate",
+      "skillsToModify",
+      "skillsToReassign",
+      "workflowPhases",
     ]) {
       if (!Array.isArray(c[key])) errors.push(`changes.${key} must be an array`);
     }
@@ -156,10 +163,10 @@ const CWD = process.cwd();
 const CHECKPOINT_FILE = join(CWD, "memory", ".team-builder-checkpoint.json");
 
 const STEP_DEFS: Omit<Checkpoint, "status">[] = [
-  { step: 6,  label: "Pre-conditions check" },
-  { step: 7,  label: "Proactive skill transfer (reassign skills before deletion)" },
-  { step: 8,  label: "Delete agents" },
-  { step: 9,  label: "Convert agents (rename files + update frontmatter)" },
+  { step: 6, label: "Pre-conditions check" },
+  { step: 7, label: "Proactive skill transfer (reassign skills before deletion)" },
+  { step: 8, label: "Delete agents" },
+  { step: 9, label: "Convert agents (rename files + update frontmatter)" },
   { step: 10, label: "Create new agents" },
   { step: 11, label: "Update AGENTS.md" },
   { step: 12, label: "Update workflow documentation" },
@@ -186,7 +193,7 @@ function loadCheckpoints(): Checkpoint[] {
       // makes a resumed run look fresh without explanation. (A missing file is
       // normal first-run state and stays silent — see the existsSync guard.)
       console.warn(
-        `[team-builder] ⚠️  Could not load checkpoint file ${CHECKPOINT_FILE} — restarting with fresh checkpoints (${err instanceof Error ? err.message : String(err)})`
+        `[team-builder] ⚠️  Could not load checkpoint file ${CHECKPOINT_FILE} — restarting with fresh checkpoints (${err instanceof Error ? err.message : String(err)})`,
       );
       return initCheckpoints();
     }
@@ -236,7 +243,11 @@ async function writeFile(path: string, content: string): Promise<void> {
 }
 
 function deleteFile(filePath: string): void {
-  try { unlinkSync(filePath); } catch (err) { console.error(`[team-builder] Error: ${err}`); }
+  try {
+    unlinkSync(filePath);
+  } catch (err) {
+    console.error(`[team-builder] Error: ${err}`);
+  }
 }
 
 // ─── Template generators ──────────────────────────────────────────────────────
@@ -246,15 +257,9 @@ export function generateAgentMd(a: AgentToCreate): string {
   // dispatch time from docs/workspace-schema.json `models`, never emitted here.
   const tier = resolveAgentTier(a.tier);
   const phasesYaml = a.phases.map((p) => `  - "${p}"`).join("\n");
-  const handoffToYaml = a.handoffTo.length
-    ? a.handoffTo.map((h) => `  - ${h}`).join("\n")
-    : "  []";
-  const handoffFromYaml = a.handoffFrom.length
-    ? a.handoffFrom.map((h) => `  - ${h}`).join("\n")
-    : "  []";
-  const requiredSkillsYaml = a.requiredSkills.length
-    ? a.requiredSkills.map((s) => `  - ${s}`).join("\n")
-    : "  []";
+  const handoffToYaml = a.handoffTo.length ? a.handoffTo.map((h) => `  - ${h}`).join("\n") : "  []";
+  const handoffFromYaml = a.handoffFrom.length ? a.handoffFrom.map((h) => `  - ${h}`).join("\n") : "  []";
+  const requiredSkillsYaml = a.requiredSkills.length ? a.requiredSkills.map((s) => `  - ${s}`).join("\n") : "  []";
   const phasesInline = a.phases.join(", ");
 
   return `---
@@ -340,10 +345,7 @@ prerequisites: ${prereqs}
 
 // ─── Step 6: Pre-conditions ───────────────────────────────────────────────────
 
-async function checkPreconditions(
-  proposal: TeamBuilderProposal,
-  skipChecks: boolean
-): Promise<boolean> {
+async function checkPreconditions(proposal: TeamBuilderProposal, skipChecks: boolean): Promise<boolean> {
   if (skipChecks) {
     console.log(`${Y}[WARN] --skip-checks active: bypassing pre-condition checks.${Z}`);
     return true;
@@ -392,9 +394,7 @@ async function checkPreconditions(
 
 // ─── Step 7: Proactive skill transfer ────────────────────────────────────────
 
-async function proactiveSkillTransfer(
-  proposal: TeamBuilderProposal
-): Promise<void> {
+async function proactiveSkillTransfer(proposal: TeamBuilderProposal): Promise<void> {
   const transfers: SkillToReassign[] = [];
 
   // Gather transfers from deletions
@@ -461,18 +461,13 @@ async function convertAgents(proposal: TeamBuilderProposal): Promise<void> {
     let content = await readFile(srcPath);
 
     // Update formal_name
-    content = content.replace(
-      /^formal_name: .+$/m,
-      `formal_name: ${conv.newFormalName}`
-    );
+    content = content.replace(/^formal_name: .+$/m, `formal_name: ${conv.newFormalName}`);
 
     // Replace skills in required_skills frontmatter for replaced skills
     for (const replaced of conv.skillsReplaced) {
       // Remove line referencing replaced skill in frontmatter list
       const lines = content.split("\n");
-      const filtered = lines.filter(
-        (l) => !(l.trim().startsWith("- ") && l.includes(replaced))
-      );
+      const filtered = lines.filter((l) => !(l.trim().startsWith("- ") && l.includes(replaced)));
       content = filtered.join("\n");
     }
 
@@ -603,13 +598,10 @@ async function updateWorkflowDocs(proposal: TeamBuilderProposal): Promise<void> 
         // Replace Lead: line within this section
         const idx = content.indexOf(phaseHeader);
         const nextIdx = content.indexOf("\n## ", idx + 1);
-        const section = nextIdx !== -1
-          ? content.slice(idx, nextIdx)
-          : content.slice(idx);
+        const section = nextIdx !== -1 ? content.slice(idx, nextIdx) : content.slice(idx);
         const updated = section.replace(/\*\*Lead\*\*: .+/, `**Lead**: ${wp.lead}`);
-        content = nextIdx !== -1
-          ? content.slice(0, idx) + updated + content.slice(nextIdx)
-          : content.slice(0, idx) + updated;
+        content =
+          nextIdx !== -1 ? content.slice(0, idx) + updated + content.slice(nextIdx) : content.slice(0, idx) + updated;
         console.log(`  Updated phase-definitions.md for phase ${wp.phase}`);
       }
     }
@@ -625,7 +617,9 @@ async function updateWorkflowDocs(proposal: TeamBuilderProposal): Promise<void> 
     let changed = false;
     for (const del of proposal.changes.agentsToDelete) {
       if (content.includes(del.name)) {
-        console.log(`  ${Y}[WARN] co-work.context.md references deleted agent "${del.name}" — manual review recommended.${Z}`);
+        console.log(
+          `  ${Y}[WARN] co-work.context.md references deleted agent "${del.name}" — manual review recommended.${Z}`,
+        );
       }
     }
     for (const conv of proposal.changes.agentsToConvert) {
@@ -718,9 +712,8 @@ async function recordChangeHistory(proposal: TeamBuilderProposal): Promise<void>
   const converted = proposal.changes.agentsToConvert.map((a) => a.newFile).join(", ") || "none";
   const deleted = proposal.changes.agentsToDelete.map((a) => a.name).join(", ") || "none";
   const skillsCreated = proposal.changes.skillsToCreate.map((s) => s.name).join(", ") || "none";
-  const skillsReassigned = proposal.changes.skillsToReassign
-    .map((s) => `${s.skill} (→${s.toOwner})`)
-    .join(", ") || "none";
+  const skillsReassigned =
+    proposal.changes.skillsToReassign.map((s) => `${s.skill} (→${s.toOwner})`).join(", ") || "none";
 
   const entry = `
 ## Team Builder Execution — ${new Date().toISOString()}
@@ -786,7 +779,9 @@ function runDryRun(proposal: TeamBuilderProposal): void {
 
   // Workflow docs
   if (proposal.changes.workflowPhases.length > 0) {
-    console.log(`${Y}[DRY-RUN] Would update: docs/phase-definitions.md (${proposal.changes.workflowPhases.length} phases)${Z}`);
+    console.log(
+      `${Y}[DRY-RUN] Would update: docs/phase-definitions.md (${proposal.changes.workflowPhases.length} phases)${Z}`,
+    );
     console.log(`${Y}[DRY-RUN] Would review: docs/co-work.context.md for agent name references${Z}`);
   }
 

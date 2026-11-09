@@ -16,10 +16,10 @@
 // normalizeBlockContent (line-trailing-whitespace strip + blank-edge collapse)
 // — the same "byte-identical after line normalization" contract PM-04b uses.
 
-import { normalizeBlockContent } from './managed-block-parity.ts';
+import { normalizeBlockContent } from "./managed-block-parity.ts";
 
-export const TRAIL_BLOCK_START = '<!-- trail:start -->';
-export const TRAIL_BLOCK_END = '<!-- trail:end -->';
+export const TRAIL_BLOCK_START = "<!-- trail:start -->";
+export const TRAIL_BLOCK_END = "<!-- trail:end -->";
 
 /** Extract the whole trail marker block (markers inclusive) from an AGENTS.md
  *  body, or null when absent. Multiple blocks are a defect the arm reports
@@ -43,10 +43,10 @@ export function countTrailBlocks(content: string): number {
 export function compareTrailBlock(
   reference: string,
   candidateContent: string,
-): 'missing' | 'duplicate' | 'mismatch' | null {
+): "missing" | "duplicate" | "mismatch" | null {
   const count = countTrailBlocks(candidateContent);
-  if (count === 0) return 'missing';
-  if (count > 1) return 'duplicate';
+  if (count === 0) return "missing";
+  if (count > 1) return "duplicate";
   const block = extractTrailBlock(candidateContent)!;
-  return normalizeBlockContent(reference) === normalizeBlockContent(block) ? null : 'mismatch';
+  return normalizeBlockContent(reference) === normalizeBlockContent(block) ? null : "mismatch";
 }

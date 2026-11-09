@@ -100,13 +100,14 @@ async function discoverAgents(targetDir: string): Promise<AgentInfo[]> {
     try {
       const content = await fs.readFile(agentsMdPath, "utf-8");
       const tableRowRegex = /\|\s*\*\*([a-zA-Z0-9_-]+)\*\*\s*\|\s*\[?`?([^`\]]+)`?\]?\s*\|\s*([^|]+)\|\s*([^|]+)\|/g;
-      let match: RegExpExecArray | null;
-      while ((match = tableRowRegex.exec(content)) !== null) {
+      let match: RegExpExecArray | null = tableRowRegex.exec(content);
+      while (match !== null) {
         const name = match[1].trim();
         const role = match[4].trim();
         if (name && name.toLowerCase() !== "agent" && !agents.has(name)) {
           agents.set(name, { name, role, source: "AGENTS.md" });
         }
+        match = tableRowRegex.exec(content);
       }
     } catch {
       // Ignore read errors
@@ -142,12 +143,28 @@ async function discoverAgents(targetDir: string): Promise<AgentInfo[]> {
   if (agents.size === 0) {
     const defaults: AgentInfo[] = [
       { name: "pm", role: "Project Manager - orchestrates workflow and team assembly", source: "default" },
-      { name: "architect", role: "Design agent - produces implementation plans and technical specs", source: "default" },
+      {
+        name: "architect",
+        role: "Design agent - produces implementation plans and technical specs",
+        source: "default",
+      },
       { name: "code-writer", role: "Implementation agent - writes source code from approved plans", source: "default" },
       { name: "designer", role: "UI/UX design agent - produces components and design tokens", source: "default" },
-      { name: "security-monitor", role: "Security monitor - scans vulnerabilities and security gates", source: "default" },
-      { name: "stack-setup", role: "Stack setup specialist - manages environment and IDE integration", source: "default" },
-      { name: "test-runner", role: "QA and verification agent - executes tests and validates criteria", source: "default" },
+      {
+        name: "security-monitor",
+        role: "Security monitor - scans vulnerabilities and security gates",
+        source: "default",
+      },
+      {
+        name: "stack-setup",
+        role: "Stack setup specialist - manages environment and IDE integration",
+        source: "default",
+      },
+      {
+        name: "test-runner",
+        role: "QA and verification agent - executes tests and validates criteria",
+        source: "default",
+      },
     ];
     for (const d of defaults) {
       agents.set(d.name, d);

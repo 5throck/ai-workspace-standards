@@ -93,11 +93,12 @@ function checkUrl(urlStr: string): Promise<CheckResult | "TIMEOUT" | "ERROR"> {
           method: currentMethod,
           timeout: TIMEOUT_MS,
           headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
             "Accept-Encoding": "gzip, deflate, br",
-            "Connection": "keep-alive",
+            Connection: "keep-alive",
             "Upgrade-Insecure-Requests": "1",
           },
         },
@@ -182,11 +183,7 @@ function checkUrl(urlStr: string): Promise<CheckResult | "TIMEOUT" | "ERROR"> {
  * Like Promise.allSettled but limited to `limit` concurrent promises.
  * Returns results in the same order as the inputs.
  */
-async function mapLimit<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let index = 0;
 
@@ -211,8 +208,10 @@ function extractExternalUrls(html: string): string[] {
   const urls: string[] = [];
   const aRe = /<a\s+(?:[^>]*?\s)?href="(https?:\/\/[^"]*)"[^>]*>/gi;
   let m: RegExpExecArray | null;
-  while ((m = aRe.exec(html)) !== null) {
+  m = aRe.exec(html);
+  while (m !== null) {
     urls.push(m[1]);
+    m = aRe.exec(html);
   }
   return urls;
 }

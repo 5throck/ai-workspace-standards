@@ -17,9 +17,9 @@
  * tracked files, foreign skills needing manifest protection).
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
-import { join } from 'path';
-import { iterEffectiveTemplateFiles, resolveClaim } from '../lib/upgrade-policy.ts';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { iterEffectiveTemplateFiles, resolveClaim } from "../lib/upgrade-policy.ts";
 
 // ============================================================================
 // TYPES
@@ -29,7 +29,7 @@ export const ADOPT_PLAN_VERSION = 1;
 
 export interface DeliveredPath {
   rel: string;
-  source: 'common' | 'variant';
+  source: "common" | "variant";
   claimPass: string;
 }
 
@@ -39,13 +39,13 @@ export interface Collision {
 }
 
 export interface HookManagerFinding {
-  kind: 'husky' | 'simple-git-hooks' | 'lefthook' | 'pre-commit-config' | 'custom-githooks';
+  kind: "husky" | "simple-git-hooks" | "lefthook" | "pre-commit-config" | "custom-githooks";
   detail: string;
 }
 
 export interface WorkflowTrace {
   rel: string;
-  kind: 'docs' | 'ci' | 'platform-twin' | 'agent-doc' | 'build';
+  kind: "docs" | "ci" | "platform-twin" | "agent-doc" | "build";
 }
 
 export interface AdoptionPlan {
@@ -68,9 +68,9 @@ export interface AdoptionPlan {
 // DELIVERED-PATH DERIVATION
 // ============================================================================
 
-const TEMPLATE_SKIP_DIRS = new Set(['node_modules', '.git', '.gateguard-state', '.DS_Store']);
+const TEMPLATE_SKIP_DIRS = new Set(["node_modules", ".git", ".gateguard-state", ".DS_Store"]);
 
-function walkTemplateFiles(dir: string, prefix = ''): string[] {
+function walkTemplateFiles(dir: string, prefix = ""): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (TEMPLATE_SKIP_DIRS.has(entry.name)) continue;
@@ -90,7 +90,7 @@ function walkTemplateFiles(dir: string, prefix = ''): string[] {
  */
 export function deriveDeliveredPaths(commonDir: string, variantDir: string | null): Map<string, DeliveredPath> {
   const delivered = new Map<string, DeliveredPath>();
-  const effective: Array<{ rel: string; source: 'common' | 'variant' }> = [];
+  const effective: Array<{ rel: string; source: "common" | "variant" }> = [];
   for (const f of iterEffectiveTemplateFiles(commonDir, variantDir && existsSync(variantDir) ? variantDir : null)) {
     effective.push({ rel: f.rel, source: f.source });
   }
@@ -122,11 +122,11 @@ export function scanCollisions(projectDir: string, delivered: Map<string, Delive
  * test-* harnesses are exempt (same exclusion as the audit).
  */
 export function scanRetainedForeignScripts(projectDir: string, delivered: Map<string, DeliveredPath>): string[] {
-  const scriptsDir = join(projectDir, 'scripts');
+  const scriptsDir = join(projectDir, "scripts");
   if (!existsSync(scriptsDir)) return [];
   const out: string[] = [];
   for (const entry of readdirSync(scriptsDir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith('.ts') || entry.name.startsWith('test-')) continue;
+    if (!entry.isFile() || !entry.name.endsWith(".ts") || entry.name.startsWith("test-")) continue;
     const rel = `scripts/${entry.name}`;
     if (delivered.has(rel)) continue;
     out.push(rel);
@@ -139,51 +139,59 @@ export function scanRetainedForeignScripts(projectDir: string, delivered: Map<st
 // ============================================================================
 
 const SECRET_PATH_PATTERNS: RegExp[] = [
-  /(^|\/)\.env(\..+)?$/,            // .env, .env.local, .env.production
-  /\.(pem|key|p12|pfx)$/i,          // key material
+  /(^|\/)\.env(\..+)?$/, // .env, .env.local, .env.production
+  /\.(pem|key|p12|pfx)$/i, // key material
   /credential/i,
   /secret/i,
-  /service-account.*\.json$/i,      // GCP-style service accounts
+  /service-account.*\.json$/i, // GCP-style service accounts
 ];
 
 /** Secret-shaped paths among the supplied tracked-file list. Refusal-grade: --yes cannot bypass. */
 export function findSecretShapedFiles(trackedFiles: string[]): string[] {
-  return trackedFiles.filter(f => SECRET_PATH_PATTERNS.some(p => p.test(f))).sort();
+  return trackedFiles.filter((f) => SECRET_PATH_PATTERNS.some((p) => p.test(f))).sort();
 }
 
-const GOVERNED_GITHOOKS = new Set([
-  'pre-commit', 'pre-push', 'commit-msg', 'post-checkout', 'pre-rebase',
-]);
+const GOVERNED_GITHOOKS = new Set(["pre-commit", "pre-push", "commit-msg", "post-checkout", "pre-rebase"]);
 
 /** Hook-manager conflicts that would fight the workspace's .githooks enforcement. Refusal-grade. */
 export function detectHookManagerConflicts(projectDir: string): HookManagerFinding[] {
   const findings: HookManagerFinding[] = [];
-  const pkgPath = join(projectDir, 'package.json');
+  const pkgPath = join(projectDir, "package.json");
   if (existsSync(pkgPath)) {
     try {
-      const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
+      const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as {
         scripts?: Record<string, string>;
         dependencies?: Record<string, string>;
         devDependencies?: Record<string, string>;
       };
-      const prepare = pkg.scripts?.prepare ?? '';
-      if (/\bhusky\b/.test(prepare)) findings.push({ kind: 'husky', detail: 'package.json scripts.prepare runs husky' });
-      if (/simple-git-hooks/.test(prepare)) findings.push({ kind: 'simple-git-hooks', detail: 'package.json scripts.prepare runs simple-git-hooks' });
-      if (/lefthook/.test(prepare)) findings.push({ kind: 'lefthook', detail: 'package.json scripts.prepare runs lefthook' });
+      const prepare = pkg.scripts?.prepare ?? "";
+      if (/\bhusky\b/.test(prepare))
+        findings.push({ kind: "husky", detail: "package.json scripts.prepare runs husky" });
+      if (/simple-git-hooks/.test(prepare))
+        findings.push({ kind: "simple-git-hooks", detail: "package.json scripts.prepare runs simple-git-hooks" });
+      if (/lefthook/.test(prepare))
+        findings.push({ kind: "lefthook", detail: "package.json scripts.prepare runs lefthook" });
       const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
-      if (deps['husky']) findings.push({ kind: 'husky', detail: `husky is a declared dependency (${deps['husky']})` });
-      if (deps['simple-git-hooks']) findings.push({ kind: 'simple-git-hooks', detail: `simple-git-hooks is a declared dependency (${deps['simple-git-hooks']})` });
-      if (deps['lefthook']) findings.push({ kind: 'lefthook', detail: `lefthook is a declared dependency (${deps['lefthook']})` });
+      if (deps["husky"]) findings.push({ kind: "husky", detail: `husky is a declared dependency (${deps["husky"]})` });
+      if (deps["simple-git-hooks"])
+        findings.push({
+          kind: "simple-git-hooks",
+          detail: `simple-git-hooks is a declared dependency (${deps["simple-git-hooks"]})`,
+        });
+      if (deps["lefthook"])
+        findings.push({ kind: "lefthook", detail: `lefthook is a declared dependency (${deps["lefthook"]})` });
     } catch {
       // unparseable package.json — the settling merge will report it; not a hook finding
     }
   }
-  if (existsSync(join(projectDir, '.husky'))) findings.push({ kind: 'husky', detail: '.husky/ directory present' });
-  if (existsSync(join(projectDir, '.pre-commit-config.yaml'))) findings.push({ kind: 'pre-commit-config', detail: '.pre-commit-config.yaml present' });
-  const gh = join(projectDir, '.githooks');
+  if (existsSync(join(projectDir, ".husky"))) findings.push({ kind: "husky", detail: ".husky/ directory present" });
+  if (existsSync(join(projectDir, ".pre-commit-config.yaml")))
+    findings.push({ kind: "pre-commit-config", detail: ".pre-commit-config.yaml present" });
+  const gh = join(projectDir, ".githooks");
   if (existsSync(gh)) {
-    const extra = readdirSync(gh).filter(f => !GOVERNED_GITHOOKS.has(f) && f !== 'README.md');
-    if (extra.length > 0) findings.push({ kind: 'custom-githooks', detail: `.githooks/ carries non-governed hooks: ${extra.join(', ')}` });
+    const extra = readdirSync(gh).filter((f) => !GOVERNED_GITHOOKS.has(f) && f !== "README.md");
+    if (extra.length > 0)
+      findings.push({ kind: "custom-githooks", detail: `.githooks/ carries non-governed hooks: ${extra.join(", ")}` });
   }
   return findings;
 }
@@ -195,19 +203,19 @@ export function detectHookManagerConflicts(projectDir: string): HookManagerFindi
 /** Existing workflow artifacts the PM Gateway adoption will coexist with. */
 export function scanWorkflowTraces(projectDir: string): WorkflowTrace[] {
   const traces: WorkflowTrace[] = [];
-  const check = (rel: string, kind: WorkflowTrace['kind']) => {
+  const check = (rel: string, kind: WorkflowTrace["kind"]) => {
     if (existsSync(join(projectDir, rel))) traces.push({ rel, kind });
   };
-  check('CONTRIBUTING.md', 'docs');
-  check('CLAUDE.md', 'platform-twin');
-  check('GEMINI.md', 'platform-twin');
-  check('CODEX.md', 'platform-twin');
-  check('AGENTS.md', 'agent-doc');
-  check('Makefile', 'build');
-  const wfDir = join(projectDir, '.github', 'workflows');
+  check("CONTRIBUTING.md", "docs");
+  check("CLAUDE.md", "platform-twin");
+  check("GEMINI.md", "platform-twin");
+  check("CODEX.md", "platform-twin");
+  check("AGENTS.md", "agent-doc");
+  check("Makefile", "build");
+  const wfDir = join(projectDir, ".github", "workflows");
   if (existsSync(wfDir)) {
     for (const f of readdirSync(wfDir)) {
-      if (f.endsWith('.yml') || f.endsWith('.yaml')) traces.push({ rel: `.github/workflows/${f}`, kind: 'ci' });
+      if (f.endsWith(".yml") || f.endsWith(".yaml")) traces.push({ rel: `.github/workflows/${f}`, kind: "ci" });
     }
   }
   return traces;
@@ -215,11 +223,11 @@ export function scanWorkflowTraces(projectDir: string): WorkflowTrace[] {
 
 /** Agents the variant template will install (roster shown in the mapping confirmation). */
 export function listVariantRoster(variantDir: string): string[] {
-  const agentsDir = join(variantDir, 'agents');
+  const agentsDir = join(variantDir, "agents");
   if (!existsSync(agentsDir)) return [];
   return readdirSync(agentsDir)
-    .filter(f => f.endsWith('.md') && f !== 'pm.md' && !f.startsWith('README'))
-    .map(f => f.replace(/\.md$/, ''))
+    .filter((f) => f.endsWith(".md") && f !== "pm.md" && !f.startsWith("README"))
+    .map((f) => f.replace(/\.md$/, ""))
     .sort();
 }
 
@@ -231,14 +239,14 @@ export function listVariantRoster(variantDir: string): string[] {
 export function listForeignSkills(projectDir: string, commonDir: string, variantDir: string | null): string[] {
   const templateSkills = new Set<string>();
   for (const base of [commonDir, ...(variantDir && existsSync(variantDir) ? [variantDir] : [])]) {
-    const skillsDir = join(base, 'skills');
+    const skillsDir = join(base, "skills");
     if (!existsSync(skillsDir)) continue;
     for (const e of readdirSync(skillsDir, { withFileTypes: true })) {
       if (e.isDirectory()) templateSkills.add(e.name);
     }
   }
   const foreign = new Set<string>();
-  const skillsRoot = join(projectDir, 'skills');
+  const skillsRoot = join(projectDir, "skills");
   if (existsSync(skillsRoot)) {
     for (const e of readdirSync(skillsRoot, { withFileTypes: true })) {
       if (e.isDirectory() && !templateSkills.has(e.name)) foreign.add(e.name);
@@ -279,6 +287,6 @@ export function buildAdoptionPlan(inputs: PlanInputs): AdoptionPlan {
     roster: inputs.variantDir ? listVariantRoster(inputs.variantDir) : [],
     // Scaffold parity: new-project deletes these after delivery (NEW_PROJECT_CLEANUP_FILES
     // semantics) — adopt records them so the settling pass removes the same set.
-    deliveredThenRemoved: ['variant.json'],
+    deliveredThenRemoved: ["variant.json"],
   };
 }

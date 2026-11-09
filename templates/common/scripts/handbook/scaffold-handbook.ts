@@ -149,8 +149,8 @@ const packageJson = {
     "check-i18n": `bun run scripts/check-i18n-parity.ts --docs-dir docs`,
     "apply-theme": `bun run scripts/apply-handbook-theme.ts --project . --theme azure`,
     "handbook-doctor": `bun run scripts/handbook-doctor.ts --project .`,
-    "scaffold": `bun run scripts/scaffold-handbook.ts --project . --output handbook --lang ${lang}`,
-    "deploy": `bun run scripts/deploy-handbook.ts --project . --output handbook`,
+    scaffold: `bun run scripts/scaffold-handbook.ts --project . --output handbook --lang ${lang}`,
+    deploy: `bun run scripts/deploy-handbook.ts --project . --output handbook`,
   },
 };
 writeFileSync(join(targetDir, "package.json"), JSON.stringify(packageJson, null, 2) + "\n");
@@ -158,7 +158,12 @@ created++;
 
 // --- README.md + LICENSE generation ---
 
-const chapters = chaptersArg ? chaptersArg.split(",").map(s => s.trim()).filter(Boolean) : [];
+const chapters = chaptersArg
+  ? chaptersArg
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  : [];
 
 // Supported languages for README generation: en is always README.md,
 // additional languages get README_<code>.md (e.g. README_ko.md, README_ja.md).
@@ -172,30 +177,31 @@ function generateReadme(langCode: string, langLabel: string): string {
   const isKo = langCode === "ko";
 
   // Build language switcher: list all README_LANGS entries
-  const langLinks = README_LANGS.map(l => {
+  const langLinks = README_LANGS.map((l) => {
     const marker = l.code === langCode ? `**${l.label}**` : l.label;
     return `[${marker}](${l.file})`;
   });
   const langSwitcher = `Language: ${langLinks.join(" | ")}`;
 
-  const desc = description || (isKo
-    ? `${title}은(는) AI 워크스페이스 교육 프로그램입니다.`
-    : `Welcome to the **${title}**, an AI Workspace educational program.`);
+  const desc =
+    description ||
+    (isKo
+      ? `${title}은(는) AI 워크스페이스 교육 프로그램입니다.`
+      : `Welcome to the **${title}**, an AI Workspace educational program.`);
 
   const pagesUrl = repo
     ? `https://${repo.replace(/^https?:\/\//, "").split("/")[0]}.github.io/${repo.split("/").pop()}/`
     : "";
 
   const pagesSection = pagesUrl
-    ? (isKo
-        ? `\n## 🌐 교육 프로그램 바로가기 (웹사이트)\n👉 **[${title} 교육 사이트 보기](${pagesUrl})**\n`
-        : `\n## 🌐 Read the Handbook Live\n👉 **[Online Handbook & Educational Program](${pagesUrl})**\n`)
+    ? isKo
+      ? `\n## 🌐 교육 프로그램 바로가기 (웹사이트)\n👉 **[${title} 교육 사이트 보기](${pagesUrl})**\n`
+      : `\n## 🌐 Read the Handbook Live\n👉 **[Online Handbook & Educational Program](${pagesUrl})**\n`
     : "";
 
   const curriculumHeader = isKo ? "## 📚 커리큘럼 구성" : "## 📚 Curriculum / Contents";
-  const chapterList = chapters.length > 0
-    ? chapters.map(ch => `  - **${ch}**`).join("\n")
-    : `  - *(Add chapter list)*`;
+  const chapterList =
+    chapters.length > 0 ? chapters.map((ch) => `  - **${ch}**`).join("\n") : `  - *(Add chapter list)*`;
 
   const versionsHeader = isKo ? "## 🎯 대상 버전" : "## 🎯 Target Versions";
   const versionInfo = "Claude Code 2026-07 / Antigravity CLI 1.1.0+ / Antigravity 2.0";
@@ -308,7 +314,10 @@ writeFileSync(join(targetDir, ".github", "workflows", "validate-handbook.yml"), 
 created++;
 
 // Create CHANGELOG.md placeholder
-writeFileSync(join(targetDir, "CHANGELOG.md"), `# Changelog\n\nAll notable changes to this handbook.\n\n## [Unreleased]\n\n`);
+writeFileSync(
+  join(targetDir, "CHANGELOG.md"),
+  `# Changelog\n\nAll notable changes to this handbook.\n\n## [Unreleased]\n\n`,
+);
 created++;
 
 // Summary

@@ -93,8 +93,8 @@
 // passes — absent memory/ is a documented no-op handled at the dev-sync step
 // layer (same posture as step 3.87).
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { basename, join } from "node:path";
 
 /** One parsed session block (verify-memory.ts:108-117 conventions). */
 export interface MemoryBlock {
@@ -109,7 +109,7 @@ export interface MemoryBlock {
 /** One integrity finding. `detail` names the block (heading + first content
  * line) and, for drops, the owning parent — enough for mechanical repair. */
 export interface UnionFinding {
-  kind: 'dropped-block' | 'fused-heading' | 'malformed-result';
+  kind: "dropped-block" | "fused-heading" | "malformed-result";
   /** Repo-relative file, e.g. memory/2026-11-04.md. */
   file: string;
   detail: string;
@@ -126,8 +126,8 @@ export function parseBlocks(content: string): MemoryBlock[] {
   for (const raw of content.split(/\n---\n/)) {
     const trimmed = raw.trim();
     if (!trimmed) continue;
-    const lines = trimmed.split('\n');
-    let heading = '';
+    const lines = trimmed.split("\n");
+    let heading = "";
     let headingIdx = -1;
     for (let i = 0; i < lines.length; i++) {
       const m = lines[i].match(/^## (.+)$/);
@@ -137,7 +137,7 @@ export function parseBlocks(content: string): MemoryBlock[] {
         break;
       }
     }
-    let firstLine = '';
+    let firstLine = "";
     if (headingIdx >= 0) {
       for (let i = headingIdx + 1; i < lines.length; i++) {
         if (lines[i].trim()) {
@@ -181,22 +181,22 @@ export function verifyWellFormed(opts: { file: string; content: string }): Union
   const seps = separatorCount(content);
   if (blocks.length !== seps + 1) {
     findings.push({
-      kind: 'malformed-result',
+      kind: "malformed-result",
       file,
       detail: `block/separator count invariant violated: ${blocks.length} session block(s) vs ${seps} '---' separator(s) (expected blocks === separators + 1)`,
     });
   }
   for (const block of blocks) {
-    if (!block.text.startsWith('## ')) {
+    if (!block.text.startsWith("## ")) {
       findings.push({
-        kind: 'malformed-result',
+        kind: "malformed-result",
         file,
         detail: `block does not begin with a '## ' heading after trim — first line: ${JSON.stringify(block.firstLine.slice(0, 120))}`,
       });
     }
     if (sessionSummaryCount(block.text) >= 2) {
       findings.push({
-        kind: 'fused-heading',
+        kind: "fused-heading",
         file,
         detail: `block carries ${sessionSummaryCount(block.text)} '## Session Summary' headings — the fused heading/separator signature (two session blocks share one separator)`,
       });
@@ -209,18 +209,13 @@ export function verifyWellFormed(opts: { file: string; content: string }): Union
  * by either parent must be present in `merged` (exact trimmed fingerprint
  * first, then heading + firstLine fallback — design §5.1 rule 4), and the
  * merged content must be structurally well-formed (rules 2 and 3). */
-export function verifyUnion(opts: {
-  file: string;
-  ours: string;
-  theirs: string;
-  merged: string;
-}): UnionFinding[] {
+export function verifyUnion(opts: { file: string; ours: string; theirs: string; merged: string }): UnionFinding[] {
   const { file, ours, theirs, merged } = opts;
   const findings: UnionFinding[] = [...verifyWellFormed({ file, content: merged })];
   for (const { parent, block } of droppedBlocks(ours, theirs, merged)) {
-    const label = block.heading !== '' ? `## ${block.heading}` : '(no heading)';
+    const label = block.heading !== "" ? `## ${block.heading}` : "(no heading)";
     findings.push({
-      kind: 'dropped-block',
+      kind: "dropped-block",
       file,
       detail: `block dropped from the ${parent} side of the merge: ${label} — first line: ${JSON.stringify(block.firstLine.slice(0, 120))}`,
     });
@@ -235,13 +230,16 @@ export function droppedBlocks(
   ours: string,
   theirs: string,
   head: string,
-): Array<{ parent: 'ours' | 'theirs'; block: MemoryBlock }> {
+): Array<{ parent: "ours" | "theirs"; block: MemoryBlock }> {
   const headBlocks = parseBlocks(head);
   const matchesHead = (block: MemoryBlock): boolean =>
     headBlocks.some((m) => m.text === block.text) ||
-    headBlocks.some((m) => m.heading === block.heading && m.heading !== '' && m.firstLine === block.firstLine);
-  const dropped: Array<{ parent: 'ours' | 'theirs'; block: MemoryBlock }> = [];
-  for (const [parent, content] of [['ours', ours], ['theirs', theirs]] as const) {
+    headBlocks.some((m) => m.heading === block.heading && m.heading !== "" && m.firstLine === block.firstLine);
+  const dropped: Array<{ parent: "ours" | "theirs"; block: MemoryBlock }> = [];
+  for (const [parent, content] of [
+    ["ours", ours],
+    ["theirs", theirs],
+  ] as const) {
     for (const block of parseBlocks(content)) {
       if (matchesHead(block)) continue;
       dropped.push({ parent, block });
@@ -266,7 +264,7 @@ export function repairedAtHead(opts: { ours: string; theirs: string; head: strin
   const dropped = droppedBlocks(ours, theirs, head);
   if (dropped.length === 0) return true;
   for (const { block } of dropped) {
-    if (block.heading !== '') return false; // headed debt: strict rule only
+    if (block.heading !== "") return false; // headed debt: strict rule only
     if (!head.includes(block.text)) return false; // un-headed debt: absorbed verbatim?
   }
   return true;
@@ -276,8 +274,8 @@ export function repairedAtHead(opts: { ours: string; theirs: string; head: strin
  * (MEMORY.md, meeting-*, adr-*, date-*-meeting) plus the memory/archive/
  * subtree. `relPath` is repo-relative, e.g. memory/2026-11-04.md. */
 export function isExemptMemoryFile(relPath: string): boolean {
-  const rest = relPath.startsWith('memory/') ? relPath.slice('memory/'.length) : relPath;
-  if (rest.includes('/')) return true; // nested subtree (memory/archive/, memory/skill-review/, ...)
+  const rest = relPath.startsWith("memory/") ? relPath.slice("memory/".length) : relPath;
+  if (rest.includes("/")) return true; // nested subtree (memory/archive/, memory/skill-review/, ...)
   return (
     /^MEMORY\.md$/.test(rest) ||
     /^meeting-/.test(rest) ||
@@ -292,7 +290,7 @@ export function flatMemoryFiles(memoryDir: string): string[] {
   if (!existsSync(memoryDir)) return [];
   const out: string[] = [];
   for (const entry of readdirSync(memoryDir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+    if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
     const rel = `memory/${entry.name}`;
     if (isExemptMemoryFile(rel)) continue;
     out.push(rel);
@@ -325,7 +323,7 @@ export interface MergeScanResult {
   commit: string;
   file: string;
   findings: UnionFinding[];
-  tier: 'blocking' | 'historical' | 'repaired-at-head';
+  tier: "blocking" | "historical" | "repaired-at-head";
 }
 
 /** Git plumbing failures are no longer silent (T-20261106-005 item 2): a
@@ -333,9 +331,11 @@ export interface MergeScanResult {
  *  of indistinguishable from an empty window. Return contract unchanged:
  *  null = "no data" (fail-open at the caller). */
 function git(args: string[], cwd: string): string | null {
-  const res = Bun.spawnSync(['git', ...args], { cwd, stdout: 'pipe', stderr: 'pipe' });
+  const res = Bun.spawnSync(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
   if (res.exitCode !== 0) {
-    console.warn(`⚠️  memory-union-verify: git ${args[0]} failed (exit ${res.exitCode}) — sweep results may be incomplete`);
+    console.warn(
+      `⚠️  memory-union-verify: git ${args[0]} failed (exit ${res.exitCode}) — sweep results may be incomplete`,
+    );
     return null;
   }
   return res.stdout.toString();
@@ -345,11 +345,7 @@ function git(args: string[], cwd: string): string | null {
  * `maxCommits`), touching anything under memory/, with the touched flat
  * non-exempt memory logs enumerated against each parent. A repo without
  * merge commits touching memory returns an empty list (documented no-op). */
-export function listMemoryMerges(opts: {
-  sinceDays: number;
-  maxCommits: number;
-  cwd?: string;
-}): MergeScanTarget[] {
+export function listMemoryMerges(opts: { sinceDays: number; maxCommits: number; cwd?: string }): MergeScanTarget[] {
   // Non-positive window disables the sweep entirely — git's --since is >=
   // semantics, so "0 days" would still include same-instant commits; the
   // bounded-window contract needs a hard off-switch (and maxCommits=0 already
@@ -359,36 +355,36 @@ export function listMemoryMerges(opts: {
   const cwd = opts.cwd ?? process.cwd();
   const logOut = git(
     [
-      'log',
-      '--merges',
+      "log",
+      "--merges",
       // --full-history is required: default history simplification prunes a
       // merge that is TREESAME to one parent for the pathspec — a clean union
       // merge that took one side's file verbatim (the shape union-verify most
       // needs to bless) would silently vanish from the sweep without it.
-      '--full-history',
+      "--full-history",
       `--since=${opts.sinceDays} days`,
-      '-n',
+      "-n",
       String(opts.maxCommits),
-      '--format=%H %P',
-      '--',
-      'memory',
+      "--format=%H %P",
+      "--",
+      "memory",
     ],
     cwd,
   );
   if (logOut === null) return [];
   const targets: MergeScanTarget[] = [];
-  for (const line of logOut.split('\n')) {
+  for (const line of logOut.split("\n")) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     const [commit, ...parents] = trimmed.split(/\s+/);
     if (parents.length < 2) continue; // defensive: --merges guarantees >= 2
     const touched = new Set<string>();
     for (const parent of parents) {
-      const diffOut = git(['diff-tree', '-r', '--name-only', parent, commit], cwd);
+      const diffOut = git(["diff-tree", "-r", "--name-only", parent, commit], cwd);
       if (diffOut === null) continue;
-      for (const f of diffOut.split('\n')) {
+      for (const f of diffOut.split("\n")) {
         const p = f.trim();
-        if (!p.startsWith('memory/') || !p.endsWith('.md')) continue;
+        if (!p.startsWith("memory/") || !p.endsWith(".md")) continue;
         if (isExemptMemoryFile(p)) continue;
         touched.add(p);
       }
@@ -402,7 +398,7 @@ export function listMemoryMerges(opts: {
 /** `git show <commit>:<path>` — null when the path is absent in that commit
  * (file added or deleted relative to that side). */
 export function showBlob(commit: string, file: string, cwd?: string): string | null {
-  return git(['show', `${commit}:${file}`], cwd ?? process.cwd());
+  return git(["show", `${commit}:${file}`], cwd ?? process.cwd());
 }
 
 /** Full Arm A: run verifyUnion over the bounded merge sweep. A parent blob
@@ -436,12 +432,12 @@ export function unionScan(opts: {
           // cycle when its MEMORY.md index row survives (the tombstone IS the
           // positive evidence — the same positive-evidence-only posture as
           // filterTransientCheckouts). No tombstone row = original tier.
-          let deletedTier: MergeScanResult['tier'] = tier;
+          let deletedTier: MergeScanResult["tier"] = tier;
           try {
-            const memoryIndex = readFileSync(join(cwd, 'memory', 'MEMORY.md'), 'utf8');
-            const base = file.replace(/^memory\//, '').replace(/\.md$/, '');
-            if (new RegExp(`^\\| ${base} \\|`, 'm').test(memoryIndex)) {
-              deletedTier = 'repaired-at-head'; // sanctioned archival — INFO tier shared
+            const memoryIndex = readFileSync(join(cwd, "memory", "MEMORY.md"), "utf8");
+            const base = file.replace(/^memory\//, "").replace(/\.md$/, "");
+            if (new RegExp(`^\\| ${base} \\|`, "m").test(memoryIndex)) {
+              deletedTier = "repaired-at-head"; // sanctioned archival — INFO tier shared
             }
           } catch {
             // MEMORY.md unreadable — keep the original tier (fail-closed)
@@ -452,11 +448,12 @@ export function unionScan(opts: {
             tier: deletedTier,
             findings: [
               {
-                kind: 'dropped-block',
+                kind: "dropped-block",
                 file,
-                detail: deletedTier === 'repaired-at-head'
-                  ? 'file deleted in the merge commit — archive-memory 7-day retention (MEMORY.md tombstone row present; INFO, ages out with the window)'
-                  : 'file deleted in the merge commit while a parent still carries session blocks',
+                detail:
+                  deletedTier === "repaired-at-head"
+                    ? "file deleted in the merge commit — archive-memory 7-day retention (MEMORY.md tombstone row present; INFO, ages out with the window)"
+                    : "file deleted in the merge commit while a parent still carries session blocks",
               },
             ],
           });
@@ -465,8 +462,8 @@ export function unionScan(opts: {
       }
       const findings = verifyUnion({
         file,
-        ours: ours ?? '',
-        theirs: theirs ?? '',
+        ours: ours ?? "",
+        theirs: theirs ?? "",
         merged,
       });
       if (findings.length > 0) {
@@ -476,11 +473,11 @@ export function unionScan(opts: {
         // (repairedAtHead), the group reports tier 'repaired-at-head'
         // (INFO) instead of blocking. Unreadable worktree file = not
         // proven repaired = original tier stands.
-        let effectiveTier: MergeScanResult['tier'] = tier;
+        let effectiveTier: MergeScanResult["tier"] = tier;
         try {
-          const worktreeContent = readFileSync(join(cwd, file), 'utf8');
-          if (repairedAtHead({ ours: ours ?? '', theirs: theirs ?? '', head: worktreeContent })) {
-            effectiveTier = 'repaired-at-head';
+          const worktreeContent = readFileSync(join(cwd, file), "utf8");
+          if (repairedAtHead({ ours: ours ?? "", theirs: theirs ?? "", head: worktreeContent })) {
+            effectiveTier = "repaired-at-head";
           }
         } catch {
           // v1.2.0 archive-location fallback (T-20261106-007): the worktree
@@ -489,9 +486,9 @@ export function unionScan(opts: {
           // The archived content IS the parent blocks (relocated, not
           // destroyed), so the repaired-at-head check runs against it.
           try {
-            const archivedContent = readFileSync(join(cwd, 'memory', 'archive', basename(file)), 'utf8');
-            if (repairedAtHead({ ours: ours ?? '', theirs: theirs ?? '', head: archivedContent })) {
-              effectiveTier = 'repaired-at-head';
+            const archivedContent = readFileSync(join(cwd, "memory", "archive", basename(file)), "utf8");
+            if (repairedAtHead({ ours: ours ?? "", theirs: theirs ?? "", head: archivedContent })) {
+              effectiveTier = "repaired-at-head";
             }
           } catch {
             // neither worktree nor archive readable — keep the original tier
@@ -506,14 +503,14 @@ export function unionScan(opts: {
 
 /** Commit date (committer, ISO-8601) of a merge commit; null when git fails. */
 function commitDateIso(commit: string, cwd: string): string | null {
-  return git(['show', '-s', '--format=%cI', commit], cwd)?.trim() ?? null;
+  return git(["show", "-s", "--format=%cI", commit], cwd)?.trim() ?? null;
 }
 
-function tierFor(commit: string, activationIso: string | undefined, cwd: string): 'blocking' | 'historical' {
-  if (!activationIso) return 'blocking';
+function tierFor(commit: string, activationIso: string | undefined, cwd: string): "blocking" | "historical" {
+  if (!activationIso) return "blocking";
   const date = commitDateIso(commit, cwd);
-  if (date === null) return 'blocking'; // fail-closed: undatable commit treated as new
-  return date > activationIso ? 'blocking' : 'historical';
+  if (date === null) return "blocking"; // fail-closed: undatable commit treated as new
+  return date > activationIso ? "blocking" : "historical";
 }
 
 /** Arm B plumbing: verifyWellFormed over every flat, non-exempt memory log in
@@ -521,8 +518,8 @@ function tierFor(commit: string, activationIso: string | undefined, cwd: string)
 export function wellFormedScan(opts: { memoryDir: string }): Array<{ file: string; findings: UnionFinding[] }> {
   const out: Array<{ file: string; findings: UnionFinding[] }> = [];
   for (const rel of flatMemoryFiles(opts.memoryDir)) {
-    const abs = join(opts.memoryDir, rel.slice('memory/'.length));
-    const content = readFileSync(abs, 'utf-8');
+    const abs = join(opts.memoryDir, rel.slice("memory/".length));
+    const content = readFileSync(abs, "utf-8");
     const findings = verifyWellFormed({ file: rel, content });
     if (findings.length > 0) out.push({ file: rel, findings });
   }

@@ -5,8 +5,8 @@
  * @usage bun scripts/md-to-ooxml.ts [--input <path>] [--output <path>] [--type docx|xlsx|pptx] [--check] [--help]
  */
 
-import { existsSync, readFileSync, writeFileSync } from "fs";
-import { resolve, extname } from "path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { resolve, extname } from "node:path";
 
 const args = process.argv.slice(2);
 
@@ -93,13 +93,21 @@ function compileToWordML(mdText: string): string {
     if (!trimmed) continue;
 
     if (trimmed.startsWith("# ")) {
-      paragraphs.push(`<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(2))}</w:t></w:r></w:p>`);
+      paragraphs.push(
+        `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(2))}</w:t></w:r></w:p>`,
+      );
     } else if (trimmed.startsWith("## ")) {
-      paragraphs.push(`<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(3))}</w:t></w:r></w:p>`);
+      paragraphs.push(
+        `<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(3))}</w:t></w:r></w:p>`,
+      );
     } else if (trimmed.startsWith("### ")) {
-      paragraphs.push(`<w:p><w:pPr><w:pStyle w:val="Heading3"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(4))}</w:t></w:r></w:p>`);
+      paragraphs.push(
+        `<w:p><w:pPr><w:pStyle w:val="Heading3"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(4))}</w:t></w:r></w:p>`,
+      );
     } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-      paragraphs.push(`<w:p><w:pPr><w:pStyle w:val="ListBullet"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(2))}</w:t></w:r></w:p>`);
+      paragraphs.push(
+        `<w:p><w:pPr><w:pStyle w:val="ListBullet"/></w:pPr><w:r><w:t>${escapeXml(trimmed.slice(2))}</w:t></w:r></w:p>`,
+      );
     } else {
       paragraphs.push(`<w:p><w:r><w:t>${escapeXml(trimmed)}</w:t></w:r></w:p>`);
     }
@@ -135,9 +143,7 @@ function compileToSpreadsheetML(mdText: string): string {
       // Skip separator rows like |---|---|
       if (cells.every((c) => /^:?-+:?$/.test(c))) continue;
 
-      const cellXml = cells
-        .map((val) => `<Cell><Data ss:Type="String">${escapeXml(val)}</Data></Cell>`)
-        .join("");
+      const cellXml = cells.map((val) => `<Cell><Data ss:Type="String">${escapeXml(val)}</Data></Cell>`).join("");
       rows.push(`<Row>${cellXml}</Row>`);
     } else {
       // General text line mapped to single cell row
@@ -237,7 +243,10 @@ function compileToPresentationML(mdText: string): string {
     }
 
     if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
-      const cells = trimmed.split("|").slice(1, -1).map((c) => c.trim());
+      const cells = trimmed
+        .split("|")
+        .slice(1, -1)
+        .map((c) => c.trim());
       // Skip separator rows like |---|---|
       if (cells.every((c) => /^:?-+:?$/.test(c))) continue;
       pushBodyParagraph(plainParagraph(trimmed));
@@ -363,7 +372,10 @@ function compileToPresentationML(mdText: string): string {
 
   // --- Package assembly (Flat OPC single-file form) -----------------------------
   const slideOverrides = slides
-    .map((_, i) => `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`)
+    .map(
+      (_, i) =>
+        `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`,
+    )
     .join("\n        ");
 
   const contentTypesXml = `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -408,13 +420,41 @@ ${slides.map((_, i) => `  <Relationship Id="rId${i + 2}" Type="${REL_TYPE}/slide
   const parts: { name: string; contentType: string; xml: string }[] = [
     { name: "/[Content_Types].xml", contentType: "application/xml", xml: contentTypesXml },
     { name: "/_rels/.rels", contentType: "application/vnd.openxmlformats-package.relationships+xml", xml: rootRelsXml },
-    { name: "/ppt/presentation.xml", contentType: "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml", xml: presentationXml },
-    { name: "/ppt/_rels/presentation.xml.rels", contentType: "application/vnd.openxmlformats-package.relationships+xml", xml: presentationRelsXml },
-    { name: "/ppt/slideMasters/slideMaster1.xml", contentType: "application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml", xml: slideMasterXml },
-    { name: "/ppt/slideMasters/_rels/slideMaster1.xml.rels", contentType: "application/vnd.openxmlformats-package.relationships+xml", xml: slideMasterRelsXml },
-    { name: "/ppt/slideLayouts/slideLayout1.xml", contentType: "application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml", xml: slideLayoutXml },
-    { name: "/ppt/slideLayouts/_rels/slideLayout1.xml.rels", contentType: "application/vnd.openxmlformats-package.relationships+xml", xml: slideLayoutRelsXml },
-    { name: "/ppt/theme/theme1.xml", contentType: "application/vnd.openxmlformats-officedocument.theme+xml", xml: themeXml },
+    {
+      name: "/ppt/presentation.xml",
+      contentType: "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml",
+      xml: presentationXml,
+    },
+    {
+      name: "/ppt/_rels/presentation.xml.rels",
+      contentType: "application/vnd.openxmlformats-package.relationships+xml",
+      xml: presentationRelsXml,
+    },
+    {
+      name: "/ppt/slideMasters/slideMaster1.xml",
+      contentType: "application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml",
+      xml: slideMasterXml,
+    },
+    {
+      name: "/ppt/slideMasters/_rels/slideMaster1.xml.rels",
+      contentType: "application/vnd.openxmlformats-package.relationships+xml",
+      xml: slideMasterRelsXml,
+    },
+    {
+      name: "/ppt/slideLayouts/slideLayout1.xml",
+      contentType: "application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml",
+      xml: slideLayoutXml,
+    },
+    {
+      name: "/ppt/slideLayouts/_rels/slideLayout1.xml.rels",
+      contentType: "application/vnd.openxmlformats-package.relationships+xml",
+      xml: slideLayoutRelsXml,
+    },
+    {
+      name: "/ppt/theme/theme1.xml",
+      contentType: "application/vnd.openxmlformats-officedocument.theme+xml",
+      xml: themeXml,
+    },
     ...slides.map((slide, i) => ({
       name: `/ppt/slides/slide${i + 1}.xml`,
       contentType: "application/vnd.openxmlformats-officedocument.presentationml.slide+xml",
@@ -438,7 +478,7 @@ ${parts
     <pkg:xmlData>
 ${part.xml}
     </pkg:xmlData>
-  </pkg:part>`
+  </pkg:part>`,
   )
   .join("\n")}
 </pkg:package>`;
@@ -450,7 +490,11 @@ if (isCheck) {
 }
 
 const compiledOutput =
-  targetType === "xlsx" ? compileToSpreadsheetML(content) : targetType === "pptx" ? compileToPresentationML(content) : compileToWordML(content);
+  targetType === "xlsx"
+    ? compileToSpreadsheetML(content)
+    : targetType === "pptx"
+      ? compileToPresentationML(content)
+      : compileToWordML(content);
 const targetFile = outputPath ? resolve(process.cwd(), outputPath) : resolvedInput.replace(/\.md$/, `.${targetType}`);
 
 writeFileSync(targetFile, compiledOutput, "utf-8");

@@ -6,10 +6,10 @@
 // co-newbiz relocated the file for 9 days with no gate noticing. Pure helper
 // (fs injected) consumed by audit.ts's placement check.
 
-import { join } from 'node:path';
+import { join } from "node:path";
 
 export interface VariantContextFinding {
-  status: 'pass' | 'fail' | 'skip';
+  status: "pass" | "fail" | "skip";
   message: string;
 }
 
@@ -26,25 +26,25 @@ export function variantContextPlacement(
   readFile: (p: string) => string,
   exists: (p: string) => boolean,
 ): VariantContextFinding {
-  const manifestPath = join(root, 'variant.json');
+  const manifestPath = join(root, "variant.json");
   if (!exists(manifestPath)) {
-    return { status: 'skip', message: 'no variant.json — not a scaffolded project' };
+    return { status: "skip", message: "no variant.json — not a scaffolded project" };
   }
-  let name = '';
+  let name = "";
   try {
-    name = JSON.parse(readFile(manifestPath)).name ?? '';
+    name = JSON.parse(readFile(manifestPath)).name ?? "";
   } catch {
-    return { status: 'skip', message: 'variant.json unreadable' };
+    return { status: "skip", message: "variant.json unreadable" };
   }
-  if (typeof name !== 'string' || !NAME_RE.test(name)) {
-    return { status: 'skip', message: 'variant.json has no usable variant name' };
+  if (typeof name !== "string" || !NAME_RE.test(name)) {
+    return { status: "skip", message: "variant.json has no usable variant name" };
   }
   const expected = `docs/${name}.context.md`;
   if (exists(join(root, expected))) {
-    return { status: 'pass', message: `${expected} present at the template-convention path` };
+    return { status: "pass", message: `${expected} present at the template-convention path` };
   }
   return {
-    status: 'fail',
+    status: "fail",
     message: `${expected} is MISSING — the convention renders variant.context.template.md to that path and the PM workflow table references it; return the file to the convention path or register a superseding relocation record (U-20261026-002)`,
   };
 }

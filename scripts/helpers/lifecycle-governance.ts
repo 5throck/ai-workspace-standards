@@ -9,22 +9,21 @@
  * Outputs comma-separated mandatory domains to stdout
  */
 
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const governancePath = join(__dirname, '..', '..', 'docs', 'templates', 'lifecycle-governance.json');
+const governancePath = join(__dirname, "..", "..", "docs", "templates", "lifecycle-governance.json");
 
 try {
-  const content = readFileSync(governancePath, 'utf-8');
+  const content = readFileSync(governancePath, "utf-8");
   const data = JSON.parse(content);
   const policy = data.variantValidationPolicy || {};
-  const mandatory = policy.mandatoryBeforeProjectCreation || ['variant', 'agent', 'skill'];
+  const mandatory = policy.mandatoryBeforeProjectCreation || ["variant", "agent", "skill"];
 
-  console.log(mandatory.join(','));
+  console.log(mandatory.join(","));
 } catch (error) {
   // If governance JSON doesn't exist or can't be parsed, use defaults
-  console.log('variant,agent,skill');
+  console.log("variant,agent,skill");
 }
-

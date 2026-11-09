@@ -258,21 +258,31 @@
 // Migrated from new-project.sh/ps1 per ADR-0036. No file permission manipulation.
 
 import {
-  existsSync, mkdirSync, rmSync, readdirSync, statSync,
-  readFileSync, writeFileSync, copyFileSync, appendFileSync, chmodSync, mkdtempSync, unlinkSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
-import { randomUUID } from 'node:crypto';
-import { resolve, join, dirname, basename, relative } from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from './helpers/template-utils.ts';
-import { computeContentHash } from './verify-readme-sync.ts';
-import { localDateISO } from './lib/local-date.ts';
-import { rollbackPartialProject } from './helpers/rollback-partial-project.ts';
-import { blankL0Refs } from './helpers/l0-ref-policy.ts';
-import { exclusionForName } from './lib/fleet.ts';
-import { mergePackageJson } from './lib/package-merge.ts';
-import { resolveProvenanceVersion } from './helpers/template-version.ts';
+  existsSync,
+  mkdirSync,
+  rmSync,
+  readdirSync,
+  statSync,
+  readFileSync,
+  writeFileSync,
+  copyFileSync,
+  appendFileSync,
+  chmodSync,
+  mkdtempSync,
+  unlinkSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { randomUUID } from "node:crypto";
+import { resolve, join, dirname, basename, relative } from "node:path";
+import { spawnSync } from "node:child_process";
+import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from "./helpers/template-utils.ts";
+import { computeContentHash } from "./verify-readme-sync.ts";
+import { localDateISO } from "./lib/local-date.ts";
+import { rollbackPartialProject } from "./helpers/rollback-partial-project.ts";
+import { blankL0Refs } from "./helpers/l0-ref-policy.ts";
+import { exclusionForName } from "./lib/fleet.ts";
+import { mergePackageJson } from "./lib/package-merge.ts";
+import { resolveProvenanceVersion } from "./helpers/template-version.ts";
 import {
   NEW_PROJECT_COPY_SKIP_ENTRIES,
   NEW_PROJECT_WORKSPACE_ONLY_FILES,
@@ -284,44 +294,47 @@ import {
   VERSION_MANIFEST_RELPATH,
   decideManifestGeneration,
   isCanonicalPmStubBody,
-} from './helpers/scaffold-markers.ts';
-import { resolveAgentExtendsStub, stripL1BMetadata } from './helpers/resolve-pm-stub.ts';
-import { applySubstitutions } from './helpers/substitute-placeholders.ts';
+} from "./helpers/scaffold-markers.ts";
+import { resolveAgentExtendsStub, stripL1BMetadata } from "./helpers/resolve-pm-stub.ts";
+import { applySubstitutions } from "./helpers/substitute-placeholders.ts";
 import {
   alignSkillRegistryRowsWithFrontmatter,
   collectDeliveredSkills,
   foldVariantExclusiveRowsIntoWorkspaceSection,
   pruneSkillRegistryRows,
   reconcileSkillRegistry,
-} from './helpers/skills-registry.ts';
-import { SCAFFOLD_COMMON_OWNED_FILES } from './lib/upgrade-policy.ts';
-import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from './lib/platforms.ts';
-import { pruneUnselectedProfiles } from './lib/platform-prune.ts';
-import { appendRegistryRows } from './helpers/registry-append.ts';
-import { fetchProjectExternalDeps } from './lib/external-deps.ts';
+} from "./helpers/skills-registry.ts";
+import { SCAFFOLD_COMMON_OWNED_FILES } from "./lib/upgrade-policy.ts";
+import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from "./lib/platforms.ts";
+import { pruneUnselectedProfiles } from "./lib/platform-prune.ts";
+import { appendRegistryRows } from "./helpers/registry-append.ts";
+import { fetchProjectExternalDeps } from "./lib/external-deps.ts";
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
-let projectName = '';
-let variant = '';
-let templateVer = '';
-let platform = 'all'; // canonical --platform value (list-normalized below)
-let country = '';
-let projectDescription = '';
-let projectType = '';
+let projectName = "";
+let variant = "";
+let templateVer = "";
+let platform = "all"; // canonical --platform value (list-normalized below)
+let country = "";
+let projectDescription = "";
+let projectType = "";
 // v1.42.0 (external-deps design D2): opt-in hard-fail for the §7.9 external-dep
 // fetch — CI/provisioning contexts that must not proceed without deps.
 let strictExternalDeps = false;
 
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--variant' && args[i + 1]) { variant = args[++i]; continue; }
-  if (args[i] === '--description' && args[i + 1]) {
+  if (args[i] === "--variant" && args[i + 1]) {
+    variant = args[++i];
+    continue;
+  }
+  if (args[i] === "--description" && args[i + 1]) {
     projectDescription = args[++i];
     continue;
   }
-  if (args[i] === '--type' && args[i + 1]) {
+  if (args[i] === "--type" && args[i + 1]) {
     projectType = args[++i];
-    if (!['web', 'cli', 'api', 'mcp'].includes(projectType)) {
+    if (!["web", "cli", "api", "mcp"].includes(projectType)) {
       console.error(`❌ Invalid --type value: '${projectType}'. Use one of: web, cli, api, mcp.`);
       if (import.meta.main) {
         process.exit(1);
@@ -329,34 +342,50 @@ for (let i = 0; i < args.length; i++) {
     }
     continue;
   }
-  if (args[i] === '--version' && args[i + 1]) {
+  if (args[i] === "--version" && args[i + 1]) {
     templateVer = args[++i];
     // Strict allowlist: only alphanumeric, dots, hyphens, underscores — no shell metacharacters
     if (!/^[a-zA-Z0-9._-]+$/.test(templateVer)) {
-      console.error(`❌ Invalid --version value: '${templateVer}'. Only letters, numbers, dots, hyphens, underscores allowed.`);
+      console.error(
+        `❌ Invalid --version value: '${templateVer}'. Only letters, numbers, dots, hyphens, underscores allowed.`,
+      );
       if (import.meta.main) {
         process.exit(1);
       }
     }
     continue;
   }
-  if (args[i] === '--platform' && args[i + 1]) { platform = args[++i]; continue; }
+  if (args[i] === "--platform" && args[i + 1]) {
+    platform = args[++i];
+    continue;
+  }
   // v1.42.0 (external-deps design D2): hard-fail posture for the §7.9 fetch.
   // Exempt from the catch-all below like --yes: consumed here, no value.
-  if (args[i] === '--strict-external-deps') { strictExternalDeps = true; continue; }
-  if (args[i] === '--country' && args[i + 1]) {
+  if (args[i] === "--strict-external-deps") {
+    strictExternalDeps = true;
+    continue;
+  }
+  if (args[i] === "--country" && args[i + 1]) {
     country = args[++i];
     // Validate country pattern: ISO 3166-1 alpha-2 or well-known region codes (EU, ASEAN)
     if (!/^[A-Z]{2,4}$/.test(country)) {
-      console.error(`❌ Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`);
+      console.error(
+        `❌ Invalid --country value: '${country}'. Use ISO 3166-1 alpha-2 (KR, US), region code (EU, ASEAN), or omit for region-neutral.`,
+      );
       if (import.meta.main) {
         process.exit(1);
       }
     }
     continue;
   }
-  if (!projectName && !args[i].startsWith('--')) { projectName = args[i]; continue; }
-  if (projectName && !variant && !args[i].startsWith('--')) { variant = args[i]; continue; }
+  if (!projectName && !args[i].startsWith("--")) {
+    projectName = args[i];
+    continue;
+  }
+  if (projectName && !variant && !args[i].startsWith("--")) {
+    variant = args[i];
+    continue;
+  }
   // R6 (2026-09-24-scaffold-hygiene-bundle-design, D5): catch-all — a `--` token
   // that reached this point matched no known flag, or was a known flag left
   // without a value (those guards require a truthy next token). Hard error
@@ -364,10 +393,14 @@ for (let i = 0; i < args.length; i++) {
   // explicit-but-typo'd intent (`--varaint`, `--platfrom`) must never be
   // silently dropped. `--yes` is exempt — the auto-confirm prompt scan below
   // consumes it from process.argv directly (it never takes a value here).
-  if (args[i].startsWith('--') && args[i] !== '--yes' && args[i] !== '--strict-external-deps') {
+  if (args[i].startsWith("--") && args[i] !== "--yes" && args[i] !== "--strict-external-deps") {
     console.error(`❌ Unknown flag: '${args[i]}'.`);
-    console.error('   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform <profile>[,<profile>...]|all | --country <CODE> | --strict-external-deps');
-    console.error('   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp] [--strict-external-deps]');
+    console.error(
+      '   Valid flags: --variant <co-variant> | --description "<one sentence>" | --type web|cli|api|mcp | --version X.Y.Z | --platform <profile>[,<profile>...]|all | --country <CODE> | --strict-external-deps',
+    );
+    console.error(
+      '   Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp] [--strict-external-deps]',
+    );
     if (import.meta.main) {
       process.exit(1);
     }
@@ -376,17 +409,23 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!projectName) {
-  console.error('Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]');
-  console.error('       --description/--type are optional; when omitted, docs/project.md keeps its TODO(project-overview) fallback lines.');
+  console.error(
+    'Usage: bun scripts/new-project.ts "<project-name>" [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--version X.Y.Z] [--country <CODE>] [--description "<one sentence>"] [--type web|cli|api|mcp]',
+  );
+  console.error(
+    "       --description/--type are optional; when omitted, docs/project.md keeps its TODO(project-overview) fallback lines.",
+  );
   if (import.meta.main) {
     process.exit(1);
   }
 }
 
 // Validate project name
-if (!/^[a-zA-Z0-9_/.\-]+$/.test(projectName) || projectName.includes('..')) {
+if (!/^[a-zA-Z0-9_/.\-]+$/.test(projectName) || projectName.includes("..")) {
   console.error(`❌ Invalid project name: '${projectName}'`);
-  console.error('   Only letters, numbers, hyphens (-), underscores (_), and dots (.) are allowed, without path traversal (..).');
+  console.error(
+    "   Only letters, numbers, hyphens (-), underscores (_), and dots (.) are allowed, without path traversal (..).",
+  );
   if (import.meta.main) {
     process.exit(1);
   }
@@ -399,30 +438,32 @@ if (projectName.length > 64) {
 }
 
 // Validate platform (comma-separated list; see lib/platforms.ts parsePlatformList)
-let selectedProfiles: PlatformProfile[] = ['claude', 'antigravity', 'codex', 'hermes'];
+let selectedProfiles: PlatformProfile[] = ["claude", "antigravity", "codex", "hermes"];
 try {
   const parsed = parsePlatformList(platform);
   selectedProfiles = parsed.profiles;
   platform = parsed.canonical;
   for (const w of parsed.warnings) console.warn(`⚠️  --platform: ${w}`);
 } catch (e) {
-  console.error(`❌ --platform: ${(e as Error).message}. Use one or more of claude, antigravity, codex, hermes (comma-separated) or all (default: all).`);
+  console.error(
+    `❌ --platform: ${(e as Error).message}. Use one or more of claude, antigravity, codex, hermes (comma-separated) or all (default: all).`,
+  );
   if (import.meta.main) {
     process.exit(1);
   }
 }
 
 // ── Workspace root resolution ──────────────────────────────────────────────────
-const workspaceRoot = resolve(import.meta.dir, '..');
+const workspaceRoot = resolve(import.meta.dir, "..");
 // Bare names scaffold under Projects/<name> (canonical layout). Path-like names
 // (containing '/') are explicit workspace-relative destinations — the E2E harness
 // (scripts/test-new-project.ts) scaffolds into tests/.temp/ this way.
-const projectDir = projectName.includes('/')
+const projectDir = projectName.includes("/")
   ? resolve(workspaceRoot, projectName)
-  : join(workspaceRoot, 'Projects', projectName);
+  : join(workspaceRoot, "Projects", projectName);
 // Containment guard (incident 2026-09-12): never resolve to — or outside — the
 // workspace root itself.
-if (resolve(projectDir) === workspaceRoot || relative(workspaceRoot, resolve(projectDir)).startsWith('..')) {
+if (resolve(projectDir) === workspaceRoot || relative(workspaceRoot, resolve(projectDir)).startsWith("..")) {
   console.error(`❌ Project directory escapes the workspace: ${projectDir}`);
   if (import.meta.main) {
     process.exit(1);
@@ -436,15 +477,28 @@ if (resolve(projectDir) === workspaceRoot || relative(workspaceRoot, resolve(pro
 // root-upgrade incident. 'tests' stays allowed: the E2E harness scaffolds
 // into tests/.temp/ by design.
 const MANAGED_TOP_LEVEL_DIRS = new Set([
-  'templates', 'scripts', 'docs', 'agents', 'skills', 'memory', 'graft',
-  '.trail', '.github', '.claude', '.gemini', '.agents', '.codex',
+  "templates",
+  "scripts",
+  "docs",
+  "agents",
+  "skills",
+  "memory",
+  "graft",
+  ".trail",
+  ".github",
+  ".claude",
+  ".gemini",
+  ".agents",
+  ".codex",
 ]);
 // 'graft' stays: trail 0.28.1 `trail build` still materializes `<repo>/graft`
 // (vendor --dir default) until the project's own `trail init` migrates it to
 // `.trail/cache` (design 2026-10-31-graft-trail-migration R2.5 addendum).
-if (projectName.includes('/') && MANAGED_TOP_LEVEL_DIRS.has(projectName.split('/')[0])) {
-  console.error(`❌ Project target '${projectName}' resolves inside the managed '${projectName.split('/')[0]}/' directory.`);
-  console.error('   Scaffold into Projects/ (bare name) or tests/.temp/ instead.');
+if (projectName.includes("/") && MANAGED_TOP_LEVEL_DIRS.has(projectName.split("/")[0])) {
+  console.error(
+    `❌ Project target '${projectName}' resolves inside the managed '${projectName.split("/")[0]}/' directory.`,
+  );
+  console.error("   Scaffold into Projects/ (bare name) or tests/.temp/ instead.");
   if (import.meta.main) {
     process.exit(1);
   }
@@ -456,12 +510,14 @@ if (projectName.includes('/') && MANAGED_TOP_LEVEL_DIRS.has(projectName.split('/
 // would resurrect the exact membership confusion the exclusion removed.
 // Creating genuinely new members stays friction-free — every scaffold is a
 // member by the default rule; only an EXCLUDED name collides.
-const scaffoldLeafName = projectName.split('/').pop() ?? projectName;
+const scaffoldLeafName = projectName.split("/").pop() ?? projectName;
 const scaffoldExclusion = (() => {
   try {
     return exclusionForName(scaffoldLeafName, workspaceRoot);
   } catch (err) {
-    console.error(`❌ Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`);
+    console.error(
+      `❌ Fleet registry failed to load (docs/fleet-membership.json) — refusing to proceed (fail-closed): ${err instanceof Error ? err.message : String(err)}`,
+    );
     if (import.meta.main) {
       process.exit(1);
     }
@@ -469,8 +525,12 @@ const scaffoldExclusion = (() => {
   }
 })();
 if (scaffoldExclusion) {
-  console.error(`❌ Project name '${scaffoldLeafName}' matches an excluded fleet member (docs/fleet-membership.json, ${scaffoldExclusion.decision_ref}).`);
-  console.error('   Choose a different name — or remove the exclusion row first if the project is rejoining the fleet (the record is the reversal path).');
+  console.error(
+    `❌ Project name '${scaffoldLeafName}' matches an excluded fleet member (docs/fleet-membership.json, ${scaffoldExclusion.decision_ref}).`,
+  );
+  console.error(
+    "   Choose a different name — or remove the exclusion row first if the project is rejoining the fleet (the record is the reversal path).",
+  );
   if (import.meta.main) {
     process.exit(1);
   }
@@ -484,7 +544,7 @@ if (scaffoldExclusion) {
 // unparseable SSOT aborts here, BEFORE any scaffolding work (tag extraction,
 // readiness gate, copy), so no project can ever record an "unknown"
 // provenance version in docs/<variant>.context.md or template-version.txt.
-let templateVersion = '';
+let templateVersion = "";
 try {
   templateVersion = resolveProvenanceVersion(templateVer, workspaceRoot);
 } catch (err) {
@@ -501,34 +561,38 @@ function getValidVariants(fromTag?: string): string[] {
     // T-20260927-019: `git archive <tag> --list` is invalid syntax (git rejects it with
     // "extra command line parameter", so EVERY pinned scaffold failed). List the tag's tree
     // contents via ls-tree instead — same output contract (one path per line).
-    const result = spawnSync('git', ['-C', workspaceRoot, 'ls-tree', '-r', '--name-only', fromTag, '--', 'templates/'], { encoding: 'utf8' });
+    const result = spawnSync(
+      "git",
+      ["-C", workspaceRoot, "ls-tree", "-r", "--name-only", fromTag, "--", "templates/"],
+      { encoding: "utf8" },
+    );
     if (result.status !== 0) return [];
     return result.stdout
-      .split('\n')
-      .filter(l => /^templates\/co-[^/]+\/variant\.json$/.test(l))
-      .map(l => l.replace('templates/', '').replace('/variant.json', ''))
+      .split("\n")
+      .filter((l) => /^templates\/co-[^/]+\/variant\.json$/.test(l))
+      .map((l) => l.replace("templates/", "").replace("/variant.json", ""))
       .sort();
   }
-  if (!existsSync(join(workspaceRoot, 'templates'))) return [];
-  return readdirSync(join(workspaceRoot, 'templates'))
-    .filter(d => d.startsWith('co-'))
+  if (!existsSync(join(workspaceRoot, "templates"))) return [];
+  return readdirSync(join(workspaceRoot, "templates"))
+    .filter((d) => d.startsWith("co-"))
     .sort();
 }
 
-const tag = templateVer ? `template-v${templateVer}` : '';
+const tag = templateVer ? `template-v${templateVer}` : "";
 const validVariants = getValidVariants(tag || undefined);
 
 if (tag && validVariants.length === 0) {
   console.error(`❌ Could not detect variants from tag '${tag}'. Tag may not exist.`);
-  console.error('   To list available tags: git tag --list \'template-v*\'');
+  console.error("   To list available tags: git tag --list 'template-v*'");
   if (import.meta.main) {
     process.exit(1);
   }
 }
 
 if (!variant) {
-  console.error('\n[INFO] No variant specified. Please choose one:');
-  validVariants.forEach(v => console.error(`   ${v}`));
+  console.error("\n[INFO] No variant specified. Please choose one:");
+  validVariants.forEach((v) => console.error(`   ${v}`));
   console.error(`\n   Usage: bun scripts/new-project.ts "${projectName}" --variant <variant>\n`);
   if (import.meta.main) {
     process.exit(1);
@@ -537,38 +601,40 @@ if (!variant) {
 
 if (!validVariants.includes(variant)) {
   console.error(`❌ Invalid variant: ${variant}`);
-  console.error(`   Valid variants: ${validVariants.join(' ')}`);
+  console.error(`   Valid variants: ${validVariants.join(" ")}`);
   if (import.meta.main) {
     process.exit(1);
   }
 }
 
 // ── Directory resolution (with optional git-tag extraction) ───────────────────
-let commonDir = join(workspaceRoot, 'templates', 'common');
-let templatesDir = join(workspaceRoot, 'templates', variant);
-let tempDir = '';
+let commonDir = join(workspaceRoot, "templates", "common");
+let templatesDir = join(workspaceRoot, "templates", variant);
+let tempDir = "";
 
 if (tag) {
   // Verify tag exists
-  const tagCheck = spawnSync('git', ['-C', workspaceRoot, 'tag', '-l', tag], { encoding: 'utf8' });
+  const tagCheck = spawnSync("git", ["-C", workspaceRoot, "tag", "-l", tag], { encoding: "utf8" });
   if (!tagCheck.stdout.trim()) {
     console.error(`❌ Template version not found: ${tag}`);
-    console.error('   Run: bun scripts/list-template-versions.ts');
+    console.error("   Run: bun scripts/list-template-versions.ts");
     if (import.meta.main) {
       process.exit(1);
     }
   }
   // Extract from tag into temp dir (cross-platform: uses Node.js fs, no mktemp/tar dependency)
-  tempDir = mkdtempSync(join(tmpdir(), 'new-project-'));
-  const archivePath = join(tempDir, '_archive.tar');
+  tempDir = mkdtempSync(join(tmpdir(), "new-project-"));
+  const archivePath = join(tempDir, "_archive.tar");
   const archiveRes = spawnSync(
-    'git', ['-C', workspaceRoot, 'archive', '--output', archivePath, tag, 'templates/common/', `templates/${variant}/`],
-    { encoding: 'utf8' }
+    "git",
+    ["-C", workspaceRoot, "archive", "--output", archivePath, tag, "templates/common/", `templates/${variant}/`],
+    { encoding: "utf8" },
   );
   // tar is available on modern Windows 10/11, macOS, and Linux
-  const extract = archiveRes.status === 0
-    ? spawnSync('tar', ['-x', '-C', tempDir, '-f', archivePath], { encoding: 'utf8' })
-    : archiveRes;
+  const extract =
+    archiveRes.status === 0
+      ? spawnSync("tar", ["-x", "-C", tempDir, "-f", archivePath], { encoding: "utf8" })
+      : archiveRes;
   if (extract.status !== 0) {
     console.error(`❌ Failed to extract template version ${tag}`);
     if (tempDir) rmSync(tempDir, { recursive: true, force: true });
@@ -576,8 +642,8 @@ if (tag) {
       process.exit(1);
     }
   }
-  commonDir = join(tempDir, 'templates', 'common');
-  templatesDir = join(tempDir, 'templates', variant);
+  commonDir = join(tempDir, "templates", "common");
+  templatesDir = join(tempDir, "templates", variant);
   if (!existsSync(templatesDir)) {
     console.error(`❌ Variant '${variant}' not found in template version ${tag}`);
     rmSync(tempDir, { recursive: true, force: true });
@@ -590,9 +656,18 @@ if (tag) {
 
 // Register cleanup on exit
 if (tempDir) {
-  process.on('exit', () => { try { rmSync(tempDir, { recursive: true, force: true }); } catch (err) { console.error(`[new-project] Error: ${err}`); } });
+  process.on("exit", () => {
+    try {
+      rmSync(tempDir, { recursive: true, force: true });
+    } catch (err) {
+      console.error(`[new-project] Error: ${err}`);
+    }
+  });
   if (import.meta.main) {
-    process.on('SIGINT', () => { rmSync(tempDir, { recursive: true, force: true }); process.exit(130); });
+    process.on("SIGINT", () => {
+      rmSync(tempDir, { recursive: true, force: true });
+      process.exit(130);
+    });
   }
 }
 
@@ -605,23 +680,27 @@ if (existsSync(projectDir)) {
 }
 if (!existsSync(templatesDir)) {
   console.error(`❌ Template variant not found: ${templatesDir}`);
-  console.error(`   Available variants: ${validVariants.join(' ')}`);
+  console.error(`   Available variants: ${validVariants.join(" ")}`);
   if (import.meta.main) {
     process.exit(1);
   }
 }
 
 // Variant status check
-const variantJsonPath = join(templatesDir, 'variant.json');
+const variantJsonPath = join(templatesDir, "variant.json");
 if (existsSync(variantJsonPath)) {
-  const vj = JSON.parse(readFileSync(variantJsonPath, 'utf8'));
-  if (vj.status && vj.status !== 'stable') {
+  const vj = JSON.parse(readFileSync(variantJsonPath, "utf8"));
+  if (vj.status && vj.status !== "stable") {
     console.log(`⚠️  Variant '${variant}' has status: ${vj.status}`);
-    console.log('   This variant may not be fully implemented.');
-    const autoYes = process.argv.includes('--yes') || process.argv.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';
-    const answer = autoYes ? 'y' : (prompt('   Continue anyway? [y/N] ') ?? '');
-    if (!['y', 'Y'].includes(answer)) {
-      console.log('Aborted.');
+    console.log("   This variant may not be fully implemented.");
+    const autoYes =
+      process.argv.includes("--yes") ||
+      process.argv.includes("-y") ||
+      process.env.CI === "true" ||
+      process.env.CI === "1";
+    const answer = autoYes ? "y" : (prompt("   Continue anyway? [y/N] ") ?? "");
+    if (!["y", "Y"].includes(answer)) {
+      console.log("Aborted.");
       if (import.meta.main) {
         process.exit(1);
       }
@@ -633,13 +712,13 @@ if (existsSync(variantJsonPath)) {
 // not READY (broken agent/skill manifest paths, missing PROMOTION_CHECKLIST.md,
 // missing README/AGENTS.md, inconsistent country_config). A project may only be
 // created from a validated variant.
-const gateScript = join(workspaceRoot, 'scripts', 'validate-variant-readiness.ts');
+const gateScript = join(workspaceRoot, "scripts", "validate-variant-readiness.ts");
 if (existsSync(gateScript)) {
   console.log(`\nRunning Variant Readiness Gate for variant '${variant}'...`);
-  const gateResult = spawnSync(process.execPath, [gateScript, '--variant', variant], { encoding: 'utf8' });
+  const gateResult = spawnSync(process.execPath, [gateScript, "--variant", variant], { encoding: "utf8" });
   if (gateResult.status !== 0) {
     console.error(`\n❌ Variant '${variant}' failed the Variant Readiness Gate.`);
-    console.error('   A project may only be created from a READY variant.');
+    console.error("   A project may only be created from a READY variant.");
     console.error(`   Run: bun scripts/validate-variant-readiness.ts --variant ${variant}`);
     if (import.meta.main) process.exit(1);
   } else {
@@ -654,7 +733,8 @@ if (existsSync(gateScript)) {
 // helpers/hub-topology.ts (one derivation — same legs validate-templates and
 // the promotion pipeline run).
 {
-  const { loadHubTopology, loadCommonContractNames, checkConsumerMinimumVersions, checkHubDoctrineDuplication } = await import('./helpers/hub-topology.ts');
+  const { loadHubTopology, loadCommonContractNames, checkConsumerMinimumVersions, checkHubDoctrineDuplication } =
+    await import("./helpers/hub-topology.ts");
   const topoResult = loadHubTopology(workspaceRoot);
   if (topoResult.ok && topoResult.topology) {
     console.log(`\nRunning hub consumption preflight for variant '${variant}'...`);
@@ -663,10 +743,12 @@ if (existsSync(gateScript)) {
     // (1) consumes/minimum_version declarations resolve against the registry.
     if (existsSync(variantJsonPath)) {
       try {
-        const vj = JSON.parse(readFileSync(variantJsonPath, 'utf8')) as Record<string, unknown>;
-        const hub = vj['hub'];
-        if (hub && typeof hub === 'object' && !Array.isArray(hub)) {
-          const leg3 = checkConsumerMinimumVersions(topoResult.topology, [{ variant, hubBlock: hub as Record<string, unknown> }]);
+        const vj = JSON.parse(readFileSync(variantJsonPath, "utf8")) as Record<string, unknown>;
+        const hub = vj["hub"];
+        if (hub && typeof hub === "object" && !Array.isArray(hub)) {
+          const leg3 = checkConsumerMinimumVersions(topoResult.topology, [
+            { variant, hubBlock: hub as Record<string, unknown> },
+          ]);
           preflightFails.push(...leg3.fails);
           if (leg3.warns.length > 0) for (const w of leg3.warns) console.warn(`  ⚠️  ${w}`);
         }
@@ -686,7 +768,9 @@ if (existsSync(gateScript)) {
     if (preflightFails.length > 0) {
       for (const f of preflightFails) console.error(`  ❌ ${f}`);
       console.error(`\n❌ Hub consumption preflight FAILED for variant '${variant}' (design §6.2).`);
-      console.error('   Declare consumption in the template variant.json hub.consumes or remove the unsanctioned copy.');
+      console.error(
+        "   Declare consumption in the template variant.json hub.consumes or remove the unsanctioned copy.",
+      );
       if (import.meta.main) {
         process.exit(1);
       }
@@ -697,15 +781,18 @@ if (existsSync(gateScript)) {
 }
 
 // ── Country/jurisdiction selection ──────────────────────────────────────────────
-let selectedCountry = '';
-const autoYes = process.argv.includes('--yes') || process.argv.includes('-y') || process.env.CI === 'true' || process.env.CI === '1';
+let selectedCountry = "";
+const autoYes =
+  process.argv.includes("--yes") || process.argv.includes("-y") || process.env.CI === "true" || process.env.CI === "1";
 
 // Check if variant has country_config
 let countryConfig: { profiles_dir?: string; supported?: string[]; default?: string | null } | undefined;
 if (existsSync(variantJsonPath)) {
   try {
-    const variantJson = JSON.parse(readFileSync(variantJsonPath, 'utf-8')) as Record<string, unknown>;
-    countryConfig = variantJson.country_config as { profiles_dir?: string; supported?: string[]; default?: string | null } | undefined;
+    const variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+    countryConfig = variantJson.country_config as
+      | { profiles_dir?: string; supported?: string[]; default?: string | null }
+      | undefined;
   } catch (e) {
     // variant.json parse error - skip country config
   }
@@ -717,7 +804,7 @@ if (countryConfig?.supported && countryConfig.supported.length > 0) {
     // --country flag provided
     if (!countryConfig.supported.includes(country)) {
       console.error(`❌ Country '${country}' not supported by variant '${variant}'.`);
-      console.error(`   Supported: ${countryConfig.supported.join(', ')}`);
+      console.error(`   Supported: ${countryConfig.supported.join(", ")}`);
       if (import.meta.main) {
         process.exit(1);
       }
@@ -726,7 +813,7 @@ if (countryConfig?.supported && countryConfig.supported.length > 0) {
   } else if (!autoYes) {
     // Interactive prompting
     console.log(`\n🌐 This variant supports country-specific profiles. Select target jurisdiction:`);
-    const profilesDir = join(templatesDir, countryConfig.profiles_dir || 'docs/countries');
+    const profilesDir = join(templatesDir, countryConfig.profiles_dir || "docs/countries");
     const options: string[] = [];
 
     for (const code of countryConfig.supported) {
@@ -734,7 +821,7 @@ if (countryConfig?.supported && countryConfig.supported.length > 0) {
       let displayName = code;
       if (existsSync(profilePath)) {
         try {
-          const profileContent = readFileSync(profilePath, 'utf-8');
+          const profileContent = readFileSync(profilePath, "utf-8");
           const nameMatch = profileContent.match(/^name:\s*(.+)$/m);
           if (nameMatch) displayName = `${code} — ${nameMatch[1].trim()}`;
         } catch (e) {
@@ -745,54 +832,62 @@ if (countryConfig?.supported && countryConfig.supported.length > 0) {
     }
     options.push(`${options.length + 1}. Region-neutral (no target jurisdiction)`);
 
-    console.log(options.join('\n'));
-    const answer = prompt(`Select jurisdiction [1-${options.length}, default: ${options.length}]: `) ?? `${options.length}`;
+    console.log(options.join("\n"));
+    const answer =
+      prompt(`Select jurisdiction [1-${options.length}, default: ${options.length}]: `) ?? `${options.length}`;
     const selection = parseInt(answer, 10);
 
     if (isNaN(selection) || selection < 1 || selection > options.length) {
-      console.log('Invalid selection. Defaulting to region-neutral.');
-      selectedCountry = ''; // Region-neutral
+      console.log("Invalid selection. Defaulting to region-neutral.");
+      selectedCountry = ""; // Region-neutral
     } else if (selection === options.length) {
-      selectedCountry = ''; // Region-neutral
+      selectedCountry = ""; // Region-neutral
     } else {
       selectedCountry = countryConfig.supported[selection - 1];
     }
   } else {
     // --yes or CI: default to region-neutral
-    selectedCountry = '';
+    selectedCountry = "";
   }
 } else {
   // Variant does not have country_config
   if (country) {
     console.error(`❌ Variant '${variant}' does not support country profiles.`);
-    console.error('   The --country flag is only valid for variants with country_config.');
+    console.error("   The --country flag is only valid for variants with country_config.");
     if (import.meta.main) {
       process.exit(1);
     }
   }
-  selectedCountry = ''; // Region-neutral
+  selectedCountry = ""; // Region-neutral
 }
 
 // ── Lifecycle governance pre-check ────────────────────────────────────────────
-const governanceJson = join(workspaceRoot, 'docs', 'templates', 'lifecycle-governance.json');
-if (existsSync(join(workspaceRoot, 'scripts', 'validate-templates.ts')) && existsSync(governanceJson)) {
+const governanceJson = join(workspaceRoot, "docs", "templates", "lifecycle-governance.json");
+if (existsSync(join(workspaceRoot, "scripts", "validate-templates.ts")) && existsSync(governanceJson)) {
   console.log(`\nRunning lifecycle governance pre-check for variant '${variant}'…`);
-  const govResult = spawnSync(process.execPath, [join(workspaceRoot, 'scripts', 'helpers', 'lifecycle-governance.ts')], { encoding: 'utf8' });
-  const mandatoryDomains = govResult.status === 0 ? govResult.stdout.trim() : 'variant,agent,skill';
+  const govResult = spawnSync(
+    process.execPath,
+    [join(workspaceRoot, "scripts", "helpers", "lifecycle-governance.ts")],
+    { encoding: "utf8" },
+  );
+  const mandatoryDomains = govResult.status === 0 ? govResult.stdout.trim() : "variant,agent,skill";
 
   const validateResult = spawnSync(
-    process.execPath, [join(workspaceRoot, 'scripts', 'validate-templates.ts'), '--variant', variant, '--json'],
-    { encoding: 'utf8' }
+    process.execPath,
+    [join(workspaceRoot, "scripts", "validate-templates.ts"), "--variant", variant, "--json"],
+    { encoding: "utf8" },
   );
-  const validateOutput = validateResult.stdout || '{"errors":[{"check":"validate-failed","message":"validate-templates.ts failed to run"}]}';
+  const validateOutput =
+    validateResult.stdout || '{"errors":[{"check":"validate-failed","message":"validate-templates.ts failed to run"}]}';
 
   const validateCheck = spawnSync(
-    process.execPath, [join(workspaceRoot, 'scripts', 'helpers', 'validate-output.ts'), mandatoryDomains, validateOutput],
-    { encoding: 'utf8' }
+    process.execPath,
+    [join(workspaceRoot, "scripts", "helpers", "validate-output.ts"), mandatoryDomains, validateOutput],
+    { encoding: "utf8" },
   );
   if (validateCheck.status !== 0) {
     console.error(`\n❌ Lifecycle governance pre-check FAILED for variant '${variant}'.`);
-    console.error('   Fix the issues above before creating a project from this variant.');
+    console.error("   Fix the issues above before creating a project from this variant.");
     console.error(`   Run: bun scripts/validate-templates.ts --variant ${variant}`);
     if (import.meta.main) {
       process.exit(1);
@@ -802,10 +897,12 @@ if (existsSync(join(workspaceRoot, 'scripts', 'validate-templates.ts')) && exist
 }
 
 // ── Template validation ────────────────────────────────────────────────────────
-const templateValidationHelper = join(workspaceRoot, 'scripts', 'helpers', 'template-validation.ts');
+const templateValidationHelper = join(workspaceRoot, "scripts", "helpers", "template-validation.ts");
 if (existsSync(templateValidationHelper)) {
-  console.log('Validating template integrity…');
-  const result = spawnSync(process.execPath, [templateValidationHelper, variant, commonDir, templatesDir], { encoding: 'utf8' });
+  console.log("Validating template integrity…");
+  const result = spawnSync(process.execPath, [templateValidationHelper, variant, commonDir, templatesDir], {
+    encoding: "utf8",
+  });
   if (result.status !== 0) {
     console.error(result.stderr);
     if (import.meta.main) {
@@ -826,7 +923,7 @@ const COPY_SKIP_ENTRIES = new Set(NEW_PROJECT_COPY_SKIP_ENTRIES);
 function copyDir(src: string, dest: string): void {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
-    if (entry === '.DS_Store') continue; // OS cruft — never copy into a scaffolded project
+    if (entry === ".DS_Store") continue; // OS cruft — never copy into a scaffolded project
     if (COPY_SKIP_ENTRIES.has(entry)) continue;
     const srcPath = join(src, entry);
     const destPath = join(dest, entry);
@@ -881,7 +978,7 @@ mkdirSync(projectDir, { recursive: true });
 // synchronously in both cases, making it a single, low-risk hook point
 // without restructuring the rest of this script's control flow.
 if (import.meta.main) {
-  process.on('exit', (code) => {
+  process.on("exit", (code) => {
     if (code === 0) return;
     const result = rollbackPartialProject(projectDir, workspaceRoot);
     if (result.rolledBack) {
@@ -898,35 +995,39 @@ copyDir(commonDir, projectDir);
 makeWritable(projectDir);
 for (const f of WORKSPACE_ONLY_FILES) {
   const fp = join(projectDir, f);
-  if (existsSync(fp)) { rmSync(fp); console.log(`  🗑️  Excluded workspace-only file: ${f}`); }
+  if (existsSync(fp)) {
+    rmSync(fp);
+    console.log(`  🗑️  Excluded workspace-only file: ${f}`);
+  }
 }
 
 // ── 2.5c. Generate project root package.json ─────────────────────────────
 // Self-contained projects use a single root package.json as SSOT.
 // All runtime dependencies (js-yaml, etc.) and scripts are resolved from root.
-const templatePkg = join(commonDir, 'package.json');
+const templatePkg = join(commonDir, "package.json");
 if (!existsSync(templatePkg)) {
   throw new Error(`Template package.json not found: ${templatePkg}`);
 }
-const pkg = JSON.parse(readFileSync(templatePkg, 'utf-8'));
+const pkg = JSON.parse(readFileSync(templatePkg, "utf-8"));
 // Slugify: lowercase, non-alphanumeric → hyphen, collapse, trim edges
 let slug = projectName
   .toLowerCase()
-  .replace(/[^a-z0-9-]/g, '-')
-  .replace(/-+/g, '-')
-  .replace(/^-|-$/g, '');
+  .replace(/[^a-z0-9-]/g, "-")
+  .replace(/-+/g, "-")
+  .replace(/^-|-$/g, "");
 // Fallback priority: projectName → basename(projectDir) → "workspace" (with warning)
 // Note: "workspace" can collide if multiple non-Latin-named projects exist in same workspace
 if (!slug) {
-  slug = basename(projectDir)
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '') || 'workspace';
+  slug =
+    basename(projectDir)
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "workspace";
   console.log(`  ⚠️  Project name "${projectName}" produced no valid slug — using "${slug}"`);
 }
 pkg.name = slug;
-writeFileSync(join(projectDir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
+writeFileSync(join(projectDir, "package.json"), JSON.stringify(pkg, null, 2) + "\n", "utf-8");
 console.log(`  ✅ Root package.json generated (name: ${pkg.name})`);
 
 // ── L1-only agent files ──────────────────────────────────────────────────
@@ -934,7 +1035,10 @@ console.log(`  ✅ Root package.json generated (name: ${pkg.name})`);
 const L1_ONLY_AGENTS = [...NEW_PROJECT_L1_ONLY_AGENTS];
 for (const a of L1_ONLY_AGENTS) {
   const fp = join(projectDir, a);
-  if (existsSync(fp)) { rmSync(fp); console.log(`  🗑️  Excluded L1-only agent: ${a}`); }
+  if (existsSync(fp)) {
+    rmSync(fp);
+    console.log(`  🗑️  Excluded L1-only agent: ${a}`);
+  }
 }
 
 // L1-only directories (single source: helpers/scaffold-markers.ts — T-20260915-003;
@@ -942,7 +1046,10 @@ for (const a of L1_ONLY_AGENTS) {
 const L1_ONLY_DIRS = [...NEW_PROJECT_L1_ONLY_DIRS];
 for (const d of L1_ONLY_DIRS) {
   const dp = join(projectDir, d);
-  if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Excluded L1-only directory: ${d}`); }
+  if (existsSync(dp)) {
+    rmSync(dp, { recursive: true });
+    console.log(`  🗑️  Excluded L1-only directory: ${d}`);
+  }
 }
 
 // ── 2.5b. Sanitize: blank L0 CONSTITUTION.md references in all .md files ────
@@ -954,8 +1061,8 @@ for (const d of L1_ONLY_DIRS) {
 // blankL0Refs() preserves line structure and removes only the matched text.
 let sanitizedCount = 0;
 for (const f of walkFiles(projectDir)) {
-  if (!f.endsWith('.md')) continue;
-  const original = readFileSync(f, 'utf-8');
+  if (!f.endsWith(".md")) continue;
+  const original = readFileSync(f, "utf-8");
   const cleaned = blankL0Refs(original);
   if (cleaned !== original) {
     writeFileSync(f, cleaned);
@@ -967,18 +1074,18 @@ if (sanitizedCount > 0) {
 }
 
 // Clear memory log files (new projects start with empty memory/)
-const memoryDir = join(projectDir, 'memory');
+const memoryDir = join(projectDir, "memory");
 if (existsSync(memoryDir)) {
   for (const f of walkFiles(memoryDir)) {
-    if (f.endsWith('.md')) rmSync(f);
+    if (f.endsWith(".md")) rmSync(f);
   }
-  console.log('  🗑️  Cleared memory/*.md (new projects start with empty memory/)');
+  console.log("  🗑️  Cleared memory/*.md (new projects start with empty memory/)");
 
   // Seed memory/MEMORY.md — mirrors create-l3-scaffold.ts. sync-md.ts treats a missing
   // "## Sessions" index as a legacy file needing migration on every run; a fresh project
   // starts with the canonical structure instead (2026-09-21 review M-13).
   writeFileSync(
-    join(memoryDir, 'MEMORY.md'),
+    join(memoryDir, "MEMORY.md"),
     `# Memory Index
 
 ## Sessions
@@ -997,15 +1104,15 @@ if (existsSync(memoryDir)) {
 |----|-------|--------|------|
 `,
   );
-  console.log('  ✅ Seeded memory/MEMORY.md (empty index)');
+  console.log("  ✅ Seeded memory/MEMORY.md (empty index)");
 }
 
 // ── 2.6. Flatten docs/_common/ → docs/ ───────────────────────────────────────
-const commonDocs = join(projectDir, 'docs', '_common');
+const commonDocs = join(projectDir, "docs", "_common");
 if (existsSync(commonDocs)) {
-  copyDir(commonDocs, join(projectDir, 'docs'));
+  copyDir(commonDocs, join(projectDir, "docs"));
   rmSync(commonDocs, { recursive: true });
-  console.log('  ✅ docs/_common/ → docs/ (flattened)');
+  console.log("  ✅ docs/_common/ → docs/ (flattened)");
 }
 
 // ── 2. Overlay variant/ on top ────────────────────────────────────────────────
@@ -1016,7 +1123,7 @@ if (!existsSync(templatesDir)) {
   }
 }
 
-console.log('📝 Copying variant templates...');
+console.log("📝 Copying variant templates...");
 // Files a variant MUST NOT overlay — owned by templates/common/ (copied earlier in
 // this pass) and sacred to the project. A variant-level docs/context.md would clobber
 // the canonical immutable context that was just laid down (see CONSTITUTION.md §10).
@@ -1024,7 +1131,7 @@ console.log('📝 Copying variant templates...');
 // the same SSOT validate-templates WS-07 enforces (no variant copy may exist at all);
 // this skip is defense-in-depth at scaffold time. (T-20260917-009)
 for (const srcFile of walkFiles(templatesDir)) {
-  const relPath = relative(templatesDir, srcFile).replace(/\\/g, '/');
+  const relPath = relative(templatesDir, srcFile).replace(/\\/g, "/");
   if (SCAFFOLD_COMMON_OWNED_FILES.has(relPath)) {
     console.log(`  ⏭️  Skipped variant overlay (owned by templates/common/): ${relPath}`);
     continue;
@@ -1037,7 +1144,7 @@ for (const srcFile of walkFiles(templatesDir)) {
   // rows to match the final delivered tree. Local skip, NOT SCAFFOLD_COMMON_
   // OWNED_FILES: that set drives validate-templates WS-07 (variants must not
   // carry the file at all) — variants legitimately ship their SKILLS.md.
-  if (relPath === 'skills/SKILLS.md') {
+  if (relPath === "skills/SKILLS.md") {
     console.log(`  ⏭️  Skipped variant overlay (registry reconcile seeds from common): ${relPath}`);
     continue;
   }
@@ -1046,15 +1153,17 @@ for (const srcFile of walkFiles(templatesDir)) {
   // it — the generated file carries the Tier 2 scripts (audit/dev-sync/sync-md) a
   // variant file may not define (the #1432/#1433 regression class kept the nightly
   // scaffold E2E red 2026-10-06..08). Same overlay-local pattern as skills/SKILLS.md.
-  if (relPath === 'package.json') {
+  if (relPath === "package.json") {
     try {
-      const variantPkg = JSON.parse(readFileSync(srcFile, 'utf-8'));
-      const generatedPath = join(projectDir, 'package.json');
-      const generated = JSON.parse(readFileSync(generatedPath, 'utf-8'));
-      writeFileSync(generatedPath, JSON.stringify(mergePackageJson(generated, variantPkg), null, 2) + '\n', 'utf-8');
+      const variantPkg = JSON.parse(readFileSync(srcFile, "utf-8"));
+      const generatedPath = join(projectDir, "package.json");
+      const generated = JSON.parse(readFileSync(generatedPath, "utf-8"));
+      writeFileSync(generatedPath, JSON.stringify(mergePackageJson(generated, variantPkg), null, 2) + "\n", "utf-8");
       console.log(`  🔀 Merged variant package.json over generated (variant wins per key; Tier 2 scripts preserved)`);
     } catch (err) {
-      console.log(`  ⚠️  Variant package.json unparseable — kept generated file: ${err instanceof Error ? err.message : String(err)}`);
+      console.log(
+        `  ⚠️  Variant package.json unparseable — kept generated file: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
     continue;
   }
@@ -1072,15 +1181,17 @@ makeWritable(projectDir);
 // agents/*.md carrying `extends:` frontmatter (the 13 variant i18n-specialist.md
 // stubs resolve here too); pm.md keeps the H12 canonical-prose check injected.
 {
-  const projAgentsDir = join(projectDir, 'agents');
+  const projAgentsDir = join(projectDir, "agents");
   if (existsSync(projAgentsDir)) {
-    for (const fname of readdirSync(projAgentsDir).filter(f => f.endsWith('.md')).sort()) {
+    for (const fname of readdirSync(projAgentsDir)
+      .filter((f) => f.endsWith(".md"))
+      .sort()) {
       const agentPath = join(projAgentsDir, fname);
       const stubResult = resolveAgentExtendsStub(
         agentPath,
-        join(commonDir, 'agents', fname),
+        join(commonDir, "agents", fname),
         variant,
-        fname === 'pm.md' ? { isCanonicalStubBody: isCanonicalPmStubBody } : undefined,
+        fname === "pm.md" ? { isCanonicalStubBody: isCanonicalPmStubBody } : undefined,
       );
       const rel = `agents/${fname}`;
       if (stubResult.resolved && stubResult.nonCanonical) {
@@ -1089,15 +1200,17 @@ makeWritable(projectDir);
             `(${stubResult.proseBodyLength} chars) in templates/${variant}/agents/${fname} — it is not the ` +
             `canonical stub prose and will be DISCARDED when the templates/common body is attached. ` +
             `If this body holds real variant content, inline it and remove \`extends:\`; ` +
-            `otherwise restore the canonical stub.`
+            `otherwise restore the canonical stub.`,
         );
       }
-      if (stubResult.resolved && stubResult.shape === 'prose') {
+      if (stubResult.resolved && stubResult.shape === "prose") {
         console.log(`  ✅ ${rel}: resolved prose extends-stub against templates/common body`);
       } else if (stubResult.resolved) {
         console.log(`  ✅ ${rel}: resolved empty extends-stub against templates/common body`);
       } else if (stubResult.missingL1) {
-        console.log(`  ⚠️  ${rel}: extends-stub but templates/common/agents/${fname} is missing — project ships a stub agent`);
+        console.log(
+          `  ⚠️  ${rel}: extends-stub but templates/common/agents/${fname} is missing — project ships a stub agent`,
+        );
       }
     }
   }
@@ -1110,12 +1223,18 @@ makeWritable(projectDir);
 // green on the project's first audit. Templates ship no mirror trees (trade-off
 // T3) — the scaffold-time run is the only generation point for new projects.
 {
-  const mirrorGenerator = join(workspaceRoot, 'scripts', 'sync-agent-mirrors.ts');
+  const mirrorGenerator = join(workspaceRoot, "scripts", "sync-agent-mirrors.ts");
   if (existsSync(mirrorGenerator)) {
-    console.log('🪞 Generating platform agent mirrors (.claude/agents)...');
-    const mirrorResult = spawnSync(process.execPath, [mirrorGenerator, '--dir', projectDir, '--templates-root', join(workspaceRoot, 'templates')], { stdio: 'inherit' });
+    console.log("🪞 Generating platform agent mirrors (.claude/agents)...");
+    const mirrorResult = spawnSync(
+      process.execPath,
+      [mirrorGenerator, "--dir", projectDir, "--templates-root", join(workspaceRoot, "templates")],
+      { stdio: "inherit" },
+    );
     if (mirrorResult.status !== 0) {
-      console.error(`❌ Agent-mirror generation failed — the scaffold is complete but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`);
+      console.error(
+        `❌ Agent-mirror generation failed — the scaffold is complete but its mirrors are not; repair with: bun scripts/sync-agent-mirrors.ts --dir ${projectDir}`,
+      );
       if (import.meta.main) {
         process.exit(1);
       }
@@ -1124,12 +1243,16 @@ makeWritable(projectDir);
 }
 
 // ── 2.4. Prune country-scoped assets ───────────────────────────────────────────
-const pruneHelper = join(workspaceRoot, 'scripts', 'helpers', 'prune-country-scoped-assets.ts');
+const pruneHelper = join(workspaceRoot, "scripts", "helpers", "prune-country-scoped-assets.ts");
 if (existsSync(pruneHelper)) {
-  console.log(`🌐 Pruning country-scoped assets${selectedCountry ? ` for ${selectedCountry}` : ' (region-neutral)'}…`);
-  const pruneResult = spawnSync(process.execPath, [pruneHelper, projectDir, selectedCountry || 'none', variant || 'none'], { stdio: 'inherit' });
+  console.log(`🌐 Pruning country-scoped assets${selectedCountry ? ` for ${selectedCountry}` : " (region-neutral)"}…`);
+  const pruneResult = spawnSync(
+    process.execPath,
+    [pruneHelper, projectDir, selectedCountry || "none", variant || "none"],
+    { stdio: "inherit" },
+  );
   if (pruneResult.status !== 0) {
-    console.error('❌ Prune helper failed');
+    console.error("❌ Prune helper failed");
     // T-012-BUG: called with only (projectDir); the required workspaceRoot argument was
     // missing, so at runtime resolve(undefined) threw inside the helper and the partial-
     // project rollback never ran (the script crashed instead of exiting cleanly).
@@ -1140,9 +1263,9 @@ if (existsSync(pruneHelper)) {
     }
   }
 } else {
-  console.warn('⚠️  prune-country-scoped-assets.ts not found — skipping country-scoped asset pruning');
+  console.warn("⚠️  prune-country-scoped-assets.ts not found — skipping country-scoped asset pruning");
 }
-console.log('  ✅ Variant templates copied');
+console.log("  ✅ Variant templates copied");
 
 // ── 2.3a. Purge Windows device-name artifacts copied from the template ─────────
 // copyDir ignores .gitignore, so a device-name file (e.g. `nul`) that somehow lands in a
@@ -1153,15 +1276,28 @@ console.log('  ✅ Variant templates copied');
 // regresses. audit.ts sweeps the templates/ tree too, but that runs later and elsewhere.
 {
   const DEVICE_NAMES = new Set([
-    'nul', 'NUL', 'con', 'CON', 'prn', 'PRN', 'aux', 'AUX',
-    ...Array.from({ length: 9 }, (_, i) => `com${i + 1}`), ...Array.from({ length: 9 }, (_, i) => `COM${i + 1}`),
-    ...Array.from({ length: 9 }, (_, i) => `lpt${i + 1}`), ...Array.from({ length: 9 }, (_, i) => `LPT${i + 1}`),
+    "nul",
+    "NUL",
+    "con",
+    "CON",
+    "prn",
+    "PRN",
+    "aux",
+    "AUX",
+    ...Array.from({ length: 9 }, (_, i) => `com${i + 1}`),
+    ...Array.from({ length: 9 }, (_, i) => `COM${i + 1}`),
+    ...Array.from({ length: 9 }, (_, i) => `lpt${i + 1}`),
+    ...Array.from({ length: 9 }, (_, i) => `LPT${i + 1}`),
   ]);
-  const SKIP = new Set(['node_modules', '.git', '.venv', '.bun', 'dist', 'build']);
+  const SKIP = new Set(["node_modules", ".git", ".venv", ".bun", "dist", "build"]);
   const purge = (dir: string, depth: number): number => {
     if (depth > 8) return 0;
-    let entries: import('node:fs').Dirent[];
-    try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return 0; }
+    let entries: import("node:fs").Dirent[];
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return 0;
+    }
     let removed = 0;
     for (const entry of entries) {
       const p = join(dir, entry.name);
@@ -1172,17 +1308,19 @@ console.log('  ✅ Variant templates copied');
       if (!DEVICE_NAMES.has(entry.name)) continue;
       // Forward-slash path: Git Bash's rm mis-handles backslash forms. Shell-free argument
       // passing; trust the exit status (fs.existsSync is unreliable for device-name paths).
-      const rm = spawnSync('bash', ['-c', 'rm -f -- "$1"', 'rm', p.split('\\').join('/')], { encoding: 'utf-8' });
+      const rm = spawnSync("bash", ["-c", 'rm -f -- "$1"', "rm", p.split("\\").join("/")], { encoding: "utf-8" });
       let purged = rm.status === 0;
-      if (!purged && process.platform === 'win32') {
+      if (!purged && process.platform === "win32") {
         // Windows fallback (T-20260910-031): bash (Git Bash) is unavailable or failed.
         // The extended-length prefix (\\?\C:\...) bypasses Win32 reserved-device-name
         // resolution, letting fs unlink `nul`/`con`/`aux` artifacts that Node otherwise
         // cannot address (CLAUDE.md §1 Windows safeguard).
         try {
-          rmSync('\\\\?\\' + resolve(p), { force: true });
+          rmSync("\\\\?\\" + resolve(p), { force: true });
           purged = true;
-        } catch { /* reported below */ }
+        } catch {
+          /* reported below */
+        }
       }
       if (purged) {
         console.log(`  🗑️  Purged device-name artifact from scaffold: ${p}`);
@@ -1197,76 +1335,88 @@ console.log('  ✅ Variant templates copied');
 }
 
 // ── 2.6a. Create deliverables/ subdirectories (co-consult) ──────────────────────
-if (variant === 'co-consult') {
-  const delRoot = join(projectDir, 'deliverables');
+if (variant === "co-consult") {
+  const delRoot = join(projectDir, "deliverables");
   const delDirs = [
-    { name: 'reports', desc: 'Final deliverables, client-ready reports' },
-    { name: 'drafts', desc: 'Work-in-progress documents and drafts' },
-    { name: 'research', desc: 'Research notes, source materials, data' },
-    { name: 'presentations', desc: 'Client presentation decks' },
+    { name: "reports", desc: "Final deliverables, client-ready reports" },
+    { name: "drafts", desc: "Work-in-progress documents and drafts" },
+    { name: "research", desc: "Research notes, source materials, data" },
+    { name: "presentations", desc: "Client presentation decks" },
   ];
   for (const d of delDirs) {
     const dir = join(delRoot, d.name);
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, 'README.md'), [
-      `# deliverables/${d.name}/`,
-      '',
-      d.desc + '.',
-      '',
-      '## Output Destination',
-      '',
-      'See Output Destination Mapping in `docs/co-consult.context.md` for per-agent paths and naming conventions.',
-      '',
-    ].join('\n'));
+    writeFileSync(
+      join(dir, "README.md"),
+      [
+        `# deliverables/${d.name}/`,
+        "",
+        d.desc + ".",
+        "",
+        "## Output Destination",
+        "",
+        "See Output Destination Mapping in `docs/co-consult.context.md` for per-agent paths and naming conventions.",
+        "",
+      ].join("\n"),
+    );
   }
-  console.log('  ✅ deliverables/{reports,drafts,research,presentations}/ created');
+  console.log("  ✅ deliverables/{reports,drafts,research,presentations}/ created");
 }
 
 // ── 2.6a-2. Create deliverables/ subdirectories (co-work) ──────────────────────
-if (variant === 'co-work') {
-  const delRoot = join(projectDir, 'deliverables');
+if (variant === "co-work") {
+  const delRoot = join(projectDir, "deliverables");
   const delDirs = [
-    { name: 'reports', desc: 'Final deliverables, client-ready reports' },
-    { name: 'drafts', desc: 'Work-in-progress documents and drafts' },
-    { name: 'research', desc: 'Research findings, analytical outputs, data analysis results' },
-    { name: 'references', desc: 'Reference materials, source archives, citations, supporting documents' },
-    { name: 'presentations', desc: 'Client presentation decks' },
+    { name: "reports", desc: "Final deliverables, client-ready reports" },
+    { name: "drafts", desc: "Work-in-progress documents and drafts" },
+    { name: "research", desc: "Research findings, analytical outputs, data analysis results" },
+    { name: "references", desc: "Reference materials, source archives, citations, supporting documents" },
+    { name: "presentations", desc: "Client presentation decks" },
   ];
   for (const d of delDirs) {
     const dir = join(delRoot, d.name);
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, 'README.md'), [
-      `# deliverables/${d.name}/`,
-      '',
-      d.desc + '.',
-      '',
-      '## Output Destination',
-      '',
-      'See Output Destination Mapping in `docs/co-work.context.md` for per-agent paths and naming conventions.',
-      '',
-      '## Naming Convention',
-      '',
-      '`{topic}-YYYY-MM-DD[_ko].md` — deliverables are written in Korean by default (use the `_ko.md` suffix). English deliverables (explicit client request only) use `.md` without suffix.',
-      '',
-    ].join('\n'));
+    writeFileSync(
+      join(dir, "README.md"),
+      [
+        `# deliverables/${d.name}/`,
+        "",
+        d.desc + ".",
+        "",
+        "## Output Destination",
+        "",
+        "See Output Destination Mapping in `docs/co-work.context.md` for per-agent paths and naming conventions.",
+        "",
+        "## Naming Convention",
+        "",
+        "`{topic}-YYYY-MM-DD[_ko].md` — deliverables are written in Korean by default (use the `_ko.md` suffix). English deliverables (explicit client request only) use `.md` without suffix.",
+        "",
+      ].join("\n"),
+    );
   }
-  console.log('  ✅ deliverables/{reports,drafts,research,references,presentations}/ created');
+  console.log("  ✅ deliverables/{reports,drafts,research,references,presentations}/ created");
 }
 
 // ── 2.5. Strip L1-B metadata from agents/pm.md ────────────────────────────────
 // Logic extracted verbatim to scripts/helpers/resolve-pm-stub.ts (v1.25.0) — shared
 // with the adopt-project settling pass. Behavior unchanged.
 const projectDate = new Date().toISOString().slice(0, 10);
-const pmMd = join(projectDir, 'agents', 'pm.md');
+const pmMd = join(projectDir, "agents", "pm.md");
 if (existsSync(pmMd)) {
   stripL1BMetadata(pmMd, projectDate);
-  console.log('  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, formal_name, variant); regenerated lifecycle with project-local dates');
+  console.log(
+    "  ✅ agents/pm.md: stripped L1-B metadata (@resolved-from, formal_name, variant); regenerated lifecycle with project-local dates",
+  );
 }
 
 // ── 2.6b. Remove template-only docs/ subdirs (variant overlay may re-add; removed here after overlay)
-for (const d of L1_ONLY_DIRS) { // docs/specs stays (ADR-0074) — not in L1_ONLY_DIRS
+for (const d of L1_ONLY_DIRS) {
+  // docs/specs stays (ADR-0074) — not in L1_ONLY_DIRS
   const dp = join(projectDir, d);
-  if (existsSync(dp)) { rmSync(dp, { recursive: true }); console.log(`  🗑️  Removed template-only dir: ${d}`); }
+  if (existsSync(dp)) {
+    rmSync(dp, { recursive: true });
+    console.log(`  🗑️  Removed template-only dir: ${d}`);
+  }
 }
 
 // ── 2.7. Apply platform profile ───────────────────────────────────────────────
@@ -1277,15 +1427,15 @@ pruneUnselectedProfiles(projectDir, selectedProfiles);
 
 // Remove .cmd files
 for (const f of walkFiles(projectDir)) {
-  if (f.endsWith('.cmd')) rmSync(f);
+  if (f.endsWith(".cmd")) rmSync(f);
 }
 
 // ── 3.6. Agent Override Merge (VARIANT-SECTION substitution) ──────────────────
 if (existsSync(variantJsonPath)) {
-  const agentOverrideMerge = join(workspaceRoot, 'scripts', 'lib', 'agent-override-merge.ts');
+  const agentOverrideMerge = join(workspaceRoot, "scripts", "lib", "agent-override-merge.ts");
   const mergeResult = spawnSync(process.execPath, [agentOverrideMerge, commonDir, templatesDir, projectDir], {
-    encoding: 'utf8',
-    stdio: 'inherit',
+    encoding: "utf8",
+    stdio: "inherit",
   });
   // M9 (2026-09-15 project review): unchecked helper spawns shipped broken
   // scaffolds with a success banner. Every helper below fails loud now.
@@ -1299,12 +1449,12 @@ if (existsSync(variantJsonPath)) {
 if (selectedCountry && countryConfig?.profiles_dir) {
   const countriesDir = join(projectDir, countryConfig.profiles_dir);
   if (existsSync(countriesDir)) {
-    const activePath = join(countriesDir, 'ACTIVE.md');
+    const activePath = join(countriesDir, "ACTIVE.md");
     let countryName = selectedCountry;
     const profilePath = join(countriesDir, `${selectedCountry}.md`);
     if (existsSync(profilePath)) {
       try {
-        const profileContent = readFileSync(profilePath, 'utf-8');
+        const profileContent = readFileSync(profilePath, "utf-8");
         const nameMatch = profileContent.match(/^name:\s*(.+)$/m);
         if (nameMatch) countryName = nameMatch[1].trim();
       } catch (e) {
@@ -1320,29 +1470,31 @@ Active jurisdiction: ${selectedCountry} — ${countryName}. See ${countryConfig.
   } else {
     // T-20260921-014 (review M-16): the profiles directory was silently missing —
     // the scaffold produced no jurisdiction artifact at all. Warn loud instead.
-    console.warn(`  ⚠️  Country profiles directory '${countryConfig.profiles_dir}/' not found in the scaffolded tree — ACTIVE.md was NOT created`);
+    console.warn(
+      `  ⚠️  Country profiles directory '${countryConfig.profiles_dir}/' not found in the scaffolded tree — ACTIVE.md was NOT created`,
+    );
   }
 }
 
 // ── 5. Remove .gitkeep placeholders ───────────────────────────────────────────
 for (const f of walkFiles(projectDir)) {
-  if (basename(f) === '.gitkeep') rmSync(f);
+  if (basename(f) === ".gitkeep") rmSync(f);
 }
 
 // ── 5. Substitute placeholders ────────────────────────────────────────────────
-const substitutePlaceholders = join(workspaceRoot, 'scripts', 'helpers', 'substitute-placeholders.ts');
+const substitutePlaceholders = join(workspaceRoot, "scripts", "helpers", "substitute-placeholders.ts");
 if (existsSync(substitutePlaceholders)) {
   // Get country display name for {{COUNTRY}} placeholder
-  let countryDisplayName = '';
+  let countryDisplayName = "";
   if (selectedCountry) {
     // T-20260921-014 (review M-16): honor the variant's profiles_dir instead of
     // hardcoding docs/countries — a variant with a custom profiles_dir otherwise
     // got a fallback-to-code display name in every {{COUNTRY}} marker.
-    const profilesDir = countryConfig?.profiles_dir ?? join('docs', 'countries');
+    const profilesDir = countryConfig?.profiles_dir ?? join("docs", "countries");
     const profilePath = join(projectDir, profilesDir, `${selectedCountry}.md`);
     if (existsSync(profilePath)) {
       try {
-        const profileContent = readFileSync(profilePath, 'utf-8');
+        const profileContent = readFileSync(profilePath, "utf-8");
         const nameMatch = profileContent.match(/^name:\s*(.+)$/m);
         if (nameMatch) countryDisplayName = nameMatch[1].trim();
       } catch (e) {
@@ -1354,13 +1506,19 @@ if (existsSync(substitutePlaceholders)) {
     }
   }
 
-  const substituteResult = spawnSync(process.execPath, [substitutePlaceholders, projectDir, basename(projectName), 'A new project', '', variant, countryDisplayName], { stdio: 'inherit' });
+  const substituteResult = spawnSync(
+    process.execPath,
+    [substitutePlaceholders, projectDir, basename(projectName), "A new project", "", variant, countryDisplayName],
+    { stdio: "inherit" },
+  );
   if (substituteResult.status !== 0) {
-    console.error(`❌ Helper failed: substitute-placeholders (exit ${substituteResult.status}) — live {{markers}} would ship in the project`);
+    console.error(
+      `❌ Helper failed: substitute-placeholders (exit ${substituteResult.status}) — live {{markers}} would ship in the project`,
+    );
     if (import.meta.main) process.exit(1);
   }
 } else {
-  console.log('⚠️  Placeholder substitution skipped (helper missing)');
+  console.log("⚠️  Placeholder substitution skipped (helper missing)");
 }
 
 // ── 5.2. Render docs/project.md (project identity seed — spec 2026-09-24-scaffold-identity-overview-design) ──
@@ -1373,17 +1531,17 @@ if (existsSync(substitutePlaceholders)) {
 // TODO(project-overview) fallback lines, which match the audit.ts placeholder
 // regex family so an undescribed project stays WARN-visible.
 {
-  const identityTemplatePath = join(commonDir, 'docs', 'project.template.md');
-  const deliveredTemplateCopy = join(projectDir, 'docs', 'project.template.md');
-  const identityOutPath = join(projectDir, 'docs', 'project.md');
+  const identityTemplatePath = join(commonDir, "docs", "project.template.md");
+  const deliveredTemplateCopy = join(projectDir, "docs", "project.template.md");
+  const identityOutPath = join(projectDir, "docs", "project.md");
   if (existsSync(identityTemplatePath)) {
     try {
-      let identity = applySubstitutions(readFileSync(identityTemplatePath, 'utf-8'), {
+      let identity = applySubstitutions(readFileSync(identityTemplatePath, "utf-8"), {
         projectName: basename(projectName),
-        description: projectDescription || 'A new project',
-        characteristics: '',
+        description: projectDescription || "A new project",
+        characteristics: "",
         variantName: variant,
-        countryDisplayName: '',
+        countryDisplayName: "",
       });
       if (projectDescription) {
         identity = identity.replace(
@@ -1397,14 +1555,18 @@ if (existsSync(substitutePlaceholders)) {
           () => `- **Type**: ${projectType}`,
         );
       }
-      writeFileSync(identityOutPath, identity, 'utf-8');
-      console.log('  ✅ docs/project.md rendered from the identity seed template');
+      writeFileSync(identityOutPath, identity, "utf-8");
+      console.log("  ✅ docs/project.md rendered from the identity seed template");
       // T-20261007-024: an undescribed project ships TODO(project-overview)
       // placeholders on day one (the co-hr/co-news class) — say so at scaffold
       // time with an explicit checklist item, not only via the later audit WARN.
       if (!projectDescription || !projectType) {
-        const missing = [!projectDescription ? '--description' : null, !projectType ? '--type' : null].filter(Boolean).join(' and ');
-        console.warn(`  ⚠️  ${missing} omitted — docs/project.md keeps its TODO(project-overview) placeholder(s). Post-scaffold checklist: populate docs/project.md Description/Type (audit WARNs until they are filled).`);
+        const missing = [!projectDescription ? "--description" : null, !projectType ? "--type" : null]
+          .filter(Boolean)
+          .join(" and ");
+        console.warn(
+          `  ⚠️  ${missing} omitted — docs/project.md keeps its TODO(project-overview) placeholder(s). Post-scaffold checklist: populate docs/project.md Description/Type (audit WARNs until they are filled).`,
+        );
       }
     } catch (err) {
       console.error(`❌ Failed to render docs/project.md from the identity seed: ${(err as Error).message}`);
@@ -1413,20 +1575,22 @@ if (existsSync(substitutePlaceholders)) {
     // The raw .template.md copy never ships: rendered output replaces it.
     if (existsSync(deliveredTemplateCopy)) {
       rmSync(deliveredTemplateCopy);
-      console.log('  🗑️  Removed raw template copy: docs/project.template.md');
+      console.log("  🗑️  Removed raw template copy: docs/project.template.md");
     }
-  } else if ((projectDescription || projectType) && existsSync(join(projectDir, 'docs'))) {
-    console.warn('  ⚠️  docs/project.template.md not found in the template source — docs/project.md was NOT rendered (old template version?)');
+  } else if ((projectDescription || projectType) && existsSync(join(projectDir, "docs"))) {
+    console.warn(
+      "  ⚠️  docs/project.template.md not found in the template source — docs/project.md was NOT rendered (old template version?)",
+    );
   }
 }
 
 // ── 5.5b. Update lifecycle.statusSince in variant.json ────────────────────────
 // (projectDate is declared at §2.5, which also needs it)
-const projVariantJson = join(projectDir, 'variant.json');
+const projVariantJson = join(projectDir, "variant.json");
 if (existsSync(projVariantJson)) {
-  const helper = join(workspaceRoot, 'scripts', 'helpers', 'update-variant-lifecycle.ts');
+  const helper = join(workspaceRoot, "scripts", "helpers", "update-variant-lifecycle.ts");
   if (existsSync(helper)) {
-    const r = spawnSync(process.execPath, [helper, projectDir, projectDate, variant], { stdio: 'inherit' });
+    const r = spawnSync(process.execPath, [helper, projectDir, projectDate, variant], { stdio: "inherit" });
     if (r.status !== 0) {
       console.error(`❌ Helper failed: update-variant-lifecycle (exit ${r.status})`);
       if (import.meta.main) process.exit(1);
@@ -1435,11 +1599,13 @@ if (existsSync(projVariantJson)) {
 }
 
 // ── 5.5c. Write scripts-snapshot.json ─────────────────────────────────────────
-const scriptsMd = join(workspaceRoot, 'scripts', 'SCRIPTS.md');
+const scriptsMd = join(workspaceRoot, "scripts", "SCRIPTS.md");
 if (existsSync(scriptsMd)) {
-  const helper = join(workspaceRoot, 'scripts', 'helpers', 'write-scripts-snapshot.ts');
+  const helper = join(workspaceRoot, "scripts", "helpers", "write-scripts-snapshot.ts");
   if (existsSync(helper)) {
-    const r = spawnSync(process.execPath, [helper, projectDir, projectDate, variant, 'templates/common/scripts'], { stdio: 'inherit' });
+    const r = spawnSync(process.execPath, [helper, projectDir, projectDate, variant, "templates/common/scripts"], {
+      stdio: "inherit",
+    });
     if (r.status !== 0) {
       console.error(`❌ Helper failed: write-scripts-snapshot (exit ${r.status})`);
       if (import.meta.main) process.exit(1);
@@ -1453,26 +1619,31 @@ if (existsSync(scriptsMd)) {
 // fail-loud via helpers/template-version.ts resolveProvenanceVersion() (M11
 // parity with create-l3-scaffold.ts). The previous silent "unknown" fallback
 // is removed — the downstream output formats are unchanged.
-const variantContextMd = join(projectDir, 'docs', `${variant}.context.md`);
+const variantContextMd = join(projectDir, "docs", `${variant}.context.md`);
 
 // Regenerate context.md from canonical template (SSOT: templates/common/docs/variant.context.template.md)
 // H6 (2026-09-15 project review): read the canonical template from commonDir —
 // the tag's extracted copy when --version <tag> is used.
-const contextTemplatePath = join(commonDir, 'docs', 'variant.context.template.md');
+const contextTemplatePath = join(commonDir, "docs", "variant.context.template.md");
 if (existsSync(contextTemplatePath) && !existsSync(variantContextMd)) {
   applyContextTemplate(contextTemplatePath, variantContextMd, {
     variantName: variant,
     version: templateVersion,
-    pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[variant] ?? 'Workflow management, dispatch, quality gates',
+    pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[variant] ?? "Workflow management, dispatch, quality gates",
   });
   console.log(`  ✅ context.md generated from canonical template`);
 }
 
 if (existsSync(variantContextMd)) {
-  const ctx = readFileSync(variantContextMd, 'utf8');
-  if (!ctx.includes('Template-Version:')) {
-    const jurisdictionLine = selectedCountry ? `- **Target-Jurisdiction**: ${selectedCountry}\n` : `- **Target-Jurisdiction**: region-neutral\n`;
-    appendFileSync(variantContextMd, `\n## Template Provenance\n\n- **Template-Version**: ${templateVersion}\n- **Template-Variant**: ${variant}\n${jurisdictionLine}`);
+  const ctx = readFileSync(variantContextMd, "utf8");
+  if (!ctx.includes("Template-Version:")) {
+    const jurisdictionLine = selectedCountry
+      ? `- **Target-Jurisdiction**: ${selectedCountry}\n`
+      : `- **Target-Jurisdiction**: region-neutral\n`;
+    appendFileSync(
+      variantContextMd,
+      `\n## Template Provenance\n\n- **Template-Version**: ${templateVersion}\n- **Template-Variant**: ${variant}\n${jurisdictionLine}`,
+    );
   }
 }
 
@@ -1482,14 +1653,14 @@ if (existsSync(variantContextMd)) {
 // legacy .claude/template-version.txt as a fallback, so pre-move projects work.
 const countryLine = selectedCountry ? `country=${selectedCountry}\n` : `country=none\n`;
 writeFileSync(
-  join(projectDir, 'template-version.txt'),
-  `variant=${variant}\nversion=${templateVersion}\nplatform=${platform}\n${countryLine}created=${new Date().toISOString()}\n`
+  join(projectDir, "template-version.txt"),
+  `variant=${variant}\nversion=${templateVersion}\nplatform=${platform}\n${countryLine}created=${new Date().toISOString()}\n`,
 );
 
 // ── 5.6b. Inject AGENTS.md Skills into docs/context.md ───────────────────────
-const injectSkills = join(workspaceRoot, 'scripts', 'helpers', 'inject-skills.ts');
+const injectSkills = join(workspaceRoot, "scripts", "helpers", "inject-skills.ts");
 if (existsSync(injectSkills)) {
-  const r = spawnSync(process.execPath, [injectSkills, projectDir], { stdio: 'inherit' });
+  const r = spawnSync(process.execPath, [injectSkills, projectDir], { stdio: "inherit" });
   if (r.status !== 0) {
     console.error(`❌ Helper failed: inject-skills (exit ${r.status})`);
     if (import.meta.main) process.exit(1);
@@ -1497,14 +1668,14 @@ if (existsSync(injectSkills)) {
 }
 
 // ── 5.7. Protect context.md from accidental overwrites ────────────────────────
-const gitattributes = join(projectDir, '.gitattributes');
+const gitattributes = join(projectDir, ".gitattributes");
 if (existsSync(gitattributes)) {
-  const ga = readFileSync(gitattributes, 'utf8');
-  if (!ga.includes('docs/context.md')) {
-    appendFileSync(gitattributes, '\ndocs/context.md merge=ours\n');
+  const ga = readFileSync(gitattributes, "utf8");
+  if (!ga.includes("docs/context.md")) {
+    appendFileSync(gitattributes, "\ndocs/context.md merge=ours\n");
   }
 } else {
-  writeFileSync(gitattributes, 'docs/context.md merge=ours\n');
+  writeFileSync(gitattributes, "docs/context.md merge=ours\n");
 }
 
 // ── 5a. Refresh README hashes (v1.24.0, T-20260921-002; v1.33.0 T-20260929-002) ──
@@ -1520,46 +1691,46 @@ if (existsSync(gitattributes)) {
 // seed commit) is a same-value no-op instead of mutating the body after the
 // hash below is recorded (surfaced by the T-20260929-002 seed commit).
 {
-  const enPath = join(projectDir, 'README.md');
-  const koPath = join(projectDir, 'README_ko.md');
+  const enPath = join(projectDir, "README.md");
+  const koPath = join(projectDir, "README_ko.md");
   if (existsSync(enPath)) {
     const today = localDateISO();
     for (const p of [enPath, koPath]) {
       if (!existsSync(p)) continue;
-      const before = readFileSync(p, 'utf-8');
+      const before = readFileSync(p, "utf-8");
       const after = before.replace(/(Last Updated:) \d{4}-\d{2}-\d{2}/g, `$1 ${today}`);
-      if (after !== before) writeFileSync(p, after, 'utf-8');
+      if (after !== before) writeFileSync(p, after, "utf-8");
     }
     const h = computeContentHash(enPath);
-    const en = readFileSync(enPath, 'utf-8');
+    const en = readFileSync(enPath, "utf-8");
     const updated = /^content_hash:/m.test(en)
       ? en.replace(/^content_hash:\s*.+$/m, `content_hash: ${h}`)
       : en.replace(/^(---\r?\n[\s\S]*?)(---)/m, `$1content_hash: ${h}\n$2`);
-    writeFileSync(enPath, updated, 'utf-8');
+    writeFileSync(enPath, updated, "utf-8");
     if (existsSync(koPath)) {
-      const ko = readFileSync(koPath, 'utf-8');
+      const ko = readFileSync(koPath, "utf-8");
       const koUpdated = /^translated_from_hash:/m.test(ko)
         ? ko.replace(/^translated_from_hash:\s*.+$/m, `translated_from_hash: ${h}`)
         : ko.replace(/^(---\r?\n[\s\S]*?)(---)/m, `$1translated_from_hash: ${h}\n$2`);
-      writeFileSync(koPath, koUpdated, 'utf-8');
+      writeFileSync(koPath, koUpdated, "utf-8");
     }
-    console.log('  ✅ README content hashes refreshed (EN + KO)');
+    console.log("  ✅ README content hashes refreshed (EN + KO)");
   }
 }
 
 // ── 6. Cleanup Strictly L0 Files ──────────────────────────────────────────────
-const layerFilter = join(workspaceRoot, 'scripts', 'helpers', 'layer-filter.ts');
+const layerFilter = join(workspaceRoot, "scripts", "helpers", "layer-filter.ts");
 let l0Scripts: string[] = [];
 if (existsSync(layerFilter)) {
-  const result = spawnSync(process.execPath, [layerFilter, '--scripts-l0-only', '--format=list'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [layerFilter, "--scripts-l0-only", "--format=list"], { encoding: "utf8" });
   if (result.status === 0) {
-    l0Scripts = result.stdout.split('\n').filter(Boolean);
+    l0Scripts = result.stdout.split("\n").filter(Boolean);
   }
 } else {
-  l0Scripts = ['validate-templates.ts', 'create-l3-scaffold.ts', 'l3-to-variant-pipeline.ts', 'fix-script-versions.ts'];
+  l0Scripts = ["validate-templates.ts", "create-l3-scaffold.ts", "l3-to-variant-pipeline.ts", "fix-script-versions.ts"];
 }
 for (const s of l0Scripts) {
-  const fp = join(projectDir, 'scripts', s);
+  const fp = join(projectDir, "scripts", s);
   if (existsSync(fp)) rmSync(fp, { recursive: true, force: true });
 }
 
@@ -1592,9 +1763,9 @@ for (const base of projectSkillBases) {
   const baseDir = join(projectDir, base);
   if (!existsSync(baseDir)) continue;
   for (const skillName of readdirSync(baseDir)) {
-    const skillMd = join(baseDir, skillName, 'SKILL.md');
+    const skillMd = join(baseDir, skillName, "SKILL.md");
     if (existsSync(skillMd)) {
-      const content = readFileSync(skillMd, 'utf-8');
+      const content = readFileSync(skillMd, "utf-8");
       if (/^l2_propagate:\s*false\b/m.test(content)) {
         rmSync(join(baseDir, skillName), { recursive: true });
         console.log(`  🗑️  Excluded L1-only skill (${base}): ${skillName}`);
@@ -1633,12 +1804,12 @@ for (const base of projectSkillBases) {
 // Idempotent (a second run changes nothing) and non-fatal (INFO skip when the
 // registry is absent) — the post-scaffold audit is the gate.
 {
-  const registryPath = join(projectDir, 'skills', 'SKILLS.md');
-  const skillsDir = join(projectDir, 'skills');
+  const registryPath = join(projectDir, "skills", "SKILLS.md");
+  const skillsDir = join(projectDir, "skills");
   if (!existsSync(registryPath)) {
-    console.log('  ℹ️  skills/SKILLS.md not found — skipping registry reconcile');
+    console.log("  ℹ️  skills/SKILLS.md not found — skipping registry reconcile");
   } else {
-    const before = readFileSync(registryPath, 'utf-8');
+    const before = readFileSync(registryPath, "utf-8");
 
     // Pass 1 — fold variant-exclusive rows into the audit-visible section.
     const folded = foldVariantExclusiveRowsIntoWorkspaceSection(before);
@@ -1654,7 +1825,7 @@ for (const base of projectSkillBases) {
     const keepNames = new Set<string>();
     if (existsSync(skillsDir)) {
       for (const entry of readdirSync(skillsDir)) {
-        if (existsSync(join(skillsDir, entry, 'SKILL.md'))) keepNames.add(entry);
+        if (existsSync(join(skillsDir, entry, "SKILL.md"))) keepNames.add(entry);
       }
     }
     const { content: prunedContent, pruned } = pruneSkillRegistryRows(folded.content, keepNames);
@@ -1678,7 +1849,7 @@ for (const base of projectSkillBases) {
       console.log(`  🔧 ALIGNED registry row: ${skill} (status/owner from delivered SKILL.md)`);
     }
     if (finalContent !== before) {
-      writeFileSync(registryPath, finalContent, 'utf-8');
+      writeFileSync(registryPath, finalContent, "utf-8");
     }
     console.log(
       `  ✅ skills/SKILLS.md reconciled against delivered tree ` +
@@ -1691,13 +1862,13 @@ for (const base of projectSkillBases) {
 // Safety-net: remove any workspace-only scripts that bypassed propagation filtering
 // (@l2-propagate: false header). Primary enforcement is in propagate-to-templates.ts
 // via layer-filter.ts — this block catches manual additions to templates/common/scripts/.
-const projectScriptsDir = join(projectDir, 'scripts');
+const projectScriptsDir = join(projectDir, "scripts");
 if (existsSync(projectScriptsDir)) {
   for (const scriptName of readdirSync(projectScriptsDir)) {
-    if (!scriptName.endsWith('.ts')) continue;
+    if (!scriptName.endsWith(".ts")) continue;
     const scriptPath = join(projectScriptsDir, scriptName);
     try {
-      const content = readFileSync(scriptPath, 'utf-8');
+      const content = readFileSync(scriptPath, "utf-8");
       if (/^\/\/ @l2-propagate:\s*false\b/m.test(content)) {
         rmSync(scriptPath);
         console.log(`  🗑️  Excluded L1-only script: ${scriptName}`);
@@ -1713,12 +1884,12 @@ if (existsSync(projectScriptsDir)) {
 // project.  After L0-only .ts files are removed above, SCRIPTS.md still contains
 // their rows — causing "Ghost entry" errors in verify-scripts.ts.  Strip those
 // rows and rewrite the header to reflect the L2 snapshot context.
-const projectScriptsMd = join(projectScriptsDir, 'SCRIPTS.md');
+const projectScriptsMd = join(projectScriptsDir, "SCRIPTS.md");
 if (l0Scripts.length > 0 && existsSync(projectScriptsMd)) {
-  const mdContent = readFileSync(projectScriptsMd, 'utf-8');
-  const l0Set = new Set(l0Scripts.map(s => s.replace(/`/g, '')));
+  const mdContent = readFileSync(projectScriptsMd, "utf-8");
+  const l0Set = new Set(l0Scripts.map((s) => s.replace(/`/g, "")));
 
-  const lines = mdContent.split('\n');
+  const lines = mdContent.split("\n");
   const out: string[] = [];
   let inRegistry = false;
   let headerParsed = false;
@@ -1741,16 +1912,32 @@ if (l0Scripts.length > 0 && existsSync(projectScriptsMd)) {
     if (inRegistry) {
       const trimmed = line.trim();
       // Skip separator row
-      if (trimmed.startsWith('|-')) { out.push(line); continue; }
-      if (!trimmed.startsWith('|')) { out.push(line); continue; }
+      if (trimmed.startsWith("|-")) {
+        out.push(line);
+        continue;
+      }
+      if (!trimmed.startsWith("|")) {
+        out.push(line);
+        continue;
+      }
 
       // Extract script name (first column, between pipes)
-      const cols = trimmed.split('|').slice(1, -1).map(c => c.trim());
-      if (cols.length < 6) { out.push(line); continue; }
+      const cols = trimmed
+        .split("|")
+        .slice(1, -1)
+        .map((c) => c.trim());
+      if (cols.length < 6) {
+        out.push(line);
+        continue;
+      }
 
-      if (!headerParsed) { headerParsed = true; out.push(line); continue; }
+      if (!headerParsed) {
+        headerParsed = true;
+        out.push(line);
+        continue;
+      }
 
-      const scriptName = cols[0].replace(/`/g, '');
+      const scriptName = cols[0].replace(/`/g, "");
       if (l0Set.has(scriptName)) {
         removed++;
         continue; // drop L0-only row
@@ -1761,21 +1948,22 @@ if (l0Scripts.length > 0 && existsSync(projectScriptsMd)) {
   }
 
   // Rewrite header to reflect L2 snapshot context
-  const rewritten = out.join('\n')
+  const rewritten = out
+    .join("\n")
     .replace(
-      '> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).\n' +
-      '> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run propagate:apply`.\n' +
-      '> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.',
-      '> This file is a **project-level snapshot** (Tier 3) of the scripts that were scaffolded\n' +
-      '> from the common template at `new-project` time. L0-only entries have been stripped.\n' +
-      '> For the authoritative registry, see the workspace root `scripts/SCRIPTS.md`.'
+      "> This file is the Single Source of Truth (Tier 1 SSOT) for all scripts in `scripts/` (workspace root).\n" +
+        "> Template `templates/common/scripts/` (Tier 2) is a snapshot published from here via `bun run propagate:apply`.\n" +
+        "> Project `scripts/` (Tier 3) is a snapshot created from Tier 2 at `new-project` time.",
+      "> This file is a **project-level snapshot** (Tier 3) of the scripts that were scaffolded\n" +
+        "> from the common template at `new-project` time. L0-only entries have been stripped.\n" +
+        "> For the authoritative registry, see the workspace root `scripts/SCRIPTS.md`.",
     )
     .replace(
-      '*SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*',
-      '*SCRIPTS.md — project snapshot (auto-generated at scaffold time)*'
+      "*SCRIPTS.md maintained by: workspace maintainer (L0 SSOT)*",
+      "*SCRIPTS.md — project snapshot (auto-generated at scaffold time)*",
     );
 
-  writeFileSync(projectScriptsMd, rewritten, 'utf-8');
+  writeFileSync(projectScriptsMd, rewritten, "utf-8");
   console.log(`  📝 Filtered SCRIPTS.md: removed ${removed} L0-only registry entries`);
 }
 
@@ -1786,7 +1974,7 @@ if (l0Scripts.length > 0 && existsSync(projectScriptsMd)) {
 // audit with "not found in SCRIPTS.md" (nightly scaffold E2E red 2026-10-11).
 // Append a row per delivered variant top-level script the registry lacks,
 // versioned from the script's own @version header.
-const variantScriptsTopDir = join(templatesDir, 'scripts');
+const variantScriptsTopDir = join(templatesDir, "scripts");
 if (variant && existsSync(variantScriptsTopDir) && existsSync(projectScriptsMd)) {
   // Recursive walk EXCLUDING the scripts/<variant>/ sub-tree — those rows come
   // from the delivered variant sub-registry (scripts/<variant>/SCRIPTS.md).
@@ -1799,27 +1987,32 @@ if (variant && existsSync(variantScriptsTopDir) && existsSync(projectScriptsMd))
         walkVariantScripts(join(dir, e.name), childRel);
         continue;
       }
-      if (!e.name.endsWith('.ts')) continue;
-      const header = readFileSync(join(dir, e.name), 'utf-8');
-      const version = header.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? '1.0.0';
+      if (!e.name.endsWith(".ts")) continue;
+      const header = readFileSync(join(dir, e.name), "utf-8");
+      const version = header.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? "1.0.0";
       delivered.push({ name: childRel, version });
     }
   };
-  walkVariantScripts(variantScriptsTopDir, '');
+  walkVariantScripts(variantScriptsTopDir, "");
   if (delivered.length > 0) {
-    const mdContent = readFileSync(projectScriptsMd, 'utf-8');
+    const mdContent = readFileSync(projectScriptsMd, "utf-8");
     const existingRows = new Set(
-      mdContent.split('\n')
+      mdContent
+        .split("\n")
         .filter((l) => /^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(l))
-        .map((l) => l.split('|')[1]?.replace(/`/g, '').trim())
+        .map((l) => l.split("|")[1]?.replace(/`/g, "").trim())
         .filter(Boolean) as Array<string>,
     );
     const missing = delivered.filter((d) => !existingRows.has(d.name));
     if (missing.length > 0) {
-      const rows = missing.map((d) =>
-        `| \`${d.name}\` | L2-only | ${d.version} | active | Variant-delivered top-level script (auto-registered at scaffold, T-20261012-001) | —| L2-only | —|`);
+      const rows = missing.map(
+        (d) =>
+          `| \`${d.name}\` | L2-only | ${d.version} | active | Variant-delivered top-level script (auto-registered at scaffold, T-20261012-001) | —| L2-only | —|`,
+      );
       if (appendRegistryRows(projectScriptsMd, rows)) {
-        console.log(`  📝 SCRIPTS.md: registered ${missing.length} variant-delivered script(s): ${missing.map((d) => d.name).join(', ')}`);
+        console.log(
+          `  📝 SCRIPTS.md: registered ${missing.length} variant-delivered script(s): ${missing.map((d) => d.name).join(", ")}`,
+        );
       }
     }
   }
@@ -1830,40 +2023,40 @@ process.chdir(projectDir);
 // v1.24.0 (T-20260921-003): git init without cwd reinitialized the PARENT
 // workspace repo (git walks up to an existing work tree) — the scaffold
 // inherited the workspace origin and its first /sync opened PRs there.
-spawnSync('git', ['init'], { stdio: 'inherit', cwd: projectDir });
-spawnSync('git', ['config', 'core.hooksPath', '.githooks'], { stdio: 'inherit' });
+spawnSync("git", ["init"], { stdio: "inherit", cwd: projectDir });
+spawnSync("git", ["config", "core.hooksPath", ".githooks"], { stdio: "inherit" });
 
 // Set git identity if missing
-const emailCheck = spawnSync('git', ['config', 'user.email'], { encoding: 'utf8' });
+const emailCheck = spawnSync("git", ["config", "user.email"], { encoding: "utf8" });
 if (!emailCheck.stdout.trim()) {
-  spawnSync('git', ['config', 'user.email', 'scaffold-bot@local']);
-  spawnSync('git', ['config', 'user.name', 'Scaffold Bot']);
+  spawnSync("git", ["config", "user.email", "scaffold-bot@local"]);
+  spawnSync("git", ["config", "user.name", "Scaffold Bot"]);
 }
 
 // ── 7.5. Install dependencies ──────────────────────────────────────────────
 // Self-contained projects install all dependencies at root level.
 // Scripts resolve modules from root node_modules/ — no separate scripts/ install needed.
 function bunInstall(dir: string): void {
-  const pkgPath = join(dir, 'package.json');
+  const pkgPath = join(dir, "package.json");
   if (!existsSync(pkgPath)) {
-    console.log('  ⚠️  package.json missing — skipping bun install');
+    console.log("  ⚠️  package.json missing — skipping bun install");
     return;
   }
   try {
     // Verify bun is available (ENOENT guard for environments without bun)
-    const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+    const bunCheck = spawnSync("bun", ["--version"], { encoding: "utf8", stdio: "pipe" });
     if (bunCheck.error || bunCheck.status !== 0) {
-      console.log('  ⚠️  bun not available — skipping dependency installation');
+      console.log("  ⚠️  bun not available — skipping dependency installation");
       console.log(`       Manual retry: cd "${dir}" && bun install`);
       return;
     }
-    console.log('  📦 Running bun install …');
-    const result = spawnSync('bun', ['install'], { stdio: 'inherit', cwd: dir });
+    console.log("  📦 Running bun install …");
+    const result = spawnSync("bun", ["install"], { stdio: "inherit", cwd: dir });
     if (result.status !== 0) {
-      console.log('  ⚠️  bun install failed (non-fatal — scripts may fail)');
+      console.log("  ⚠️  bun install failed (non-fatal — scripts may fail)");
       console.log(`       Manual retry: cd "${dir}" && bun install`);
     } else {
-      console.log('  ✅ bun install complete');
+      console.log("  ✅ bun install complete");
     }
   } catch (err) {
     // Catch ENOENT (bun not installed) or permission errors
@@ -1887,21 +2080,23 @@ bunInstall(projectDir);
 // Non-fatal: a missing bun, a missing generator script, or any generation error
 // degrades gracefully to the existing lazy behavior (first /sync still runs
 // step 4.65 regardless) rather than blocking project creation.
-console.log('\nGenerating initial skill graph…');
+console.log("\nGenerating initial skill graph…");
 try {
-  const projectGeneratorScript = join(projectDir, 'scripts', 'generate-skill-graph.ts');
+  const projectGeneratorScript = join(projectDir, "scripts", "generate-skill-graph.ts");
   if (!existsSync(projectGeneratorScript)) {
-    console.log('  ⚠️  scripts/generate-skill-graph.ts not found in scaffolded project — skipping (will run on first /sync)');
+    console.log(
+      "  ⚠️  scripts/generate-skill-graph.ts not found in scaffolded project — skipping (will run on first /sync)",
+    );
   } else {
-    const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+    const bunCheck = spawnSync("bun", ["--version"], { encoding: "utf8", stdio: "pipe" });
     if (bunCheck.error || bunCheck.status !== 0) {
-      console.log('  ⚠️  bun not available — skipping initial skill graph generation (will run on first /sync)');
+      console.log("  ⚠️  bun not available — skipping initial skill graph generation (will run on first /sync)");
     } else {
-      const genResult = spawnSync('bun', [projectGeneratorScript], { stdio: 'inherit', cwd: projectDir });
+      const genResult = spawnSync("bun", [projectGeneratorScript], { stdio: "inherit", cwd: projectDir });
       if (genResult.status === 0) {
-        console.log('  ✅ Initial docs/skill-graph.json generated (L3)');
+        console.log("  ✅ Initial docs/skill-graph.json generated (L3)");
       } else {
-        console.log('  ⚠️  Skill graph generation failed (non-fatal — will run on first /sync)');
+        console.log("  ⚠️  Skill graph generation failed (non-fatal — will run on first /sync)");
       }
     }
   }
@@ -1915,17 +2110,17 @@ try {
 // give the fresh project its repo graph right away. Non-fatal: the trail binary
 // may be unavailable (offline), and every trail tool self-refreshes the graph
 // before answering, so a skipped build self-heals on first use.
-console.log('\nBuilding trail repo index…');
+console.log("\nBuilding trail repo index…");
 // Plain `trail build` (trail 0.28.1; graft-first/bunx-fallback spellings retired
 // from the scaffold path per the R2.5 addendum — new scaffolds are trail-native).
 // Vendor note: 0.28.1 defaults its graph dir to `<repo>/graft` (--dir global
 // flag); the project's own `trail init` (next upgrade visit) migrates it to
 // `.trail/cache`.
-const trailBuild = spawnSync('trail', ['build'], { stdio: 'inherit', cwd: projectDir });
+const trailBuild = spawnSync("trail", ["build"], { stdio: "inherit", cwd: projectDir });
 if (trailBuild.status === 0) {
-  console.log('  ✅ trail repo index created');
+  console.log("  ✅ trail repo index created");
 } else {
-  console.log('  ⚠️  trail build failed or trail unavailable (non-fatal) — run `trail build` in the project later.');
+  console.log("  ⚠️  trail build failed or trail unavailable (non-fatal) — run `trail build` in the project later.");
 }
 
 // ── 7.8. Version manifest generation (T-20260916-010) ─────────────────────────
@@ -1939,34 +2134,37 @@ if (trailBuild.status === 0) {
 // degrades gracefully, and the audit immediately after enforces the
 // VERSION_MANIFEST gates (skills↔manifest parity + --check drift), so a
 // skipped generation can never ship silently.
-console.log('\nGenerating version manifest…');
+console.log("\nGenerating version manifest…");
 try {
   const decision = decideManifestGeneration(
     existsSync(join(projectDir, VERSION_MANIFEST_GENERATOR_RELPATH)),
     (() => {
-      const bunCheck = spawnSync('bun', ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+      const bunCheck = spawnSync("bun", ["--version"], { encoding: "utf8", stdio: "pipe" });
       return !bunCheck.error && bunCheck.status === 0;
     })(),
   );
   switch (decision.action) {
-    case 'generate': {
-      const genResult = spawnSync(
-        'bun',
-        [join(projectDir, VERSION_MANIFEST_GENERATOR_RELPATH)],
-        { stdio: 'inherit', cwd: projectDir },
-      );
+    case "generate": {
+      const genResult = spawnSync("bun", [join(projectDir, VERSION_MANIFEST_GENERATOR_RELPATH)], {
+        stdio: "inherit",
+        cwd: projectDir,
+      });
       if (genResult.status === 0) {
         console.log(`  ✅ ${VERSION_MANIFEST_RELPATH} generated (full project manifest)`);
       } else {
-        console.log(`  ⚠️  Version manifest generation failed (non-fatal) — run \`bun ${VERSION_MANIFEST_GENERATOR_RELPATH}\` in the project later.`);
+        console.log(
+          `  ⚠️  Version manifest generation failed (non-fatal) — run \`bun ${VERSION_MANIFEST_GENERATOR_RELPATH}\` in the project later.`,
+        );
       }
       break;
     }
-    case 'skip-missing-generator':
-      console.log(`  ⚠️  ${VERSION_MANIFEST_GENERATOR_RELPATH} not found in scaffolded project — skipping (audit will flag the missing manifest)`);
+    case "skip-missing-generator":
+      console.log(
+        `  ⚠️  ${VERSION_MANIFEST_GENERATOR_RELPATH} not found in scaffolded project — skipping (audit will flag the missing manifest)`,
+      );
       break;
-    case 'skip-no-bun':
-      console.log('  ⚠️  bun not available — skipping version manifest generation');
+    case "skip-no-bun":
+      console.log("  ⚠️  bun not available — skipping version manifest generation");
       break;
   }
 } catch (err) {
@@ -1985,13 +2183,15 @@ try {
 // need git on PATH (no code-level workaround, design §3). The core lives in
 // scripts/lib/external-deps.ts fetchProjectExternalDeps() so the unit tests
 // exercise the identical path without a full scaffold.
-console.log('\nFetching external dependencies…');
+console.log("\nFetching external dependencies…");
 try {
   const fetchResult = fetchProjectExternalDeps(projectDir, { strict: strictExternalDeps });
   if (!fetchResult.manifestPresent) {
-    console.log('  ℹ️  No external-deps.json in the scaffolded project — nothing to fetch');
+    console.log("  ℹ️  No external-deps.json in the scaffolded project — nothing to fetch");
   } else if (fetchResult.manifestError) {
-    console.warn(`  ⚠️  external-deps.json is not a valid external-deps manifest — fetch skipped: ${fetchResult.manifestError}`);
+    console.warn(
+      `  ⚠️  external-deps.json is not a valid external-deps manifest — fetch skipped: ${fetchResult.manifestError}`,
+    );
     if (strictExternalDeps) {
       console.error(`❌ --strict-external-deps: manifest validation failed — aborting scaffold post-materialization.`);
       process.exit(1);
@@ -1999,25 +2199,31 @@ try {
   } else {
     for (const dep of fetchResult.results) {
       if (dep.ok) {
-        console.log(`  ✅ ${dep.id}: ${dep.status} at ${dep.commit?.slice(0, 12) ?? '<unknown commit>'}`);
-      } else if (dep.status === 'skipped') {
+        console.log(`  ✅ ${dep.id}: ${dep.status} at ${dep.commit?.slice(0, 12) ?? "<unknown commit>"}`);
+      } else if (dep.status === "skipped") {
         // v1.44.0 — E5 (external-deps standard §5.4): the pre-install gate
         // (license policy + external/<id> convention) refused the entry; a
         // deny-class dependency never reaches the disk. Retrying will not help.
         console.warn(`  ⚠️  ${dep.id}: NOT cloned — ${dep.error}`);
-        console.warn('       Fix the manifest entry (license / install_dir), then: bun scripts/external-deps.ts install');
+        console.warn(
+          "       Fix the manifest entry (license / install_dir), then: bun scripts/external-deps.ts install",
+        );
       } else {
         console.warn(`  ⚠️  ${dep.id}: external dependency NOT fetched — ${dep.error}`);
-        console.warn(`       Retry after scaffold (from the project root): bun scripts/external-deps.ts install --id ${dep.id}`);
+        console.warn(
+          `       Retry after scaffold (from the project root): bun scripts/external-deps.ts install --id ${dep.id}`,
+        );
         console.warn(`       (root alternative: bun scripts/upgrade-project.ts "${projectDir}" --external-deps-only)`);
-        console.warn('       (Windows hosts: git must be on PATH — design 2026-11-07-external-deps-machinery §3)');
+        console.warn("       (Windows hosts: git must be on PATH — design 2026-11-07-external-deps-machinery §3)");
       }
     }
     for (const dir of fetchResult.gitignoreAppended) {
       console.log(`  🙈 .gitignore: appended ${dir}/ (D5 — an external clone must never be committed)`);
     }
     if (strictExternalDeps && !fetchResult.ok) {
-      console.error('\n❌ --strict-external-deps: one or more external dependencies failed to fetch — see the WARN rows above.');
+      console.error(
+        "\n❌ --strict-external-deps: one or more external dependencies failed to fetch — see the WARN rows above.",
+      );
       if (import.meta.main) process.exit(1);
     }
   }
@@ -2030,60 +2236,68 @@ try {
 }
 
 // ── 6.5. Security Bootstrap Verification ──────────────────────────────────────
-console.log('\nRunning security bootstrap verification…');
+console.log("\nRunning security bootstrap verification…");
 let securityOk = true;
 
 function check(label: string, condition: boolean): void {
-  if (condition) { console.log(`  ✅ ${label}`); }
-  else { console.log(`  ❌ ${label}`); securityOk = false; }
+  if (condition) {
+    console.log(`  ✅ ${label}`);
+  } else {
+    console.log(`  ❌ ${label}`);
+    securityOk = false;
+  }
 }
 
-check('.gitleaks.toml present', existsSync(join(projectDir, '.gitleaks.toml')));
-check('.githooks/pre-commit present', existsSync(join(projectDir, '.githooks', 'pre-commit')));
+check(".gitleaks.toml present", existsSync(join(projectDir, ".gitleaks.toml")));
+check(".githooks/pre-commit present", existsSync(join(projectDir, ".githooks", "pre-commit")));
 
-const gitattributesContent = existsSync(gitattributes) ? readFileSync(gitattributes, 'utf8') : '';
-check('.gitattributes has eol=lf', gitattributesContent.includes('eol=lf'));
+const gitattributesContent = existsSync(gitattributes) ? readFileSync(gitattributes, "utf8") : "";
+check(".gitattributes has eol=lf", gitattributesContent.includes("eol=lf"));
 
-const gitignoreContent = existsSync(join(projectDir, '.gitignore')) ? readFileSync(join(projectDir, '.gitignore'), 'utf8') : '';
-check('.gitignore excludes .env', gitignoreContent.includes('.env'));
+const gitignoreContent = existsSync(join(projectDir, ".gitignore"))
+  ? readFileSync(join(projectDir, ".gitignore"), "utf8")
+  : "";
+check(".gitignore excludes .env", gitignoreContent.includes(".env"));
 
-const hooksPathResult = spawnSync('git', ['-C', projectDir, 'config', 'core.hooksPath'], { encoding: 'utf8' });
-check('git core.hooksPath configured', hooksPathResult.stdout.includes('.githooks'));
+const hooksPathResult = spawnSync("git", ["-C", projectDir, "config", "core.hooksPath"], { encoding: "utf8" });
+check("git core.hooksPath configured", hooksPathResult.stdout.includes(".githooks"));
 
 if (!securityOk) {
-  console.error('\n❌ Security bootstrap check FAILED. Fix the issues above before using this project.');
+  console.error("\n❌ Security bootstrap check FAILED. Fix the issues above before using this project.");
   console.error("   Run 'bun scripts/audit.ts' after fixing to verify.");
   if (import.meta.main) {
     process.exit(1);
   }
 }
-console.log('  ✅ All security bootstrap checks passed');
+console.log("  ✅ All security bootstrap checks passed");
 
 // ── 8. Post-scaffold audit ────────────────────────────────────────────────────
-console.log('\nRunning post-scaffold audit…');
+console.log("\nRunning post-scaffold audit…");
 // Run the new project's own audit to validate the scaffold result
-const projectAuditScript = join(projectDir, 'scripts', 'audit.ts');
-const workspaceAuditScript = join(workspaceRoot, 'scripts', 'audit.ts');
+const projectAuditScript = join(projectDir, "scripts", "audit.ts");
+const workspaceAuditScript = join(workspaceRoot, "scripts", "audit.ts");
 const auditScript = existsSync(projectAuditScript) ? projectAuditScript : workspaceAuditScript;
-const auditResult = spawnSync(process.execPath, [auditScript, '--skip-memory'], { stdio: 'inherit', cwd: projectDir });
+const auditResult = spawnSync(process.execPath, [auditScript, "--skip-memory"], { stdio: "inherit", cwd: projectDir });
 
 if (auditResult.status === 0) {
   console.log(`\n✅ Project '${projectName}' scaffolded and verified at: ${projectDir}`);
 } else {
-  console.log('\n⚠️  Project scaffolded but audit found issues — review above before continuing.');
+  console.log("\n⚠️  Project scaffolded but audit found issues — review above before continuing.");
 }
 
 // ── 9. Environment setup ──────────────────────────────────────────────────────
-console.log('\nRunning environment setup…');
-const setupTs = join(projectDir, 'scripts', 'setup.ts');
-const setupSh = join(projectDir, 'scripts', 'setup.sh');
+console.log("\nRunning environment setup…");
+const setupTs = join(projectDir, "scripts", "setup.ts");
+const setupSh = join(projectDir, "scripts", "setup.sh");
 if (existsSync(setupTs)) {
-  const result = spawnSync(process.execPath, [setupTs], { stdio: 'inherit', cwd: projectDir });
-  if (result.status !== 0) console.log("\n⚠️  Setup encountered an error — run 'bun scripts/setup.ts' manually to retry.");
+  const result = spawnSync(process.execPath, [setupTs], { stdio: "inherit", cwd: projectDir });
+  if (result.status !== 0)
+    console.log("\n⚠️  Setup encountered an error — run 'bun scripts/setup.ts' manually to retry.");
 } else if (existsSync(setupSh)) {
   // Pass relative path to bash to avoid Windows path separator issues
-  const result = spawnSync('bash', ['scripts/setup.sh'], { stdio: 'inherit', cwd: projectDir });
-  if (result.status !== 0) console.log("\n⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry.");
+  const result = spawnSync("bash", ["scripts/setup.sh"], { stdio: "inherit", cwd: projectDir });
+  if (result.status !== 0)
+    console.log("\n⚠️  Setup encountered an error — run 'bash scripts/setup.sh' manually to retry.");
 }
 
 // ── 9.5. Initial scaffold commit (T-20260929-002) ─────────────────────────────
@@ -2096,47 +2310,51 @@ if (existsSync(setupTs)) {
 // section 8 has just run), so it satisfies that contract with a fresh
 // single-use nonce, removed after the commit. Non-fatal: an identity or hook
 // failure leaves the tree staged for a manual first commit.
-const initialHeadCheck = spawnSync('git', ['rev-parse', '--verify', 'HEAD'], { cwd: projectDir, stdio: 'pipe' });
+const initialHeadCheck = spawnSync("git", ["rev-parse", "--verify", "HEAD"], { cwd: projectDir, stdio: "pipe" });
 if (initialHeadCheck.status !== 0) {
-  console.log('\nCreating the initial scaffold commit…');
-  spawnSync('git', ['add', '-A'], { stdio: 'inherit', cwd: projectDir });
+  console.log("\nCreating the initial scaffold commit…");
+  spawnSync("git", ["add", "-A"], { stdio: "inherit", cwd: projectDir });
   const syncContext = randomUUID();
   const contextFileName = `.sync_context.${syncContext}.tmp`;
   const contextFilePath = join(projectDir, contextFileName);
   writeFileSync(contextFilePath, syncContext);
-  const initialCommit = spawnSync('git', ['commit', '-m', 'chore: initial scaffold (new-project)'], {
-    stdio: 'inherit',
+  const initialCommit = spawnSync("git", ["commit", "-m", "chore: initial scaffold (new-project)"], {
+    stdio: "inherit",
     cwd: projectDir,
     env: {
       ...process.env,
-      SYNC_ACTIVE: '1',
+      SYNC_ACTIVE: "1",
       DEV_SYNC_CONTEXT: syncContext,
       DEV_SYNC_CONTEXT_FILE: contextFilePath,
     },
   });
-  try { unlinkSync(contextFilePath); } catch { /* already removed */ }
+  try {
+    unlinkSync(contextFilePath);
+  } catch {
+    /* already removed */
+  }
   if (initialCommit.status !== 0) {
-    console.log('  ⚠️  Initial commit did not land (pre-commit hook or git identity) — files are staged.');
+    console.log("  ⚠️  Initial commit did not land (pre-commit hook or git identity) — files are staged.");
     console.log(`       Manual retry: cd "${projectDir}" && git commit -m "chore: initial scaffold"`);
   } else {
-    console.log('  ✅ Initial scaffold commit created');
+    console.log("  ✅ Initial scaffold commit created");
   }
 }
 
 // ── 10. Final banner ──────────────────────────────────────────────────────────
-console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 console.log(`\x1b[36m📂 PROJECT DIRECTORY:\x1b[0m ${projectDir}`);
-console.log('');
-console.log('\x1b[33m⚠️  Your shell is still at the workspace root.\x1b[0m');
-console.log('   Run the following command to move into your new project:');
-console.log('');
+console.log("");
+console.log("\x1b[33m⚠️  Your shell is still at the workspace root.\x1b[0m");
+console.log("   Run the following command to move into your new project:");
+console.log("");
 console.log(`   \x1b[32mcd "${projectDir}"\x1b[0m`);
-console.log('');
-console.log('   All subsequent work (git, scripts, sessions) must be run');
-console.log('   from inside this directory, not the workspace root.');
-console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('');
-if (existsSync(join(templatesDir, 'docs', '_examples'))) {
-  console.log('Extension templates (ADR, analyst agent, skill, daily log):');
-  console.log(`  → ${join(templatesDir, 'docs', '_examples')}/`);
+console.log("");
+console.log("   All subsequent work (git, scripts, sessions) must be run");
+console.log("   from inside this directory, not the workspace root.");
+console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+console.log("");
+if (existsSync(join(templatesDir, "docs", "_examples"))) {
+  console.log("Extension templates (ADR, analyst agent, skill, daily log):");
+  console.log(`  → ${join(templatesDir, "docs", "_examples")}/`);
 }

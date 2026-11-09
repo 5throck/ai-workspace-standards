@@ -38,7 +38,7 @@ export const L0_REF_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
 export const L0_REF_PATTERN_GLOBAL = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/gi;
 
 /** Marker annotation that marks an intentional, locally-maintained duplicate of L0 content. */
-export const INTENTIONAL_DUPLICATE_MARKER = 'intentional-duplicate';
+export const INTENTIONAL_DUPLICATE_MARKER = "intentional-duplicate";
 
 /**
  * Phrases that identify a policy self-description comment: documentation of the
@@ -47,8 +47,8 @@ export const INTENTIONAL_DUPLICATE_MARKER = 'intentional-duplicate';
  * these phrases from the scrub transform.
  */
 export const POLICY_SELF_DESCRIPTION_MARKERS: readonly string[] = [
-  'Non-Propagation',
-  'must NOT reference CONSTITUTION.md',
+  "Non-Propagation",
+  "must NOT reference CONSTITUTION.md",
 ];
 
 /** True when the text is (part of) a policy self-description comment. */
@@ -74,12 +74,12 @@ export interface L0LeakLine {
  */
 export function findL0LeakLines(content: string): L0LeakLine[] {
   return content
-    .split('\n')
+    .split("\n")
     .map((line, idx) => ({ lineNo: idx + 1, line }))
-    .filter(({ line }) =>
-      L0_REF_PATTERN.test(line)
-      && !line.includes(INTENTIONAL_DUPLICATE_MARKER)
-      && !isPolicySelfDescription(line));
+    .filter(
+      ({ line }) =>
+        L0_REF_PATTERN.test(line) && !line.includes(INTENTIONAL_DUPLICATE_MARKER) && !isPolicySelfDescription(line),
+    );
 }
 
 /**
@@ -93,8 +93,8 @@ export function findL0LeakLines(content: string): L0LeakLine[] {
  */
 export function blankL0Refs(content: string): string {
   return content
-    .split('\n')
-    .map(line => line.replace(L0_REF_PATTERN_GLOBAL, ''))
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n');
+    .split("\n")
+    .map((line) => line.replace(L0_REF_PATTERN_GLOBAL, ""))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n");
 }

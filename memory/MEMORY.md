@@ -7,6 +7,7 @@
 | Date | Summary |
 |------|---------|
 | [2026-11-10](2026-11-10.md) | docs(skills): meeting-facilitation v1.5.0 — committee-form alignment |
+| [2026-11-10](2026-11-10.md) | feat(scripts): strict biome/tsconfig profile for delivered scripts — Option A compliance sweep |
 | [2026-11-09](2026-11-09.md) | fix: git-env sanitizer for hook-injected GIT_DIR in hygiene gate and tenant tests |
 | [2026-11-08](2026-11-08.md) | docs(designs): trail fleet standard — Row 0 design (T-20261108-001) |
 | [2026-11-08](2026-11-08.md) | chore(tickets): U-20261107-004 triage + T-20261108-001 intake record |

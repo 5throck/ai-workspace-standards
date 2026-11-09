@@ -11,15 +11,15 @@
  * memory/MEMORY.md session rows.
  * @version 1.1.0
  */
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
-const memoryDir = 'memory';
-const archiveDir = path.join(memoryDir, 'archive');
-const memoryIndexPath = path.join(memoryDir, 'MEMORY.md');
+const memoryDir = "memory";
+const archiveDir = path.join(memoryDir, "archive");
+const memoryIndexPath = path.join(memoryDir, "MEMORY.md");
 
 if (!fs.existsSync(archiveDir)) {
-    fs.mkdirSync(archiveDir, { recursive: true });
+  fs.mkdirSync(archiveDir, { recursive: true });
 }
 
 const files = fs.readdirSync(memoryDir);
@@ -29,45 +29,45 @@ today.setHours(0, 0, 0, 0);
 const archivedSessions: string[] = [];
 
 for (const file of files) {
-    if (!file.endsWith('.md')) continue;
-    if (file === 'MEMORY.md') continue;
+  if (!file.endsWith(".md")) continue;
+  if (file === "MEMORY.md") continue;
 
-    const fullPath = path.join(memoryDir, file);
-    if (fs.statSync(fullPath).isDirectory()) continue;
+  const fullPath = path.join(memoryDir, file);
+  if (fs.statSync(fullPath).isDirectory()) continue;
 
-    const dateMatch = file.match(/^(\d{4}-\d{2}-\d{2})\.md$/);
-    let fileDate: Date;
-    if (dateMatch) {
-        fileDate = new Date(dateMatch[1]);
-    } else {
-        fileDate = fs.statSync(fullPath).mtime;
-    }
+  const dateMatch = file.match(/^(\d{4}-\d{2}-\d{2})\.md$/);
+  let fileDate: Date;
+  if (dateMatch) {
+    fileDate = new Date(dateMatch[1]);
+  } else {
+    fileDate = fs.statSync(fullPath).mtime;
+  }
 
-    const diffTime = today.getTime() - fileDate.getTime();
-    const diffDays = diffTime / (1000 * 3600 * 24);
+  const diffTime = today.getTime() - fileDate.getTime();
+  const diffDays = diffTime / (1000 * 3600 * 24);
 
-    if (diffDays > 7) {
-        fs.renameSync(fullPath, path.join(archiveDir, file));
-        if (dateMatch) archivedSessions.push(dateMatch[1]);
-        console.log(`Archived ${file}`);
-    }
+  if (diffDays > 7) {
+    fs.renameSync(fullPath, path.join(archiveDir, file));
+    if (dateMatch) archivedSessions.push(dateMatch[1]);
+    console.log(`Archived ${file}`);
+  }
 }
 
 // Tombstone MEMORY.md rows for the sessions just archived: replace the
 // `[date](date.md)` link with plain-text date (link-free rows are the
 // documented tombstone convention in memory/MEMORY.md).
 if (archivedSessions.length > 0 && fs.existsSync(memoryIndexPath)) {
-    let index = fs.readFileSync(memoryIndexPath, 'utf-8');
-    let changed = false;
-    for (const date of archivedSessions) {
-        const linkRe = new RegExp(`\\[(${date})\\]\\(${date}\\.md\\)`, 'g');
-        if (linkRe.test(index)) {
-            index = index.replace(linkRe, '$1');
-            changed = true;
-        }
+  let index = fs.readFileSync(memoryIndexPath, "utf-8");
+  let changed = false;
+  for (const date of archivedSessions) {
+    const linkRe = new RegExp(`\\[(${date})\\]\\(${date}\\.md\\)`, "g");
+    if (linkRe.test(index)) {
+      index = index.replace(linkRe, "$1");
+      changed = true;
     }
-    if (changed) {
-        fs.writeFileSync(memoryIndexPath, index, 'utf-8');
-        console.log(`Tombstoned ${archivedSessions.length} MEMORY.md row(s)`);
-    }
+  }
+  if (changed) {
+    fs.writeFileSync(memoryIndexPath, index, "utf-8");
+    console.log(`Tombstoned ${archivedSessions.length} MEMORY.md row(s)`);
+  }
 }

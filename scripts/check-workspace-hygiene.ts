@@ -25,15 +25,12 @@
 //   --json        machine-readable output: {"ok":boolean,"root":string,"offenders":[]}
 // Exit codes: 0 clean, 1 residue found (also 1 on a git error — fail-closed).
 
-import { $ } from 'bun';
-import {
-  classifyWorkspaceHygieneResidue,
-  formatHygieneResidueReport,
-} from './lib/workspace-hygiene.ts';
-import { gitCleanEnv } from './lib/git-env.ts';
+import { $ } from "bun";
+import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from "./lib/workspace-hygiene.ts";
+import { gitCleanEnv } from "./lib/git-env.ts";
 
 function defaultRoot(): string {
-  return new URL('..', import.meta.url).pathname;
+  return new URL("..", import.meta.url).pathname;
 }
 
 function parseArgs(argv: string[]): { root: string; json: boolean } {
@@ -41,16 +38,16 @@ function parseArgs(argv: string[]): { root: string; json: boolean } {
   let json = false;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg === '--json') {
+    if (arg === "--json") {
       json = true;
-    } else if (arg === '--root') {
-      root = argv[++i] ?? '';
-    } else if (arg.startsWith('--root=')) {
-      root = arg.slice('--root='.length);
+    } else if (arg === "--root") {
+      root = argv[++i] ?? "";
+    } else if (arg.startsWith("--root=")) {
+      root = arg.slice("--root=".length);
     }
   }
   if (!root) {
-    console.error('--root requires a directory argument');
+    console.error("--root requires a directory argument");
     process.exit(2);
   }
   return { root, json };
@@ -64,10 +61,10 @@ const status = await $`git status --porcelain`.env(gitCleanEnv()).cwd(root).quie
 if (status.exitCode !== 0) {
   const detail = status.stderr.toString().trim();
   if (json) {
-    console.log(JSON.stringify({ ok: false, root, offenders: [], error: detail || 'git status failed' }));
+    console.log(JSON.stringify({ ok: false, root, offenders: [], error: detail || "git status failed" }));
   } else {
-    console.error(`check-workspace-hygiene: git status failed (exit ${status.exitCode})${detail ? `: ${detail}` : ''}`);
-    console.error('Fail-closed: a gate that cannot read the tree refuses to pass.');
+    console.error(`check-workspace-hygiene: git status failed (exit ${status.exitCode})${detail ? `: ${detail}` : ""}`);
+    console.error("Fail-closed: a gate that cannot read the tree refuses to pass.");
   }
   process.exit(1);
 }

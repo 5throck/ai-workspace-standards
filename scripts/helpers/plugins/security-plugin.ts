@@ -13,11 +13,7 @@
  *   3. Encryption policy mention (INFO) — encryption policy documentation
  */
 
-import type {
-  VariantPlugin,
-  ValidationContext,
-  ValidationIssue,
-} from './variant-plugin.ts';
+import type { VariantPlugin, ValidationContext, ValidationIssue } from "./variant-plugin.ts";
 
 /**
  * Plugin for the 'security' variant type.
@@ -39,7 +35,7 @@ import type {
  */
 export class SecurityPlugin implements VariantPlugin {
   /** The variant type this plugin handles. */
-  readonly type = 'security' as const;
+  readonly type = "security" as const;
 
   /**
    * Validates a security variant against security-specific requirements.
@@ -66,20 +62,13 @@ export class SecurityPlugin implements VariantPlugin {
     // Verify that agents collectively cover threat-modeling, compliance-check,
     // incident-response, and access-control.
     // These are hard functional requirements — security variants cannot function without them.
-    const agentCapabilities = new Set(
-      ctx.agentFrontmatters.flatMap((a) => a.capabilities),
-    );
-    const expectedCapabilities = [
-      'threat-modeling',
-      'compliance-check',
-      'incident-response',
-      'access-control',
-    ];
+    const agentCapabilities = new Set(ctx.agentFrontmatters.flatMap((a) => a.capabilities));
+    const expectedCapabilities = ["threat-modeling", "compliance-check", "incident-response", "access-control"];
     for (const cap of expectedCapabilities) {
       if (!agentCapabilities.has(cap)) {
         issues.push({
-          severity: 'error',
-          category: 'capability-coverage',
+          severity: "error",
+          category: "capability-coverage",
           message: `Missing security capability: ${cap}`,
           capability: cap,
         });
@@ -90,28 +79,22 @@ export class SecurityPlugin implements VariantPlugin {
     // Security variants should reference an authorization gate review in their documentation.
     // Authorization gates are a critical control point in security workflows.
     const variantContent = JSON.stringify(ctx.variantJson);
-    if (
-      !variantContent.toLowerCase().includes('authorization-gate-review')
-    ) {
+    if (!variantContent.toLowerCase().includes("authorization-gate-review")) {
       issues.push({
-        severity: 'warning',
-        category: 'authorization-gate-review',
-        message:
-          'Security variant should reference an authorization gate review process',
+        severity: "warning",
+        category: "authorization-gate-review",
+        message: "Security variant should reference an authorization gate review process",
       });
     }
 
     // --- Check 3: Encryption policy mention ---
     // Standard encryption policy documentation for security contexts.
     // This is informational; not all security contexts require encryption policy documentation.
-    if (
-      !variantContent.toLowerCase().includes('encryption policy')
-    ) {
+    if (!variantContent.toLowerCase().includes("encryption policy")) {
       issues.push({
-        severity: 'info',
-        category: 'encryption-policy',
-        message:
-          'Consider documenting encryption policy standards',
+        severity: "info",
+        category: "encryption-policy",
+        message: "Consider documenting encryption policy standards",
       });
     }
 

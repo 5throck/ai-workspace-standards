@@ -23,9 +23,9 @@
 // reprioritize.ts — Pure policy + strike ledger for the delegation kanban priority
 // governance. No ticket I/O here (see ticket-store.ts).
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
-import { join } from 'node:path';
-import type { Priority } from './ticket-schema.ts';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
+import { join } from "node:path";
+import type { Priority } from "./ticket-schema.ts";
 
 /** Who is asking for a priority change.
  * - `user` — the human operator (unrestricted, including urgent/P0).
@@ -34,7 +34,7 @@ import type { Priority } from './ticket-schema.ts';
  * - `spoke-tenant:gw-<12hex>` — a gateway tenant agent (design
  *   2026-11-08-gw-tenant-loop-and-hardening-design §3.3); same write rules as spoke-pm,
  *   strike ledger keyed on the tenant id. */
-export type ReprioritizeActor = 'user' | 'hub-pm' | `spoke-pm:${string}` | `spoke-tenant:${string}`;
+export type ReprioritizeActor = "user" | "hub-pm" | `spoke-pm:${string}` | `spoke-tenant:${string}`;
 
 const SPOKE_ACTOR_RE = /^spoke-pm:([a-z0-9-]{1,64})$/;
 // Tenant ids are a FIXED grammar (gw-<12hex>, design §3.1) — tighter than the
@@ -43,7 +43,7 @@ const TENANT_ACTOR_RE = /^spoke-tenant:(gw-[0-9a-f]{12})$/;
 
 /** Parses the --actor grammar; null on a malformed actor token. */
 export function parseActor(raw: string): ReprioritizeActor | null {
-  if (raw === 'user' || raw === 'hub-pm') return raw;
+  if (raw === "user" || raw === "hub-pm") return raw;
   const m = SPOKE_ACTOR_RE.exec(raw);
   if (m) return `spoke-pm:${m[1]}` as ReprioritizeActor;
   const t = TENANT_ACTOR_RE.exec(raw);
@@ -54,10 +54,10 @@ export function parseActor(raw: string): ReprioritizeActor | null {
  * spoke-pm actors are keyed by their project name, spoke-tenant actors by their
  * tenant id (the spoke-tenant: prefix sliced off), hub-pm by the literal 'hub-pm'. */
 export function strikeKeyFor(actor: ReprioritizeActor): string | null {
-  if (actor === 'user') return null;
-  if (actor === 'hub-pm') return 'hub-pm';
-  if (actor.startsWith('spoke-tenant:')) return actor.slice('spoke-tenant:'.length);
-  return actor.slice('spoke-pm:'.length);
+  if (actor === "user") return null;
+  if (actor === "hub-pm") return "hub-pm";
+  if (actor.startsWith("spoke-tenant:")) return actor.slice("spoke-tenant:".length);
+  return actor.slice("spoke-pm:".length);
 }
 
 /** Rank toward urgent: higher level = more urgent. A "raise" is a positive delta. */
@@ -65,7 +65,7 @@ export const PRIORITY_LEVEL: Record<Priority, number> = { low: 0, normal: 1, hig
 
 export const REPRIORITIZE_RAISE_WINDOW_MS = 24 * 3_600_000;
 
-export type ReprioritizeRefusalCode = 'no-op' | 'p0-user-only' | 'raise-cap' | 'raise-window';
+export type ReprioritizeRefusalCode = "no-op" | "p0-user-only" | "raise-cap" | "raise-window";
 
 export type ReprioritizeVerdict =
   | { allowed: true }
@@ -87,17 +87,19 @@ export function checkReprioritize(
   opts: { nowMs?: number; lastRaiseAt?: string } = {},
 ): ReprioritizeVerdict {
   if (from === to) {
-    return { allowed: false, violation: false, code: 'no-op', reason: `priority is already ${to} — nothing to change` };
+    return { allowed: false, violation: false, code: "no-op", reason: `priority is already ${to} — nothing to change` };
   }
   // Hard rule (design §5.2): P0/urgent is settable by USER only — a hard error for
   // every agent actor, and it counts as a cap violation for the strike ledger.
-  if (to === 'urgent' && actor !== 'user') {
+  if (to === "urgent" && actor !== "user") {
     return {
-      allowed: false, violation: true, code: 'p0-user-only',
-      reason: 'P0/urgent is settable by actor=user only — agents (hub-pm, spoke-pm, spoke-tenant) can set P1-P3',
+      allowed: false,
+      violation: true,
+      code: "p0-user-only",
+      reason: "P0/urgent is settable by actor=user only — agents (hub-pm, spoke-pm, spoke-tenant) can set P1-P3",
     };
   }
-  if (actor === 'user' || actor === 'hub-pm') return { allowed: true };
+  if (actor === "user" || actor === "hub-pm") return { allowed: true };
   // spoke-pm and spoke-tenant: only RAISES are capped — lowering (or any
   // non-increase) is unrestricted (design 2026-11-08 §3.3 puts tenant actors
   // under the same cap as spoke-pm).
@@ -105,7 +107,9 @@ export function checkReprioritize(
   if (raise <= 0) return { allowed: true };
   if (raise > 1) {
     return {
-      allowed: false, violation: true, code: 'raise-cap',
+      allowed: false,
+      violation: true,
+      code: "raise-cap",
       reason: `spoke raises are capped at +1 level per ticket per 24h (attempted ${from} -> ${to})`,
     };
   }
@@ -114,7 +118,9 @@ export function checkReprioritize(
     const now = opts.nowMs ?? Date.now();
     if (!Number.isNaN(last) && now - last < REPRIORITIZE_RAISE_WINDOW_MS) {
       return {
-        allowed: false, violation: true, code: 'raise-window',
+        allowed: false,
+        violation: true,
+        code: "raise-window",
         reason: `spoke raises are capped at 1 level per ticket per 24h (last raise ${opts.lastRaiseAt})`,
       };
     }
@@ -124,7 +130,7 @@ export function checkReprioritize(
 
 // ── 3-strike ledger (design §5.2; the 2026-10-31 trust-model rule) ────────────
 
-export const STRIKES_FILE_NAME = 'hub-reprioritize-strikes.json';
+export const STRIKES_FILE_NAME = "hub-reprioritize-strikes.json";
 export const FROZEN_THRESHOLD = 3;
 
 export interface StrikeRecord {
@@ -157,8 +163,8 @@ export function loadStrikes(stateDir: string): StrikesState {
   const path = join(stateDir, STRIKES_FILE_NAME);
   if (!existsSync(path)) return emptyStrikes();
   try {
-    const obj = JSON.parse(readFileSync(path, 'utf-8')) as Record<string, unknown>;
-    if (obj.version !== 1 || typeof obj.projects !== 'object' || obj.projects === null) return emptyStrikes();
+    const obj = JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
+    if (obj.version !== 1 || typeof obj.projects !== "object" || obj.projects === null) return emptyStrikes();
     return obj as unknown as StrikesState;
   } catch {
     return emptyStrikes();
@@ -169,7 +175,7 @@ export function saveStrikes(stateDir: string, state: StrikesState): void {
   mkdirSync(stateDir, { recursive: true });
   const path = join(stateDir, STRIKES_FILE_NAME);
   const tmpPath = `${path}.tmp-${process.pid}-${Date.now()}`;
-  writeFileSync(tmpPath, JSON.stringify(state, null, 2), 'utf-8');
+  writeFileSync(tmpPath, JSON.stringify(state, null, 2), "utf-8");
   renameSync(tmpPath, path);
 }
 
@@ -195,8 +201,12 @@ export function recordStrike(stateDir: string, key: string, record: StrikeRecord
 /** Typed refusal — the store throws it, the CLI prints it, the MCP server maps it
  * onto a typed -32602 error carrying the machine-readable `code`. */
 export class ReprioritizeRefusedError extends Error {
-  constructor(message: string, public readonly code: ReprioritizeRefusalCode | 'frozen', public readonly violation: boolean) {
+  constructor(
+    message: string,
+    public readonly code: ReprioritizeRefusalCode | "frozen",
+    public readonly violation: boolean,
+  ) {
     super(message);
-    this.name = 'ReprioritizeRefusedError';
+    this.name = "ReprioritizeRefusedError";
   }
 }

@@ -11,14 +11,21 @@
 
 /** Legal spec statuses — mirrors audit.ts spec-check Check 4's vocabulary. */
 export const SPEC_STATUS_VOCABULARY: readonly string[] = [
-  'draft', 'proposed', 'approved', 'planned', 'implemented', 'superseded', 'drifted', 'archived',
+  "draft",
+  "proposed",
+  "approved",
+  "planned",
+  "implemented",
+  "superseded",
+  "drifted",
+  "archived",
 ];
 
 /** A design doc's Status header line: a list item whose label is exactly
  *  "Status" (house style: `- **Status**: implemented (...)`). Returns the
  *  value part, or null when the doc carries no Status header line. */
 export function extractStatusHeaderValue(text: string): string | null {
-  for (const line of text.split('\n')) {
+  for (const line of text.split("\n")) {
     const m = line.match(/^\s*[-*]\s*\*\*Status\*\*\s*:\s*(.*)$/);
     if (m) return m[1].trim();
   }
@@ -38,7 +45,7 @@ export function extractStatusHeaderValue(text: string): string | null {
 export function parseStatusHeaderValue(value: string): string | null {
   let best: { word: string; pos: number } | null = null;
   for (const word of SPEC_STATUS_VOCABULARY) {
-    const m = value.match(new RegExp(`\\b${word}\\b`, 'i'));
+    const m = value.match(new RegExp(`\\b${word}\\b`, "i"));
     if (m && (best === null || m.index! < best.pos)) {
       best = { word, pos: m.index! };
     }
@@ -57,17 +64,14 @@ export function parseDocStatus(text: string): string | null {
  * reads the file and handles absence). Exported so tests pin the verdicts.
  */
 export type HeaderConsistencyVerdict =
-  | { verdict: 'match'; status: string }
-  | { verdict: 'mismatch'; registryStatus: string; docStatus: string }
-  | { verdict: 'unparseable' };
+  | { verdict: "match"; status: string }
+  | { verdict: "mismatch"; registryStatus: string; docStatus: string }
+  | { verdict: "unparseable" };
 
-export function classifySpecHeader(
-  registryStatus: string,
-  docText: string | null,
-): HeaderConsistencyVerdict {
-  if (docText === null) return { verdict: 'unparseable' };
+export function classifySpecHeader(registryStatus: string, docText: string | null): HeaderConsistencyVerdict {
+  if (docText === null) return { verdict: "unparseable" };
   const docStatus = parseDocStatus(docText);
-  if (docStatus === null) return { verdict: 'unparseable' };
-  if (docStatus === registryStatus) return { verdict: 'match', status: docStatus };
-  return { verdict: 'mismatch', registryStatus, docStatus };
+  if (docStatus === null) return { verdict: "unparseable" };
+  if (docStatus === registryStatus) return { verdict: "match", status: docStatus };
+  return { verdict: "mismatch", registryStatus, docStatus };
 }

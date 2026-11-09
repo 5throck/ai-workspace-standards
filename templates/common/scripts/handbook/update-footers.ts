@@ -85,7 +85,8 @@ export function updateFooters(docsDir?: string): { updated: number; total: numbe
     } else if (cleanContent.includes('class="wrap"')) {
       const lastDivIndex = cleanContent.lastIndexOf("</div>");
       if (lastDivIndex !== -1) {
-        newContent = cleanContent.slice(0, lastDivIndex) + `${targetFooter}\n  </div>` + cleanContent.slice(lastDivIndex + 6);
+        newContent =
+          cleanContent.slice(0, lastDivIndex) + `${targetFooter}\n  </div>` + cleanContent.slice(lastDivIndex + 6);
       } else if (cleanContent.includes("</body>")) {
         newContent = cleanContent.replace("</body>", `${targetFooter}\n</body>`);
       }

@@ -48,19 +48,19 @@
  * Triggered by PreToolUse (Claude Code), matcher: "Agent".
  */
 
-import { readFileSync, readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
+import { readFileSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 // fileURLToPath, not URL.pathname: on Windows the pathname keeps a leading slash and
 // percent-encoded spaces, producing an unusable root (T-20261002-013; same fix as
 // pm-role-bootstrap.ts, PR #1317).
-const WORKSPACE_ROOT = fileURLToPath(new URL('../..', import.meta.url));
+const WORKSPACE_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const SCHEMA_PATH = `${WORKSPACE_ROOT}docs/workspace-schema.json`;
 const AGENTS_DIR = `${WORKSPACE_ROOT}agents`;
 
-const VALID_ALIASES = new Set(['sonnet', 'opus', 'haiku', 'fable']);
-const VALID_TIERS = new Set(['high', 'medium', 'low']);
+const VALID_ALIASES = new Set(["sonnet", "opus", "haiku", "fable"]);
+const VALID_TIERS = new Set(["high", "medium", "low"]);
 
 interface GateEntry {
   tier: string;
@@ -90,12 +90,12 @@ function extractAgentTier(content: string): string | null {
   }
 
   // Legacy per-platform block: `tier:` + indented `<platform>: <tier>` lines.
-  const lines = fm[1].split('\n').map((l) => l.replace(/\r$/, ''));
+  const lines = fm[1].split("\n").map((l) => l.replace(/\r$/, ""));
   const tierIdx = lines.findIndex((l) => /^tier\s*:\s*$/.test(l));
   if (tierIdx === -1) return null;
   const values = new Set<string>();
   for (const line of lines.slice(tierIdx + 1)) {
-    if (line.trim() === '') continue;
+    if (line.trim() === "") continue;
     if (!/^\s/.test(line)) break; // next top-level key — block ended
     const entry = line.trim().match(/^([\w-]+)\s*:\s*([\w-]+)/);
     if (entry) values.add(entry[2].trim().toLowerCase());
@@ -113,7 +113,7 @@ function extractAgentTier(content: string): string | null {
 function loadTierRegistry(): Record<string, GateEntry> | null {
   let schema: WorkspaceSchema;
   try {
-    schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf-8')) as WorkspaceSchema;
+    schema = JSON.parse(readFileSync(SCHEMA_PATH, "utf-8")) as WorkspaceSchema;
   } catch (err) {
     console.error(`[TIER-GATE] WARN: cannot read ${SCHEMA_PATH} (${(err as Error).message}); skipping gate`);
     return null;
@@ -121,24 +121,26 @@ function loadTierRegistry(): Record<string, GateEntry> | null {
 
   const claudeModels = schema.models?.claude;
   if (!claudeModels) {
-    console.error('[TIER-GATE] WARN: workspace-schema.json is missing models.claude; skipping gate');
+    console.error("[TIER-GATE] WARN: workspace-schema.json is missing models.claude; skipping gate");
     return null;
   }
 
   let files: string[];
   try {
-    files = readdirSync(AGENTS_DIR).filter((f) => f.endsWith('.md') && !f.startsWith('README'));
+    files = readdirSync(AGENTS_DIR).filter((f) => f.endsWith(".md") && !f.startsWith("README"));
   } catch (err) {
-    console.error(`[TIER-GATE] WARN: cannot read agents directory ${AGENTS_DIR} (${(err as Error).message}); skipping gate`);
+    console.error(
+      `[TIER-GATE] WARN: cannot read agents directory ${AGENTS_DIR} (${(err as Error).message}); skipping gate`,
+    );
     return null;
   }
 
   const registry: Record<string, GateEntry> = {};
   for (const file of files) {
-    const agent = file.replace(/\.md$/, '');
+    const agent = file.replace(/\.md$/, "");
     let tier: string | null;
     try {
-      tier = extractAgentTier(readFileSync(join(AGENTS_DIR, file), 'utf-8'));
+      tier = extractAgentTier(readFileSync(join(AGENTS_DIR, file), "utf-8"));
     } catch (err) {
       console.error(`[TIER-GATE] WARN: cannot read agents/${file} (${(err as Error).message}); agent not gated`);
       continue;
@@ -148,9 +150,11 @@ function loadTierRegistry(): Record<string, GateEntry> | null {
       continue;
     }
     const registryId = claudeModels[tier];
-    const alias = registryId?.split('-')[1];
+    const alias = registryId?.split("-")[1];
     if (!registryId || !alias || !VALID_ALIASES.has(alias)) {
-      console.error(`[TIER-GATE] WARN: no valid claude alias derivable for tier '${tier}' (agent '${agent}'); agent not gated`);
+      console.error(
+        `[TIER-GATE] WARN: no valid claude alias derivable for tier '${tier}' (agent '${agent}'); agent not gated`,
+      );
       continue;
     }
     registry[agent] = { tier, alias };
@@ -165,12 +169,13 @@ function loadTierRegistry(): Record<string, GateEntry> | null {
  * 'glm-5.3'). An unreadable schema returns false — the caller then falls through
  * to the tier gate, which fails open when the schema is unavailable. */
 function isFullModelId(model: string): boolean {
-  if (model.includes('/')) return true;
+  if (model.includes("/")) return true;
   try {
-    const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf-8')) as WorkspaceSchema;
+    const schema = JSON.parse(readFileSync(SCHEMA_PATH, "utf-8")) as WorkspaceSchema;
     const models = schema.models ?? {};
-    return Object.values(models).some((tierMap) =>
-      tierMap !== null && typeof tierMap === 'object' && Object.values(tierMap).includes(model));
+    return Object.values(models).some(
+      (tierMap) => tierMap !== null && typeof tierMap === "object" && Object.values(tierMap).includes(model),
+    );
   } catch {
     return false;
   }
@@ -179,7 +184,7 @@ function isFullModelId(model: string): boolean {
 function main(): void {
   let stdinJson: string;
   try {
-    stdinJson = readFileSync(0, 'utf-8');
+    stdinJson = readFileSync(0, "utf-8");
   } catch {
     process.exit(0);
     return;
@@ -193,7 +198,7 @@ function main(): void {
     return;
   }
 
-  if (data.tool_name !== 'Agent') {
+  if (data.tool_name !== "Agent") {
     process.exit(0);
     return;
   }
@@ -236,8 +241,8 @@ function main(): void {
   // variants now: omitted vs provided-but-unrecognized.
   const reason = model
     ? `[TIER-GATE] Dispatching '${subagentType}' with model="${model}", which is ` +
-      `neither a tier alias (${[...VALID_ALIASES].join('/')}) nor a known full model ID. ` +
-      (model === 'inherit'
+      `neither a tier alias (${[...VALID_ALIASES].join("/")}) nor a known full model ID. ` +
+      (model === "inherit"
         ? `model: "inherit" is the same as omitting model — the frontmatter's inherit ` +
           `default silently runs this agent on the PARENT session's model instead of its `
         : `An unrecognized model id runs the risk of silently falling back to the parent session's model instead of the `) +
@@ -248,8 +253,8 @@ function main(): void {
       `the PARENT session's model instead of its documented ${tierLabel} tier. ` +
       `Add model: "${entry.alias}" to this Agent() call (see CLAUDE.md §6 / AGENTS.md §3.6).`;
 
-  const response = { decision: 'ask' as const, reason };
-  process.stdout.write(JSON.stringify(response) + '\n');
+  const response = { decision: "ask" as const, reason };
+  process.stdout.write(JSON.stringify(response) + "\n");
   process.exit(0);
 }
 

@@ -44,7 +44,7 @@ import { existsSync, readFileSync } from "node:fs";
 export function extractScriptVersion(filePath: string): string {
   if (!existsSync(filePath)) return "";
   const content = readFileSync(filePath, "utf8");
-  const lineVersion = content.split("\n").find(l => /^\s*\/\/\s*@version\s+\d/.test(l));
+  const lineVersion = content.split("\n").find((l) => /^\s*\/\/\s*@version\s+\d/.test(l));
   if (lineVersion) return lineVersion.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
   return content.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? "";
 }
@@ -60,7 +60,7 @@ export function extractScriptVersion(filePath: string): string {
 export function preserveLifecycleFrontmatter(tplContent: string, projContent: string): string {
   // Locate the `lifecycle:` key inside the project's YAML frontmatter block.
   const lines = projContent.split("\n");
-  const lifecycleIdx = lines.findIndex(l => /^lifecycle:\s*$/.test(l));
+  const lifecycleIdx = lines.findIndex((l) => /^lifecycle:\s*$/.test(l));
   if (lifecycleIdx === -1) return tplContent;
 
   // Collect the indented keys that belong to the lifecycle block.
@@ -78,7 +78,7 @@ export function preserveLifecycleFrontmatter(tplContent: string, projContent: st
   // in place with the project's block. Appending a second block would create a
   // duplicate YAML key — parsers take last-key-wins, silently discarding the
   // project's newer governance data (2026-09-25 co-abap review, finding #1).
-  const tplLifecycleIdx = tplLines.findIndex(l => /^lifecycle:\s*$/.test(l));
+  const tplLifecycleIdx = tplLines.findIndex((l) => /^lifecycle:\s*$/.test(l));
   if (tplLifecycleIdx !== -1) {
     let tplBlockEnd = tplLifecycleIdx + 1;
     while (tplBlockEnd < tplLines.length && /^\s{2,}\S/.test(tplLines[tplBlockEnd])) tplBlockEnd++;
@@ -89,7 +89,10 @@ export function preserveLifecycleFrontmatter(tplContent: string, projContent: st
   // Insert before the closing `---` of the template frontmatter.
   let closingIdx = -1;
   for (let i = 1; i < tplLines.length; i++) {
-    if (tplLines[i].trim() === "---") { closingIdx = i; break; }
+    if (tplLines[i].trim() === "---") {
+      closingIdx = i;
+      break;
+    }
   }
   if (closingIdx === -1) return tplContent;
   tplLines.splice(closingIdx, 0, lifecycleBlock);
@@ -109,10 +112,7 @@ export function preserveLifecycleFrontmatter(tplContent: string, projContent: st
  *    the last delivery commit after every upgrade wave).
  * Returns { text, bumped } — bumped is true only when the output differs.
  */
-export function bumpFrontmatterLastUpdated(
-  text: string,
-  date: string,
-): { text: string; bumped: boolean } {
+export function bumpFrontmatterLastUpdated(text: string, date: string): { text: string; bumped: boolean } {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { text, bumped: false };
   const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!fm) return { text, bumped: false };
@@ -120,7 +120,10 @@ export function bumpFrontmatterLastUpdated(
   let inLifecycle = false;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (/^lifecycle:\s*$/.test(line)) { inLifecycle = true; continue; }
+    if (/^lifecycle:\s*$/.test(line)) {
+      inLifecycle = true;
+      continue;
+    }
     if (inLifecycle) {
       if (/^[^\s#]/.test(line)) inLifecycle = false;
       else continue; // still inside the lifecycle block — leave nested dates alone
@@ -151,10 +154,7 @@ export function bumpFrontmatterLastUpdated(
  *    touched; comment lines (`#`) inside the block are skipped.
  * Returns { text, bumped } — bumped is true only when the output differs.
  */
-export function bumpNestedLifecycleLastUpdated(
-  text: string,
-  date: string,
-): { text: string; bumped: boolean } {
+export function bumpNestedLifecycleLastUpdated(text: string, date: string): { text: string; bumped: boolean } {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { text, bumped: false };
   const fm = text.match(/^---(\r?\n)([\s\S]*?)\r?\n---/);
   if (!fm) return { text, bumped: false };
@@ -168,9 +168,15 @@ export function bumpNestedLifecycleLastUpdated(
     // re-attach the CR so each line's EOL style survives byte-for-byte.
     const crlf = line.endsWith("\r");
     const bare = crlf ? line.slice(0, -1) : line;
-    if (/^lifecycle:\s*$/.test(bare)) { inLifecycle = true; continue; }
+    if (/^lifecycle:\s*$/.test(bare)) {
+      inLifecycle = true;
+      continue;
+    }
     if (!inLifecycle) continue;
-    if (/^[^\s#]/.test(bare)) { inLifecycle = false; continue; } // block ended (column-0 key)
+    if (/^[^\s#]/.test(bare)) {
+      inLifecycle = false;
+      continue;
+    } // block ended (column-0 key)
     const m = bare.match(/^(\s+)last_updated:(\s*)(\S.*)?$/);
     if (!m) continue; // other lifecycle keys (phase, created, governance, …) stay verbatim
     if (m[3] === date) return { text, bumped: false };

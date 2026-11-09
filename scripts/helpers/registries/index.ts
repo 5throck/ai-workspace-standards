@@ -11,32 +11,32 @@ export {
   isVariantType,
   listVariantTypes,
   getVariantTypeDefinition,
-} from './variant-type-registry.ts';
+} from "./variant-type-registry.ts";
 
 export {
   CAPABILITY_REGISTRY,
   type Capability,
   isCapability,
-} from './capability-registry.ts';
+} from "./capability-registry.ts";
 
 export {
   PROMOTION_POLICIES,
   type PromotionPolicy,
   getPromotionPolicy,
-} from './promotion-policy.ts';
+} from "./promotion-policy.ts";
 
 export {
   VALIDATION_POLICIES,
   type ValidationPolicy,
   getValidationPolicy,
-} from './validation-policy.ts';
+} from "./validation-policy.ts";
 
 // --- Cross-Registry Integrity Validation ---
 
-import { VARIANT_TYPE_REGISTRY } from './variant-type-registry.ts';
-import { CAPABILITY_REGISTRY, isCapability } from './capability-registry.ts';
-import { PROMOTION_POLICIES } from './promotion-policy.ts';
-import { VALIDATION_POLICIES } from './validation-policy.ts';
+import { VARIANT_TYPE_REGISTRY } from "./variant-type-registry.ts";
+import { CAPABILITY_REGISTRY, isCapability } from "./capability-registry.ts";
+import { PROMOTION_POLICIES } from "./promotion-policy.ts";
+import { VALIDATION_POLICIES } from "./validation-policy.ts";
 
 /**
  * A single error or warning found during registry integrity validation.
@@ -47,7 +47,7 @@ export interface RegistryIntegrityError {
   /** Human-readable description of the issue. */
   readonly message: string;
   /** Severity of the issue — only 'error' counts as a failure. */
-  readonly severity: 'error' | 'warning';
+  readonly severity: "error" | "warning";
 }
 
 /**
@@ -83,49 +83,49 @@ export function validateRegistryIntegrity(): RegistryIntegrityReport {
   const validationKeys = Object.keys(VALIDATION_POLICIES) as string[];
 
   // Check 1: Type registry keys match promotion policy keys
-  const missingPromotion = typeKeys.filter(k => !promotionKeys.includes(k));
-  const extraPromotion = promotionKeys.filter(k => !typeKeys.includes(k));
+  const missingPromotion = typeKeys.filter((k) => !promotionKeys.includes(k));
+  const extraPromotion = promotionKeys.filter((k) => !typeKeys.includes(k));
   if (missingPromotion.length > 0) {
     errors.push({
-      registry: 'promotion-policy',
-      message: `Missing promotion policies for types: ${missingPromotion.join(', ')}`,
-      severity: 'error',
+      registry: "promotion-policy",
+      message: `Missing promotion policies for types: ${missingPromotion.join(", ")}`,
+      severity: "error",
     });
   }
   if (extraPromotion.length > 0) {
     errors.push({
-      registry: 'promotion-policy',
-      message: `Promotion policies for unregistered types: ${extraPromotion.join(', ')}`,
-      severity: 'error',
+      registry: "promotion-policy",
+      message: `Promotion policies for unregistered types: ${extraPromotion.join(", ")}`,
+      severity: "error",
     });
   }
 
   // Check 2: Type registry keys match validation policy keys
-  const missingValidation = typeKeys.filter(k => !validationKeys.includes(k));
-  const extraValidation = validationKeys.filter(k => !typeKeys.includes(k));
+  const missingValidation = typeKeys.filter((k) => !validationKeys.includes(k));
+  const extraValidation = validationKeys.filter((k) => !typeKeys.includes(k));
   if (missingValidation.length > 0) {
     errors.push({
-      registry: 'validation-policy',
-      message: `Missing validation policies for types: ${missingValidation.join(', ')}`,
-      severity: 'error',
+      registry: "validation-policy",
+      message: `Missing validation policies for types: ${missingValidation.join(", ")}`,
+      severity: "error",
     });
   }
   if (extraValidation.length > 0) {
     errors.push({
-      registry: 'validation-policy',
-      message: `Validation policies for unregistered types: ${extraValidation.join(', ')}`,
-      severity: 'error',
+      registry: "validation-policy",
+      message: `Validation policies for unregistered types: ${extraValidation.join(", ")}`,
+      severity: "error",
     });
   }
 
   // Check 3: No duplicate variant type names
-  const names = Object.values(VARIANT_TYPE_REGISTRY).map(v => v.name);
+  const names = Object.values(VARIANT_TYPE_REGISTRY).map((v) => v.name);
   const duplicateNames = names.filter((n, i) => names.indexOf(n) !== i);
   if (duplicateNames.length > 0) {
     errors.push({
-      registry: 'variant-type',
-      message: `Duplicate variant type names: ${[...new Set(duplicateNames)].join(', ')}`,
-      severity: 'error',
+      registry: "variant-type",
+      message: `Duplicate variant type names: ${[...new Set(duplicateNames)].join(", ")}`,
+      severity: "error",
     });
   }
 
@@ -133,9 +133,9 @@ export function validateRegistryIntegrity(): RegistryIntegrityReport {
   for (const [key, def] of Object.entries(VARIANT_TYPE_REGISTRY)) {
     if (!def.description || def.description.trim().length === 0) {
       errors.push({
-        registry: 'variant-type',
+        registry: "variant-type",
         message: `Type "${key}" has empty description`,
-        severity: 'warning',
+        severity: "warning",
       });
     }
   }
@@ -146,9 +146,9 @@ export function validateRegistryIntegrity(): RegistryIntegrityReport {
     for (const cap of policy.requiredCapabilities) {
       if (!validCapabilities.has(cap)) {
         errors.push({
-          registry: 'validation-policy',
+          registry: "validation-policy",
           message: `Type "${type}" references unregistered capability: ${cap}`,
-          severity: 'error',
+          severity: "error",
         });
       }
     }
@@ -158,16 +158,16 @@ export function validateRegistryIntegrity(): RegistryIntegrityReport {
   for (const [type, policy] of Object.entries(PROMOTION_POLICIES)) {
     if (policy.minEngagements < 1) {
       errors.push({
-        registry: 'promotion-policy',
+        registry: "promotion-policy",
         message: `Type "${type}" has minEngagements < 1`,
-        severity: 'error',
+        severity: "error",
       });
     }
     if (policy.minBetaMonths < 1) {
       errors.push({
-        registry: 'promotion-policy',
+        registry: "promotion-policy",
         message: `Type "${type}" has minBetaMonths < 1`,
-        severity: 'error',
+        severity: "error",
       });
     }
   }
@@ -188,15 +188,15 @@ export function validateRegistryIntegrity(): RegistryIntegrityReport {
       // This would also be caught by check 5, but we report it with a distinct registry label
       // for clarity: check 5 is type-specific, check 7 is a global audit
       errors.push({
-        registry: 'capability-registry',
+        registry: "capability-registry",
         message: `Unregistered capability referenced in policies: ${ref}`,
-        severity: 'error',
+        severity: "error",
       });
     }
   }
 
   return {
-    passed: errors.filter(e => e.severity === 'error').length === 0,
+    passed: errors.filter((e) => e.severity === "error").length === 0,
     errors,
   };
 }

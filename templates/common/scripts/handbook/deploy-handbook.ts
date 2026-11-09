@@ -62,7 +62,11 @@ function fatal(msg: string): never {
   process.exit(1);
 }
 
-function runArgs(bin: string, argv: string[], opts?: { cwd?: string; silent?: boolean; captureStderr?: boolean }): string {
+function runArgs(
+  bin: string,
+  argv: string[],
+  opts?: { cwd?: string; silent?: boolean; captureStderr?: boolean },
+): string {
   const cwd = opts?.cwd ?? projectDir;
   try {
     const stdioCfg = opts?.silent ? ["ignore", "pipe", opts?.captureStderr ? "pipe" : "inherit"] : "inherit";
@@ -107,12 +111,8 @@ function patchReadmePagesUrl(readmePath: string, url: string, title: string): bo
   const isKo = lang === "ko";
 
   // Build the expected 🌐 section (matches scaffold-handbook.ts format)
-  const sectionHeading = isKo
-    ? "## 🌐 교육 프로그램 바로가기 (웹사이트)"
-    : "## 🌐 Read the Handbook Live";
-  const linkText = isKo
-    ? `${title} 교육 사이트 보기`
-    : "Online Handbook & Educational Program";
+  const sectionHeading = isKo ? "## 🌐 교육 프로그램 바로가기 (웹사이트)" : "## 🌐 Read the Handbook Live";
+  const linkText = isKo ? `${title} 교육 사이트 보기` : "Online Handbook & Educational Program";
   const newSection = `${sectionHeading}\n👉 **[${linkText}](${url})**`;
 
   // Case 2/3: 🌐 section already exists
@@ -141,11 +141,7 @@ function patchReadmePagesUrl(readmePath: string, url: string, title: string): bo
   }
 
   // Case 1: No 🌐 section — insert before 🎯 or 📜
-  const insertBefore = content.includes("## 🎯")
-    ? "## 🎯"
-    : content.includes("## 📜")
-      ? "## 📜"
-      : null;
+  const insertBefore = content.includes("## 🎯") ? "## 🎯" : content.includes("## 📜") ? "## 📜" : null;
 
   if (insertBefore) {
     content = content.replace(insertBefore, `${newSection}\n\n${insertBefore}`);
@@ -188,10 +184,15 @@ try {
 // --- Step 1: Secret scan ---
 log("🔒", "Running secret scan on docs/...");
 const scanPatterns = [
-  "api_key", "apikey", "api-key",
-  "password", "passwd",
-  "secret", "secret_key",
-  "token", "access_token",
+  "api_key",
+  "apikey",
+  "api-key",
+  "password",
+  "passwd",
+  "secret",
+  "secret_key",
+  "token",
+  "access_token",
   "private_key",
   "credentials",
 ];
@@ -225,7 +226,9 @@ try {
 
 if (repoExists) {
   // Check current visibility
-  const currentVis = runArgs("gh", ["repo", "view", fullRepo, "--json", "isPrivate", "-q", ".isPrivate"], { silent: true });
+  const currentVis = runArgs("gh", ["repo", "view", fullRepo, "--json", "isPrivate", "-q", ".isPrivate"], {
+    silent: true,
+  });
   const isPrivate = currentVis === "true";
   const wantsPublic = visibility === "public";
 
@@ -308,7 +311,10 @@ log("🌐", "Configuring GitHub Pages...");
 try {
   // Check if Pages is already enabled (captureStderr: gh api may exit non-zero
   // on 404 — we want the combined stdout+stderr text, not a thrown error).
-  const pagesInfo = runArgs("gh", ["api", `repos/${fullRepo}/pages`, "-q", ".source"], { silent: true, captureStderr: true });
+  const pagesInfo = runArgs("gh", ["api", `repos/${fullRepo}/pages`, "-q", ".source"], {
+    silent: true,
+    captureStderr: true,
+  });
 
   if (pagesInfo && !pagesInfo.includes("404")) {
     log("ℹ️", "GitHub Pages is already configured");
@@ -318,7 +324,22 @@ try {
 } catch {
   // Enable Pages via Actions deployment source
   try {
-    runArgs("gh", ["api", `repos/${fullRepo}/pages`, "-X", "POST", "-f", "build_type=workflow", "-f", "source[branch]=main", "-f", "source[path]=/"], { silent: true });
+    runArgs(
+      "gh",
+      [
+        "api",
+        `repos/${fullRepo}/pages`,
+        "-X",
+        "POST",
+        "-f",
+        "build_type=workflow",
+        "-f",
+        "source[branch]=main",
+        "-f",
+        "source[path]=/",
+      ],
+      { silent: true },
+    );
     log("✅", "GitHub Pages enabled (Actions deployment)");
   } catch (e: unknown) {
     const err = e as { message?: string };
@@ -327,7 +348,10 @@ try {
       runArgs("gh", ["api", `repos/${fullRepo}/pages`, "-X", "POST", "-f", "build_type=workflow"], { silent: true });
       log("✅", "GitHub Pages enabled (Actions deployment)");
     } catch {
-      log("⚠️", `Could not enable Pages via API. It may auto-enable on first push. Manual step: go to repo Settings → Pages → Source: GitHub Actions`);
+      log(
+        "⚠️",
+        `Could not enable Pages via API. It may auto-enable on first push. Manual step: go to repo Settings → Pages → Source: GitHub Actions`,
+      );
     }
   }
 }
@@ -347,7 +371,7 @@ runArgs("git", ["add", `${outputDir}/.github/workflows/deploy-pages.yml`, `${out
 log("✅", "Staged deploy workflow and .nojekyll");
 
 // Patch README files with GitHub Pages URL
-const readmeFiles = readdirSync(handbookDir).filter(f => f.startsWith("README") && f.endsWith(".md"));
+const readmeFiles = readdirSync(handbookDir).filter((f) => f.startsWith("README") && f.endsWith(".md"));
 for (const readmeFile of readmeFiles) {
   const readmePath = join(handbookDir, readmeFile);
   const patched = patchReadmePagesUrl(readmePath, pagesUrl, repoName);
@@ -360,8 +384,19 @@ for (const readmeFile of readmeFiles) {
 }
 
 // Check if there are changes to commit
-const readmeArgList = readmeFiles.map(f => `${outputDir}/${f}`);
-const status = runArgs("git", ["status", "--porcelain", "--", `${outputDir}/.github/workflows/deploy-pages.yml`, `${outputDir}/docs/.nojekyll`, ...readmeArgList], { silent: true });
+const readmeArgList = readmeFiles.map((f) => `${outputDir}/${f}`);
+const status = runArgs(
+  "git",
+  [
+    "status",
+    "--porcelain",
+    "--",
+    `${outputDir}/.github/workflows/deploy-pages.yml`,
+    `${outputDir}/docs/.nojekyll`,
+    ...readmeArgList,
+  ],
+  { silent: true },
+);
 if (status) {
   runArgs("git", ["commit", "-m", "ci(handbook): add GitHub Pages deploy workflow"]);
   log("✅", "Committed deploy workflow");

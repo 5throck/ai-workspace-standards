@@ -13,16 +13,16 @@
 
 const args = process.argv.slice(2);
 const mandatoryStr = args[0];
-const jsonStr = args.slice(1).join(' '); // Rejoin remaining args in case JSON has spaces
+const jsonStr = args.slice(1).join(" "); // Rejoin remaining args in case JSON has spaces
 
 if (!mandatoryStr || !jsonStr) {
-  console.error('Usage: bun validate-output.ts <comma-separated-domains> <json-string>');
+  console.error("Usage: bun validate-output.ts <comma-separated-domains> <json-string>");
   if (import.meta.main) {
     process.exit(1);
   }
 }
 
-const mandatoryDomains = mandatoryStr.split(',');
+const mandatoryDomains = mandatoryStr.split(",");
 
 try {
   const output = JSON.parse(jsonStr);
@@ -30,13 +30,13 @@ try {
 
   // Filter errors for mandatory domains only
   const mandatoryErrors = errors.filter((err: any) => {
-    const check = err.check || '';
+    const check = err.check || "";
     return mandatoryDomains.some((domain: string) => check.includes(domain));
   });
 
   if (mandatoryErrors.length > 0) {
     for (const err of mandatoryErrors) {
-      console.error(`  ❌ ${err.message || err.check || 'unknown error'}`);
+      console.error(`  ❌ ${err.message || err.check || "unknown error"}`);
     }
     if (import.meta.main) {
       process.exit(1);

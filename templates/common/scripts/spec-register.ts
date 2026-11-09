@@ -50,50 +50,57 @@
  *          unchanged for the standard workspace-root invocation.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 // Resolved from the script's own location (scripts/spec-register.ts → workspace
 // root), not cwd — spawned callers may run from a different working directory.
-export const REGISTRY_PATH = path.resolve(import.meta.dir, '..', 'docs', 'specs', 'registry.json');
+export const REGISTRY_PATH = path.resolve(import.meta.dir, "..", "docs", "specs", "registry.json");
 
 /** T-20261005-005: one-file-per-spec SSOT — one pretty-printed SpecEntry object
  * per file; registry.json becomes a committed generated projection (same path
  * and shape, so every reader works unchanged). */
-export const ENTRIES_DIR = path.resolve(import.meta.dir, '..', 'docs', 'specs', 'entries');
+export const ENTRIES_DIR = path.resolve(import.meta.dir, "..", "docs", "specs", "entries");
 
 // ANSI colors — explicit \x1b escapes produce the exact same output bytes as the
 // previous raw-escape-character literals.
-const GREEN = '\x1b[32m';
-const RED = '\x1b[31m';
-const YELLOW = '\x1b[33m';
-const CYAN = '\x1b[36m';
-const RESET = '\x1b[0m';
+const GREEN = "\x1b[32m";
+const RED = "\x1b[31m";
+const YELLOW = "\x1b[33m";
+const CYAN = "\x1b[36m";
+const RESET = "\x1b[0m";
 
 /** T-20261003-013 (2026-10-03 review H7): the legal status vocabulary. `planned` (approved,
  * awaiting execution) and `superseded` (requires `superseded_by`) joined the set — the
  * registry previously carried them (and `designed`) as unvalidated casts that no gate saw. */
-const SPEC_STATUSES = ['draft', 'proposed', 'approved', 'planned', 'implemented', 'superseded', 'drifted', 'archived'] as const;
+const SPEC_STATUSES = [
+  "draft",
+  "proposed",
+  "approved",
+  "planned",
+  "implemented",
+  "superseded",
+  "drifted",
+  "archived",
+] as const;
 type SpecStatus = (typeof SPEC_STATUSES)[number];
 
 function isSpecStatus(value: unknown): value is SpecStatus {
-  return typeof value === 'string' && (SPEC_STATUSES as readonly string[]).includes(value);
+  return typeof value === "string" && (SPEC_STATUSES as readonly string[]).includes(value);
 }
 
 /** Validate one entry's lifecycle fields — throws on an out-of-vocabulary status or a
  * `superseded` entry without a `superseded_by` pointer. Shared by register/update/audit. */
 export function validateSpecEntry(entry: { status: string; superseded_by?: string; id?: string }): void {
-  const label = entry.id ? `spec ${entry.id}` : 'spec entry';
+  const label = entry.id ? `spec ${entry.id}` : "spec entry";
   if (!isSpecStatus(entry.status)) {
-    throw new Error(
-      `${label} has illegal status "${entry.status}" (legal: ${SPEC_STATUSES.join('|')})`,
-    );
+    throw new Error(`${label} has illegal status "${entry.status}" (legal: ${SPEC_STATUSES.join("|")})`);
   }
-  if (entry.status === 'superseded' && !entry.superseded_by) {
+  if (entry.status === "superseded" && !entry.superseded_by) {
     throw new Error(`${label} is superseded but carries no superseded_by pointer to the successor`);
   }
 }
-type SpecSource = 'brainstorming' | 'meeting' | 'manual' | 'architect' | 'pm';
+type SpecSource = "brainstorming" | "meeting" | "manual" | "architect" | "pm";
 
 interface SpecEntry {
   id: string;
@@ -116,9 +123,10 @@ interface Registry {
 /** Read every entry file (sorted by id); empty when the directory is absent. */
 export function readEntryFiles(entriesDir = ENTRIES_DIR): SpecEntry[] {
   if (!fs.existsSync(entriesDir)) return [];
-  return fs.readdirSync(entriesDir)
-    .filter(f => f.endsWith('.json'))
-    .map(f => JSON.parse(fs.readFileSync(path.join(entriesDir, f), 'utf-8')) as SpecEntry)
+  return fs
+    .readdirSync(entriesDir)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => JSON.parse(fs.readFileSync(path.join(entriesDir, f), "utf-8")) as SpecEntry)
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
@@ -128,7 +136,7 @@ export function entryPath(id: string, entriesDir = ENTRIES_DIR): string {
 
 export function writeEntryFile(entry: SpecEntry, entriesDir = ENTRIES_DIR): void {
   fs.mkdirSync(entriesDir, { recursive: true });
-  fs.writeFileSync(entryPath(entry.id, entriesDir), JSON.stringify(entry, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(entryPath(entry.id, entriesDir), JSON.stringify(entry, null, 2) + "\n", "utf-8");
 }
 
 export function loadRegistry(opts: { entriesDir?: string; registryPath?: string } = {}): Registry {
@@ -136,14 +144,14 @@ export function loadRegistry(opts: { entriesDir?: string; registryPath?: string 
   // projection fallback keeps legacy trees and not-yet-migrated projects working.
   const entries = readEntryFiles(opts.entriesDir);
   if (entries.length > 0) {
-    return { version: '1.0.0', specs: entries };
+    return { version: "1.0.0", specs: entries };
   }
   const registryPath = opts.registryPath ?? REGISTRY_PATH;
   if (!fs.existsSync(registryPath)) {
     fs.mkdirSync(path.dirname(registryPath), { recursive: true });
-    return { version: '1.0.0', specs: [] };
+    return { version: "1.0.0", specs: [] };
   }
-  return JSON.parse(fs.readFileSync(registryPath, 'utf-8'));
+  return JSON.parse(fs.readFileSync(registryPath, "utf-8"));
 }
 
 export function saveRegistry(registry: Registry, registryPath = REGISTRY_PATH): void {
@@ -152,7 +160,7 @@ export function saveRegistry(registry: Registry, registryPath = REGISTRY_PATH): 
   // file self-heals from historical arrival-order on the next save.
   registry.specs.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   fs.mkdirSync(path.dirname(registryPath), { recursive: true });
-  fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + "\n", "utf-8");
 }
 
 /** T-20261005-005: rebuild the projection from the entries directory. Legacy
@@ -165,8 +173,8 @@ export function regenerateProjection(opts: { entriesDir?: string; registryPath?:
   const registryPath = opts.registryPath ?? REGISTRY_PATH;
   if (fs.existsSync(registryPath)) {
     try {
-      const legacy = JSON.parse(fs.readFileSync(registryPath, 'utf-8')) as Registry;
-      const have = new Set(readEntryFiles(entriesDir).map(e => e.id));
+      const legacy = JSON.parse(fs.readFileSync(registryPath, "utf-8")) as Registry;
+      const have = new Set(readEntryFiles(entriesDir).map((e) => e.id));
       for (const spec of legacy.specs) {
         if (!have.has(spec.id)) writeEntryFile(spec, entriesDir);
       }
@@ -176,7 +184,7 @@ export function regenerateProjection(opts: { entriesDir?: string; registryPath?:
       console.log(`${YELLOW}Projection is conflicted or unparseable — rebuilding from ${entriesDir}${RESET}`);
     }
   }
-  const registry: Registry = { version: '1.0.0', specs: readEntryFiles(entriesDir) };
+  const registry: Registry = { version: "1.0.0", specs: readEntryFiles(entriesDir) };
   saveRegistry(registry, registryPath);
   return registry;
 }
@@ -195,20 +203,21 @@ export function canonicalOrderViolation(specs: { id: string }[]): string | null 
 }
 
 export function slugFromPath(filePath: string): string {
-  return path.basename(filePath, '.md')
+  return path
+    .basename(filePath, ".md")
     .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export function titleFromPath(filePath: string): string {
-  const base = path.basename(filePath, '.md');
-  return base.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/-/g, ' ');
+  const base = path.basename(filePath, ".md");
+  return base.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/-/g, " ");
 }
 
 export function today(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 /** Register (or refresh) a spec entry — the `--file` code path, callable without process.argv. */
@@ -219,8 +228,8 @@ export function registerSpec(options: {
   status?: SpecStatus;
   id?: string;
 }): { id: string; updated: boolean } {
-  const source = (options.source ?? 'manual') as SpecSource;
-  const status = (options.status ?? (source === 'brainstorming' ? 'approved' : 'draft')) as SpecStatus;
+  const source = (options.source ?? "manual") as SpecSource;
+  const status = (options.status ?? (source === "brainstorming" ? "approved" : "draft")) as SpecStatus;
   // T-20261003-013: reject an out-of-vocabulary status at the write gate (previously a
   // blind cast — `superseded`/`planned`/`designed` landed in the registry unchecked).
   validateSpecEntry({ status });
@@ -235,7 +244,7 @@ export function registerSpec(options: {
 
   const registry = loadRegistry();
   const id = options.id ?? slugFromPath(options.filePath);
-  const existing = registry.specs.find(s => s.id === id);
+  const existing = registry.specs.find((s) => s.id === id);
   if (existing) {
     existing.last_updated = today();
     if (options.meetingRef) existing.meeting_ref = options.meetingRef;
@@ -248,13 +257,13 @@ export function registerSpec(options: {
   const entry: SpecEntry = {
     id,
     title: titleFromPath(options.filePath),
-    file: options.filePath.split('\\').join('/'),
+    file: options.filePath.split("\\").join("/"),
     status,
     source,
     created: today(),
     last_updated: today(),
   };
-  if (options.meetingRef) entry.meeting_ref = options.meetingRef.split('\\').join('/');
+  if (options.meetingRef) entry.meeting_ref = options.meetingRef.split("\\").join("/");
   writeEntryFile(entry);
   regenerateProjection();
   console.log(`${GREEN}Registered spec: ${id}${RESET}`);
@@ -278,36 +287,44 @@ function dispatch(): void {
   }
 
   function isValidSource(source: string): source is SpecSource {
-    const validSources: SpecSource[] = ['brainstorming', 'meeting', 'manual', 'architect', 'pm'];
+    const validSources: SpecSource[] = ["brainstorming", "meeting", "manual", "architect", "pm"];
     return validSources.includes(source as SpecSource);
   }
 
-  if (getArg('--file')) {
-    const sourceArg = getArg('--source') ?? 'manual';
+  if (getArg("--file")) {
+    const sourceArg = getArg("--source") ?? "manual";
     if (!isValidSource(sourceArg)) {
-      console.error(`${RED}Invalid --source value: "${sourceArg}". Valid options: brainstorming, meeting, manual, architect, pm${RESET}`);
+      console.error(
+        `${RED}Invalid --source value: "${sourceArg}". Valid options: brainstorming, meeting, manual, architect, pm${RESET}`,
+      );
       process.exit(1);
     }
     registerSpec({
-      filePath: getArg('--file')!,
+      filePath: getArg("--file")!,
       source: sourceArg,
-      meetingRef: getArg('--ref'),
-      status: (getArg('--status') ?? undefined) as SpecStatus | undefined,
-      id: getArg('--id'),
+      meetingRef: getArg("--ref"),
+      status: (getArg("--status") ?? undefined) as SpecStatus | undefined,
+      id: getArg("--id"),
     });
     // The old CLI exited immediately after register/update; preserve that contract.
     process.exit(0);
   }
 
-  if (getArg('--update')) {
-    const id = getArg('--update')!;
-    const newStatus = getArg('--status') as SpecStatus | undefined;
-    if (!newStatus) { console.error(`${RED}--update requires --status${RESET}`); process.exit(1); }
+  if (getArg("--update")) {
+    const id = getArg("--update")!;
+    const newStatus = getArg("--status") as SpecStatus | undefined;
+    if (!newStatus) {
+      console.error(`${RED}--update requires --status${RESET}`);
+      process.exit(1);
+    }
     const registry = loadRegistry();
-    const entry = registry.specs.find(s => s.id === id);
-    if (!entry) { console.error(`${RED}Spec not found: ${id}${RESET}`); process.exit(1); }
+    const entry = registry.specs.find((s) => s.id === id);
+    if (!entry) {
+      console.error(`${RED}Spec not found: ${id}${RESET}`);
+      process.exit(1);
+    }
     // T-20261003-013: --superseded-by <spec-id> is required when status is superseded.
-    const supersededBy = getArg('--superseded-by');
+    const supersededBy = getArg("--superseded-by");
     try {
       validateSpecEntry({ status: newStatus, superseded_by: supersededBy, id });
     } catch (err) {
@@ -324,31 +341,34 @@ function dispatch(): void {
     process.exit(0);
   }
 
-  if (hasFlag('--regenerate')) {
+  if (hasFlag("--regenerate")) {
     const registry = regenerateProjection();
     console.log(`${GREEN}Regenerated projection: ${registry.specs.length} spec(s)${RESET}`);
     process.exit(0);
   }
 
-  if (hasFlag('--list') || args.length === 0) {
+  if (hasFlag("--list") || args.length === 0) {
     const registry = loadRegistry();
-    const filterStatus = getArg('--status') as SpecStatus | undefined;
-    const specs = filterStatus ? registry.specs.filter(s => s.status === filterStatus) : registry.specs;
+    const filterStatus = getArg("--status") as SpecStatus | undefined;
+    const specs = filterStatus ? registry.specs.filter((s) => s.status === filterStatus) : registry.specs;
     if (specs.length === 0) {
-      console.log(`${CYAN}No specs found${filterStatus ? ` with status: ${filterStatus}` : ''}.${RESET}`);
+      console.log(`${CYAN}No specs found${filterStatus ? ` with status: ${filterStatus}` : ""}.${RESET}`);
       process.exit(0);
     }
     console.log(`${CYAN}Spec Registry (${specs.length} entries)${RESET}
 `);
     for (const s of specs) {
-      const c = s.status === 'implemented' ? GREEN : s.status === 'approved' ? CYAN : s.status === 'drifted' ? RED : YELLOW;
+      const c =
+        s.status === "implemented" ? GREEN : s.status === "approved" ? CYAN : s.status === "drifted" ? RED : YELLOW;
       console.log(`  ${c}[${s.status.padEnd(11)}]${RESET} ${s.id}
              ${s.file}`);
     }
     process.exit(0);
   }
 
-  console.error('Usage: --file <path> --source <brainstorming|meeting|manual|architect|pm> | --update <id> --status <status> | --regenerate | --list');
+  console.error(
+    "Usage: --file <path> --source <brainstorming|meeting|manual|architect|pm> | --update <id> --status <status> | --regenerate | --list",
+  );
   process.exit(1);
 }
 

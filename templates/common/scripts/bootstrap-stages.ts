@@ -27,8 +27,8 @@
  *   bun scripts/bootstrap-stages.ts [--variants co-consult,co-deck,...] [--report-only] [--force]
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as YAML from "js-yaml";
 
 interface Procedure {
@@ -81,12 +81,7 @@ interface DistinctnessReport {
 // regardless of DEG-P-01 outcome. This is a scope decision, not a result of the algorithm.
 // Note: co-abap and co-security were promoted out of the deferred set after passing DEG-P-01
 // with genuine distinct stages defined in their respective process/stages.yaml files.
-const DEFERRED_VARIANTS = new Set([
-  "co-develop",
-  "co-news",
-  "co-safety",
-  "co-work",
-]);
+const DEFERRED_VARIANTS = new Set(["co-develop", "co-news", "co-safety", "co-work"]);
 
 const WORKSPACE_ROOT = path.resolve(__dirname, "..");
 const TEMPLATES_DIR = path.join(WORKSPACE_ROOT, "templates");
@@ -125,11 +120,7 @@ function loadProcedures(variantPath: string): {
   // Load procedure schemas
   const dirs = fs
     .readdirSync(proceduresDir)
-    .filter(
-      (f) =>
-        fs.statSync(path.join(proceduresDir, f)).isDirectory() &&
-        !f.startsWith("_")
-    );
+    .filter((f) => fs.statSync(path.join(proceduresDir, f)).isDirectory() && !f.startsWith("_"));
 
   dirs.forEach((dir) => {
     const schemaFile = path.join(proceduresDir, dir, "schema.yaml");
@@ -241,7 +232,7 @@ function buildHandoffGraph(procedures: Map<string, Procedure>): Map<string, Grap
 
 function computeLongestPathLayering(
   graph: Map<string, GraphNode>,
-  procedures: Map<string, Procedure>
+  procedures: Map<string, Procedure>,
 ): Map<string, number> {
   const levels = new Map<string, number>();
 
@@ -313,7 +304,7 @@ function computeLongestPathLayering(
 function drawStageBoundaries(
   graph: Map<string, GraphNode>,
   levels: Map<string, number>,
-  procedures: Map<string, Procedure>
+  procedures: Map<string, Procedure>,
 ): string[][] {
   // Group procedures by level
   const levelGroups = new Map<number, string[]>();
@@ -413,7 +404,7 @@ function drawStageBoundaries(
 function mergeUndersiZedSegments(
   segments: string[][],
   procedures: Map<string, Procedure>,
-  outputTypes: Set<string>
+  outputTypes: Set<string>,
 ): string[][] {
   const merged: string[][] = [];
   let i = 0;
@@ -468,10 +459,7 @@ function mergeUndersiZedSegments(
 // Step 6: Apply name-prefix tiebreak
 // ============================================================================
 
-function applyNamePrefixTiebreak(
-  segments: string[][],
-  procedures: Map<string, Procedure>
-): string[][] {
+function applyNamePrefixTiebreak(segments: string[][], procedures: Map<string, Procedure>): string[][] {
   // If we have only one segment or no clear articulation, try prefix-based split
   if (segments.length === 1) {
     const segment = segments[0];
@@ -500,8 +488,8 @@ function applyNamePrefixTiebreak(
       });
 
       if (prefixGroups.size > 1) {
-        return Array.from(prefixGroups.values()).sort(
-          (a, b) => procedures.get(a[0])!.title.localeCompare(procedures.get(b[0])!.title)
+        return Array.from(prefixGroups.values()).sort((a, b) =>
+          procedures.get(a[0])!.title.localeCompare(procedures.get(b[0])!.title),
         );
       }
     }
@@ -519,7 +507,7 @@ function deriveOrderAndEmitStages(
   procedures: Map<string, Procedure>,
   levels: Map<string, number>,
   variantName: string,
-  variantPath: string
+  variantPath: string,
 ): Stage[] {
   const stages: Stage[] = [];
 
@@ -584,7 +572,7 @@ function deriveOrderAndEmitStages(
 function runDistinctnessCheck(
   variant: string,
   stages: Stage[],
-  procedures: Map<string, Procedure>
+  procedures: Map<string, Procedure>,
 ): DistinctnessReport {
   const distinctPhases = new Set<number>();
   procedures.forEach((proc) => {
@@ -645,7 +633,11 @@ async function main() {
     variantsIdx >= 0 && argv[variantsIdx + 1] && !argv[variantsIdx + 1].startsWith("--")
       ? argv[variantsIdx + 1]
       : argv.find((a) => a.startsWith("--variants="))?.split("=")[1];
-  if (variantsIdx >= 0 && (!argv[variantsIdx + 1] || argv[variantsIdx + 1].startsWith("--")) && !argv.some((a) => a.startsWith("--variants="))) {
+  if (
+    variantsIdx >= 0 &&
+    (!argv[variantsIdx + 1] || argv[variantsIdx + 1].startsWith("--")) &&
+    !argv.some((a) => a.startsWith("--variants="))
+  ) {
     console.error("❌ --variants requires a comma-separated list, e.g. --variants co-consult,co-deck");
     process.exit(1);
   }
@@ -665,7 +657,12 @@ async function main() {
   });
 
   if (variantsArg) {
-    const wanted = new Set(variantsArg.split(",").map((s) => s.trim()).filter(Boolean));
+    const wanted = new Set(
+      variantsArg
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
     allVariants = allVariants.filter((v) => wanted.has(v));
     if (allVariants.length === 0) {
       console.error(`❌ No matching co-* variants for --variants ${variantsArg}`);
@@ -680,9 +677,7 @@ async function main() {
   // documented escape for a genuine re-bootstrap; --report-only writes
   // nothing and so needs no override.
   if (!REPORT_ONLY && !FORCE) {
-    const curated = allVariants.filter(
-      (v) => fs.existsSync(path.join(TEMPLATES_DIR, v, "process", "stages.yaml"))
-    );
+    const curated = allVariants.filter((v) => fs.existsSync(path.join(TEMPLATES_DIR, v, "process", "stages.yaml")));
     if (curated.length > 0) {
       console.error(
         [
@@ -699,7 +694,7 @@ async function main() {
           "   - Preview the derivation without writing anything:",
           "       bun scripts/bootstrap-stages.ts --report-only",
           "",
-        ].join("\n")
+        ].join("\n"),
       );
       process.exit(1);
     }
@@ -710,15 +705,11 @@ async function main() {
   // Also include l0 root procedures
   const l0Include = process.argv.includes("--include-l0");
 
-  console.log(
-    `Processing ${allVariants.length} variants` + (l0Include ? " + l0 root procedures" : "")
-  );
+  console.log(`Processing ${allVariants.length} variants` + (l0Include ? " + l0 root procedures" : ""));
 
   for (const variantName of allVariants) {
     const variantPath =
-      variantName === "common"
-        ? path.join(TEMPLATES_DIR, "common")
-        : path.join(TEMPLATES_DIR, variantName);
+      variantName === "common" ? path.join(TEMPLATES_DIR, "common") : path.join(TEMPLATES_DIR, variantName);
 
     console.log(`\n📦 ${variantName}...`);
 
@@ -789,9 +780,7 @@ async function main() {
 
     // Check DEG-P-01: fail if stages map 1:1 to phases
     if (isFailing && !isDeferred) {
-      console.log(
-        `  ❌ DISTINCTNESS CHECK FAILED: stages map 1:1 to phases (NOT EXPECTED for governed variant)`
-      );
+      console.log(`  ❌ DISTINCTNESS CHECK FAILED: stages map 1:1 to phases (NOT EXPECTED for governed variant)`);
       console.log(`  Creating stage_bootstrap:${variantName} governance ticket (non-blocking)`);
 
       // Set deg_conformance: "core" with stages_file: null for unexpectedly failing governed variant
@@ -820,7 +809,7 @@ async function main() {
     if (isDeferred) {
       const passStr = isFailing ? "FAILED" : "PASSED";
       console.log(
-        `  ℹ️  Deferred variant (per design §13.1): ${distinctnessReport.procedureCount} procedures, ${distinctnessReport.distinctPhaseCount} phases, ${distinctnessReport.distinctStageCount} stages, distinctness check ${passStr}`
+        `  ℹ️  Deferred variant (per design §13.1): ${distinctnessReport.procedureCount} procedures, ${distinctnessReport.distinctPhaseCount} phases, ${distinctnessReport.distinctStageCount} stages, distinctness check ${passStr}`,
       );
       console.log(`  Creating stage_bootstrap:${variantName} governance ticket (non-blocking)`);
 
@@ -849,14 +838,14 @@ async function main() {
     // Otherwise, bootstrap normally for governed variants that pass DEG-P-01
     if (!isFailing) {
       console.log(
-        `  ✅ DISTINCTNESS CHECK PASSED (${distinctnessReport.distinctStageCount} distinct stages, ${distinctnessReport.distinctPhaseCount} distinct phases)`
+        `  ✅ DISTINCTNESS CHECK PASSED (${distinctnessReport.distinctStageCount} distinct stages, ${distinctnessReport.distinctPhaseCount} distinct phases)`,
       );
 
       const variantJsonPath = path.join(variantPath, "variant.json");
 
       if (REPORT_ONLY) {
         console.log(
-          `  🔍 Would emit ${path.join("process", "stages.yaml")} (${stages.length} stages), add stage: fields to procedure schemas, and set deg_conformance: "governed" in variant.json`
+          `  🔍 Would emit ${path.join("process", "stages.yaml")} (${stages.length} stages), add stage: fields to procedure schemas, and set deg_conformance: "governed" in variant.json`,
         );
         continue;
       }
@@ -893,9 +882,7 @@ async function main() {
           // procId is "<variant>-<procedure-dir>"
           // Extract procedure dir by removing the "<variant>-" prefix
           const procDirPrefix = variantName + "-";
-          const procDir = procId.startsWith(procDirPrefix)
-            ? procId.substring(procDirPrefix.length)
-            : procId;
+          const procDir = procId.startsWith(procDirPrefix) ? procId.substring(procDirPrefix.length) : procId;
           const schemaPath = path.join(proceduresDir, procDir, "schema.yaml");
 
           if (fs.existsSync(schemaPath)) {
@@ -955,11 +942,11 @@ async function main() {
 
   const table = reports.map((r) => ({
     Variant: r.variant,
-    "Procedures": r.procedureCount,
+    Procedures: r.procedureCount,
     "Distinct Phases": r.distinctPhaseCount,
     "Distinct Stages": r.distinctStageCount,
     "Pass?": r.pass ? "✓" : "✗",
-    "Disposition": r.disposition,
+    Disposition: r.disposition,
   }));
 
   console.table(table);
@@ -970,13 +957,13 @@ async function main() {
   const bootstrappedCount = reports.filter((r) => r.disposition === "bootstrapped").length;
 
   console.log(
-    `\n📈 Summary: ${bootstrappedCount} bootstrapped, ${deferredCount} deferred, ${failingCount} distinctness failures`
+    `\n📈 Summary: ${bootstrappedCount} bootstrapped, ${deferredCount} deferred, ${failingCount} distinctness failures`,
   );
   console.log(`   Deferred variants (per design §13.1): ${Array.from(DEFERRED_VARIANTS).sort().join(", ")}`);
 
   // Verify that deferred variants all have no stages.yaml
   const deferredVariants = reports.filter((r) => DEFERRED_VARIANTS.has(r.variant));
-  console.log(`\n✅ All ${deferredCount} deferred variants marked deg_conformance: "core" with no stages.yaml`)
+  console.log(`\n✅ All ${deferredCount} deferred variants marked deg_conformance: "core" with no stages.yaml`);
 
   console.log("\n" + "=".repeat(80));
   console.log("📋 FILES SUMMARY");
@@ -984,7 +971,7 @@ async function main() {
   console.log(`Created: ${filesCreated.length} files`);
   console.log(`Modified: ${filesModified.length} files`);
   console.log(
-    `\nTotal procedures updated with stage: field: ${filesModified.filter((f) => f.includes("schema.yaml")).length}`
+    `\nTotal procedures updated with stage: field: ${filesModified.filter((f) => f.includes("schema.yaml")).length}`,
   );
 }
 

@@ -19,8 +19,8 @@
  *               by skill scope parsing
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -54,11 +54,8 @@ function normalizeLayer(raw: string): LayerValue {
  *   script | source | version | status | removal-date | security-advisory | layer | pair
  * Dynamically resolves column index from the header row for robustness.
  */
-export function parseScriptLayers(
-  scriptsMdPath?: string,
-): Map<string, LayerValue> {
-  const mdPath =
-    scriptsMdPath ?? path.join(process.cwd(), "scripts", "SCRIPTS.md");
+export function parseScriptLayers(scriptsMdPath?: string): Map<string, LayerValue> {
+  const mdPath = scriptsMdPath ?? path.join(process.cwd(), "scripts", "SCRIPTS.md");
   const result = new Map<string, LayerValue>();
 
   let content: string;
@@ -119,9 +116,7 @@ export function parseScriptLayers(
  * Reads `l2_propagate: false` and `scope: workspace` frontmatter fields — both map to 'L0'
  * (excluded from L1 propagation).
  */
-export function parseSkillLayers(
-  skillsDirPath?: string,
-): Map<string, LayerValue> {
+export function parseSkillLayers(skillsDirPath?: string): Map<string, LayerValue> {
   const skillsDir = skillsDirPath ?? path.join(process.cwd(), "skills");
   return _parseSkillLayersFromFrontmatter(skillsDir);
 }
@@ -144,7 +139,8 @@ function _walkSkillDirs(dir: string, skillsDir: string, result: Map<string, Laye
 
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    if (entry.name === "_archive" || entry.name === "local" || entry.name === "external" || entry.name.startsWith("_")) continue;
+    if (entry.name === "_archive" || entry.name === "local" || entry.name === "external" || entry.name.startsWith("_"))
+      continue;
     const fullPath = path.join(dir, entry.name);
     const skillMdPath = path.join(fullPath, "SKILL.md");
     if (!fs.existsSync(skillMdPath)) {
@@ -210,28 +206,19 @@ function _getScriptLayers(layers?: Map<string, LayerValue>): Map<string, LayerVa
 }
 
 /** Should this script be included in templates/common (L1)? */
-export function includeScriptInL1(
-  scriptName: string,
-  layers?: Map<string, LayerValue>,
-): boolean {
+export function includeScriptInL1(scriptName: string, layers?: Map<string, LayerValue>): boolean {
   const layer = getScriptLayer(scriptName, layers);
   return layer === "L0+L1" || layer === "L0+L1+L2";
 }
 
 /** Should this script be included when scaffolding an L3 project? (Named `InL2` historically — see CONSTITUTION.md §Terminology Definition; L3 = Projects/*.) */
-export function includeScriptInL3(
-  scriptName: string,
-  layers?: Map<string, LayerValue>,
-): boolean {
+export function includeScriptInL3(scriptName: string, layers?: Map<string, LayerValue>): boolean {
   const layer = getScriptLayer(scriptName, layers);
   return layer === "L0+L1" || layer === "L0+L1+L2";
 }
 
 /** Get the layer value for a specific script. Defaults to L0+L1 if unknown. */
-export function getScriptLayer(
-  scriptName: string,
-  layers?: Map<string, LayerValue>,
-): LayerValue {
+export function getScriptLayer(scriptName: string, layers?: Map<string, LayerValue>): LayerValue {
   const map = _getScriptLayers(layers);
 
   // Try exact match first
@@ -259,29 +246,20 @@ function _getSkillLayers(layers?: Map<string, LayerValue>): Map<string, LayerVal
 }
 
 /** Should this skill be included in templates/common (L1)? */
-export function includeSkillInL1(
-  skillName: string,
-  layers?: Map<string, LayerValue>,
-): boolean {
+export function includeSkillInL1(skillName: string, layers?: Map<string, LayerValue>): boolean {
   const layer = getSkillLayer(skillName, layers);
   // Variant-specific skills (L0+L2) skip L1 — they ship via the co-* overlay.
   return layer === "L0+L1" || layer === "L0+L1+L2";
 }
 
 /** Should this skill be included when scaffolding an L3 project? (Named `InL2` historically — see CONSTITUTION.md §Terminology Definition; L3 = Projects/*.) */
-export function includeSkillInL3(
-  skillName: string,
-  layers?: Map<string, LayerValue>,
-): boolean {
+export function includeSkillInL3(skillName: string, layers?: Map<string, LayerValue>): boolean {
   const layer = getSkillLayer(skillName, layers);
   return layer === "L0+L1" || layer === "L0+L1+L2";
 }
 
 /** Get the layer value for a specific skill. Defaults to L0+L1 if unknown. */
-export function getSkillLayer(
-  skillName: string,
-  layers?: Map<string, LayerValue>,
-): LayerValue {
+export function getSkillLayer(skillName: string, layers?: Map<string, LayerValue>): LayerValue {
   const map = _getSkillLayers(layers);
   return map.get(skillName) ?? "L0+L1";
 }
@@ -302,19 +280,13 @@ if (import.meta.main) {
 
   if (showScriptsL0Only) {
     const layers = parseScriptLayers();
-    names = [...layers.entries()]
-      .filter(([, v]) => v === "L0")
-      .map(([k]) => k);
+    names = [...layers.entries()].filter(([, v]) => v === "L0").map(([k]) => k);
   } else if (showScriptsL0PlusL1) {
     const layers = parseScriptLayers();
-    names = [...layers.entries()]
-      .filter(([, v]) => v === "L0+L1")
-      .map(([k]) => k);
+    names = [...layers.entries()].filter(([, v]) => v === "L0+L1").map(([k]) => k);
   } else if (showSkillsL0Only) {
     const layers = parseSkillLayers();
-    names = [...layers.entries()]
-      .filter(([, v]) => v === "L0")
-      .map(([k]) => k);
+    names = [...layers.entries()].filter(([, v]) => v === "L0").map(([k]) => k);
   } else {
     console.error(
       "Usage: bun scripts/helpers/layer-filter.ts [--scripts-l0-only | --scripts-l0-plus-l1 | --skills-l0-only] [--format=list|json]",

@@ -38,16 +38,14 @@
  * Spec: docs/designs/2026-10-18-codex-user-prompt-gate-design.md
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { fileURLToPath } from "node:url";
 
-const WORKSPACE_ROOT =
-  process.env.CLAUDE_PROJECT_DIR ?? fileURLToPath(new URL('../..', import.meta.url));
+const WORKSPACE_ROOT = process.env.CLAUDE_PROJECT_DIR ?? fileURLToPath(new URL("../..", import.meta.url));
 
-const STATE_DIR =
-  process.env.PM_GATE_STATE_DIR ?? join(tmpdir(), 'ai-workspace-pm-gateway');
+const STATE_DIR = process.env.PM_GATE_STATE_DIR ?? join(tmpdir(), "ai-workspace-pm-gateway");
 
 const MARKER_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -61,16 +59,16 @@ interface HookPayload {
 }
 
 export interface GateDecision {
-  decision: 'block';
+  decision: "block";
   reason: string;
 }
 
 /** Live-dispatch roster: agents/*.md minus pm.md, sorted for determinism. */
 function loadSpecialistRoster(): string[] {
-  const dir = join(WORKSPACE_ROOT, 'agents');
+  const dir = join(WORKSPACE_ROOT, "agents");
   return readdirSync(dir)
-    .filter((name) => name.endsWith('.md') && name !== 'pm.md')
-    .map((name) => name.replace(/\.md$/, ''))
+    .filter((name) => name.endsWith(".md") && name !== "pm.md")
+    .map((name) => name.replace(/\.md$/, ""))
     .sort();
 }
 
@@ -78,8 +76,8 @@ function loadSpecialistRoster(): string[] {
  * usable session id (those sessions are never marker-exempt). */
 function markerFilePath(sessionId: string | null): string | null {
   if (!sessionId) return null;
-  const safe = sessionId.replace(/[^A-Za-z0-9_-]/g, '_');
-  if (!safe || safe === '_'.repeat(safe.length)) return null;
+  const safe = sessionId.replace(/[^A-Za-z0-9_-]/g, "_");
+  if (!safe || safe === "_".repeat(safe.length)) return null;
   return join(STATE_DIR, `${safe}.json`);
 }
 
@@ -88,8 +86,8 @@ function markerIsFresh(markerPath: string | null): boolean {
   if (!markerPath) return false;
   if (!existsSync(markerPath)) return false;
   try {
-    const parsed = JSON.parse(readFileSync(markerPath, 'utf-8')) as MarkerPayload;
-    if (typeof parsed.ts !== 'number' || !Number.isFinite(parsed.ts)) return false;
+    const parsed = JSON.parse(readFileSync(markerPath, "utf-8")) as MarkerPayload;
+    if (typeof parsed.ts !== "number" || !Number.isFinite(parsed.ts)) return false;
     return Date.now() - parsed.ts <= MARKER_TTL_MS;
   } catch {
     return false;
@@ -104,7 +102,7 @@ export function extractSlashCommand(prompt: string): string | null {
 }
 
 export function evaluate(payload: HookPayload): GateDecision | null {
-  if (typeof payload.prompt !== 'string' || payload.prompt.length === 0) return null;
+  if (typeof payload.prompt !== "string" || payload.prompt.length === 0) return null;
 
   const command = extractSlashCommand(payload.prompt);
   if (!command) return null;
@@ -118,9 +116,7 @@ export function evaluate(payload: HookPayload): GateDecision | null {
   }
   if (!roster.includes(command)) return null;
 
-  const sessionId = typeof payload.session_id === 'string' && payload.session_id.length > 0
-    ? payload.session_id
-    : null;
+  const sessionId = typeof payload.session_id === "string" && payload.session_id.length > 0 ? payload.session_id : null;
   if (markerIsFresh(markerFilePath(sessionId))) return null;
 
   // No marker: prompt blocked. Codex UserPromptSubmit documents exactly this
@@ -132,12 +128,12 @@ export function evaluate(payload: HookPayload): GateDecision | null {
     `not a PM session). Restate the request as PM work, or boot this session ` +
     `into the PM role (agents/pm.md session bootstrap / CODEX.md) before ` +
     `invoking specialists again.`;
-  return { decision: 'block', reason };
+  return { decision: "block", reason };
 }
 
 function main(): void {
   try {
-    const payload = JSON.parse(readFileSync(0, 'utf-8')) as HookPayload;
+    const payload = JSON.parse(readFileSync(0, "utf-8")) as HookPayload;
     const decision = evaluate(payload);
     if (decision) {
       process.stdout.write(`${JSON.stringify(decision)}\n`);

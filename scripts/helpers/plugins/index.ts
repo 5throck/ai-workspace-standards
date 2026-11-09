@@ -32,20 +32,20 @@ export {
   getPlugin,
   hasPlugin,
   getAllPlugins,
-} from './variant-plugin.ts';
+} from "./variant-plugin.ts";
 
 // ---------------------------------------------------------------------------
 // Explicit Plugin Registration
 // ---------------------------------------------------------------------------
 
-import { registerPlugin } from './variant-plugin.ts';
-import { GamePlugin } from './game-plugin.ts';
-import { SecurityPlugin } from './security-plugin.ts';
-import { DevelopmentPlugin } from './development-plugin.ts';
-import { DesignPlugin } from './design-plugin.ts';
-import { ConsultingPlugin } from './consulting-plugin.ts';
-import { CollaborationPlugin } from './collaboration-plugin.ts';
-import { LecturePlugin } from './lecture-plugin.ts';
+import { registerPlugin } from "./variant-plugin.ts";
+import { GamePlugin } from "./game-plugin.ts";
+import { SecurityPlugin } from "./security-plugin.ts";
+import { DevelopmentPlugin } from "./development-plugin.ts";
+import { DesignPlugin } from "./design-plugin.ts";
+import { ConsultingPlugin } from "./consulting-plugin.ts";
+import { CollaborationPlugin } from "./collaboration-plugin.ts";
+import { LecturePlugin } from "./lecture-plugin.ts";
 
 // Register the game variant plugin.
 // The 'game' type is defined in variant-type-registry.ts.

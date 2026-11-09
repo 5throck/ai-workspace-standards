@@ -13,10 +13,10 @@
  *   4. Report orphan references as WARNING (may reference common/shared agents)
  */
 
-import { join, basename } from 'path';
-import { existsSync, readFileSync } from 'fs';
-import * as yaml from 'js-yaml';
-import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from './types.ts';
+import { join, basename } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import * as yaml from "js-yaml";
+import type { ValidatorContext, ValidatorDefinition, ValidatorResult, ValidationIssue } from "./types.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -43,9 +43,9 @@ function parseFrontmatter(content: string): Record<string, any> {
 function extractStringArray(frontmatter: Record<string, any>, field: string): string[] {
   const value = frontmatter[field];
   if (!value) return [];
-  if (typeof value === 'string') return [value];
+  if (typeof value === "string") return [value];
   if (!Array.isArray(value)) return [];
-  return value.filter((v: any) => typeof v === 'string' && v.trim() !== '');
+  return value.filter((v: any) => typeof v === "string" && v.trim() !== "");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -56,29 +56,27 @@ function extractStringArray(frontmatter: Record<string, any>, field: string): st
  * Validates that cross-references in agent frontmatter point to real files.
  */
 export const orphanReferenceValidator: ValidatorDefinition = {
-  name: 'orphan-reference',
-  description: 'Validates that agent cross-references (handoff_to, required_skills) point to real files',
-  prerequisites: ['variant-json', 'extends'],
+  name: "orphan-reference",
+  description: "Validates that agent cross-references (handoff_to, required_skills) point to real files",
+  prerequisites: ["variant-json", "extends"],
 
   validate(ctx: ValidatorContext): ValidatorResult {
     const start = performance.now();
     const issues: ValidationIssue[] = [];
     let checks = 0;
 
-    const agentsDir = join(ctx.variantDir, 'agents');
+    const agentsDir = join(ctx.variantDir, "agents");
 
     // Build a set of known agent names from filenames on disk
     const knownAgentFiles = new Set(ctx.agentFiles);
     // Map agent filenames to agent names (filename without .md)
-    const knownAgentNames = new Set(
-      ctx.agentFiles.map(f => basename(f, '.md')),
-    );
+    const knownAgentNames = new Set(ctx.agentFiles.map((f) => basename(f, ".md")));
 
     // Build a set of known skill names from variant.json
     const knownSkillNames = new Set(
-      ctx.skillFiles.map(s => {
+      ctx.skillFiles.map((s) => {
         // skillFiles come from variant.json skills[].name
-        if (typeof s === 'object' && s !== null && 'name' in s) return (s as any).name;
+        if (typeof s === "object" && s !== null && "name" in s) return (s as any).name;
         return s;
       }),
     );
@@ -87,19 +85,19 @@ export const orphanReferenceValidator: ValidatorDefinition = {
       const agentPath = join(agentsDir, agentFile);
       if (!existsSync(agentPath)) continue;
 
-      const content = readFileSync(agentPath, 'utf-8');
+      const content = readFileSync(agentPath, "utf-8");
       const frontmatter = parseFrontmatter(content);
-      const agentName = basename(agentFile, '.md');
+      const agentName = basename(agentFile, ".md");
 
       // ── Check handoff_to references ────────────────────────────────────
-      const handoffTo = extractStringArray(frontmatter, 'handoff_to');
+      const handoffTo = extractStringArray(frontmatter, "handoff_to");
       for (const target of handoffTo) {
         checks++;
         // Check if the target is a known agent name
         if (!knownAgentNames.has(target)) {
           issues.push({
-            severity: 'warning',
-            category: 'orphan-handoff',
+            severity: "warning",
+            category: "orphan-handoff",
             message: `Agent "${agentName}" handoff_to "${target}" — no matching agent file in agents/`,
             file: agentFile,
             agentName,
@@ -108,13 +106,13 @@ export const orphanReferenceValidator: ValidatorDefinition = {
       }
 
       // ── Check required_skills references ───────────────────────────────
-      const requiredSkills = extractStringArray(frontmatter, 'required_skills');
+      const requiredSkills = extractStringArray(frontmatter, "required_skills");
       for (const skill of requiredSkills) {
         checks++;
         if (!knownSkillNames.has(skill)) {
           issues.push({
-            severity: 'warning',
-            category: 'orphan-skill-reference',
+            severity: "warning",
+            category: "orphan-skill-reference",
             message: `Agent "${agentName}" required_skills "${skill}" — no matching skill in variant.json`,
             file: agentFile,
             agentName,
@@ -124,7 +122,7 @@ export const orphanReferenceValidator: ValidatorDefinition = {
     }
 
     return {
-      validator: 'orphan-reference',
+      validator: "orphan-reference",
       duration_ms: performance.now() - start,
       checks,
       issues,

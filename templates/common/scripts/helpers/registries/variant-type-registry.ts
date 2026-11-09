@@ -25,46 +25,49 @@ export interface VariantTypeDefinition {
  */
 export const VARIANT_TYPE_REGISTRY = {
   security: {
-    name: 'security',
-    description: 'Security review, pentesting, threat modeling, and patch engineering',
+    name: "security",
+    description: "Security review, pentesting, threat modeling, and patch engineering",
   },
   development: {
-    name: 'development',
-    description: 'Software development workflow with PM, Architect, and implementation agents',
+    name: "development",
+    description: "Software development workflow with PM, Architect, and implementation agents",
   },
   design: {
-    name: 'design',
-    description: 'UI/UX design, design systems, prototyping, and design handoff',
+    name: "design",
+    description: "UI/UX design, design systems, prototyping, and design handoff",
   },
   consulting: {
-    name: 'consulting',
-    description: 'Strategy consulting for AI-assisted business consulting engagements',
+    name: "consulting",
+    description: "Strategy consulting for AI-assisted business consulting engagements",
   },
   collaboration: {
-    name: 'collaboration',
-    description: 'General work, research, documentation, and project coordination',
+    name: "collaboration",
+    description: "General work, research, documentation, and project coordination",
   },
   lecture: {
-    name: 'lecture',
-    description: 'Lecture and presentation material production workflow',
-    canonicalExtensionSource: 'templates/co-deck/variant.json',
+    name: "lecture",
+    description: "Lecture and presentation material production workflow",
+    canonicalExtensionSource: "templates/co-deck/variant.json",
   },
   game: {
-    name: 'game',
-    description: 'Game development for HTML5 Canvas games using Vanilla TypeScript',
+    name: "game",
+    description: "Game development for HTML5 Canvas games using Vanilla TypeScript",
   },
-  'abap-development': {
-    name: 'abap-development',
-    description: 'SAP ABAP development against NetWeaver via ADT REST APIs, with module analysts (SD/MM/FI/CO/PP/LE) and technical execution agents',
+  "abap-development": {
+    name: "abap-development",
+    description:
+      "SAP ABAP development against NetWeaver via ADT REST APIs, with module analysts (SD/MM/FI/CO/PP/LE) and technical execution agents",
   },
   safety: {
-    name: 'safety',
-    description: 'EHS/GxP compliance platform for Korean occupational safety, pharmaceutical quality, and medical device regulation',
+    name: "safety",
+    description:
+      "EHS/GxP compliance platform for Korean occupational safety, pharmaceutical quality, and medical device regulation",
   },
   learning: {
-    name: 'learning',
-    description: 'Learning and assessment workflow — bias-audited question-bank authoring, remediation ledger review, and exam operations',
-    canonicalExtensionSource: 'templates/co-learning/variant.json',
+    name: "learning",
+    description:
+      "Learning and assessment workflow — bias-audited question-bank authoring, remediation ledger review, and exam operations",
+    canonicalExtensionSource: "templates/co-learning/variant.json",
   },
 } as const;
 

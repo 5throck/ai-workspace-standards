@@ -49,16 +49,16 @@
  * Exit codes: 0 = pass (or skipped: nothing to audit), 1 = fail (finding, waiver, or infrastructure).
  */
 
-import { readFileSync } from 'node:fs';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
+import { readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
+import path from "node:path";
 
-const VERSION = '1.1.0';
+const VERSION = "1.1.0";
 
-const DEFAULT_WAIVER_FILE = path.join('.github', 'dependency-waivers.toml');
-const SEVERITY_ORDER = ['critical', 'high', 'moderate', 'low'];
+const DEFAULT_WAIVER_FILE = path.join(".github", "dependency-waivers.toml");
+const SEVERITY_ORDER = ["critical", "high", "moderate", "low"];
 /** Severities that trip the gate (matches the L0 root gate threshold). */
-const FAILING_SEVERITIES = new Set(['critical', 'high']);
+const FAILING_SEVERITIES = new Set(["critical", "high"]);
 
 /** One advisory record as emitted by `bun audit --json`. */
 export interface AuditAdvisory {
@@ -76,7 +76,7 @@ export interface Waiver {
   advisory: string;
   package: string;
   version: string;
-  scope: 'dev-only' | 'production';
+  scope: "dev-only" | "production";
   reason: string;
   decided_by: string;
   revisit_by: string;
@@ -102,13 +102,9 @@ export function extractGhsa(value: string | undefined): string | null {
 /** Strict `YYYY-MM-DD` validation (real calendar date, not just the shape). */
 export function isValidIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [y, mo, d] = value.split('-').map(Number);
+  const [y, mo, d] = value.split("-").map(Number);
   const date = new Date(Date.UTC(y, mo - 1, d));
-  return (
-    date.getUTCFullYear() === y &&
-    date.getUTCMonth() === mo - 1 &&
-    date.getUTCDate() === d
-  );
+  return date.getUTCFullYear() === y && date.getUTCMonth() === mo - 1 && date.getUTCDate() === d;
 }
 
 /**
@@ -121,42 +117,38 @@ export function parseWaiverFile(text: string): Waiver[] {
   try {
     parsed = Bun.TOML.parse(text);
   } catch (e) {
-    throw new Error(
-      `waiver file is not valid TOML (fail-closed): ${(e as Error).message}`,
-    );
+    throw new Error(`waiver file is not valid TOML (fail-closed): ${(e as Error).message}`);
   }
-  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('waiver file must be a TOML table with [[waiver]] entries');
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("waiver file must be a TOML table with [[waiver]] entries");
   }
   const root = parsed as Record<string, unknown>;
   for (const key of Object.keys(root)) {
-    if (key !== 'waiver') {
-      throw new Error(
-        `unknown top-level key "${key}" — only [[waiver]] entries are allowed (strict schema)`,
-      );
+    if (key !== "waiver") {
+      throw new Error(`unknown top-level key "${key}" — only [[waiver]] entries are allowed (strict schema)`);
     }
   }
-  const rawList = root['waiver'];
+  const rawList = root["waiver"];
   if (rawList === undefined) return [];
   if (!Array.isArray(rawList)) {
     throw new Error('"waiver" must be an array of tables ([[waiver]])');
   }
 
-  const REQUIRED: Array<{ key: keyof Waiver; kind: 'string' }> = [
-    { key: 'advisory', kind: 'string' },
-    { key: 'package', kind: 'string' },
-    { key: 'version', kind: 'string' },
-    { key: 'scope', kind: 'string' },
-    { key: 'reason', kind: 'string' },
-    { key: 'decided_by', kind: 'string' },
-    { key: 'revisit_by', kind: 'string' },
+  const REQUIRED: Array<{ key: keyof Waiver; kind: "string" }> = [
+    { key: "advisory", kind: "string" },
+    { key: "package", kind: "string" },
+    { key: "version", kind: "string" },
+    { key: "scope", kind: "string" },
+    { key: "reason", kind: "string" },
+    { key: "decided_by", kind: "string" },
+    { key: "revisit_by", kind: "string" },
   ];
   const ALLOWED_KEYS = new Set(REQUIRED.map((r) => r.key as string));
 
   const waivers: Waiver[] = [];
   rawList.forEach((raw, i) => {
     const where = `waiver[${i}]`;
-    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+    if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
       throw new Error(`${where} must be a [[waiver]] table`);
     }
     const entry = raw as Record<string, unknown>;
@@ -167,28 +159,28 @@ export function parseWaiverFile(text: string): Waiver[] {
     }
     for (const { key } of REQUIRED) {
       const v = entry[key];
-      if (typeof v !== 'string' || v.trim() === '') {
+      if (typeof v !== "string" || v.trim() === "") {
         throw new Error(`${where}: "${key}" is required and must be a non-empty string`);
       }
     }
 
-    const advisory = String(entry['advisory']).trim().toUpperCase();
+    const advisory = String(entry["advisory"]).trim().toUpperCase();
     if (!/^GHSA(?:-[0-9A-Z]{4}){3,4}$/.test(advisory)) {
       throw new Error(`${where}: "advisory" must be a GHSA id (GHSA-xxxx-xxxx-xxxx), got "${advisory}"`);
     }
-    const pkg = String(entry['package']).trim();
+    const pkg = String(entry["package"]).trim();
     if (!/^[@a-zA-Z0-9._/-]+$/.test(pkg)) {
       throw new Error(`${where}: "package" does not look like an npm package name: "${pkg}"`);
     }
-    const version = String(entry['version']).trim();
+    const version = String(entry["version"]).trim();
     if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)) {
       throw new Error(`${where}: "version" must be an exact semver pin (x.y.z), got "${version}"`);
     }
-    const scope = String(entry['scope']).trim();
-    if (scope !== 'dev-only' && scope !== 'production') {
+    const scope = String(entry["scope"]).trim();
+    if (scope !== "dev-only" && scope !== "production") {
       throw new Error(`${where}: "scope" must be "dev-only" or "production", got "${scope}"`);
     }
-    const revisit = String(entry['revisit_by']).trim();
+    const revisit = String(entry["revisit_by"]).trim();
     if (!isValidIsoDate(revisit)) {
       throw new Error(`${where}: "revisit_by" must be a valid YYYY-MM-DD date, got "${revisit}"`);
     }
@@ -197,9 +189,9 @@ export function parseWaiverFile(text: string): Waiver[] {
       advisory,
       package: pkg,
       version,
-      scope: scope as Waiver['scope'],
-      reason: String(entry['reason']).trim(),
-      decided_by: String(entry['decided_by']).trim(),
+      scope: scope as Waiver["scope"],
+      reason: String(entry["reason"]).trim(),
+      decided_by: String(entry["decided_by"]).trim(),
       revisit_by: revisit,
     });
   });
@@ -233,12 +225,12 @@ export interface MatchResult {
 }
 
 /** Installed version of a package from node_modules, or null when unavailable. */
-export function installedVersion(pkg: string, repoRoot = '.'): string | null {
-  const pkgJson = path.join(repoRoot, 'node_modules', ...pkg.split('/'), 'package.json');
+export function installedVersion(pkg: string, repoRoot = "."): string | null {
+  const pkgJson = path.join(repoRoot, "node_modules", ...pkg.split("/"), "package.json");
   if (!existsSync(pkgJson)) return null;
   try {
-    const data = JSON.parse(readFileSync(pkgJson, 'utf-8'));
-    return typeof data?.version === 'string' ? data.version : null;
+    const data = JSON.parse(readFileSync(pkgJson, "utf-8"));
+    return typeof data?.version === "string" ? data.version : null;
   } catch {
     return null;
   }
@@ -248,11 +240,7 @@ export function installedVersion(pkg: string, repoRoot = '.'): string | null {
  * Match waivers against findings.
  * A waiver applies when the package name AND the advisory GHSA id match.
  */
-export function matchWaivers(
-  findings: AuditFindings,
-  waivers: Waiver[],
-  repoRoot = '.',
-): MatchResult {
+export function matchWaivers(findings: AuditFindings, waivers: Waiver[], repoRoot = "."): MatchResult {
   const result: MatchResult = { suppressed: [], stale: [], versionDrift: [], remaining: [] };
   const remainingPerPkg: Record<string, AuditAdvisory[]> = {};
   for (const [pkg, advisories] of Object.entries(findings)) {
@@ -290,19 +278,16 @@ export function matchWaivers(
 
 /** Unknown severity strings are treated as high — fail closed on surprises. */
 export function normalizeSeverity(severity: string | undefined): string {
-  const s = String(severity ?? '').toLowerCase();
-  return SEVERITY_ORDER.includes(s) ? s : 'high';
+  const s = String(severity ?? "").toLowerCase();
+  return SEVERITY_ORDER.includes(s) ? s : "high";
 }
 
 /** `dev-only` waiver for a package declared in production dependencies is a contradiction. */
-export function scopeContradictions(
-  waivers: Waiver[],
-  packageJson: Record<string, unknown>,
-): string[] {
-  const deps = (packageJson['dependencies'] ?? {}) as Record<string, unknown>;
+export function scopeContradictions(waivers: Waiver[], packageJson: Record<string, unknown>): string[] {
+  const deps = (packageJson["dependencies"] ?? {}) as Record<string, unknown>;
   const contradictions: string[] = [];
   for (const w of waivers) {
-    if (w.scope === 'dev-only' && Object.prototype.hasOwnProperty.call(deps, w.package)) {
+    if (w.scope === "dev-only" && Object.prototype.hasOwnProperty.call(deps, w.package)) {
       contradictions.push(
         `${w.advisory} (${w.package}) is waived as dev-only but is declared in package.json "dependencies" (production)`,
       );
@@ -314,17 +299,17 @@ export function scopeContradictions(
 // ── Orchestration ────────────────────────────────────────────────────────────
 
 async function runBunAudit(): Promise<string> {
-  const proc = Bun.spawn(['bun', 'audit', '--json'], {
-    stdout: 'pipe',
-    stderr: 'pipe',
+  const proc = Bun.spawn(["bun", "audit", "--json"], {
+    stdout: "pipe",
+    stderr: "pipe",
   });
   const stdout = await new Response(proc.stdout).text();
   await proc.exited;
-  if (stdout.trim() === '') {
+  if (stdout.trim() === "") {
     const stderr = await new Response(proc.stderr).text();
     fail(
       `bun audit produced no stdout output (possible registry/infrastructure failure). stderr: ${
-        stderr.trim().split('\n')[0] || '(empty)'
+        stderr.trim().split("\n")[0] || "(empty)"
       }`,
     );
   }
@@ -339,8 +324,8 @@ export function parseAuditJson(output: string): AuditFindings {
   } catch {
     // fall through: scan for an embedded JSON object (bun logs may prefix lines)
   }
-  const start = trimmed.indexOf('{');
-  const end = trimmed.lastIndexOf('}');
+  const start = trimmed.indexOf("{");
+  const end = trimmed.lastIndexOf("}");
   if (start !== -1 && end > start) {
     try {
       return JSON.parse(trimmed.slice(start, end + 1)) as AuditFindings;
@@ -348,14 +333,14 @@ export function parseAuditJson(output: string): AuditFindings {
       // fall through to the loud failure below
     }
   }
-  throw new GateError('bun audit output is not valid JSON (infrastructure failure) — refusing to guess');
+  throw new GateError("bun audit output is not valid JSON (infrastructure failure) — refusing to guess");
 }
 
-function loadPackageJson(repoRoot = '.'): Record<string, unknown> {
-  const p = path.join(repoRoot, 'package.json');
+function loadPackageJson(repoRoot = "."): Record<string, unknown> {
+  const p = path.join(repoRoot, "package.json");
   if (!existsSync(p)) return {};
   try {
-    return JSON.parse(readFileSync(p, 'utf-8'));
+    return JSON.parse(readFileSync(p, "utf-8"));
   } catch {
     return {};
   }
@@ -384,12 +369,12 @@ async function main(): Promise<number> {
   const args = process.argv.slice(2);
   let waiverFile = DEFAULT_WAIVER_FILE;
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--help' || args[i] === '-h') {
+    if (args[i] === "--help" || args[i] === "-h") {
       printHelp();
       return 0;
     }
-    if (args[i] === '--waiver-file') {
-      waiverFile = args[i + 1] ?? '';
+    if (args[i] === "--waiver-file") {
+      waiverFile = args[i + 1] ?? "";
       i++;
       continue;
     }
@@ -397,16 +382,16 @@ async function main(): Promise<number> {
     return 1;
   }
   if (!waiverFile) {
-    console.error('[FAIL] --waiver-file requires a path');
+    console.error("[FAIL] --waiver-file requires a path");
     return 1;
   }
 
   // 0. Manifest-skip (T-20261004-029): a repo with no root package.json has no
   //    declared npm dependencies to audit — passing with a notice is correct,
   //    not a gate bypass (bun audit itself would hard-error on the same input).
-  if (!existsSync(path.join(process.cwd(), 'package.json'))) {
+  if (!existsSync(path.join(process.cwd(), "package.json"))) {
     console.log(
-      '[SKIP] no package.json at repo root — no declared npm dependencies to audit; gate not applicable (passing with notice).',
+      "[SKIP] no package.json at repo root — no declared npm dependencies to audit; gate not applicable (passing with notice).",
     );
     return 0;
   }
@@ -428,9 +413,9 @@ async function main(): Promise<number> {
   if (existsSync(waiverFile)) {
     console.log(`Waiver file: ${waiverFile}`);
     try {
-      waivers = parseWaiverFile(readFileSync(waiverFile, 'utf-8'));
+      waivers = parseWaiverFile(readFileSync(waiverFile, "utf-8"));
     } catch (e) {
-      console.error(`[FAIL] ${(waiverFile)}: ${(e as Error).message}`);
+      console.error(`[FAIL] ${waiverFile}: ${(e as Error).message}`);
       return 1;
     }
     console.log(`Waivers loaded: ${waivers.length}`);
@@ -442,15 +427,17 @@ async function main(): Promise<number> {
   const todayIso = new Date().toISOString().slice(0, 10);
   const expired = expiredWaivers(waivers, todayIso);
   if (expired.length > 0) {
-    console.error('[FAIL] expired waiver(s) — past their revisit-by date, review required:');
+    console.error("[FAIL] expired waiver(s) — past their revisit-by date, review required:");
     for (const w of expired) {
-      console.error(`       - ${w.advisory} (${w.package} ${w.version}) revisit_by=${w.revisit_by} decided_by=${w.decided_by}`);
+      console.error(
+        `       - ${w.advisory} (${w.package} ${w.version}) revisit_by=${w.revisit_by} decided_by=${w.decided_by}`,
+      );
     }
     return 1;
   }
   const contradictions = scopeContradictions(waivers, loadPackageJson());
   if (contradictions.length > 0) {
-    console.error('[FAIL] waiver scope contradiction(s):');
+    console.error("[FAIL] waiver scope contradiction(s):");
     for (const c of contradictions) console.error(`       - ${c}`);
     return 1;
   }
@@ -458,14 +445,18 @@ async function main(): Promise<number> {
   // 4. Match waivers against findings; stale/missing matches fail closed.
   const match = matchWaivers(findings, waivers);
   if (match.versionDrift.length > 0) {
-    console.error('[FAIL] waiver version drift — the recorded decision no longer matches the tree, review required:');
+    console.error("[FAIL] waiver version drift — the recorded decision no longer matches the tree, review required:");
     for (const { waiver, installed } of match.versionDrift) {
-      console.error(`       - ${waiver.advisory} (${waiver.package}): pinned ${waiver.version}, installed ${installed}`);
+      console.error(
+        `       - ${waiver.advisory} (${waiver.package}): pinned ${waiver.version}, installed ${installed}`,
+      );
     }
     return 1;
   }
   if (match.stale.length > 0) {
-    console.error('[FAIL] stale waiver(s) — advisory/package no longer present in audit output, remove the waiver via review:');
+    console.error(
+      "[FAIL] stale waiver(s) — advisory/package no longer present in audit output, remove the waiver via review:",
+    );
     for (const w of match.stale) {
       console.error(`       - ${w.advisory} (${w.package} ${w.version}) revisit_by=${w.revisit_by}`);
     }
@@ -488,7 +479,9 @@ async function main(): Promise<number> {
   if (failing.length > 0) {
     console.error(`[FAIL] ${failing.length} high/critical vulnerabilit(y/ies) not covered by any waiver:`);
     for (const { pkg, advisory } of failing) {
-      console.error(`       - ${pkg} — ${advisory.title ?? '(untitled)'} (${extractGhsa(advisory.url) ?? advisory.id}, ${advisory.severity})`);
+      console.error(
+        `       - ${pkg} — ${advisory.title ?? "(untitled)"} (${extractGhsa(advisory.url) ?? advisory.id}, ${advisory.severity})`,
+      );
       if (advisory.url) console.error(`         ${advisory.url}`);
     }
     return 1;
@@ -498,11 +491,13 @@ async function main(): Promise<number> {
   if (reported.length > 0) {
     console.log(`Non-failing findings reported (low/moderate only — informational):`);
     for (const { pkg, advisory } of reported) {
-      console.log(`  [REPORTED] ${pkg} — ${advisory.title ?? '(untitled)'} (${extractGhsa(advisory.url) ?? advisory.id}, ${advisory.severity})`);
+      console.log(
+        `  [REPORTED] ${pkg} — ${advisory.title ?? "(untitled)"} (${extractGhsa(advisory.url) ?? advisory.id}, ${advisory.severity})`,
+      );
     }
   }
 
-  console.log('Security check passed (no high/critical vulnerabilities outside reviewed waivers).');
+  console.log("Security check passed (no high/critical vulnerabilities outside reviewed waivers).");
   return 0;
 }
 

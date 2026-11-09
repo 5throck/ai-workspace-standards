@@ -160,13 +160,7 @@ interface FileRow {
   file: string;
   state: "modified" | "untracked" | "tombstoned";
   mtime: string;
-  verdict:
-    | "STALE-RESIDUE"
-    | "PRESUME-STALE"
-    | "LOCAL-WORK"
-    | "KEEP"
-    | "TOMBSTONE-UNCONFIRMED"
-    | "TOMBSTONE-VIOLATION";
+  verdict: "STALE-RESIDUE" | "PRESUME-STALE" | "LOCAL-WORK" | "KEEP" | "TOMBSTONE-UNCONFIRMED" | "TOMBSTONE-VIOLATION";
   basis: string;
 }
 
@@ -174,10 +168,7 @@ interface FileRow {
  *  (U-20261028-001 D1). Both keys optional: v1-shaped manifests and missing
  *  manifests degrade to empty maps (a zero census, no guard rows). */
 interface DeliveryTombstoneState {
-  tombstones: Record<
-    string,
-    { recordedAt?: string; templateVersion?: string; reason?: string }
-  >;
+  tombstones: Record<string, { recordedAt?: string; templateVersion?: string; reason?: string }>;
   baselines: Record<string, unknown>;
 }
 
@@ -188,10 +179,7 @@ export function loadDeliveryTombstoneState(projectPath: string): DeliveryTombsto
   if (!existsSync(manifestPath)) return empty;
   try {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf-8")) as {
-      tombstones?: Record<
-        string,
-        { recordedAt?: string; templateVersion?: string; reason?: string }
-      >;
+      tombstones?: Record<string, { recordedAt?: string; templateVersion?: string; reason?: string }>;
       baselines?: Record<string, unknown>;
     };
     return {
@@ -224,19 +212,18 @@ export function tombstoneViolations(projectPath: string, delivery: DeliveryTombs
     let mtime = "";
     try {
       mtime = statSync(abs).mtime.toISOString().slice(0, 10);
-    } catch { /* vanished mid-audit — the next run re-flags */ }
-    const recorded = [
-      `recorded ${t.recordedAt ?? "?"}`,
-      t.templateVersion ? `template v${t.templateVersion}` : null,
-    ]
+    } catch {
+      /* vanished mid-audit — the next run re-flags */
+    }
+    const recorded = [`recorded ${t.recordedAt ?? "?"}`, t.templateVersion ? `template v${t.templateVersion}` : null]
       .filter(Boolean)
       .join(", ");
     const reason = t.reason
       ? ` — ${
-        t.reason.length > TOMBSTONE_REASON_SNIPPET_MAX
-          ? `${t.reason.slice(0, TOMBSTONE_REASON_SNIPPET_MAX)}…`
-          : t.reason
-      }`
+          t.reason.length > TOMBSTONE_REASON_SNIPPET_MAX
+            ? `${t.reason.slice(0, TOMBSTONE_REASON_SNIPPET_MAX)}…`
+            : t.reason
+        }`
       : "";
     rows.push({
       file: rel,
@@ -279,7 +266,8 @@ function parseArgs(): { projects: string[]; json: boolean; snapshotDir?: string;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--help" || args[i] === "-h") help = true;
     else if (args[i] === "--json") json = true;
-    else if (args[i] === "--final-state") continue; // consumed in main (T-20261007-027)
+    else if (args[i] === "--final-state")
+      continue; // consumed in main (T-20261007-027)
     else if (args[i] === "--snapshot-dir") snapshotDir = args[++i];
     else if (args[i] === "--project") projects.push(args[++i]);
     else projects.push(args[i]);
@@ -356,8 +344,15 @@ function sourceCandidates(projectPath: string, relFile: string): string[] {
 
 /** Prefixes whose files are considered template-delivered (sync waves). */
 const TEMPLATE_DELIVERED_PREFIXES = [
-  "skills/", ".claude/", ".gemini/", ".agents/", ".codex/", "scripts/", "agents/",
-  "docs/constitution/", "docs/context.md",
+  "skills/",
+  ".claude/",
+  ".gemini/",
+  ".agents/",
+  ".codex/",
+  "scripts/",
+  "agents/",
+  "docs/constitution/",
+  "docs/context.md",
 ];
 
 /**
@@ -367,9 +362,23 @@ const TEMPLATE_DELIVERED_PREFIXES = [
  * report with thousands of LOCAL-WORK rows.
  */
 const SKIP_UNTRACKED_DIR_NAMES = new Set([
-  "node_modules", "dist", "build", "out", "coverage", ".turbo", ".next",
-  ".nuxt", ".cache", ".venv", "venv", "__pycache__", "target", ".bun",
-  ".pytest_cache", ".mypy_cache", "vendor",
+  "node_modules",
+  "dist",
+  "build",
+  "out",
+  "coverage",
+  ".turbo",
+  ".next",
+  ".nuxt",
+  ".cache",
+  ".venv",
+  "venv",
+  "__pycache__",
+  "target",
+  ".bun",
+  ".pytest_cache",
+  ".mypy_cache",
+  "vendor",
 ]);
 
 export function walkProjectDir(dir: string): string[] {
@@ -420,8 +429,14 @@ function isTemplateDelivered(relFile: string): boolean {
  * current source (typical: a newer template added fields/sections).
  */
 function isOlderRevision(older: string, newer: string): boolean {
-  const a = older.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length > 0);
-  const b = newer.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length > 0);
+  const a = older
+    .split("\n")
+    .map((l) => l.trimEnd())
+    .filter((l) => l.trim().length > 0);
+  const b = newer
+    .split("\n")
+    .map((l) => l.trimEnd())
+    .filter((l) => l.trim().length > 0);
   if (b.length <= a.length) return false;
   const counts = new Map<string, number>();
   for (const l of b) counts.set(l, (counts.get(l) ?? 0) + 1);
@@ -439,8 +454,14 @@ function isOlderRevision(older: string, newer: string): boolean {
  * genuinely an earlier revision rather than a deliberate reordering.
  */
 export function linesInOrder(sub: string, superStr: string): boolean {
-  const a = sub.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length > 0);
-  const b = superStr.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length > 0);
+  const a = sub
+    .split("\n")
+    .map((l) => l.trimEnd())
+    .filter((l) => l.trim().length > 0);
+  const b = superStr
+    .split("\n")
+    .map((l) => l.trimEnd())
+    .filter((l) => l.trim().length > 0);
   let i = 0;
   for (const line of b) {
     if (i < a.length && line === a[i]) i++;
@@ -500,12 +521,19 @@ export function corroboratedStale(
   };
 }
 
-function classify(projectPath: string, relFile: string, state: "modified" | "untracked", delivery: DeliveryTombstoneState): FileRow {
+function classify(
+  projectPath: string,
+  relFile: string,
+  state: "modified" | "untracked",
+  delivery: DeliveryTombstoneState,
+): FileRow {
   const abs = join(projectPath, relFile);
   let mtime = "";
   try {
     mtime = statSync(abs).mtime.toISOString().slice(0, 10);
-  } catch { /* vanished mid-audit */ }
+  } catch {
+    /* vanished mid-audit */
+  }
 
   const row: FileRow = { file: relFile, state, mtime, verdict: "KEEP", basis: "default-safe: unresolvable → KEEP" };
 
@@ -537,7 +565,8 @@ function classify(projectPath: string, relFile: string, state: "modified" | "unt
         row.basis = `tombstoned deletion honored (recorded ${t.recordedAt ?? "?"}${t.reason ? ` — ${t.reason}` : ""})`;
       } else if (delivery.baselines[relFile]) {
         row.verdict = "TOMBSTONE-UNCONFIRMED";
-        row.basis = "deleted in working tree but previously delivered (no tombstone) — the next wave re-delivers (TOMBSTONED, ERROR); confirm with --tombstone or restore";
+        row.basis =
+          "deleted in working tree but previously delivered (no tombstone) — the next wave re-delivers (TOMBSTONED, ERROR); confirm with --tombstone or restore";
       } else {
         row.verdict = "KEEP";
         row.basis = "deleted in working tree — no file content to audit; restore or commit the deletion";
@@ -619,7 +648,10 @@ function groupRows(rows: FileRow[]): ProjectReport["groups"] {
   return [...byGroup.entries()].map(([group, rs]) => {
     const verdicts = new Set(rs.map((r) => r.verdict));
     const verdict = verdicts.size === 1 ? [...verdicts][0] : "MIXED";
-    const mtimes = rs.map((r) => r.mtime).filter(Boolean).sort();
+    const mtimes = rs
+      .map((r) => r.mtime)
+      .filter(Boolean)
+      .sort();
     return {
       group,
       verdict,
@@ -634,7 +666,9 @@ function snapshotDiscardables(projectPath: string, rows: FileRow[], snapshotDir:
   if (discard.length === 0) return null;
   const name = projectPath.split(/[\\/]/).pop() ?? "project";
   mkdirSync(snapshotDir, { recursive: true });
-  const tarball = resolve(join(snapshotDir, `${name}-discard-snapshot-${new Date().toISOString().slice(0, 10)}.tar.gz`));
+  const tarball = resolve(
+    join(snapshotDir, `${name}-discard-snapshot-${new Date().toISOString().slice(0, 10)}.tar.gz`),
+  );
   const listFile = tarball.replace(/\.tar\.gz$/, ".filelist");
   writeList(listFile, discard);
   const r = spawnSync("tar", ["-czf", tarball, "-C", projectPath, "-T", listFile], { encoding: "utf-8" });
@@ -659,7 +693,10 @@ function markdownReport(reports: ProjectReport[]): string {
     // U-20261028-001 (§4.3): the tombstone census row — present for EVERY
     // project, zero-inclusive, so the daily fleet report always carries it.
     // v1.7.0 (PR4, §3.B3): the census gains the violation count.
-    lines.push(`- tombstone census: ${p.tombstoneCensus.honored} honored deletion(s) · ${p.tombstoneCensus.unconfirmed} unconfirmed candidate(s) · ${p.tombstoneCensus.violations} violation(s) present on disk`, "");
+    lines.push(
+      `- tombstone census: ${p.tombstoneCensus.honored} honored deletion(s) · ${p.tombstoneCensus.unconfirmed} unconfirmed candidate(s) · ${p.tombstoneCensus.violations} violation(s) present on disk`,
+      "",
+    );
     lines.push("| group | verdict | note |", "|---|---|---|");
     for (const g of p.groups) {
       lines.push(`| ${g.group} | ${g.verdict} | ${g.note} |`);
@@ -711,15 +748,24 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
       let openPr = "(no remote)";
       const slug = remoteUrl.match(/[:/]([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+?)(?:\.git)?$/);
       if (slug) {
-        const ghOut = spawnSync("gh", ["pr", "list", "-R", `${slug[1]}/${slug[2]}`, "--head", branch, "--state", "open", "--json", "number"], { encoding: "utf-8" });
+        const ghOut = spawnSync(
+          "gh",
+          ["pr", "list", "-R", `${slug[1]}/${slug[2]}`, "--head", branch, "--state", "open", "--json", "number"],
+          { encoding: "utf-8" },
+        );
         try {
           openPr = String((JSON.parse(ghOut.stdout || "[]") as Array<unknown>).length);
-        } catch { openPr = "(gh n/a)"; }
+        } catch {
+          openPr = "(gh n/a)";
+        }
       }
       let tplVersion = "—";
       const tvPath = join(project, "template-version.txt");
       if (existsSync(tvPath)) {
-        tplVersion = readFileSync(tvPath, "utf-8").match(/^version=(.*)$/m)?.[1]?.trim() || tplVersion;
+        tplVersion =
+          readFileSync(tvPath, "utf-8")
+            .match(/^version=(.*)$/m)?.[1]
+            ?.trim() || tplVersion;
       }
       console.log(`| ${project} | ${branch} | ${dirty} | ${unpushed} | ${openPr} | ${tplVersion} |`);
     }
@@ -771,7 +817,8 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
       rows: allRows,
       groups: groupRows(allRows),
       tombstoneCensus: {
-        honored: allRows.filter((r) => r.verdict === "KEEP" && r.basis.startsWith("tombstoned deletion honored")).length,
+        honored: allRows.filter((r) => r.verdict === "KEEP" && r.basis.startsWith("tombstoned deletion honored"))
+          .length,
         unconfirmed: allRows.filter((r) => r.verdict === "TOMBSTONE-UNCONFIRMED").length,
         violations: violations.length,
       },

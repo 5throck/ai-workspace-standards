@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath } from "node:url";
 /**
  * Serial Agent Dispatcher
  * @version 1.1.2
@@ -24,7 +24,7 @@ interface SerialAgentTask {
 
 interface SerialPipelineResult {
   task: SerialAgentTask;
-  status: 'completed' | 'failed' | 'skipped';
+  status: "completed" | "failed" | "skipped";
   output?: string;
   error?: string;
   timestamp: Date;
@@ -46,35 +46,35 @@ const defaultPipeline: SerialAgentTask[] = [
     description: "Implement feature",
     role: "automation-engineer",
     task: "Implement the new feature following the approved specification",
-    verifyOutput: true
+    verifyOutput: true,
   },
   {
     description: "Review implementation",
     role: "architect",
     task: "Review the implemented feature for correctness and quality",
     dependsOn: "Implement feature",
-    verifyOutput: true
+    verifyOutput: true,
   },
   {
     description: "Run quality gate",
     role: "auditor",
     task: "Run bun scripts/audit.ts and verify all checks pass",
     dependsOn: "Review implementation",
-    verifyOutput: true
+    verifyOutput: true,
   },
   {
     description: "Generate documentation",
     role: "docs-writer",
     task: "Update documentation to reflect the implemented changes",
     dependsOn: "Run quality gate",
-    continueOnError: true
+    continueOnError: true,
   },
   {
     description: "Lifecycle update",
     role: "lifecycle-manager",
     task: "Bump versions and update SCRIPTS.md / AGENTS.md as required",
-    dependsOn: "Generate documentation"
-  }
+    dependsOn: "Generate documentation",
+  },
 ];
 
 /**
@@ -82,7 +82,7 @@ const defaultPipeline: SerialAgentTask[] = [
  */
 async function executeSerialTask(
   task: SerialAgentTask,
-  options: SerialExecutionOptions
+  options: SerialExecutionOptions,
 ): Promise<SerialPipelineResult> {
   const startTime = Date.now();
 
@@ -90,9 +90,9 @@ async function executeSerialTask(
     console.log(`   [DRY RUN] Would execute: ${task.description}`);
     return {
       task,
-      status: 'completed',
+      status: "completed",
       timestamp: new Date(),
-      duration: 0
+      duration: 0,
     };
   }
 
@@ -106,14 +106,15 @@ async function executeSerialTask(
     }
 
     const duration = Date.now() - startTime;
-    const errMsg = 'CLI dispatch cannot invoke the host Agent tool. Run with --dry-run, or dispatch this task from the PM/orchestrator session.';
+    const errMsg =
+      "CLI dispatch cannot invoke the host Agent tool. Run with --dry-run, or dispatch this task from the PM/orchestrator session.";
     console.log(`   ❌ Failed: ${errMsg} (${duration}ms)\n`);
     return {
       task,
-      status: 'failed',
+      status: "failed",
       error: errMsg,
       timestamp: new Date(),
-      duration
+      duration,
     };
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -121,10 +122,10 @@ async function executeSerialTask(
 
     return {
       task,
-      status: 'failed',
+      status: "failed",
       error: error instanceof Error ? error.message : String(error),
       timestamp: new Date(),
-      duration
+      duration,
     };
   }
 }
@@ -134,18 +135,14 @@ async function executeSerialTask(
  */
 export async function dispatchSerial(
   pipeline: SerialAgentTask[],
-  options: SerialExecutionOptions = {}
+  options: SerialExecutionOptions = {},
 ): Promise<SerialPipelineResult[]> {
-  const {
-    stopOnError = true,
-    verbose = false,
-    dryRun = false
-  } = options;
+  const { stopOnError = true, verbose = false, dryRun = false } = options;
 
   console.log(`\n🔄 Serial Agent Dispatcher`);
   console.log(`📋 Executing pipeline of ${pipeline.length} tasks`);
   if (dryRun) console.log(`   [DRY RUN MODE - No actual execution]`);
-  console.log(`\n━${'━'.repeat(60)}`);
+  console.log(`\n━${"━".repeat(60)}`);
 
   const results: SerialPipelineResult[] = [];
   const startTime = Date.now();
@@ -154,28 +151,26 @@ export async function dispatchSerial(
   for (const task of pipeline) {
     // Check dependencies
     if (task.dependsOn) {
-      const dependency = results.find(
-        r => r.task.description === task.dependsOn
-      );
+      const dependency = results.find((r) => r.task.description === task.dependsOn);
 
       if (!dependency) {
         console.log(`\n⚠️  Skipping "${task.description}": dependency not found`);
         results.push({
           task,
-          status: 'skipped',
+          status: "skipped",
           timestamp: new Date(),
-          duration: 0
+          duration: 0,
         });
         continue;
       }
 
-      if (dependency.status === 'failed') {
+      if (dependency.status === "failed") {
         console.log(`\n⚠️  Skipping "${task.description}": dependency failed`);
         results.push({
           task,
-          status: 'skipped',
+          status: "skipped",
           timestamp: new Date(),
-          duration: 0
+          duration: 0,
         });
         continue;
       }
@@ -185,19 +180,19 @@ export async function dispatchSerial(
     const result = await executeSerialTask(task, { ...options, verbose });
     results.push(result);
 
-    if (result.status === 'completed') {
+    if (result.status === "completed") {
       completedCount++;
-    } else if (result.status === 'failed' && stopOnError && !task.continueOnError) {
+    } else if (result.status === "failed" && stopOnError && !task.continueOnError) {
       console.log(`\n⛔ Pipeline stopped due to failure in "${task.description}"`);
       break;
     }
   }
 
   const elapsed = Date.now() - startTime;
-  const failedCount = results.filter(r => r.status === 'failed').length;
-  const skippedCount = results.filter(r => r.status === 'skipped').length;
+  const failedCount = results.filter((r) => r.status === "failed").length;
+  const skippedCount = results.filter((r) => r.status === "skipped").length;
 
-  console.log(`\n━${'━'.repeat(60)}`);
+  console.log(`\n━${"━".repeat(60)}`);
   console.log(`\n📊 Pipeline Results:`);
   console.log(`   ✅ Completed: ${completedCount}/${pipeline.length}`);
   console.log(`   ❌ Failed: ${failedCount}/${pipeline.length}`);
@@ -221,34 +216,35 @@ export async function dispatchSerial(
  */
 export async function runCli(
   args: string[] = process.argv.slice(2),
-  defaults: SerialAgentTask[] = defaultPipeline
+  defaults: SerialAgentTask[] = defaultPipeline,
 ): Promise<void> {
   const options: SerialExecutionOptions = {
-    stopOnError: !args.includes('--continue-on-error'),
-    verbose: args.includes('--verbose') || args.includes('-v'),
-    dryRun: args.includes('--dry-run')
+    stopOnError: !args.includes("--continue-on-error"),
+    verbose: args.includes("--verbose") || args.includes("-v"),
+    dryRun: args.includes("--dry-run"),
   };
 
   // Check for custom pipeline file
-  const pipelineFileIndex = args.indexOf('--pipeline');
+  const pipelineFileIndex = args.indexOf("--pipeline");
   let pipeline = defaults;
 
   if (pipelineFileIndex >= 0 && args[pipelineFileIndex + 1]) {
     try {
       const pipelinePath = args[pipelineFileIndex + 1];
       // Security: reject absolute paths and paths outside workspace
-      const workspaceRoot = fileURLToPath(new URL('..', import.meta.url));
-      const resolved = pipelinePath.startsWith('.') ? pipelinePath : pipelinePath;
-      const isAbsolute = pipelinePath.startsWith('/') || pipelinePath.startsWith('\\') || /^[A-Za-z]:/.test(pipelinePath);
+      const workspaceRoot = fileURLToPath(new URL("..", import.meta.url));
+      const resolved = pipelinePath.startsWith(".") ? pipelinePath : pipelinePath;
+      const isAbsolute =
+        pipelinePath.startsWith("/") || pipelinePath.startsWith("\\") || /^[A-Za-z]:/.test(pipelinePath);
       if (isAbsolute) {
         console.error(`❌ --pipeline must be a relative path (received absolute: ${pipelinePath})`);
         process.exit(1);
       }
-      if (resolved.includes('..')) {
+      if (resolved.includes("..")) {
         console.error(`❌ --pipeline must not contain path traversal (received: ${pipelinePath})`);
         process.exit(1);
       }
-      pipeline = await import(pipelinePath).then(m => m.default || m.pipeline);
+      pipeline = await import(pipelinePath).then((m) => m.default || m.pipeline);
     } catch (error) {
       console.error(`❌ Failed to load pipeline from ${args[pipelineFileIndex + 1]}:`, error);
       process.exit(1);
@@ -257,11 +253,11 @@ export async function runCli(
 
   try {
     const results = await dispatchSerial(pipeline, options);
-    const hasFailures = results.some(r => r.status === 'failed');
+    const hasFailures = results.some((r) => r.status === "failed");
 
     process.exit(hasFailures ? 1 : 0);
   } catch (error) {
-    console.error('❌ Pipeline execution failed:', error);
+    console.error("❌ Pipeline execution failed:", error);
     process.exit(1);
   }
 }
@@ -286,4 +282,3 @@ export async function runDispatcher(options?: SerialExecutionOptions): Promise<S
 }
 
 export { dispatchSerial as default, SerialAgentTask, SerialPipelineResult };
-

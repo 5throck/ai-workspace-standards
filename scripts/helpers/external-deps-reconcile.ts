@@ -39,7 +39,7 @@ import {
   parseExternalDepsManifest,
   type ExternalDepEntry,
   type ExternalDepsManifest,
-} from '../lib/external-deps.ts';
+} from "../lib/external-deps.ts";
 
 export interface ReconcileInvalidEntry {
   /** Entry id, or `entry[<index>]` when the entry has no string id. */
@@ -64,7 +64,7 @@ export interface ReconcileResult {
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 /**
@@ -72,14 +72,24 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
  * ones that do not (id + loader message). Order preserved; a later duplicate
  * id is reported invalid.
  */
-export function splitValidEntries(rawEntries: unknown[], schemaVersion: number, opts: { allowLocalRepos?: boolean } = {}): { valid: ExternalDepEntry[]; invalid: ReconcileInvalidEntry[] } {
+export function splitValidEntries(
+  rawEntries: unknown[],
+  schemaVersion: number,
+  opts: { allowLocalRepos?: boolean } = {},
+): { valid: ExternalDepEntry[]; invalid: ReconcileInvalidEntry[] } {
   const valid: ExternalDepEntry[] = [];
   const invalid: ReconcileInvalidEntry[] = [];
   rawEntries.forEach((raw, i) => {
-    const id = isPlainObject(raw) && typeof raw['id'] === 'string' ? raw['id'] : `entry[${i}]`;
+    const id = isPlainObject(raw) && typeof raw["id"] === "string" ? raw["id"] : `entry[${i}]`;
     const v = validateSingleEntry(raw, schemaVersion, opts.allowLocalRepos === true);
-    if (!v.entry) { invalid.push({ id, reason: v.error ?? 'invalid entry' }); return; }
-    if (valid.some((e) => e.id === v.entry!.id)) { invalid.push({ id, reason: `duplicate id '${id}'` }); return; }
+    if (!v.entry) {
+      invalid.push({ id, reason: v.error ?? "invalid entry" });
+      return;
+    }
+    if (valid.some((e) => e.id === v.entry!.id)) {
+      invalid.push({ id, reason: `duplicate id '${id}'` });
+      return;
+    }
     valid.push(v.entry);
   });
   return { valid, invalid };
@@ -90,10 +100,14 @@ export function splitValidEntries(rawEntries: unknown[], schemaVersion: number, 
  * single-entry document through the shared strict loader. Returns the typed
  * entry, or the loader's error message.
  */
-function validateSingleEntry(raw: unknown, schemaVersion: number, allowLocalRepos: boolean): { entry?: ExternalDepEntry; error?: string } {
+function validateSingleEntry(
+  raw: unknown,
+  schemaVersion: number,
+  allowLocalRepos: boolean,
+): { entry?: ExternalDepEntry; error?: string } {
   try {
     const doc = JSON.stringify({ schema_version: schemaVersion, dependencies: [raw] });
-    const parsed = parseExternalDepsManifest(doc, 'project-only entry', { allowLocalRepos });
+    const parsed = parseExternalDepsManifest(doc, "project-only entry", { allowLocalRepos });
     return { entry: parsed.dependencies[0] };
   } catch (err) {
     return { error: (err as Error).message };
@@ -124,15 +138,19 @@ export function reconcileExternalDepsManifest(
   try {
     projectDoc = JSON.parse(projectRaw);
   } catch (err) {
-    return { ...empty, error: `project external-deps.json is not valid JSON (${(err as Error).message}) — not overwritten; fix it by hand` };
+    return {
+      ...empty,
+      error: `project external-deps.json is not valid JSON (${(err as Error).message}) — not overwritten; fix it by hand`,
+    };
   }
 
-  const projectEntries: unknown[] = isPlainObject(projectDoc) && Array.isArray(projectDoc['dependencies'])
-    ? projectDoc['dependencies'] as unknown[]
-    : [];
+  const projectEntries: unknown[] =
+    isPlainObject(projectDoc) && Array.isArray(projectDoc["dependencies"])
+      ? (projectDoc["dependencies"] as unknown[])
+      : [];
   const projectById = new Map<string, Record<string, unknown>>();
   for (const dep of projectEntries) {
-    if (isPlainObject(dep) && typeof dep['id'] === 'string') projectById.set(dep['id'], dep);
+    if (isPlainObject(dep) && typeof dep["id"] === "string") projectById.set(dep["id"], dep);
   }
 
   // 1. Seed entries — authoritative per id; operative pin/commit preserved.
@@ -144,8 +162,9 @@ export function reconcileExternalDepsManifest(
     const merged: ExternalDepEntry = { ...seedEntry };
     const legacy = projectById.get(seedEntry.id);
     if (legacy) {
-      if (typeof legacy['pin'] === 'string' && legacy['pin']) merged.pin = legacy['pin'];
-      if (typeof legacy['commit'] === 'string' && /^[0-9a-f]{40}$/.test(legacy['commit'])) merged.commit = legacy['commit'];
+      if (typeof legacy["pin"] === "string" && legacy["pin"]) merged.pin = legacy["pin"];
+      if (typeof legacy["commit"] === "string" && /^[0-9a-f]{40}$/.test(legacy["commit"]))
+        merged.commit = legacy["commit"];
       for (const k of Object.keys(legacy)) {
         if (!(ENTRY_FIELDS as readonly string[]).includes(k)) droppedLegacyKeys.add(k);
       }
@@ -158,30 +177,34 @@ export function reconcileExternalDepsManifest(
   const preservedProjectOnly: string[] = [];
   const invalidProjectOnly: ReconcileInvalidEntry[] = [];
   projectEntries.forEach((dep, i) => {
-    const id = isPlainObject(dep) && typeof dep['id'] === 'string' ? dep['id'] : null;
+    const id = isPlainObject(dep) && typeof dep["id"] === "string" ? dep["id"] : null;
     if (id !== null && seedIds.has(id)) return; // handled in step 1
     const v = validateSingleEntry(dep, schemaVersion, allowLocalRepos);
     written.push(dep);
     if (v.entry) {
       if (typed.some((t) => t.id === v.entry!.id)) {
-        invalidProjectOnly.push({ id: v.entry.id, reason: `duplicate id '${v.entry.id}' — kept verbatim, excluded from the pass` });
+        invalidProjectOnly.push({
+          id: v.entry.id,
+          reason: `duplicate id '${v.entry.id}' — kept verbatim, excluded from the pass`,
+        });
         return;
       }
       typed.push(v.entry);
       preservedProjectOnly.push(v.entry.id);
     } else {
-      invalidProjectOnly.push({ id: id ?? `entry[${i}]`, reason: v.error ?? 'invalid entry' });
+      invalidProjectOnly.push({ id: id ?? `entry[${i}]`, reason: v.error ?? "invalid entry" });
     }
   });
 
-  const document: ReconcileResult['document'] = { schema_version: schemaVersion, dependencies: written };
-  if (isPlainObject(projectDoc) && typeof projectDoc['$comment'] === 'string') {
-    document.$comment = projectDoc['$comment'];
+  const document: ReconcileResult["document"] = { schema_version: schemaVersion, dependencies: written };
+  if (isPlainObject(projectDoc) && typeof projectDoc["$comment"] === "string") {
+    document.$comment = projectDoc["$comment"];
   }
   // Keep $comment first for readability when present.
-  const ordered: ReconcileResult['document'] = document.$comment !== undefined
-    ? { $comment: document.$comment, schema_version: schemaVersion, dependencies: written }
-    : document;
+  const ordered: ReconcileResult["document"] =
+    document.$comment !== undefined
+      ? { $comment: document.$comment, schema_version: schemaVersion, dependencies: written }
+      : document;
 
   return {
     ok: true,

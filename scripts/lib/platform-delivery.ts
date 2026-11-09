@@ -32,10 +32,7 @@ export interface SkippedProseTarget {
  * codex-opt-out profiles, so partial states are not expected but either
  * alone still means the platform reached the context).
  */
-export function isCodexPlatformDelivered(
-  codexMdExists: boolean,
-  codexDirExists: boolean,
-): boolean {
+export function isCodexPlatformDelivered(codexMdExists: boolean, codexDirExists: boolean): boolean {
   return codexMdExists || codexDirExists;
 }
 
@@ -56,14 +53,14 @@ export function partitionProseTargetsByDelivery<T extends ProseTargetRef>(
   const active: T[] = [];
   const skipped: SkippedProseTarget[] = [];
   for (const target of targets) {
-    if (target.file === 'CODEX.md') {
-      if (isCodexPlatformDelivered(exists('CODEX.md'), exists('.codex'))) {
+    if (target.file === "CODEX.md") {
+      if (isCodexPlatformDelivered(exists("CODEX.md"), exists(".codex"))) {
         active.push(target);
       } else {
         skipped.push({
           file: target.file,
           label: target.label,
-          reason: 'codex platform not delivered',
+          reason: "codex platform not delivered",
         });
       }
       continue;
@@ -74,7 +71,7 @@ export function partitionProseTargetsByDelivery<T extends ProseTargetRef>(
       skipped.push({
         file: target.file,
         label: target.label,
-        reason: 'file not present in this context',
+        reason: "file not present in this context",
       });
     }
   }

@@ -28,8 +28,8 @@
  * Runs automatically in dev-sync step 4.52 (after propagate step 4.5, before audit step 4.9).
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 // ============================================================================
 // TYPES
@@ -37,7 +37,7 @@ import * as path from 'node:path';
 
 export interface DepDrift {
   key: string;
-  section: 'dependencies' | 'devDependencies';
+  section: "dependencies" | "devDependencies";
   rootVersion: string;
   templateVersion: string;
 }
@@ -74,7 +74,7 @@ export function alignTemplateDeps(rootPkg: any, templatePkg: any): AlignResult {
     enginesChanged: false,
   };
 
-  const sections: Array<'dependencies' | 'devDependencies'> = ['dependencies', 'devDependencies'];
+  const sections: Array<"dependencies" | "devDependencies"> = ["dependencies", "devDependencies"];
 
   for (const section of sections) {
     const rootSection = rootPkg[section] || {};
@@ -123,10 +123,10 @@ export function alignTemplateDeps(rootPkg: any, templatePkg: any): AlignResult {
  * exported for unit testing; no-op when absent.
  */
 export function pruneTemplateNodeModules(templateDir: string): boolean {
-  const nmDir = path.join(templateDir, 'node_modules');
+  const nmDir = path.join(templateDir, "node_modules");
   if (!fs.existsSync(nmDir)) return false;
   fs.rmSync(nmDir, { recursive: true, force: true });
-  console.log('🧹 Removed templates/common/node_modules (validate-templates forbids it)');
+  console.log("🧹 Removed templates/common/node_modules (validate-templates forbids it)");
   return true;
 }
 
@@ -135,16 +135,16 @@ export function pruneTemplateNodeModules(templateDir: string): boolean {
 // ============================================================================
 
 if (import.meta.main) {
-  const mode = process.argv.includes('--apply') ? 'apply' : 'check';
+  const mode = process.argv.includes("--apply") ? "apply" : "check";
 
   // Resolve paths relative to script directory
-  const workspaceRoot = path.resolve(import.meta.dir, '..');
-  const rootPkgPath = path.join(workspaceRoot, 'package.json');
-  const templatePkgPath = path.join(workspaceRoot, 'templates', 'common', 'package.json');
+  const workspaceRoot = path.resolve(import.meta.dir, "..");
+  const rootPkgPath = path.join(workspaceRoot, "package.json");
+  const templatePkgPath = path.join(workspaceRoot, "templates", "common", "package.json");
 
   // L1/L3 context check: skip if template package.json doesn't exist
   if (!fs.existsSync(templatePkgPath)) {
-    console.log('ℹ️  templates/common/package.json not found (L1/L3 context) — skipping');
+    console.log("ℹ️  templates/common/package.json not found (L1/L3 context) — skipping");
     process.exit(0);
   }
 
@@ -153,41 +153,41 @@ if (import.meta.main) {
   let templatePkg: any;
 
   try {
-    rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf-8'));
-    templatePkg = JSON.parse(fs.readFileSync(templatePkgPath, 'utf-8'));
+    rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, "utf-8"));
+    templatePkg = JSON.parse(fs.readFileSync(templatePkgPath, "utf-8"));
   } catch (err) {
-    console.error('❌ Failed to parse package.json files');
+    console.error("❌ Failed to parse package.json files");
     console.error(String(err));
     process.exit(1);
   }
 
-  if (mode === 'check') {
+  if (mode === "check") {
     // Check mode: report drift only
     const result = alignTemplateDeps(rootPkg, { ...templatePkg }); // Clone to avoid mutation
 
     if (result.changed.length === 0 && !result.enginesChanged) {
-      console.log('✓ Template dependencies are in sync with root package.json');
+      console.log("✓ Template dependencies are in sync with root package.json");
       process.exit(0);
     }
 
     // Print drift table
-    console.log('⚠️  Dependency drift detected:\n');
+    console.log("⚠️  Dependency drift detected:\n");
     for (const drift of result.changed) {
       console.log(`  ${drift.section}.${drift.key}: "${drift.templateVersion}" → "${drift.rootVersion}"`);
     }
     if (result.enginesChanged) {
-      console.log('  engines: values differ');
+      console.log("  engines: values differ");
     }
 
     // Print informational lists (INFO level, no exit code impact)
     if (result.rootOnly.length > 0) {
-      console.log('\nℹ️  Root-only dependencies (not auto-added to template):');
+      console.log("\nℹ️  Root-only dependencies (not auto-added to template):");
       for (const entry of result.rootOnly) {
         console.log(`  ${entry.section}.${entry.key}`);
       }
     }
     if (result.templateOnly.length > 0) {
-      console.log('\nℹ️  Template-only dependencies (not auto-removed):');
+      console.log("\nℹ️  Template-only dependencies (not auto-removed):");
       for (const entry of result.templateOnly) {
         console.log(`  ${entry.section}.${entry.key}`);
       }
@@ -196,64 +196,60 @@ if (import.meta.main) {
     process.exit(1); // Drift found → fail check
   }
 
-  if (mode === 'apply') {
+  if (mode === "apply") {
     // Apply mode: align and regenerate lock
     const result = alignTemplateDeps(rootPkg, templatePkg);
     const templateDir = path.dirname(templatePkgPath);
 
     if (result.changed.length === 0 && !result.enginesChanged) {
-      console.log('✓ Template dependencies already in sync — no install needed');
+      console.log("✓ Template dependencies already in sync — no install needed");
       pruneTemplateNodeModules(templateDir);
       process.exit(0);
     }
 
     // Write aligned package.json
     try {
-      const written = fs.writeFileSync(
-        templatePkgPath,
-        JSON.stringify(templatePkg, null, 2) + '\n',
-        'utf-8'
-      );
+      const written = fs.writeFileSync(templatePkgPath, JSON.stringify(templatePkg, null, 2) + "\n", "utf-8");
       console.log(`✓ Wrote ${templatePkgPath}`);
     } catch (err) {
-      console.error('❌ Failed to write template package.json');
+      console.error("❌ Failed to write template package.json");
       console.error(String(err));
       process.exit(1);
     }
 
     // Regenerate bun.lock
-    console.log('📦 Regenerating templates/common/bun.lock...');
+    console.log("📦 Regenerating templates/common/bun.lock...");
 
     try {
-      const install = Bun.spawn(['bun', 'install'], {
+      const install = Bun.spawn(["bun", "install"], {
         cwd: templateDir,
-        stdout: 'inherit',
-        stderr: 'inherit',
+        stdout: "inherit",
+        stderr: "inherit",
       });
 
       const exitCode = await install.exited;
       if (exitCode !== 0) {
         console.error(`\n❌ bun install failed (exit ${exitCode})`);
-        console.error('   Run manually: cd templates/common && bun install');
+        console.error("   Run manually: cd templates/common && bun install");
         process.exit(1);
       }
 
-      console.log('✓ bun install completed');
+      console.log("✓ bun install completed");
       pruneTemplateNodeModules(templateDir);
     } catch (err) {
-      console.error('❌ Failed to spawn bun install');
+      console.error("❌ Failed to spawn bun install");
       console.error(String(err));
-      console.error('   Run manually: cd templates/common && bun install');
+      console.error("   Run manually: cd templates/common && bun install");
       process.exit(1);
     }
 
     // Print summary
-    console.log('\n✓ Aligned dependencies:');
+    console.log("\n✓ Aligned dependencies:");
     for (const drift of result.changed) {
       console.log(`  ${drift.section}.${drift.key}: "${drift.templateVersion}" → "${drift.rootVersion}"`);
     }
     if (result.enginesChanged) {
-      console.log('  engines: aligned');
+      console.log("  engines: aligned");
     }
 
     process.exit(0);

@@ -13,9 +13,9 @@
  * @version 1.0.0
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { load as yamlLoad } from 'js-yaml';
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { load as yamlLoad } from "js-yaml";
 
 interface Issue {
   layer: string;
@@ -45,11 +45,11 @@ function parseYaml(text: string, file: string): any | null {
 /** Discover variant namespaces: co-* templates + l0 (if procedures/ exists) */
 function discoverVariants(root: string): string[] {
   const variants: string[] = [];
-  if (existsSync(join(root, 'procedures'))) variants.push('l0');
-  const templatesDir = join(root, 'templates');
+  if (existsSync(join(root, "procedures"))) variants.push("l0");
+  const templatesDir = join(root, "templates");
   if (existsSync(templatesDir)) {
     for (const name of readdirSync(templatesDir)) {
-      if (name.startsWith('co-') && statSync(join(templatesDir, name)).isDirectory()) {
+      if (name.startsWith("co-") && statSync(join(templatesDir, name)).isDirectory()) {
         variants.push(name);
       }
     }
@@ -62,37 +62,32 @@ function discoverVariants(root: string): string[] {
  * Returns the set of stage IDs if valid, null if file doesn't exist (OK for deferred),
  * and reports errors.
  */
-function validateStagesFile(
-  variant: string,
-  root: string,
-  issues: Issue[],
-): Set<string> | null {
-  const variantDir =
-    variant === 'l0' ? root : join(root, 'templates', variant);
-  const stagesPath = join(variantDir, 'process', 'stages.yaml');
+function validateStagesFile(variant: string, root: string, issues: Issue[]): Set<string> | null {
+  const variantDir = variant === "l0" ? root : join(root, "templates", variant);
+  const stagesPath = join(variantDir, "process", "stages.yaml");
 
   if (!existsSync(stagesPath)) {
     // Stages file is optional (deferred variants don't have it yet)
     return null;
   }
 
-  const content = readFileSync(stagesPath, 'utf-8');
+  const content = readFileSync(stagesPath, "utf-8");
   const data = parseYaml(content, stagesPath) as ProcessData;
 
-  if (data && typeof data === 'object' && '__parseError' in data) {
+  if (data && typeof data === "object" && "__parseError" in data) {
     issues.push({
-      layer: 'L1',
+      layer: "L1",
       file: stagesPath,
       message: `YAML parse error: ${(data as any).__parseError}`,
     });
     return null;
   }
 
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== "object") {
     issues.push({
-      layer: 'L1',
+      layer: "L1",
       file: stagesPath,
-      message: 'stages.yaml must contain a YAML object',
+      message: "stages.yaml must contain a YAML object",
     });
     return null;
   }
@@ -102,24 +97,24 @@ function validateStagesFile(
   if (Array.isArray(data.stages)) {
     for (let i = 0; i < data.stages.length; i++) {
       const stage = data.stages[i];
-      if (!stage || typeof stage !== 'object') {
+      if (!stage || typeof stage !== "object") {
         issues.push({
-          layer: 'L2',
+          layer: "L2",
           file: stagesPath,
           message: `stages[${i}] must be an object`,
         });
         continue;
       }
-      if (typeof stage.id !== 'string' || !stage.id) {
+      if (typeof stage.id !== "string" || !stage.id) {
         issues.push({
-          layer: 'L2',
+          layer: "L2",
           file: stagesPath,
           message: `stages[${i}].id must be a non-empty string`,
         });
       } else {
         if (stageIds.has(stage.id)) {
           issues.push({
-            layer: 'L2',
+            layer: "L2",
             file: stagesPath,
             message: `duplicate stage id "${stage.id}"`,
           });
@@ -127,10 +122,10 @@ function validateStagesFile(
           stageIds.add(stage.id);
         }
       }
-      if (typeof stage.order === 'number') {
+      if (typeof stage.order === "number") {
         if (orders.has(stage.order)) {
           issues.push({
-            layer: 'L2',
+            layer: "L2",
             file: stagesPath,
             message: `duplicate stage order ${stage.order}`,
           });
@@ -148,33 +143,28 @@ function validateStagesFile(
  * Load procedures from a variant and check their stage: field references.
  * Returns a map of procedure name to stage ID for distinctness checking.
  */
-function loadProcedureStages(
-  variant: string,
-  root: string,
-  issues: Issue[],
-): Map<string, string> {
+function loadProcedureStages(variant: string, root: string, issues: Issue[]): Map<string, string> {
   const procMap = new Map<string, string>();
-  const variantDir =
-    variant === 'l0' ? join(root, 'procedures') : join(root, 'templates', variant, 'procedures');
+  const variantDir = variant === "l0" ? join(root, "procedures") : join(root, "templates", variant, "procedures");
 
   if (!existsSync(variantDir)) {
     return procMap;
   }
 
   for (const entry of readdirSync(variantDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
-    const schemaPath = join(variantDir, entry.name, 'schema.yaml');
+    if (!entry.isDirectory() || entry.name.startsWith("_")) continue;
+    const schemaPath = join(variantDir, entry.name, "schema.yaml");
     if (!existsSync(schemaPath)) continue;
 
-    const content = readFileSync(schemaPath, 'utf-8');
+    const content = readFileSync(schemaPath, "utf-8");
     const data = parseYaml(content, schemaPath) as any;
 
-    if (!data || typeof data !== 'object' || '__parseError' in data) {
+    if (!data || typeof data !== "object" || "__parseError" in data) {
       // Skip malformed procedures; validate-procedures.ts owns that check
       continue;
     }
 
-    if (typeof data.stage === 'string' && data.stage) {
+    if (typeof data.stage === "string" && data.stage) {
       procMap.set(entry.name, data.stage);
     }
   }
@@ -202,21 +192,18 @@ function checkDistinctness(
   result.stageCount = stageIds.size;
 
   // Collect phase values from procedures
-  const procDir =
-    variant === 'l0'
-      ? join(root, 'procedures')
-      : join(root, 'templates', variant, 'procedures');
+  const procDir = variant === "l0" ? join(root, "procedures") : join(root, "templates", variant, "procedures");
   const phaseMap = new Map<string, Set<number>>();
 
   for (const [procName, stage] of procStages) {
-    const schemaPath = join(procDir, procName, 'schema.yaml');
+    const schemaPath = join(procDir, procName, "schema.yaml");
     if (!existsSync(schemaPath)) continue;
 
-    const content = readFileSync(schemaPath, 'utf-8');
+    const content = readFileSync(schemaPath, "utf-8");
     const data = parseYaml(content, schemaPath) as any;
-    if (!data || typeof data !== 'object' || '__parseError' in data) continue;
+    if (!data || typeof data !== "object" || "__parseError" in data) continue;
 
-    if (typeof data.phase === 'number') {
+    if (typeof data.phase === "number") {
       if (!phaseMap.has(stage)) {
         phaseMap.set(stage, new Set());
       }
@@ -282,8 +269,8 @@ export function validateAll(root: string, onlyVariant?: string, shouldCheckDisti
       // DEG-P-01: reject if bijective
       if (result.bijective && stageIds && procStages.size > 0) {
         issues.push({
-          layer: 'DEG-P-01',
-          file: `${variant === 'l0' ? 'procedures' : `templates/${variant}/procedures`}`,
+          layer: "DEG-P-01",
+          file: `${variant === "l0" ? "procedures" : `templates/${variant}/procedures`}`,
           message: `FATAL: stage→phase mapping is bijective (${result.stageCount} stages, ${result.phaseCount} phases). The stage axis is a relabeling of the phase axis.`,
         });
       }
@@ -292,12 +279,14 @@ export function validateAll(root: string, onlyVariant?: string, shouldCheckDisti
 
   // Report distinctness results
   if (shouldCheckDistinctness && distinctnessResults.length > 0) {
-    console.log('\nDistinctness Check Results (DEG-P-01):');
-    console.log('| Variant | Stages | Distinct phases | Bijective? |');
-    console.log('|---------|--------|-----------------|-----------|');
+    console.log("\nDistinctness Check Results (DEG-P-01):");
+    console.log("| Variant | Stages | Distinct phases | Bijective? |");
+    console.log("|---------|--------|-----------------|-----------|");
     for (const { variant, result } of distinctnessResults) {
-      const bijStr = result.bijective ? 'FAIL' : 'PASS';
-      console.log(`| ${variant.padEnd(7)} | ${String(result.stageCount).padEnd(6)} | ${String(result.phaseCount).padEnd(15)} | ${bijStr.padEnd(9)} |`);
+      const bijStr = result.bijective ? "FAIL" : "PASS";
+      console.log(
+        `| ${variant.padEnd(7)} | ${String(result.stageCount).padEnd(6)} | ${String(result.phaseCount).padEnd(15)} | ${bijStr.padEnd(9)} |`,
+      );
     }
   }
 
@@ -311,12 +300,13 @@ function main(): void {
   let checkDist = false;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--variant') variant = args[++i];
-    else if (args[i] === '--root') root = args[++i];
-    else if (args[i] === '--determinism') checkDist = true;
-    else if (args[i] === '--all') { /* default scope */ }
-    else if (args[i] === '--help' || args[i] === '-h') {
-      console.log('Usage: bun scripts/validate-process.ts [--variant <name>] [--determinism] [--all] [--root <dir>]');
+    if (args[i] === "--variant") variant = args[++i];
+    else if (args[i] === "--root") root = args[++i];
+    else if (args[i] === "--determinism") checkDist = true;
+    else if (args[i] === "--all") {
+      /* default scope */
+    } else if (args[i] === "--help" || args[i] === "-h") {
+      console.log("Usage: bun scripts/validate-process.ts [--variant <name>] [--determinism] [--all] [--root <dir>]");
       process.exit(0);
     } else {
       console.error(`Unknown argument: ${args[i]}`);
@@ -327,7 +317,7 @@ function main(): void {
   const issues = validateAll(root, variant, checkDist);
 
   if (issues.length === 0) {
-    const scope = variant ?? 'all variants';
+    const scope = variant ?? "all variants";
     console.log(`OK: process validation passed for ${scope}.`);
     process.exit(0);
   }

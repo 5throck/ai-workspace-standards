@@ -26,12 +26,12 @@
  * L2 = templates/co-*, L3 = Projects/*; this scanner operates on Projects/*).
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join, relative, basename } from 'path';
-import { createHash } from 'crypto';
-import { readUTF8File, detectEncoding } from '../lib/encoding-utils.ts';
-import { fatalError, warningError, ErrorPhase, ErrorSeverity } from '../lib/error-handling.ts';
-import { PLATFORM_SKILL_BASES } from '../lib/platforms.ts';
+import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { join, relative, basename } from "node:path";
+import { createHash } from "node:crypto";
+import { readUTF8File, detectEncoding } from "../lib/encoding-utils.ts";
+import { fatalError, warningError, ErrorPhase, ErrorSeverity } from "../lib/error-handling.ts";
+import { PLATFORM_SKILL_BASES } from "../lib/platforms.ts";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -57,9 +57,9 @@ export interface FileClassification {
   /** SHA-256 hash of L3 file content */
   hashL3?: string;
   /** Classification based on comparison */
-  classification: 'new' | 'modified' | 'identical' | 'conflict';
+  classification: "new" | "modified" | "identical" | "conflict";
   /** Platform scope detection */
-  platformScope: 'claude' | 'gemini' | 'agents' | 'codex' | 'both' | 'neutral';
+  platformScope: "claude" | "gemini" | "agents" | "codex" | "both" | "neutral";
 }
 
 export interface L3ScanResult {
@@ -87,7 +87,7 @@ export interface L3ScanResult {
 // ============================================================================
 
 const L0_ROOT = process.cwd();
-const L1_COMMON = join(L0_ROOT, 'templates', 'common');
+const L1_COMMON = join(L0_ROOT, "templates", "common");
 
 // File categories to scan
 // v1.4.0 (2026-09-21 review H-3): .agents/.codex mirrors and the AGENTS.md/CODEX.md/
@@ -95,7 +95,7 @@ const L1_COMMON = join(L0_ROOT, 'templates', 'common');
 // blind to the two newest platform surfaces (a codex-primary project lost its platform
 // files at promotion, and .codex skill copies were never classified).
 const SCAN_CATEGORIES = {
-  agents: ['agents', '.claude/agents', '.gemini/agents'],
+  agents: ["agents", ".claude/agents", ".gemini/agents"],
   skills: PLATFORM_SKILL_BASES,
   // Command surfaces (spec 2026-09-25-verifier-platform-expansion-design site
   // 13): .codex/prompts is the 1:1 codex mirror of .claude/commands (ADR-0077
@@ -104,14 +104,24 @@ const SCAN_CATEGORIES = {
   // docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
   // T-20260925-003); promoting it would copy a workspace-only surface into
   // variants.
-  commands: ['.claude/commands', '.gemini/commands', '.codex/prompts'],
-  configs: ['.claude', '.gemini', '.agents', '.codex'],
-  scripts: ['scripts'],
-  docs: ['docs'],
+  commands: [".claude/commands", ".gemini/commands", ".codex/prompts"],
+  configs: [".claude", ".gemini", ".agents", ".codex"],
+  scripts: ["scripts"],
+  docs: ["docs"],
   // Procedure Schema YAML workflows (ADR-0063) — MUST survive L3→variant promotion
   // so promoted variants carry their (agent, phase) workflow corpus.
-  procedures: ['procedures'],
-  root: ['CLAUDE.md', 'GEMINI.md', 'AGENTS.md', 'CODEX.md', 'README.md', 'README_ko.md', 'SECURITY.md', 'CHANGELOG.md', 'package.json'],
+  procedures: ["procedures"],
+  root: [
+    "CLAUDE.md",
+    "GEMINI.md",
+    "AGENTS.md",
+    "CODEX.md",
+    "README.md",
+    "README_ko.md",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "package.json",
+  ],
 } as const;
 
 // ============================================================================
@@ -123,7 +133,7 @@ const SCAN_CATEGORIES = {
  * @version 1.1.0
  */
 function computeHash(content: string): string {
-  return createHash('sha256').update(content, 'utf8').digest('hex');
+  return createHash("sha256").update(content, "utf8").digest("hex");
 }
 
 /**
@@ -139,36 +149,32 @@ function extractVersion(content: string): string | undefined {
  * Detect platform scope from file path
  * @version 1.1.0
  */
-function detectPlatformScope(relativePath: string): FileClassification['platformScope'] {
-  if (relativePath.includes('.claude/') && !relativePath.includes('.gemini/')) {
-    return 'claude';
+function detectPlatformScope(relativePath: string): FileClassification["platformScope"] {
+  if (relativePath.includes(".claude/") && !relativePath.includes(".gemini/")) {
+    return "claude";
   }
-  if (relativePath.includes('.gemini/') && !relativePath.includes('.claude/')) {
-    return 'gemini';
+  if (relativePath.includes(".gemini/") && !relativePath.includes(".claude/")) {
+    return "gemini";
   }
-  if (relativePath.includes('.claude/') && relativePath.includes('.gemini/')) {
-    return 'both'; // Should not happen in normal structure
+  if (relativePath.includes(".claude/") && relativePath.includes(".gemini/")) {
+    return "both"; // Should not happen in normal structure
   }
   // v1.5.0 (spec 2026-09-25-verifier-platform-expansion-design site 13): the two
   // newest platform surfaces classify explicitly instead of falling to 'neutral'.
-  if (relativePath.includes('.agents/')) {
-    return 'agents';
+  if (relativePath.includes(".agents/")) {
+    return "agents";
   }
-  if (relativePath.includes('.codex/')) {
-    return 'codex';
+  if (relativePath.includes(".codex/")) {
+    return "codex";
   }
-  return 'neutral';
+  return "neutral";
 }
 
 /**
  * Recursively scan directory for files
  * @version 1.1.0
  */
-function scanDirectoryRecursively(
-  dirPath: string,
-  baseDir: string,
-  extensions: string[] = []
-): string[] {
+function scanDirectoryRecursively(dirPath: string, baseDir: string, extensions: string[] = []): string[] {
   const files: string[] = [];
 
   if (!existsSync(dirPath)) {
@@ -182,14 +188,14 @@ function scanDirectoryRecursively(
 
     if (entry.isDirectory()) {
       // Skip node_modules and .git
-      if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === '.pipeline-state') {
+      if (entry.name === "node_modules" || entry.name === ".git" || entry.name === ".pipeline-state") {
         continue;
       }
       // Recurse into subdirectory
       files.push(...scanDirectoryRecursively(fullPath, baseDir, extensions));
     } else if (entry.isFile()) {
       // Filter by extension if specified
-      if (extensions.length === 0 || extensions.some(ext => entry.name.endsWith(ext))) {
+      if (extensions.length === 0 || extensions.some((ext) => entry.name.endsWith(ext))) {
         files.push(fullPath);
       }
     }
@@ -202,12 +208,7 @@ function scanDirectoryRecursively(
  * Classify a single file by comparing L0/L1/L3 versions
  * @version 1.1.0
  */
-function classifyFile(
-  l3Path: string,
-  l3ProjectPath: string,
-  l0Root: string,
-  l1Common: string
-): FileClassification {
+function classifyFile(l3Path: string, l3ProjectPath: string, l0Root: string, l1Common: string): FileClassification {
   const relativePath = relative(l3ProjectPath, l3Path);
   const platformScope = detectPlatformScope(relativePath);
 
@@ -229,10 +230,10 @@ function classifyFile(
   } catch (error) {
     throw fatalError(
       ErrorPhase.L3_SCAN,
-      'L3_FILE_READ_FAILED',
+      "L3_FILE_READ_FAILED",
       `Failed to read L3 file: ${relativePath}`,
       error instanceof Error ? error.message : String(error),
-      'Ensure file is readable and valid UTF-8 encoding'
+      "Ensure file is readable and valid UTF-8 encoding",
     );
   }
 
@@ -253,9 +254,9 @@ function classifyFile(
     } catch (error) {
       throw warningError(
         ErrorPhase.L3_SCAN,
-        'L0_FILE_READ_FAILED',
+        "L0_FILE_READ_FAILED",
         `Failed to read L0 file: ${relativePath}`,
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
     }
   }
@@ -268,32 +269,32 @@ function classifyFile(
     } catch (error) {
       throw warningError(
         ErrorPhase.L3_SCAN,
-        'L1_FILE_READ_FAILED',
+        "L1_FILE_READ_FAILED",
         `Failed to read L1 file: ${relativePath}`,
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
     }
   }
 
   // Classify based on comparison
-  let classification: FileClassification['classification'] = 'new';
+  let classification: FileClassification["classification"] = "new";
 
   if (!existsInL0 && !existsInL1) {
     // New file - only exists in L3
-    classification = 'new';
+    classification = "new";
   } else if (existsInL0 && !existsInL1) {
     // Compare with L0 only
     if (hashL3 === hashL0) {
-      classification = 'identical';
+      classification = "identical";
     } else {
-      classification = 'modified';
+      classification = "modified";
     }
   } else if (!existsInL0 && existsInL1) {
     // Compare with L1 only
     if (hashL3 === hashL1) {
-      classification = 'identical';
+      classification = "identical";
     } else {
-      classification = 'modified';
+      classification = "modified";
     }
   } else if (existsInL0 && existsInL1) {
     // Compare with both L0 and L1
@@ -301,22 +302,22 @@ function classifyFile(
     const matchesL1 = hashL3 === hashL1;
 
     if (matchesL0 && matchesL1) {
-      classification = 'identical';
+      classification = "identical";
     } else if (matchesL1) {
       // L3 matches L1 (variant's inheritance source) even when L0 differs —
       // the variant inherits this file from templates/common, so the L3 copy is redundant.
-      classification = 'identical';
+      classification = "identical";
     } else if (!matchesL0 && !matchesL1) {
       // Check if L0 and L1 are identical (then it's a true modification)
       if (hashL0 === hashL1) {
-        classification = 'modified';
+        classification = "modified";
       } else {
         // L0 and L1 differ - potential conflict
-        classification = 'conflict';
+        classification = "conflict";
       }
     } else {
       // Matches L0 but not L1 - variant cannot inherit from common
-      classification = 'conflict';
+      classification = "conflict";
     }
   }
 
@@ -352,10 +353,10 @@ export async function scanL3Project(l3ProjectPath: string): Promise<L3ScanResult
   if (!existsSync(l3ProjectPath)) {
     throw fatalError(
       ErrorPhase.L3_SCAN,
-      'L3_PROJECT_NOT_FOUND',
+      "L3_PROJECT_NOT_FOUND",
       `L3 project path does not exist: ${l3ProjectPath}`,
       undefined,
-      'Verify the L3 project path is correct and the directory exists'
+      "Verify the L3 project path is correct and the directory exists",
     );
   }
 
@@ -380,10 +381,14 @@ export async function scanL3Project(l3ProjectPath: string): Promise<L3ScanResult
 
       if (isDirectory) {
         // Scan directory recursively
-        const extensions = category === 'scripts' ? ['.ts', '.sh', '.ps1'] :
-                         category === 'agents' || category === 'skills' ? ['.md'] :
-                         category === 'procedures' ? ['.yaml', '.yml', '.ts'] :
-                         ['.md', '.json'];
+        const extensions =
+          category === "scripts"
+            ? [".ts", ".sh", ".ps1"]
+            : category === "agents" || category === "skills"
+              ? [".md"]
+              : category === "procedures"
+                ? [".yaml", ".yml", ".ts"]
+                : [".md", ".json"];
         filesToScan = scanDirectoryRecursively(fullScanPath, l3ProjectPath, extensions);
       } else {
         // Single file
@@ -408,10 +413,10 @@ export async function scanL3Project(l3ProjectPath: string): Promise<L3ScanResult
   // Compute summary
   const summary = {
     totalFiles: files.length,
-    newFiles: files.filter(f => f.classification === 'new').length,
-    modifiedFiles: files.filter(f => f.classification === 'modified').length,
-    identicalFiles: files.filter(f => f.classification === 'identical').length,
-    conflicts: files.filter(f => f.classification === 'conflict').length,
+    newFiles: files.filter((f) => f.classification === "new").length,
+    modifiedFiles: files.filter((f) => f.classification === "modified").length,
+    identicalFiles: files.filter((f) => f.classification === "identical").length,
+    conflicts: files.filter((f) => f.classification === "conflict").length,
   };
 
   const scanDuration = Date.now() - startTime;
@@ -442,34 +447,34 @@ export async function scanL3Project(l3ProjectPath: string): Promise<L3ScanResult
 
 async function main() {
   const args = process.argv.slice(2);
-  const l3PathArg = args.find(arg => arg.startsWith('--l3-path='));
+  const l3PathArg = args.find((arg) => arg.startsWith("--l3-path="));
 
   if (!l3PathArg) {
-    console.error('Usage: bun scripts/helpers/scan-l3-project.ts --l3-path=<path-to-l3-project>');
+    console.error("Usage: bun scripts/helpers/scan-l3-project.ts --l3-path=<path-to-l3-project>");
     process.exit(1);
   }
 
-  const l3ProjectPath = l3PathArg.split('=')[1];
+  const l3ProjectPath = l3PathArg.split("=")[1];
 
   try {
     const result = await scanL3Project(l3ProjectPath);
 
     // Output JSON for programmatic use
-    const jsonPath = join(L0_ROOT, '.pipeline-state', 'l3-scan-result.json');
-    const fs = await import('fs');
+    const jsonPath = join(L0_ROOT, ".pipeline-state", "l3-scan-result.json");
+    const fs = await import("node:fs");
     const { mkdirSync, writeFileSync } = fs;
-    const stateDir = join(L0_ROOT, '.pipeline-state');
+    const stateDir = join(L0_ROOT, ".pipeline-state");
 
     if (!existsSync(stateDir)) {
       mkdirSync(stateDir, { recursive: true });
     }
 
-    writeFileSync(jsonPath, JSON.stringify(result, null, 2), 'utf-8');
+    writeFileSync(jsonPath, JSON.stringify(result, null, 2), "utf-8");
     console.log(`\n✅ Scan result saved to: ${jsonPath}`);
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Scan failed:');
+    console.error("\n❌ Scan failed:");
     console.error(error);
     process.exit(1);
   }

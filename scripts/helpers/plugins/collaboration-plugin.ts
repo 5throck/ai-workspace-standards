@@ -13,11 +13,7 @@
  *   3. Meeting cadence mention (INFO) — meeting cadence documentation
  */
 
-import type {
-  VariantPlugin,
-  ValidationContext,
-  ValidationIssue,
-} from './variant-plugin.ts';
+import type { VariantPlugin, ValidationContext, ValidationIssue } from "./variant-plugin.ts";
 
 /**
  * Plugin for the 'collaboration' variant type.
@@ -40,7 +36,7 @@ import type {
  */
 export class CollaborationPlugin implements VariantPlugin {
   /** The variant type this plugin handles. */
-  readonly type = 'collaboration' as const;
+  readonly type = "collaboration" as const;
 
   /**
    * Validates a collaboration variant against collaboration-specific requirements.
@@ -67,20 +63,13 @@ export class CollaborationPlugin implements VariantPlugin {
     // Verify that agents collectively cover communication, task-management,
     // documentation, and knowledge-sharing.
     // These are hard functional requirements — collaboration variants cannot function without them.
-    const agentCapabilities = new Set(
-      ctx.agentFrontmatters.flatMap((a) => a.capabilities),
-    );
-    const expectedCapabilities = [
-      'communication',
-      'task-management',
-      'documentation',
-      'knowledge-sharing',
-    ];
+    const agentCapabilities = new Set(ctx.agentFrontmatters.flatMap((a) => a.capabilities));
+    const expectedCapabilities = ["communication", "task-management", "documentation", "knowledge-sharing"];
     for (const cap of expectedCapabilities) {
       if (!agentCapabilities.has(cap)) {
         issues.push({
-          severity: 'error',
-          category: 'capability-coverage',
+          severity: "error",
+          category: "capability-coverage",
           message: `Missing collaboration capability: ${cap}`,
           capability: cap,
         });
@@ -91,28 +80,22 @@ export class CollaborationPlugin implements VariantPlugin {
     // Collaboration variants should reference team workflows in their documentation.
     // Explicit workflow documentation ensures team members understand processes and handoffs.
     const variantContent = JSON.stringify(ctx.variantJson);
-    if (
-      !variantContent.toLowerCase().includes('team workflow')
-    ) {
+    if (!variantContent.toLowerCase().includes("team workflow")) {
       issues.push({
-        severity: 'warning',
-        category: 'team-workflow',
-        message:
-          'Collaboration variant should reference team workflow processes',
+        severity: "warning",
+        category: "team-workflow",
+        message: "Collaboration variant should reference team workflow processes",
       });
     }
 
     // --- Check 3: Meeting cadence mention ---
     // Standard meeting cadence documentation for collaboration contexts.
     // This is informational; not all collaboration contexts require explicit meeting cadence docs.
-    if (
-      !variantContent.toLowerCase().includes('meeting cadence')
-    ) {
+    if (!variantContent.toLowerCase().includes("meeting cadence")) {
       issues.push({
-        severity: 'info',
-        category: 'meeting-cadence',
-        message:
-          'Consider documenting meeting cadence standards',
+        severity: "info",
+        category: "meeting-cadence",
+        message: "Consider documenting meeting cadence standards",
       });
     }
 

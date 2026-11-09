@@ -50,17 +50,17 @@
  *         import the helper functions safely.
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, dirname, basename, resolve } from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { cwd } from 'node:process';
-import { parseTierDeclaration, type TierDecl } from './lifecycle-sync-audit.ts';
-import { baselineKeyFor } from './lib/upgrade-policy.ts';
+import { readFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
+import { join, relative, dirname, basename, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { cwd } from "node:process";
+import { parseTierDeclaration, type TierDecl } from "./lifecycle-sync-audit.ts";
+import { baselineKeyFor } from "./lib/upgrade-policy.ts";
 
 interface AgentFrontmatter {
   name: string;
   role?: string;
-  status?: 'draft' | 'active' | 'deprecated' | 'archived';
+  status?: "draft" | "active" | "deprecated" | "archived";
   color?: string;
   description?: string;
   responsibilities?: string[];
@@ -69,7 +69,7 @@ interface AgentFrontmatter {
 }
 
 interface AgentIssue {
-  level: 'error' | 'warning';
+  level: "error" | "warning";
   file: string;
   message: string;
   fix?: string;
@@ -85,17 +85,17 @@ interface AuditResult {
 
 // ANSI colors
 const colors = {
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  green: '\x1b[32m',
-  cyan: '\x1b[36m',
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
 };
 
 const ROOT = cwd();
-const AGENTS_FILE = join(ROOT, 'AGENTS.md');
-const CONSTITUTION_FILE = join(ROOT, 'CONSTITUTION.md');
+const AGENTS_FILE = join(ROOT, "AGENTS.md");
+const CONSTITUTION_FILE = join(ROOT, "CONSTITUTION.md");
 
 // Detect if we're at workspace root or in a sub-project
 const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
@@ -103,10 +103,10 @@ const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
 // Platform detection
 const PLATFORM = detectPlatform();
 
-function detectPlatform(): 'claude-code' | 'antigravity' | 'unknown' {
-  if (existsSync(join(ROOT, 'GEMINI.md'))) return 'antigravity';
-  if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) return 'claude-code';
-  return 'unknown';
+function detectPlatform(): "claude-code" | "antigravity" | "unknown" {
+  if (existsSync(join(ROOT, "GEMINI.md"))) return "antigravity";
+  if (existsSync(join(ROOT, "CLAUDE.md")) || existsSync(join(ROOT, ".claude"))) return "claude-code";
+  return "unknown";
 }
 
 // Parse AGENTS.md for registered agents
@@ -119,7 +119,7 @@ function getRegisteredAgents(): Set<string> {
   }
 
   // Strip HTML comments so placeholder/example rows (e.g. VARIANT-AGENTS scaffolding) aren't mistaken for real registrations
-  const content = readFileSync(AGENTS_FILE, 'utf-8').replace(/<!--[\s\S]*?-->/g, '');
+  const content = readFileSync(AGENTS_FILE, "utf-8").replace(/<!--[\s\S]*?-->/g, "");
 
   // Extract agent names from markdown table links
   const matches = content.matchAll(/\[([^\]]+)\]\(agents\/([^)]+)\.md\)/g);
@@ -133,20 +133,20 @@ function getRegisteredAgents(): Set<string> {
 // Parse agent frontmatter
 function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
     if (!frontmatterMatch) return null;
 
     const frontmatter: Record<string, unknown> = {};
-    const lines = frontmatterMatch[1].split('\n');
+    const lines = frontmatterMatch[1].split("\n");
 
     let inTierBlock = false;
     let currentIndentation = 0;
 
     for (const line of lines) {
       const trimmedLine = line.trim();
-      const colonIndex = line.indexOf(':');
+      const colonIndex = line.indexOf(":");
       if (colonIndex === -1) continue;
 
       const indent = line.search(/\S/);
@@ -154,14 +154,20 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
       const value = line.slice(colonIndex + 1).trim();
 
       // Track if we're entering or leaving a tier block
-      if (key === 'tier' && value === '' && indent === 0) {
+      if (key === "tier" && value === "" && indent === 0) {
         inTierBlock = true;
         currentIndentation = indent; // Get indentation level
         continue;
       }
 
       // Check if we've left the tier block (decreased indentation or new top-level key)
-      if (inTierBlock && indent <= currentIndentation && key !== 'claude' && key !== 'antigravity' && key !== 'gemini-cli') {
+      if (
+        inTierBlock &&
+        indent <= currentIndentation &&
+        key !== "claude" &&
+        key !== "antigravity" &&
+        key !== "gemini-cli"
+      ) {
         inTierBlock = false;
       }
 
@@ -170,22 +176,25 @@ function parseAgentFrontmatter(filePath: string): AgentFrontmatter | null {
         continue;
       }
 
-      if (value.startsWith('[') && value.endsWith(']')) {
+      if (value.startsWith("[") && value.endsWith("]")) {
         frontmatter[key] = value
           .slice(1, -1)
-          .split(',')
-          .map((v) => v.trim().replace(/^['"]|['"]$/g, ''))
+          .split(",")
+          .map((v) => v.trim().replace(/^['"]|['"]$/g, ""))
           .filter(Boolean);
-      } else if (inTierBlock && (key === 'claude' || key === 'antigravity' || key === 'gemini-cli')) {
+      } else if (inTierBlock && (key === "claude" || key === "antigravity" || key === "gemini-cli")) {
         // Handle nested tier fields
-        if (!frontmatter['tier']) {
-          frontmatter['tier'] = {};
+        if (!frontmatter["tier"]) {
+          frontmatter["tier"] = {};
         }
         // Strip comments and clean the value
-        const cleanValue = value.split('#')[0].trim().replace(/^['"]|['"]$/g, '');
-        (frontmatter['tier'] as Record<string, string>)[key] = cleanValue;
+        const cleanValue = value
+          .split("#")[0]
+          .trim()
+          .replace(/^['"]|['"]$/g, "");
+        (frontmatter["tier"] as Record<string, string>)[key] = cleanValue;
       } else {
-        frontmatter[key] = value.replace(/^['"]|['"]$/g, '');
+        frontmatter[key] = value.replace(/^['"]|['"]$/g, "");
       }
     }
 
@@ -214,17 +223,17 @@ function resolveEffectiveTierDecl(
   visited: Set<string> = new Set(),
 ): TierDecl {
   const decl = parseTierDeclaration(content);
-  if (decl.kind === 'scalar' || decl.kind === 'legacy') return decl;
-  const extendsPath = typeof extendsHint === 'string' ? extendsHint.trim() : '';
-  if (!extendsPath) return { kind: 'absent' };
+  if (decl.kind === "scalar" || decl.kind === "legacy") return decl;
+  const extendsPath = typeof extendsHint === "string" ? extendsHint.trim() : "";
+  if (!extendsPath) return { kind: "absent" };
   const target = resolve(dirname(agentFile), extendsPath);
-  if (visited.has(target) || !existsSync(target)) return { kind: 'absent' };
+  if (visited.has(target) || !existsSync(target)) return { kind: "absent" };
   visited.add(target);
   let targetContent: string;
   try {
-    targetContent = readFileSync(target, 'utf-8');
+    targetContent = readFileSync(target, "utf-8");
   } catch {
-    return { kind: 'absent' };
+    return { kind: "absent" };
   }
   const parentFm = parseAgentFrontmatter(target);
   return resolveEffectiveTierDecl(target, targetContent, parentFm?.extends, visited);
@@ -239,7 +248,7 @@ export function findAgentFiles(dir: string, depth = 0, explicitAgentsDir = false
 
   // If project root has an agents/ directory, only scan that (avoids false positives in docs/, etc.)
   if (dir === ROOT) {
-    const agentsDir = join(dir, 'agents');
+    const agentsDir = join(dir, "agents");
     if (existsSync(agentsDir)) {
       return findAgentFiles(agentsDir, 0, true);
     }
@@ -254,26 +263,33 @@ export function findAgentFiles(dir: string, depth = 0, explicitAgentsDir = false
     const fullPath = join(dir, entry.name);
 
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === '_archive' ||
-          entry.name === 'skills' || entry.name === 'commands') continue;
+      if (
+        entry.name === "node_modules" ||
+        entry.name === "_archive" ||
+        entry.name === "skills" ||
+        entry.name === "commands"
+      )
+        continue;
       agents.push(...findAgentFiles(fullPath, depth + 1, explicitAgentsDir));
-    } else if (entry.name.endsWith('.md') &&
-               entry.name !== 'AGENTS.md' &&
-               entry.name !== 'README.md' &&
-               entry.name !== 'SKILL.md') {
+    } else if (
+      entry.name.endsWith(".md") &&
+      entry.name !== "AGENTS.md" &&
+      entry.name !== "README.md" &&
+      entry.name !== "SKILL.md"
+    ) {
       // Check if it looks like an agent file (has frontmatter with role or color)
-      const content = readFileSync(fullPath, 'utf-8');
+      const content = readFileSync(fullPath, "utf-8");
       const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
       if (frontmatterMatch) {
         const fm = frontmatterMatch[1];
         // Inside the explicit agents/ directory, a named frontmatter is enough
         // (project agents use description: and no role:).
         if (explicitAgentsDir) {
-          if (/^name:/m.test(fm) && !entry.name.startsWith('README')) agents.push(fullPath);
+          if (/^name:/m.test(fm) && !entry.name.startsWith("README")) agents.push(fullPath);
           continue;
         }
         // Agents have 'role:' or 'color:' in frontmatter; skills have 'description:' instead
-        if ((fm.includes('role:') || fm.includes('color:')) && !fm.includes('description: This skill should be used')) {
+        if ((fm.includes("role:") || fm.includes("color:")) && !fm.includes("description: This skill should be used")) {
           agents.push(fullPath);
         }
       }
@@ -307,12 +323,12 @@ function findSkillFiles(dir: string, depth = 0): string[] {
   if (!existsSync(dir)) return skills;
 
   if (depth > 8) return skills; // symlink-cycle / runaway-recursion bound (T-20260910-026)
-  let entries;
+  let entries: Dirent[];
   try {
     entries = readdirSync(dir, { withFileTypes: true });
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code === 'EPERM' || code === 'EACCES') return skills; // skip inaccessible dirs (e.g. test scaffolds)
+    if (code === "EPERM" || code === "EACCES") return skills; // skip inaccessible dirs (e.g. test scaffolds)
     throw err;
   }
 
@@ -321,9 +337,9 @@ function findSkillFiles(dir: string, depth = 0): string[] {
     const fullPath = join(dir, entry.name);
 
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
       skills.push(...findSkillFiles(fullPath, depth + 1));
-    } else if (entry.name === 'SKILL.md') {
+    } else if (entry.name === "SKILL.md") {
       skills.push(fullPath);
     }
   }
@@ -334,7 +350,7 @@ function findSkillFiles(dir: string, depth = 0): string[] {
 // Parse skill frontmatter (minimal version)
 function parseSkillFrontmatter(filePath: string): { owner?: string } | null {
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
     if (!frontmatterMatch) return null;
 
@@ -351,8 +367,8 @@ function parseSkillFrontmatter(filePath: string): { owner?: string } | null {
 // Normalize a frontmatter date value ("2026-08-24", "2026-08-24T00:00:00.000Z")
 // to YYYY-MM-DD; null when the value is not calendar-date shaped.
 export function parseFrontmatterDate(value: unknown): string | null {
-  if (typeof value !== 'string') return null;
-  const unquoted = value.replace(/^['"]|['"]$/g, '');
+  if (typeof value !== "string") return null;
+  const unquoted = value.replace(/^['"]|['"]$/g, "");
   const m = unquoted.match(/^(\d{4}-\d{2}-\d{2})/);
   return m ? m[1] : null;
 }
@@ -407,11 +423,15 @@ export function loadDeliveryBaselineManifest(root: string = ROOT): DeliveryBasel
   }
   let manifest: DeliveryBaselineManifest | null = null;
   try {
-    const parsed = JSON.parse(readFileSync(join(root, '.claude', 'last-upgrade-delivery.json'), 'utf-8')) as Partial<DeliveryBaselineManifest> | null;
+    const parsed = JSON.parse(
+      readFileSync(join(root, ".claude", "last-upgrade-delivery.json"), "utf-8"),
+    ) as Partial<DeliveryBaselineManifest> | null;
     if (
-      parsed && typeof parsed === 'object' &&
-      typeof parsed.templateVersion === 'string' &&
-      parsed.baselines && typeof parsed.baselines === 'object'
+      parsed &&
+      typeof parsed === "object" &&
+      typeof parsed.templateVersion === "string" &&
+      parsed.baselines &&
+      typeof parsed.baselines === "object"
     ) {
       manifest = { templateVersion: parsed.templateVersion, baselines: parsed.baselines };
     }
@@ -436,7 +456,7 @@ export function isDeliveredBaselineEqual(
 ): boolean {
   if (!manifest) return false;
   const entry = manifest.baselines[relPath];
-  if (!entry || typeof entry.hash !== 'string' || !entry.hash) return false;
+  if (!entry || typeof entry.hash !== "string" || !entry.hash) return false;
   try {
     return baselineKeyFor(relPath, content) === entry.hash;
   } catch {
@@ -452,9 +472,11 @@ export function deliveryStalenessInfoLine(
   commitDate: string,
   manifest: DeliveryBaselineManifest,
 ): string {
-  return `${relPath}: frontmatter date (${fmDate}) is older than the last git content commit (${commitDate})` +
+  return (
+    `${relPath}: frontmatter date (${fmDate}) is older than the last git content commit (${commitDate})` +
     ` — staleness explained by delivery v${manifest.templateVersion}` +
-    ` — file equals the recorded delivered baseline; review stamp intentionally not engine-managed`;
+    ` — file equals the recorded delivered baseline; review stamp intentionally not engine-managed`
+  );
 }
 
 // Sync-only commit subjects (DEC-20260930-01 ruling 2, T-20260930-024): pipeline
@@ -480,7 +502,7 @@ export function isSyncOnlyCommitSubject(subject: string): boolean {
  *  return false (fail-open). Used by lastContentCommitDate to skip bump commits that
  *  don't represent content changes. */
 export function isMetadataOnlyChange(diffText: string): boolean {
-  const lines = diffText.split('\n');
+  const lines = diffText.split("\n");
   let hasChangedLines = false;
   let inHunk = false;
 
@@ -489,32 +511,32 @@ export function isMetadataOnlyChange(diffText: string): boolean {
     if (!line.trim()) continue;
 
     // "\ No newline at end of file" is metadata, skip it
-    if (line.startsWith('\\ ')) continue;
+    if (line.startsWith("\\ ")) continue;
 
     // @@ marks the start of the hunk body; headers end
-    if (line.startsWith('@@')) {
+    if (line.startsWith("@@")) {
       inHunk = true;
       continue;
     }
 
     // Before first @@: skip all diff headers
     if (!inHunk) {
-      if (line.startsWith('diff --git')) continue;
-      if (line.startsWith('index')) continue;
-      if (line.startsWith('---')) continue;
-      if (line.startsWith('+++')) continue;
-      if (line.startsWith('new file')) continue;
-      if (line.startsWith('deleted file')) continue;
-      if (line.startsWith('old mode')) continue;
-      if (line.startsWith('new mode')) continue;
-      if (line.startsWith('similarity')) continue;
-      if (line.startsWith('rename')) continue;
+      if (line.startsWith("diff --git")) continue;
+      if (line.startsWith("index")) continue;
+      if (line.startsWith("---")) continue;
+      if (line.startsWith("+++")) continue;
+      if (line.startsWith("new file")) continue;
+      if (line.startsWith("deleted file")) continue;
+      if (line.startsWith("old mode")) continue;
+      if (line.startsWith("new mode")) continue;
+      if (line.startsWith("similarity")) continue;
+      if (line.startsWith("rename")) continue;
       // If we encounter something else before @@, skip it
       continue;
     }
 
     // In hunk body: check if this is a changed line
-    if (line.startsWith('+') || line.startsWith('-')) {
+    if (line.startsWith("+") || line.startsWith("-")) {
       hasChangedLines = true;
       // All changed lines must match /^[+-]last_updated:/
       if (!/^[+-]last_updated:/.test(line)) {
@@ -532,12 +554,16 @@ export function isMetadataOnlyChange(diffText: string): boolean {
 /** An agent name resolves if a roster entry, an agent file, or a variant agent file exists. */
 function agentNameExists(name: string, registeredAgents: Set<string>): boolean {
   if (registeredAgents.has(name)) return true;
-  if (existsSync(join(ROOT, 'agents', `${name}.md`))) return true;
-  if (existsSync(join(ROOT, '.claude', 'agents', `${name}.md`))) return true;
-  const templatesDir = join(ROOT, 'templates');
+  if (existsSync(join(ROOT, "agents", `${name}.md`))) return true;
+  if (existsSync(join(ROOT, ".claude", "agents", `${name}.md`))) return true;
+  const templatesDir = join(ROOT, "templates");
   if (existsSync(templatesDir)) {
     for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
-      if (e.isDirectory() && e.name.startsWith('co-') && existsSync(join(templatesDir, e.name, 'agents', `${name}.md`))) {
+      if (
+        e.isDirectory() &&
+        e.name.startsWith("co-") &&
+        existsSync(join(templatesDir, e.name, "agents", `${name}.md`))
+      ) {
         return true;
       }
     }
@@ -548,24 +574,35 @@ function agentNameExists(name: string, registeredAgents: Set<string>): boolean {
 /** Extract list-valued frontmatter entries (handoff_to, handoff_from, …) as name tokens. */
 function extractFrontmatterNameList(filePath: string, field: string): string[] {
   try {
-    const content = readFileSync(filePath, 'utf-8').replace(/\r\n/g, '\n');
+    const content = readFileSync(filePath, "utf-8").replace(/\r\n/g, "\n");
     const fm = content.match(/^---\n([\s\S]*?)\n---/);
     if (!fm) return [];
     const names: string[] = [];
-    const lines = fm[1].split('\n');
+    const lines = fm[1].split("\n");
     for (let i = 0; i < lines.length; i++) {
       const inline = lines[i].match(new RegExp(`^${field}:\\s*(.+)$`));
       if (inline) {
-        if (inline[1].startsWith('[')) {
-          names.push(...inline[1].slice(1, -1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean));
+        if (inline[1].startsWith("[")) {
+          names.push(
+            ...inline[1]
+              .slice(1, -1)
+              .split(",")
+              .map((s) => s.trim().replace(/^['"]|['"]$/g, ""))
+              .filter(Boolean),
+          );
         } else if (inline[1]) {
-          names.push(inline[1].trim().replace(/^['"]|['"]$/g, ''));
+          names.push(inline[1].trim().replace(/^['"]|['"]$/g, ""));
         }
         continue;
       }
       if (new RegExp(`^${field}:\\s*$`).test(lines[i])) {
         for (let j = i + 1; j < lines.length && /^-\s/.test(lines[j]); j++) {
-          names.push(lines[j].replace(/^-\s*/, '').trim().replace(/^['"]|['"]$/g, ''));
+          names.push(
+            lines[j]
+              .replace(/^-\s*/, "")
+              .trim()
+              .replace(/^['"]|['"]$/g, ""),
+          );
         }
       }
     }
@@ -578,7 +615,7 @@ function extractFrontmatterNameList(filePath: string, field: string): string[] {
 /** Removal-review deadline (ISO date) is in the past. */
 export function isRemovalReviewOverdue(removalReview: string | null): boolean {
   if (!removalReview || !/^\d{4}-\d{2}-\d{2}$/.test(removalReview)) return false;
-  return new Date(removalReview + 'T23:59:59').getTime() <= Date.now();
+  return new Date(removalReview + "T23:59:59").getTime() <= Date.now();
 }
 
 // Read a date-ish frontmatter field directly from the raw frontmatter text. The
@@ -586,10 +623,10 @@ export function isRemovalReviewOverdue(removalReview: string | null): boolean {
 // nests under `lifecycle:` in agent files — a targeted regex catches both layouts.
 function extractFrontmatterDate(filePath: string, field: string): string | null {
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
     if (!frontmatterMatch) return null;
-    const m = frontmatterMatch[1].match(new RegExp(`^\\s*${field}:\\s*['"]?(\\S+)`, 'm'));
+    const m = frontmatterMatch[1].match(new RegExp(`^\\s*${field}:\\s*['"]?(\\S+)`, "m"));
     return m ? m[1] : null;
   } catch {
     return null;
@@ -607,18 +644,21 @@ function extractFrontmatterDate(filePath: string, field: string): string | null 
  *  is sync-only. */
 export function lastContentCommitDate(filePath: string, repoCwd: string = cwd()): string | null {
   try {
-    const result = spawnSync('git', ['log', '-n', '200', '--format=%H%x09%cs%x09%s', '--', filePath], { encoding: 'utf-8', cwd: repoCwd });
-    for (const line of (result.stdout || '').split('\n')) {
+    const result = spawnSync("git", ["log", "-n", "200", "--format=%H%x09%cs%x09%s", "--", filePath], {
+      encoding: "utf-8",
+      cwd: repoCwd,
+    });
+    for (const line of (result.stdout || "").split("\n")) {
       const trimmed = line.trim();
       if (!trimmed) continue;
 
       // Parse: SHA<tab>date<tab>subject
-      const parts = trimmed.split('\t');
+      const parts = trimmed.split("\t");
       if (parts.length < 3) continue;
 
       const sha = parts[0];
       const date = parts[1];
-      const subject = parts.slice(2).join('\t');
+      const subject = parts.slice(2).join("\t");
 
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
 
@@ -627,11 +667,11 @@ export function lastContentCommitDate(filePath: string, repoCwd: string = cwd())
 
       // For non-sync-only commits, check if it's metadata-only by running git show
       try {
-        const showResult = spawnSync('git', ['show', sha, '-U0', '--format=', '--', filePath], {
-          encoding: 'utf-8',
+        const showResult = spawnSync("git", ["show", sha, "-U0", "--format=", "--", filePath], {
+          encoding: "utf-8",
           cwd: repoCwd,
         });
-        if (showResult.status === 0 && isMetadataOnlyChange(showResult.stdout || '')) {
+        if (showResult.status === 0 && isMetadataOnlyChange(showResult.stdout || "")) {
           // Metadata-only commit; skip it
           continue;
         }
@@ -650,20 +690,20 @@ export function lastContentCommitDate(filePath: string, repoCwd: string = cwd())
 
 /** True when the named agent exists but is deprecated/archived (non-live). */
 function isAgentNonLive(name: string): boolean {
-  for (const p of [join(ROOT, 'agents', `${name}.md`), join(ROOT, '.claude', 'agents', `${name}.md`)]) {
+  for (const p of [join(ROOT, "agents", `${name}.md`), join(ROOT, ".claude", "agents", `${name}.md`)]) {
     if (existsSync(p)) {
       const fm = parseAgentFrontmatter(p);
-      return fm?.status === 'deprecated' || fm?.status === 'archived';
+      return fm?.status === "deprecated" || fm?.status === "archived";
     }
   }
-  const templatesDir = join(ROOT, 'templates');
+  const templatesDir = join(ROOT, "templates");
   if (existsSync(templatesDir)) {
     for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
-      if (e.isDirectory() && e.name.startsWith('co-')) {
-        const p = join(templatesDir, e.name, 'agents', `${name}.md`);
+      if (e.isDirectory() && e.name.startsWith("co-")) {
+        const p = join(templatesDir, e.name, "agents", `${name}.md`);
         if (existsSync(p)) {
           const fm = parseAgentFrontmatter(p);
-          return fm?.status === 'deprecated' || fm?.status === 'archived';
+          return fm?.status === "deprecated" || fm?.status === "archived";
         }
       }
     }
@@ -685,25 +725,25 @@ function auditAgents(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}🔍 Agent Lifecycle Audit${colors.reset}`);
     console.log(`${colors.cyan}========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
-    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? 'workspace root' : 'current project'}${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? "workspace root" : "current project"}${colors.reset}`);
     console.log(`${colors.dim}Agents found: ${agentFiles.length}${colors.reset}`);
-    console.log('');
+    console.log("");
   }
 
   // Check each agent file
   for (const agentFile of agentFiles) {
-    const relPath = relative(ROOT, agentFile).replace(/\\/g, '/');
+    const relPath = relative(ROOT, agentFile).replace(/\\/g, "/");
     // Extract agent name from filename (e.g., "agents/architect.md" -> "architect")
-    const agentName = basename(relPath, '.md');
+    const agentName = basename(relPath, ".md");
     const frontmatter = parseAgentFrontmatter(agentFile);
 
     // Check 1: Missing frontmatter
     if (!frontmatter) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'No valid frontmatter found',
-        fix: 'Add YAML frontmatter with name, role, and status',
+        message: "No valid frontmatter found",
+        fix: "Add YAML frontmatter with name, role, and status",
       });
       continue;
     }
@@ -711,9 +751,9 @@ function auditAgents(jsonMode = false): AuditResult {
     // Check 2: Missing name
     if (!frontmatter.name) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'Missing name in frontmatter',
+        message: "Missing name in frontmatter",
         fix: "Add 'name: agent-name' to frontmatter",
       });
       continue;
@@ -722,9 +762,9 @@ function auditAgents(jsonMode = false): AuditResult {
     // Check 3: Missing role
     if (!frontmatter.role && !frontmatter.description) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: 'Missing role and description in frontmatter',
+        message: "Missing role and description in frontmatter",
         fix: "Add 'role: brief description of agent role' (or 'description:')",
       });
     }
@@ -732,17 +772,17 @@ function auditAgents(jsonMode = false): AuditResult {
     // Check 4: Missing status
     if (!frontmatter.status) {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: 'Missing status in frontmatter',
+        message: "Missing status in frontmatter",
         fix: "Add 'status: active' (or draft/deprecated/archived)",
       });
     }
 
     // Check 5: Agent not registered in AGENTS.md
-    if (!registeredAgents.has(agentName) && frontmatter.status !== 'archived') {
+    if (!registeredAgents.has(agentName) && frontmatter.status !== "archived") {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
         message: `Agent not registered in AGENTS.md`,
         fix: `Add to AGENTS.md agent roster table`,
@@ -750,24 +790,24 @@ function auditAgents(jsonMode = false): AuditResult {
     }
 
     // Check 6: Deprecated agents with active skill references
-    if (frontmatter.status === 'deprecated' || frontmatter.status === 'archived') {
+    if (frontmatter.status === "deprecated" || frontmatter.status === "archived") {
       const refs = skillOwnerRefs.get(agentName) || [];
       if (refs.length > 0) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
           message: `Deprecated agent still referenced by ${refs.length} skill(s)`,
-          fix: `Reassign skills: ${refs.slice(0, 3).join(', ')}${refs.length > 3 ? '...' : ''}`,
+          fix: `Reassign skills: ${refs.slice(0, 3).join(", ")}${refs.length > 3 ? "..." : ""}`,
         });
       }
     }
 
     // Check 7: Check if agent file is in _archive but status is not archived
-    if (relPath.includes('_archive') && frontmatter.status !== 'archived') {
+    if (relPath.includes("_archive") && frontmatter.status !== "archived") {
       warnings.push({
-        level: 'warning',
+        level: "warning",
         file: relPath,
-        message: 'Agent in _archive/ but status not set to archived',
+        message: "Agent in _archive/ but status not set to archived",
         fix: "Set 'status: archived' in frontmatter",
       });
     }
@@ -784,18 +824,18 @@ function auditAgents(jsonMode = false): AuditResult {
     // an INFO line; PR1's engine re-stamp plus the delivery→landing skew no
     // longer re-flag wave-delivered content, and any genuine project edit
     // breaks the hash and re-arms the warning.
-    if (frontmatter.status !== 'archived' && !relPath.includes('_archive')) {
-      const fmDate = parseFrontmatterDate(extractFrontmatterDate(agentFile, 'last_updated'));
+    if (frontmatter.status !== "archived" && !relPath.includes("_archive")) {
+      const fmDate = parseFrontmatterDate(extractFrontmatterDate(agentFile, "last_updated"));
       const commitDate = lastContentCommitDate(agentFile);
       if (fmDate && commitDate && isFrontmatterStale(fmDate, commitDate)) {
         const manifest = loadDeliveryBaselineManifest();
-        if (isDeliveredBaselineEqual(relPath, readFileSync(agentFile, 'utf-8'), manifest)) {
+        if (isDeliveredBaselineEqual(relPath, readFileSync(agentFile, "utf-8"), manifest)) {
           if (!jsonMode) {
             console.log(`  ℹ️  ${deliveryStalenessInfoLine(relPath, fmDate, commitDate, manifest!)}`);
           }
         } else {
           warnings.push({
-            level: 'warning',
+            level: "warning",
             file: relPath,
             message: `frontmatter last_updated (${fmDate}) is older than the last git commit (${commitDate})`,
             fix: "Update 'last_updated' in frontmatter to reflect the latest change",
@@ -805,38 +845,38 @@ function auditAgents(jsonMode = false): AuditResult {
     }
 
     // Check 4b: status vocabulary (v1.3.0) — `retired` is a legacy alias of `archived`
-    const validAgentStatuses = ['draft', 'active', 'deprecated', 'archived'];
+    const validAgentStatuses = ["draft", "active", "deprecated", "archived"];
     if (frontmatter.status && !validAgentStatuses.includes(String(frontmatter.status))) {
-      if (String(frontmatter.status) === 'retired') {
+      if (String(frontmatter.status) === "retired") {
         warnings.push({
-          level: 'warning',
+          level: "warning",
           file: relPath,
           message: "status 'retired' is a legacy alias — use 'archived'",
           fix: "Set 'status: archived' in frontmatter",
         });
       } else {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
-          message: `Invalid status value '${frontmatter.status}' (allowed: ${validAgentStatuses.join(' | ')})`,
-          fix: `Set status to one of: ${validAgentStatuses.join(', ')}`,
+          message: `Invalid status value '${frontmatter.status}' (allowed: ${validAgentStatuses.join(" | ")})`,
+          fix: `Set status to one of: ${validAgentStatuses.join(", ")}`,
         });
       }
     }
 
     // Check 13: handoff integrity (v1.3.0) — handoff targets must exist and be live
-    for (const field of ['handoff_to', 'handoff_from'] as const) {
+    for (const field of ["handoff_to", "handoff_from"] as const) {
       for (const target of extractFrontmatterNameList(agentFile, field)) {
         if (!agentNameExists(target, registeredAgents)) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `Dangling ${field} reference: agent '${target}' does not exist`,
             fix: `Update or remove the ${field} entry`,
           });
         } else if (isAgentNonLive(target)) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `${field} references non-live agent '${target}'`,
             fix: `Re-route the handoff to a live agent`,
@@ -847,21 +887,21 @@ function auditAgents(jsonMode = false): AuditResult {
 
     // Check 14: removal-review deadline (v1.3.0) — deprecated agents must carry a
     // future removal_review date, and an expired one blocks until the review runs.
-    if (frontmatter.status === 'deprecated') {
-      const removalReview = parseFrontmatterDate(extractFrontmatterDate(agentFile, 'removal_review'));
+    if (frontmatter.status === "deprecated") {
+      const removalReview = parseFrontmatterDate(extractFrontmatterDate(agentFile, "removal_review"));
       if (!removalReview) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
-          message: 'Deprecated agent has no removal_review date',
+          message: "Deprecated agent has no removal_review date",
           fix: "Add 'removal_review: YYYY-MM-DD' (default: deprecation + 90 days) to frontmatter",
         });
       } else if (isRemovalReviewOverdue(removalReview)) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
           message: `Removal review overdue for deprecated agent (removal_review ${removalReview} has passed)`,
-          fix: 'Run the removal review now: delete (user-approved), archive, or push the date out with a recorded rationale',
+          fix: "Run the removal review now: delete (user-approved), archive, or push the date out with a recorded rationale",
         });
       }
     }
@@ -873,47 +913,47 @@ function auditAgents(jsonMode = false): AuditResult {
     // the Missing/Invalid error paths). Extends-stubs inherit the tier from their
     // target (T-20261001-004): a stub without its own tier is legitimate; follow
     // the chain and exempt the stub when the chain cannot be resolved here.
-    const agentContent = readFileSync(agentFile, 'utf-8');
+    const agentContent = readFileSync(agentFile, "utf-8");
     const tierDecl = resolveEffectiveTierDecl(agentFile, agentContent, frontmatter.extends);
-    const validTiers = ['high', 'medium', 'low'];
-    if (tierDecl.kind === 'scalar') {
+    const validTiers = ["high", "medium", "low"];
+    if (tierDecl.kind === "scalar") {
       // Check 10 (scalar): tier value must be one of high|medium|low.
       if (!validTiers.includes(tierDecl.tier)) {
         errors.push({
-          level: 'error',
+          level: "error",
           file: relPath,
           message: `Invalid tier value: "${tierDecl.tier}"`,
           fix: "Use the ADR-0102 scalar form: 'tier: high', 'tier: medium', or 'tier: low'",
         });
       }
-    } else if (tierDecl.kind === 'legacy') {
+    } else if (tierDecl.kind === "legacy") {
       // Transition fallback: legacy per-platform blocks keep the original
       // Check 9 (missing platforms) / Check 10 (invalid values) semantics.
-      const requiredPlatforms = ['claude', 'antigravity', 'gemini-cli'] as const;
+      const requiredPlatforms = ["claude", "antigravity", "gemini-cli"] as const;
       for (const platform of requiredPlatforms) {
         const value = tierDecl.block[platform];
         if (!value) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `Missing tier.${platform} specification`,
             fix: `Add tier.${platform}: high|medium|low to frontmatter`,
           });
         } else if (!validTiers.includes(value)) {
           errors.push({
-            level: 'error',
+            level: "error",
             file: relPath,
             message: `Invalid tier.${platform} value: "${value}"`,
-            fix: `Use one of: ${validTiers.join(', ')}`,
+            fix: `Use one of: ${validTiers.join(", ")}`,
           });
         }
       }
     } else if (!frontmatter.extends) {
       // Check 8: no tier anywhere on the chain (or unparseable frontmatter).
       errors.push({
-        level: 'error',
+        level: "error",
         file: relPath,
-        message: 'Missing tier field in frontmatter',
+        message: "Missing tier field in frontmatter",
         fix: "Add 'tier: high|medium|low' to frontmatter (ADR-0102 scalar form)",
       });
     }
@@ -921,13 +961,13 @@ function auditAgents(jsonMode = false): AuditResult {
 
   // Check 8: Agents registered in AGENTS.md but files don't exist
   for (const agentName of registeredAgents) {
-    const agentPath1 = join(ROOT, 'agents', `${agentName}.md`);
-    const agentPath2 = join(ROOT, '.claude', 'agents', `${agentName}.md`);
+    const agentPath1 = join(ROOT, "agents", `${agentName}.md`);
+    const agentPath2 = join(ROOT, ".claude", "agents", `${agentName}.md`);
     if (!existsSync(agentPath1) && !existsSync(agentPath2)) {
       errors.push({
-        level: 'error',
+        level: "error",
         file: `agents/${agentName}.md`,
-        message: 'Registered in AGENTS.md but file not found',
+        message: "Registered in AGENTS.md but file not found",
         fix: `Create agents/${agentName}.md or remove from AGENTS.md`,
       });
     }
@@ -943,14 +983,14 @@ function auditAgents(jsonMode = false): AuditResult {
     if (!IS_WORKSPACE_ROOT) break; // v1.3.1: authoring-surface check — project snapshots keep their owners as delivered
     for (const token of owner.split(/[\s,]+/).filter(Boolean)) {
       if (agentNameExists(token, registeredAgents)) continue;
-      const l0Path = skillPaths.find(p => {
-        const norm = p.replace(/\\/g, '/');
-        return norm.startsWith('skills/');
+      const l0Path = skillPaths.find((p) => {
+        const norm = p.replace(/\\/g, "/");
+        return norm.startsWith("skills/");
       });
       if (l0Path) {
         errors.push({
-          level: 'error',
-          file: l0Path.replace(/\\/g, '/'),
+          level: "error",
+          file: l0Path.replace(/\\/g, "/"),
           message: `Skill owner references nonexistent agent: ${token}`,
           fix: `Create agents/${token}.md, or reassign the skill's owner to a live agent`,
         });
@@ -977,12 +1017,14 @@ function generateSummary(scanned: number, errors: number, warnings: number): { c
     };
   }
   return {
-    colored: `${colors.green}✓ Agents scanned: ${scanned}${colors.reset}` +
-      (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : '') +
-      (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ''),
-    clean: `Agents scanned: ${scanned}` +
-      (warnings > 0 ? `, Warnings: ${warnings}` : '') +
-      (errors > 0 ? `, Errors: ${errors}` : ''),
+    colored:
+      `${colors.green}✓ Agents scanned: ${scanned}${colors.reset}` +
+      (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : "") +
+      (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ""),
+    clean:
+      `Agents scanned: ${scanned}` +
+      (warnings > 0 ? `, Warnings: ${warnings}` : "") +
+      (errors > 0 ? `, Errors: ${errors}` : ""),
   };
 }
 
@@ -991,14 +1033,14 @@ function printResults(result: AuditResult): void {
     console.log(`${colors.red}✖ ERROR: ${error.message}${colors.reset}`);
     console.log(`   File: ${error.file}`);
     if (error.fix) console.log(`   Fix: ${error.fix}`);
-    console.log('');
+    console.log("");
   }
 
   for (const warning of result.warnings) {
     console.log(`${colors.yellow}⚠️  WARNING: ${warning.message}${colors.reset}`);
     console.log(`   File: ${warning.file}`);
     if (warning.fix) console.log(`   Fix: ${warning.fix}`);
-    console.log('');
+    console.log("");
   }
 
   console.log(`${colors.cyan}========================${colors.reset}`);
@@ -1018,8 +1060,8 @@ function printJsonResults(result: AuditResult): void {
 
 // CLI interface
 const args = process.argv.slice(2);
-const jsonMode = args.includes('--json');
-const helpMode = args.includes('--help') || args.includes('-h');
+const jsonMode = args.includes("--json");
+const helpMode = args.includes("--help") || args.includes("-h");
 
 // Dispatch is import-guarded so unit tests can import the helper functions without
 // triggering a full audit run.
@@ -1057,4 +1099,3 @@ Platform: ${PLATFORM}
 
   process.exit(result.errors.length > 0 ? 1 : 0);
 }
-

@@ -128,7 +128,13 @@ import {
   scanInstructionRegions,
   spanCarriesProjectAuthoredLines,
 } from "./lib/upgrade-policy.ts";
-import { exclusionNotice, listFleetProjects, listTenantLoopProjects, tenantForProjectPath, type TenantLoopTenant } from "./lib/fleet.ts";
+import {
+  exclusionNotice,
+  listFleetProjects,
+  listTenantLoopProjects,
+  tenantForProjectPath,
+  type TenantLoopTenant,
+} from "./lib/fleet.ts";
 
 const VERSION = "1.3.0";
 
@@ -253,7 +259,9 @@ function resolveProjects(requested: string[]): string[] {
   for (const p of resolved) {
     const tenant = tenantOrNull(p);
     if (tenant && !tenant.scopes.backportReview) {
-      console.warn(`⚠️  backport-diff: ${tenant.id} has scopes.backportReview=false (.pipeline-state/tenant-loop-registry.json) — proceeding read-only`);
+      console.warn(
+        `⚠️  backport-diff: ${tenant.id} has scopes.backportReview=false (.pipeline-state/tenant-loop-registry.json) — proceeding read-only`,
+      );
     }
   }
   return resolved;
@@ -362,7 +370,12 @@ export function directionFor(
 // ---------------------------------------------------------------------------
 
 const lineSet = (content: string | null): Set<string> =>
-  new Set((content ?? "").split("\n").map((l) => l.trim()).filter((l) => l !== ""));
+  new Set(
+    (content ?? "")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l !== ""),
+  );
 
 /** Lines of `head` (trimmed, non-blank) the counterpart does not contain, minus
  *  lines the delivered base already carried (stale template vocabulary is the
@@ -481,7 +494,10 @@ function markdownReport(reports: ProjectReport[]): string {
       lines.push("No files matching the requested surfaces in this range.", "");
       continue;
     }
-    lines.push("| path | surface | source counterpart | direction | ownership | verdict | +added | -removed | note |", "|---|---|---|---|---|---|---|---|---|");
+    lines.push(
+      "| path | surface | source counterpart | direction | ownership | verdict | +added | -removed | note |",
+      "|---|---|---|---|---|---|---|---|---|",
+    );
     for (const r of p.rows) {
       lines.push(
         `| ${r.file} | ${r.surface} | ${r.counterpart ?? "—"} | ${r.direction} | ${r.ownership} | ${r.verdict} | ${r.added} | ${r.removed} | ${r.note ?? "—"} |`,
@@ -538,7 +554,9 @@ writes.`);
     }
     const variant = variantName(project);
     const branch = git(project, ["rev-parse", "--abbrev-ref", "HEAD"]) || "?";
-    const changed = git(project, ["diff", "--name-only", `${resolvedBase}..HEAD`]).split("\n").filter(Boolean);
+    const changed = git(project, ["diff", "--name-only", `${resolvedBase}..HEAD`])
+      .split("\n")
+      .filter(Boolean);
     if (changed.length === 0) {
       console.log(`backport-diff: ${project} — no local work in ${resolvedBase}..HEAD (nothing to diff).`);
       continue;
@@ -550,9 +568,8 @@ writes.`);
       const counterpart = resolveCounterpart(relFile, variant);
       const baseContent = gitShow(project, resolvedBase, relFile);
       const headContent = gitShow(project, "HEAD", relFile);
-      const counterpartContent = counterpart && existsSync(counterpart)
-        ? readFileSync(counterpart, "utf-8").replace(/\r\n/g, "\n")
-        : null;
+      const counterpartContent =
+        counterpart && existsSync(counterpart) ? readFileSync(counterpart, "utf-8").replace(/\r\n/g, "\n") : null;
       const [added, removed] = numstat(project, resolvedBase, relFile);
       const direction = directionFor(baseContent, headContent, counterpartContent);
       const ownership = ownershipFor(relFile, headContent, counterpartContent, baseContent);

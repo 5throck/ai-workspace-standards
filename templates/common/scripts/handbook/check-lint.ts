@@ -72,8 +72,12 @@ function checkInlineStyles(html: string, file: string): LintIssue[] {
 
   const styleRe = /style\s*=\s*"([^"]*)"/gi;
   let m: RegExpExecArray | null;
-  while ((m = styleRe.exec(stripped)) !== null) {
-    if (isAllowedInlineStyle(m[1])) continue;
+  m = styleRe.exec(stripped);
+  while (m !== null) {
+    if (isAllowedInlineStyle(m[1])) {
+      m = styleRe.exec(stripped);
+      continue;
+    }
     const line = html.slice(0, m.index!).split("\n").length;
     issues.push({
       file,
@@ -81,6 +85,7 @@ function checkInlineStyles(html: string, file: string): LintIssue[] {
       category: "inline-style",
       detail: `style="${m[1]}"`,
     });
+    m = styleRe.exec(stripped);
   }
 
   return issues;
@@ -90,7 +95,8 @@ function checkInlineStyles(html: string, file: string): LintIssue[] {
 // 2. Inline event handlers (XSS risk)
 // ---------------------------------------------------------------------------
 
-const EVENT_HANDLER_RE = /\bon(click|dblclick|mousedown|mouseup|mouseover|mouseout|mouseenter|mouseleave|keydown|keyup|keypress|load|error|focus|blur|change|submit|reset|select|abort|resize|scroll|unload|contextmenu|drag|dragend|dragenter|dragleave|dragover|dragstart|drop|input|invalid|touchstart|touchend|touchmove|wheel|beforeunload|hashchange|popstate|storage|message)\s*=\s*"[^"]*"/gi;
+const EVENT_HANDLER_RE =
+  /\bon(click|dblclick|mousedown|mouseup|mouseover|mouseout|mouseenter|mouseleave|keydown|keyup|keypress|load|error|focus|blur|change|submit|reset|select|abort|resize|scroll|unload|contextmenu|drag|dragend|dragenter|dragleave|dragover|dragstart|drop|input|invalid|touchstart|touchend|touchmove|wheel|beforeunload|hashchange|popstate|storage|message)\s*=\s*"[^"]*"/gi;
 
 /** Find inline event handler attributes (potential XSS vectors). */
 function checkInlineEvents(html: string, file: string): LintIssue[] {
@@ -100,7 +106,8 @@ function checkInlineEvents(html: string, file: string): LintIssue[] {
   const stripped = html.replace(/<script[\s\S]*?<\/script>/gi, (m) => " ".repeat(m.length));
 
   let m: RegExpExecArray | null;
-  while ((m = EVENT_HANDLER_RE.exec(stripped)) !== null) {
+  m = EVENT_HANDLER_RE.exec(stripped);
+  while (m !== null) {
     const line = html.slice(0, m.index!).split("\n").length;
     issues.push({
       file,
@@ -108,6 +115,7 @@ function checkInlineEvents(html: string, file: string): LintIssue[] {
       category: "inline-event",
       detail: m[0].slice(0, 100),
     });
+    m = EVENT_HANDLER_RE.exec(stripped);
   }
 
   return issues;
@@ -134,7 +142,8 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
   {
     const re = /<font[\s>]/gi;
     let m: RegExpExecArray | null;
-    while ((m = re.exec(stripped)) !== null) {
+    m = re.exec(stripped);
+    while (m !== null) {
       const line = html.slice(0, m.index!).split("\n").length;
       issues.push({
         file,
@@ -142,6 +151,7 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
         category: "deprecated-tag",
         detail: `<font> tag (use CSS instead)`,
       });
+      m = re.exec(stripped);
     }
   }
 
@@ -149,7 +159,8 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
   {
     const re = /<center[\s>]/gi;
     let m: RegExpExecArray | null;
-    while ((m = re.exec(stripped)) !== null) {
+    m = re.exec(stripped);
+    while (m !== null) {
       const line = html.slice(0, m.index!).split("\n").length;
       issues.push({
         file,
@@ -157,6 +168,7 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
         category: "deprecated-tag",
         detail: `<center> tag (use CSS instead)`,
       });
+      m = re.exec(stripped);
     }
   }
 
@@ -164,7 +176,8 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
   {
     const re = /<b[\s>]/gi;
     let m: RegExpExecArray | null;
-    while ((m = re.exec(stripped)) !== null) {
+    m = re.exec(stripped);
+    while (m !== null) {
       // Check if this <b> is inside a <summary> block
       const preceding = stripped.slice(Math.max(0, m.index! - 500), m.index!);
       const hasSummaryContext = /<summary[\s>][^<]*$/i.test(preceding);
@@ -181,6 +194,7 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
           detail: `<b> tag (use <strong> or CSS font-weight instead)`,
         });
       }
+      m = re.exec(stripped);
     }
   }
 
@@ -188,7 +202,8 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
   {
     const re = /<i\s+[^>]*>/gi;
     let m: RegExpExecArray | null;
-    while ((m = re.exec(stripped)) !== null) {
+    m = re.exec(stripped);
+    while (m !== null) {
       const tagAttrs = m[0];
       const isIcon = /class="[^"]*(?:icon|fa-|bi-|mdi-|material-icons|icon-)/i.test(tagAttrs);
       if (!isIcon) {
@@ -200,6 +215,7 @@ function checkDeprecatedTags(html: string, file: string): LintIssue[] {
           detail: `<i> tag without icon class (use <em> or CSS font-style instead)`,
         });
       }
+      m = re.exec(stripped);
     }
   }
 
@@ -221,11 +237,13 @@ function checkDuplicateIds(html: string, file: string): LintIssue[] {
   const idLocations = new Map<string, number[]>();
   let m: RegExpExecArray | null;
 
-  while ((m = idRe.exec(stripped)) !== null) {
+  m = idRe.exec(stripped);
+  while (m !== null) {
     const id = m[1];
     const line = html.slice(0, m.index!).split("\n").length;
     if (!idLocations.has(id)) idLocations.set(id, []);
     idLocations.get(id)!.push(line);
+    m = idRe.exec(stripped);
   }
 
   for (const [id, lines] of idLocations) {
@@ -255,7 +273,8 @@ function checkEmptyHeadings(html: string, file: string): LintIssue[] {
 
   const headingRe = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
   let m: RegExpExecArray | null;
-  while ((m = headingRe.exec(stripped)) !== null) {
+  m = headingRe.exec(stripped);
+  while (m !== null) {
     const inner = m[2].replace(/<[^>]*>/g, "").trim();
     if (inner.length === 0) {
       const line = html.slice(0, m.index!).split("\n").length;
@@ -266,6 +285,7 @@ function checkEmptyHeadings(html: string, file: string): LintIssue[] {
         detail: `empty <h${m[1]}> tag`,
       });
     }
+    m = headingRe.exec(stripped);
   }
 
   return issues;

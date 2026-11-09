@@ -11,15 +11,15 @@
  * in docs/<variant>.context.md and replaces content with Skills table from AGENTS.md.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 function main(): number {
   const args = process.argv.slice(2);
   const projectDir = args[0];
 
   if (!projectDir) {
-    console.error('Usage: bun inject-skills.ts <project-dir>');
+    console.error("Usage: bun inject-skills.ts <project-dir>");
     return 1;
   }
 
@@ -27,11 +27,11 @@ function main(): number {
   // Keep in sync with templates/co-*/docs/<variant>.context.md files that use the
   // <!-- DYNAMIC_SKILLS_START --> / <!-- DYNAMIC_SKILLS_END --> marker pattern.
   // co-deck is intentionally excluded: it maintains a static skills table, not the marker.
-  const variants = ['co-develop', 'co-design', 'co-work', 'co-security', 'co-consult', 'co-game'];
+  const variants = ["co-develop", "co-design", "co-work", "co-security", "co-consult", "co-game"];
   let contextMdPath: string | null = null;
 
   for (const variant of variants) {
-    const path = join(projectDir, 'docs', `${variant}.context.md`);
+    const path = join(projectDir, "docs", `${variant}.context.md`);
     if (existsSync(path)) {
       contextMdPath = path;
       break;
@@ -40,7 +40,7 @@ function main(): number {
 
   // Fallback to generic context.md
   if (!contextMdPath) {
-    const genericPath = join(projectDir, 'docs', 'context.md');
+    const genericPath = join(projectDir, "docs", "context.md");
     if (existsSync(genericPath)) {
       contextMdPath = genericPath;
     }
@@ -50,15 +50,15 @@ function main(): number {
     return 0; // No context file found, not an error
   }
 
-  const agentsMdPath = join(projectDir, 'AGENTS.md');
+  const agentsMdPath = join(projectDir, "AGENTS.md");
 
   if (!existsSync(agentsMdPath)) {
     return 0; // AGENTS.md not found, not an error
   }
 
   try {
-    const agentsContent = readFileSync(agentsMdPath, 'utf-8');
-    const contextContent = readFileSync(contextMdPath, 'utf-8');
+    const agentsContent = readFileSync(agentsMdPath, "utf-8");
+    const contextContent = readFileSync(contextMdPath, "utf-8");
 
     // Extract Skills table from AGENTS.md
     const skillsMatch = agentsContent.match(/^## Skills\s*(\| Skill .*?)(?=\n---|\Z)/ms);
@@ -71,12 +71,12 @@ function main(): number {
     // Replace content between markers
     const newContextContent = contextContent.replace(
       /(<!-- DYNAMIC_SKILLS_START -->).*?(<!-- DYNAMIC_SKILLS_END -->)/s,
-      `$1\n${skillsTable}\n$2`
+      `$1\n${skillsTable}\n$2`,
     );
 
     if (newContextContent !== contextContent) {
-      writeFileSync(contextMdPath, newContextContent, 'utf-8');
-      console.log('  ✅ Injected dynamic skills from AGENTS.md into docs/context.md');
+      writeFileSync(contextMdPath, newContextContent, "utf-8");
+      console.log("  ✅ Injected dynamic skills from AGENTS.md into docs/context.md");
     }
 
     return 0;

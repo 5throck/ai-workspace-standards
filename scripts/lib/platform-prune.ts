@@ -10,9 +10,9 @@
  * profile's owned paths. Shared files (AGENTS.md, skills/, .agents/) are never
  * owned by a profile, so they are never touched here.
  */
-import { existsSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, type PlatformProfile } from './platforms.ts';
+import { existsSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, type PlatformProfile } from "./platforms.ts";
 
 /** Remove unselected profiles' owned paths under projectDir. Returns the removed relative paths. */
 export function pruneUnselectedProfiles(projectDir: string, selected: readonly PlatformProfile[]): string[] {

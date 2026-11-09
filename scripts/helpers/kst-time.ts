@@ -14,5 +14,5 @@ export function kstDate(d: Date = new Date()): string {
 
 /** ISO-8601 timestamp with milliseconds and an explicit +09:00 offset. */
 export function kstIso(d: Date = new Date()): string {
-  return new Date(d.getTime() + KST_OFFSET_MS).toISOString().slice(0, -1) + '+09:00';
+  return new Date(d.getTime() + KST_OFFSET_MS).toISOString().slice(0, -1) + "+09:00";
 }

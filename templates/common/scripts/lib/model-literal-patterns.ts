@@ -42,7 +42,7 @@ export const MODEL_ID_PATTERNS: readonly RegExp[] = [
 export function findModelLiterals(content: string): string[] {
   const found: string[] = [];
   for (const pattern of MODEL_ID_PATTERNS) {
-    const global = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g');
+    const global = new RegExp(pattern.source, pattern.flags.includes("g") ? pattern.flags : pattern.flags + "g");
     for (const m of content.matchAll(global)) {
       if (!found.includes(m[0])) found.push(m[0]);
     }

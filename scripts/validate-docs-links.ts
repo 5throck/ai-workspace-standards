@@ -69,8 +69,8 @@
 //              workspace scopes, warning (never gating) in variant
 //              template-docs scope.
 
-import { existsSync, readdirSync, statSync, readFileSync } from "fs";
-import { join, resolve, dirname, extname, relative, sep, basename } from "path";
+import { existsSync, readdirSync, statSync, readFileSync, type Stats } from "node:fs";
+import { join, resolve, dirname, extname, relative, sep, basename } from "node:path";
 
 const WORKSPACE_ROOT = resolve(import.meta.dir, "..");
 const args = process.argv.slice(2);
@@ -79,15 +79,7 @@ const scanAll = args.includes("--all");
 const dirArg = args.find((a) => a.startsWith("--dir="))?.split("=")[1];
 
 // Directories to skip during recursive scan
-const SKIP_DIRS = new Set([
-  "node_modules",
-  ".git",
-  "dist",
-  "build",
-  ".tmp",
-  ".cache",
-  ".gateguard-state",
-]);
+const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", ".tmp", ".cache", ".gateguard-state"]);
 
 // Placeholder example paths to skip (documentation examples, not real links)
 const EXAMPLE_PATH_PATTERNS = [
@@ -189,13 +181,15 @@ const templateDocWarnings: string[] = [];
  * "10-terminology--canonical-definitions".
  */
 function headingSlug(headingText: string): string {
-  return headingText
-    .trim()
-    .toLowerCase()
-    // eslint-disable-next-line no-irregular-whitespace
-    .replace(/[̀-ͯ]/g, "") // combining diacritics
-    .replace(/[^\p{L}\p{N}\p{M}\s\-_]/gu, "")
-    .replace(/\s/g, "-");
+  return (
+    headingText
+      .trim()
+      .toLowerCase()
+      // eslint-disable-next-line no-irregular-whitespace
+      .replace(/[̀-ͯ]/g, "") // combining diacritics
+      .replace(/[^\p{L}\p{N}\p{M}\s\-_]/gu, "")
+      .replace(/\s/g, "-")
+  );
 }
 
 /**
@@ -247,7 +241,10 @@ function collectAnchorFragments(mdPath: string): Set<string> {
     if (!heading) continue;
     const explicit = heading[2].match(/\{#([A-Za-z0-9_-]+)\}/);
     if (explicit) fragments.add(explicit[1].toLowerCase());
-    const text = heading[2].replace(/\s*#+\s*$/, "").replace(/\{#[A-Za-z0-9_-]+\}/g, "").trim();
+    const text = heading[2]
+      .replace(/\s*#+\s*$/, "")
+      .replace(/\{#[A-Za-z0-9_-]+\}/g, "")
+      .trim();
     fragments.add(headingSlug(text));
   }
   return fragments;
@@ -270,7 +267,7 @@ function collectMdFiles(dir: string, recurse = true, extraSkipDirs?: Set<string>
   }
   for (const entry of entries) {
     const fullPath = join(dir, entry);
-    let stat;
+    let stat: Stats;
     try {
       stat = statSync(fullPath);
     } catch {
@@ -485,7 +482,7 @@ for (const f of mdFiles) {
 // gated on (the exit code below depends only on brokenLinks).
 if (templateDocWarnings.length > 0) {
   console.error(
-    `\n⚠️  ${templateDocWarnings.length} template-docs link warning(s) in --all scope (informational, not gated):\n`
+    `\n⚠️  ${templateDocWarnings.length} template-docs link warning(s) in --all scope (informational, not gated):\n`,
   );
   for (const w of templateDocWarnings) console.error(w);
 }
@@ -500,7 +497,9 @@ if (brokenLinks > 0) {
     console.log(`\n✅ All ${totalLinks} relative links in ${totalFiles} markdown files resolve correctly.`);
   }
   if (!verbose && templateDocWarnings.length > 0) {
-    console.error(`\n✅ 0 broken links in ${totalFiles} markdown file(s) (${templateDocWarnings.length} template-docs warning(s) above; informational).`);
+    console.error(
+      `\n✅ 0 broken links in ${totalFiles} markdown file(s) (${templateDocWarnings.length} template-docs warning(s) above; informational).`,
+    );
   }
   process.exit(0);
 }

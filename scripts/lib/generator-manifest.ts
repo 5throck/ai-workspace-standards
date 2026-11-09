@@ -31,8 +31,8 @@
 //              scripts/validate-templates.ts (additive generator-manifest arm).
 // Unit-pinned by tests/unit/generator-manifest.test.ts.
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 /** Max generators per manifest (design §7.6 — bounds runaway pipelines). */
 export const MAX_GENERATORS = 16;
@@ -41,7 +41,7 @@ export const MAX_OUTPUTS = 8;
 /** Max lines of combined failure output shown in a FAIL row (design §7.5). */
 export const FAILURE_OUTPUT_LINES = 20;
 /** Only this argv[0] is accepted (design §7.2). */
-export const REQUIRED_ARGV0 = 'bun';
+export const REQUIRED_ARGV0 = "bun";
 
 /** Generator name: echoed into `[generator:<name>]` log rows, so the charset is restricted. */
 const NAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -81,9 +81,7 @@ export interface GeneratorManifestLoadResult {
   errors: GeneratorManifestError[];
 }
 
-export type ParseResult =
-  | { ok: true; manifest: GeneratorManifest }
-  | { ok: false; error: string };
+export type ParseResult = { ok: true; manifest: GeneratorManifest } | { ok: false; error: string };
 
 /** Default spawn adapter over Bun.spawnSync (array-form, piped, no env passed). */
 export type SpawnSyncFn = (
@@ -92,11 +90,11 @@ export type SpawnSyncFn = (
 ) => { exitCode: number; stdout: string; stderr: string };
 
 function defaultSpawnSync(cmd: string[], opts: { cwd: string }): { exitCode: number; stdout: string; stderr: string } {
-  const proc = Bun.spawnSync(cmd, { cwd: opts.cwd, stdout: 'pipe', stderr: 'pipe' });
+  const proc = Bun.spawnSync(cmd, { cwd: opts.cwd, stdout: "pipe", stderr: "pipe" });
   return {
     exitCode: proc.exitCode ?? (proc.success ? 0 : 1),
-    stdout: proc.stdout ? proc.stdout.toString() : '',
-    stderr: proc.stderr ? proc.stderr.toString() : '',
+    stdout: proc.stdout ? proc.stdout.toString() : "",
+    stderr: proc.stderr ? proc.stderr.toString() : "",
   };
 }
 
@@ -113,14 +111,14 @@ function defaultSpawnSync(cmd: string[], opts: { cwd: string }): { exitCode: num
  * @returns an error message, or null when the path is contained.
  */
 export function pathContainmentError(projectRoot: string, declared: string): string | null {
-  if (typeof declared !== 'string' || declared.trim().length === 0) {
-    return 'path is empty or not a string';
+  if (typeof declared !== "string" || declared.trim().length === 0) {
+    return "path is empty or not a string";
   }
   if (path.isAbsolute(declared)) {
     return `absolute path rejected: ${declared}`;
   }
   const segments = declared.split(/[\\/]+/);
-  if (segments.some((s) => s === '..')) {
+  if (segments.some((s) => s === "..")) {
     return `path traversal ('..') rejected: ${declared}`;
   }
   const resolved = path.resolve(projectRoot, declared);
@@ -139,7 +137,7 @@ function validateStringArray(value: unknown, field: string): string | null {
     return `${field} must be an array`;
   }
   for (const item of value) {
-    if (typeof item !== 'string' || item.length === 0) {
+    if (typeof item !== "string" || item.length === 0) {
       return `${field} must contain only non-empty strings`;
     }
   }
@@ -162,8 +160,8 @@ export function parseGeneratorManifest(content: string): ParseResult {
   } catch (e) {
     return { ok: false, error: `malformed JSON: ${e instanceof Error ? e.message : String(e)}` };
   }
-  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
-    return { ok: false, error: 'manifest must be a JSON object' };
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    return { ok: false, error: "manifest must be a JSON object" };
   }
   const keys = Object.keys(raw as Record<string, unknown>);
   if (keys.length === 0) {
@@ -175,7 +173,7 @@ export function parseGeneratorManifest(content: string): ParseResult {
     return { ok: false, error: `unsupported manifest version: ${JSON.stringify(obj.version)} (expected 1)` };
   }
   if (!Array.isArray(obj.generators)) {
-    return { ok: false, error: 'generators must be an array' };
+    return { ok: false, error: "generators must be an array" };
   }
   if (obj.generators.length > MAX_GENERATORS) {
     return { ok: false, error: `too many generators: ${obj.generators.length} (max ${MAX_GENERATORS})` };
@@ -185,11 +183,11 @@ export function parseGeneratorManifest(content: string): ParseResult {
   for (let i = 0; i < obj.generators.length; i++) {
     const entry = obj.generators[i];
     const label = `generators[${i}]`;
-    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) {
+    if (entry === null || typeof entry !== "object" || Array.isArray(entry)) {
       return { ok: false, error: `${label} must be an object` };
     }
     const e = entry as Record<string, unknown>;
-    if (typeof e.name !== 'string' || !NAME_PATTERN.test(e.name)) {
+    if (typeof e.name !== "string" || !NAME_PATTERN.test(e.name)) {
       return {
         ok: false,
         error: `${label}.name must match ${NAME_PATTERN.source} (got ${JSON.stringify(e.name)})`,
@@ -205,12 +203,15 @@ export function parseGeneratorManifest(content: string): ParseResult {
     const cmdErr = validateStringArray(e.command, `${label}.command`);
     if (cmdErr) return { ok: false, error: `${label}: ${cmdErr}` };
     if (e.command[0] !== REQUIRED_ARGV0) {
-      return { ok: false, error: `${label}.command argv[0] must be "${REQUIRED_ARGV0}" (got ${JSON.stringify(e.command[0])})` };
+      return {
+        ok: false,
+        error: `${label}.command argv[0] must be "${REQUIRED_ARGV0}" (got ${JSON.stringify(e.command[0])})`,
+      };
     }
     // Script path (argv[1]) lexical containment (design §7.2): absolute paths
     // and `..` traversal are rejected in the pure parse; existence + symlink
     // containment are the loader's fs-bound checks (validateManifestAgainstRoot).
-    const scriptPathErr = pathContainmentError('.', e.command[1]);
+    const scriptPathErr = pathContainmentError(".", e.command[1]);
     if (scriptPathErr) {
       return { ok: false, error: `${label}.command script path: ${scriptPathErr}` };
     }
@@ -222,7 +223,7 @@ export function parseGeneratorManifest(content: string): ParseResult {
     }
     const outputs: string[] = e.outputs as string[];
     for (const o of outputs) {
-      const err = pathContainmentError('.', o);
+      const err = pathContainmentError(".", o);
       if (err) return { ok: false, error: `${label}.outputs: ${err}` };
     }
     if (e.sources === undefined) {
@@ -232,7 +233,7 @@ export function parseGeneratorManifest(content: string): ParseResult {
     if (srcErr) return { ok: false, error: `${label}: ${srcErr}` };
     const sources = e.sources as string[];
     for (const s of sources) {
-      const err = pathContainmentError('.', s);
+      const err = pathContainmentError(".", s);
       if (err) return { ok: false, error: `${label}.sources: ${err}` };
     }
     generators.push({
@@ -316,7 +317,7 @@ export function validateManifestAgainstRoot(projectRoot: string, manifest: Gener
  * by the caller (strict parse — never silently skipped).
  */
 export function loadGeneratorManifests(projectRoot: string): GeneratorManifestLoadResult {
-  const scriptsDir = path.join(projectRoot, 'scripts');
+  const scriptsDir = path.join(projectRoot, "scripts");
   if (!fs.existsSync(scriptsDir)) {
     return { manifests: [], errors: [] };
   }
@@ -329,16 +330,16 @@ export function loadGeneratorManifests(projectRoot: string): GeneratorManifestLo
   const manifests: LoadedGeneratorManifest[] = [];
   const errors: GeneratorManifestError[] = [];
   const dirs = entries
-    .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
+    .filter((e) => e.isDirectory() && !e.name.startsWith("."))
     .map((e) => e.name)
     .sort();
   for (const dirName of dirs) {
     const variantDir = path.join(scriptsDir, dirName);
-    const manifestPath = path.join(variantDir, 'generators.json');
+    const manifestPath = path.join(variantDir, "generators.json");
     if (!fs.existsSync(manifestPath)) continue;
     let content: string;
     try {
-      content = fs.readFileSync(manifestPath, 'utf-8');
+      content = fs.readFileSync(manifestPath, "utf-8");
     } catch (e) {
       errors.push({ manifestPath, message: `unreadable: ${e instanceof Error ? e.message : String(e)}` });
       continue;
@@ -394,7 +395,7 @@ const VALUE_ASSIGNMENT_RE = /[=:]|=>/;
 export function scrubSecretLines(text: string): { lines: string[]; redacted: number } {
   const lines: string[] = [];
   let redacted = 0;
-  for (const line of text.split('\n')) {
+  for (const line of text.split("\n")) {
     if (SECRET_WORD_RE.test(line) && VALUE_ASSIGNMENT_RE.test(line)) {
       redacted++;
       continue;
@@ -408,7 +409,7 @@ export function scrubSecretLines(text: string): { lines: string[]; redacted: num
 export function failureOutputDetail(combined: string): { detail: string; redacted: number } {
   const { lines, redacted } = scrubSecretLines(combined);
   const kept = lines.slice(-FAILURE_OUTPUT_LINES);
-  return { detail: kept.join('\n'), redacted };
+  return { detail: kept.join("\n"), redacted };
 }
 
 // ---------------------------------------------------------------------------
@@ -443,10 +444,10 @@ export interface GeneratorRunOptions {
 }
 
 function defaultStage(projectRoot: string, relPath: string): { exitCode: number; stderr?: string } {
-  const proc = Bun.spawnSync(['git', 'add', relPath], { cwd: projectRoot, stdout: 'pipe', stderr: 'pipe' });
+  const proc = Bun.spawnSync(["git", "add", relPath], { cwd: projectRoot, stdout: "pipe", stderr: "pipe" });
   return {
     exitCode: proc.exitCode ?? (proc.success ? 0 : 1),
-    stderr: proc.stderr ? proc.stderr.toString() : '',
+    stderr: proc.stderr ? proc.stderr.toString() : "",
   };
 }
 
@@ -474,12 +475,12 @@ export function runDeclaredGenerators(options: GeneratorRunOptions): GeneratorRu
   const fail = (f: GeneratorRunFailure): void => {
     result.ok = false;
     result.failures.push(f);
-    log(`[generator:${f.generator}] FAIL (${f.reason})${f.detail ? `\n${f.detail}` : ''}`);
+    log(`[generator:${f.generator}] FAIL (${f.reason})${f.detail ? `\n${f.detail}` : ""}`);
   };
 
   const load = loadGeneratorManifests(projectRoot);
   for (const e of load.errors) {
-    fail({ generator: 'manifest', reason: 'manifest', detail: `${e.manifestPath}: ${e.message}` });
+    fail({ generator: "manifest", reason: "manifest", detail: `${e.manifestPath}: ${e.message}` });
   }
   if (!result.ok) return result;
   if (load.manifests.length === 0) return result; // absent/empty = documented no-op
@@ -493,19 +494,19 @@ export function runDeclaredGenerators(options: GeneratorRunOptions): GeneratorRu
         generators: [gen],
       });
       if (scriptErrors.length > 0) {
-        fail({ generator: gen.name, reason: 'manifest', detail: scriptErrors.join('\n') });
+        fail({ generator: gen.name, reason: "manifest", detail: scriptErrors.join("\n") });
         return result;
       }
-      log(`[generator:${gen.name}] running: ${gen.command.join(' ')} (cwd=${projectRoot})`);
+      log(`[generator:${gen.name}] running: ${gen.command.join(" ")} (cwd=${projectRoot})`);
       const proc = spawn(gen.command, { cwd: projectRoot });
       result.ran++;
       if (proc.exitCode !== 0) {
-        const combined = `${proc.stdout ?? ''}${proc.stderr ?? ''}`;
+        const combined = `${proc.stdout ?? ""}${proc.stderr ?? ""}`;
         const { detail, redacted } = failureOutputDetail(combined);
-        const suffix = redacted > 0 ? ` (${redacted} line(s) redacted)` : '';
+        const suffix = redacted > 0 ? ` (${redacted} line(s) redacted)` : "";
         fail({
           generator: gen.name,
-          reason: 'exit',
+          reason: "exit",
           detail: `exit code ${proc.exitCode}${suffix}\n${detail}`,
         });
         return result; // abort — no partial staging, later generators never run
@@ -514,15 +515,19 @@ export function runDeclaredGenerators(options: GeneratorRunOptions): GeneratorRu
       for (const out of gen.outputs) {
         const abs = path.resolve(projectRoot, out);
         if (!fs.existsSync(abs)) {
-          fail({ generator: gen.name, reason: 'output-missing', detail: `declared output missing after exit 0: ${out}` });
+          fail({
+            generator: gen.name,
+            reason: "output-missing",
+            detail: `declared output missing after exit 0: ${out}`,
+          });
           return result;
         }
       }
       for (const out of gen.outputs) {
         const st = stage(projectRoot, out);
         if (st.exitCode !== 0) {
-          const { detail } = failureOutputDetail(st.stderr ?? '');
-          fail({ generator: gen.name, reason: 'stage', detail: `git add failed for ${out}\n${detail}` });
+          const { detail } = failureOutputDetail(st.stderr ?? "");
+          fail({ generator: gen.name, reason: "stage", detail: `git add failed for ${out}\n${detail}` });
           return result;
         }
         result.staged.push(out);

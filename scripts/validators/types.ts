@@ -26,7 +26,7 @@ export interface ValidatorContext {
  */
 export interface ValidationIssue {
   /** Severity of the finding. */
-  readonly severity: 'error' | 'warning' | 'info';
+  readonly severity: "error" | "warning" | "info";
   /** Machine-readable category slug (e.g., 'missing-field', 'circular-reference') */
   readonly category: string;
   /** Human-readable description of the issue */

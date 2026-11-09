@@ -39,17 +39,17 @@
  * on PATH.
  */
 
-import { existsSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import {
   parseExternalDepsManifest,
   fetchProjectExternalDeps,
   verifyProjectExternalDeps,
   checkUpstreamTags,
   type ExternalDepsManifest,
-} from './lib/external-deps.ts';
+} from "./lib/external-deps.ts";
 
-const SUBCOMMANDS = ['list', 'install', 'verify', 'check-updates'] as const;
+const SUBCOMMANDS = ["list", "install", "verify", "check-updates"] as const;
 type Subcommand = (typeof SUBCOMMANDS)[number];
 
 interface CliOptions {
@@ -62,34 +62,48 @@ interface CliOptions {
 
 function usage(msg?: string): never {
   if (msg) console.error(`external-deps: ${msg}`);
-  console.error('Usage: bun scripts/external-deps.ts <list|install|verify|check-updates> [--json] [--manifest-only] [--id <id>] [--project <dir>]');
+  console.error(
+    "Usage: bun scripts/external-deps.ts <list|install|verify|check-updates> [--json] [--manifest-only] [--id <id>] [--project <dir>]",
+  );
   process.exit(2);
 }
 
 export function parseArgs(argv: string[]): CliOptions {
   const sub = argv[0];
-  if (!sub || !(SUBCOMMANDS as readonly string[]).includes(sub)) usage(sub ? `unknown subcommand '${sub}'` : 'missing subcommand');
-  const opts: CliOptions = { sub: sub as Subcommand, json: false, manifestOnly: false, id: null, projectDir: process.cwd() };
+  if (!sub || !(SUBCOMMANDS as readonly string[]).includes(sub))
+    usage(sub ? `unknown subcommand '${sub}'` : "missing subcommand");
+  const opts: CliOptions = {
+    sub: sub as Subcommand,
+    json: false,
+    manifestOnly: false,
+    id: null,
+    projectDir: process.cwd(),
+  };
   for (let i = 1; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--json') opts.json = true;
-    else if (a === '--manifest-only') opts.manifestOnly = true;
-    else if (a === '--id') { opts.id = argv[++i] ?? usage('--id needs a value'); }
-    else if (a === '--project') { opts.projectDir = resolve(argv[++i] ?? usage('--project needs a value')); }
-    else usage(`unknown flag '${a}'`);
+    if (a === "--json") opts.json = true;
+    else if (a === "--manifest-only") opts.manifestOnly = true;
+    else if (a === "--id") {
+      opts.id = argv[++i] ?? usage("--id needs a value");
+    } else if (a === "--project") {
+      opts.projectDir = resolve(argv[++i] ?? usage("--project needs a value"));
+    } else usage(`unknown flag '${a}'`);
   }
-  if (opts.manifestOnly && opts.sub !== 'verify') usage('--manifest-only applies to verify only');
-  if (opts.id && opts.sub !== 'install') usage('--id applies to install only');
+  if (opts.manifestOnly && opts.sub !== "verify") usage("--manifest-only applies to verify only");
+  if (opts.id && opts.sub !== "install") usage("--id applies to install only");
   return opts;
 }
 
-const allowLocalRepos = process.env.EXTERNAL_DEPS_ALLOW_LOCAL_REPOS === '1';
+const allowLocalRepos = process.env.EXTERNAL_DEPS_ALLOW_LOCAL_REPOS === "1";
 
 function loadManifest(projectDir: string): { manifest: ExternalDepsManifest | null; present: boolean; error?: string } {
-  const p = join(projectDir, 'external-deps.json');
+  const p = join(projectDir, "external-deps.json");
   if (!existsSync(p)) return { manifest: null, present: false };
   try {
-    return { manifest: parseExternalDepsManifest(readFileSync(p, 'utf8'), 'external-deps.json', { allowLocalRepos }), present: true };
+    return {
+      manifest: parseExternalDepsManifest(readFileSync(p, "utf8"), "external-deps.json", { allowLocalRepos }),
+      present: true,
+    };
   } catch (err) {
     return { manifest: null, present: true, error: (err as Error).message };
   }
@@ -97,7 +111,10 @@ function loadManifest(projectDir: string): { manifest: ExternalDepsManifest | nu
 
 function cmdList(o: CliOptions): number {
   const { manifest, present, error } = loadManifest(o.projectDir);
-  if (error) { console.error(`❌ ${error}`); return 1; }
+  if (error) {
+    console.error(`❌ ${error}`);
+    return 1;
+  }
   const rows = (manifest?.dependencies ?? []).map((d) => ({
     id: d.id,
     pin: d.pin,
@@ -106,24 +123,44 @@ function cmdList(o: CliOptions): number {
     usage: d.usage ?? null,
     adapter: d.adapter ?? null,
     install_dir: d.install_dir,
-    installed: existsSync(join(o.projectDir, d.install_dir, '.git')),
+    installed: existsSync(join(o.projectDir, d.install_dir, ".git")),
   }));
   if (o.json) {
-    console.log(JSON.stringify({ manifestPresent: present, schemaVersion: manifest?.schema_version ?? null, dependencies: rows }, null, 2));
+    console.log(
+      JSON.stringify(
+        { manifestPresent: present, schemaVersion: manifest?.schema_version ?? null, dependencies: rows },
+        null,
+        2,
+      ),
+    );
     return 0;
   }
-  if (!present) { console.log('No external-deps.json — no external dependencies declared.'); return 0; }
-  if (rows.length === 0) { console.log(`external-deps.json (schema v${manifest!.schema_version}): no dependencies declared.`); return 0; }
+  if (!present) {
+    console.log("No external-deps.json — no external dependencies declared.");
+    return 0;
+  }
+  if (rows.length === 0) {
+    console.log(`external-deps.json (schema v${manifest!.schema_version}): no dependencies declared.`);
+    return 0;
+  }
   for (const r of rows) {
-    console.log(`${r.id}  pin=${r.pin}  commit=${r.commit?.slice(0, 12) ?? '-'}  license=${r.license ?? 'UNDECLARED'}  usage=${r.usage ?? '-'}  adapter=${r.adapter ?? '-'}  ${r.installed ? 'installed' : 'NOT installed'} (${r.install_dir})`);
+    console.log(
+      `${r.id}  pin=${r.pin}  commit=${r.commit?.slice(0, 12) ?? "-"}  license=${r.license ?? "UNDECLARED"}  usage=${r.usage ?? "-"}  adapter=${r.adapter ?? "-"}  ${r.installed ? "installed" : "NOT installed"} (${r.install_dir})`,
+    );
   }
   return 0;
 }
 
 function cmdInstall(o: CliOptions): number {
   const { manifest, present, error } = loadManifest(o.projectDir);
-  if (error) { console.error(`❌ ${error}`); return 1; }
-  if (!present) { console.log('No external-deps.json — nothing to install.'); return 0; }
+  if (error) {
+    console.error(`❌ ${error}`);
+    return 1;
+  }
+  if (!present) {
+    console.log("No external-deps.json — nothing to install.");
+    return 0;
+  }
   if (o.id && !manifest!.dependencies.some((d) => d.id === o.id)) {
     console.error(`❌ no dependency with id '${o.id}' in external-deps.json`);
     return 1;
@@ -131,33 +168,46 @@ function cmdInstall(o: CliOptions): number {
   const r = fetchProjectExternalDeps(o.projectDir, { allowLocalRepos, onlyIds: o.id ? [o.id] : undefined });
   let failed = 0;
   for (const dep of r.results) {
-    if (dep.ok) console.log(`✅ ${dep.id}: ${dep.status} at ${dep.commit?.slice(0, 12) ?? '<unknown commit>'}`);
-    else { failed++; console.error(`❌ ${dep.id}: ${dep.status} — ${dep.error}`); }
+    if (dep.ok) console.log(`✅ ${dep.id}: ${dep.status} at ${dep.commit?.slice(0, 12) ?? "<unknown commit>"}`);
+    else {
+      failed++;
+      console.error(`❌ ${dep.id}: ${dep.status} — ${dep.error}`);
+    }
   }
   for (const d of r.gitignoreAppended) console.log(`   .gitignore: appended ${d}/`);
-  if (r.results.length === 0) console.log('No dependencies declared — nothing to install.');
+  if (r.results.length === 0) console.log("No dependencies declared — nothing to install.");
   return failed > 0 ? 1 : 0;
 }
 
 function cmdVerify(o: CliOptions): number {
-  const { findings, manifestPresent } = verifyProjectExternalDeps(o.projectDir, { manifestOnly: o.manifestOnly, allowLocalRepos });
-  const fails = findings.filter((f) => f.severity === 'fail');
-  const warns = findings.filter((f) => f.severity === 'warn');
+  const { findings, manifestPresent } = verifyProjectExternalDeps(o.projectDir, {
+    manifestOnly: o.manifestOnly,
+    allowLocalRepos,
+  });
+  const fails = findings.filter((f) => f.severity === "fail");
+  const warns = findings.filter((f) => f.severity === "warn");
   if (o.json) {
-    console.log(JSON.stringify({ manifestPresent, manifestOnly: o.manifestOnly, ok: fails.length === 0, findings }, null, 2));
+    console.log(
+      JSON.stringify({ manifestPresent, manifestOnly: o.manifestOnly, ok: fails.length === 0, findings }, null, 2),
+    );
     return fails.length > 0 ? 1 : 0;
   }
   for (const f of findings) {
-    const tag = f.severity === 'fail' ? '[FAIL]' : f.severity === 'warn' ? '[WARN]' : '[PASS]';
+    const tag = f.severity === "fail" ? "[FAIL]" : f.severity === "warn" ? "[WARN]" : "[PASS]";
     console.log(`${tag} ${f.check} ${f.message}`);
   }
-  console.log(`external-deps verify${o.manifestOnly ? ' --manifest-only' : ''}: ${fails.length} fail, ${warns.length} warn`);
+  console.log(
+    `external-deps verify${o.manifestOnly ? " --manifest-only" : ""}: ${fails.length} fail, ${warns.length} warn`,
+  );
   return fails.length > 0 ? 1 : 0;
 }
 
 function cmdCheckUpdates(o: CliOptions): number {
   const { manifest, present, error } = loadManifest(o.projectDir);
-  if (error) { console.error(`❌ ${error}`); return 1; }
+  if (error) {
+    console.error(`❌ ${error}`);
+    return 1;
+  }
   const rows = (manifest?.dependencies ?? []).map((d) => {
     const u = checkUpstreamTags(d);
     return { id: d.id, pin: d.pin, ok: u.ok, newer: u.newer ?? null, error: u.error ?? null };
@@ -166,10 +216,16 @@ function cmdCheckUpdates(o: CliOptions): number {
     console.log(JSON.stringify({ manifestPresent: present, updates: rows }, null, 2));
     return 0;
   }
-  if (rows.length === 0) { console.log('No dependencies declared — nothing to check.'); return 0; }
+  if (rows.length === 0) {
+    console.log("No dependencies declared — nothing to check.");
+    return 0;
+  }
   for (const r of rows) {
     if (!r.ok) console.log(`[WARN] ${r.id}: upstream check failed — ${r.error}`);
-    else if (r.newer) console.log(`[UPDATE] ${r.id}: ${r.pin} → ${r.newer} available (pin moves only via the upgrade pass after compatibility_test)`);
+    else if (r.newer)
+      console.log(
+        `[UPDATE] ${r.id}: ${r.pin} → ${r.newer} available (pin moves only via the upgrade pass after compatibility_test)`,
+      );
     else console.log(`[OK] ${r.id}: ${r.pin} is current`);
   }
   return 0;
@@ -178,10 +234,14 @@ function cmdCheckUpdates(o: CliOptions): number {
 export function run(argv: string[]): number {
   const o = parseArgs(argv);
   switch (o.sub) {
-    case 'list': return cmdList(o);
-    case 'install': return cmdInstall(o);
-    case 'verify': return cmdVerify(o);
-    case 'check-updates': return cmdCheckUpdates(o);
+    case "list":
+      return cmdList(o);
+    case "install":
+      return cmdInstall(o);
+    case "verify":
+      return cmdVerify(o);
+    case "check-updates":
+      return cmdCheckUpdates(o);
   }
 }
 

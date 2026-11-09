@@ -55,8 +55,8 @@
  * @license MIT
  */
 
-import { extname, posix } from 'node:path';
-import { isPolicySelfDescription, POLICY_SELF_DESCRIPTION_MARKERS } from '../helpers/l0-ref-policy.ts';
+import { extname, posix } from "node:path";
+import { isPolicySelfDescription, POLICY_SELF_DESCRIPTION_MARKERS } from "../helpers/l0-ref-policy.ts";
 
 /**
  * Mask policy self-description HTML comments so the prose rules cannot touch
@@ -94,14 +94,14 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
   // T-20260912-005: JSON is functional data, not prose. No occurrence of
   // context.md in a .json file is ever prose — it is a field value some
   // reader depends on.
-  if (filePath && extname(filePath).toLowerCase() === '.json') {
+  if (filePath && extname(filePath).toLowerCase() === ".json") {
     return content;
   }
 
   const isCode = filePath ? /\.(ts|tsx|js|jsx)$/.test(filePath) : false;
 
   if (isCode) {
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     let inBlockComment = false;
     const scrubbedLines = lines.map((line) => {
       const trimmed = line.trim();
@@ -112,8 +112,8 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
       // into block-comment mode, so every following functional string literal
       // was blanket-scrubbed — the divergence class that shipped context.md
       // into audit.ts/dev-sync.ts existsSync guards and message strings.
-      if (trimmed.startsWith('//')) {
-        return line.replace(/CONSTITUTION\.md/g, 'context.md');
+      if (trimmed.startsWith("//")) {
+        return line.replace(/CONSTITUTION\.md/g, "context.md");
       }
       const wasInBlockComment = inBlockComment;
       // The closer probe starts at idx+1 (not idx+2) so an OVERLAPPING `/*/`
@@ -121,27 +121,27 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
       // string) counts as balanced instead of wedging the machine open
       // (T-20261004-022: this wedge blanket-scrubbed dev-sync.ts literals
       // between the glob line and the next real block close).
-      if (/\/\*/.test(line) && !/\*\//.test(line.slice(line.indexOf('/*') + 1))) {
+      if (/\/\*/.test(line) && !/\*\//.test(line.slice(line.indexOf("/*") + 1))) {
         inBlockComment = true;
       } else if (wasInBlockComment && /\*\//.test(line)) {
         inBlockComment = false;
       }
-      const isFullLineComment = wasInBlockComment || inBlockComment || trimmed.startsWith('*');
+      const isFullLineComment = wasInBlockComment || inBlockComment || trimmed.startsWith("*");
 
       if (isFullLineComment) {
-        return line.replace(/CONSTITUTION\.md/g, 'context.md');
+        return line.replace(/CONSTITUTION\.md/g, "context.md");
       }
 
       // Trailing line comment on an otherwise-functional line: scrub only the comment part.
-      const commentIdx = line.indexOf('//');
-      if (commentIdx !== -1 && line.slice(commentIdx).includes('context.md')) {
-        return line.slice(0, commentIdx) + line.slice(commentIdx).replace(/CONSTITUTION\.md/g, 'context.md');
+      const commentIdx = line.indexOf("//");
+      if (commentIdx !== -1 && line.slice(commentIdx).includes("context.md")) {
+        return line.slice(0, commentIdx) + line.slice(commentIdx).replace(/CONSTITUTION\.md/g, "context.md");
       }
 
       // Functional code (string literal in join()/existsSync()/array/etc.) — leave as-is.
       return line;
     });
-    return scrubbedLines.join('\n');
+    return scrubbedLines.join("\n");
   }
 
   // T-20260912-005: policy self-description comments (documentation OF the
@@ -161,32 +161,29 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
   // A-1. Header line — handles both backtick and plain variants.
   work = work.replace(
     /> \*\*(?:Shared workspace setup.*?|Project context.*?)(?:CONSTITUTION\.md|context\.md)[^*]*?\.\*\*/s,
-    '> **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**'
+    "> **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**",
   );
   // A-2. Full markdown links where link text mentions context.md.
-  work = work.replace(
-    /\[`?CONSTITUTION\.md`?[^\]]*\]\([^)]*\)/g,
-    '[docs/context.md](docs/context.md)'
-  );
+  work = work.replace(/\[`?CONSTITUTION\.md`?[^\]]*\]\([^)]*\)/g, "[docs/context.md](docs/context.md)");
   // A-3. Remaining markdown link targets that still point at context.md.
-  work = work.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, '](docs/context.md)');
+  work = work.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, "](docs/context.md)");
   // A-4. Plain-text mentions.
-  work = work.replace(/CONSTITUTION\.md/g, 'context.md');
+  work = work.replace(/CONSTITUTION\.md/g, "context.md");
   // A-5. Part-file links into docs/constitution/ (e.g. 06-skill-lifecycle.md) whose
   // link text does NOT mention context.md (those are already covered by A-2).
   // L1/L2 trees have no docs/constitution/ directory — the projected home is
   // docs/context.md, so pointing the link there keeps it resolvable.
   work = work.replace(
     /\[[^\]]*docs\/constitution\/[^\]]*\]\([^)]*docs\/constitution\/[^)]*\)/g,
-    '[docs/context.md](docs/context.md)'
+    "[docs/context.md](docs/context.md)",
   );
   // A-5b. ANY remaining markdown link whose TARGET points into docs/constitution/ —
   // link text like "[§9.1]" carries no recognizable hint, so A-5 misses it. Projected
   // home is docs/context.md (anchors dropped; the visible text keeps the reference).
-  work = work.replace(/\]\([^)]*docs\/constitution\/[^)]*\)/g, '](docs/context.md)');
+  work = work.replace(/\]\([^)]*docs\/constitution\/[^)]*\)/g, "](docs/context.md)");
   // A-7. Plain-text / inline-code mentions of a docs/constitution/ part file
   // (e.g. `docs/constitution/06-skill-lifecycle.md §6.6`) — projected to docs/context.md.
-  work = work.replace(/docs\/constitution\/[a-z0-9.-]+\.md/gi, 'docs/context.md');
+  work = work.replace(/docs\/constitution\/[a-z0-9.-]+\.md/gi, "docs/context.md");
   // A-8. Bare `docs/constitution/` directory mentions (no part-file name, so A-7
   // misses them — found 2026-09-12: context.md's validate-md-language scan-path
   // list propagated the bare directory into templates/common/docs/context.md, where
@@ -194,10 +191,10 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
   // exemption). A list item (`X`, `docs/constitution/`, …) is dropped with one
   // delimiter; a standalone backticked mention projects to `docs/` (the L1+
   // governance-docs root); any remaining plain-text mention likewise.
-  work = work.replace(/`docs\/constitution\/`,\s*/g, '');
-  work = work.replace(/,\s*`docs\/constitution\/`/g, '');
-  work = work.replace(/`docs\/constitution\/`/g, '`docs/`');
-  work = work.replace(/(^|[^\/\w.-])docs\/constitution\/(?![\w.-])/gi, '$1docs/');
+  work = work.replace(/`docs\/constitution\/`,\s*/g, "");
+  work = work.replace(/,\s*`docs\/constitution\/`/g, "");
+  work = work.replace(/`docs\/constitution\/`/g, "`docs/`");
+  work = work.replace(/(^|[^\/\w.-])docs\/constitution\/(?![\w.-])/gi, "$1docs/");
   // A-6. Target-aware: every ](docs/context.md) the rules above emit is
   // root-depth-shaped, which only resolves from the project root. Rewrite the
   // target to the path relative to the TARGET file's own directory — a
@@ -207,11 +204,11 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
   // resolve to docs/docs/context.md). No targetPath → no-op (callers that
   // cannot say where the content lands keep the legacy literal).
   if (targetPath) {
-    const normalizedTarget = targetPath.replace(/\\/g, '/');
+    const normalizedTarget = targetPath.replace(/\\/g, "/");
     // In-project path: strip the templates/<variant>/ prefix (L1 common and
     // L2 variants alike) — the delivered depth is what links resolve against.
-    const inProject = normalizedTarget.replace(/^.*?templates\/[^/]+\//, '').replace(/^\/+/, '');
-    const rel = posix.relative(posix.dirname('/' + inProject), '/docs/context.md');
+    const inProject = normalizedTarget.replace(/^.*?templates\/[^/]+\//, "").replace(/^\/+/, "");
+    const rel = posix.relative(posix.dirname("/" + inProject), "/docs/context.md");
     work = work.replace(/\]\(docs\/context\.md\)/g, `](${rel})`);
     // A-9. adr/ link targets have no projected home — L1+ trees carry no
     // docs/adr/ content (root docs/adr/ is L0-only governance, §7.5), so the

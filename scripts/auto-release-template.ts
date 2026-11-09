@@ -28,31 +28,29 @@
 // warns on a dirty tree (the classification diff is commit-range based, so a
 // dirty tree cannot change it).
 
-import { readFileSync, writeFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import * as path from 'node:path';
-import { die, fatalError, logError, ErrorPhase } from './lib/error-handling.ts';
-import { localDateISO } from './lib/local-date.ts';
-import {
-  classifyTemplateChanges,
-  isSemver,
-  type ClassifyResult,
-} from './lib/template-release-classify.ts';
+import { readFileSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import * as path from "node:path";
+import { die, fatalError, logError, ErrorPhase } from "./lib/error-handling.ts";
+import { localDateISO } from "./lib/local-date.ts";
+import { classifyTemplateChanges, isSemver, type ClassifyResult } from "./lib/template-release-classify.ts";
 
-const GREEN = '\x1b[32m';
-const YELLOW = '\x1b[33m';
-const RED = '\x1b[31m';
-const CYAN = '\x1b[36m';
-const RESET = '\x1b[0m';
+const GREEN = "\x1b[32m";
+const YELLOW = "\x1b[33m";
+const RED = "\x1b[31m";
+const CYAN = "\x1b[36m";
+const RESET = "\x1b[0m";
 
-const workspaceRoot = path.resolve(import.meta.dir, '..');
-const versionPath = path.join(workspaceRoot, 'templates', 'VERSION');
-const changelogPath = path.join(workspaceRoot, 'templates', 'CHANGELOG.md');
+const workspaceRoot = path.resolve(import.meta.dir, "..");
+const versionPath = path.join(workspaceRoot, "templates", "VERSION");
+const changelogPath = path.join(workspaceRoot, "templates", "CHANGELOG.md");
 
 function usage(exitCode = 1): never {
   console.log(`Usage: bun scripts/auto-release-template.ts [--plan | --dry-run | --release]`);
   console.log(`  --plan / --dry-run / (default)  read-only classification of the pending template diff`);
-  console.log(`  --release                       synthesize the [Unreleased] entry and bump via release-template.ts --no-tag`);
+  console.log(
+    `  --release                       synthesize the [Unreleased] entry and bump via release-template.ts --no-tag`,
+  );
   console.log(`Exit codes: 0 ok / 2 manual-review / 3 no pending changes / 1 error`);
   process.exit(exitCode);
 }
@@ -60,31 +58,33 @@ function usage(exitCode = 1): never {
 // ── CLI parsing ──────────────────────────────────────────────────────────────
 
 const argv = process.argv.slice(2);
-if (argv.includes('--help') || argv.includes('-h')) usage(0);
-const wantsRelease = argv.includes('--release');
-const wantsPlan = argv.includes('--plan') || argv.includes('--dry-run');
-if (wantsRelease && wantsPlan) die('--plan and --release are mutually exclusive.');
+if (argv.includes("--help") || argv.includes("-h")) usage(0);
+const wantsRelease = argv.includes("--release");
+const wantsPlan = argv.includes("--plan") || argv.includes("--dry-run");
+if (wantsRelease && wantsPlan) die("--plan and --release are mutually exclusive.");
 const releaseMode = wantsRelease;
 
 // ── Guards ───────────────────────────────────────────────────────────────────
 
-const currentVersion = readFileSync(versionPath, 'utf-8').trim();
+const currentVersion = readFileSync(versionPath, "utf-8").trim();
 if (!isSemver(currentVersion)) {
   die(`templates/VERSION '${currentVersion}' is not semver X.Y.Z — refuse to run (design R6b).`);
 }
 
 function git(args: string[], label: string): string {
-  const result = spawnSync('git', ['-C', workspaceRoot, ...args], { encoding: 'utf-8' });
+  const result = spawnSync("git", ["-C", workspaceRoot, ...args], { encoding: "utf-8" });
   if (result.status !== 0) {
-    die(`git ${label} failed (exit ${result.status}): ${(result.stderr ?? '').trim()}`);
+    die(`git ${label} failed (exit ${result.status}): ${(result.stderr ?? "").trim()}`);
   }
-  return result.stdout ?? '';
+  return result.stdout ?? "";
 }
 
-const porcelain = git(['status', '--porcelain'], 'status --porcelain');
+const porcelain = git(["status", "--porcelain"], "status --porcelain");
 if (porcelain.trim()) {
   if (releaseMode) {
-    die(`working tree is not clean — --release requires a clean tree (design R12). Commit or land the pending changes first.`);
+    die(
+      `working tree is not clean — --release requires a clean tree (design R12). Commit or land the pending changes first.`,
+    );
   }
   console.log(`${YELLOW}⚠ Working tree is not clean; plan mode is read-only, continuing.${RESET}`);
 }
@@ -93,16 +93,16 @@ if (porcelain.trim()) {
 
 const diffRange = `template-v${currentVersion}..HEAD`;
 const diffOut = git(
-  ['diff', '-M', diffRange, '--name-status', '--', 'templates/'],
+  ["diff", "-M", diffRange, "--name-status", "--", "templates/"],
   `diff -M ${diffRange} --name-status -- templates/`,
 );
-const rows = diffOut.split('\n');
+const rows = diffOut.split("\n");
 
 const tagName = `template-v${currentVersion}`;
-const tagOut = git(['tag', '-l', tagName], `tag -l ${tagName}`).trim();
+const tagOut = git(["tag", "-l", tagName], `tag -l ${tagName}`).trim();
 const tagExists = tagOut === tagName;
-const allTags = git(['tag', '-l', 'template-v*'], 'tag -l template-v*')
-  .split('\n')
+const allTags = git(["tag", "-l", "template-v*"], "tag -l template-v*")
+  .split("\n")
   .map((t) => t.trim())
   .filter(Boolean);
 const otherTemplateTagsExist = allTags.some((t) => t !== tagName);
@@ -116,36 +116,40 @@ const result: ClassifyResult = classifyTemplateChanges(rows, {
 });
 
 const c = result.counts;
-const summary = `A ${c.added} / M ${c.modified} / D ${c.deleted} / R ${c.renamed}${c.other ? ` / other ${c.other}` : ''}`;
+const summary = `A ${c.added} / M ${c.modified} / D ${c.deleted} / R ${c.renamed}${c.other ? ` / other ${c.other}` : ""}`;
 
 console.log(`${CYAN}Template auto-release plan${RESET}`);
 console.log(`  Current version : ${currentVersion}`);
 console.log(`  Diff base       : ${diffRange}`);
-console.log(`  Tag present     : ${tagExists ? 'yes' : 'NO'}${otherTemplateTagsExist ? ' (older template-v* tags exist)' : ''}`);
+console.log(
+  `  Tag present     : ${tagExists ? "yes" : "NO"}${otherTemplateTagsExist ? " (older template-v* tags exist)" : ""}`,
+);
 console.log(`  Scoped rows     : ${c.scopedTotal} (delivered path endpoints ${c.deliveredPaths})`);
 console.log(`  Per status      : ${summary}`);
 const dirSummary = Object.entries(c.byDir)
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([d, n]) => `${d} ${n}`)
-  .join(' / ');
-console.log(`  Per directory   : ${dirSummary || '(none)'}`);
+  .join(" / ");
+console.log(`  Per directory   : ${dirSummary || "(none)"}`);
 console.log(`  Level           : ${result.level.toUpperCase()}`);
 if (result.nextVersion) console.log(`  Next version    : ${result.nextVersion}`);
 for (const [family, list] of Object.entries(result.samples)) {
-  if (list.length) console.log(`  Sample ${family.padEnd(8)}: ${list.join(' | ')}`);
+  if (list.length) console.log(`  Sample ${family.padEnd(8)}: ${list.join(" | ")}`);
 }
 
 // ── No-op / manual-review exits (R3, R6) ────────────────────────────────────
 
-if (result.level === 'no-op') {
+if (result.level === "no-op") {
   console.log(`${GREEN}No pending delivered template changes — nothing to release, nothing mutated.${RESET}`);
   process.exit(3);
 }
 
-if (result.level === 'manual-review') {
+if (result.level === "manual-review") {
   console.error(`${RED}Manual review required — no auto-release (design R6):${RESET}`);
   for (const reason of result.reasons) console.error(`  - ${reason}`);
-  console.error(`File one ticket (bun scripts/ticket.ts create auto-template-release --priority high) and skip the release.`);
+  console.error(
+    `File one ticket (bun scripts/ticket.ts create auto-template-release --priority high) and skip the release.`,
+  );
   process.exit(2);
 }
 
@@ -164,7 +168,7 @@ const notes = `auto-release ${releaseDate}: ${c.scopedTotal} delivered paths (${
 const entryLine = `- **[${releaseDate}]**: ${notes}`;
 
 function synthesizeUnreleasedEntry(content: string, line: string): { content: string; inserted: boolean } {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const headerIdx = lines.findIndex((l) => /^## \[Unreleased\]\s*$/.test(l));
   if (headerIdx === -1) {
     throw new Error('templates/CHANGELOG.md is missing "## [Unreleased]"');
@@ -187,9 +191,9 @@ function synthesizeUnreleasedEntry(content: string, line: string): { content: st
   if (changedIdx !== -1) {
     lines.splice(changedIdx + 1, 0, line); // first bullet of the existing Changed subsection
   } else {
-    lines.splice(headerIdx + 1, 0, '', '### Changed', line);
+    lines.splice(headerIdx + 1, 0, "", "### Changed", line);
   }
-  return { content: lines.join('\n'), inserted: true };
+  return { content: lines.join("\n"), inserted: true };
 }
 
 const prTitle = `chore(templates): auto-release v${result.nextVersion} (${result.level}, ${c.scopedTotal} delivered paths)`;
@@ -202,28 +206,21 @@ try {
   // in the cut section even when [Unreleased] is already non-empty.
   // release-template.ts cutChangelog preserves a non-empty [Unreleased]
   // verbatim and falls back to --notes when empty — both paths covered.
-  preRunChangelog = readFileSync(changelogPath, 'utf-8');
+  preRunChangelog = readFileSync(changelogPath, "utf-8");
   const synthesized = synthesizeUnreleasedEntry(preRunChangelog, entryLine);
-  if (synthesized.inserted) writeFileSync(changelogPath, synthesized.content, 'utf-8');
+  if (synthesized.inserted) writeFileSync(changelogPath, synthesized.content, "utf-8");
 
   // Compose the atomic helper. NEVER --push, NEVER touch templates/VERSION
   // here: release-template.ts owns both writes and restores them on failure.
-  const bumpArgs = [
-    'scripts/release-template.ts',
-    '--bump',
-    result.level as string,
-    '--notes',
-    notes,
-    '--no-tag',
-  ];
-  const bump = spawnSync(process.execPath, bumpArgs, { cwd: workspaceRoot, stdio: 'inherit' });
+  const bumpArgs = ["scripts/release-template.ts", "--bump", result.level as string, "--notes", notes, "--no-tag"];
+  const bump = spawnSync(process.execPath, bumpArgs, { cwd: workspaceRoot, stdio: "inherit" });
   if (bump.status !== 0) {
     throw new Error(`release-template.ts failed with exit code ${bump.status}`);
   }
 
-  const releasedVersion = readFileSync(versionPath, 'utf-8').trim();
+  const releasedVersion = readFileSync(versionPath, "utf-8").trim();
   console.log(`${GREEN}templates/VERSION is now ${releasedVersion}.${RESET}`);
-  console.log('');
+  console.log("");
   console.log(`${CYAN}Next steps (caller: ADR-0089 nightly runner):${RESET}`);
   console.log(`  1. Land the bump via dev-sync PR '${prTitle}'`);
   console.log(`     (touches only templates/VERSION and templates/CHANGELOG.md); merge under ADR-0089 R27.`);
@@ -235,7 +232,7 @@ try {
   // leaves the tree exactly as it entered.
   if (preRunChangelog !== null) {
     try {
-      writeFileSync(changelogPath, preRunChangelog, 'utf-8');
+      writeFileSync(changelogPath, preRunChangelog, "utf-8");
     } catch {
       // best-effort restore only
     }
@@ -243,10 +240,10 @@ try {
   logError(
     fatalError(
       ErrorPhase.SCRIPT_EXECUTION,
-      'AUTO_TEMPLATE_RELEASE_FAILED',
+      "AUTO_TEMPLATE_RELEASE_FAILED",
       err instanceof Error ? err.message : String(err),
       undefined,
-      'File one ticket (bun scripts/ticket.ts create auto-template-release --priority high), continue Phase II (design R15).',
+      "File one ticket (bun scripts/ticket.ts create auto-template-release --priority high), continue Phase II (design R15).",
     ),
   );
   process.exit(1);

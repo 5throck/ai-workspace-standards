@@ -97,7 +97,7 @@ const WORKSPACE_ROOT = fileURLToPath(new URL("..", import.meta.url))
 // platform_surfaces registry consumers (sync-agent-mirrors coverage guard,
 // validate-templates shape check, registry unit tests).
 export const PLATFORMS = ["claude", "gemini", "antigravity", "gemini-cli", "codex", "hermes", "zai", "zcode"] as const;
-type Platform = typeof PLATFORMS[number];
+type Platform = (typeof PLATFORMS)[number];
 
 export const VALID_TIERS = ["high", "medium", "low"] as const;
 
@@ -172,9 +172,7 @@ export function extractFrontmatter(content: string): string | null {
  *     antigravity: high   # gemini-3.1-pro (thinking_level="medium")
  *     gemini-cli: high    # gemini-3.1-pro
  */
-export function parseTierBlock(
-  frontmatter: string,
-): Map<string, { tier: string; modelComment: string | null }> {
+export function parseTierBlock(frontmatter: string): Map<string, { tier: string; modelComment: string | null }> {
   const result = new Map<string, { tier: string; modelComment: string | null }>();
   const lines = frontmatter.split("\n");
 
@@ -564,8 +562,7 @@ export function runModelRegistryValidation(workspaceRoot: string): ModelRegistry
           : [models[target.platform]?.[tier]].filter((m): m is string => Boolean(m)).sort();
       const declaredSorted = [...declaredIds].sort();
       const matches =
-        declaredSorted.length === expectedIds.length &&
-        declaredSorted.every((id, i) => id === expectedIds[i]);
+        declaredSorted.length === expectedIds.length && declaredSorted.every((id, i) => id === expectedIds[i]);
       if (!matches) {
         report.proseMismatches.push({
           file: target.file,
@@ -668,11 +665,7 @@ export function printReport(report: ModelRegistryReport): void {
   // transition WARN classes — every tier-coverage finding is a coverageFail
   // printed as ERROR above; a run either prints the bare ✓ PASS line or FAILs.
 
-  if (
-    report.coverageFails.length === 0 &&
-    report.modelMismatches.length === 0 &&
-    report.proseMismatches.length === 0
-  ) {
+  if (report.coverageFails.length === 0 && report.modelMismatches.length === 0 && report.proseMismatches.length === 0) {
     console.log("✓ All agent model names + tier→model mapping prose match registry");
   }
 }

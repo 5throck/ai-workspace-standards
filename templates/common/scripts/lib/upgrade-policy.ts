@@ -362,26 +362,26 @@
 //   - scripts/check-upgrade-coverage.ts — reports the classification matrix over the whole
 //     effective template tree and gates on the strict checks (placeholders, WS-07, JSON health).
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import { join } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { join } from "node:path";
 
 /** Delivery policies. `SYNC` is the default fallback (deliver with conflict warning). */
 export type UpgradePolicy =
-  | 'LOCKED'
-  | 'MERGE_MANAGED'
-  | 'OVERWRITE'
-  | 'VERSIONED_SYNC'
-  | 'HASH_SYNC'
-  | 'ADD_IF_MISSING'
-  | 'REGENERATED'
-  | 'PRESERVE'
-  | 'PROJECT_STATE'
-  | 'TEMPLATE_ONLY'
-  | 'JSON_MERGE'
-  | 'SCHEMA_MERGE'
-  | 'WORKSPACE'
-  | 'SYNC';
+  | "LOCKED"
+  | "MERGE_MANAGED"
+  | "OVERWRITE"
+  | "VERSIONED_SYNC"
+  | "HASH_SYNC"
+  | "ADD_IF_MISSING"
+  | "REGENERATED"
+  | "PRESERVE"
+  | "PROJECT_STATE"
+  | "TEMPLATE_ONLY"
+  | "JSON_MERGE"
+  | "SCHEMA_MERGE"
+  | "WORKSPACE"
+  | "SYNC";
 
 export interface UpgradeClaim {
   policy: UpgradePolicy;
@@ -390,14 +390,14 @@ export interface UpgradeClaim {
 }
 
 /** Pass id of the default-policy delivery pass in scripts/upgrade-project.ts. */
-export const TEMPLATE_TREE_SYNC_PASS = 'TEMPLATE TREE SYNC';
+export const TEMPLATE_TREE_SYNC_PASS = "TEMPLATE TREE SYNC";
 
 /** Pass id of the generic VARIANT ASSET DIRS delivery pass in scripts/upgrade-project.ts
  *  (every top-level template dir outside KNOWN_TOP_DIRS — co-safety's workflows/,
  *  co-design's decisions/, …). Exported so the pass's per-file claim filter compares
  *  identities, not a second hard-coded literal — the same drift class
  *  TEMPLATE_TREE_SYNC_PASS exists to prevent (T-20260924-011, design D2/D3). */
-export const VARIANT_ASSET_DIRS_PASS = 'VARIANT ASSET DIRS';
+export const VARIANT_ASSET_DIRS_PASS = "VARIANT ASSET DIRS";
 
 /** Pass id of the dedicated REGION PROFILES delivery pass (T-20260927-010): add-if-missing
  *  per file for `region-profiles/**` — the ADR-0091 structured regulatory layer. Project
@@ -405,12 +405,12 @@ export const VARIANT_ASSET_DIRS_PASS = 'VARIANT ASSET DIRS';
  *  template update must never overwrite a delivered file (the procedures/** clobber class,
  *  T-20260924-011). Without the claim the resolveClaim fallthrough assigned these paths
  *  plain SYNC on the VARIANT ASSET DIRS pass. */
-export const REGION_PROFILES_PASS = 'REGION PROFILES';
+export const REGION_PROFILES_PASS = "REGION PROFILES";
 
 // ── Legacy pass inventories (mirrored from scripts/upgrade-project.ts; drift-guarded by tests) ──
 
 /** GOVERNANCE FILES SYNC list (upgrade-project.ts). SECURITY.md added per design D5. */
-export const GOVERNANCE_FILES = ['LICENSE', 'SECURITY.md'] as const;
+export const GOVERNANCE_FILES = ["LICENSE", "SECURITY.md"] as const;
 
 /** docs/ subdirectories that are PROJECT WORKSPACES: template seeds are add-if-missing only;
  *  project artifacts there are never overwritten and never pruned. `specs` (ADR-0074): the
@@ -418,7 +418,14 @@ export const GOVERNANCE_FILES = ['LICENSE', 'SECURITY.md'] as const;
  *  TEMPLATE TREE SYNC pass (a named pass with no delivery code is silently never delivered:
  *  the 2026-09-12 DESIGN GATE SEED incident). */
 export const WORKSPACE_DOC_DIRS = [
-  'designs', 'drafts', 'reports', 'research', 'findings', 'threat-models', 'lifecycle', 'specs',
+  "designs",
+  "drafts",
+  "reports",
+  "research",
+  "findings",
+  "threat-models",
+  "lifecycle",
+  "specs",
 ] as const;
 
 /** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass.
@@ -431,8 +438,11 @@ export const WORKSPACE_DOC_DIRS = [
  *  to the templates/common seed today, so the merge is a no-op rollout (ADR-0076 v1.2.0
  *  precedent). */
 export const JSON_MERGE_FILES = [
-  '.claude/settings.json', '.gemini/settings.json', '.mcp.json', 'opencode.json',
-  '.agents/mcp.json',
+  ".claude/settings.json",
+  ".gemini/settings.json",
+  ".mcp.json",
+  "opencode.json",
+  ".agents/mcp.json",
 ] as const;
 
 /** Graft-era seeds retired by the trail migration (design
@@ -447,14 +457,14 @@ export const JSON_MERGE_FILES = [
  *  unit-pinnable; the list never shrinks silently (design R2.6: graft-era
  *  tolerance stays while any project is pre-migration). */
 export const TRAIL_RETIRED_SEEDS = [
-  '.mcp.json',
-  '.claude/helpers/graft-hooks.cjs',
-  '.claude/helpers/graft-statusline.cjs',
+  ".mcp.json",
+  ".claude/helpers/graft-hooks.cjs",
+  ".claude/helpers/graft-statusline.cjs",
 ] as const;
 
 /** True when `rel` is a graft-era seed retired by the trail migration. */
 export function isTrailRetiredSeed(rel: string): boolean {
-  return (TRAIL_RETIRED_SEEDS as readonly string[]).includes(rel.replace(/\\/g, '/'));
+  return (TRAIL_RETIRED_SEEDS as readonly string[]).includes(rel.replace(/\\/g, "/"));
 }
 
 /** The one file the SCHEMA_MERGE delivery policy claims (spec
@@ -466,21 +476,21 @@ export function isTrailRetiredSeed(rel: string): boolean {
  *  conflict-skip path blocked the 0.25.0 upgrades entirely; SCHEMA_MERGE delivers
  *  template-added blocks (platform_surfaces, routeAudit) while the merge preserves
  *  project-owned content (design §4). */
-export const SCHEMA_MERGE_FILE = 'docs/workspace-schema.json';
+export const SCHEMA_MERGE_FILE = "docs/workspace-schema.json";
 
 /** Files whose scaffold-delivered copy was intentionally left unsubstituted — `{{tokens}}` are
  *  expected content, so the coverage validator's placeholder check must not flag them. */
 export const PLACEHOLDER_ALLOWLIST = new Set([
-  'docs/README.template.md',
-  'docs/README_ko.template.md',
+  "docs/README.template.md",
+  "docs/README_ko.template.md",
   // explain-me ships its own report TEMPLATE + authoring guide; the {{tokens}} are
   // substituted by the skill itself at project runtime (report generation), never by
   // scaffolding — exactly the "ships verbatim unrendered by design" contract above.
   // (T-20260912-021: the files reached templates/common when the skill's L0↔L1
   // mirror drift was fixed; before that only SKILL.md propagated and projects got a
   // broken half-skill.)
-  'skills/explain-me/templates/report.html',
-  'skills/explain-me/references/BUILD_GUIDE.md',
+  "skills/explain-me/templates/report.html",
+  "skills/explain-me/references/BUILD_GUIDE.md",
   // co-security assurance-suite canonicals (hub doctrine, spec
   // 2026-11-01-hub-consolidation-design Phase 1 batch C): the {{PROJECT_*}}
   // tokens are hub-doctrine derivation parameters substituted when a spoke
@@ -489,16 +499,16 @@ export const PLACEHOLDER_ALLOWLIST = new Set([
   // "ships verbatim unrendered by design" contract as explain-me above; the
   // mirror-prefix strip in check-upgrade-coverage.ts covers the platform
   // mirrors via these skill-level keys.
-  'skills/samm-maturity/SKILL.md',
-  'skills/sarif-exporter/SKILL.md',
-  'skills/spdx-sbom/SKILL.md',
-  'skills/stride-threat-matrix/SKILL.md',
-  'skills/finding-reconciliation/SKILL.md',
+  "skills/samm-maturity/SKILL.md",
+  "skills/sarif-exporter/SKILL.md",
+  "skills/spdx-sbom/SKILL.md",
+  "skills/stride-threat-matrix/SKILL.md",
+  "skills/finding-reconciliation/SKILL.md",
   // co-develop generic-dev-spine agent canonicals (hub doctrine, spec
   // 2026-11-01-hub-consolidation-design Phase 1 batch D): derivation tokens
   // per the batch C contract above; agent files carry no L2 platform mirrors.
-  'agents/architect.md',
-  'agents/test-runner.md',
+  "agents/architect.md",
+  "agents/test-runner.md",
 ]);
 
 // ── Scaffold-parity facts (mirrored from scripts/new-project.ts) ─────────────────────────────
@@ -508,17 +518,15 @@ export const PLACEHOLDER_ALLOWLIST = new Set([
  *  into a project would resurrect files the scaffold deliberately removed. docs/specs left
  *  this list in ADR-0074 Amendment 2: its registry seed activates the Universal Design Gate
  *  in projects and rides the WORKSPACE seed semantics above. */
-const TEMPLATE_ONLY_DIRS = [
-  'docs/_common', 'docs/_templates', 'docs/_examples', 'docs/variants', 'docs/adr',
-];
+const TEMPLATE_ONLY_DIRS = ["docs/_common", "docs/_templates", "docs/_examples", "docs/variants", "docs/adr"];
 
 const TEMPLATE_ONLY_FILES = new Set([
-  'docs/variant.context.template.md',
-  'docs/project.template.md', // rendered into docs/project.md at scaffold time, then removed (spec 2026-09-24-scaffold-identity-overview-design)
-  'agents/lifecycle-manager.md',
-  'agents/_COMMON.md',
-  'agents/pm.md.backup',
-  'scripts/propagation-map.json',
+  "docs/variant.context.template.md",
+  "docs/project.template.md", // rendered into docs/project.md at scaffold time, then removed (spec 2026-09-24-scaffold-identity-overview-design)
+  "agents/lifecycle-manager.md",
+  "agents/_COMMON.md",
+  "agents/pm.md.backup",
+  "scripts/propagation-map.json",
 ]);
 
 /** Project-owned identity seed (spec 2026-09-24-scaffold-identity-overview-design,
@@ -529,22 +537,19 @@ const TEMPLATE_ONLY_FILES = new Set([
  *  deny-list fallback (SYNC) would wholesale-copy over user content, and this
  *  claim still blocks that (the co-abap docs/context.md regression class). */
 const ADD_IF_MISSING_FILES = new Set([
-  'docs/project.md',
+  "docs/project.md",
   // Trail skeleton wiring (design 2026-11-08-trail-fleet-standard-design §5.2,
   // DEC-20261108-01 R2): seed-when-absent, withhold-when-present — a project
   // whose copies exist (scaffold-delivered or `trail init`-refreshed) keeps
   // them byte-for-byte. Unlike docs/project.md this claim FIRES: the files
   // exist template-side at templates/common/.trail/ from this design on.
-  '.trail/hook.cjs',
-  '.trail/README.md',
-  '.trail/.gitignore',
+  ".trail/hook.cjs",
+  ".trail/README.md",
+  ".trail/.gitignore",
 ]);
 
 /** Project runtime / generated state — exists in projects but is never template-delivered. */
-const PROJECT_STATE_FILES = new Set([
-  'package.json', 'bun.lock', 'bun.lockb', 'package-lock.json',
-  'variant.json',
-]);
+const PROJECT_STATE_FILES = new Set(["package.json", "bun.lock", "bun.lockb", "package-lock.json", "variant.json"]);
 
 /** Project files the scaffold/upgrade flows REGENERATE in place
  *  (T-20260916-010: docs/VERSION_MANIFEST.md joined — templates stopped
@@ -558,16 +563,15 @@ const PROJECT_STATE_FILES = new Set([
  *  froze it at scaffold/adopt, so the Script version comparison re-reported
  *  the same stale snapshot drift on every upgrade.) */
 const REGENERATED_FILES = new Set([
-  'docs/skill-graph.json', '.claude/template-version.txt',
-  'docs/VERSION_MANIFEST.md',
-  'scripts-snapshot.json',
+  "docs/skill-graph.json",
+  ".claude/template-version.txt",
+  "docs/VERSION_MANIFEST.md",
+  "scripts-snapshot.json",
 ]);
 
-const PRESERVE_FILES = new Set([
-  'README.md', 'README_ko.md', 'CHANGELOG.md', 'docs/README.md', 'docs/README_ko.md',
-]);
+const PRESERVE_FILES = new Set(["README.md", "README_ko.md", "CHANGELOG.md", "docs/README.md", "docs/README_ko.md"]);
 
-const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
+const LOCKED_FILES = new Set([".gitattributes", ".gitleaks.toml"]);
 
 /**
  * Files whose WORKSPACE-MANAGED blocks upgrade MERGE unions into projects. Exported
@@ -588,7 +592,16 @@ const LOCKED_FILES = new Set(['.gitattributes', '.gitleaks.toml']);
  * to MANAGED_PATTERNS, so the CODEX/HERMES zone merges are ACTIVE. No claim
  * change was needed, as predicted.)
  */
-export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md', '.gitignore', 'AGENTS.md', 'agents/pm.md', '.github/workflows/ci.yml']);
+export const MERGE_MANAGED_FILES = new Set([
+  "CLAUDE.md",
+  "GEMINI.md",
+  "CODEX.md",
+  "HERMES.md",
+  ".gitignore",
+  "AGENTS.md",
+  "agents/pm.md",
+  ".github/workflows/ci.yml",
+]);
 
 /** Common-owned scaffold files: delivered by templates/common/ and sacred to the
  *  project — a variant template must never carry them (WS-07) and new-project's
@@ -596,17 +609,30 @@ export const MERGE_MANAGED_FILES = new Set(['CLAUDE.md', 'GEMINI.md', 'CODEX.md'
  *  clobbering the canonical common file just laid down). One SSOT for both
  *  consumers; extend here, never with a local hand list. (T-20260917-009,
  *  design docs/designs/2026-09-17-governance-backlog-batch-design.md) */
-export const SCAFFOLD_COMMON_OWNED_FILES = new Set(['docs/context.md']);
+export const SCAFFOLD_COMMON_OWNED_FILES = new Set(["docs/context.md"]);
 
-const OVERWRITE_FILES = new Set(['docs/phase-definitions.md', 'docs/security.md']);
+const OVERWRITE_FILES = new Set(["docs/phase-definitions.md", "docs/security.md"]);
 
-const TRAVERSAL_SKIP_DIRS = new Set(['node_modules', '.git', '.gateguard-state']);
+const TRAVERSAL_SKIP_DIRS = new Set(["node_modules", ".git", ".gateguard-state"]);
 
 /** Top-level dirs claimed by dedicated upgrade passes / platform machinery (everything else at
  *  top level belongs to the generic VARIANT ASSET DIRS pass). */
 const KNOWN_TOP_DIRS = new Set([
-  'agents', 'skills', 'scripts', 'docs', 'procedures',
-  '.claude', '.gemini', '.agents', '.codex', '.hermes', '.githooks', '.github', '.git', 'memory', 'node_modules',
+  "agents",
+  "skills",
+  "scripts",
+  "docs",
+  "procedures",
+  ".claude",
+  ".gemini",
+  ".agents",
+  ".codex",
+  ".hermes",
+  ".githooks",
+  ".github",
+  ".git",
+  "memory",
+  "node_modules",
 ]);
 
 function underDir(rel: string, dir: string): boolean {
@@ -618,65 +644,65 @@ function underDir(rel: string, dir: string): boolean {
  * `variant` enables the `docs/<variant>.context.md` DOCS_MERGE classification.
  * Never returns null — the fallback is the default-policy delivery claim by design.
  */
-export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
-  const rel = relPath.replace(/\\/g, '/').replace(/^\.\//, '');
-  if (!rel || rel === '.') return { policy: 'PROJECT_STATE', pass: '(none)' };
+export function resolveClaim(relPath: string, variant = ""): UpgradeClaim {
+  const rel = relPath.replace(/\\/g, "/").replace(/^\.\//, "");
+  if (!rel || rel === ".") return { policy: "PROJECT_STATE", pass: "(none)" };
 
   // Platform-machinery artifacts the scaffold strips or generates
-  if (rel.endsWith('.cmd')) return { policy: 'TEMPLATE_ONLY', pass: '(platform profile)' };
+  if (rel.endsWith(".cmd")) return { policy: "TEMPLATE_ONLY", pass: "(platform profile)" };
 
-  if (PROJECT_STATE_FILES.has(rel)) return { policy: 'PROJECT_STATE', pass: '(project state)' };
+  if (PROJECT_STATE_FILES.has(rel)) return { policy: "PROJECT_STATE", pass: "(project state)" };
   // external-deps.json (design docs/designs/2026-11-07-external-deps-machinery-design.md
   // D1/D3): the manifest is template-SEEDED (common + variant)
   // but project-OPERATED — the pass rewrites pin/commit on a compat-gated pin move, so a
   // generic SYNC claim would escalate every rewrite to CONFLICT. The dedicated EXTERNAL
   // DEPS pass owns delivery (seed add-if-missing + interim-manifest reconcile) and all
   // rewrites; TEMPLATE TREE SYNC never touches it.
-  if (rel === 'external-deps.json') return { policy: 'PROJECT_STATE', pass: 'EXTERNAL DEPS' };
-  if (underDir(rel, 'memory')) return { policy: 'PROJECT_STATE', pass: '(project memory)' };
-  if (rel === 'docs/countries/ACTIVE.md') return { policy: 'PROJECT_STATE', pass: '(country runtime state)' };
+  if (rel === "external-deps.json") return { policy: "PROJECT_STATE", pass: "EXTERNAL DEPS" };
+  if (underDir(rel, "memory")) return { policy: "PROJECT_STATE", pass: "(project memory)" };
+  if (rel === "docs/countries/ACTIVE.md") return { policy: "PROJECT_STATE", pass: "(country runtime state)" };
 
   // Universal Design Gate seed (ADR-0074): docs/specs/* claims fall through to the
   // WORKSPACE branch below (add-if-missing seed, never overwrite/prune project entries).
 
-  if (TEMPLATE_ONLY_FILES.has(rel)) return { policy: 'TEMPLATE_ONLY', pass: '(scaffold-removed)' };
+  if (TEMPLATE_ONLY_FILES.has(rel)) return { policy: "TEMPLATE_ONLY", pass: "(scaffold-removed)" };
   for (const dir of TEMPLATE_ONLY_DIRS) {
-    if (underDir(rel, dir)) return { policy: 'TEMPLATE_ONLY', pass: '(scaffold-removed)' };
+    if (underDir(rel, dir)) return { policy: "TEMPLATE_ONLY", pass: "(scaffold-removed)" };
   }
 
-  if (REGENERATED_FILES.has(rel)) return { policy: 'REGENERATED', pass: '(regenerated in place)' };
+  if (REGENERATED_FILES.has(rel)) return { policy: "REGENERATED", pass: "(regenerated in place)" };
   // .env.sample delivery is country-aware (ENV_SAMPLE SYNC pass): scaffold-time pruning
   // (prune-country-scoped-assets.ts, shared lib/env-sample.ts) strips country-scoped env
   // blocks from the project copy, so upgrades must re-deliver with the same pruning
   // applied — never a wholesale copy (that would re-inject pruned country profiles). The
   // pass MERGES (lib/env-sample.ts): template keys updated, project-only keys preserved.
-  if (rel === '.env.sample') return { policy: 'SYNC', pass: 'ENV_SAMPLE SYNC' };
-  if (PRESERVE_FILES.has(rel)) return { policy: 'PRESERVE', pass: '(project-owned)' };
+  if (rel === ".env.sample") return { policy: "SYNC", pass: "ENV_SAMPLE SYNC" };
+  if (PRESERVE_FILES.has(rel)) return { policy: "PRESERVE", pass: "(project-owned)" };
   if ((GOVERNANCE_FILES as readonly string[]).includes(rel)) {
-    return { policy: 'ADD_IF_MISSING', pass: 'GOVERNANCE FILES' };
+    return { policy: "ADD_IF_MISSING", pass: "GOVERNANCE FILES" };
   }
   // Project-owned identity seed — claim must sit ABOVE the docs/ fallback SYNC
   // branch below (spec 2026-09-24-scaffold-identity-overview-design, R6/D2).
   if (ADD_IF_MISSING_FILES.has(rel)) {
-    return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
+    return { policy: "ADD_IF_MISSING", pass: TEMPLATE_TREE_SYNC_PASS };
   }
 
-  if (LOCKED_FILES.has(rel) || underDir(rel, '.githooks')) return { policy: 'LOCKED', pass: 'LOCKED' };
-  if (MERGE_MANAGED_FILES.has(rel)) return { policy: 'MERGE_MANAGED', pass: 'MERGE' };
+  if (LOCKED_FILES.has(rel) || underDir(rel, ".githooks")) return { policy: "LOCKED", pass: "LOCKED" };
+  if (MERGE_MANAGED_FILES.has(rel)) return { policy: "MERGE_MANAGED", pass: "MERGE" };
   if (variant && rel === `docs/${variant}.context.md`) {
-    return { policy: 'MERGE_MANAGED', pass: 'DOCS_MERGE' };
+    return { policy: "MERGE_MANAGED", pass: "DOCS_MERGE" };
   }
-  if (OVERWRITE_FILES.has(rel)) return { policy: 'OVERWRITE', pass: 'DOCS_OVERWRITE' };
+  if (OVERWRITE_FILES.has(rel)) return { policy: "OVERWRITE", pass: "DOCS_OVERWRITE" };
   // The former VARIANT_DOCS_SYNC pass (docs/context.md and friends) was folded into the
   // TEMPLATE TREE SYNC pass in v1.22.0 — these files carry inline `*<file> version: X.Y`
   // footers (or hash fallback) and the default SYNC policy reproduces the old semantics
   // exactly, so no explicit claim is needed (deny-list inversion).
 
-  if (underDir(rel, '.claude/commands') || underDir(rel, '.gemini/commands')) {
-    return { policy: 'HASH_SYNC', pass: 'COMMANDS_SYNC' };
+  if (underDir(rel, ".claude/commands") || underDir(rel, ".gemini/commands")) {
+    return { policy: "HASH_SYNC", pass: "COMMANDS_SYNC" };
   }
   if ((JSON_MERGE_FILES as readonly string[]).includes(rel)) {
-    return { policy: 'JSON_MERGE', pass: TEMPLATE_TREE_SYNC_PASS };
+    return { policy: "JSON_MERGE", pass: TEMPLATE_TREE_SYNC_PASS };
   }
   // docs/workspace-schema.json (spec 2026-10-31-workspace-schema-merge-delivery-design):
   // the fleet SSOT for platform/model registries, route-audit tripwires, and design-lint
@@ -686,24 +712,30 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // additions (platform_surfaces, routeAudit) while the merge preserves project-owned
   // content. Claim must sit ABOVE the docs/ SYNC fall-through below.
   if (rel === SCHEMA_MERGE_FILE) {
-    return { policy: 'SCHEMA_MERGE', pass: TEMPLATE_TREE_SYNC_PASS };
+    return { policy: "SCHEMA_MERGE", pass: TEMPLATE_TREE_SYNC_PASS };
   }
 
-  if (underDir(rel, 'procedures')) return { policy: 'ADD_IF_MISSING', pass: 'PROCEDURES' };
+  if (underDir(rel, "procedures")) return { policy: "ADD_IF_MISSING", pass: "PROCEDURES" };
 
   // region-profiles/** (T-20260927-010): the ADR-0091 structured regulatory layer is
   // delivered once (scaffold or first upgrade carrying it) and is never overwritten —
   // project deltas are intentional (ADR-0091 R2). Dedicated REGION PROFILES pass.
-  if (underDir(rel, 'region-profiles')) return { policy: 'ADD_IF_MISSING', pass: REGION_PROFILES_PASS };
+  if (underDir(rel, "region-profiles")) return { policy: "ADD_IF_MISSING", pass: REGION_PROFILES_PASS };
 
   // Platform skill mirrors are distributed by the post-upgrade sync-skills.ts run, not file
   // passes. Codex mirrors (ADR-0077 W1/W4) joined them in the 2026-09-21 review (C-1); the
   // Hermes mirror (ADR-0088 W2) joins the same group. This group MUST stay ABOVE the blanket
   // `.codex/**` rule below, or the blanket ADD_IF_MISSING swallows the mirrors and fleet projects
   // never receive skill/prompt updates (graft fleet-gap class).
-  if (underDir(rel, '.claude/skills') || underDir(rel, '.gemini/skills') || underDir(rel, '.agents/skills')
-    || underDir(rel, '.codex/skills') || underDir(rel, '.codex/prompts') || underDir(rel, '.hermes/skills')) {
-    return { policy: 'SYNC', pass: 'sync-skills.ts (platform mirror)' };
+  if (
+    underDir(rel, ".claude/skills") ||
+    underDir(rel, ".gemini/skills") ||
+    underDir(rel, ".agents/skills") ||
+    underDir(rel, ".codex/skills") ||
+    underDir(rel, ".codex/prompts") ||
+    underDir(rel, ".hermes/skills")
+  ) {
+    return { policy: "SYNC", pass: "sync-skills.ts (platform mirror)" };
   }
   // Codex project config is per-project by nature (project MCP servers + codex hooks, e.g.
   // co-abap/co-safety): seed add-if-missing only, never overwrite an existing file (ADR-0076 D4).
@@ -715,58 +747,68 @@ export function resolveClaim(relPath: string, variant = ''): UpgradeClaim {
   // TOML merge is new delivery machinery that is deliberately out of scope. Accepted
   // trade-off: template-side config.toml changes intentionally reach only NEW projects —
   // existing projects drift by design; a drift DETECTOR is a candidate follow-up.
-  if (underDir(rel, '.codex')) return { policy: 'ADD_IF_MISSING', pass: TEMPLATE_TREE_SYNC_PASS };
+  if (underDir(rel, ".codex")) return { policy: "ADD_IF_MISSING", pass: TEMPLATE_TREE_SYNC_PASS };
 
   // Registration pointers + platform settings extras: default sync (static today, format may evolve).
   // `.hermes` (ADR-0088) is skills-mirror-only today — the mirror claim above owns `.hermes/skills`;
   // anything else under `.hermes` (none exists yet) defaults to SYNC like the other registration dirs.
-  if (underDir(rel, '.claude') || underDir(rel, '.gemini') || underDir(rel, '.agents') || underDir(rel, '.hermes')) {
-    return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
+  if (underDir(rel, ".claude") || underDir(rel, ".gemini") || underDir(rel, ".agents") || underDir(rel, ".hermes")) {
+    return { policy: "SYNC", pass: TEMPLATE_TREE_SYNC_PASS };
   }
 
-  if (underDir(rel, 'agents')) return { policy: 'SYNC', pass: 'SYNC_IF_NEWER: agents/' };
-  if (underDir(rel, 'skills')) return { policy: 'SYNC', pass: 'SYNC_IF_NEWER: skills/' };
-  if (underDir(rel, 'scripts')) return { policy: 'SYNC', pass: 'SYNC_IF_NEWER: scripts/' };
+  if (underDir(rel, "agents")) return { policy: "SYNC", pass: "SYNC_IF_NEWER: agents/" };
+  if (underDir(rel, "skills")) return { policy: "SYNC", pass: "SYNC_IF_NEWER: skills/" };
+  if (underDir(rel, "scripts")) return { policy: "SYNC", pass: "SYNC_IF_NEWER: scripts/" };
 
-  if (underDir(rel, 'docs')) {
-    const second = rel.split('/')[1] ?? '';
+  if (underDir(rel, "docs")) {
+    const second = rel.split("/")[1] ?? "";
     if ((WORKSPACE_DOC_DIRS as readonly string[]).includes(second)) {
-      return { policy: 'WORKSPACE', pass: TEMPLATE_TREE_SYNC_PASS };
+      return { policy: "WORKSPACE", pass: TEMPLATE_TREE_SYNC_PASS };
     }
-    return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
+    return { policy: "SYNC", pass: TEMPLATE_TREE_SYNC_PASS };
   }
 
   // Any other top-level directory (e.g. co-safety's workflows/, regulations/) is the
   // generic VARIANT ASSET DIRS pass's territory. A path deeper than one segment can only
   // get here from such a directory (all known tops are claimed above).
-  const top = rel.split('/')[0];
-  if (!KNOWN_TOP_DIRS.has(top) && rel.includes('/')) {
-    return { policy: 'SYNC', pass: VARIANT_ASSET_DIRS_PASS };
+  const top = rel.split("/")[0];
+  if (!KNOWN_TOP_DIRS.has(top) && rel.includes("/")) {
+    return { policy: "SYNC", pass: VARIANT_ASSET_DIRS_PASS };
   }
 
   // Root-level files with no dedicated pass (.editorconfig, …): the inversion —
   // deliver by default instead of silently dropping.
-  return { policy: 'SYNC', pass: TEMPLATE_TREE_SYNC_PASS };
+  return { policy: "SYNC", pass: TEMPLATE_TREE_SYNC_PASS };
 }
 
 /** True when a claim's policy delivers file content into the project (validator placeholder check scope). */
 export function isDeliveryPolicy(policy: UpgradePolicy): boolean {
-  return ['LOCKED', 'MERGE_MANAGED', 'OVERWRITE', 'VERSIONED_SYNC', 'HASH_SYNC',
-    'ADD_IF_MISSING', 'JSON_MERGE', 'SCHEMA_MERGE', 'WORKSPACE', 'SYNC'].includes(policy);
+  return [
+    "LOCKED",
+    "MERGE_MANAGED",
+    "OVERWRITE",
+    "VERSIONED_SYNC",
+    "HASH_SYNC",
+    "ADD_IF_MISSING",
+    "JSON_MERGE",
+    "SCHEMA_MERGE",
+    "WORKSPACE",
+    "SYNC",
+  ].includes(policy);
 }
 
 // ── Effective template tree (scaffold parity: variant overlay over common) ────────────────────
 
 export interface EffectiveFile {
   rel: string;
-  source: 'variant' | 'common';
+  source: "variant" | "common";
   abs: string;
 }
 
-function* walkFiles(root: string, prefix = ''): Generator<string> {
+function* walkFiles(root: string, prefix = ""): Generator<string> {
   if (!existsSync(root)) return;
   for (const entry of readdirSync(root, { withFileTypes: true })) {
-    if (TRAVERSAL_SKIP_DIRS.has(entry.name) || entry.name === '.DS_Store') continue;
+    if (TRAVERSAL_SKIP_DIRS.has(entry.name) || entry.name === ".DS_Store") continue;
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
     const abs = join(root, entry.name);
     if (statSync(abs).isDirectory()) yield* walkFiles(abs, rel);
@@ -779,21 +821,18 @@ function* walkFiles(root: string, prefix = ''): Generator<string> {
  * templates/common (variant wins), replicating scaffold overlay facts — the variant never
  * provides docs/context.md (VARIANT_OVERLAY_SKIP / WS-07).
  */
-export function* iterEffectiveTemplateFiles(
-  commonDir: string,
-  variantDir: string | null,
-): Generator<EffectiveFile> {
+export function* iterEffectiveTemplateFiles(commonDir: string, variantDir: string | null): Generator<EffectiveFile> {
   const seen = new Set<string>();
   if (variantDir && existsSync(variantDir)) {
     for (const rel of walkFiles(variantDir)) {
-      if (rel === 'docs/context.md') continue; // WS-07: common is the SSOT
+      if (rel === "docs/context.md") continue; // WS-07: common is the SSOT
       seen.add(rel);
-      yield { rel, source: 'variant', abs: join(variantDir, rel) };
+      yield { rel, source: "variant", abs: join(variantDir, rel) };
     }
   }
   for (const rel of walkFiles(commonDir)) {
     if (seen.has(rel)) continue;
-    yield { rel, source: 'common', abs: join(commonDir, rel) };
+    yield { rel, source: "common", abs: join(commonDir, rel) };
   }
 }
 
@@ -807,7 +846,7 @@ export interface JsonMergeResult {
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 /** Deep-merge template settings over project settings (design D4):
@@ -815,7 +854,11 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
  *  - arrays are unioned — project-only entries survive (protects project permission grants),
  *  - scalars: template wins.
  *  Project-only keys anywhere in the tree are preserved and reported (dot paths from the root). */
-export function mergeSettingsData(template: unknown, project: unknown, path = ''): { merged: unknown; preserved: string[] } {
+export function mergeSettingsData(
+  template: unknown,
+  project: unknown,
+  path = "",
+): { merged: unknown; preserved: string[] } {
   const preserved: string[] = [];
   const childPath = (key: string) => (path ? `${path}.${key}` : key);
 
@@ -840,7 +883,7 @@ export function mergeSettingsData(template: unknown, project: unknown, path = ''
     // Union with template first: template entries present, project-only entries kept.
     const merged = [...template];
     for (const item of project) {
-      if (!merged.some(m => JSON.stringify(m) === JSON.stringify(item))) {
+      if (!merged.some((m) => JSON.stringify(m) === JSON.stringify(item))) {
         merged.push(item);
         preserved.push(`${path}[]`);
       }
@@ -853,8 +896,8 @@ export function mergeSettingsData(template: unknown, project: unknown, path = ''
 
 /** Merge the template settings file over the project's copy on disk. Read-only on the template. */
 export function mergeSettingsJson(projectFile: string, templateFile: string): JsonMergeResult {
-  const template = JSON.parse(readFileSync(templateFile, 'utf8'));
-  const projectRaw = readFileSync(projectFile, 'utf8');
+  const template = JSON.parse(readFileSync(templateFile, "utf8"));
+  const projectRaw = readFileSync(projectFile, "utf8");
   const project = JSON.parse(projectRaw);
   const { merged, preserved } = mergeSettingsData(template, project);
   const out = `${JSON.stringify(merged, null, 2)}\n`;
@@ -876,7 +919,7 @@ export function mergeSettingsJson(projectFile: string, templateFile: string): Js
  *  even when present in the project copy, the template value lands (schema-version
  *  evolution must reach every project). Everything else absent from the project copy is
  *  also template-owned (template-ADDED blocks land through that rule). */
-export const SCHEMA_TEMPLATE_OWNED_KEYS = ['$schema', 'version', 'description'] as const;
+export const SCHEMA_TEMPLATE_OWNED_KEYS = ["$schema", "version", "description"] as const;
 
 /** Template-authoritative vocabulary blocks (v1.34.0, U-20261101-001 addendum):
  *  top-level blocks the template owns VERBATIM even when present in the project
@@ -887,7 +930,7 @@ export const SCHEMA_TEMPLATE_OWNED_KEYS = ['$schema', 'version', 'description'] 
  *  pair and fails the gate. The template value lands; divergence is logged
  *  (TEMPLATE_DELTA INFO), never withheld. Everything else (notably
  *  `designLint`, the protected token-debt class) stays project-wins. */
-export const SCHEMA_TEMPLATE_AUTHORITATIVE_KEYS = ['models', 'platform_surfaces'] as const;
+export const SCHEMA_TEMPLATE_AUTHORITATIVE_KEYS = ["models", "platform_surfaces"] as const;
 
 /** One withheld template change: a shared-block leaf whose final (project-won) value
  *  differs from the template's value. The engine turns these into TEMPLATE_DELTA
@@ -902,7 +945,7 @@ export interface SchemaMergeLeafDelta {
   project: string;
   /** WARN for scalar/array divergences (a reshaped value the template wanted to deliver);
    *  INFO for structural mismatches (an object replaced by a non-object or vice versa). */
-  severity: 'WARN' | 'INFO';
+  severity: "WARN" | "INFO";
 }
 
 export interface SchemaMergeResult {
@@ -916,7 +959,7 @@ export interface SchemaMergeResult {
 }
 
 function isSchemaPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 /** Structural deep-equality (order-insensitive for object keys; arrays compare element-wise
@@ -967,7 +1010,7 @@ function mergeSchemaNode(t: unknown, p: unknown, path: string, deltas: SchemaMer
       path,
       template: summarizeSchemaValue(t),
       project: summarizeSchemaValue(p),
-      severity: structural ? 'INFO' : 'WARN',
+      severity: structural ? "INFO" : "WARN",
     });
   }
   return p;
@@ -989,16 +1032,16 @@ function recordTemplateAuthoritativeDeltas(t: unknown, p: unknown, path: string,
       if (!(key in t)) {
         deltas.push({
           path: `${path}.${key}`,
-          template: '(absent — project-only key dropped by the template-authoritative landing)',
+          template: "(absent — project-only key dropped by the template-authoritative landing)",
           project: summarizeSchemaValue(p[key]),
-          severity: 'INFO',
+          severity: "INFO",
         });
       }
     }
     return;
   }
   if (!schemaDeepEqual(t, p)) {
-    deltas.push({ path, template: summarizeSchemaValue(t), project: summarizeSchemaValue(p), severity: 'INFO' });
+    deltas.push({ path, template: summarizeSchemaValue(t), project: summarizeSchemaValue(p), severity: "INFO" });
   }
 }
 
@@ -1026,10 +1069,10 @@ function recordTemplateAuthoritativeDeltas(t: unknown, p: unknown, path: string,
  */
 export function mergeWorkspaceSchemaData(template: unknown, project: unknown): SchemaMergeResult {
   if (!isSchemaPlainObject(template)) {
-    throw new Error('SCHEMA_MERGE: template docs/workspace-schema.json is not a JSON object');
+    throw new Error("SCHEMA_MERGE: template docs/workspace-schema.json is not a JSON object");
   }
   if (!isSchemaPlainObject(project)) {
-    throw new Error('SCHEMA_MERGE: project docs/workspace-schema.json is not a JSON object');
+    throw new Error("SCHEMA_MERGE: project docs/workspace-schema.json is not a JSON object");
   }
   const deltas: SchemaMergeLeafDelta[] = [];
   const merged: Record<string, unknown> = { ...project };
@@ -1077,8 +1120,8 @@ export interface SchemaMergeJsonResult {
 }
 
 export function mergeWorkspaceSchemaJson(projectFile: string, templateFile: string): SchemaMergeJsonResult {
-  const template = JSON.parse(readFileSync(templateFile, 'utf8'));
-  const projectRaw = readFileSync(projectFile, 'utf8');
+  const template = JSON.parse(readFileSync(templateFile, "utf8"));
+  const projectRaw = readFileSync(projectFile, "utf8");
   const project = JSON.parse(projectRaw);
   const result = mergeWorkspaceSchemaData(template, project);
   const out = `${JSON.stringify(result.merged, null, 2)}\n`;
@@ -1101,7 +1144,10 @@ export function lifecyclelessText(text: string): string {
   const kept: string[] = [];
   let skipping = false;
   for (const line of lines) {
-    if (/^lifecycle:\s*$/.test(line)) { skipping = true; continue; }
+    if (/^lifecycle:\s*$/.test(line)) {
+      skipping = true;
+      continue;
+    }
     if (skipping) {
       if (/^[^\s#]/.test(line)) {
         skipping = false;
@@ -1159,13 +1205,13 @@ function frontmatterBody(content: string): { body: string; start: number; end: n
     body: m[1],
     start: m.index,
     end: m.index + m[0].length,
-    eol: m[0].includes('\r\n') ? '\r\n' : '\n',
+    eol: m[0].includes("\r\n") ? "\r\n" : "\n",
   };
 }
 
 /** Strip a trailing YAML comment from a scalar tier value (`medium # claude:sonnet` → `medium`). */
 function stripTierComment(value: string): string {
-  return value.replace(/\s+#.*$/, '').trim();
+  return value.replace(/\s+#.*$/, "").trim();
 }
 
 /**
@@ -1189,7 +1235,12 @@ function stripTierComment(value: string): string {
  */
 export function normalizeAgentTierFrontmatter(projectContent: string, templateContent: string): AgentTierNormalization {
   const untouched: AgentTierNormalization = {
-    content: projectContent, changed: false, conflict: false, legacy: false, templateTier: '', projectTier: '',
+    content: projectContent,
+    changed: false,
+    conflict: false,
+    legacy: false,
+    templateTier: "",
+    projectTier: "",
   };
   const tplFm = frontmatterBody(templateContent);
   if (!tplFm) return untouched;
@@ -1221,7 +1272,7 @@ export function normalizeAgentTierFrontmatter(projectContent: string, templateCo
     conflict: false,
     legacy: true,
     templateTier,
-    projectTier: '',
+    projectTier: "",
   };
 }
 
@@ -1281,19 +1332,19 @@ export function backfillStubFrontmatter(
   const present = (key: string): boolean =>
     projFm.body.split(/\r?\n/).some((l) => new RegExp(`^${key}:(?:[ \\t].*)?$`).test(l));
   const tplScalar = (key: string): string => {
-    const m = tplFm.body.match(new RegExp(`^${key}:[ \\t]*(\\S[^\\r\\n]*)$`, 'm'));
-    return m ? m[1].trim() : '';
+    const m = tplFm.body.match(new RegExp(`^${key}:[ \\t]*(\\S[^\\r\\n]*)$`, "m"));
+    return m ? m[1].trim() : "";
   };
   const fills: string[] = [];
-  if (!present('tier')) {
-    const tier = stripTierComment(tplScalar('tier'));
+  if (!present("tier")) {
+    const tier = stripTierComment(tplScalar("tier"));
     if (tier) fills.push(`tier: ${tier}`);
   }
-  if (!present('version')) {
-    const version = tplScalar('version');
+  if (!present("version")) {
+    const version = tplScalar("version");
     if (version) fills.push(`version: ${version}`);
   }
-  if (!present('last_updated') && /^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) {
+  if (!present("last_updated") && /^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) {
     fills.push(`last_updated: ${deliveryDate}`);
   }
   if (fills.length === 0) return unchanged;
@@ -1302,7 +1353,7 @@ export function backfillStubFrontmatter(
   return {
     content: projectContent.slice(0, projFm.start) + fmText + projectContent.slice(projFm.end),
     changed: true,
-    filled: fills.map((f) => f.split(':')[0]!),
+    filled: fills.map((f) => f.split(":")[0]!),
   };
 }
 
@@ -1314,17 +1365,17 @@ export function backfillStubFrontmatter(
  *  manifest.files; when their content changed, isDeliveredDiff() rejected the
  *  diff and dev-sync step 3.9 hard-blocked a purely delivered diff. */
 export const PIPELINE_ARTIFACT_PATHS: readonly string[] = [
-  'CHANGELOG.md',
-  'docs/VERSION_MANIFEST.md',
-  'docs/skill-graph.json',
-  'docs/skill-graph.md',
-  '.claude/last-upgrade-delivery.json',
-  '.claude/last-upgrade-pr-body.md',
-  'scripts-snapshot.json',
+  "CHANGELOG.md",
+  "docs/VERSION_MANIFEST.md",
+  "docs/skill-graph.json",
+  "docs/skill-graph.md",
+  ".claude/last-upgrade-delivery.json",
+  ".claude/last-upgrade-pr-body.md",
+  "scripts-snapshot.json",
 ];
 
 export function isPipelineArtifact(rel: string): boolean {
-  return PIPELINE_ARTIFACT_PATHS.includes(rel) || rel.startsWith('memory/');
+  return PIPELINE_ARTIFACT_PATHS.includes(rel) || rel.startsWith("memory/");
 }
 
 /**
@@ -1336,8 +1387,9 @@ export function isDeliveredDiff(changedFiles: string[], deliveredFiles: string[]
   const delivered = new Set(deliveredFiles);
   // Requires at least one delivered file in the diff — a changelog/memory-only
   // diff is not an upgrade delivery.
-  return changedFiles.some(f => delivered.has(f))
-    && changedFiles.every(f => delivered.has(f) || isPipelineArtifact(f));
+  return (
+    changedFiles.some((f) => delivered.has(f)) && changedFiles.every((f) => delivered.has(f) || isPipelineArtifact(f))
+  );
 }
 
 // ── Delivery-decision log (sync-overwrite-policy design, spec 2026-10-27-sync-overwrite-policy) ─
@@ -1350,7 +1402,7 @@ export function isDeliveredDiff(changedFiles: string[], deliveredFiles: string[]
  *  worth reading; ERROR = requires explicit disposition before the delivery can
  *  be considered clean. MERGE defaults INFO (uncontested union); the engine
  *  overrides to WARN when a destructive in-zone replace wrote a snapshot. */
-export type DecisionSeverity = 'INFO' | 'WARN' | 'ERROR';
+export type DecisionSeverity = "INFO" | "WARN" | "ERROR";
 
 /** Verdicts of the unified decision log (design D3/D2 matrix). TOMBSTONED /
  *  TOMBSTONED_SKIP joined in v1.27.0 (tombstone-ownership design D3);
@@ -1375,56 +1427,56 @@ export type DecisionSeverity = 'INFO' | 'WARN' | 'ERROR';
  *  must never be silent; DELETE is contractually WARN, the floor the
  *  adjudication set for destructive rows). */
 export type DecisionVerdict =
-  | 'NEW'
-  | 'UPDATE'
-  | 'ADOPT'
-  | 'SKIP'
-  | 'MERGE'
-  | 'TEMPLATE_DELTA'
-  | 'CONTEXT_PRESERVE'
-  | 'DRIFT_PRESERVE'
-  | 'DRIFT_RESTORED'
-  | 'STUB_SKIP'
-  | 'STUB_FM_BACKFILL'
-  | 'STUB_VERSION_BUMP_ADVICE'
-  | 'STUB_VERSION_DIVERGENCE'
-  | 'REGION_IN_SYNC'
-  | 'EVOLVED_REGION'
-  | 'TEMPLATE_AHEAD_REGION'
-  | 'SEED_SKIP'
-  | 'SKELETON_COLLISION'
-  | 'EVOLVED'
-  | 'TOMBSTONED'
-  | 'TOMBSTONED_SKIP'
-  | 'TOMBSTONE_CLEARED'
-  | 'CONFLICT'
-  | 'DELETE';
+  | "NEW"
+  | "UPDATE"
+  | "ADOPT"
+  | "SKIP"
+  | "MERGE"
+  | "TEMPLATE_DELTA"
+  | "CONTEXT_PRESERVE"
+  | "DRIFT_PRESERVE"
+  | "DRIFT_RESTORED"
+  | "STUB_SKIP"
+  | "STUB_FM_BACKFILL"
+  | "STUB_VERSION_BUMP_ADVICE"
+  | "STUB_VERSION_DIVERGENCE"
+  | "REGION_IN_SYNC"
+  | "EVOLVED_REGION"
+  | "TEMPLATE_AHEAD_REGION"
+  | "SEED_SKIP"
+  | "SKELETON_COLLISION"
+  | "EVOLVED"
+  | "TOMBSTONED"
+  | "TOMBSTONED_SKIP"
+  | "TOMBSTONE_CLEARED"
+  | "CONFLICT"
+  | "DELETE";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
-  NEW: 'INFO',
-  UPDATE: 'INFO',
-  ADOPT: 'INFO',
-  SKIP: 'INFO',
-  MERGE: 'INFO',
-  TEMPLATE_DELTA: 'INFO',
-  SEED_SKIP: 'INFO',
-  STUB_SKIP: 'INFO',
-  STUB_FM_BACKFILL: 'INFO',
-  STUB_VERSION_BUMP_ADVICE: 'INFO',
-  STUB_VERSION_DIVERGENCE: 'INFO',
-  REGION_IN_SYNC: 'INFO',
-  EVOLVED_REGION: 'WARN',
-  TEMPLATE_AHEAD_REGION: 'WARN',
-  CONTEXT_PRESERVE: 'WARN',
-  DRIFT_PRESERVE: 'WARN',
-  DRIFT_RESTORED: 'WARN',
-  SKELETON_COLLISION: 'WARN',
-  EVOLVED: 'WARN',
-  TOMBSTONED: 'ERROR',
-  TOMBSTONED_SKIP: 'INFO',
-  TOMBSTONE_CLEARED: 'INFO',
-  CONFLICT: 'ERROR',
-  DELETE: 'WARN',
+  NEW: "INFO",
+  UPDATE: "INFO",
+  ADOPT: "INFO",
+  SKIP: "INFO",
+  MERGE: "INFO",
+  TEMPLATE_DELTA: "INFO",
+  SEED_SKIP: "INFO",
+  STUB_SKIP: "INFO",
+  STUB_FM_BACKFILL: "INFO",
+  STUB_VERSION_BUMP_ADVICE: "INFO",
+  STUB_VERSION_DIVERGENCE: "INFO",
+  REGION_IN_SYNC: "INFO",
+  EVOLVED_REGION: "WARN",
+  TEMPLATE_AHEAD_REGION: "WARN",
+  CONTEXT_PRESERVE: "WARN",
+  DRIFT_PRESERVE: "WARN",
+  DRIFT_RESTORED: "WARN",
+  SKELETON_COLLISION: "WARN",
+  EVOLVED: "WARN",
+  TOMBSTONED: "ERROR",
+  TOMBSTONED_SKIP: "INFO",
+  TOMBSTONE_CLEARED: "INFO",
+  CONFLICT: "ERROR",
+  DELETE: "WARN",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */
@@ -1482,7 +1534,7 @@ export interface DeliveryManifestV2 {
 }
 
 /** How a project file relates to its delivered baseline and today's deliverable (design D1). */
-export type ProjectStateClassification = 'UNTOUCHED' | 'IN_SYNC' | 'PROJECT_EVOLVED' | 'NO_BASELINE';
+export type ProjectStateClassification = "UNTOUCHED" | "IN_SYNC" | "PROJECT_EVOLVED" | "NO_BASELINE";
 
 export interface ProjectStateVerdict {
   state: ProjectStateClassification;
@@ -1496,7 +1548,7 @@ export interface ProjectStateVerdict {
 
 /** SHA-256 of UTF-8 content (baseline keys, decision-log fingerprints). */
 export function sha256Hex(content: string): string {
-  return createHash('sha256').update(content, 'utf8').digest('hex');
+  return createHash("sha256").update(content, "utf8").digest("hex");
 }
 
 /**
@@ -1510,9 +1562,7 @@ export function sha256Hex(content: string): string {
  * path, so writer and classifier always agree.
  */
 export function baselineKeyFor(rel: string, content: string): string {
-  return rel.startsWith('agents/')
-    ? sha256Hex(lifecyclelessText(content))
-    : sha256Hex(content);
+  return rel.startsWith("agents/") ? sha256Hex(lifecyclelessText(content)) : sha256Hex(content);
 }
 
 /**
@@ -1532,22 +1582,20 @@ export function classifyProjectState(
   const deliverableKey = baselineKeyFor(rel, deliverableContent);
   const matchesDeliverable = projectKey === deliverableKey;
   if (!baseline) {
-    return { state: 'NO_BASELINE', matchesDeliverable, templateChanged: false };
+    return { state: "NO_BASELINE", matchesDeliverable, templateChanged: false };
   }
   if (projectKey === baseline.hash) {
-    return { state: 'UNTOUCHED', matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
+    return { state: "UNTOUCHED", matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
   }
   if (matchesDeliverable) {
-    return { state: 'IN_SYNC', matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
+    return { state: "IN_SYNC", matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
   }
-  return { state: 'PROJECT_EVOLVED', matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
+  return { state: "PROJECT_EVOLVED", matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
 }
 
 /** The CLI disposition flag state (design D2): default (CONFLICT → SKIP) or an
  *  explicit adopt-template grant, optionally narrowed by a glob. */
-export type DispositionFlag =
-  | { mode: 'default' }
-  | { mode: 'adopt-template'; matches: (rel: string) => boolean };
+export type DispositionFlag = { mode: "default" } | { mode: "adopt-template"; matches: (rel: string) => boolean };
 
 export interface DispositionOutcome {
   /** True when the pass may deliver (per the disposition matrix). */
@@ -1576,31 +1624,34 @@ export function resolveDisposition(
   rel: string,
   disposition: DispositionFlag,
 ): DispositionOutcome {
-  if (classification.state !== 'PROJECT_EVOLVED') {
-    return { deliver: true, verdict: 'UPDATE', severity: 'INFO', detail: '' };
+  if (classification.state !== "PROJECT_EVOLVED") {
+    return { deliver: true, verdict: "UPDATE", severity: "INFO", detail: "" };
   }
   if (!classification.templateChanged) {
     return {
       deliver: true,
-      verdict: 'EVOLVED',
-      severity: 'WARN',
-      detail: 'project-evolved since delivery; template content unchanged — version-gated delivery proceeds (EVOLVED, WARN)',
+      verdict: "EVOLVED",
+      severity: "WARN",
+      detail:
+        "project-evolved since delivery; template content unchanged — version-gated delivery proceeds (EVOLVED, WARN)",
     };
   }
-  const granted = disposition.mode === 'adopt-template' && disposition.matches(rel);
+  const granted = disposition.mode === "adopt-template" && disposition.matches(rel);
   if (granted) {
     return {
       deliver: true,
-      verdict: 'ADOPT',
-      severity: 'INFO',
-      detail: 'project-evolved + template changed — delivered via explicit --disposition adopt-template (decision recorded)',
+      verdict: "ADOPT",
+      severity: "INFO",
+      detail:
+        "project-evolved + template changed — delivered via explicit --disposition adopt-template (decision recorded)",
     };
   }
   return {
     deliver: false,
-    verdict: 'CONFLICT',
-    severity: 'ERROR',
-    detail: 'project-evolved since the last delivery AND template changed — CONFLICT disposition: delivery SKIPPED, project copy preserved',
+    verdict: "CONFLICT",
+    severity: "ERROR",
+    detail:
+      "project-evolved since the last delivery AND template changed — CONFLICT disposition: delivery SKIPPED, project copy preserved",
   };
 }
 
@@ -1610,19 +1661,19 @@ export function resolveDisposition(
 // a/b) and a leading doublestar slash matches top level (**/b matches b).
 export function globToRegExp(glob: string): RegExp {
   const src = glob
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*\*/g, '\u0000')
-    .replace(/\*/g, '[^/]*')
-    .replace(/\?/g, '[^/]')
-    .replace(/\/\u0000\//g, '(?:/.*)?/')
-    .replace(/^\u0000\//, '(?:.*/)?')
-    .replace(/\u0000/g, '.*');
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*\*/g, "\u0000")
+    .replace(/\*/g, "[^/]*")
+    .replace(/\?/g, "[^/]")
+    .replace(/\/\u0000\//g, "(?:/.*)?/")
+    .replace(/^\u0000\//, "(?:.*/)?")
+    .replace(/\u0000/g, ".*");
   return new RegExp(`^${src}$`);
 }
 
 /** ERROR-severity decisions of a run (design D3.1 — these block silent landing). */
 export function unresolvedErrorDecisions(decisions: DeliveryDecision[]): DeliveryDecision[] {
-  return decisions.filter((d) => d.severity === 'ERROR');
+  return decisions.filter((d) => d.severity === "ERROR");
 }
 
 /**
@@ -1631,12 +1682,10 @@ export function unresolvedErrorDecisions(decisions: DeliveryDecision[]): Deliver
  * must be refused). Tolerates v1-shaped manifests (no decisions key → false).
  */
 export function manifestHasUnresolvedErrors(manifest: unknown): boolean {
-  if (!manifest || typeof manifest !== 'object') return false;
+  if (!manifest || typeof manifest !== "object") return false;
   const decisions = (manifest as { decisions?: unknown }).decisions;
   if (!Array.isArray(decisions)) return false;
-  return decisions.some(
-    (d) => !!d && typeof d === 'object' && (d as { severity?: unknown }).severity === 'ERROR',
-  );
+  return decisions.some((d) => !!d && typeof d === "object" && (d as { severity?: unknown }).severity === "ERROR");
 }
 
 // ── Delivery tombstones (tombstone-ownership design, spec 2026-10-28-delivery-tombstone-ownership) ─
@@ -1666,7 +1715,10 @@ export interface TombstoneGuardOutcome {
 }
 
 const TOMBSTONE_NOT_FIRING: TombstoneGuardOutcome = {
-  fires: false, verdict: null, severity: null, detail: '',
+  fires: false,
+  verdict: null,
+  severity: null,
+  detail: "",
 };
 
 /**
@@ -1701,17 +1753,18 @@ export function tombstoneGuard(
   if (entry) {
     return {
       fires: true,
-      verdict: 'TOMBSTONED_SKIP',
-      severity: 'INFO',
-      detail: `tombstoned deletion honored (recorded ${entry.recordedAt}${entry.reason ? ` — ${entry.reason}` : ''}) — delivery skipped, project copy stays absent`,
+      verdict: "TOMBSTONED_SKIP",
+      severity: "INFO",
+      detail: `tombstoned deletion honored (recorded ${entry.recordedAt}${entry.reason ? ` — ${entry.reason}` : ""}) — delivery skipped, project copy stays absent`,
     };
   }
   if (prior.baselines?.[rel]) {
     return {
       fires: true,
-      verdict: 'TOMBSTONED',
-      severity: 'ERROR',
-      detail: 'project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run',
+      verdict: "TOMBSTONED",
+      severity: "ERROR",
+      detail:
+        "project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run",
     };
   }
   return TOMBSTONE_NOT_FIRING;
@@ -1740,22 +1793,22 @@ export function tombstoneGuard(
 // instructionCensusGate; the engine records the decision rows.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-import { MANAGED_PATTERNS } from './managed-block-merge.ts';
-import { MANAGED_SKELETON_SECTIONS } from './platform-skeleton-merge.ts';
-import { VARIANT_SCAFFOLD_MARKER_NAMES } from '../helpers/scaffold-markers.ts';
+import { MANAGED_PATTERNS } from "./managed-block-merge.ts";
+import { MANAGED_SKELETON_SECTIONS } from "./platform-skeleton-merge.ts";
+import { VARIANT_SCAFFOLD_MARKER_NAMES } from "../helpers/scaffold-markers.ts";
 
 /** The five instruction files the D1 taxonomy covers (tombstone-design D4
  *  extended from agents/*.md). */
 export const INSTRUCTION_FILE_RELS: readonly string[] = [
-  'AGENTS.md',
-  'CLAUDE.md',
-  'GEMINI.md',
-  'CODEX.md',
-  'HERMES.md',
+  "AGENTS.md",
+  "CLAUDE.md",
+  "GEMINI.md",
+  "CODEX.md",
+  "HERMES.md",
 ];
 
 /** D1 region kinds. */
-export type InstructionRegionKind = 'I1' | 'I2' | 'I3';
+export type InstructionRegionKind = "I1" | "I2" | "I3";
 
 /** One classified region: a half-open line-index span [start, end) over
  *  `content.split('\n')`. */
@@ -1773,7 +1826,7 @@ interface LineSpan {
   end: number; // exclusive
 }
 
-const trimmedLines = (content: string): string[] => content.split('\n').map((l) => l.trim());
+const trimmedLines = (content: string): string[] => content.split("\n").map((l) => l.trim());
 
 function zoneLineSpans(lines: string[]): LineSpan[] {
   const spans: LineSpan[] = [];
@@ -1818,14 +1871,14 @@ function overlaps(spans: LineSpan[], idx: number): boolean {
  * marker syntax.
  */
 export function scanInstructionRegions(content: string, rel: string): InstructionRegion[] {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const regions: InstructionRegion[] = [];
   const claimed = new Array<boolean>(lines.length).fill(false);
 
   // I1 — managed marker zones.
   for (const span of zoneLineSpans(lines)) {
-    const label = MANAGED_PATTERNS.find((p) => openLineMatches(p, lines[span.start]!))?.label ?? 'managed-zone';
-    regions.push({ kind: 'I1', name: label, ...span });
+    const label = MANAGED_PATTERNS.find((p) => openLineMatches(p, lines[span.start]!))?.label ?? "managed-zone";
+    regions.push({ kind: "I1", name: label, ...span });
     for (let i = span.start; i < span.end; i++) claimed[i] = true;
   }
 
@@ -1846,7 +1899,7 @@ export function scanInstructionRegions(content: string, rel: string): Instructio
           break;
         }
       }
-      regions.push({ kind: 'I1', name: entry.id, start, end });
+      regions.push({ kind: "I1", name: entry.id, start, end });
       for (let i = start; i < end; i++) claimed[i] = true;
     }
   }
@@ -1854,8 +1907,8 @@ export function scanInstructionRegions(content: string, rel: string): Instructio
   // I2 — VARIANT-* project-state marker sections (scaffold-rendered, NOT in
   // MANAGED_PATTERNS; Q2 default: project state, no ownership change).
   for (const span of variantMarkerLineSpans(lines)) {
-    const name = (lines[span.start]!.trim().match(/^<!-- ([A-Z-]+)-START -->$/)?.[1]) ?? 'VARIANT-marker';
-    regions.push({ kind: 'I2', name, ...span });
+    const name = lines[span.start]!.trim().match(/^<!-- ([A-Z-]+)-START -->$/)?.[1] ?? "VARIANT-marker";
+    regions.push({ kind: "I2", name, ...span });
     for (let i = span.start; i < span.end; i++) claimed[i] = true;
   }
 
@@ -1865,7 +1918,12 @@ export function scanInstructionRegions(content: string, rel: string): Instructio
     if (i < lines.length && !claimed[i]) {
       if (runStart < 0) runStart = i;
     } else if (runStart >= 0) {
-      regions.push({ kind: 'I3', name: `free-form #${regions.filter((r) => r.kind === 'I3').length + 1}`, start: runStart, end: i });
+      regions.push({
+        kind: "I3",
+        name: `free-form #${regions.filter((r) => r.kind === "I3").length + 1}`,
+        start: runStart,
+        end: i,
+      });
       runStart = -1;
     }
   }
@@ -1881,11 +1939,11 @@ function openLineMatches(p: { open: RegExp }, line: string): boolean {
  *  recorded by the engine when a write channel (unlabeled reconcile, skeleton
  *  replace) targets a span carrying EVOLVED_REGION content and no
  *  --disposition adopt-template grant covers the path. */
-export type RegionCensusVerdict = 'REGION_IN_SYNC' | 'EVOLVED_REGION' | 'TEMPLATE_AHEAD_REGION';
+export type RegionCensusVerdict = "REGION_IN_SYNC" | "EVOLVED_REGION" | "TEMPLATE_AHEAD_REGION";
 
 export interface RegionCensusRow {
   verdict: RegionCensusVerdict;
-  severity: 'INFO' | 'WARN';
+  severity: "INFO" | "WARN";
   detail: string;
 }
 
@@ -1903,7 +1961,7 @@ function contextAnchor(lines: string[], claimed: boolean[], idx: number): string
     if (claimed[i]) continue;
     if (/^#{1,6}\s+/.test(lines[i]!.trim())) return lines[i]!.trim();
   }
-  return 'start of file';
+  return "start of file";
 }
 
 /**
@@ -1931,10 +1989,10 @@ export function censusInstructionRegions(
   const tplRegions = scanInstructionRegions(templateContent, rel);
 
   const outOfZoneLines = (content: string, regions: InstructionRegion[]): Array<{ line: string; at: number }> => {
-    const all = content.split('\n');
+    const all = content.split("\n");
     const claimed = new Array<boolean>(all.length).fill(false);
     for (const r of regions) {
-      if (r.kind === 'I3') continue;
+      if (r.kind === "I3") continue;
       for (let i = r.start; i < r.end && i < all.length; i++) claimed[i] = true;
     }
     // Non-blank trimmed lines only: the census classifies CONTENT, and blank
@@ -1945,7 +2003,7 @@ export function censusInstructionRegions(
     for (let i = 0; i < all.length; i++) {
       if (claimed[i]) continue;
       const t = all[i]!.trim();
-      if (t === '') continue;
+      if (t === "") continue;
       out.push({ line: t, at: i });
     }
     return out;
@@ -1953,10 +2011,10 @@ export function censusInstructionRegions(
 
   const proj = outOfZoneLines(projectContent, projRegions);
   const tpl = outOfZoneLines(templateContent, tplRegions);
-  const projAll = projectContent.split('\n');
+  const projAll = projectContent.split("\n");
   const claimedFlags = new Array<boolean>(projAll.length).fill(false);
   for (const r of projRegions) {
-    if (r.kind === 'I3') continue;
+    if (r.kind === "I3") continue;
     for (let i = r.start; i < r.end && i < projAll.length; i++) claimedFlags[i] = true;
   }
 
@@ -1970,12 +2028,17 @@ export function censusInstructionRegions(
   const dp = new Int32Array((n + 1) * (m + 1));
   for (let i = n - 1; i >= 0; i--) {
     for (let j = m - 1; j >= 0; j--) {
-      dp[i * (m + 1) + j] = a[i] === b[j]
-        ? dp[(i + 1) * (m + 1) + j + 1]! + 1
-        : Math.max(dp[(i + 1) * (m + 1) + j]!, dp[i * (m + 1) + j + 1]!);
+      dp[i * (m + 1) + j] =
+        a[i] === b[j]
+          ? dp[(i + 1) * (m + 1) + j + 1]! + 1
+          : Math.max(dp[(i + 1) * (m + 1) + j]!, dp[i * (m + 1) + j + 1]!);
     }
   }
-  interface Hunk { kind: 'added' | 'removed'; lines: string[]; at: number; }
+  interface Hunk {
+    kind: "added" | "removed";
+    lines: string[];
+    at: number;
+  }
   const raw: Hunk[] = [];
   let syncLines = 0;
   {
@@ -1987,19 +2050,19 @@ export function censusInstructionRegions(
         i++;
         j++;
       } else if (dp[(i + 1) * (m + 1) + j]! >= dp[i * (m + 1) + j + 1]!) {
-        raw.push({ kind: 'added', lines: [a[i]!], at: proj[i]!.at });
+        raw.push({ kind: "added", lines: [a[i]!], at: proj[i]!.at });
         i++;
       } else {
-        raw.push({ kind: 'removed', lines: [b[j]!], at: proj[Math.min(i, n - 1)]?.at ?? 0 });
+        raw.push({ kind: "removed", lines: [b[j]!], at: proj[Math.min(i, n - 1)]?.at ?? 0 });
         j++;
       }
     }
     while (i < n) {
-      raw.push({ kind: 'added', lines: [a[i]!], at: proj[i]!.at });
+      raw.push({ kind: "added", lines: [a[i]!], at: proj[i]!.at });
       i++;
     }
     while (j < m) {
-      raw.push({ kind: 'removed', lines: [b[j]!], at: proj[Math.min(i, n - 1)]?.at ?? 0 });
+      raw.push({ kind: "removed", lines: [b[j]!], at: proj[Math.min(i, n - 1)]?.at ?? 0 });
       j++;
     }
   }
@@ -2020,26 +2083,27 @@ export function censusInstructionRegions(
     return { rows: [], divergent: false };
   }
 
-  const PORT_HINT = 'land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6)';
+  const PORT_HINT =
+    "land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6)";
   const rows: RegionCensusRow[] = [
     {
-      verdict: 'REGION_IN_SYNC',
-      severity: 'INFO',
+      verdict: "REGION_IN_SYNC",
+      severity: "INFO",
       detail: `${syncLines} of ${n} out-of-zone lines byte-equal — in-sync regions carry no write channel; ${hunks.length} divergent block(s) below`,
     },
   ];
   for (const h of hunks) {
     const anchor = contextAnchor(projAll, claimedFlags, h.at);
-    if (h.kind === 'added') {
+    if (h.kind === "added") {
       rows.push({
-        verdict: 'EVOLVED_REGION',
-        severity: 'WARN',
+        verdict: "EVOLVED_REGION",
+        severity: "WARN",
         detail: `project-authored line-block (${h.lines.length} line(s)) after '${anchor}' — preserved (WARN — port candidate: ${PORT_HINT})`,
       });
     } else {
       rows.push({
-        verdict: 'TEMPLATE_AHEAD_REGION',
-        severity: 'WARN',
+        verdict: "TEMPLATE_AHEAD_REGION",
+        severity: "WARN",
         detail: `template line-block (${h.lines.length} line(s)) absent from the project copy after '${anchor}' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)`,
       });
     }
@@ -2059,13 +2123,18 @@ export function censusInstructionRegions(
  * today.
  */
 export function spanCarriesProjectAuthoredLines(spanContent: string, templateContent: string): boolean {
-  const tplLines = new Set(templateContent.split('\n').map((l) => l.trim()).filter((l) => l !== ''));
-  const lines = spanContent.split('\n');
+  const tplLines = new Set(
+    templateContent
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l !== ""),
+  );
+  const lines = spanContent.split("\n");
   const claimed = new Array<boolean>(lines.length).fill(false);
   for (const span of zoneLineSpans(lines)) {
     for (let i = span.start; i < span.end && i < lines.length; i++) claimed[i] = true;
   }
-  return lines.some((l, i) => !claimed[i] && l.trim() !== '' && !tplLines.has(l.trim()));
+  return lines.some((l, i) => !claimed[i] && l.trim() !== "" && !tplLines.has(l.trim()));
 }
 
 /** The gate shape handed to mergeManagedBlocks / mergeSkeletonSections (the

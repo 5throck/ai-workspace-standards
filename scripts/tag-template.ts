@@ -7,25 +7,25 @@
 // checks `git ls-remote --tags origin` and recovers by pushing the existing
 // local tag. --no-push skips the recovery; --fail-on-push-error still escalates.
 
-import { $ } from 'bun';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import { $ } from "bun";
+import * as path from "node:path";
+import * as fs from "node:fs";
 
-const GREEN    = '\x1b[32m';
-const YELLOW   = '\x1b[33m';
-const RED      = '\x1b[31m';
-const CYAN     = '\x1b[36m';
-const DARKGRAY = '\x1b[90m';
-const RESET    = '\x1b[0m';
+const GREEN = "\x1b[32m";
+const YELLOW = "\x1b[33m";
+const RED = "\x1b[31m";
+const CYAN = "\x1b[36m";
+const DARKGRAY = "\x1b[90m";
+const RESET = "\x1b[0m";
 
-const scriptDir     = import.meta.dir;
-const workspaceRoot = path.resolve(scriptDir, '..');
-const isDryRun      = process.argv.includes('--dry-run');
-const noPush        = process.argv.includes('--no-push');
-const failOnPushError = process.argv.includes('--fail-on-push-error');
+const scriptDir = import.meta.dir;
+const workspaceRoot = path.resolve(scriptDir, "..");
+const isDryRun = process.argv.includes("--dry-run");
+const noPush = process.argv.includes("--no-push");
+const failOnPushError = process.argv.includes("--fail-on-push-error");
 
 // 1. Read templates/VERSION
-const versionFile = path.join(workspaceRoot, 'templates', 'VERSION');
+const versionFile = path.join(workspaceRoot, "templates", "VERSION");
 const vf = Bun.file(versionFile);
 if (!(await vf.exists())) {
   console.error(`${RED}✗ templates/VERSION not found at ${versionFile}${RESET}`);
@@ -47,14 +47,20 @@ if (tagExists) {
   if (onOrigin) {
     console.log(`${GREEN}✅ tag ${tagName} exists locally and on origin. Nothing to do.${RESET}`);
   } else if (noPush) {
-    console.log(`${YELLOW}⚠ tag ${tagName} exists locally but is missing on origin (--no-push: recovery push skipped)${RESET}`);
+    console.log(
+      `${YELLOW}⚠ tag ${tagName} exists locally but is missing on origin (--no-push: recovery push skipped)${RESET}`,
+    );
   } else {
     const recoverResult = await $`git -C ${workspaceRoot} push origin ${tagName}`.quiet().nothrow();
     if (recoverResult.exitCode === 0) {
-      console.log(`${GREEN}✅ tag ${tagName} existed locally but was missing on origin — recovery push published it${RESET}`);
+      console.log(
+        `${GREEN}✅ tag ${tagName} existed locally but was missing on origin — recovery push published it${RESET}`,
+      );
     } else {
       const stderr = recoverResult.stderr.toString().trim();
-      console.log(`${YELLOW}⚠ tag ${tagName} exists locally, is missing on origin, and the recovery push failed: ${stderr}${RESET}`);
+      console.log(
+        `${YELLOW}⚠ tag ${tagName} exists locally, is missing on origin, and the recovery push failed: ${stderr}${RESET}`,
+      );
       console.log(`${YELLOW}  Run: git push origin ${tagName}${RESET}`);
       if (failOnPushError && import.meta.main) {
         process.exit(1);
@@ -67,8 +73,8 @@ if (tagExists) {
 }
 
 // 3. List variant folders under templates/ (exclude non-variant entries)
-const EXCLUDED = new Set(['common', 'VERSION', 'CHANGELOG.md', 'README.md', 'README_ko.md']);
-const templatesDir = path.join(workspaceRoot, 'templates');
+const EXCLUDED = new Set(["common", "VERSION", "CHANGELOG.md", "README.md", "README_ko.md"]);
+const templatesDir = path.join(workspaceRoot, "templates");
 const entries = fs.readdirSync(templatesDir);
 const variants = entries.filter((e) => !EXCLUDED.has(e));
 
@@ -79,10 +85,10 @@ const variantStatus: { name: string; exists: boolean }[] = variants.map((v) => (
 }));
 
 // 5. Print summary table
-console.log('');
+console.log("");
 console.log(`${CYAN}Template version : ${version}${RESET}`);
 console.log(`${CYAN}Tag to publish   : ${tagName}${RESET}`);
-console.log('');
+console.log("");
 console.log(`${CYAN}Variants included:${RESET}`);
 for (const { name, exists } of variantStatus) {
   if (exists) {
@@ -91,7 +97,7 @@ for (const { name, exists } of variantStatus) {
     console.log(`  ${RED}✗ ${name}  ${DARKGRAY}(folder missing — check templates/${name})${RESET}`);
   }
 }
-console.log('');
+console.log("");
 
 // 6. Dry-run exit
 if (isDryRun) {
@@ -131,5 +137,5 @@ if (pushResult.exitCode === 0) {
 }
 
 // 8. Remind user to bump version for the next release
-console.log('');
+console.log("");
 console.log(`${DARKGRAY}Reminder: update templates/VERSION to the next version before your next release.${RESET}`);

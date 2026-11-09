@@ -46,34 +46,34 @@
  * - 1: Operational failure (e.g., docs/adr missing), duplicate ADR numbers (any mode), OR strict mode with ADR-linkage, marker-drift, or amendment-reference findings
  */
 
-import { readFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createHash } from 'node:crypto';
+import { readFileSync, existsSync, readdirSync, writeFileSync } from "node:fs";
+import { join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 import {
   parseSectionNumber,
   parseMarkerFields,
   resolveConstitutionSource,
   computeSectionHash,
   scanIntentionalDuplicateMarkers,
-  type IntentionalDuplicateMarker
-} from './helpers/markers.ts';
+  type IntentionalDuplicateMarker,
+} from "./helpers/markers.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ROOT = resolve(__dirname, '..');
+const ROOT = resolve(__dirname, "..");
 
 // Constants
-const CUTOFF_DATE = '2026-08-23';
-const ADR_DIR = join(ROOT, 'docs', 'adr');
-const CONSTITUTION_MD = join(ROOT, 'CONSTITUTION.md');
-const CONSTITUTION_DIR = join(ROOT, 'docs', 'constitution');
-const GOVERNANCE_DIR = join(ROOT, 'docs', 'governance');
-const TEMPLATES_DIR = join(ROOT, 'templates');
+const CUTOFF_DATE = "2026-08-23";
+const ADR_DIR = join(ROOT, "docs", "adr");
+const CONSTITUTION_MD = join(ROOT, "CONSTITUTION.md");
+const CONSTITUTION_DIR = join(ROOT, "docs", "constitution");
+const GOVERNANCE_DIR = join(ROOT, "docs", "governance");
+const TEMPLATES_DIR = join(ROOT, "templates");
 
 // CLI flags
-const UPDATE_MARKER_HASHES = process.argv.includes('--update-marker-hashes');
-const STRICT = process.argv.includes('--strict');
+const UPDATE_MARKER_HASHES = process.argv.includes("--update-marker-hashes");
+const STRICT = process.argv.includes("--strict");
 
 /**
  * Represents a parsed ADR file
@@ -90,16 +90,16 @@ interface ADR {
  * Classification of ADR status
  */
 enum ADRStatus {
-  Accepted = 'accepted',
-  Proposed = 'proposed',
-  Unparseable = 'unparseable',
+  Accepted = "accepted",
+  Proposed = "proposed",
+  Unparseable = "unparseable",
 }
 
 /**
  * Check marker hash drift
  */
 function checkMarkerDrift(markers: IntentionalDuplicateMarker[]): number {
-  console.log('🔍 Checking intentional-duplicate marker drift...\n');
+  console.log("🔍 Checking intentional-duplicate marker drift...\n");
 
   let okCount = 0;
   let totalMarkers = markers.length;
@@ -109,16 +109,14 @@ function checkMarkerDrift(markers: IntentionalDuplicateMarker[]): number {
     // Check if marker has source/hash fields
     if (!marker.source || !marker.hash) {
       console.log(
-        `[WARN] marker at ${marker.file}:${marker.line} lacks source/hash fields (seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes)`
+        `[WARN] marker at ${marker.file}:${marker.line} lacks source/hash fields (seed with: bun scripts/verify-adr-governance.ts --update-marker-hashes)`,
       );
       findings++;
       continue;
     }
 
     // Resolve source file
-    const resolvedSource = marker.source.startsWith('docs/')
-      ? join(ROOT, marker.source)
-      : marker.source;
+    const resolvedSource = marker.source.startsWith("docs/") ? join(ROOT, marker.source) : marker.source;
 
     if (!existsSync(resolvedSource)) {
       console.log(`[WARN] marker at ${marker.file}:${marker.line} references missing source: ${marker.source}`);
@@ -130,7 +128,9 @@ function checkMarkerDrift(markers: IntentionalDuplicateMarker[]): number {
     const currentHash = computeSectionHash(resolvedSource);
 
     if (!currentHash) {
-      console.log(`[WARN] marker at ${marker.file}:${marker.line} - failed to compute hash for source: ${marker.source}`);
+      console.log(
+        `[WARN] marker at ${marker.file}:${marker.line} - failed to compute hash for source: ${marker.source}`,
+      );
       findings++;
       continue;
     }
@@ -138,7 +138,7 @@ function checkMarkerDrift(markers: IntentionalDuplicateMarker[]): number {
     // Check for drift
     if (currentHash !== marker.hash) {
       console.log(
-        `[WARN] intentional-duplicate marker at ${marker.file}:${marker.line} is stale: source ${marker.source} changed since hash ${marker.hash} was recorded (expected ${currentHash}) — review the duplicated section and re-seed with --update-marker-hashes after updating it`
+        `[WARN] intentional-duplicate marker at ${marker.file}:${marker.line} is stale: source ${marker.source} changed since hash ${marker.hash} was recorded (expected ${currentHash}) — review the duplicated section and re-seed with --update-marker-hashes after updating it`,
       );
       findings++;
       continue;
@@ -161,7 +161,7 @@ function checkMarkerDrift(markers: IntentionalDuplicateMarker[]): number {
  * Update marker hashes (seeding mode)
  */
 function updateMarkerHashes(markers: IntentionalDuplicateMarker[]): void {
-  console.log('🔄 Updating intentional-duplicate marker hashes...\n');
+  console.log("🔄 Updating intentional-duplicate marker hashes...\n");
 
   let touchedCount = 0;
 
@@ -178,13 +178,15 @@ function updateMarkerHashes(markers: IntentionalDuplicateMarker[]): void {
     const currentHash = computeSectionHash(resolvedSource);
 
     if (!currentHash) {
-      console.log(`[WARN] marker at ${marker.file}:${marker.line} - failed to compute hash for source: ${resolvedSource}`);
+      console.log(
+        `[WARN] marker at ${marker.file}:${marker.line} - failed to compute hash for source: ${resolvedSource}`,
+      );
       continue;
     }
 
     // Read file content
-    let content = readFileSync(marker.file, 'utf-8');
-    const lines = content.split('\n');
+    let content = readFileSync(marker.file, "utf-8");
+    const lines = content.split("\n");
     const lineIndex = marker.line - 1; // Convert to 0-indexed
 
     // Extract the marker prefix (everything before " -->")
@@ -198,17 +200,17 @@ function updateMarkerHashes(markers: IntentionalDuplicateMarker[]): void {
 
     // Build new marker with source and hash
     // Convert absolute path to relative (handle both Unix and Windows paths)
-    let relativeSource = resolvedSource.replace(ROOT, '').replace(/^[\/\\]+/, '');
+    let relativeSource = resolvedSource.replace(ROOT, "").replace(/^[\/\\]+/, "");
     // Normalize forward slashes
-    relativeSource = relativeSource.replace(/\\/g, '/');
+    relativeSource = relativeSource.replace(/\\/g, "/");
     const newMarker = `${markerPrefixMatch[1]}source: ${relativeSource}; hash: ${currentHash} -->`;
 
     // Update the line
     lines[lineIndex] = newMarker;
-    content = lines.join('\n');
+    content = lines.join("\n");
 
     // Write back
-    writeFileSync(marker.file, content, 'utf-8');
+    writeFileSync(marker.file, content, "utf-8");
     console.log(`✓ Updated: ${marker.file} (§${marker.section} → ${relativeSource}, hash: ${currentHash})`);
     touchedCount++;
   }
@@ -230,16 +232,16 @@ function readGovernanceCorpus(): string[] {
   // docs/constitution/**/*.md
   if (existsSync(CONSTITUTION_DIR)) {
     const constitutionFiles = readdirSync(CONSTITUTION_DIR, { recursive: true, withFileTypes: true })
-      .filter(dirent => dirent.isFile() && dirent.name.endsWith('.md'))
-      .map(dirent => join(dirent.parentPath, dirent.name));
+      .filter((dirent) => dirent.isFile() && dirent.name.endsWith(".md"))
+      .map((dirent) => join(dirent.parentPath, dirent.name));
     files.push(...constitutionFiles);
   }
 
   // docs/governance/**/*.md
   if (existsSync(GOVERNANCE_DIR)) {
     const governanceFiles = readdirSync(GOVERNANCE_DIR, { recursive: true, withFileTypes: true })
-      .filter(dirent => dirent.isFile() && dirent.name.endsWith('.md'))
-      .map(dirent => join(dirent.parentPath, dirent.name));
+      .filter((dirent) => dirent.isFile() && dirent.name.endsWith(".md"))
+      .map((dirent) => join(dirent.parentPath, dirent.name));
     files.push(...governanceFiles);
   }
 
@@ -265,14 +267,14 @@ function extractADRStatus(content: string): string | null {
     const frontmatter = frontmatterMatch[1];
     const statusMatch = frontmatter.match(/^status:\s*(.+)$/m);
     if (statusMatch) {
-      return statusMatch[1].trim().replace(/^["']|["']$/g, '');
+      return statusMatch[1].trim().replace(/^["']|["']$/g, "");
     }
   }
 
   // Fallback to body line
   const bodyStatusMatch = content.match(/^\*\*Status\*\*:\s*(.+)$/m);
   if (bodyStatusMatch) {
-    return bodyStatusMatch[1].trim().replace(/^["']|["']$/g, '');
+    return bodyStatusMatch[1].trim().replace(/^["']|["']$/g, "");
   }
 
   return null;
@@ -308,10 +310,10 @@ function classifyStatus(status: string | null): ADRStatus {
   if (!status) return ADRStatus.Unparseable;
 
   const normalized = status.toLowerCase();
-  if (normalized.startsWith('accepted') || normalized.startsWith('active')) {
+  if (normalized.startsWith("accepted") || normalized.startsWith("active")) {
     return ADRStatus.Accepted;
   }
-  if (normalized.startsWith('proposed')) {
+  if (normalized.startsWith("proposed")) {
     return ADRStatus.Proposed;
   }
   return ADRStatus.Unparseable;
@@ -323,13 +325,13 @@ function classifyStatus(status: string | null): ADRStatus {
  */
 function isADRLinkedInGovernance(adr: ADR, governanceFiles: string[]): boolean {
   // Pattern 1: ADR-0058 or ADR-58
-  const numberPattern = new RegExp(`ADR-?0*${adr.number}\\b`, 'i');
+  const numberPattern = new RegExp(`ADR-?0*${adr.number}\\b`, "i");
 
   // Pattern 2: Literal basename without extension
-  const basenamePattern = new RegExp(adr.file.replace(/\.md$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  const basenamePattern = new RegExp(adr.file.replace(/\.md$/, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
 
   for (const file of governanceFiles) {
-    const content = readFileSync(file, 'utf-8');
+    const content = readFileSync(file, "utf-8");
     if (numberPattern.test(content) || basenamePattern.test(content)) {
       return true;
     }
@@ -352,7 +354,7 @@ function scanADRFiles(): ADR[] {
 
   for (const entry of entries) {
     // Skip if not a .md file
-    if (!entry.endsWith('.md')) {
+    if (!entry.endsWith(".md")) {
       continue;
     }
 
@@ -368,13 +370,13 @@ function scanADRFiles(): ADR[] {
       continue;
     }
 
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const status = extractADRStatus(content);
     const date = extractADRDate(content);
 
     adrs.push({
       number,
-      slug: entry.replace(/^\d{4}-/, '').replace(/\.md$/, ''),
+      slug: entry.replace(/^\d{4}-/, "").replace(/\.md$/, ""),
       file: entry,
       status,
       date,
@@ -391,7 +393,7 @@ function scanADRFiles(): ADR[] {
  * Collisions are integrity errors: they fail in BOTH default and strict mode.
  */
 function checkADRIdUniqueness(adrs: ADR[]): number {
-  console.log('🔍 Checking ADR ID uniqueness...\n');
+  console.log("🔍 Checking ADR ID uniqueness...\n");
 
   const byNumber = new Map<string, ADR[]>();
   for (const adr of adrs) {
@@ -408,7 +410,7 @@ function checkADRIdUniqueness(adrs: ADR[]): number {
     findings++;
     console.log(`[ERROR] ADR number collision: ${group.length} files claim ADR-${number}:`);
     for (const adr of group) {
-      console.log(`        - docs/adr/${adr.file} (status: ${adr.status ?? 'unknown'})`);
+      console.log(`        - docs/adr/${adr.file} (status: ${adr.status ?? "unknown"})`);
     }
   }
 
@@ -416,7 +418,7 @@ function checkADRIdUniqueness(adrs: ADR[]): number {
     console.log(`✅ ADR IDs are unique across ${adrs.length} file(s).\n`);
   } else {
     console.log(
-      `\n⛔ ${findings} duplicate ADR number(s) found — renumber the later ADR of each pair and repoint all citations by meaning (blocking in every mode)`
+      `\n⛔ ${findings} duplicate ADR number(s) found — renumber the later ADR of each pair and repoint all citations by meaning (blocking in every mode)`,
     );
   }
 
@@ -444,12 +446,12 @@ function checkADRIdUniqueness(adrs: ADR[]): number {
  * Returns the finding count. Default mode: WARN-only; strict mode: blocking.
  */
 function checkAmendmentReferences(governanceFiles: string[], adrs: ADR[]): number {
-  console.log('🔍 Checking ADR amendment-reference resolution...\n');
+  console.log("🔍 Checking ADR amendment-reference resolution...\n");
 
   const textByNumber = new Map<string, string>();
   for (const adr of adrs) {
     // ADR.file is the bare entry name (scanADRFiles) — resolve against ADR_DIR.
-    textByNumber.set(adr.number, readFileSync(join(ADR_DIR, adr.file), 'utf-8').replace(/\r\n/g, '\n'));
+    textByNumber.set(adr.number, readFileSync(join(ADR_DIR, adr.file), "utf-8").replace(/\r\n/g, "\n"));
   }
 
   const AMEND_RE = /Amendments?\s+(\d+)(?:\s*[–—-]\s*(\d+))?/g;
@@ -457,17 +459,19 @@ function checkAmendmentReferences(governanceFiles: string[], adrs: ADR[]): numbe
 
   let findings = 0;
   for (const file of governanceFiles) {
-    const lines = readFileSync(file, 'utf-8').split(/\r?\n/);
+    const lines = readFileSync(file, "utf-8").split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const amendMatches = [...line.matchAll(AMEND_RE)];
       if (amendMatches.length === 0) continue;
-      const adrNumbers = new Set([...line.matchAll(ADR_NUM_RE)].map(m => m[1]));
+      const adrNumbers = new Set([...line.matchAll(ADR_NUM_RE)].map((m) => m[1]));
       if (adrNumbers.size !== 1) continue; // ambiguous association — skipped by design
       const adrNumber = [...adrNumbers][0] as string;
       const target = textByNumber.get(adrNumber);
       if (target === undefined) {
-        console.log(`[WARN] ${file}:${i + 1} cites ADR-${adrNumber} which does not exist under docs/adr/ — repoint or remove the citation`);
+        console.log(
+          `[WARN] ${file}:${i + 1} cites ADR-${adrNumber} which does not exist under docs/adr/ — repoint or remove the citation`,
+        );
         findings++;
         continue;
       }
@@ -481,16 +485,20 @@ function checkAmendmentReferences(governanceFiles: string[], adrs: ADR[]): numbe
         }
       }
       if (missing.length > 0) {
-        console.log(`[WARN] ${file}:${i + 1} cites "ADR-${adrNumber} Amendment ${missing.join(', ')}" but ADR-${adrNumber} records no such amendment — repoint the citation at the ADR that records the amendment (the CONSTITUTION.md ADR-0073-Amendment-2 → ADR-0074 pattern)`);
+        console.log(
+          `[WARN] ${file}:${i + 1} cites "ADR-${adrNumber} Amendment ${missing.join(", ")}" but ADR-${adrNumber} records no such amendment — repoint the citation at the ADR that records the amendment (the CONSTITUTION.md ADR-0073-Amendment-2 → ADR-0074 pattern)`,
+        );
         findings++;
       }
     }
   }
 
   if (findings === 0) {
-    console.log('✅ All ADR amendment references in governance docs resolve.\n');
+    console.log("✅ All ADR amendment references in governance docs resolve.\n");
   } else {
-    console.log(`\n⚠️  ${findings} unresolvable ADR amendment reference(s) in governance docs (WARN-only in default mode, blocking in strict)\n`);
+    console.log(
+      `\n⚠️  ${findings} unresolvable ADR amendment reference(s) in governance docs (WARN-only in default mode, blocking in strict)\n`,
+    );
   }
   return findings;
 }
@@ -501,12 +509,12 @@ function checkAmendmentReferences(governanceFiles: string[], adrs: ADR[]): numbe
 function main(): void {
   // Combined-mode guard: --strict and --update-marker-hashes are mutually exclusive
   if (UPDATE_MARKER_HASHES && STRICT) {
-    console.error('[ERROR] --strict and --update-marker-hashes are mutually exclusive (gating vs seeding).');
-    console.error('Usage: bun scripts/verify-adr-governance.ts [--strict | --update-marker-hashes]');
+    console.error("[ERROR] --strict and --update-marker-hashes are mutually exclusive (gating vs seeding).");
+    console.error("Usage: bun scripts/verify-adr-governance.ts [--strict | --update-marker-hashes]");
     process.exit(1);
   }
 
-  console.log('🔍 Checking ADR→governance linkage...\n');
+  console.log("🔍 Checking ADR→governance linkage...\n");
 
   // Load governance corpus
   const governanceFiles = readGovernanceCorpus();
@@ -522,7 +530,7 @@ function main(): void {
   // Filter: post-cutoff + Accepted/active
   // Also detect Accepted/Proposed ADRs with unparseable dates (safety gate)
   const undatedWarnings: ADR[] = [];
-  const checked = adrs.filter(adr => {
+  const checked = adrs.filter((adr) => {
     if (!adr.date) {
       // No date = cannot determine if post-cutoff
       // But if it's Accepted/Proposed, warn about the unknown date
@@ -545,10 +553,10 @@ function main(): void {
     console.log(`⚠️  [WARN] Found ${undatedWarnings.length} Accepted/Proposed ADR(s) with unparseable date:\n`);
     for (const adr of undatedWarnings) {
       console.log(
-        `[WARN] ADR-${adr.number} (${adr.slug}) has status ${adr.status} but no parseable date (neither YAML frontmatter 'date:' nor body-line '**Date**:') — add date metadata in YAML frontmatter to enable governance linkage checking`
+        `[WARN] ADR-${adr.number} (${adr.slug}) has status ${adr.status} but no parseable date (neither YAML frontmatter 'date:' nor body-line '**Date**:') — add date metadata in YAML frontmatter to enable governance linkage checking`,
       );
     }
-    console.log('');
+    console.log("");
   }
 
   console.log(`✓ Post-cutoff Accepted ADRs to check: ${checked.length}\n`);
@@ -557,7 +565,7 @@ function main(): void {
   let linkageFindings = 0;
 
   if (checked.length === 0) {
-    console.log('ℹ️  All ADRs predate the cutoff date — no linkage check needed.');
+    console.log("ℹ️  All ADRs predate the cutoff date — no linkage check needed.");
     console.log(`   (Cutoff: ${CUTOFF_DATE})\n`);
   } else {
     // Check linkage
@@ -576,10 +584,10 @@ function main(): void {
       console.log(`⚠️  [WARN] Found ${findings.length} unlinked Accepted ADR(s):\n`);
       for (const adr of findings) {
         console.log(
-          `[WARN] ADR-${adr.number} (${adr.slug}) dated ${adr.date} is Accepted but not referenced from any governance doc (CONSTITUTION.md, docs/constitution/, docs/governance/) — add a pointer using the canonical form ADR-${adr.number} so governance readers can discover it`
+          `[WARN] ADR-${adr.number} (${adr.slug}) dated ${adr.date} is Accepted but not referenced from any governance doc (CONSTITUTION.md, docs/constitution/, docs/governance/) — add a pointer using the canonical form ADR-${adr.number} so governance readers can discover it`,
         );
       }
-      console.log('');
+      console.log("");
     }
 
     const linked = checked.length - findings.length;
@@ -587,12 +595,14 @@ function main(): void {
 
     if (findings.length > 0) {
       if (STRICT) {
-        console.log(`⛔ Strict mode: ${findings.length} unlinked-ADR finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`);
+        console.log(
+          `⛔ Strict mode: ${findings.length} unlinked-ADR finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`,
+        );
       } else {
-        console.log('✅ Check completed (findings are WARN-only — exit 0)');
+        console.log("✅ Check completed (findings are WARN-only — exit 0)");
       }
     } else {
-      console.log('✅ All post-cutoff Accepted ADRs are referenced from governance docs.');
+      console.log("✅ All post-cutoff Accepted ADRs are referenced from governance docs.");
     }
   }
 
@@ -607,9 +617,11 @@ function main(): void {
   if (UPDATE_MARKER_HASHES) {
     updateMarkerHashes(markers);
   } else if (STRICT && (linkageFindings > 0 || markerFindings > 0 || amendmentFindings > 0)) {
-    console.log(`⛔ Strict mode: ${linkageFindings} unlinked-ADR and/or ${markerFindings} marker-drift and/or ${amendmentFindings} amendment-reference finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`);
+    console.log(
+      `⛔ Strict mode: ${linkageFindings} unlinked-ADR and/or ${markerFindings} marker-drift and/or ${amendmentFindings} amendment-reference finding(s) — blocking (dev-sync step 3.97; see docs/adr/0059)`,
+    );
   } else if (STRICT && linkageFindings === 0 && markerFindings === 0 && amendmentFindings === 0) {
-    console.log('ℹ️  Strict mode: no linkage, marker-drift, or amendment-reference findings — exit 0');
+    console.log("ℹ️  Strict mode: no linkage, marker-drift, or amendment-reference findings — exit 0");
   }
 
   // ID-uniqueness collisions fail in EVERY mode (integrity error, not a linkage WARN).
@@ -618,7 +630,7 @@ function main(): void {
   if (duplicateFindings > 0) {
     process.exit(1);
   }
-  process.exit(STRICT && (linkageFindings + markerFindings + amendmentFindings) > 0 ? 1 : 0);
+  process.exit(STRICT && linkageFindings + markerFindings + amendmentFindings > 0 ? 1 : 0);
 }
 
 // Run the check

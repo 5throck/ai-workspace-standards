@@ -14,7 +14,7 @@ const VALIDATOR = readFileSync(join(ROOT, "scripts", "validate-doc-folder.ts"), 
 function parseAllowlistConsts(name: string): Set<string> {
   const m = new RegExp(`const ${name}[^=]*= new Set\\(\\[([\\s\\S]*?)\\]\\);`).exec(VALIDATOR);
   expect(m, `${name} const exists`).toBeTruthy();
-  return new Set([...m![1].matchAll(/'([^']+)'/g)].map((x) => x[1]));
+  return new Set([...m![1].matchAll(/(['"])([^'\"\n]*)\1/g)].map((x) => x[2]));
 }
 
 const ALLOWED_DIRS = parseAllowlistConsts("ALLOWED_DIRS");

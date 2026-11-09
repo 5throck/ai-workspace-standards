@@ -40,9 +40,9 @@
  * remain after normalization, or file/usage error.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { die } from './lib/error-handling.ts';
-import { changelogGateFindings } from './helpers/changelog-duplicates.ts';
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { die } from "./lib/error-handling.ts";
+import { changelogGateFindings } from "./helpers/changelog-duplicates.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pure core
@@ -83,10 +83,10 @@ const CATEGORY_RE = /^###\s+\S/;
 const UNRELEASED_RE = /^##\s*\[Unreleased\]/;
 
 /** Canonical heading every `[Unreleased]`-family section merges into. */
-const CANONICAL_UNRELEASED = '## [Unreleased]';
+const CANONICAL_UNRELEASED = "## [Unreleased]";
 
 function categoryKey(line: string): string {
-  return line.replace(/^###\s+/, '').trim();
+  return line.replace(/^###\s+/, "").trim();
 }
 
 /** Split a CHANGELOG body into preamble + `## ` release sections (detector-equivalent parsing). */
@@ -163,13 +163,13 @@ function hasDuplicateCategories(body: string[]): boolean {
 /** Drop edge blanks, collapse interior blank runs to one. Blank-line-only normalization. */
 function tidy(lines: string[]): string[] {
   const body = lines.slice();
-  while (body.length > 0 && body[0].trim() === '') body.shift();
-  while (body.length > 0 && body[body.length - 1].trim() === '') body.pop();
+  while (body.length > 0 && body[0].trim() === "") body.shift();
+  while (body.length > 0 && body[body.length - 1].trim() === "") body.pop();
   const out: string[] = [];
   let prevBlank = false;
   for (const line of body) {
-    if (line.trim() === '') {
-      if (!prevBlank) out.push('');
+    if (line.trim() === "") {
+      if (!prevBlank) out.push("");
       prevBlank = true;
     } else {
       out.push(line);
@@ -185,11 +185,11 @@ function emitBlocks(blocks: SectionBlocks): string[] {
   const pre = tidy(blocks.pre);
   lines.push(...pre);
   for (const cat of blocks.cats) {
-    lines.push('');
+    lines.push("");
     lines.push(cat.heading);
     const content = tidy(cat.content);
     if (content.length > 0) {
-      lines.push('');
+      lines.push("");
       lines.push(...content);
     }
   }
@@ -198,8 +198,8 @@ function emitBlocks(blocks: SectionBlocks): string[] {
 
 /** Structural repair. Only called when changelogGateFindings(text) is non-empty. */
 function repair(text: string): string {
-  const eol = text.includes('\r\n') ? '\r\n' : '\n';
-  const endsWithNewline = text.endsWith('\n');
+  const eol = text.includes("\r\n") ? "\r\n" : "\n";
+  const endsWithNewline = text.endsWith("\n");
   const lines = text.split(/\r?\n/);
   if (endsWithNewline) lines.pop();
 
@@ -239,13 +239,13 @@ function repair(text: string): string {
       if (!mergePlaced) {
         mergePlaced = true;
         const body = emitBlocks(collapseCategories(mergedBlocks));
-        chunks.push({ lines: [CANONICAL_UNRELEASED, ...(body.length > 0 ? ['', ...body] : [])], rebuilt: true });
+        chunks.push({ lines: [CANONICAL_UNRELEASED, ...(body.length > 0 ? ["", ...body] : [])], rebuilt: true });
       }
       continue; // later duplicates are consumed by the merged section
     }
     if (hasDuplicateCategories(sections[i].body)) {
       const body = emitBlocks(collapseCategories(parseBlocks(sections[i].body)));
-      chunks.push({ lines: [sections[i].header, ...(body.length > 0 ? ['', ...body] : [])], rebuilt: true });
+      chunks.push({ lines: [sections[i].header, ...(body.length > 0 ? ["", ...body] : [])], rebuilt: true });
     } else {
       // Untouched section: byte-identical (header + body verbatim).
       chunks.push({ lines: [sections[i].header, ...sections[i].body], rebuilt: false });
@@ -258,8 +258,8 @@ function repair(text: string): string {
   for (const chunk of chunks) {
     if (chunk.rebuilt || prevRebuilt) {
       // Normalize the seam to exactly one blank line (blank-line-only churn).
-      while (out.length > 0 && out[out.length - 1].trim() === '') out.pop();
-      if (out.length > 0) out.push('');
+      while (out.length > 0 && out[out.length - 1].trim() === "") out.pop();
+      if (out.length > 0) out.push("");
     }
     out.push(...chunk.lines);
     prevRebuilt = chunk.rebuilt;
@@ -288,8 +288,8 @@ export function normalizeChangelog(text: string): NormalizeResult {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function unifiedDiff(before: string, after: string, file: string): string {
-  const a = before.split('\n');
-  const b = after.split('\n');
+  const a = before.split("\n");
+  const b = after.split("\n");
   // LCS table (changelog-sized files; O(n*m) is fine here).
   const n = a.length;
   const m = b.length;
@@ -299,30 +299,30 @@ function unifiedDiff(before: string, after: string, file: string): string {
       lcs[i][j] = a[i] === b[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
     }
   }
-  const ops: Array<{ type: ' ' | '-' | '+'; line: string }> = [];
+  const ops: Array<{ type: " " | "-" | "+"; line: string }> = [];
   let i = 0;
   let j = 0;
   while (i < n && j < m) {
     if (a[i] === b[j]) {
-      ops.push({ type: ' ', line: a[i] });
+      ops.push({ type: " ", line: a[i] });
       i++;
       j++;
     } else if (lcs[i + 1][j] >= lcs[i][j + 1]) {
-      ops.push({ type: '-', line: a[i] });
+      ops.push({ type: "-", line: a[i] });
       i++;
     } else {
-      ops.push({ type: '+', line: b[j] });
+      ops.push({ type: "+", line: b[j] });
       j++;
     }
   }
-  while (i < n) ops.push({ type: '-', line: a[i++] });
-  while (j < m) ops.push({ type: '+', line: b[j++] });
+  while (i < n) ops.push({ type: "-", line: a[i++] });
+  while (j < m) ops.push({ type: "+", line: b[j++] });
 
   const CONTEXT = 3;
   const hunks: string[] = [];
   let idx = 0;
   while (idx < ops.length) {
-    if (ops[idx].type === ' ') {
+    if (ops[idx].type === " ") {
       idx++;
       continue;
     }
@@ -331,7 +331,7 @@ function unifiedDiff(before: string, after: string, file: string): string {
     let trailing = 0;
     let k = idx;
     while (k < ops.length) {
-      if (ops[k].type !== ' ') {
+      if (ops[k].type !== " ") {
         end = k;
         trailing = 0;
       } else {
@@ -345,19 +345,18 @@ function unifiedDiff(before: string, after: string, file: string): string {
     let aStart = 1;
     let bStart = 1;
     for (let t = 0; t < start; t++) {
-      if (ops[t].type !== '+') aStart++;
-      if (ops[t].type !== '-') bStart++;
+      if (ops[t].type !== "+") aStart++;
+      if (ops[t].type !== "-") bStart++;
     }
-    const aCount = slice.filter((o) => o.type !== '+').length;
-    const bCount = slice.filter((o) => o.type !== '-').length;
+    const aCount = slice.filter((o) => o.type !== "+").length;
+    const bCount = slice.filter((o) => o.type !== "-").length;
     hunks.push(
-      `@@ -${aStart},${aCount} +${bStart},${bCount} @@\n` +
-        slice.map((o) => `${o.type} ${o.line}`).join('\n'),
+      `@@ -${aStart},${aCount} +${bStart},${bCount} @@\n` + slice.map((o) => `${o.type} ${o.line}`).join("\n"),
     );
     idx = end + 1;
   }
-  if (hunks.length === 0) return '';
-  return `--- a/${file}\n+++ b/${file}\n${hunks.join('\n')}\n`;
+  if (hunks.length === 0) return "";
+  return `--- a/${file}\n+++ b/${file}\n${hunks.join("\n")}\n`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -371,19 +370,19 @@ function printFindings(findings: ReturnType<typeof changelogGateFindings>): void
 }
 
 async function main(): Promise<void> {
-  const args = process.argv.slice(2).filter((a) => a !== '--dry-run' && a !== '--check');
-  const dryRun = process.argv.includes('--dry-run');
-  const checkOnly = process.argv.includes('--check');
+  const args = process.argv.slice(2).filter((a) => a !== "--dry-run" && a !== "--check");
+  const dryRun = process.argv.includes("--dry-run");
+  const checkOnly = process.argv.includes("--check");
   const file = args[0];
 
   if (!file || args.length !== 1) {
-    die('usage: bun scripts/changelog-normalize.ts <file> [--dry-run | --check]');
+    die("usage: bun scripts/changelog-normalize.ts <file> [--dry-run | --check]");
   }
   if (!existsSync(file)) {
     die(`file not found: ${file}`);
   }
 
-  const before = readFileSync(file, 'utf-8');
+  const before = readFileSync(file, "utf-8");
   const findingsBefore = changelogGateFindings(before);
 
   // --check: read-only operator smoke check — exit 0 when zero findings.
@@ -418,7 +417,7 @@ async function main(): Promise<void> {
   }
 
   // Write mode.
-  writeFileSync(file, after, 'utf-8');
+  writeFileSync(file, after, "utf-8");
   if (findingsAfter.length > 0) {
     console.log(`FAIL: ${file} normalized but ${findingsAfter.length} finding(s) remain — repair by hand.`);
     printFindings(findingsAfter);

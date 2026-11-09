@@ -113,28 +113,41 @@
  * sync.
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'node:fs';
-import type { Dirent } from 'node:fs';
-import { join, resolve, sep } from 'node:path';
-import { homedir, tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from "node:fs";
+import type { Dirent } from "node:fs";
+import { join, resolve, sep } from "node:path";
+import { homedir, tmpdir } from "node:os";
 
-const TAG = '[DELETE-GUARD]';
+const TAG = "[DELETE-GUARD]";
 const MARKER_TTL_MS = 30 * 60 * 1000; // dry-run marker validity window
-const STATE_DIR =
-  process.env.DELETE_GUARD_STATE_DIR || join(tmpdir(), 'ai-workspace-delete-guard');
+const STATE_DIR = process.env.DELETE_GUARD_STATE_DIR || join(tmpdir(), "ai-workspace-delete-guard");
 
 /** Workspace-root markers (upward-walk fallback when CLAUDE_PROJECT_DIR is
  * unset) — mirrors scripts/helpers/security-validator.ts detectWorkspaceRoot
  * (U-20261104-002). Reimplemented locally so the hook stays self-contained
  * for the Phase-2 L1 delivery (hooks ship as single files). */
-const WORKSPACE_ROOT_MARKERS = ['CONSTITUTION.md', join('templates', 'common')];
+const WORKSPACE_ROOT_MARKERS = ["CONSTITUTION.md", join("templates", "common")];
 
 /** Regenerable-artifact allowlist — path-segment match, case-sensitive
  * (design §5.1). */
 const ALLOWLIST_SEGMENTS: ReadonlySet<string> = new Set([
-  'node_modules', '.next', 'dist', 'build', 'coverage', 'tmp', 'temp',
-  '.cache', '.turbo', '.parcel-cache', '.nuxt', '.output', '.vite',
-  '__pycache__', '.pytest_cache', 'target', '.eslintcache',
+  "node_modules",
+  ".next",
+  "dist",
+  "build",
+  "coverage",
+  "tmp",
+  "temp",
+  ".cache",
+  ".turbo",
+  ".parcel-cache",
+  ".nuxt",
+  ".output",
+  ".vite",
+  "__pycache__",
+  ".pytest_cache",
+  "target",
+  ".eslintcache",
 ]);
 
 // ---------------------------------------------------------------------------
@@ -146,7 +159,7 @@ const ALLOWLIST_SEGMENTS: ReadonlySet<string> = new Set([
  * the design's documented heuristic (§5.1 step 2), not a shell parser. */
 export function splitSegments(command: string): string[] {
   return command
-    .replace(/\r\n?/g, '\n')
+    .replace(/\r\n?/g, "\n")
     .split(/&&|\|\||;|\||\n/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
@@ -157,7 +170,7 @@ export function splitSegments(command: string): string[] {
  * (`-fr`, `-rf`, `-Rf`, ...). Double-dash tokens are handled separately. */
 export function shortFlagsEnableRecursive(token: string): boolean {
   if (!/^-[^-]+$/.test(token)) return false;
-  return token.slice(1).includes('r') || token.slice(1).includes('R');
+  return token.slice(1).includes("r") || token.slice(1).includes("R");
 }
 
 export interface SegmentAnalysis {
@@ -201,7 +214,7 @@ export function analyzeSegment(segment: string): SegmentAnalysis {
   // execute the following command unchanged — skip them (and any env
   // assignments they carry) so the delete verb is detected through the
   // wrapper. Loop until no progress: covers stacked forms (sudo env rm).
-  const TRANSPARENT_PREFIXES = new Set(['sudo', 'env', 'nice', 'xargs', 'nohup']);
+  const TRANSPARENT_PREFIXES = new Set(["sudo", "env", "nice", "xargs", "nohup"]);
   let progressed = true;
   while (progressed) {
     progressed = false;
@@ -231,28 +244,26 @@ export function analyzeSegment(segment: string): SegmentAnalysis {
         skipNext = false;
         continue;
       }
-      if (!optionsEnded && t === '--') {
+      if (!optionsEnded && t === "--") {
         optionsEnded = true;
         continue;
       }
       if (isRedirectToken(t)) {
         // Bare operator (`>`, `>>`, `2>`) consumes the next token as target;
         // attached forms (`>file`, `2>&1`) carry it in the token itself.
-        skipNext = /^[0-9]*[<>]{1,2}$/.test(t) || t === '<' || t === '&>' || t === '&>>';
+        skipNext = /^[0-9]*[<>]{1,2}$/.test(t) || t === "<" || t === "&>" || t === "&>>";
         continue;
       }
-      if (!optionsEnded && t.startsWith('-')) continue;
+      if (!optionsEnded && t.startsWith("-")) continue;
       operands.push(t);
     }
     return operands;
   };
 
-  if (verb === 'rm' || verb === 'trash' || verb === 'trash-put') {
+  if (verb === "rm" || verb === "trash" || verb === "trash-put") {
     const recursive =
-      verb !== 'rm' || // trash commands are inherently recursive
-      tokens.slice(1).some(
-        (t) => t === '--recursive' || shortFlagsEnableRecursive(t),
-      );
+      verb !== "rm" || // trash commands are inherently recursive
+      tokens.slice(1).some((t) => t === "--recursive" || shortFlagsEnableRecursive(t));
     if (recursive) {
       result.isRecursiveDelete = true;
       result.deleteOperands = collectOperands(1);
@@ -260,13 +271,13 @@ export function analyzeSegment(segment: string): SegmentAnalysis {
     return result;
   }
 
-  if (verb === 'ls' || verb === 'tree' || verb === 'stat') {
+  if (verb === "ls" || verb === "tree" || verb === "stat") {
     result.isListing = true;
     result.listingOperands = collectOperands(1);
-  } else if (verb === 'du' && tokens.includes('-s')) {
+  } else if (verb === "du" && tokens.includes("-s")) {
     result.isListing = true;
     result.listingOperands = collectOperands(1);
-  } else if (verb === 'find' && tokens.includes('-maxdepth') && tokens.length > 1) {
+  } else if (verb === "find" && tokens.includes("-maxdepth") && tokens.length > 1) {
     result.isListing = true;
     result.listingOperands = [tokens[1]];
   }
@@ -276,8 +287,8 @@ export function analyzeSegment(segment: string): SegmentAnalysis {
 /** Expand a leading `~` to the user's home directory (design §5.1 step 4).
  * Accepts both `~/` and the platform separator (`~\\` on win32). */
 export function expandTilde(p: string): string {
-  if (p === '~') return homedir();
-  if (p.startsWith('~/') || p.startsWith('~' + sep)) return join(homedir(), p.slice(2));
+  if (p === "~") return homedir();
+  if (p.startsWith("~/") || p.startsWith("~" + sep)) return join(homedir(), p.slice(2));
   return p;
 }
 
@@ -301,7 +312,7 @@ export function canonicalize(p: string): string {
  * and get no realpath case-normalization). */
 export function normalizeForCompare(p: string): string {
   const resolved = resolve(p);
-  return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+  return process.platform === "win32" ? resolved.toLowerCase() : resolved;
 }
 
 /** Inside check against the (canonicalized) workspace root: the root itself
@@ -326,7 +337,7 @@ function detectWorkspaceRoot(): string {
     if (WORKSPACE_ROOT_MARKERS.some((m) => existsSync(join(dir, m)))) {
       return canonicalize(dir);
     }
-    const parent = resolve(dir, '..');
+    const parent = resolve(dir, "..");
     if (parent === dir) return canonicalize(resolve(process.cwd())); // fail closed to cwd
     dir = parent;
   }
@@ -366,12 +377,12 @@ function scanForGit(dir: string, levels: number): boolean {
     return false;
   }
   for (const entry of entries) {
-    if (entry.name === '.git') return true;
+    if (entry.name === ".git") return true;
   }
   if (levels > 1) {
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
-      if (entry.name === '.git') continue; // already matched above
+      if (entry.name === ".git") continue; // already matched above
       if (scanForGit(join(dir, entry.name), levels - 1)) return true;
     }
   }
@@ -392,7 +403,7 @@ interface MarkerFile {
 }
 
 function sanitizeSessionId(sessionId: string): string {
-  return sessionId.replace(/[^A-Za-z0-9_-]/g, '_');
+  return sessionId.replace(/[^A-Za-z0-9_-]/g, "_");
 }
 
 function markerPathFor(sessionId: string): string | null {
@@ -404,16 +415,12 @@ function readMarker(sessionId: string): MarkerFile {
   const path = markerPathFor(sessionId);
   if (!path || !existsSync(path)) return { entries: [] };
   try {
-    const parsed = JSON.parse(readFileSync(path, 'utf-8')) as Partial<MarkerFile>;
+    const parsed = JSON.parse(readFileSync(path, "utf-8")) as Partial<MarkerFile>;
     const entries = Array.isArray(parsed.entries) ? parsed.entries : [];
     const now = Date.now();
     return {
       entries: entries.filter(
-        (e) =>
-          e &&
-          typeof e.resolvedPath === 'string' &&
-          typeof e.at === 'number' &&
-          now - e.at <= MARKER_TTL_MS,
+        (e) => e && typeof e.resolvedPath === "string" && typeof e.at === "number" && now - e.at <= MARKER_TTL_MS,
       ),
     };
   } catch {
@@ -433,7 +440,7 @@ function recordListingMarkers(resolvedPaths: string[], sessionId: string): void 
     for (const p of resolvedPaths) byPath.set(p, now); // latest listing wins
     const entries = [...byPath.entries()].map(([resolvedPath, at]) => ({ resolvedPath, at }));
     mkdirSync(STATE_DIR, { recursive: true });
-    writeFileSync(join(STATE_DIR, `${sanitizeSessionId(sessionId)}.json`), JSON.stringify({ entries }), 'utf-8');
+    writeFileSync(join(STATE_DIR, `${sanitizeSessionId(sessionId)}.json`), JSON.stringify({ entries }), "utf-8");
   } catch (err) {
     console.error(`${TAG} WARN: marker write failed (fail-open): ${(err as Error).message}`);
   }
@@ -442,9 +449,7 @@ function recordListingMarkers(resolvedPaths: string[], sessionId: string): void 
 /** A fresh (≤30 min) marker exists for this exact resolved path. */
 function hasFreshMarker(resolvedPath: string, sessionId: string): boolean {
   const now = Date.now();
-  return readMarker(sessionId).entries.some(
-    (e) => e.resolvedPath === resolvedPath && now - e.at <= MARKER_TTL_MS,
-  );
+  return readMarker(sessionId).entries.some((e) => e.resolvedPath === resolvedPath && now - e.at <= MARKER_TTL_MS);
 }
 
 // ---------------------------------------------------------------------------
@@ -452,12 +457,12 @@ function hasFreshMarker(resolvedPath: string, sessionId: string): boolean {
 // ---------------------------------------------------------------------------
 
 function emitAsk(reason: string): never {
-  process.stdout.write(JSON.stringify({ decision: 'ask', reason }) + '\n');
+  process.stdout.write(JSON.stringify({ decision: "ask", reason }) + "\n");
   process.exit(0);
 }
 
 function emitDeny(reason: string): never {
-  process.stdout.write(JSON.stringify({ decision: 'deny', reason }) + '\n');
+  process.stdout.write(JSON.stringify({ decision: "deny", reason }) + "\n");
   process.exit(2);
 }
 
@@ -466,10 +471,10 @@ function allowSilently(): never {
 }
 
 function gateReason(paths: string[], opts: { suppressNote: boolean; markerAck: boolean }): string {
-  const targetList = paths.map((p) => `'${p}'`).join(', ');
+  const targetList = paths.map((p) => `'${p}'`).join(", ");
   const suppression = opts.suppressNote
     ? ` The regenerable-artifact allowlist bypass is suppressed: a .git entry exists at or beneath the target — never delete a path that can contain .git children.`
-    : '';
+    : "";
   if (opts.markerAck) {
     return (
       `${TAG} Recursive delete of ${targetList} (inside workspace root). A dry-run listing of this exact ` +
@@ -494,16 +499,15 @@ function main(): void {
   // 1. Platform/mode flags (gateguard convention: gemini forces deny;
   //    claude defaults to ask, --mode deny overrides).
   const args = process.argv.slice(2);
-  const platformIdx = args.indexOf('--platform');
-  const platform: 'claude' | 'gemini' =
-    platformIdx !== -1 && args[platformIdx + 1] === 'gemini' ? 'gemini' : 'claude';
-  const modeIdx = args.indexOf('--mode');
-  const mode: 'ask' | 'deny' = modeIdx !== -1 && args[modeIdx + 1] === 'deny' ? 'deny' : 'ask';
+  const platformIdx = args.indexOf("--platform");
+  const platform: "claude" | "gemini" = platformIdx !== -1 && args[platformIdx + 1] === "gemini" ? "gemini" : "claude";
+  const modeIdx = args.indexOf("--mode");
+  const mode: "ask" | "deny" = modeIdx !== -1 && args[modeIdx + 1] === "deny" ? "deny" : "ask";
 
   // 2. Read stdin (fd 0) — fail-open.
   let stdinJson: string;
   try {
-    stdinJson = readFileSync(0, 'utf-8');
+    stdinJson = readFileSync(0, "utf-8");
   } catch {
     process.exit(0);
     return;
@@ -523,12 +527,12 @@ function main(): void {
   //    Missing or non-string → fail-open.
   const toolInput = data.tool_input ?? {};
   const command = toolInput.command;
-  if (typeof command !== 'string' || command.trim().length === 0) {
+  if (typeof command !== "string" || command.trim().length === 0) {
     process.exit(0);
     return;
   }
 
-  const sessionId = typeof data.session_id === 'string' ? data.session_id : '';
+  const sessionId = typeof data.session_id === "string" ? data.session_id : "";
   const root = detectWorkspaceRoot();
   const canonicalTmp = canonicalize(tmpdir());
   const segments = splitSegments(command);
@@ -572,7 +576,7 @@ function main(): void {
 
   // 7. Reviewed escape hatch (pre-push.ts ALLOW_REMOTE_BRANCH_DELETE=1
   //    precedent): bypass for this invocation.
-  if (process.env.ALLOW_RECURSIVE_DELETE === '1') {
+  if (process.env.ALLOW_RECURSIVE_DELETE === "1") {
     console.error(`${TAG} ALLOW_RECURSIVE_DELETE=1 — gate bypassed for this invocation (reviewed escape).`);
     allowSilently();
     return;
@@ -581,7 +585,7 @@ function main(): void {
   // 8. Marker check: every gated target must have a fresh marker for the
   //    exact resolved path for the protocol to count as satisfied.
   const paths = [...gatedTargets, ...suppressedTargets];
-  const markerSatisfied = sessionId !== '' && paths.every((p) => hasFreshMarker(p, sessionId));
+  const markerSatisfied = sessionId !== "" && paths.every((p) => hasFreshMarker(p, sessionId));
 
   const reason = gateReason(paths, {
     suppressNote: suppressedTargets.length > 0,
@@ -592,7 +596,7 @@ function main(): void {
   //    human confirms; marker never bypasses the ask; --mode deny
   //    hard-blocks), Gemini = deny (exit 2; a valid marker downgrades to
   //    allow — Manual terminal approval supplies the confirmation there).
-  if (platform === 'gemini') {
+  if (platform === "gemini") {
     if (markerSatisfied) {
       allowSilently();
       return;
@@ -600,7 +604,7 @@ function main(): void {
     emitDeny(reason);
     return;
   }
-  if (mode === 'deny') {
+  if (mode === "deny") {
     emitDeny(reason);
     return;
   }

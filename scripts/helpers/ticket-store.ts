@@ -73,10 +73,23 @@
 // Design: docs/archive/superpowers/specs/2026-07-16-service-ticket-kanban-design.md,
 //         docs/designs/2026-10-02-upstream-review-backlog-remediations-design.md (§A)
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, openSync, closeSync, statSync, rmSync, linkSync, unlinkSync } from 'node:fs';
-import { randomBytes } from 'node:crypto';
-import { join, dirname, basename, relative, resolve, isAbsolute } from 'node:path';
-import { load, dump, JSON_SCHEMA } from 'js-yaml';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+  openSync,
+  closeSync,
+  statSync,
+  rmSync,
+  linkSync,
+  unlinkSync,
+} from "node:fs";
+import { randomBytes } from "node:crypto";
+import { join, dirname, basename, relative, resolve, isAbsolute } from "node:path";
+import { load, dump, JSON_SCHEMA } from "js-yaml";
 import {
   CURRENT_SCHEMA_VERSION,
   canTransition,
@@ -93,7 +106,7 @@ import {
   type Ticket,
   type UpstreamBlock,
   isActionEntry,
-} from './ticket-schema.ts';
+} from "./ticket-schema.ts";
 import {
   checkReprioritize,
   isFrozen,
@@ -104,16 +117,17 @@ import {
   FROZEN_THRESHOLD,
   PRIORITY_LEVEL,
   type ReprioritizeActor,
-} from './reprioritize.ts';
-import { kstDate, kstIso } from './kst-time.ts';
+} from "./reprioritize.ts";
+import { kstDate, kstIso } from "./kst-time.ts";
 
 const MAX_YAML_BYTES = 64 * 1024;
 const PRIORITY_RANK: Record<Priority, number> = { urgent: 0, high: 1, normal: 2, low: 3 };
 
 function loadYamlCapped<T>(path: string): T {
   const stat = statSync(path);
-  if (stat.size > MAX_YAML_BYTES) throw new Error(`[ticket-store] refusing to parse oversized YAML (${stat.size} bytes): ${path}`);
-  return load(readFileSync(path, 'utf-8'), { schema: JSON_SCHEMA }) as T;
+  if (stat.size > MAX_YAML_BYTES)
+    throw new Error(`[ticket-store] refusing to parse oversized YAML (${stat.size} bytes): ${path}`);
+  return load(readFileSync(path, "utf-8"), { schema: JSON_SCHEMA }) as T;
 }
 
 /** Ticket id shape enforced at the store boundary (T-20260926-026c): ids reach
@@ -125,7 +139,9 @@ const TICKET_ID_PATTERN = /^[TU]-\d{8}-\d{3,4}$/;
 
 function ticketPath(dir: string, id: string): string {
   if (!TICKET_ID_PATTERN.test(id)) {
-    throw new Error(`[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN or U-YYYYMMDD-NNN`);
+    throw new Error(
+      `[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN or U-YYYYMMDD-NNN`,
+    );
   }
   return join(dir, `${id}.yaml`);
 }
@@ -134,7 +150,7 @@ function writeTicketAtomic(dir: string, ticket: Ticket): void {
   mkdirSync(dir, { recursive: true });
   const finalPath = ticketPath(dir, ticket.id);
   const tmpPath = `${finalPath}.tmp-${process.pid}-${Date.now()}`;
-  writeFileSync(tmpPath, dump(ticket), 'utf-8');
+  writeFileSync(tmpPath, dump(ticket), "utf-8");
   renameSync(tmpPath, finalPath);
 }
 
@@ -150,17 +166,17 @@ const TICKET_LOCK_POLL_MS = 20;
 
 function ticketLockTimeoutMs(): number {
   const raw = process.env.TICKET_LOCK_TIMEOUT_MS;
-  if (raw === undefined || raw === '') return 5000;
+  if (raw === undefined || raw === "") return 5000;
   if (/^\d{1,6}$/.test(raw.trim())) return parseInt(raw, 10);
   return 5000;
 }
 
 function readLockOwner(lockDir: string): string {
   try {
-    const owner = JSON.parse(readFileSync(join(lockDir, 'owner'), 'utf-8')) as { pid?: number; holder?: string };
-    return `pid ${owner.pid ?? '?'} (${owner.holder ?? 'unknown'})`;
+    const owner = JSON.parse(readFileSync(join(lockDir, "owner"), "utf-8")) as { pid?: number; holder?: string };
+    return `pid ${owner.pid ?? "?"} (${owner.holder ?? "unknown"})`;
   } catch {
-    return 'unknown holder';
+    return "unknown holder";
   }
 }
 
@@ -172,22 +188,24 @@ function readLockOwner(lockDir: string): string {
  * new holder's lock. NOT re-entrant: nested calls deadlock on the timeout. */
 export function withTicketLock<T>(dir: string, holder: string, fn: () => T): T {
   mkdirSync(dir, { recursive: true });
-  const lockDir = join(dir, '.ticket-lock');
-  const token = randomBytes(8).toString('hex');
+  const lockDir = join(dir, ".ticket-lock");
+  const token = randomBytes(8).toString("hex");
   const deadline = Date.now() + ticketLockTimeoutMs();
   for (;;) {
     try {
       mkdirSync(lockDir);
       break;
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+      if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
       // Stale takeover ONLY for a lock older than TICKET_LOCK_STALE_MS — a fresh
       // lock belongs to an active holder, and renaming it away would break the
       // mutual exclusion this lock exists to provide.
       let stale = false;
       try {
         stale = Date.now() - statSync(lockDir).mtimeMs > TICKET_LOCK_STALE_MS;
-      } catch { /* vanished between EEXIST and stat — loop and retry mkdir */ }
+      } catch {
+        /* vanished between EEXIST and stat — loop and retry mkdir */
+      }
       if (stale) {
         try {
           // Atomic takeover: the rename succeeds for exactly one waiter.
@@ -195,27 +213,33 @@ export function withTicketLock<T>(dir: string, holder: string, fn: () => T): T {
           renameSync(lockDir, stalePath);
           rmSync(stalePath, { recursive: true, force: true });
           continue;
-        } catch { /* another waiter won the rename, or already removed it — wait */ }
+        } catch {
+          /* another waiter won the rename, or already removed it — wait */
+        }
       }
       if (Date.now() >= deadline) {
         throw new Error(
           `[ticket-store] could not acquire the ticket lock at ${lockDir} within ${ticketLockTimeoutMs()}ms ` +
-          `(held by ${readLockOwner(lockDir)}) — retry, and check for a stuck server process`,
+            `(held by ${readLockOwner(lockDir)}) — retry, and check for a stuck server process`,
         );
       }
       Bun.sleepSync(TICKET_LOCK_POLL_MS);
     }
   }
   try {
-    writeFileSync(join(lockDir, 'owner'), JSON.stringify({ pid: process.pid, token, holder, at: kstIso() }), 'utf-8');
-  } catch { /* the lock was stolen between mkdir and owner write — release below is a no-op */ }
+    writeFileSync(join(lockDir, "owner"), JSON.stringify({ pid: process.pid, token, holder, at: kstIso() }), "utf-8");
+  } catch {
+    /* the lock was stolen between mkdir and owner write — release below is a no-op */
+  }
   try {
     return fn();
   } finally {
     try {
-      const owner = JSON.parse(readFileSync(join(lockDir, 'owner'), 'utf-8')) as { token?: string };
+      const owner = JSON.parse(readFileSync(join(lockDir, "owner"), "utf-8")) as { token?: string };
       if (owner.token === token) rmSync(lockDir, { recursive: true, force: true });
-    } catch { /* lock already gone (stale-taken) — nothing to release */ }
+    } catch {
+      /* lock already gone (stale-taken) — nothing to release */
+    }
   }
 }
 
@@ -239,17 +263,19 @@ export function readTicket(dir: string, id: string): Ticket {
 
 export function listTickets(dir: string, filter?: { status?: Status; kind?: Kind; ready?: boolean }): Ticket[] {
   if (!existsSync(dir)) return [];
-  const files = readdirSync(dir).filter(f => f.endsWith('.yaml') && !f.includes('.tmp-'));
-  const tickets = files.map(f => {
+  const files = readdirSync(dir).filter((f) => f.endsWith(".yaml") && !f.includes(".tmp-"));
+  const tickets = files.map((f) => {
     const obj = loadYamlCapped<unknown>(join(dir, f));
     validateTicket(obj);
     return obj;
   });
-  const READY_STATUSES: Status[] = ['backlog', 'waiting'];
-  return tickets.filter(t =>
-    (filter?.status === undefined || t.status === filter.status) &&
-    (filter?.kind === undefined || t.kind === filter.kind) &&
-    (filter?.ready !== true || (READY_STATUSES.includes(t.status) && (t.not_before === undefined || t.not_before <= kstDate())))
+  const READY_STATUSES: Status[] = ["backlog", "waiting"];
+  return tickets.filter(
+    (t) =>
+      (filter?.status === undefined || t.status === filter.status) &&
+      (filter?.kind === undefined || t.kind === filter.kind) &&
+      (filter?.ready !== true ||
+        (READY_STATUSES.includes(t.status) && (t.not_before === undefined || t.not_before <= kstDate()))),
   );
 }
 
@@ -258,7 +284,7 @@ export function listTickets(dir: string, filter?: { status?: Status; kind?: Kind
  * history.at and the --ready not_before filter all read as KST dates. Existing UTC
  * 'Z' timestamps and ids remain valid; comparisons use Date.parse, not strings. */
 function todayPrefix(): string {
-  return `T-${kstDate().replace(/-/g, '')}`;
+  return `T-${kstDate().replace(/-/g, "")}`;
 }
 
 function nextSeqGuess(dir: string, prefix: string): number {
@@ -266,14 +292,12 @@ function nextSeqGuess(dir: string, prefix: string): number {
   // move/list resolve an id with governance/ precedence, so a seq guessed from
   // the target directory alone can mint an id that shadows (or is shadowed by)
   // a same-day ticket in the other directory. Always scan both.
-  const dirs = basename(dir) === 'governance'
-    ? [dir, dirname(dir)]
-    : [dir, join(dir, 'governance')];
+  const dirs = basename(dir) === "governance" ? [dir, dirname(dir)] : [dir, join(dir, "governance")];
   let max = 0;
   for (const d of dirs) {
     if (!existsSync(d)) continue;
     for (const f of readdirSync(d)) {
-      if (!f.startsWith(prefix) || !f.endsWith('.yaml')) continue;
+      if (!f.startsWith(prefix) || !f.endsWith(".yaml")) continue;
       // v1.4.1 (2026-10-01 review M1): read to the end of the digit run — the
       // fixed 3-char slice truncated 4-digit ids (e.g. T-20260912-1000.yaml)
       // to their first 3 digits, so max-seq guesses started over low and
@@ -316,10 +340,10 @@ export class DuplicateTicketError extends Error {
   constructor(existingId: string, candidateTitle: string) {
     super(
       `[ticket-store] duplicate ticket refused: a ticket with the same normalized title already exists — ` +
-      `${existingId} ("${candidateTitle}"). Re-filing an existing ticket is the 2026-11-03 rollback ` +
-      `duplication shape; if this is the legitimate re-file-after-archive case, re-run with --allow-duplicate`,
+        `${existingId} ("${candidateTitle}"). Re-filing an existing ticket is the 2026-11-03 rollback ` +
+        `duplication shape; if this is the legitimate re-file-after-archive case, re-run with --allow-duplicate`,
     );
-    this.name = 'DuplicateTicketError';
+    this.name = "DuplicateTicketError";
     this.existingId = existingId;
   }
 }
@@ -328,7 +352,7 @@ export class DuplicateTicketError extends Error {
  * Exact normalized match only — similarity thresholds were rejected for v1 to
  * keep false positives at zero. */
 function normalizeTitleForDuplicateCheck(title: string): string {
-  return title.trim().toLowerCase().replace(/\s+/g, ' ');
+  return title.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 /** Scans BOTH stores (same sibling layout as nextSeqGuess) for an existing
@@ -345,14 +369,12 @@ function normalizeTitleForDuplicateCheck(title: string): string {
  * cannot mask a real duplicate. */
 function findDuplicateByTitle(dir: string, input: CreateTicketInput): Ticket | null {
   if (input.title === undefined) return null;
-  const dirs = basename(dir) === 'governance'
-    ? [dir, dirname(dir)]
-    : [dir, join(dir, 'governance')];
+  const dirs = basename(dir) === "governance" ? [dir, dirname(dir)] : [dir, join(dir, "governance")];
   const candidate = normalizeTitleForDuplicateCheck(input.title);
   for (const d of dirs) {
     if (!existsSync(d)) continue;
     for (const f of readdirSync(d)) {
-      if (!f.endsWith('.yaml') || f.includes('.tmp-')) continue;
+      if (!f.endsWith(".yaml") || f.includes(".tmp-")) continue;
       let t: Ticket;
       try {
         const obj = loadYamlCapped<unknown>(join(d, f));
@@ -381,7 +403,7 @@ function findDuplicateByTitle(dir: string, input: CreateTicketInput): Ticket | n
  * normalized-title duplicate across both stores is refused (DuplicateTicketError)
  * unless opts.allowDuplicate is set. */
 export function createTicket(dir: string, input: CreateTicketInput, opts: CreateTicketOptions = {}): Ticket {
-  return withTicketLock(dir, 'create', () => createTicketUnlocked(dir, input, opts));
+  return withTicketLock(dir, "create", () => createTicketUnlocked(dir, input, opts));
 }
 
 /** Core create — caller MUST already hold the ticket lock (see withTicketLock). */
@@ -392,28 +414,28 @@ function createTicketUnlocked(dir: string, input: CreateTicketInput, opts: Creat
   // originals had survived. Refusal is store-level (DEC-20261104-02 ruling 5).
   if (!opts.allowDuplicate) {
     const dup = findDuplicateByTitle(dir, input);
-    if (dup !== null) throw new DuplicateTicketError(dup.id, dup.title ?? '');
+    if (dup !== null) throw new DuplicateTicketError(dup.id, dup.title ?? "");
   }
   const prefix = todayPrefix();
   const MAX_ATTEMPTS = 50;
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const seq = nextSeqGuess(dir, prefix) + attempt;
-    const id = `${prefix}-${String(seq).padStart(3, '0')}`;
+    const id = `${prefix}-${String(seq).padStart(3, "0")}`;
     const path = ticketPath(dir, id);
     const ticket: Ticket = {
       schemaVersion: CURRENT_SCHEMA_VERSION,
       id,
       kind: input.kind,
-      service: input.kind === 'service' ? input.service : undefined,
+      service: input.kind === "service" ? input.service : undefined,
       title: input.title,
       inputs: input.inputs,
       priority: input.priority,
       not_before: input.not_before,
       hub: input.hub,
-      status: 'backlog',
+      status: "backlog",
       attempts: 0,
       created_at: kstIso(),
-      history: [{ at: kstIso(), from: null, to: 'backlog' }],
+      history: [{ at: kstIso(), from: null, to: "backlog" }],
       result: null,
       error: null,
     };
@@ -424,23 +446,31 @@ function createTicketUnlocked(dir: string, input: CreateTicketInput, opts: Creat
     // so the empty-file crash window (a crash between wx-create and rename left
     // a zero-byte .yaml that wedged listTickets and consumed the id) is closed.
     const tmpPath = `${path}.tmp-${process.pid}-${Date.now()}-${attempt}`;
-    writeFileSync(tmpPath, dump(ticket), 'utf-8');
+    writeFileSync(tmpPath, dump(ticket), "utf-8");
     try {
       linkSync(tmpPath, path);
-      try { unlinkSync(tmpPath); } catch { /* best-effort temp cleanup */ }
+      try {
+        unlinkSync(tmpPath);
+      } catch {
+        /* best-effort temp cleanup */
+      }
       return ticket;
     } catch (err: unknown) {
-      try { unlinkSync(tmpPath); } catch { /* already unlinked or vanished */ }
-      if ((err as NodeJS.ErrnoException).code === 'EEXIST') continue;
+      try {
+        unlinkSync(tmpPath);
+      } catch {
+        /* already unlinked or vanished */
+      }
+      if ((err as NodeJS.ErrnoException).code === "EEXIST") continue;
       // Documented fallback (design §5.3 / §9): a platform that rejects link()
       // falls back to the historical wx + atomic-rename dance. The empty-file
       // window re-opens only on those platforms and only on a crash between the
       // two calls — recorded as an accepted residual risk, one code path.
       let fd: number;
       try {
-        fd = openSync(path, 'wx');
+        fd = openSync(path, "wx");
       } catch (fallbackErr: unknown) {
-        if ((fallbackErr as NodeJS.ErrnoException).code === 'EEXIST') continue;
+        if ((fallbackErr as NodeJS.ErrnoException).code === "EEXIST") continue;
         throw fallbackErr;
       }
       closeSync(fd);
@@ -466,30 +496,32 @@ export interface TicketLocation {
   archived: boolean;
 }
 
-export function resolveTicketLocation(
-  serviceDir: string,
-  governanceDir: string,
-  id: string,
-): TicketLocation {
+export function resolveTicketLocation(serviceDir: string, governanceDir: string, id: string): TicketLocation {
   const explicit = /^(service|governance)\/([TU]-\d{8}-\d{3,4})$/.exec(id);
   if (explicit) {
     // T-20261001-016: upstream request tickets (U-) are kind: manual by schema —
     // an explicit service/ prefix on a U- id is a caller error, not a lookup miss.
-    if (explicit[1] === 'service' && explicit[2].startsWith('U-')) {
-      throw new Error(`[ticket-store] upstream request tickets (${explicit[2]}) are kind: manual — use 'governance/${explicit[2]}' or the bare id`);
+    if (explicit[1] === "service" && explicit[2].startsWith("U-")) {
+      throw new Error(
+        `[ticket-store] upstream request tickets (${explicit[2]}) are kind: manual — use 'governance/${explicit[2]}' or the bare id`,
+      );
     }
-    const dir = explicit[1] === 'governance' ? governanceDir : serviceDir;
-    const kind: Kind = explicit[1] === 'governance' ? 'manual' : 'service';
+    const dir = explicit[1] === "governance" ? governanceDir : serviceDir;
+    const kind: Kind = explicit[1] === "governance" ? "manual" : "service";
     if (existsSync(join(dir, `${explicit[2]}.yaml`))) {
       return { dir, kind, id: explicit[2], archived: false };
     }
     if (existsSync(join(archiveDirFor(dir), `${explicit[2]}.yaml`))) {
       return { dir: archiveDirFor(dir), kind, id: explicit[2], archived: true };
     }
-    throw new Error(`[ticket-store] ticket not found: ${explicit[2]} (looked in ${join(dir, explicit[2] + '.yaml')} and ${join(archiveDirFor(dir), explicit[2] + '.yaml')})`);
+    throw new Error(
+      `[ticket-store] ticket not found: ${explicit[2]} (looked in ${join(dir, explicit[2] + ".yaml")} and ${join(archiveDirFor(dir), explicit[2] + ".yaml")})`,
+    );
   }
   if (!TICKET_ID_PATTERN.test(id)) {
-    throw new Error(`[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN (optionally prefixed service/<id> or governance/<id>)`);
+    throw new Error(
+      `[ticket-store] invalid ticket id: ${JSON.stringify(id)} — expected T-YYYYMMDD-NNN (optionally prefixed service/<id> or governance/<id>)`,
+    );
   }
   const servicePath = join(serviceDir, `${id}.yaml`);
   const governancePath = join(governanceDir, `${id}.yaml`);
@@ -500,26 +532,28 @@ export function resolveTicketLocation(
   if (inService && inGovernance) {
     throw new Error(
       `[ticket-store] ambiguous ticket id ${id}: it exists in BOTH stores — ` +
-      `${governancePath} and ${servicePath}. ` +
-      `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
+        `${governancePath} and ${servicePath}. ` +
+        `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
     );
   }
-  if (inGovernance) return { dir: governanceDir, kind: 'manual', id, archived: false };
-  if (inService) return { dir: serviceDir, kind: 'service', id, archived: false };
+  if (inGovernance) return { dir: governanceDir, kind: "manual", id, archived: false };
+  if (inService) return { dir: serviceDir, kind: "service", id, archived: false };
   const inServiceArchive = existsSync(serviceArchivePath);
   const inGovernanceArchive = existsSync(governanceArchivePath);
   if (inServiceArchive && inGovernanceArchive) {
     throw new Error(
       `[ticket-store] ambiguous ticket id ${id}: it exists in BOTH archives — ` +
-      `${governanceArchivePath} and ${serviceArchivePath}. ` +
-      `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
+        `${governanceArchivePath} and ${serviceArchivePath}. ` +
+        `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
     );
   }
   // Archived ids resolve to the ARCHIVE directory as the containing dir, so
   // readTicket/moveTicket operate on the real file (review C1, 2026-10-04).
-  if (inGovernanceArchive) return { dir: archiveDirFor(governanceDir), kind: 'manual', id, archived: true };
-  if (inServiceArchive) return { dir: archiveDirFor(serviceDir), kind: 'service', id, archived: true };
-  throw new Error(`[ticket-store] ticket not found: ${id} (looked in ${servicePath}, ${governancePath}, ${serviceArchivePath} and ${governanceArchivePath})`);
+  if (inGovernanceArchive) return { dir: archiveDirFor(governanceDir), kind: "manual", id, archived: true };
+  if (inServiceArchive) return { dir: archiveDirFor(serviceDir), kind: "service", id, archived: true };
+  throw new Error(
+    `[ticket-store] ticket not found: ${id} (looked in ${servicePath}, ${governancePath}, ${serviceArchivePath} and ${governanceArchivePath})`,
+  );
 }
 
 export interface MoveOptions {
@@ -551,7 +585,7 @@ function moveTicketUnlocked(dir: string, id: string, to: Status, opts: MoveOptio
   if (!opts.force && !canTransition(from, to)) {
     throw new Error(`[ticket-store] transition ${from} -> ${to} is not allowed for ${id} (use --force to override)`);
   }
-  const isRetry = from === 'failed' && to === 'waiting';
+  const isRetry = from === "failed" && to === "waiting";
   const nextAttempts = isRetry ? ticket.attempts + 1 : ticket.attempts;
   if (isRetry && nextAttempts > DEFAULT_ATTEMPTS_CAP && !opts.force) {
     throw new Error(
@@ -561,8 +595,8 @@ function moveTicketUnlocked(dir: string, id: string, to: Status, opts: MoveOptio
   ticket.status = to;
   ticket.history.push({ at: kstIso(), from, to });
   if (isRetry) ticket.attempts = nextAttempts;
-  if (to === 'failed' && opts.error !== undefined) ticket.error = opts.error;
-  if (to === 'done' && opts.result !== undefined) ticket.result = opts.result;
+  if (to === "failed" && opts.error !== undefined) ticket.error = opts.error;
+  if (to === "done" && opts.result !== undefined) ticket.result = opts.result;
   // v1.11.0 (U-20261006 runner batch): validate the mutated ticket BEFORE the
   // write. The schema invariants are read-path-only otherwise, so a move could
   // write a state (e.g. upstream inbox+waiting) that NO ticket.ts command could
@@ -585,20 +619,22 @@ function moveTicketUnlocked(dir: string, id: string, to: Status, opts: MoveOptio
 export function setUpstreamTriage(
   dir: string,
   id: string,
-  triage: 'inbox' | 'ready',
+  triage: "inbox" | "ready",
   opts: { confirmReviewed?: boolean } = {},
 ): Ticket {
   return withTicketLock(dir, `triage:${id}`, () => {
     const ticket = readTicket(dir, id);
     if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
-    if (ticket.status === 'done') {
+    if (ticket.status === "done") {
       throw new Error(`[ticket-store] ${id} is done — a closed request is never re-triaged`);
     }
-    if (triage === 'ready' && ticket.upstream.flagged && !opts.confirmReviewed) {
-      throw new Error(`[ticket-store] ${id} is flagged for human review — promote to ready only with confirmReviewed (--confirm-reviewed)`);
+    if (triage === "ready" && ticket.upstream.flagged && !opts.confirmReviewed) {
+      throw new Error(
+        `[ticket-store] ${id} is flagged for human review — promote to ready only with confirmReviewed (--confirm-reviewed)`,
+      );
     }
-    const target: Status = triage === 'ready' ? 'waiting' : 'backlog';
-    if (ticket.status !== target && triage === 'ready' && !canTransition(ticket.status, target)) {
+    const target: Status = triage === "ready" ? "waiting" : "backlog";
+    if (ticket.status !== target && triage === "ready" && !canTransition(ticket.status, target)) {
       throw new Error(
         `[ticket-store] transition ${ticket.status} -> ${target} is not allowed for ${id} (ready promotion refused, nothing written)`,
       );
@@ -631,13 +667,13 @@ export function setUpstreamTriage(
 export function setUpstreamResolution(
   dir: string,
   id: string,
-  resolution: NonNullable<UpstreamBlock['resolution']>,
+  resolution: NonNullable<UpstreamBlock["resolution"]>,
   summary: string,
 ): Ticket {
   return withTicketLock(dir, `resolve:${id}`, () => {
     const ticket = readTicket(dir, id);
     if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
-    if (ticket.status === 'done') {
+    if (ticket.status === "done") {
       if (ticket.upstream.resolution) {
         throw new Error(`[ticket-store] ${id} already carries a resolution — a closed request is never re-resolved`);
       }
@@ -645,13 +681,14 @@ export function setUpstreamResolution(
     }
     // M10 (T-20261002-010): kind manual never enters the service-runner 'running' hop —
     // design §5.1 maps investigation to review, reached directly from waiting.
-    const order: Status[] = ticket.kind === 'manual'
-      ? ['backlog', 'waiting', 'review', 'done']
-      : ['backlog', 'waiting', 'running', 'review', 'done'];
+    const order: Status[] =
+      ticket.kind === "manual"
+        ? ["backlog", "waiting", "review", "done"]
+        : ["backlog", "waiting", "running", "review", "done"];
     let hop: Status = ticket.status;
     const chain: Status[] = [];
-    while (hop !== 'done') {
-      const next: Status = hop === 'failed' ? 'waiting' : order[order.indexOf(hop) + 1];
+    while (hop !== "done") {
+      const next: Status = hop === "failed" ? "waiting" : order[order.indexOf(hop) + 1];
       if (!next || !canTransition(hop, next)) {
         throw new Error(`[ticket-store] ${id}: no legal hop from ${hop} toward done (nothing written)`);
       }
@@ -659,7 +696,7 @@ export function setUpstreamResolution(
       hop = next;
     }
     // Preserve moveTicket's retry-budget rule for the failed -> waiting hop.
-    if (ticket.status === 'failed' && ticket.attempts + 1 > DEFAULT_ATTEMPTS_CAP) {
+    if (ticket.status === "failed" && ticket.attempts + 1 > DEFAULT_ATTEMPTS_CAP) {
       throw new Error(
         `[ticket-store] ${id} has exhausted its retry budget (attempts ${ticket.attempts}, cap ${DEFAULT_ATTEMPTS_CAP}) — escalate to a human instead of re-queuing (use --force to override)`,
       );
@@ -672,11 +709,11 @@ export function setUpstreamResolution(
       ticket.history.push({ at: kstIso(), from, to });
       from = to;
     }
-    ticket.status = 'done';
+    ticket.status = "done";
     ticket.result = summary;
     // Keep attempts equal to its definition (failed → waiting hop count) — a failed
     // ticket re-entering through waiting adds one hop, same as moveTicket does.
-    ticket.attempts = ticket.history.filter(h => h.from === 'failed' && h.to === 'waiting').length;
+    ticket.attempts = ticket.history.filter((h) => h.from === "failed" && h.to === "waiting").length;
     writeTicketAtomic(dir, ticket);
     return readTicket(dir, id);
   });
@@ -685,7 +722,7 @@ export function setUpstreamResolution(
 // ── v1.13.0: delegation kanban alias layer (hub-consolidation design §5) ──────
 
 /** Relative path of the machine-readable alias table (design §5.1). */
-export const KANBAN_ALIASES_RELATIVE_PATH = join('docs', 'templates', 'hub-kanban-aliases.json');
+export const KANBAN_ALIASES_RELATIVE_PATH = join("docs", "templates", "hub-kanban-aliases.json");
 
 /** Loads and shape-validates the delegation kanban alias table. A missing file (unit-test
  * temp workspaces) falls back to DEFAULT_KANBAN_ALIASES; a PRESENT file that fails
@@ -693,7 +730,7 @@ export const KANBAN_ALIASES_RELATIVE_PATH = join('docs', 'templates', 'hub-kanba
 export function loadKanbanAliases(workspaceRoot: string): KanbanAliases {
   const path = join(workspaceRoot, KANBAN_ALIASES_RELATIVE_PATH);
   if (!existsSync(path)) return DEFAULT_KANBAN_ALIASES;
-  const raw: unknown = JSON.parse(readFileSync(path, 'utf-8'));
+  const raw: unknown = JSON.parse(readFileSync(path, "utf-8"));
   validateKanbanAliases(raw);
   return raw;
 }
@@ -703,7 +740,7 @@ export function loadKanbanAliases(workspaceRoot: string): KanbanAliases {
 function lastRaiseAtOf(ticket: Ticket): string | undefined {
   for (let i = ticket.history.length - 1; i >= 0; i--) {
     const e = ticket.history[i];
-    if (!isActionEntry(e) || e.action !== 'reprioritize') continue;
+    if (!isActionEntry(e) || e.action !== "reprioritize") continue;
     const from = PRIORITY_LEVEL[e.from as Priority];
     const to = PRIORITY_LEVEL[e.to as Priority];
     if (from !== undefined && to !== undefined && to > from) return e.at;
@@ -741,7 +778,7 @@ export function reprioritizeTicket(
     const ticket = readTicket(dir, id);
     if (opts.ownerProject !== undefined) {
       if (!ticket.upstream || ticket.upstream.project !== opts.ownerProject) {
-        throw new ReprioritizeRefusedError('not found', 'no-op', false);
+        throw new ReprioritizeRefusedError("not found", "no-op", false);
       }
     }
     const from = ticket.priority;
@@ -754,7 +791,7 @@ export function reprioritizeTicket(
       if (isFrozen(state, key)) {
         throw new ReprioritizeRefusedError(
           `priority raises from '${key}' are frozen after ${FROZEN_THRESHOLD} cap violations — pending user review (P0 requires user action via ticket.ts; user review lifts the freeze)`,
-          'frozen',
+          "frozen",
           false,
         );
       }
@@ -762,12 +799,17 @@ export function reprioritizeTicket(
     const verdict = checkReprioritize(actor, from, to, { nowMs: opts.nowMs, lastRaiseAt: lastRaiseAtOf(ticket) });
     if (!verdict.allowed) {
       if (verdict.violation && key !== null && opts.stateDir !== undefined) {
-        recordStrike(opts.stateDir, key, { at: kstIso(), actor, attempted: `${from} -> ${to}`, reason: verdict.reason });
+        recordStrike(opts.stateDir, key, {
+          at: kstIso(),
+          actor,
+          attempted: `${from} -> ${to}`,
+          reason: verdict.reason,
+        });
       }
       throw new ReprioritizeRefusedError(verdict.reason, verdict.code, verdict.violation);
     }
     ticket.priority = to;
-    ticket.history.push({ at: kstIso(), action: 'reprioritize', actor, from, to });
+    ticket.history.push({ at: kstIso(), action: "reprioritize", actor, from, to });
     // Validate the mutated ticket BEFORE the atomic write (v1.11.0 precedent).
     validateTicket(ticket);
     writeTicketAtomic(dir, ticket);
@@ -784,24 +826,34 @@ export function reprioritizeTicket(
 export function autoReadySev1Ticket(dir: string, id: string): Ticket {
   return withTicketLock(dir, `sev1-auto-ready:${id}`, () => {
     const ticket = readTicket(dir, id);
-    if (ticket.sev !== 'SEV1') {
-      throw new Error(`[ticket-store] ${id} is not SEV1 — only sev=SEV1 tickets bypass triage (negative rule, design 2026-11-01 §5.1)`);
+    if (ticket.sev !== "SEV1") {
+      throw new Error(
+        `[ticket-store] ${id} is not SEV1 — only sev=SEV1 tickets bypass triage (negative rule, design 2026-11-01 §5.1)`,
+      );
     }
     if (!ticket.upstream) throw new Error(`[ticket-store] ${id} is not an upstream ticket (no upstream block)`);
-    if (ticket.status === 'done') {
+    if (ticket.status === "done") {
       throw new Error(`[ticket-store] ${id} is done — a closed request is never re-triaged`);
     }
-    if (ticket.status === 'failed') {
-      throw new Error(`[ticket-store] ${id} is failed — re-enter through the retry budget (ticket.ts move) before the SEV1 bypass applies`);
+    if (ticket.status === "failed") {
+      throw new Error(
+        `[ticket-store] ${id} is failed — re-enter through the retry budget (ticket.ts move) before the SEV1 bypass applies`,
+      );
     }
-    if (ticket.upstream.triage === 'ready') return ticket;
+    if (ticket.upstream.triage === "ready") return ticket;
     const now = kstIso();
-    ticket.history.push({ at: now, action: 'sev1-auto-ready', actor: 'sev-policy', from: ticket.upstream.triage, to: 'ready' });
-    ticket.upstream.triage = 'ready';
-    if (ticket.status === 'backlog') {
+    ticket.history.push({
+      at: now,
+      action: "sev1-auto-ready",
+      actor: "sev-policy",
+      from: ticket.upstream.triage,
+      to: "ready",
+    });
+    ticket.upstream.triage = "ready";
+    if (ticket.status === "backlog") {
       // triage↔status invariant: ready ⇒ waiting|running|review|done.
-      ticket.history.push({ at: now, from: 'backlog', to: 'waiting' });
-      ticket.status = 'waiting';
+      ticket.history.push({ at: now, from: "backlog", to: "waiting" });
+      ticket.status = "waiting";
     }
     validateTicket(ticket);
     writeTicketAtomic(dir, ticket);
@@ -811,16 +863,19 @@ export function autoReadySev1Ticket(dir: string, id: string): Ticket {
 
 /** Pulls the highest-priority waiting service ticket (urgent > high > normal > low,
  * then creation order) and atomically moves it to `running`. Never returns a manual ticket. */
-export function nextServiceTicket(dir: string): Ticket | null {  const candidates = listTickets(dir, { status: 'waiting', kind: 'service' })
-    .sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || Date.parse(a.created_at) - Date.parse(b.created_at));
+export function nextServiceTicket(dir: string): Ticket | null {
+  const candidates = listTickets(dir, { status: "waiting", kind: "service" }).sort(
+    (a, b) =>
+      PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || Date.parse(a.created_at) - Date.parse(b.created_at),
+  );
   if (candidates.length === 0) return null;
-  return moveTicket(dir, candidates[0].id, 'running', { force: false });
+  return moveTicket(dir, candidates[0].id, "running", { force: false });
 }
 
 export function staleRunningTickets(dir: string, thresholdMinutes: number): Ticket[] {
   const now = Date.now();
-  return listTickets(dir, { status: 'running' }).filter(t => {
-    const runningSince = [...t.history].reverse().find(h => h.to === 'running')?.at ?? t.created_at;
+  return listTickets(dir, { status: "running" }).filter((t) => {
+    const runningSince = [...t.history].reverse().find((h) => h.to === "running")?.at ?? t.created_at;
     const ageMinutes = (now - new Date(runningSince).getTime()) / 60000;
     return ageMinutes > thresholdMinutes;
   });
@@ -855,7 +910,7 @@ export const DEFAULT_ARCHIVE_DAYS = 7;
  * store `tickets/governance/` into `tickets/governance/archive/` (git-tracked —
  * the audit trail survives). */
 export function archiveDirFor(dir: string): string {
-  return join(dir, 'archive');
+  return join(dir, "archive");
 }
 
 /** Resolves when a done ticket became done: the `at` of the last history entry
@@ -864,7 +919,7 @@ export function archiveDirFor(dir: string): string {
  * File mtime is deliberately never used — it resets on every clone and would
  * mis-age candidates on a fresh checkout. */
 export function doneAtOf(ticket: Ticket): string {
-  const doneEntry = [...ticket.history].reverse().find(h => h.to === 'done');
+  const doneEntry = [...ticket.history].reverse().find((h) => h.to === "done");
   if (doneEntry) return doneEntry.at;
   const last = ticket.history[ticket.history.length - 1];
   return last?.at ?? ticket.created_at;
@@ -880,12 +935,12 @@ export interface ArchiveCandidate {
  * never qualify, regardless of age. Sorted by id for stable output. */
 export function archiveCandidates(dir: string, days: number, now: number = Date.now()): ArchiveCandidate[] {
   const dwellMs = days * 86_400_000;
-  return listTickets(dir, { status: 'done' })
-    .map(ticket => {
+  return listTickets(dir, { status: "done" })
+    .map((ticket) => {
       const doneAt = doneAtOf(ticket);
       return { ticket, doneAt, ageDays: (now - new Date(doneAt).getTime()) / 86_400_000 };
     })
-    .filter(c => now - new Date(c.doneAt).getTime() >= dwellMs)
+    .filter((c) => now - new Date(c.doneAt).getTime() >= dwellMs)
     .sort((a, b) => a.ticket.id.localeCompare(b.ticket.id));
 }
 
@@ -894,7 +949,11 @@ export function archiveCandidates(dir: string, days: number, now: number = Date.
  * never modified (the archive state lives in the path, not in the YAML). A
  * ticket that vanishes between scan and lock is skipped; an existing archive
  * file with the same id is never overwritten. */
-export function archiveTickets(dir: string, days: number, opts: { now?: number; candidates?: ArchiveCandidate[] } = {}): Ticket[] {
+export function archiveTickets(
+  dir: string,
+  days: number,
+  opts: { now?: number; candidates?: ArchiveCandidate[] } = {},
+): Ticket[] {
   const moved: Ticket[] = [];
   // Single-scan contract (review M3): callers that already ran archiveCandidates
   // (the CLI plan) pass them here, so the summary reports exactly what was scanned.
@@ -940,7 +999,7 @@ export function loadCatalog(catalogPath: string): Catalog {
 }
 
 export interface ResolvedService {
-  type: 'skill' | 'script';
+  type: "skill" | "script";
   ref: string;
   absPath: string;
 }
@@ -949,13 +1008,13 @@ export interface ResolvedService {
  * re-asserts the resolved path stays under `workspaceRoot` (defense in depth —
  * validateCatalog already enforced the ref pattern at load time). */
 export function resolveServiceRef(catalog: Catalog, serviceId: string, workspaceRoot: string): ResolvedService {
-  const svc = catalog.services.find(s => s.id === serviceId);
+  const svc = catalog.services.find((s) => s.id === serviceId);
   if (!svc) throw new Error(`[ticket-store] unknown service id: ${serviceId}`);
-  const base = svc.run.type === 'script' ? svc.run.ref : join('skills', svc.run.ref);
+  const base = svc.run.type === "script" ? svc.run.ref : join("skills", svc.run.ref);
   const root = resolve(workspaceRoot);
   const absPath = resolve(root, base);
   const rel = relative(root, absPath);
-  if (rel === '' ? false : rel.startsWith('..') || isAbsolute(rel)) {
+  if (rel === "" ? false : rel.startsWith("..") || isAbsolute(rel)) {
     throw new Error(`[ticket-store] resolved service ref escapes workspace root: ${absPath}`);
   }
   return { type: svc.run.type, ref: svc.run.ref, absPath };
@@ -993,8 +1052,8 @@ export function repairTicketHistory(
     // carry a string `from`), so the cast is sound (v1.13.0 action-entry support).
     let creation = creationIdx >= 0 ? ({ ...sorted[creationIdx] } as HistoryEntry) : null;
     const rest = sorted.filter((e, i) => i !== creationIdx);
-    const kept: Ticket['history'] = [];
-    const dropped: HistoryRepairPlan['dropped'] = [];
+    const kept: Ticket["history"] = [];
+    const dropped: HistoryRepairPlan["dropped"] = [];
     for (const e of rest) {
       // v1.13.0: action entries are transparent to the chain — sorted and kept as-is;
       // chaining is evaluated against the last STATUS entry only.

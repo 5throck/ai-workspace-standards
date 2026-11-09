@@ -17,14 +17,14 @@
  * ticket T-20260925-003).
  */
 
-import { $ } from 'bun';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { $ } from "bun";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
-const YELLOW = '\x1b[33m';
-const GREEN  = '\x1b[32m';
-const RESET  = '\x1b[0m';
-const DIM    = '\x1b[2m';
+const YELLOW = "\x1b[33m";
+const GREEN = "\x1b[32m";
+const RESET = "\x1b[0m";
+const DIM = "\x1b[2m";
 
 function warn(msg: string) {
   console.log(`${YELLOW}[LIFECYCLE-WARN]${RESET} ${msg}`);
@@ -36,7 +36,7 @@ function pass(msg: string) {
 
 function hasVersionField(filePath: string): boolean {
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     return /^version:\s*\d+\.\d+\.\d+/m.test(content);
   } catch {
     return false;
@@ -58,13 +58,13 @@ function checkFiles(changed: string[]): number {
   let lifecycleIssues = 0;
 
   // Check 1: .{claude,gemini,agents,codex}/skills/*/SKILL.md — version field + propagation
-  const platformSkills = changed.filter(f => /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f));
+  const platformSkills = changed.filter((f) => /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f));
   for (const f of platformSkills) {
     if (existsSync(f) && !hasVersionField(f)) {
       warn(`${f} — missing 'version: X.Y.Z' in frontmatter. Add version: 1.0.0 for new skills.`);
       lifecycleIssues++;
     } else if (existsSync(f)) {
-      const commonPath = f.replace(/^\.(claude|gemini|agents|codex)\//, 'templates/common/.$1/');
+      const commonPath = f.replace(/^\.(claude|gemini|agents|codex)\//, "templates/common/.$1/");
       if (!existsSync(commonPath)) {
         warn(`${f} — not propagated to ${commonPath}. Run platform-skill-lifecycle-manager skill.`);
         lifecycleIssues++;
@@ -75,14 +75,14 @@ function checkFiles(changed: string[]): number {
   // Check 3: command surfaces — .claude/commands and .gemini/commands (1:1),
   // .codex/prompts (mapping) — check template propagation
   const commandSurfaces: ReadonlyArray<readonly [RegExp, string]> = [
-    [/^\.claude\/commands\/[^/]+\.md$/, 'templates/common/.claude/commands/'],
-    [/^\.gemini\/commands\/[^/]+\.md$/, 'templates/common/.gemini/commands/'],
-    [/^\.codex\/prompts\/[^/]+\.md$/, 'templates/common/.codex/prompts/'],
+    [/^\.claude\/commands\/[^/]+\.md$/, "templates/common/.claude/commands/"],
+    [/^\.gemini\/commands\/[^/]+\.md$/, "templates/common/.gemini/commands/"],
+    [/^\.codex\/prompts\/[^/]+\.md$/, "templates/common/.codex/prompts/"],
   ];
   for (const f of changed) {
     for (const [pattern, commonPrefix] of commandSurfaces) {
       if (!pattern.test(f)) continue;
-      const fileName = f.replace(/\\/g, '/').split('/').pop();
+      const fileName = f.replace(/\\/g, "/").split("/").pop();
       const commonPath = `${commonPrefix}${fileName}`;
       if (existsSync(f) && !existsSync(commonPath)) {
         warn(`${f} — not propagated to ${commonPath}. Run platform-command-lifecycle-manager skill.`);
@@ -92,11 +92,11 @@ function checkFiles(changed: string[]): number {
   }
 
   // Check 5: agents/*.md — check last_updated freshness
-  const agents = changed.filter(f => /^agents\/[^/]+\.md$/.test(f));
+  const agents = changed.filter((f) => /^agents\/[^/]+\.md$/.test(f));
   const today = new Date().toISOString().slice(0, 10);
   for (const f of agents) {
     if (!existsSync(f)) continue;
-    const content = readFileSync(f, 'utf-8');
+    const content = readFileSync(f, "utf-8");
     const match = content.match(/last_updated:\s*(\d{4}-\d{2}-\d{2})/);
     if (!match) {
       warn(`${f} — missing 'last_updated:' in frontmatter.`);
@@ -113,8 +113,8 @@ function checkFiles(changed: string[]): number {
 async function main() {
   // Determine platform from CLI flag
   const args = process.argv.slice(2);
-  const platformIdx = args.indexOf('--platform');
-  const isGemini = platformIdx !== -1 && args[platformIdx + 1] === 'gemini';
+  const platformIdx = args.indexOf("--platform");
+  const isGemini = platformIdx !== -1 && args[platformIdx + 1] === "gemini";
 
   let changed: string[];
 
@@ -122,7 +122,7 @@ async function main() {
     // Gemini AfterTool mode: read specific file from stdin JSON
     let stdinJson: string;
     try {
-      stdinJson = readFileSync(0, 'utf-8'); // fd 0 = stdin
+      stdinJson = readFileSync(0, "utf-8"); // fd 0 = stdin
     } catch {
       // Cannot read stdin — silently exit (non-blocking)
       return;
@@ -138,7 +138,7 @@ async function main() {
 
     // Extract file path from Gemini AfterTool tool_input
     const toolInput = data.tool_input ?? {};
-    const filePath = (toolInput.path as string | undefined)?.replace(/\\/g, '/');
+    const filePath = (toolInput.path as string | undefined)?.replace(/\\/g, "/");
 
     if (!filePath) return;
 
@@ -147,7 +147,11 @@ async function main() {
     // Claude PostToolUse mode: get all changed files from git diff
     try {
       const { stdout } = await $`git diff --name-only`.quiet().nothrow();
-      changed = stdout.toString().split('\n').filter(Boolean).map(f => f.replace(/\\/g, '/'));
+      changed = stdout
+        .toString()
+        .split("\n")
+        .filter(Boolean)
+        .map((f) => f.replace(/\\/g, "/"));
     } catch {
       changed = [];
     }
@@ -164,7 +168,7 @@ async function main() {
   const lifecycleIssues = checkFiles(changed);
 
   if (lifecycleIssues === 0) {
-    pass('Lifecycle check passed — no issues detected in changed files.');
+    pass("Lifecycle check passed — no issues detected in changed files.");
   } else {
     console.log(`\n${YELLOW}${lifecycleIssues} lifecycle issue(s) detected. Fix before running /sync.${RESET}`);
   }
@@ -175,8 +179,8 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error('Lifecycle check error:', err);
+main().catch((err) => {
+  console.error("Lifecycle check error:", err);
   if (import.meta.main) {
     process.exit(0); // Non-blocking: never fail PostToolUse/AfterTool
   }

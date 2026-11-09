@@ -33,7 +33,7 @@ const SKIP_SET: Set<string> = (() => {
   const src = readFileSync(join(workspaceRoot, 'scripts', 'upgrade-project.ts'), 'utf8');
   const m = src.match(/const VARIANT_ASSET_DIR_SKIP = new Set\(\[([^\]]*)\]\)/);
   if (!m) throw new Error('cannot parse VARIANT_ASSET_DIR_SKIP from scripts/upgrade-project.ts');
-  return new Set([...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]!));
+  return new Set([...m[1].matchAll(/(['\"])([^'\"\n]*)\1/g)].map((x) => x[2]!));
 })();
 
 function* walkFiles(root: string, prefix: string): Generator<string> {

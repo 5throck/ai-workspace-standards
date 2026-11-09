@@ -13,11 +13,7 @@
  *   3. Student interaction model mention (INFO) — student interaction model documentation
  */
 
-import type {
-  VariantPlugin,
-  ValidationContext,
-  ValidationIssue,
-} from './variant-plugin.ts';
+import type { VariantPlugin, ValidationContext, ValidationIssue } from "./variant-plugin.ts";
 
 /**
  * Plugin for the 'lecture' variant type.
@@ -40,7 +36,7 @@ import type {
  */
 export class LecturePlugin implements VariantPlugin {
   /** The variant type this plugin handles. */
-  readonly type = 'lecture' as const;
+  readonly type = "lecture" as const;
 
   /**
    * Validates a lecture variant against lecture-specific requirements.
@@ -67,20 +63,13 @@ export class LecturePlugin implements VariantPlugin {
     // Verify that agents collectively cover content-creation, presentation,
     // assessment, and curriculum-design.
     // These are hard functional requirements — lecture variants cannot function without them.
-    const agentCapabilities = new Set(
-      ctx.agentFrontmatters.flatMap((a) => a.capabilities),
-    );
-    const expectedCapabilities = [
-      'content-creation',
-      'presentation',
-      'assessment',
-      'curriculum-design',
-    ];
+    const agentCapabilities = new Set(ctx.agentFrontmatters.flatMap((a) => a.capabilities));
+    const expectedCapabilities = ["content-creation", "presentation", "assessment", "curriculum-design"];
     for (const cap of expectedCapabilities) {
       if (!agentCapabilities.has(cap)) {
         issues.push({
-          severity: 'error',
-          category: 'capability-coverage',
+          severity: "error",
+          category: "capability-coverage",
           message: `Missing lecture capability: ${cap}`,
           capability: cap,
         });
@@ -91,28 +80,22 @@ export class LecturePlugin implements VariantPlugin {
     // Lecture variants should reference learning objectives in their documentation.
     // Explicit learning objectives ensure educational content is goal-oriented and measurable.
     const variantContent = JSON.stringify(ctx.variantJson);
-    if (
-      !variantContent.toLowerCase().includes('learning objectives')
-    ) {
+    if (!variantContent.toLowerCase().includes("learning objectives")) {
       issues.push({
-        severity: 'warning',
-        category: 'learning-objectives',
-        message:
-          'Lecture variant should reference learning objectives',
+        severity: "warning",
+        category: "learning-objectives",
+        message: "Lecture variant should reference learning objectives",
       });
     }
 
     // --- Check 3: Student interaction model mention ---
     // Standard student interaction model documentation for lecture contexts.
     // This is informational; not all lecture contexts require explicit interaction model docs.
-    if (
-      !variantContent.toLowerCase().includes('student interaction model')
-    ) {
+    if (!variantContent.toLowerCase().includes("student interaction model")) {
       issues.push({
-        severity: 'info',
-        category: 'student-interaction-model',
-        message:
-          'Consider documenting student interaction model standards',
+        severity: "info",
+        category: "student-interaction-model",
+        message: "Consider documenting student interaction model standards",
       });
     }
 

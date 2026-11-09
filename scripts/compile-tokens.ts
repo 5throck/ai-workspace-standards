@@ -163,7 +163,7 @@ function isTokenLeaf(obj: unknown): obj is { value?: unknown; $value?: unknown }
  */
 function extractTokens(
   node: unknown,
-  currentPath: string[] = []
+  currentPath: string[] = [],
 ): {
   tokens: ExtractedToken[];
   valueTree: Record<string, unknown>;
@@ -335,11 +335,7 @@ function extractDefaultWithLayers(root: unknown): {
 /**
  * Generate CSS Custom Properties string
  */
-function generateCss(
-  tokens: ExtractedToken[],
-  themes: ExtractedTheme[],
-  inputRelativePath: string
-): string {
+function generateCss(tokens: ExtractedToken[], themes: ExtractedTheme[], inputRelativePath: string): string {
   const lines: string[] = [
     "/**",
     " * Visual Design Tokens — CSS Custom Properties",
@@ -381,9 +377,7 @@ function generateCss(
  * declares no motion durations.
  */
 function prefersReducedMotionTokens(tokens: ExtractedToken[]): string[][] {
-  const durationVars = tokens
-    .map((t) => t.cssVarName)
-    .filter((name) => name.startsWith("--motion-duration"));
+  const durationVars = tokens.map((t) => t.cssVarName).filter((name) => name.startsWith("--motion-duration"));
   if (durationVars.length === 0) return [];
   const block = ["@media (prefers-reduced-motion: reduce) {", "  :root {"];
   for (const name of durationVars) {
@@ -400,24 +394,15 @@ function generateTs(
   valueTree: Record<string, unknown>,
   cssVarTree: Record<string, unknown>,
   themes: ExtractedTheme[],
-  inputRelativePath: string
+  inputRelativePath: string,
 ): string {
   const jsonValues = JSON.stringify(valueTree, null, 2);
   const jsonCssVars = JSON.stringify(cssVarTree, null, 2);
 
   const themeLines: string[] = [];
   if (themes.length > 0) {
-    const jsonThemes = JSON.stringify(
-      Object.fromEntries(themes.map((t) => [t.name, t.valueTree])),
-      null,
-      2
-    );
-    themeLines.push(
-      `export const themes = ${jsonThemes} as const;`,
-      "",
-      "export type Themes = typeof themes;",
-      ""
-    );
+    const jsonThemes = JSON.stringify(Object.fromEntries(themes.map((t) => [t.name, t.valueTree])), null, 2);
+    themeLines.push(`export const themes = ${jsonThemes} as const;`, "", "export type Themes = typeof themes;", "");
   }
 
   const lines: string[] = [
@@ -544,7 +529,9 @@ export async function main(): Promise<void> {
     }
 
     if (!cssMatch || !tsMatch) {
-      console.error(`❌ Design tokens output files (${outputCssPath}, ${outputTsPath}) are out of sync with "${inputPath}".`);
+      console.error(
+        `❌ Design tokens output files (${outputCssPath}, ${outputTsPath}) are out of sync with "${inputPath}".`,
+      );
       process.exit(1);
     }
 

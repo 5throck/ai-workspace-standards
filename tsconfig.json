@@ -7,6 +7,7 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "declaration": false,
+    "strict": true,
     "types": ["bun"],
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true

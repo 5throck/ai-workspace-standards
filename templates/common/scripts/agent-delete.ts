@@ -89,7 +89,7 @@ Examples:
 
   return {
     name: args[0],
-    force: args.includes("--force")
+    force: args.includes("--force"),
   };
 }
 
@@ -102,7 +102,7 @@ async function main(): Promise<void> {
 }
 
 if (import.meta.main) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error("Error:", error);
     process.exit(1);
   });

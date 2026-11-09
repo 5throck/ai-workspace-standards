@@ -26,7 +26,12 @@ import { getDocsDir, configureDocsDir } from "./nav-utils.ts";
 export interface TableError {
   file: string;
   line: number;
-  rule: "inline-colgroup" | "inline-col-width" | "css-col-percentage" | "nowrap-first-column" | "max-width-without-width";
+  rule:
+    | "inline-colgroup"
+    | "inline-col-width"
+    | "css-col-percentage"
+    | "nowrap-first-column"
+    | "max-width-without-width";
   snippet: string;
 }
 
@@ -95,7 +100,12 @@ export function checkTables(docsDir?: string): TableError[] {
 
   for (let i = 0; i < cssLines.length; i++) {
     if (/col\.col-[\w-]+\s*\{[^}]*width\s*:\s*\d+%/.test(cssLines[i])) {
-      errors.push({ file: cssRelPath, line: i + 1, rule: "css-col-percentage", snippet: cssLines[i].trim().slice(0, 120) });
+      errors.push({
+        file: cssRelPath,
+        line: i + 1,
+        rule: "css-col-percentage",
+        snippet: cssLines[i].trim().slice(0, 120),
+      });
     }
   }
 
@@ -112,7 +122,7 @@ export function checkTables(docsDir?: string): TableError[] {
     const isExplicitOptIn = selectors.every((s) => (s.match(/\.[\w-]+/g) || []).length >= 2);
 
     const targetsFirstColumnTd = selectors.some(
-      (s) => /\btd\b/.test(s) && /:nth-child\(\s*1\s*\)|:first-child/.test(s)
+      (s) => /\btd\b/.test(s) && /:nth-child\(\s*1\s*\)|:first-child/.test(s),
     );
     if (targetsFirstColumnTd && !isExplicitOptIn && /white-space\s*:\s*nowrap/.test(rule.body)) {
       errors.push({
@@ -151,7 +161,7 @@ if (import.meta.main) {
     }
     console.error(
       "Fix: remove inline colgroup/col widths; never nowrap a table's first (translatable) column; " +
-        "pair max-width with a real width. See the TABLE COLUMN-SIZING POLICY comment in handbook-components.css."
+        "pair max-width with a real width. See the TABLE COLUMN-SIZING POLICY comment in handbook-components.css.",
     );
     process.exit(1);
   }
