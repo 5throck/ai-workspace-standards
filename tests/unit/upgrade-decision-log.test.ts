@@ -220,11 +220,21 @@ const composedDeliverable = composeResolvedAgentContent(
 // block, A1) advances BOTH frontmatter `last_updated` stamps — the stub
 // frontmatter carries a top-level one and the L1 target's lifecycle block
 // carries the nested one. The engine stamps new Date().toISOString().slice(0, 10).
-const deliveryDate = new Date().toISOString().slice(0, 10);
+//
+// UTC-MIDNIGHT TRAP: the delivery date is a UTC calendar day read from the wall
+// clock, so it is NOT stable for the lifetime of a test file. Evaluated once at
+// module load, the snapshot can disagree with what the engine writes a second
+// later when a CI job starts before 00:00Z and runs the engine after it
+// (windows-latest 2026-11-09: the assertion pinned [2026-11-08] against an
+// engine-stamped [2026-11-09]). Read it at ASSERTION time instead — after the
+// engine run, with the engine's own expression, so the two agree by
+// construction rather than by wall-clock luck.
+const deliveryDateAtLoad = new Date().toISOString().slice(0, 10);
+const deliveryDate = (): string => new Date().toISOString().slice(0, 10);
 const restamped = (content: string): string =>
   content
-    .replace(/^last_updated:.*$/m, `last_updated: ${deliveryDate}`)
-    .replace(/^([ \t]+last_updated:).*$/m, `$1 ${deliveryDate}`);
+    .replace(/^last_updated:.*$/m, `last_updated: ${deliveryDate()}`)
+    .replace(/^([ \t]+last_updated:).*$/m, `$1 ${deliveryDate()}`);
 // renderAgentTokens ([Project Name] → the project directory name) — the
 // delivery expectation for the plain-agent fixtures (architect/designer carry
 // the token; the i18n composed fixture does not).
@@ -1053,7 +1063,13 @@ describe('upgrade-project.ts baselines carry-forward (T-20261028-014)', () => {
 describe('upgrade-project.ts --changelog-entry (A3)', () => {
   const templateVersion = readFileSync(join(workspaceRoot, 'templates', 'VERSION'), 'utf8').trim();
   const verEsc = templateVersion.replace(/\./g, '\\.');
-  const entryRe = new RegExp(`^- \\*\\*\\[${deliveryDate}\\]\\*\\*: chore\\(upgrade\\): template sync v${verEsc} \\(\\d+ file\\(s\\) delivered; engine-scaffolded — edit or merge before commit; see templates/CHANGELOG\\.md v${verEsc}\\)$`, 'm');
+  const entryRe = (): RegExp => {
+    const now = deliveryDate();
+    // Accept both sides of a UTC-midnight crossing (see deliveryDate above);
+    // the runs under this describe span minutes, so the set has two members.
+    const day = now === deliveryDateAtLoad ? now : `${deliveryDateAtLoad}|${now}`;
+    return new RegExp(`^- \\*\\*\\[(?:${day})\\]\\*\\*: chore\\(upgrade\\): template sync v${verEsc} \\(\\d+ file\\(s\\) delivered; engine-scaffolded — edit or merge before commit; see templates/CHANGELOG\\.md v${verEsc}\\)$`, 'm');
+  };
 
   test('apply with the flag scaffolds one entry into [Unreleased], rides files[] attribution, and is idempotent on re-run', () => {
     const tmp = makeTempProject();
@@ -1065,7 +1081,7 @@ describe('upgrade-project.ts --changelog-entry (A3)', () => {
       const after = readFileSync(join(tmp, 'CHANGELOG.md'), 'utf8');
       // One entry at the top of [Unreleased]; the curated bullet stays below;
       // historical sections untouched.
-      expect(after).toMatch(entryRe);
+      expect(after).toMatch(entryRe());
       const lines = after.split('\n');
       const unreleased = lines.findIndex((l) => l === '## [Unreleased]');
       expect(lines[unreleased + 1]).toMatch(/chore\(upgrade\): template sync v/);

@@ -88,10 +88,20 @@ beforeEach(() => {
   mkdirSync(join(root, 'templates', 'co-consult'), { recursive: true });
 });
 
-afterEach(() => {
-  for (const p of procs) {
-    try { p.kill(); } catch { /* already gone */ }
-  }
+afterEach(async () => {
+  // Windows cannot delete a directory that is a live process's cwd — it fails
+  // with EBUSY: resource busy or locked, rm '<tmp>/tenant-identity-ws-…'. The
+  // previous shape killed each child and immediately removed the tree, and
+  // rmSync's maxRetries cannot help: every retry runs while the child is STILL
+  // alive. Kill, AWAIT exit, then remove.
+  const running = procs.filter((p) => p.exitCode === null && p.signalCode === null);
+  await Promise.all(running.map((p) => new Promise<void>((res) => {
+    // Defensive cap: a wedged child must not hang the suite. rmSync below still
+    // retries (maxRetries) in that improbable case.
+    const t = setTimeout(res, 5000);
+    p.once('exit', () => { clearTimeout(t); res(); });
+    try { p.kill(); } catch { clearTimeout(t); res(); /* already gone */ }
+  })));
   procs = [];
   rmSync(ws.root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

@@ -262,8 +262,18 @@ describe("tenant-loop registry export (design §3.1/§4.5)", () => {
       fx.state.registry.upsert(rec);
       const result = exportTenantLoopRegistry(fx.state);
       expect(result.ok).toBe(true);
-      const mode = statSync(tenantLoopRegistryPath(fx.workspaceDir)).mode & 0o777;
-      expect(mode).toBe(0o600);
+      const exportPath = tenantLoopRegistryPath(fx.workspaceDir);
+      if (process.platform === "win32") {
+        // Windows has no POSIX permission bits. The writer still passes
+        // mode: 0o600 unconditionally (harmless there), but statSync reports
+        // 0o666 for any writable file, so the confidentiality intent cannot be
+        // observed — assert what IS observable: the export landed on disk.
+        expect(existsSync(exportPath)).toBe(true);
+        expect(statSync(exportPath).size).toBeGreaterThan(0);
+      } else {
+        const mode = statSync(exportPath).mode & 0o777;
+        expect(mode).toBe(0o600);
+      }
     } finally {
       fx.cleanup();
     }
