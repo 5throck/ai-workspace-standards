@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-09, rogue-commit incident): both git spawns run under
+//          scripts/lib/git-env.ts gitCleanEnv(). `-C <dir>` does not defeat an
+//          inherited GIT_DIR, so a hook context made this scan report the
+//          invoking repository's files/branch (wrong generated content and wrong
+//          fixture decisions — 10 rogue commits landed that way).
 // v1.0.0 (2026-11-03, T-20261103-004): git-aware discovery helpers for scripts
 //          whose output is COMMITTED — trackedFilesUnder (one cached
 //          `git ls-files -z` query, NUL-split, forward-slash-normalized),
@@ -14,6 +19,7 @@
 //          (skill-graph-fleet-report.ts defaultProjects).
 
 import { spawnSync } from 'node:child_process';
+import { gitCleanEnv } from './git-env.ts';
 
 /**
  * One `git ls-files -z -- <dir>` query rooted at `root`, NUL-split and
@@ -21,9 +27,14 @@ import { spawnSync } from 'node:child_process';
  * null = non-git context (no repo / git unavailable) — callers treat null
  * as include-all (fail-open; SKILL_GRAPH_ROOT fixtures keep the historical
  * include-all behavior).
+ *
+ * gitCleanEnv(): `-C root` only changes cwd — an inherited GIT_DIR still wins,
+ * so under a hook context this query would report the INVOKING repo's files
+ * (2026-11-09 rogue-commit incident class: generated content and fixture
+ * decisions silently keyed off the wrong repository).
  */
 export function trackedFilesUnder(root: string, dir: string): Set<string> | null {
-  const res = spawnSync('git', ['-C', root, 'ls-files', '-z', '--', dir], { encoding: 'buffer' });
+  const res = spawnSync('git', ['-C', root, 'ls-files', '-z', '--', dir], { encoding: 'buffer', env: gitCleanEnv() as NodeJS.ProcessEnv });
   if (res.status !== 0 || !res.stdout) return null;
   const out = new Set<string>();
   for (const entry of res.stdout.toString('utf8').split('\0')) {
@@ -48,7 +59,9 @@ export function isTrackedRel(tracked: Set<string> | null, relPath: string): bool
  * evidence", never an exclusion signal.
  */
 export function checkoutBranch(dir: string): string | null {
-  const res = spawnSync('git', ['-C', dir, 'branch', '--show-current'], { encoding: 'utf8' });
+  // gitCleanEnv(): same reason as trackedFilesUnder — never let an inherited
+  // GIT_DIR answer "which branch is this checkout on" for another repo.
+  const res = spawnSync('git', ['-C', dir, 'branch', '--show-current'], { encoding: 'utf8', env: gitCleanEnv() as NodeJS.ProcessEnv });
   if (res.status !== 0) return null;
   const branch = (res.stdout || '').trim();
   return branch || null; // detached HEAD prints empty

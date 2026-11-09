@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.44.0
+- **Version**: 1.44.2
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-08
+- **Last Updated**: 2026-11-09
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,8 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-09 | production | production | v1.44.2 (2026-11-09, P0 correctness fix): the two test spawns now run under `.env(gitCleanEnvForShell())` — a full process.env copy minus the GIT_REDIRECT_ENV_KEYS — not the deleted `gitEnvUnset()`. Bun Shell's `.env(obj)` REPLACES the child environment (verified on Bun 1.4.4), so the v1.44.1 unset map ran step 4.85's `bun run test:unit` with no PATH: 26 of 268 unit files failed with `Executable not found in $PATH: "git"`. Mechanism + proof recorded in scripts/lib/git-env.ts v1.2.0. | pm |
+| 2026-11-09 | production | production | v1.44.1 (2026-11-09, rogue-commit incident): the two test spawns — step 3.95 `bun run test` and step 4.85 `bun run test:unit` — ran under `.env(gitEnvUnset())` (scripts/lib/git-env.ts; mechanism RETRACTED in v1.44.2 — the unset map masked GIT_DIR but emptied the child env), so GIT_DIR exported by a hook context never reaches the upgrade-project fixtures; that leak landed 10 rogue `Test <test@example.com>` commits on the PR branch (~393 files, three L1 core scripts deleted) and the branch was reset to recover. | automation-engineer |
 | 2026-11-08 | production | production | v1.44.0 (spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §5.1): new step 6.4 — fixture-root hygiene residue gate, BLOCKING, immediately before the 6.5 scoped-staging S1 snapshot (the design's proposed "Step 5.9", numbered 6.4 at edit time per §10 note-1): an untracked WHOLE top-level directory (`?? Projects/`, `?? tests/`, …) at the repo root can only be test-fixture residue — the relative-mkdtemp-root class behind the 2026-11-04 `rm -rf Projects` incident (memory/2026-11-04.md:159, T-20261104-003/-004); PR #1855 made the fixtures absolute and this gate makes it enforced. Untracked FILES inside tracked dirs are ordinary work and stay with 6.5's residual classification; git failure is fail-closed. Classifier is the pure lib/workspace-hygiene.ts v1.0.0 (byte-identical L1 mirror, imported by the delivered dev-sync per the IC-01 closure), shared with the standalone scripts/check-workspace-hygiene.ts v1.0.0 (L0-only per design §9 — one derivation, two callers); structural placement pinned by tests/unit/workspace-hygiene.test.ts. | automation-engineer |
 | 2026-11-08 | production | production | v1.43.0 (U-20261107-003): scoped-staging CONTENT comparison — a dirty-at-S0 file whose bytes changed by S1 (the regenerated docs/VERSION_MANIFEST.md leftover) is re-classified as pipeline output; the S0 snapshot gains a per-path content map (utf-8, absent-on-throw) and step 6.5 re-reads at S1, re-classifying the S0∩S1 overlap by byte difference. Byte-identical overlap files stay residual; deletions keep the existing path. Closes the stale-manifest class (stale bytes committed, fresh regen omitted, main CI VERSION_MANIFEST-drift failure on every push). | automation-engineer |
 | 2026-11-05 | production | production | v1.41.0 (T-20261105-002): step 3.88 gains the repaired-at-head tier — memory-union-verify v1.1.0 re-tiers a post-activation drop finding group as INFO when the working tree accounts for every parent-owed block (repairedAtHead, un-headed-block absorption tolerance); unrepaired drops stay FATAL, repaired groups print an INFO line. Completes design §5.3 "a repaired file passes" — the v1 blob-comparison made forward repairs impossible (live-blocked since c8aba5d61). | automation-engineer |

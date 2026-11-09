@@ -1,4 +1,30 @@
-// @version 1.0.0
+// @version 1.2.0
+// v1.2.0 (2026-11-09, P0 correctness fix): gitEnvUnset() was WRONG and is deleted.
+//          VERIFIED Bun semantics (Bun 1.4.4, reproduced in this worktree):
+//          `await $\`cmd\`.env(obj)` REPLACES the child environment with `obj`
+//          entirely — it does NOT merge over process.env. Proof:
+//            $.env({ GIT_DIR: undefined })  → `printenv PATH` prints "" and exits 1
+//            $.env(process.env)             → same command prints the full PATH, exit 0
+//          So an `{ redirectionKey: undefined }` map is NOT a sanitized child env;
+//          it is the ENTIRE child env, i.e. nine keys set to nothing. `undefined`
+//          unset entries are therefore unsafe as a partial Bun-Shell payload.
+//          INCIDENT CHAIN: `git push` exports GIT_DIR into the pre-push hook →
+//          GIT_DIR reached the spawned `bun test` and upgrade-project fixtures
+//          committed 10 rogue `Test <test@example.com>` commits (393 files, 3 L1
+//          scripts deleted) onto the PR branch → the "unset-map" fix was applied
+//          at every pipeline spawn → those spawns ran with no PATH and no HOME →
+//          every test that shells out to a binary died with `Executable not found
+//          in $PATH: "git"` (26 of 268 unit files failing at dev-sync step 4.85,
+//          plus hygiene integration tests whose own gitCleanEnv() child env could
+//          not inherit a PATH from the PATH-less parent).
+//          FIX: a Bun-Shell payload must be a FULL environment. Use
+//          gitCleanEnvForShell() — a copy of process.env (or `base`) with the
+//          redirection keys removed and `undefined` values filtered out. Keep
+//          gitCleanEnv() for `spawnSync`/`Bun.spawn` (those MERGE over
+//          process.env, so a full copy is not required there).
+// v1.1.0 (2026-11-09, rogue-commit incident): added gitEnvUnset() — RETRACTED in
+//          v1.2.0 (see above). Never reintroduce it: a helper whose contract is
+//          "an env that is mostly absent" is a footgun, not a sanitizer.
 // v1.0.0 (2026-11-09, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md):
 //          git repo-redirection environment sanitizer. `git push` runs hooks (pre-push)
 //          with GIT_DIR exported, pointing at the checkout's private git dir; every git
@@ -64,6 +90,37 @@ export function gitCleanEnv(base?: Record<string, string | undefined>): Record<s
   const out: Record<string, string | undefined> = {};
   for (const [key, value] of Object.entries(source)) {
     if (GIT_REDIRECT_ENV_KEYS.includes(key as (typeof GIT_REDIRECT_ENV_KEYS)[number])) continue;
+    out[key] = value;
+  }
+  return out;
+}
+
+/**
+ * Bun-Shell payload: a FULL environment (`base ?? process.env`) with the git
+ * repo-redirection vars removed and `undefined` values filtered out.
+ *
+ * Why a full copy: `await $\`bun test\`.env(obj)` REPLACES the child environment
+ * with `obj` — it does not merge over the parent env (verified on Bun 1.4.4:
+ * `.env({ GIT_DIR: undefined })` leaves the child with an empty PATH). So the
+ * payload handed to `.env()` must carry PATH, HOME and everything else the
+ * child needs; a partial map, even one whose only entries are `undefined`
+ * "unsets", produces a child that cannot find its own executables.
+ *
+ * This is the hook-level fix for the 2026-11-09 rogue-commit incident: pre-push
+ * runs with GIT_DIR exported, its `bun test` children inherited it, and the
+ * upgrade-project fixtures' `git init` / `add` / `commit` were redirected INTO
+ * this worktree — 10 rogue `Test <test@example.com>` commits, ~393 files added
+ * and three L1 core scripts deleted.
+ *
+ * Use this when spawning TOOLS through Bun Shell (test runners, tsc, nested
+ * scripts); use gitCleanEnv() when THIS process execs git via spawnSync.
+ */
+export function gitCleanEnvForShell(base?: Record<string, string | undefined>): Record<string, string> {
+  const source: Record<string, string | undefined> = base ?? (process.env as Record<string, string | undefined>);
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(source)) {
+    if (GIT_REDIRECT_ENV_KEYS.includes(key as (typeof GIT_REDIRECT_ENV_KEYS)[number])) continue;
+    if (value === undefined) continue;
     out[key] = value;
   }
   return out;

@@ -90,7 +90,12 @@
  * Engine suites spawn scripts/upgrade-project.ts against a temp project and
  * the real workspace templates (the established upgrade-tree-sync pattern).
  *
- * @version 2.1.0
+ * @version 2.1.1
+ * v2.1.1 (2026-11-09, rogue-commit incident): the fixture git calls
+ *          (makeTempProject/commitAll) run under scripts/lib/git-env.ts
+ *          gitCleanEnv(). Under a hook context (GIT_DIR exported) they used to
+ *          write into the invoking repository — this suite is the reproduction
+ *          probe used to prove the fix.
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve, basename } from 'node:path';
@@ -104,6 +109,7 @@ import {
   type DecisionBaseline,
 } from '../../scripts/lib/upgrade-policy.ts';
 import { composeResolvedAgentContent } from '../../scripts/helpers/resolve-pm-stub.ts';
+import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 const upgradeScript = join(workspaceRoot, 'scripts', 'upgrade-project.ts');
@@ -116,9 +122,13 @@ const phaseDefsTemplate = existsSync(join(workspaceRoot, 'templates', VARIANT, P
 
 function makeTempProject(): string {
   const tmp = mkdtempSync(join(tmpdir(), 'upgrade-decision-log-'));
-  spawnSync('git', ['init', '-q'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
-  spawnSync('git', ['-C', tmp, 'config', 'user.email', 'test@example.com'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
-  spawnSync('git', ['-C', tmp, 'config', 'user.name', 'Test'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
+  // gitCleanEnv(): a hook context (`git push` pre-push, or a deliberate
+  // `GIT_DIR=… bun test` regression probe) exports GIT_DIR. Without this the
+  // fixture's `git init`/`add`/`commit` would be redirected into the INVOKING
+  // repository — the 2026-11-09 rogue-commit incident (10 rogue commits).
+  spawnSync('git', ['init', '-q'], { cwd: tmp, env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
+  spawnSync('git', ['-C', tmp, 'config', 'user.email', 'test@example.com'], { cwd: tmp, env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
+  spawnSync('git', ['-C', tmp, 'config', 'user.name', 'Test'], { cwd: tmp, env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
   mkdirSync(join(tmp, '.claude'), { recursive: true });
   writeFileSync(
     join(tmp, '.claude', 'template-version.txt'),
@@ -128,8 +138,8 @@ function makeTempProject(): string {
 }
 
 function commitAll(tmp: string, message: string): void {
-  spawnSync('git', ['-C', tmp, 'add', '-A'], { stdio: ['ignore', 'pipe', 'pipe'] });
-  spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', message], { stdio: ['ignore', 'pipe', 'pipe'] });
+  spawnSync('git', ['-C', tmp, 'add', '-A'], { env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
+  spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', message], { env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
 function runUpgrade(tmp: string, extraArgs: string[] = []): { status: number; out: string } {
@@ -782,7 +792,7 @@ describe('upgrade-project.ts delivery tombstones (U-20261028-001 D1–D3)', () =
       // hooks (core.hooksPath) — unset it so the test's landing commit is not
       // blocked by the /sync-gated pre-commit hook (hook wiring is not under
       // test here).
-      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath']);
+      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath'], { env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
       commitAll(tmp, 'chore: wave 1 landing (tombstone cleared, path still absent)');
       // Run 2: no tombstone, no baseline → the guard cannot fire; the path
       // delivers as a normal NEW and a fresh baseline is written.
@@ -985,7 +995,7 @@ describe('upgrade-project.ts baselines carry-forward (T-20261028-014)', () => {
       // so run 2 must start from a commit (same pattern as the tombstone
       // two-run test; delivered hooks unset so the landing commit is not
       // blocked by the /sync-gated pre-commit hook).
-      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath']);
+      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath'], { env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
       commitAll(tmp, 'chore: wave 1 landing (conflict skipped, copy preserved)');
       // Run 2 — classification must re-derive CONFLICT from the PERSISTED
       // baseline. Pre-fix this was NO_BASELINE → DRIFT_RESTORED (WARN) +
@@ -1098,7 +1108,7 @@ describe('upgrade-project.ts --changelog-entry (A3)', () => {
       // same run (the wave-2 fixture cache).
       mkdirSync(join(tmp, 'agents'), { recursive: true });
       writeFileSync(join(tmp, 'agents', 'pm.md'), makeStub(counterpartVersion));
-      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath']);
+      spawnSync('git', ['-C', tmp, 'config', '--unset', 'core.hooksPath'], { env: gitCleanEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
       commitAll(tmp, 'chore: wave 1 landing (changelog scaffolded; complete stub seeded)');
       const second = runUpgrade(tmp, ['--changelog-entry']);
       expect(second.status).toBe(0);

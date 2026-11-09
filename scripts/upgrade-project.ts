@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.98.0
+// @version 1.98.1
+// v1.98.1 (2026-11-09, rogue-commit incident): all git spawns now go through a
+//          local `spawnSync` shim that injects scripts/lib/git-env.ts
+//          gitCleanEnv(). Historically the 23 direct spawnSync('git', …) calls
+//          inherited GIT_DIR from a hook context, so fixture seeding / baselines /
+//          snapshot committed into the INVOKING repository (10 rogue commits on the
+//          PR branch, ~393 files, three L1 core scripts deleted).
 // v1.98.0 (2026-11-09, CI fix PR #1935): the tenant-loop registry read is LAZY
 //          and PATH-SCOPED — only a target whose real path contains a gw-<12hex>
 //          segment (tenant projectDirs always sit under .../<principal>/gw-<12hex>/
@@ -1134,7 +1140,21 @@ import {
   readdirSync, statSync, rmSync, realpathSync, renameSync, unlinkSync,
 } from 'node:fs';
 import { resolve, join, dirname, basename, isAbsolute, relative } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawnSync as nodeSpawnSync } from 'node:child_process';
+// ── git spawn choke point (2026-11-09 rogue-commit incident) ─────────────────────
+// Every `git` invocation in this engine goes through the local `spawnSync` shim
+// below, which injects gitCleanEnv() so the command targets ITS OWN cwd/-C repo
+// no matter what the caller exported. Without it, an engine run started from a
+// hook context (pre-push exports GIT_DIR) redirected fixture seeding, stash
+// baselines and snapshots into the CALLER's repository — that is exactly how 10
+// rogue `Test <test@example.com>` commits landed on the PR branch. Non-git
+// spawns pass through untouched.
+const spawnSync = ((cmd: string, args?: readonly string[], opts?: Record<string, unknown>) =>
+  nodeSpawnSync(
+    cmd,
+    args as string[],
+    cmd === 'git' ? { ...opts, env: gitCleanEnv() } : opts,
+  )) as typeof nodeSpawnSync;
 import { createHash } from 'node:crypto';
 import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated, bumpNestedLifecycleLastUpdated, scaffoldChangelogEntry } from './helpers/upgrade-versions.ts';
 import { scanLocalPatches } from './helpers/local-patch-scan.ts';
@@ -1144,6 +1164,7 @@ import { selectIgnoredToolingArtifacts } from './helpers/ignored-tooling.ts';
 import { mergeGitleaksToml } from './helpers/gitleaks-merge.ts';
 import { dedupeClaudeSettingsHooks, dropMissingPathHookEntries } from './lib/hook-dedupe.ts';
 import { isFleetProjectPath, isTenantWithinWindows, TENANT_ID_RE, tenantForProjectPath, type TenantLoopTenant } from './lib/fleet.ts';
+import { gitCleanEnv } from './lib/git-env.ts';
 import { appendRegistryRows, registryAppendIndex } from './helpers/registry-append.ts';
 import { extractFrontmatterVersionAndReviewed, reconcileSkillRegistry, alignSkillRegistryRowsWithFrontmatter } from './helpers/skills-registry.ts';
 import {
