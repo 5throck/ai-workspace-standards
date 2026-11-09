@@ -17,7 +17,19 @@ import { keyEntryExpired, readKeyEntries } from "./config";
 // this exemption an unauthenticated browser in key mode gets a dead shell (the
 // module import 401s) instead of the sign-in pointer card (found 2026-10-04,
 // voice-conversation UI verification).
-export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set(["GET /", "GET /health", "GET /login", "GET /app-helpers.js"]);
+// GET /admin: the admin console shell. Exempt so a signed-out browser reaches the loginRequired
+// gate and gets a 302 to /login instead of a JSON 401; adminPage (src/pages.ts) enforces the
+// admin check itself and returns no data to non-admins.
+// GET /admin.js: the console's static script, no data. Exact-match only, so /admin/* API routes
+// stay gated.
+export const AUTH_EXEMPT_ROUTES: ReadonlySet<string> = new Set([
+  "GET /",
+  "GET /health",
+  "GET /login",
+  "GET /app-helpers.js",
+  "GET /admin",
+  "GET /admin.js",
+]);
 
 function sha256(value: string): Buffer {
   return createHash("sha256").update(value).digest();
