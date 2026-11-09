@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: T-20261109-001
+kind: manual
+title: >-
+  Repository-config corruption guard, 2026-11-09 (fixed, pending merge): a
+  spawned test inheriting a git hook's GIT_DIR corrupted the shared repository
+  config twice. (1) Rogue commits — reproduced 2026-11-09: pre-push's bun test
+  child inherited GIT_DIR, upgrade-project fixtures committed into the checkout
+  (10 commits authored Test <test@example.com>, ~393 files, three L1 core
+  scripts deleted). (2) Config corruption — directly observed by the
+  operator/agent in that session, not detected by any gate: git status failed
+  with 'fatal: this operation must be run in a work tree', git worktree list
+  --porcelain marked the main worktree bare, a direct .git/config read showed
+  'bare = true', and .git/worktrees/ was absent; the fixture-side config write
+  itself was not separately reproduced. Worktrees share the main .git/config, so
+  the damage was repo-wide. Repair applied: 'git config --local core.bare false'
+  (mode 1 was recovered by hard reset to a known commit and force-push with the
+  corrected author). Merged fix for mode 1: PR #1935 env sanitizer
+  (scripts/lib/git-env.ts). Guard for mode 2 (this PR):
+  scripts/lib/repo-integrity.ts v1.0.0 + dev-sync start-of-run work-tree
+  invariant + blocking step 4.88 config-integrity gate + pre-push v1.8.1
+  snapshot/compare; any local-config delta or core.bare flip is FATAL and an
+  unreadable snapshot aborts. Design:
+  docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §11.
+priority: high
+status: review
+attempts: 0
+created_at: '2026-11-09T10:20:31.771+09:00'
+history:
+  - at: '2026-11-09T10:20:31.771+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-09T10:32:03.428+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-09T10:32:03.448+09:00'
+    from: waiting
+    to: review
+result: null
+error: null

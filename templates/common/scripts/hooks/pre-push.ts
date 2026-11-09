@@ -1,7 +1,26 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.7.3
+ * @version 1.8.1
+ * v1.8.1 (2026-11-09, QA follow-up fix — design §11 fail-closed semantics): the pre-run
+ *          snapshot no longer fails OPEN. An unreadable config before the changed-path
+ *          test run now aborts non-zero with the same actionable shape dev-sync uses
+ *          ("FATAL — repository config could not be read …" plus the repair line and
+ *          spec reference) instead of warning and skipping the whole check. The
+ *          comparison also carries the EFFECTIVE `core.bare` field: a bare flip whose
+ *          `git config --local --list` key set is otherwise unchanged (the incident
+ *          shape — `core.bare` can flip through a global/system value, so the local
+ *          listing does not move) is now refused, matching dev-sync step 4.88.
+ * v1.8.0 (2026-11-09, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+ *          §11): repository-config integrity check around the changed-path test run —
+ *          the origin of the 2026-11-09 incident. This hook is the one place where a
+ *          test spawn has historically inherited GIT_DIR from `git push`, so it also
+ *          gets the SECOND corruption mode's guard: snapshot
+ *          `git config --local --list` before the spawn and compare after; any delta is
+ *          FATAL (a fixture-side `git config` write landed on the real repository and
+ *          left `core.bare = true`, breaking every work-tree operation until manually
+ *          repaired). Cost is four `git config` reads (two snapshots, each one list +
+ *          one effective core.bare probe) and no writes.
  * v1.7.3 (2026-11-09, P0 correctness fix): the changed-path `bun test` spawn now runs
  *           under `.env(gitCleanEnvForShell())`, not the deleted `gitEnvUnset()`. Bun
  *           Shell's `.env(obj)` REPLACES the child environment, so an
@@ -28,6 +47,7 @@
 import { $ } from "bun";
 import { existsSync } from "node:fs";
 import { gitCleanEnvForShell } from "../lib/git-env.ts";
+import { diffRepoConfig, isEmptyRepoConfigDelta, snapshotRepoConfig, type RepoConfigSnapshot } from "../lib/repo-integrity.ts";
 
 // All-zero OID: git's "null" object id, sent as the local OID of a ref
 // deletion on both SHA-1 (40 zeros) and SHA-256 (64 zeros) repositories.
@@ -147,6 +167,76 @@ function shellEscapeRevListArgs(args: string[]): string {
     }
   }
   return args.join(" ");
+}
+
+// ── Repository-config integrity guard (design §11) ───────────────────────────
+// Wraps the changed-path test run: the children below are the exact spawn that once
+// wrote into this repository's .git/config. Both phases are FAIL CLOSED — an
+// unreadable snapshot aborts the push (design §11: "unreadable at run start aborts
+// non-zero"), and the comparison carries the EFFECTIVE core.bare field so a bare flip
+// is refused even when the local key list is unchanged.
+
+/** Which side of the test run a snapshot read belongs to. */
+export type RepoConfigPhase = 'before' | 'after';
+
+/**
+ * Actionable refusal line for an unreadable snapshot, shaped like dev-sync's start-of-run
+ * and step-4.88 messages (FATAL, phase, underlying error).
+ */
+export function repoConfigSnapshotFailureMessage(phase: RepoConfigPhase, err: unknown): string {
+  const when = phase === 'before' ? 'could not be read before' : 'could not be re-read after';
+  return `pre-push: FATAL — repository config ${when} the changed-path test run: ${String(err)}`;
+}
+
+/**
+ * Read one repository-config snapshot, or abort. `abort` MUST terminate the process
+ * (the hook passes a printer+`process.exit(1)`); it is injected so the unit suite can
+ * pin the fail-closed contract without exiting the test runner. Review note v1.8.1: the
+ * previous inline `catch` warned and skipped the whole check — a guard that fails open
+ * is not a guard.
+ */
+export function snapshotRepoConfigOrAbort(
+  phase: RepoConfigPhase,
+  read: () => RepoConfigSnapshot,
+  abort: (message: string) => never,
+): RepoConfigSnapshot {
+  try {
+    return read();
+  } catch (err) {
+    abort(repoConfigSnapshotFailureMessage(phase, err));
+  }
+}
+
+/** Outcome of the before/after comparison. `lines` are the operator-facing detail rows. */
+export interface RepoConfigGuardVerdict {
+  refused: boolean;
+  lines: string[];
+}
+
+/**
+ * Pure verdict for the snapshot pair. Refuses on ANY local-config key delta (added /
+ * removed / changed) AND on any change to the effective `core.bare` — the latter because
+ * `core.bare` resolves local > global > system: a global flip leaves
+ * `git config --local --list` byte-identical yet still makes every work-tree operation
+ * fail (the incident's own failure mode). Reported even when the key diff is empty.
+ */
+export function repoConfigGuardVerdict(
+  before: RepoConfigSnapshot,
+  after: RepoConfigSnapshot,
+): RepoConfigGuardVerdict {
+  const delta = diffRepoConfig(before.entries, after.entries);
+  const bareChanged = before.coreBare !== after.coreBare;
+  if (isEmptyRepoConfigDelta(delta) && !bareChanged) return { refused: false, lines: [] };
+
+  const lines = [
+    ...delta.added.map((line) => `+ ${line}`),
+    ...delta.removed.map((line) => `- ${line}`),
+    ...delta.changed.map((line) => `~ ${line}`),
+  ];
+  if (bareChanged) {
+    lines.push(`~ core.bare (effective): ${before.coreBare ?? '(unset)'} → ${after.coreBare ?? '(unset)'}`);
+  }
+  return { refused: true, lines };
 }
 
 async function main() {
@@ -272,6 +362,23 @@ async function main() {
     // files" and block every deletion push (observed 2026-11-04, PR #1848).
     .filter(f => f.startsWith('tests/') && f.endsWith('.test.ts') && existsSync(f));
   if (changedTestFiles.length > 0) {
+    // Repository-config baseline (design §11, 2026-11-09 incident): the test children
+    // below are the exact spawn that once wrote into this repository's .git/config —
+    // worktrees share the main config, so a single redirected `git config` write
+    // (core.bare = true) breaks every work-tree operation in every checkout. Snapshot
+    // before, compare after; an unreadable snapshot OR any delta blocks the push.
+    // Read-only and cheap.
+    const configBefore = snapshotRepoConfigOrAbort(
+      'before',
+      () => snapshotRepoConfig(),
+      (message) => {
+        console.error(`\n\x1b[31m❌ ${message} — push blocked.\x1b[0m`);
+        console.error("   A guard that cannot read the repository config cannot prove the test run left it intact.");
+        console.error("   Repair a bare checkout with: git config --local core.bare false");
+        console.error("   Spec: design §11 (2026-11-08-gw-tenant-loop-and-hardening-design).");
+        process.exit(1);
+      },
+    );
     try {
       console.log(`Running ${changedTestFiles.length} changed test file(s)...`);
       // gitCleanEnvForShell(): this hook runs with GIT_DIR exported by git. The test
@@ -285,6 +392,27 @@ async function main() {
       console.error("\n\x1b[31m❌ Changed-path tests failed — push blocked. Fix test failures before pushing.\x1b[0m");
       process.exit(1);
     }
+    const configAfter = snapshotRepoConfigOrAbort(
+      'after',
+      () => snapshotRepoConfig(),
+      (message) => {
+        console.error(`\n\x1b[31m❌ ${message} — push blocked.\x1b[0m`);
+        console.error("   The run may have corrupted the repository config; inspect .git/config before re-pushing.");
+        console.error(`   Repair if core.bare was set: git config --local core.bare false`);
+        console.error("   Spec: design §11 (2026-11-08-gw-tenant-loop-and-hardening-design).");
+        process.exit(1);
+      },
+    );
+    const verdict = repoConfigGuardVerdict(configBefore, configAfter);
+    if (verdict.refused) {
+      console.error("\n\x1b[31m❌ pre-push: a test mutated the REPOSITORY git config — push blocked.\x1b[0m");
+      console.error("   Worktrees share the main .git/config, so this change is repo-wide (2026-11-09 incident).");
+      for (const line of verdict.lines) console.error(`   ${line}`);
+      console.error(`   Repair if core.bare was set: git config --local core.bare false`);
+      console.error("   Fix the spawning test: scripts/lib/git-env.ts (gitCleanEnvForShell). Spec: design §11.");
+      process.exit(1);
+    }
+    console.log("  ✅ Repository config unchanged by the test run");
   } else {
     console.log("  [no test files changed — tests skipped; full integration suite runs in CI]");
   }

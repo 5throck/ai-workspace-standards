@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261109-002
+kind: manual
+title: >-
+  Residual gap after the 2026-11-09 repository-config guard: corruption mode 1
+  (rogue commits) still has no mechanical detector — propose a
+  "git log --author='Test <test@example.com>' <base>..HEAD" emptiness check in
+  the same dev-sync 4.88 gate that carries the config-integrity guard (any
+  match aborts), plus two residual exposures to close: (a) config.worktree —
+  with extensions.worktreeConfig enabled, per-worktree config lives in
+  .git/worktrees/<name>/config.worktree and the --local snapshot in
+  scripts/lib/repo-integrity.ts does not read it; (b) a direct `bun test` run
+  (no hook, no dev-sync) inherits whatever GIT_DIR the caller exported and is
+  covered by neither the snapshot/compare gate nor the env sanitizer —
+  consider having the affected fixture suites assert their own
+  repository/remote identity (git rev-parse --absolute-git-dir must be inside
+  the fixture root). Detector NOT implemented in the PR that filed this
+  ticket (deliberately out of scope): pre-push v1.8.1 + repo-integrity.ts
+  v1.0.0 guard mode 2 only. Design context:
+  docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §11; incident
+  ticket T-20261109-001.
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-09T10:32:10.030+09:00'
+history:
+  - at: '2026-11-09T10:32:10.030+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

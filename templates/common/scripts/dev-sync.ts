@@ -1,4 +1,19 @@
-// @version 1.44.2
+// @version 1.45.0
+// v1.45.0 (2026-11-09, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
+//          §11): repository-config integrity guard (the second corruption mode of the
+//          2026-11-09 incident). (a) START-OF-RUN INVARIANT immediately after the CWD
+//          guard — assertWorkTreeHealthy() turns git's cryptic "fatal: this operation
+//          must be run in a work tree" into one line naming the repair
+//          (`git config --local core.bare false`) when the checkout was left with
+//          core.bare = true. (b) CONFIG INTEGRITY GATE after the last test-executing
+//          step (4.85) and before the audit gate — the local git config is snapshotted
+//          at run start and re-read here; any delta is FATAL because a spawned test
+//          mutated the REPOSITORY config (worktrees share the main .git/config, so the
+//          damage is repo-wide and survives the run). No key is excluded: verified
+//          2026-11-09 that no sanctioned tool writes THIS repository's local config
+//          during a sync run (every `git config` write in scripts/ targets an explicit
+//          project directory). Both primitives are the pure
+//          scripts/lib/repo-integrity.ts v1.0.0.
 // v1.44.2 (2026-11-09, P0 correctness fix): the two test spawns now run under
 //          `.env(gitCleanEnvForShell())`, not the deleted `gitEnvUnset()`. Bun Shell's
 //          `.env(obj)` REPLACES the child environment wholesale, so an
@@ -421,6 +436,13 @@ import { isAgentMdPath, bumpMechanicalLastUpdated } from './helpers/agent-mechan
 import { driftCheck } from './helpers/ticket-drift.ts';
 import { unionScan, wellFormedScan } from './helpers/memory-union-verify.ts';
 import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from './lib/workspace-hygiene.ts';
+import {
+    assertWorkTreeHealthy,
+    diffRepoConfig,
+    isEmptyRepoConfigDelta,
+    snapshotRepoConfig,
+    type RepoConfigSnapshot,
+} from './lib/repo-integrity.ts';
 
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
@@ -438,6 +460,36 @@ if (path.resolve(actualCwd) !== expectedRoot) {
     console.error(`   Expected: ${expectedRoot}`);
     console.error(`   Current:  ${actualCwd}`);
     console.error(`   Run from the workspace root: cd ${expectedRoot}`);
+    if (import.meta.main) {
+        process.exit(1);
+    }
+}
+
+// ── Start-of-run repository-config invariant (spec 2026-11-08-gw-tenant-loop-and-
+//    hardening-design §11) ───────────────────────────────────────────────────────
+// The 2026-11-09 incident left this checkout with `core.bare = true` in .git/config
+// (a spawned test's `git config` write landed on the REAL repository through an
+// inherited GIT_DIR). Every work-tree operation then dies with git's cryptic
+// "fatal: this operation must be run in a work tree" — often several steps later and
+// inside an unrelated subprocess. Probing first turns that into one line with the exact
+// repair command. Fail-closed: an unusable work tree cannot sync anything.
+const workTreeHealth = assertWorkTreeHealthy(expectedRoot);
+if (!workTreeHealth.ok) {
+    console.error(`${RED}❌ dev-sync: FATAL — ${workTreeHealth.reason}${RESET}`);
+    if (import.meta.main) {
+        process.exit(1);
+    }
+}
+
+// Config integrity baseline: the local git config as it stands BEFORE any step runs.
+// Step "4.88" (below) re-reads it after the last test-executing step and fails the run
+// if a spawned child mutated the repository config. Config reads are cheap (two
+// `git config` probes) and never write.
+let configSnapshotAtStart: RepoConfigSnapshot | null = null;
+try {
+    configSnapshotAtStart = snapshotRepoConfig(expectedRoot);
+} catch (err) {
+    console.error(`${RED}❌ dev-sync: FATAL — repository config could not be read at run start: ${String(err)}${RESET}`);
     if (import.meta.main) {
         process.exit(1);
     }
@@ -1679,8 +1731,58 @@ try {
     console.warn(`${YELLOW}⚠️  Step 4.87: agent frontmatter last_updated bump failed (non-blocking): ${String(err)}${RESET}`);
 }
 
+// 4.88 Repository-config integrity gate (spec docs/designs/2026-11-08-gw-tenant-loop-and-
+//      hardening-design.md §11) — the SECOND corruption mode of the 2026-11-09 incident.
+//      The steps above spawn real child processes (3.95 `bun run test`, 4.85
+//      `bun run test:unit`); a child that inherits a git hook's GIT_DIR and writes config
+//      lands on THIS repository — worktrees share the main .git/config, which is how the
+//      checkout ended up with `core.bare = true` and `.git/worktrees/` wiped. Compare the
+//      run-start snapshot against a post snapshot: any local-config delta is FATAL.
+//      BLOCKING, placed after the last test-executing step and before the 4.9 audit gate
+//      (a run that corrupted the repository must never reach staging/commit).
+//      No key is excluded — verified 2026-11-09 that no sanctioned tool writes this
+//      repository's local config during a run (scripts/lib/repo-integrity.ts records why).
+if (configSnapshotAtStart) {
+    let configSnapshotAfter: RepoConfigSnapshot | null = null;
+    try {
+        configSnapshotAfter = snapshotRepoConfig(expectedRoot);
+    } catch (err) {
+        console.error(`${RED}❌ Step 4.88: repository config could not be re-read after the test steps — treating as FATAL: ${String(err)}${RESET}`);
+        if (import.meta.main) {
+            process.exit(1);
+        }
+    }
+    if (configSnapshotAfter) {
+        const configDelta = diffRepoConfig(configSnapshotAtStart.entries, configSnapshotAfter.entries);
+        const bareChanged = configSnapshotAtStart.coreBare !== configSnapshotAfter.coreBare;
+        if (!isEmptyRepoConfigDelta(configDelta) || bareChanged) {
+            console.error(`${RED}❌ Step 4.88: FATAL — a spawned child mutated the REPOSITORY git config.${RESET}`);
+            console.error(`${YELLOW}   Report the delta below to the failing step's owner; the change is repo-wide because${RESET}`);
+            console.error(`${YELLOW}   worktrees share the main .git/config (2026-11-09 repository-config corruption incident).${RESET}`);
+            for (const line of configDelta.added) console.error(`${RED}   + ${line}${RESET}`);
+            for (const line of configDelta.removed) console.error(`${RED}   - ${line}${RESET}`);
+            for (const line of configDelta.changed) console.error(`${RED}   ~ ${line}${RESET}`);
+            if (bareChanged) {
+                console.error(`${RED}   ~ core.bare (effective): ${configSnapshotAtStart.coreBare ?? '(unset)'} → ${configSnapshotAfter.coreBare ?? '(unset)'}${RESET}`);
+            }
+            if (configSnapshotAfter.coreBare === 'true') {
+                console.error(`${YELLOW}   Repair: git config --local core.bare false${RESET}`);
+            }
+            console.error(`${YELLOW}   Fix the spawning test to run under scripts/lib/git-env.ts (gitCleanEnvForShell for Bun Shell,${RESET}`);
+            console.error(`${YELLOW}   gitCleanEnv for spawnSync), then re-run /sync. Spec: design §11.${RESET}`);
+            if (import.meta.main) {
+                process.exit(1);
+            }
+        } else {
+            console.log(`${GREEN}✓ Step 4.88: repository config unchanged across the test steps${RESET}`);
+        }
+    }
+}
+
 // 4.9 Audit gate — call audit.ts directly (platform-independent, no shell intermediary)
 //     Runs AFTER publish + skill sync so templates/common/ is up-to-date with scrub.
+//     The config integrity gate (4.88, above) is the last gate before this one: a run
+//     that mutated the repository config must not reach staging/commit.
 const auditRes = await $`bun scripts/audit.ts`.nothrow();
 
 if (auditRes.exitCode !== 0) {
