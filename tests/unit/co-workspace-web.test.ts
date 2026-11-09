@@ -43,6 +43,10 @@ describe("web UI scripts parse as plain JS (QA fair P1 regression guard)", () =>
     parsesAsPlainJs("login.html", extractModuleScript(join(serviceRoot, "web", "login.html")));
   });
 
+  test("admin.js (the /admin console script, design 2026-11-09 §9.2) parses as plain JS", () => {
+    parsesAsPlainJs("admin.js", readFileSync(join(serviceRoot, "web", "admin.js"), "utf8"));
+  });
+
   test("no TypeScript annotations remain in served pages", () => {
     for (const file of ["index.html", "login.html"]) {
       const script = extractModuleScript(join(serviceRoot, "web", file));

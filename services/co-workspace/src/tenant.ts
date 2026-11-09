@@ -58,6 +58,9 @@ export interface TenantRecord {
   name?: string;
   /** Trusted principal owning this tenant (P9) — from the key-file label, or "anonymous". */
   ownerPrincipal?: string;
+  /** Admin console: set by archive; an archived tenant refuses turns (409 tenant_archived) but
+   * still counts toward the owner's tenant cap. Cleared by restore. */
+  archivedAt?: string;
   /** Provisioning progress trail (P8), newest last, capped at 12 entries. */
   progress?: TenantProgressEntry[];
   /** ADR-0092 Addendum 17 attach-mode: this tenant is ATTACHED to an existing checkout under

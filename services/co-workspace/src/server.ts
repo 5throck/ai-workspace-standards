@@ -29,7 +29,7 @@ import { handleTenants } from "./routes/tenants";
 import { handleCompat } from "./routes/compat";
 import { handleFiles } from "./routes/files";
 import { handleAuth } from "./routes/auth";
-import { handleAdmin } from "./routes/admin";
+import { handleAdmin } from "./routes/admin/index";
 import { handleGemini } from "./routes/gemini";
 import { reapOrphanedTurns } from "./reaper";
 
@@ -103,11 +103,12 @@ export async function handleRequest(state: GatewayState, req: Request, peerIp?: 
     }
     // R1 gate: a session opened with an admin-issued temp credential is confined to the
     // auth surface (finish the rotation via PATCH /auth/me, sign out) plus the shell pages
-    // the forced-change dialog renders on. Every other area — tenants, chat, admin, files —
+    // the forced-change dialog renders on. `/admin` is a shell page: its handler redirects a
+    // must-change session to `/`. Every other area — tenants, chat, admin API, files —
     // answers 403 until the password is rotated. API-key callers carry no session, so they
     // pass; a caller presenting both satisfies the gate only via the session branch.
     if (sessionUser?.mustChangePassword) {
-      const shell = req.method === "GET" && ["/", "/login", "/app-helpers.js", "/health"].includes(path);
+      const shell = req.method === "GET" && ["/", "/login", "/app-helpers.js", "/health", "/admin"].includes(path);
       if (!authRoute && !shell) {
         throw new HttpError(403, "password change required — your sign-in used a temporary password");
       }

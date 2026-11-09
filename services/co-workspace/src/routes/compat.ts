@@ -4,6 +4,7 @@ import { countTokensPayload, estimateTokens, parseAnthropicRequest } from "../an
 import { parseChatRequest } from "../openai";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
 import { isAdminCaller, assertPrincipalQuota, assertQuota } from "../access";
+import { effectivePolicyFor } from "../policy";
 import { ensureReady, resolveLazyTenant } from "../lifecycle";
 import { openaiChatResponse, anthropicChatResponse } from "../responses";
 import type { GatewayState } from "../state";
@@ -20,7 +21,7 @@ export async function handleCompat(state: GatewayState, req: Request, ctx: Ctx):
     // parsed.req.user is intentionally ignored: tenant selection uses the authenticated principal.
     const { rec, promise } = resolveLazyTenant(state, req, parsed.req.model);
     const ready = await ensureReady(state, rec);
-    assertQuota(state.cfg, ready);
+    assertQuota(state.cfg, ready, undefined, effectivePolicyFor(state, ready.ownerPrincipal ?? "anonymous"));
     assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
     return await openaiChatResponse(state, ready, parsed.req.message, parsed.req.stream, promise ?? undefined);
   }
@@ -35,7 +36,7 @@ export async function handleCompat(state: GatewayState, req: Request, ctx: Ctx):
     const { rec, promise } = resolveLazyTenant(state, req, parsed.req.model);
     if (promise) await promise;
     const ready = await ensureReady(state, rec);
-    assertQuota(state.cfg, ready);
+    assertQuota(state.cfg, ready, undefined, effectivePolicyFor(state, ready.ownerPrincipal ?? "anonymous"));
     assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
     return await anthropicChatResponse(state, ready, parsed.req.message, parsed.req.stream);
   }

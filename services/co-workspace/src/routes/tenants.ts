@@ -4,7 +4,8 @@ import { modelsPayload } from "../openai";
 import { genId } from "../util";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
 import { variantStatus } from "../pages";
-import { callerPrincipal, isPasswordSetAdmin, requireTenantAccess, assertPrincipalQuota, assertQuota, assertProvisioningAllowed, assertTenantCap } from "../access";
+import { callerPrincipal, callerPolicyFor, isPasswordSetAdmin, requireTenantAccess, assertPrincipalQuota, assertQuota, assertProvisioningAllowed, assertTenantCap } from "../access";
+import { effectivePolicyFor } from "../policy";
 import { sanitizeProjectName, tenantKeyFor, startProvisioning, deleteTenantData } from "../lifecycle";
 import { allocateAttachProviderKey, assertAttachHubAdmittable, ATTACH_KIND, resolveAttachDir } from "../attach";
 import { nativeChatResponse } from "../responses";
@@ -98,7 +99,7 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
       }
       return jsonResponse({ tenantId: existing.tenantId, name: existing.name, status: existing.status, existing: true });
     }
-    assertTenantCap(state, owner);
+    assertTenantCap(state, owner, callerPolicyFor(state, req));
     // Decision 7: one low-limit provider key per attach session (pool; empty pool = the
     // deployment key per Addendum 9).
     const attachProviderKey = hubDir ? allocateAttachProviderKey(state) : undefined;
@@ -195,7 +196,7 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     // 429-before-streaming tests); a provisioning team is checked once it turns ready,
     // inside the stream where the progress frames are already flowing.
     if (rec.status !== "provisioning") {
-      assertQuota(state.cfg, rec);
+      assertQuota(state.cfg, rec, undefined, effectivePolicyFor(state, rec.ownerPrincipal ?? "anonymous"));
       assertPrincipalQuota(state, rec.ownerPrincipal ?? "anonymous");
     }
     // The stream starts immediately: provisioning progress is streamed as `: …` comment

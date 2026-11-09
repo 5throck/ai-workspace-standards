@@ -1,10 +1,11 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
-import { sessionTokenFromCookie, sessionCookieHeader, clearCookieHeader } from "../users";
+import { principalFromEmail, sessionTokenFromCookie, sessionCookieHeader, clearCookieHeader } from "../users";
 import { googleConfigured, authorizeUrl, makePkce, exchangeCode, fetchProfile } from "../google-sso";
 import { HttpError, cookieSecureFor, jsonResponse, readJsonBody } from "../http";
-import { principalTokenUsage, oauthStateMatches } from "../access";
+import { principalTokenUsage, oauthStateMatches, assertAccountEnabled, isReservedLoginId } from "../access";
+import { effectivePolicyFor } from "../policy";
 import type { GatewayState } from "../state";
 import type { Ctx } from "./ctx";
 
@@ -20,6 +21,8 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : loginId;
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new HttpError(400, "valid email is required");
     if (password.length < 8) throw new HttpError(400, "password must be at least 8 characters");
+    // Namespace (2026-11-09 review): reserved words, account-ID shapes, and API-key labels are not claimable.
+    if (loginId && isReservedLoginId(state.cfg, loginId)) throw new HttpError(409, "this login ID is not available");
     const result = await state.users.createPendingAccount({ loginId, email, password, name });
     if (!result.ok) {
       const messages: Record<string, string> = {
@@ -127,6 +130,8 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
       state.audit.record(loginId || clientIp, "login.failed");
       throw new HttpError(401, "invalid ID or password (or account not yet verified)");
     }
+    // Admin console (§7): checked only after the password verified, so suspension is not revealed.
+    assertAccountEnabled(state, user);
     // 2026-10-03 review M3: a success clears the per-account bucket, so 10 consecutive
     // FAILURES lock out but the legitimate user's next successful sign-in re-opens it —
     // an attacker must keep pumping failures forever to keep a victim out.
@@ -155,6 +160,8 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     const user = state.users.resolveSession(sessionTokenFromCookie(req));
     if (!user) throw new HttpError(401, "not signed in");
     const usage = principalTokenUsage(state, user.principal);
+    // Group policy can tighten the principal budget, so report the effective value.
+    const effective = effectivePolicyFor(state, user.principal);
     return jsonResponse({
       user: {
         loginId: user.principal,
@@ -168,7 +175,7 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
         passwordSetRequired: user.role === "admin" && !user.passwordHash,
       },
       usage: { inputTokens: usage.input, outputTokens: usage.output, totalTokens: usage.input + usage.output },
-      budget: state.cfg.principalMaxTokens > 0 ? { maxTokens: state.cfg.principalMaxTokens } : null,
+      budget: effective.maxPrincipalTokens > 0 ? { maxTokens: effective.maxPrincipalTokens } : null,
     });
   }
 
@@ -274,9 +281,14 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
         if (!state.users.isVerified(byEmail.id)) {
           throw new HttpError(409, "an unverified account uses this email — sign in with your ID and password to link Google");
         }
+        assertAccountEnabled(state, byEmail);
         if (!byEmail.googleSub) state.users.linkGoogleSub(byEmail.id, profile.sub);
         user = byEmail;
       } else {
+        // Namespace (2026-11-09 review): the account principal derives from the email local part.
+        if (isReservedLoginId(state.cfg, principalFromEmail(profile.email))) {
+          throw new HttpError(409, "this Google account cannot create an account — contact an administrator");
+        }
         user = state.users.createUser({
           email: profile.email,
           name: profile.name,
@@ -286,6 +298,7 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
         if (!user) throw new HttpError(500, "account creation failed");
       }
     }
+    assertAccountEnabled(state, user);
     const token = state.users.createSession(user.id);
     const secureFlag = cookieSecureFor(state.cfg, req) ? "; Secure" : "";
     const headers = new Headers({ location: "/" });

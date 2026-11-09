@@ -55,8 +55,8 @@ describe("csrf exemption scope (M3)", () => {
     expect(res.status).toBe(403);
   }, 20000);
 
-  test("web: every non-GET fetch in index.html/login.html carries x-requested-with", () => {
-    for (const file of ["index.html", "login.html"]) {
+  test("web: every non-GET fetch in index.html/login.html/admin.js carries x-requested-with", () => {
+    for (const file of ["index.html", "login.html", "admin.js"]) {
       const html = readFileSync(join(webDir, file), "utf8");
       const calls = [...html.matchAll(/fetch\(/g)];
       for (const m of calls) {

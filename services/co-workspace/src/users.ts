@@ -12,6 +12,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { runMigrations } from "./migrations";
 import type { LoopGroupConfig } from "./tenant-loop";
+import type { GroupPolicy } from "./policy";
 
 /**
  * Password hashing with a test-mode cost floor (root fix for the windows runner
@@ -31,6 +32,40 @@ function hashPasswordSync(password: string): string {
   return Bun.password.hashSync(password);
 }
 
+/** Async twin of hashPasswordSync for bulk paths (CSV import): the hash runs off the event
+ * loop, so a 200-row import cannot stall other requests (2026-11-09 review M5). Same test-mode
+ * cost floor as above. */
+async function hashPasswordAsync(password: string): Promise<string> {
+  if (process.env.NODE_ENV === "test") {
+    type HashWithCost = (password: string, options: { algorithm: "argon2id"; memoryCost: number; timeCost: number }) => Promise<string>;
+    return (Bun.password.hash as HashWithCost)(password, { algorithm: "argon2id", memoryCost: 4096, timeCost: 1 });
+  }
+  return Bun.password.hash(password);
+}
+
+/** A one-time temp credential: 12 chars from a 58-char alphabet (~70 bits). */
+function newTempPassword(): string {
+  const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const body = Array.from(randomBytes(12), (b) => alphabet[b % alphabet.length]).join("");
+  return `co-${body.slice(0, 4)}-${body.slice(4, 8)}-${body.slice(8)}`;
+}
+
+/** Stored policy JSON is re-validated on read (2026-11-09 review L3): a non-positive or
+ * non-numeric limit is dropped (no opinion), and allowedVariants must be a string array. */
+const POLICY_NUMERIC_FIELDS = ["maxTenants", "maxTurns", "maxTokens", "maxPrincipalTokens"] as const;
+function sanitizeStoredPolicy(raw: unknown): GroupPolicy | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const obj = raw as Record<string, unknown>;
+  const out: GroupPolicy = {};
+  for (const field of POLICY_NUMERIC_FIELDS) {
+    const value = obj[field];
+    if (typeof value === "number" && Number.isInteger(value) && value > 0) out[field] = value;
+  }
+  const list = obj.allowedVariants;
+  if (Array.isArray(list) && list.every((v) => typeof v === "string")) out.allowedVariants = [...(list as string[])];
+  return out;
+}
+
 export interface UserRecord {
   id: string;
   email: string;
@@ -43,7 +78,35 @@ export interface UserRecord {
   role: "user" | "admin";
   createdAt: string;
   deletedAt: string | null;
+  /** Admin console (v3): non-NULL means the account is suspended — no session resolves. */
+  disabledAt: string | null;
 }
+
+export type GroupKind = "general" | "loop";
+
+/** Admin console group view (both kinds). `policy` is the validated GroupPolicy or null. */
+export interface GroupRecord {
+  groupId: string;
+  name: string;
+  kind: GroupKind;
+  description: string | null;
+  policy: GroupPolicy | null;
+  memberCount: number;
+  createdAt: string | null;
+}
+
+export interface UserQuery {
+  q?: string;
+  group?: string;
+  status?: "active" | "pending" | "suspended" | "deleted";
+  role?: "user" | "admin";
+  page?: number;
+  size?: number;
+}
+
+/** Thrown on a group-id collision (a loop write onto a general group, a duplicate create) or a
+ * membership edit aimed at a loop group. Routes map it to 409. */
+export class GroupConflictError extends Error {}
 
 export interface SessionInfo {
   tokenHash: string;
@@ -131,6 +194,7 @@ export class UserStore {
       tempPasswordExpires: (r.temp_password_expires as string | null) ?? null,
       createdAt: r.created_at as string,
       deletedAt: (r.deleted_at as string | null) ?? null,
+      disabledAt: (r.disabled_at as string | null) ?? null,
     };
   }
 
@@ -198,6 +262,15 @@ export class UserStore {
       .query("SELECT * FROM users WHERE principal = ? AND deleted_at IS NULL")
       .get(principal) as Record<string, unknown> | null;
     return r ? this.rowToUser(r) : null;
+  }
+
+  /** True when a suspended or deleted account holds this principal (2026-11-09 review M2). The
+   * row is checked including soft-deleted accounts, since findByPrincipal excludes them. */
+  isPrincipalBlocked(principal: string): boolean {
+    const r = this.db.query("SELECT disabled_at, deleted_at FROM users WHERE principal = ?").get(principal) as
+      | { disabled_at: string | null; deleted_at: string | null }
+      | null;
+    return Boolean(r && (r.disabled_at || r.deleted_at));
   }
 
   findByGoogleSub(googleSub: string): UserRecord | null {
@@ -405,13 +478,19 @@ export class UserStore {
       this.db.query("DELETE FROM sessions WHERE token_hash = ?").run(hashToken(token));
       return null;
     }
+    const user = this.findById(row.user_id as string);
+    // Admin console (§7): a suspended account resolves no session; the presented row is dropped.
+    if (user?.disabledAt) {
+      this.db.query("DELETE FROM sessions WHERE token_hash = ?").run(hashToken(token));
+      return null;
+    }
     // Slide the idle window with activity — throttled to one write per idleWindow/12 so the
     // per-request resolve path does not hit the DB every time.
     const lastSeen = new Date((row.last_seen_at as string | null) ?? 0).getTime();
     if (now - lastSeen > this.sessionIdleMs / 12) {
       this.db.query("UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?").run(new Date(now).toISOString(), hashToken(token));
     }
-    return this.findById(row.user_id as string);
+    return user;
   }
 
   /** 2026-10-03 session-hardening design (D6): the caller's own sessions, newest
@@ -459,17 +538,24 @@ export class UserStore {
    * admin (stored only as its argon2id hash), 15-minute expiry, and every existing session
    * of the target is purged (SEC-06). First login with it forces a rotation. */
   createTempPassword(userId: string): string {
-    const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    // 12 chars from a 58-char alphabet (~70 bits) — the review's M1: 8 chars (~45 bits)
-    // was thin for even a 15-minute one-shot credential.
-    const bytes = randomBytes(12);
-    const body = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
-    const temp = `co-${body.slice(0, 4)}-${body.slice(4, 8)}-${body.slice(8)}`;
+    const temp = newTempPassword();
+    this.storeTempPassword(userId, hashPasswordSync(temp));
+    return temp;
+  }
+
+  /** Async variant for bulk issuance (CSV import): same credential and effects, hashed off the
+   * event loop (2026-11-09 review M5). */
+  async createTempPasswordAsync(userId: string): Promise<string> {
+    const temp = newTempPassword();
+    this.storeTempPassword(userId, await hashPasswordAsync(temp));
+    return temp;
+  }
+
+  private storeTempPassword(userId: string, passwordHash: string): void {
     this.db
       .query("UPDATE users SET password_hash=?, must_change_password=1, temp_password_expires=? WHERE id=?")
-      .run(hashPasswordSync(temp), new Date(Date.now() + 15 * 60 * 1000).toISOString(), userId);
+      .run(passwordHash, new Date(Date.now() + 15 * 60 * 1000).toISOString(), userId);
     this.db.query("DELETE FROM sessions WHERE user_id=?").run(userId);
-    return temp;
   }
 
   /** True when the account still carries an admin-issued temp credential past its expiry. */
@@ -544,28 +630,32 @@ export class UserStore {
       ...(group.scopes ? { scopes: group.scopes } : {}),
       ...(group.windows ? { windows: group.windows } : {}),
     });
-    this.db
-      .query(
-        `INSERT INTO groups (group_id, name, loop_config) VALUES (?, ?, ?)
-         ON CONFLICT(group_id) DO UPDATE SET name=excluded.name, loop_config=excluded.loop_config`,
-      )
-      .run(group.groupId, group.name || group.groupId, payload);
-    // Re-sync the join mirror from the same input.
-    this.db.query("DELETE FROM user_groups WHERE group_id=?").run(group.groupId);
-    for (const principal of group.designatedUsers) {
-      this.db.query("INSERT OR IGNORE INTO user_groups (group_id, principal) VALUES (?, ?)").run(group.groupId, principal);
-    }
+    this.db.transaction(() => {
+      const existing = this.db.query("SELECT kind FROM groups WHERE group_id=?").get(group.groupId) as { kind: string } | null;
+      if (existing && existing.kind !== "loop") throw new GroupConflictError(`group ${group.groupId} is a general group`);
+      this.db
+        .query(
+          `INSERT INTO groups (group_id, name, loop_config, kind, created_at) VALUES (?, ?, ?, 'loop', ?)
+           ON CONFLICT(group_id) DO UPDATE SET name=excluded.name, loop_config=excluded.loop_config`,
+        )
+        .run(group.groupId, group.name || group.groupId, payload, new Date().toISOString());
+      // Re-sync the join mirror from the same input.
+      this.db.query("DELETE FROM user_groups WHERE group_id=?").run(group.groupId);
+      for (const principal of group.designatedUsers) {
+        this.db.query("INSERT OR IGNORE INTO user_groups (group_id, principal) VALUES (?, ?)").run(group.groupId, principal);
+      }
+    })();
   }
 
   getGroup(groupId: string): LoopGroupConfig | undefined {
-    const r = this.db.query("SELECT group_id, name, loop_config FROM groups WHERE group_id=?").get(groupId) as
+    const r = this.db.query("SELECT group_id, name, loop_config FROM groups WHERE group_id=? AND kind='loop'").get(groupId) as
       | { group_id: string; name: string; loop_config: string }
       | null;
     return r ? this.rowToGroup(r) : undefined;
   }
 
   listGroups(): LoopGroupConfig[] {
-    const rows = this.db.query("SELECT group_id, name, loop_config FROM groups ORDER BY group_id ASC").all() as Array<{
+    const rows = this.db.query("SELECT group_id, name, loop_config FROM groups WHERE kind='loop' ORDER BY group_id ASC").all() as Array<{
       group_id: string;
       name: string;
       loop_config: string;
@@ -578,7 +668,262 @@ export class UserStore {
     this.db.query("DELETE FROM user_groups WHERE group_id=?").run(groupId);
     return Number(info.changes) > 0;
   }
+
+  /** ── Admin console (design docs/designs/2026-11-09-gw-admin-console-design.md §4): general
+   * groups share the groups/user_groups tables with the tenant loop; `kind` tells them apart.
+   * Loop groups are written only through upsertGroup and their membership only through the
+   * loop config, so the general API below refuses them. ── */
+
+  private rowToGroupRecord(r: Record<string, unknown>): GroupRecord {
+    let policy: GroupPolicy | null = null;
+    if (typeof r.policy === "string" && r.policy) {
+      try {
+        policy = sanitizeStoredPolicy(JSON.parse(r.policy));
+      } catch {
+        policy = null; /* unreadable policy is treated as no opinion */
+      }
+    }
+    return {
+      groupId: r.group_id as string,
+      name: r.name as string,
+      kind: r.kind === "general" ? "general" : "loop",
+      description: (r.description as string | null) ?? null,
+      policy,
+      memberCount: Number(r.member_count ?? 0),
+      createdAt: (r.created_at as string | null) ?? null,
+    };
+  }
+
+  private static readonly GROUP_SELECT = `SELECT g.group_id, g.name, g.kind, g.description, g.policy, g.created_at,
+    (SELECT COUNT(*) FROM user_groups ug WHERE ug.group_id = g.group_id) AS member_count
+    FROM groups g`;
+
+  getGroupRecord(groupId: string): GroupRecord | undefined {
+    const r = this.db.query(`${UserStore.GROUP_SELECT} WHERE g.group_id = ?`).get(groupId) as Record<string, unknown> | null;
+    return r ? this.rowToGroupRecord(r) : undefined;
+  }
+
+  listGroupRecords(opts: { kind?: GroupKind } = {}): GroupRecord[] {
+    const rows = opts.kind
+      ? (this.db.query(`${UserStore.GROUP_SELECT} WHERE g.kind = ? ORDER BY g.group_id ASC`).all(opts.kind) as Record<string, unknown>[])
+      : (this.db.query(`${UserStore.GROUP_SELECT} ORDER BY g.group_id ASC`).all() as Record<string, unknown>[]);
+    return rows.map((r) => this.rowToGroupRecord(r));
+  }
+
+  /** Create a general group. Throws GroupConflictError when the id is already taken (any kind). */
+  createGroup(init: { groupId: string; name: string; description?: string; policy?: GroupPolicy | null }): GroupRecord {
+    this.db.transaction(() => {
+      if (this.db.query("SELECT 1 FROM groups WHERE group_id = ?").get(init.groupId)) {
+        throw new GroupConflictError(`group ${init.groupId} already exists`);
+      }
+      this.db
+        .query(
+          `INSERT INTO groups (group_id, name, loop_config, kind, policy, description, created_at)
+           VALUES (?, ?, '{"designatedUsers":[]}', 'general', ?, ?, ?)`,
+        )
+        .run(
+          init.groupId,
+          init.name,
+          init.policy ? JSON.stringify(init.policy) : null,
+          init.description ?? null,
+          new Date().toISOString(),
+        );
+    })();
+    return this.getGroupRecord(init.groupId)!;
+  }
+
+  updateGroup(groupId: string, patch: { name?: string; description?: string | null }): GroupRecord | undefined {
+    const sets: string[] = [];
+    const values: (string | null)[] = [];
+    if (patch.name !== undefined) {
+      sets.push("name = ?");
+      values.push(patch.name);
+    }
+    if (patch.description !== undefined) {
+      sets.push("description = ?");
+      values.push(patch.description);
+    }
+    if (sets.length > 0) this.db.query(`UPDATE groups SET ${sets.join(", ")} WHERE group_id = ?`).run(...values, groupId);
+    return this.getGroupRecord(groupId);
+  }
+
+  setGroupPolicy(groupId: string, policy: GroupPolicy | null): GroupRecord | undefined {
+    this.db.query("UPDATE groups SET policy = ? WHERE group_id = ?").run(policy ? JSON.stringify(policy) : null, groupId);
+    return this.getGroupRecord(groupId);
+  }
+
+  /** Delete a general group and its memberships. Refuses loop groups (returns false). */
+  deleteGeneralGroup(groupId: string): boolean {
+    return this.db.transaction(() => {
+      const row = this.db.query("SELECT kind FROM groups WHERE group_id = ?").get(groupId) as { kind: string } | null;
+      if (!row || row.kind !== "general") return false;
+      this.db.query("DELETE FROM user_groups WHERE group_id = ?").run(groupId);
+      this.db.query("DELETE FROM groups WHERE group_id = ?").run(groupId);
+      return true;
+    })();
+  }
+
+  /** Membership edits are for general groups only; anything else is a GroupConflictError. */
+  private assertGeneralGroup(groupId: string): void {
+    const row = this.db.query("SELECT kind FROM groups WHERE group_id = ?").get(groupId) as { kind: string } | null;
+    if (!row || row.kind !== "general") throw new GroupConflictError(`group ${groupId} is not a general group`);
+  }
+
+  /** Add live users to a general group. Malformed or unknown principals are reported, not inserted. */
+  addMembers(groupId: string, principals: string[]): { added: number; unknown: string[] } {
+    const unknown: string[] = [];
+    let added = 0;
+    this.db.transaction(() => {
+      this.assertGeneralGroup(groupId);
+      for (const principal of new Set(principals)) {
+        if (!PRINCIPAL_RE.test(principal) || !this.findByPrincipal(principal)) {
+          unknown.push(principal);
+          continue;
+        }
+        added += Number(this.db.query("INSERT OR IGNORE INTO user_groups (group_id, principal) VALUES (?, ?)").run(groupId, principal).changes);
+      }
+    })();
+    return { added, unknown };
+  }
+
+  removeMembers(groupId: string, principals: string[]): { removed: number } {
+    let removed = 0;
+    this.db.transaction(() => {
+      this.assertGeneralGroup(groupId);
+      for (const principal of new Set(principals)) {
+        removed += Number(this.db.query("DELETE FROM user_groups WHERE group_id = ? AND principal = ?").run(groupId, principal).changes);
+      }
+    })();
+    return { removed };
+  }
+
+  listMembers(groupId: string): string[] {
+    const rows = this.db.query("SELECT principal FROM user_groups WHERE group_id = ? ORDER BY principal ASC").all(groupId) as Array<{ principal: string }>;
+    return rows.map((r) => r.principal);
+  }
+
+  /** Every group (any kind) a principal belongs to; the policy resolver reads this. */
+  groupsOf(principal: string): GroupRecord[] {
+    const rows = this.db
+      .query(
+        `SELECT g.group_id, g.name, g.kind, g.description, g.policy, g.created_at,
+          (SELECT COUNT(*) FROM user_groups x WHERE x.group_id = g.group_id) AS member_count
+         FROM user_groups ug JOIN groups g ON g.group_id = ug.group_id
+         WHERE ug.principal = ? ORDER BY g.group_id ASC`,
+      )
+      .all(principal) as Record<string, unknown>[];
+    return rows.map((r) => this.rowToGroupRecord(r));
+  }
+
+  /** Called by user delete: drops every membership row for the principal. */
+  removePrincipalFromAllGroups(principal: string): void {
+    this.db.query("DELETE FROM user_groups WHERE principal = ?").run(principal);
+  }
+
+  /** ── Admin console: user queries and bulk state changes ── */
+
+  /** True when the login ID or principal is held by ANY account, including soft-deleted ones
+   * (their rows keep the unique login_id/principal values). */
+  loginIdTaken(loginId: string): boolean {
+    return Boolean(this.db.query("SELECT 1 FROM users WHERE login_id = ? OR principal = ?").get(loginId, loginId));
+  }
+
+  /** Admin-provisioned account (CSV import): verified, no password yet — the caller issues the
+   * temp credential with createTempPassword. The raw email is never stored (PII-safe). */
+  createImportedAccount(init: { loginId: string; name: string; role: "user" | "admin" }): UserRecord {
+    const id = `u-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
+    const now = new Date().toISOString();
+    this.db
+      .query(
+        `INSERT INTO users (id, email, name, principal, password_hash, google_sub, role, created_at, deleted_at, login_id, email_hash, verified_at)
+         VALUES (?, NULL, ?, ?, NULL, NULL, ?, ?, NULL, ?, NULL, ?)`,
+      )
+      .run(id, init.name, init.loginId, init.role, now, init.loginId, now);
+    return this.findById(id)!;
+  }
+
+  queryUsers(q: UserQuery): { users: UserRecord[]; total: number } {
+    const where: string[] = [];
+    const params: (string | number)[] = [];
+    const term = q.q?.trim().toLowerCase();
+    if (term) {
+      const pattern = `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+      where.push("(LOWER(principal) LIKE ? ESCAPE '\\' OR LOWER(name) LIKE ? ESCAPE '\\')");
+      params.push(pattern, pattern);
+    }
+    if (q.group) {
+      where.push("principal IN (SELECT principal FROM user_groups WHERE group_id = ?)");
+      params.push(q.group);
+    }
+    if (q.role) {
+      where.push("role = ?");
+      params.push(q.role);
+    }
+    // Precedence: deleted > suspended > pending > active (design §7).
+    switch (q.status) {
+      case "deleted":
+        where.push("deleted_at IS NOT NULL");
+        break;
+      case "suspended":
+        where.push("deleted_at IS NULL AND disabled_at IS NOT NULL");
+        break;
+      case "pending":
+        where.push("deleted_at IS NULL AND disabled_at IS NULL AND verified_at IS NULL");
+        break;
+      case "active":
+        where.push("deleted_at IS NULL AND disabled_at IS NULL AND verified_at IS NOT NULL");
+        break;
+    }
+    const clause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
+    const size = Math.min(Math.max(1, Math.floor(q.size ?? 50)), 200);
+    const page = Math.max(1, Math.floor(q.page ?? 1));
+    const total = Number((this.db.query(`SELECT COUNT(*) AS n FROM users ${clause}`).get(...params) as { n: number }).n);
+    const rows = this.db
+      .query(`SELECT * FROM users ${clause} ORDER BY created_at ASC, id ASC LIMIT ? OFFSET ?`)
+      .all(...params, size, (page - 1) * size) as Record<string, unknown>[];
+    return { users: rows.map((r) => this.rowToUser(r)), total };
+  }
+
+  /** Suspend (disabled=true) or activate live users. Suspending revokes their sessions in the
+   * same transaction. Returns the number of live users processed. */
+  setDisabled(userIds: string[], disabled: boolean): number {
+    let n = 0;
+    this.db.transaction(() => {
+      const now = new Date().toISOString();
+      for (const id of new Set(userIds)) {
+        if (!this.findById(id)) continue;
+        if (disabled) {
+          this.db.query("UPDATE users SET disabled_at = COALESCE(disabled_at, ?) WHERE id = ?").run(now, id);
+          this.db.query("DELETE FROM sessions WHERE user_id = ?").run(id);
+        } else {
+          this.db.query("UPDATE users SET disabled_at = NULL WHERE id = ?").run(id);
+        }
+        n += 1;
+      }
+    })();
+    return n;
+  }
+
+  setRole(userIds: string[], role: "user" | "admin"): number {
+    let n = 0;
+    this.db.transaction(() => {
+      for (const id of new Set(userIds)) {
+        n += Number(this.db.query("UPDATE users SET role = ? WHERE id = ? AND deleted_at IS NULL").run(role, id).changes);
+      }
+    })();
+    return n;
+  }
+
+  countActiveAdmins(): number {
+    const r = this.db
+      .query("SELECT COUNT(*) AS n FROM users WHERE role = 'admin' AND deleted_at IS NULL AND disabled_at IS NULL")
+      .get() as { n: number };
+    return Number(r.n);
+  }
 }
+
+/** Principal shape (login-ID rule) checked before any membership insert. */
+const PRINCIPAL_RE = /^[a-z0-9-]{3,32}$/;
 
 /** Extract the session token from the cookie header. */
 export function sessionTokenFromCookie(req: Request): string | undefined {

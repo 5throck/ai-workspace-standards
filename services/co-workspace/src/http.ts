@@ -9,12 +9,16 @@ export class HttpError extends Error {
   }
 }
 
-export function jsonResponse(payload: unknown, status = 200): Response {
+export function jsonResponse(payload: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(payload, null, 2), {
     status,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...extraHeaders },
   });
 }
+
+/** Responses that carry a one-time credential (temp passwords) must never be cached by a
+ * browser or proxy (2026-11-09 review L6). */
+export const NO_STORE_HEADERS: Record<string, string> = { "cache-control": "no-store" };
 
 export async function readJsonBody(req: Request): Promise<unknown> {
   try {

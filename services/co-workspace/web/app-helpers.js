@@ -192,6 +192,11 @@ export function formatTurnActivity(elapsedSec, lastActivity) {
 // gate for the upgrade flow (the Confirm call must not fire without a prior plan render).
 // Unit-tested by tests/unit/co-workspace-admin-ui.test.ts. ──
 
+/** HTML-escape any value for interpolation into markup (shared by index.html and admin.js). */
+export function esc(value) {
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 /** Same shape the gateway's TENANT_ID_RE enforces (src/tenant-loop.ts) — a different
  * namespace from fleet ids (`co-*`). */
 export const TENANT_ID_RE = /^gw-[0-9a-f]{12}$/;

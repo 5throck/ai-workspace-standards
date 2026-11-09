@@ -7,6 +7,7 @@ import { startHeartbeat, sseStream, SSE_HEADERS, sseData, turnProgressComment } 
 import { TurnTiming, turnLogKey } from "./timing";
 import type { GatewayState } from "./state";
 import { assertPrincipalQuota, assertQuota } from "./access";
+import { effectivePolicyFor } from "./policy";
 import { runChat, usageSummary } from "./chat";
 
 /** 2026-10-03 review M1: SSE error frames previously embedded `String(err)` — fs paths,
@@ -46,7 +47,7 @@ export function nativeChatResponse(state: GatewayState, rec: TenantRecord, messa
             throw new Error("team provisioning timed out — try again shortly");
           }
         }
-        assertQuota(state.cfg, current);
+        assertQuota(state.cfg, current, undefined, effectivePolicyFor(state, current.ownerPrincipal ?? "anonymous"));
         assertPrincipalQuota(state, current.ownerPrincipal ?? "anonymous");
         if (sink.isClosed()) return;
         // T-20260930-010: show the silent thinking phase immediately and keep the

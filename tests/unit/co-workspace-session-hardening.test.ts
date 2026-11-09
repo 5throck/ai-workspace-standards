@@ -60,6 +60,8 @@ function authed(path: string, token: string, init: { method?: string; body?: str
       cookie: `gw_session=${token}`,
       "content-type": "application/json",
       ...(init.adminPassword ? { "x-admin-password": init.adminPassword } : {}),
+      // Console mutations always carry the SEC-09 header (design §10); GETs ignore it.
+      "x-requested-with": "co-workspace",
     },
     body: init.body,
   });

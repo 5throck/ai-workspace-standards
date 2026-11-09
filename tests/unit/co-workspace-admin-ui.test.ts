@@ -1,13 +1,16 @@
 /**
- * Admin UI pins for the tenant-loop section of the co-workspace web app (design
+ * Admin console pins for the tenant-loop section of the co-workspace web app (design
  * 2026-11-08-gw-tenant-loop-and-hardening-design §4 — the admin-UI half; the API half is
- * pinned by co-workspace-tenant-loop-acl.test.ts):
- *   (a) index.html carries the section ids, the fetch paths verbatim, the fail-closed
+ * pinned by co-workspace-tenant-loop-acl.test.ts). The section moved out of index.html into
+ * the /admin console (design 2026-11-09-gw-admin-console-design §9.4), so these pins read
+ * web/admin.js and web/admin.html:
+ *   (a) admin.js carries the section ids, the fetch paths verbatim, the fail-closed
  *       empty-state text, and the kill-switch banner;
  *   (b) every mutating tenant-loop fetch sends x-requested-with (SEC-09);
  *   (c) the register form's client-side validation (gw-<12hex>, windows, config JSON) is a
  *       pure function in app-helpers.js mirroring src/tenant-loop.ts;
- *   (d) the dry-run → confirm upgrade flow is gated structurally on a prior plan render.
+ *   (d) the dry-run → confirm upgrade flow is gated structurally on a prior plan render;
+ *   (e) index.html no longer carries the admin panel, and #adminMenu links to /admin.
  */
 
 import { describe, expect, test } from "bun:test";
@@ -24,7 +27,10 @@ import {
 import { TENANT_ID_RE as SERVER_TENANT_ID_RE } from "../../services/co-workspace/src/tenant-loop";
 
 const webDir = join(import.meta.dir, "..", "..", "services", "co-workspace", "web");
-const html = readFileSync(join(webDir, "index.html"), "utf8");
+/** The admin console script: holds the tenant-loop section and the rest of the console. */
+const html = readFileSync(join(webDir, "admin.js"), "utf8");
+const adminPage = readFileSync(join(webDir, "admin.html"), "utf8");
+const indexPage = readFileSync(join(webDir, "index.html"), "utf8");
 
 /** Every `fetch(...)` call in `source`, up to its matching close paren. */
 function fetchCalls(source: string): string[] {
@@ -107,16 +113,16 @@ describe("(a) tenant-loop section markup + fetch paths", () => {
     }
   });
 
-  test("the inline module script still parses", () => {
-    const script = html.slice(html.indexOf('<script type="module">') + '<script type="module">'.length, html.lastIndexOf("</script>"));
-    expect(() => new Bun.Transpiler({ loader: "js" }).transformSync(script)).not.toThrow();
+  test("admin.js still parses as plain JS and the page loads it as a module", () => {
+    expect(() => new Bun.Transpiler({ loader: "js" }).transformSync(html)).not.toThrow();
+    expect(adminPage).toContain('<script type="module" src="/admin.js"></script>');
   });
 });
 
 describe("(b) SEC-09: mutating tenant-loop calls send x-requested-with", () => {
   test("the shared tenant-loop headers carry the CSRF header", () => {
     const start = html.indexOf("// ── Tenant loop (design 2026-11-08");
-    const section = html.slice(start, html.indexOf("tlLoadRegistry();\n  });", start));
+    const section = html.slice(start, html.indexOf("// ── end Tenant loop", start));
     const def = section.match(/const authHeaders = (\{[^}]*\})/);
     expect(def, "tenant-loop authHeaders definition").not.toBeNull();
     expect(def![1]).toContain('"x-requested-with": "co-workspace"');
@@ -124,7 +130,7 @@ describe("(b) SEC-09: mutating tenant-loop calls send x-requested-with", () => {
 
   test("every POST/PUT fetch in the tenant-loop code uses authHeaders or the header literal", () => {
     const start = html.indexOf("// ── Tenant loop (design 2026-11-08");
-    const section = html.slice(start, html.indexOf("tlLoadRegistry();\n  });", start));
+    const section = html.slice(start, html.indexOf("// ── end Tenant loop", start));
     const mutating = fetchCalls(section).filter((c) => /method:\s*"(POST|PUT|PATCH|DELETE)"/.test(c));
     expect(mutating.length).toBeGreaterThanOrEqual(2); // tlPost (POST) + config (PUT)
     for (const call of mutating) expect(call, call.slice(0, 90)).toMatch(/authHeaders|x-requested-with/);
@@ -223,7 +229,7 @@ describe("(d) dry-run → confirm upgrade gate", () => {
     expect(flow.confirmAllowed("gw-0123456789ab")).toBe(false);
   });
 
-  test("index.html: the confirm call sits behind offerPlan + confirmAllowed", () => {
+  test("admin.js: the confirm call sits behind offerPlan + confirmAllowed", () => {
     const fn = html.slice(html.indexOf("async function tlUpgrade("));
     const offer = fn.indexOf("tlUpgradeFlow.offerPlan(tenantId, body)");
     const render = fn.indexOf("dry-run plan`");
@@ -237,5 +243,25 @@ describe("(d) dry-run → confirm upgrade gate", () => {
     expect(fn).toContain('tlPost(tenantId, "upgrade", {})');
     // Exactly one confirm call site in the page.
     expect([...html.matchAll(/confirm: true/g)]).toHaveLength(1);
+  });
+});
+
+describe("(e) the admin panel moved out of index.html", () => {
+  test("index.html carries no admin panel markup, helpers, or tenant-loop code", () => {
+    for (const marker of ["adminView", "tenant-loop", "tl-register", "userRows", "askAdminPassword", "barChart", "donutChart"]) {
+      expect(indexPage, marker).not.toContain(marker);
+    }
+  });
+
+  test("#adminMenu is a plain link to /admin", () => {
+    expect(indexPage).toContain('<a id="adminMenu" class="gws-hidden" href="/admin">');
+  });
+
+  test("admin.html carries every nav route and the shared container", () => {
+    for (const route of ["dashboard", "users", "groups", "tenants", "policies", "tenant-loop", "audit", "system"]) {
+      expect(adminPage, route).toContain(`href="#/${route}"`);
+    }
+    expect(adminPage).toContain('id="view"');
+    expect(html).toContain('from "./app-helpers.js"');
   });
 });
