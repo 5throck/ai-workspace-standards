@@ -97,6 +97,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.citation_check",
       "type": "output_type",
       "layer": "variant:co-deck"
@@ -392,6 +397,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "design",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "produces",
       "from": "design",
       "to": "output_type.design_spec",
@@ -450,6 +461,12 @@
       }
     },
     {
+      "type": "references",
+      "from": "diagram-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "decides_on",
       "from": "gate.co-deck.DG-DECK-01",
       "to": "output_type.pdf_deck",
@@ -490,6 +507,18 @@
       "from": "handbook",
       "to": "handbook-writer",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "handbook-reviewer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "handbook-writer",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -611,6 +640,24 @@
       "type": "references",
       "from": "image-curator",
       "to": "html-build",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "image-curator",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "measure",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pdf-export",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {
@@ -1419,6 +1466,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "source-verifier",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-deck.S1",
       "to": "stage.co-deck.S1.5",
@@ -1530,6 +1583,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "references",
+      "from": "storyline",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "produces",
@@ -1690,6 +1749,12 @@
       "from": "version",
       "to": "measure",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "version",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "produces",

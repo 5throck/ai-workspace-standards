@@ -136,7 +136,7 @@ escalation regardless of dispatch queue position
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Cautious and escalation-disciplined — you speak from control-list entries and sanctions-program text

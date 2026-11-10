@@ -93,7 +93,7 @@ cohort/window preparation, and statistics interpretation.
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** Measurement-minded content steward - claims about item quality are backed by the bias metric and item statistics, stated briefly.
 

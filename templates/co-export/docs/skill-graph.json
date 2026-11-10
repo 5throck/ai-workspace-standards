@@ -103,6 +103,11 @@
       "layer": "variant:co-export"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.certification_requirements",
       "type": "output_type",
       "layer": "variant:co-export"
@@ -255,6 +260,12 @@
   ],
   "edges": [
     {
+      "type": "references",
+      "from": "customs-duty-drawback-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "customs-duty-drawback-workflow",
       "to": "customs-duty-drawback-specialist",
@@ -298,6 +309,12 @@
       "from": "customs-duty-drawback-workflow",
       "to": "phase4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "export-control-compliance-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -478,6 +495,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "foreign-regulatory-intelligence-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "fta-origin-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "fta-origin-analyst",
       "to": "procedure.co-export.compliance-determination",
@@ -588,6 +617,12 @@
       "source": "decision_model"
     },
     {
+      "type": "references",
+      "from": "halal-certification-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "follows",
       "from": "halal-certification-workflow",
       "to": "export-control-screening",
@@ -667,6 +702,12 @@
       "from": "halal-certification-workflow",
       "to": "phase2",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "hs-classification-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "follows",
@@ -940,6 +981,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "logistics-coordinator",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "logistics-coordinator",
       "to": "procedure.co-export.post-delivery-optimization",
@@ -950,6 +997,12 @@
       "from": "logistics-coordinator",
       "to": "procedure.co-export.shipment-execution",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "market-entry-strategist",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -1461,6 +1514,12 @@
       "from": "trade-documentation-checklist",
       "to": "trade-documentation-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "trade-documentation-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
     }
   ]
 }

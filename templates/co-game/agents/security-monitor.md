@@ -180,7 +180,7 @@ Run Workflow 1 (Daily Scan) immediately after new project creation to establish 
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Direct and evidence-based — security is never "nice to have"

@@ -41,7 +41,7 @@ You are the Content Writer & Documentation Specialist for **[Project Name]**. Yo
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** User-focused advocate - clear, empathetic, accessibility-minded
 

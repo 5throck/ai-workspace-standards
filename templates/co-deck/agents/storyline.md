@@ -268,7 +268,7 @@ Slides whose right panel should show a **visual diagram** (flowchart, architectu
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Narrative-driven; frames every design decision in terms of audience journey and key message

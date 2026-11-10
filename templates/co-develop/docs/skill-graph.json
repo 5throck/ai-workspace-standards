@@ -33,6 +33,11 @@
       "layer": "variant:co-develop"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.approved_implementation_plan",
       "type": "output_type",
       "layer": "variant:co-develop"
@@ -160,6 +165,12 @@
   ],
   "edges": [
     {
+      "type": "references",
+      "from": "architect",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "code-review",
       "to": "code-writer",
@@ -215,8 +226,20 @@
     },
     {
       "type": "references",
+      "from": "code-writer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "designer",
       "to": "code-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "designer",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {
@@ -520,6 +543,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "security-monitor",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "stack-setup",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "phase",
       "from": "swe-solve",
       "to": "phase4",
@@ -559,6 +594,12 @@
       "from": "test-driven-development",
       "to": "test-runner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "test-runner",
+      "to": "meeting-facilitation",
+      "source": "prose"
     }
   ]
 }

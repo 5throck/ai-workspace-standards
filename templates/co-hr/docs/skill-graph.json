@@ -103,6 +103,11 @@
       "layer": "variant:co-hr"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "org-design-consultant",
       "type": "agent",
       "layer": "variant:co-hr"
@@ -394,6 +399,18 @@
       }
     },
     {
+      "type": "references",
+      "from": "career-succession-consultant",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "change-management-partner",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "compensation-benchmarking",
       "to": "compensation-benefits-analyst",
@@ -524,6 +541,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "compensation-benefits-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "compensation-benefits-analyst",
       "to": "procedure.co-hr.compensation-benchmarking",
@@ -608,6 +631,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "data-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "decides_on",
       "from": "gate.co-hr.DG-HR-01",
       "to": "output_type.benchmark_report",
@@ -683,6 +712,12 @@
       "from": "hr-metrics-analysis",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "labor-compliance-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -793,6 +828,12 @@
     },
     {
       "type": "references",
+      "from": "labor-relations-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "learning-curriculum-design",
       "to": "career-path-succession-planning",
       "source": "prose"
@@ -891,6 +932,18 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "references",
+      "from": "learning-development-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "org-design-consultant",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -1074,6 +1127,12 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "references",
+      "from": "performance-management-consultant",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "follows",
@@ -1434,6 +1493,12 @@
       "source": "process_schema"
     },
     {
+      "type": "references",
+      "from": "safety-health-officer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "gated_by",
       "from": "stage.co-hr.S1",
       "to": "gate.co-hr.DG-HR-01",
@@ -1527,6 +1592,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "references",
+      "from": "talent-acquisition-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "follows",

@@ -105,7 +105,7 @@ This agent handles games classified as **Arcade**:
 
 ## In-Meeting Character
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 - Arcade game design authority — you bring retro game design expertise
 - Data-driven on difficulty — you reference classic game balance patterns

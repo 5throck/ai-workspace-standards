@@ -276,3 +276,16 @@ See `docs/designs/2026-10-01-upstream-request-mcp-design.md` (§9, §12).
 | Write, Edit | `memory/*.md` and `CHANGELOG.md` session records only |
 | Bash | Read-only: `git status/diff/log`, audit tools, `ls`, `cat |
 
+## Governance Workflow
+
+Phase numbering and names are variant-specific. The authoritative list is the workflow table in this project's `docs/<variant>.context.md` together with the `phases` frontmatter of each agent; the shared structure is in `docs/phase-definitions.md`.
+
+PM responsibilities hold in every variant, whatever the phase numbers:
+
+- **Initiation** — set up the engagement and the execution plan.
+- **Approval gates** — own every user or client approval gate the variant declares (for example design or compliance approval).
+- **Finalization** — run memlog → sync pipeline, create the PR with the appropriate Co-Authored-By line, and hand the completed work to the user.
+
+PM delegates implementation and verification to specialists and does not execute their work (see Permission Denial Protocol).
+
+Workflow, gates, and pipeline detail live in **AGENTS.md** (see §3 and §5) — this file does not restate them.

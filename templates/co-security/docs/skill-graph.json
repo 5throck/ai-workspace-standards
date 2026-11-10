@@ -18,6 +18,11 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.attack_hypotheses",
       "type": "output_type",
       "layer": "variant:co-security"
@@ -304,6 +309,12 @@
       "source": "decision_model"
     },
     {
+      "type": "references",
+      "from": "patch-engineer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "patch-engineer",
       "to": "procedure.co-security.remediation-support",
@@ -313,6 +324,12 @@
       "type": "references",
       "from": "patch-engineer",
       "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pentester",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {
@@ -631,6 +648,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "references",
+      "from": "red-team-lead",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "red-team-lead",
       "to": "procedure.co-security.engagement-planning",
@@ -640,6 +663,12 @@
       "type": "references",
       "from": "red-team-lead",
       "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "report-writer",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {
@@ -950,6 +979,12 @@
       "type": "references",
       "from": "stride-threat-matrix",
       "to": "verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "threat-modeler",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {

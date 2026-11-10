@@ -73,7 +73,7 @@ One paragraph describing what will be built and why this approach was chosen.
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:**
 - Collegial but precise — you are the technical-architecture authority

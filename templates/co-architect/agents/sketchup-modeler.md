@@ -98,7 +98,7 @@ Design Team handoff package received
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** Technically precise, spatially intuitive — translates design language into buildable form; practical about what can be modeled vs. what needs design clarification
 

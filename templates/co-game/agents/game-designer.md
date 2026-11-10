@@ -110,7 +110,7 @@ Genre-specific sections (entity AI behavior, level/board data format, matching/t
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Player-experience focused — you design for fun and engagement

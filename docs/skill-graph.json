@@ -728,7 +728,7 @@
       "name": "analyst",
       "scope": "co-architect",
       "capability": "analyst",
-      "content_hash": "6e6bb883d331329d",
+      "content_hash": "c641e931eee275f0",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/analyst.md"
@@ -741,7 +741,7 @@
       "name": "architect",
       "scope": "co-architect",
       "capability": "architect",
-      "content_hash": "b7fe7bb2a565984e",
+      "content_hash": "7439a5d080be0211",
       "version": "1.0.0",
       "mirrors": [
         "templates/co-architect/agents/architect.md"
@@ -754,7 +754,7 @@
       "name": "automation-engineer",
       "scope": "co-architect",
       "capability": "automation-engineer",
-      "content_hash": "f3c4b5402cf4f100",
+      "content_hash": "c1e1061cb894723e",
       "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/automation-engineer.md"
@@ -780,7 +780,7 @@
       "name": "content-writer",
       "scope": "co-architect",
       "capability": "content-writer",
-      "content_hash": "94dd6e9adb000afa",
+      "content_hash": "0dfd92b0a638e583",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/content-writer.md"
@@ -793,7 +793,7 @@
       "name": "design-lead",
       "scope": "co-architect",
       "capability": "design-lead",
-      "content_hash": "923c1a7fc2e63a7c",
+      "content_hash": "b5fbb388164489e6",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/design-lead.md"
@@ -806,7 +806,7 @@
       "name": "design-storyteller",
       "scope": "co-architect",
       "capability": "design-storyteller",
-      "content_hash": "cf7ccbd823983d9d",
+      "content_hash": "5c45ce6667ce6a18",
       "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/design-storyteller.md"
@@ -858,7 +858,7 @@
       "name": "ms365-expert",
       "scope": "co-architect",
       "capability": "ms365-expert",
-      "content_hash": "b82c7f15ce9f749c",
+      "content_hash": "d66a2884d55ddf22",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/ms365-expert.md"
@@ -884,7 +884,7 @@
       "name": "project-coordinator",
       "scope": "co-architect",
       "capability": "project-coordinator",
-      "content_hash": "079d7d9dd2a962b5",
+      "content_hash": "ea0ba5e19d9cfb7a",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/project-coordinator.md"
@@ -897,7 +897,7 @@
       "name": "prototype-engineer",
       "scope": "co-architect",
       "capability": "prototype-engineer",
-      "content_hash": "eac0f7101990b257",
+      "content_hash": "5b481cf73c9ba386",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/prototype-engineer.md"
@@ -910,7 +910,7 @@
       "name": "service-designer",
       "scope": "co-architect",
       "capability": "service-designer",
-      "content_hash": "49a9a40aa58c11f0",
+      "content_hash": "a3005b50093fb9cb",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/service-designer.md"
@@ -923,7 +923,7 @@
       "name": "sketchup-modeler",
       "scope": "co-architect",
       "capability": "sketchup-modeler",
-      "content_hash": "820cb98002a2961d",
+      "content_hash": "7eed259ef43be363",
       "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/sketchup-modeler.md"
@@ -936,7 +936,7 @@
       "name": "storyteller",
       "scope": "co-architect",
       "capability": "storyteller",
-      "content_hash": "370130d805335e8c",
+      "content_hash": "5bf275685bed59bf",
       "version": "1.0.0",
       "mirrors": [
         "templates/co-architect/agents/storyteller.md"
@@ -962,7 +962,7 @@
       "name": "technical-writer",
       "scope": "co-architect",
       "capability": "technical-writer",
-      "content_hash": "d71945bc254802e6",
+      "content_hash": "332d16a1b6e1b935",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/technical-writer.md"
@@ -975,7 +975,7 @@
       "name": "typography-expert",
       "scope": "co-architect",
       "capability": "typography-expert",
-      "content_hash": "65e2fbce6c61dfb8",
+      "content_hash": "678f01ff62ed978a",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/typography-expert.md"
@@ -988,7 +988,7 @@
       "name": "ux-researcher",
       "scope": "co-architect",
       "capability": "ux-researcher",
-      "content_hash": "ade7e9078b505158",
+      "content_hash": "311537c25c952219",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/ux-researcher.md"
@@ -1001,7 +1001,7 @@
       "name": "visual-designer",
       "scope": "co-architect",
       "capability": "visual-designer",
-      "content_hash": "04697f74c9d70268",
+      "content_hash": "5e7475bc50859c6b",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-architect/agents/visual-designer.md"
@@ -1027,7 +1027,7 @@
       "name": "zwcad-drafter",
       "scope": "co-architect",
       "capability": "zwcad-drafter",
-      "content_hash": "2284e980148f9b63",
+      "content_hash": "82c8142719d5903f",
       "version": "1.0.1",
       "mirrors": [
         "templates/co-architect/agents/zwcad-drafter.md"
@@ -1040,7 +1040,7 @@
       "name": "change-management-partner",
       "scope": "co-consult",
       "capability": "change-management-partner",
-      "content_hash": "d6f483155e86e5a5",
+      "content_hash": "c4de997bb7687b11",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/change-management-partner.md"
@@ -1053,7 +1053,7 @@
       "name": "communications-lead",
       "scope": "co-consult",
       "capability": "communications-lead",
-      "content_hash": "d853207c355a8ae7",
+      "content_hash": "891a3ed1767033a9",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-consult/agents/communications-lead.md"
@@ -1066,7 +1066,7 @@
       "name": "data-analyst",
       "scope": "co-consult",
       "capability": "data-analyst",
-      "content_hash": "668344f336822d6e",
+      "content_hash": "e9a8cbec11642782",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/data-analyst.md"
@@ -1079,7 +1079,7 @@
       "name": "delivery-manager",
       "scope": "co-consult",
       "capability": "delivery-manager",
-      "content_hash": "93432a2077e91012",
+      "content_hash": "37bf192eaefb4bb6",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/delivery-manager.md"
@@ -1092,7 +1092,7 @@
       "name": "industry-expert",
       "scope": "co-consult",
       "capability": "industry-expert",
-      "content_hash": "8b93fcf83c941038",
+      "content_hash": "ae74ce9b7b7aa1cc",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/industry-expert.md"
@@ -1105,7 +1105,7 @@
       "name": "sme",
       "scope": "co-consult",
       "capability": "sme",
-      "content_hash": "8c6533a37367593e",
+      "content_hash": "a07b87dfa8144eb9",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/sme.md"
@@ -1118,7 +1118,7 @@
       "name": "solutions-architect",
       "scope": "co-consult",
       "capability": "solutions-architect",
-      "content_hash": "c212e94f7e11cc60",
+      "content_hash": "6ed045bcb0b56843",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/solutions-architect.md"
@@ -1131,7 +1131,7 @@
       "name": "strategy-analyst",
       "scope": "co-consult",
       "capability": "strategy-analyst",
-      "content_hash": "1a6e21fed01bda8a",
+      "content_hash": "1a3b985450e1ec87",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-consult/agents/strategy-analyst.md"
@@ -1144,7 +1144,7 @@
       "name": "technology-specialist",
       "scope": "co-consult",
       "capability": "technology-specialist",
-      "content_hash": "11446ae5c486b53e",
+      "content_hash": "713ebd6ea994333b",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/technology-specialist.md"
@@ -1157,7 +1157,7 @@
       "name": "workstream-lead",
       "scope": "co-consult",
       "capability": "workstream-lead",
-      "content_hash": "bb17bc8c37c68121",
+      "content_hash": "a5f0d954706ecefa",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-consult/agents/workstream-lead.md"
@@ -1170,7 +1170,7 @@
       "name": "design",
       "scope": "co-deck",
       "capability": "design",
-      "content_hash": "cae8a9bacfc6c802",
+      "content_hash": "b89bbe3fe376f72a",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/design.md"
@@ -1183,7 +1183,7 @@
       "name": "diagram-specialist",
       "scope": "co-deck",
       "capability": "diagram-specialist",
-      "content_hash": "6b87b51d388280e7",
+      "content_hash": "54b92c5c41c28c4b",
       "version": "1.3.1",
       "mirrors": [
         "templates/co-deck/agents/diagram-specialist.md"
@@ -1196,7 +1196,7 @@
       "name": "handbook-reviewer",
       "scope": "co-deck",
       "capability": "handbook-reviewer",
-      "content_hash": "566a0e00683052f4",
+      "content_hash": "9af4125a0b0fa679",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/handbook-reviewer.md"
@@ -1209,7 +1209,7 @@
       "name": "handbook-writer",
       "scope": "co-deck",
       "capability": "handbook-writer",
-      "content_hash": "c1e4cbcb42623e48",
+      "content_hash": "cf0a63879e928877",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/handbook-writer.md"
@@ -1222,7 +1222,7 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "5e86a4e6f23b69e4",
+      "content_hash": "39e37e6be552bf42",
       "version": "1.3.3",
       "mirrors": [
         "templates/co-deck/agents/html-build.md"
@@ -1235,7 +1235,7 @@
       "name": "image-curator",
       "scope": "co-deck",
       "capability": "image-curator",
-      "content_hash": "ffcb1d4c628108b1",
+      "content_hash": "34d707a82a9fcd1d",
       "version": "1.4.2",
       "mirrors": [
         "templates/co-deck/agents/image-curator.md"
@@ -1248,7 +1248,7 @@
       "name": "measure",
       "scope": "co-deck",
       "capability": "measure",
-      "content_hash": "b5576bf33e339c8c",
+      "content_hash": "2e8c8bef70068522",
       "version": "2.1.2",
       "mirrors": [
         "templates/co-deck/agents/measure.md"
@@ -1261,7 +1261,7 @@
       "name": "pdf-export",
       "scope": "co-deck",
       "capability": "pdf-export",
-      "content_hash": "052528e06eaf7093",
+      "content_hash": "da4b197fe9e863fd",
       "version": "2.2.2",
       "mirrors": [
         "templates/co-deck/agents/pdf-export.md"
@@ -1274,7 +1274,7 @@
       "name": "research",
       "scope": "co-deck",
       "capability": "research",
-      "content_hash": "ee87afe6be8b93ad",
+      "content_hash": "050a816ffcaf2256",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/research.md"
@@ -1287,7 +1287,7 @@
       "name": "source-verifier",
       "scope": "co-deck",
       "capability": "source-verifier",
-      "content_hash": "7e20b64117fc2084",
+      "content_hash": "c1e7a32f3eb925b2",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/source-verifier.md"
@@ -1300,7 +1300,7 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "00f7eb668c433fb7",
+      "content_hash": "a7680994aa0d4972",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/storyline.md"
@@ -1313,7 +1313,7 @@
       "name": "version",
       "scope": "co-deck",
       "capability": "version",
-      "content_hash": "e4f615f029421435",
+      "content_hash": "501e5cd10f657320",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-deck/agents/version.md"
@@ -1326,7 +1326,7 @@
       "name": "design-lead",
       "scope": "co-design",
       "capability": "design-lead",
-      "content_hash": "04a0e18bc42f96f3",
+      "content_hash": "354436e57e4881bf",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-design/agents/design-lead.md"
@@ -1352,7 +1352,7 @@
       "name": "prototype-engineer",
       "scope": "co-design",
       "capability": "prototype-engineer",
-      "content_hash": "32d6f6344c45d652",
+      "content_hash": "f906e6076b85e17d",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-design/agents/prototype-engineer.md"
@@ -1365,7 +1365,7 @@
       "name": "service-designer",
       "scope": "co-design",
       "capability": "service-designer",
-      "content_hash": "6efef3280135cec0",
+      "content_hash": "61353f03b200570b",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-design/agents/service-designer.md"
@@ -1378,7 +1378,7 @@
       "name": "storyteller",
       "scope": "co-design",
       "capability": "design-brand-narrative",
-      "content_hash": "8ac9657e4bed5865",
+      "content_hash": "5640e430efa72d5d",
       "version": "2.2.1",
       "mirrors": [
         "templates/co-design/agents/storyteller.md"
@@ -1391,7 +1391,7 @@
       "name": "typography-expert",
       "scope": "co-design",
       "capability": "typography-expert",
-      "content_hash": "1a53df684de367a7",
+      "content_hash": "fbd6379f7b9166d1",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-design/agents/typography-expert.md"
@@ -1404,7 +1404,7 @@
       "name": "ux-researcher",
       "scope": "co-design",
       "capability": "ux-researcher",
-      "content_hash": "d34040375fede42b",
+      "content_hash": "dd1ba9a2a369cb3a",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-design/agents/ux-researcher.md"
@@ -1417,7 +1417,7 @@
       "name": "visual-designer",
       "scope": "co-design",
       "capability": "visual-designer",
-      "content_hash": "b57bc12e39467c9c",
+      "content_hash": "ecae363c045a8646",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-design/agents/visual-designer.md"
@@ -1430,7 +1430,7 @@
       "name": "architect",
       "scope": "co-develop",
       "capability": "architect",
-      "content_hash": "8ba5b888cf3d9111",
+      "content_hash": "922ac4f7db01762b",
       "version": "1.2.0",
       "mirrors": [
         "templates/co-develop/agents/architect.md"
@@ -1443,7 +1443,7 @@
       "name": "code-writer",
       "scope": "co-develop",
       "capability": "code-writer",
-      "content_hash": "6f177c02a5e13e34",
+      "content_hash": "92b0fde8a0d08caf",
       "version": "1.2.0",
       "mirrors": [
         "templates/co-develop/agents/code-writer.md"
@@ -1456,7 +1456,7 @@
       "name": "designer",
       "scope": "co-develop",
       "capability": "designer",
-      "content_hash": "df734345ae897c39",
+      "content_hash": "d0d0220ceb1406ef",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-develop/agents/designer.md"
@@ -1483,7 +1483,7 @@
       "name": "security-monitor",
       "scope": "co-develop",
       "capability": "security-monitor",
-      "content_hash": "7bffa2b71625d535",
+      "content_hash": "00cd62982af8a8fe",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-develop/agents/security-monitor.md"
@@ -1496,7 +1496,7 @@
       "name": "stack-setup",
       "scope": "co-develop",
       "capability": "stack-setup",
-      "content_hash": "b4974d808b21eabc",
+      "content_hash": "9964b735ebdbcbc3",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-develop/agents/stack-setup.md"
@@ -1509,7 +1509,7 @@
       "name": "test-runner",
       "scope": "co-develop",
       "capability": "test-runner",
-      "content_hash": "758043dad0e76fb5",
+      "content_hash": "48d5f60125e9220a",
       "version": "1.2.0",
       "mirrors": [
         "templates/co-develop/agents/test-runner.md"
@@ -1522,7 +1522,7 @@
       "name": "customs-duty-drawback-specialist",
       "scope": "co-export",
       "capability": "customs-duty-drawback-specialist",
-      "content_hash": "86e5fba88228062f",
+      "content_hash": "6eaccc6bf51a0094",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-export/agents/customs-duty-drawback-specialist.md"
@@ -1535,7 +1535,7 @@
       "name": "export-control-compliance-specialist",
       "scope": "co-export",
       "capability": "export-control-compliance-specialist",
-      "content_hash": "f289d333d39f15c5",
+      "content_hash": "3bc21fea6615eb64",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-export/agents/export-control-compliance-specialist.md"
@@ -1548,7 +1548,7 @@
       "name": "foreign-regulatory-intelligence-analyst",
       "scope": "co-export",
       "capability": "foreign-regulatory-intelligence-analyst",
-      "content_hash": "89bb80acd0cd14dd",
+      "content_hash": "0def719b03a44a55",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-export/agents/foreign-regulatory-intelligence-analyst.md"
@@ -1561,7 +1561,7 @@
       "name": "fta-origin-analyst",
       "scope": "co-export",
       "capability": "fta-origin-analyst",
-      "content_hash": "7b190bfb5d79b892",
+      "content_hash": "a824bb9b1c3aea53",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-export/agents/fta-origin-analyst.md"
@@ -1574,7 +1574,7 @@
       "name": "halal-certification-specialist",
       "scope": "co-export",
       "capability": "halal-certification-specialist",
-      "content_hash": "3ca4cbb33583f35e",
+      "content_hash": "6b3c4f7e5df23f2b",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-export/agents/halal-certification-specialist.md"
@@ -1587,7 +1587,7 @@
       "name": "hs-classification-specialist",
       "scope": "co-export",
       "capability": "hs-classification-specialist",
-      "content_hash": "d68cf7755bfa889a",
+      "content_hash": "7fe9fcd7e1c0ad13",
       "version": "1.2.1",
       "mirrors": [
         "templates/co-export/agents/hs-classification-specialist.md"
@@ -1600,7 +1600,7 @@
       "name": "logistics-coordinator",
       "scope": "co-export",
       "capability": "logistics-coordinator",
-      "content_hash": "adc47b17345c702e",
+      "content_hash": "203f43e42f2c41ff",
       "version": "1.2.1",
       "mirrors": [
         "templates/co-export/agents/logistics-coordinator.md"
@@ -1613,7 +1613,7 @@
       "name": "market-entry-strategist",
       "scope": "co-export",
       "capability": "market-entry-strategist",
-      "content_hash": "27e32c6f3743a28c",
+      "content_hash": "dad442070a604e6e",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-export/agents/market-entry-strategist.md"
@@ -1639,7 +1639,7 @@
       "name": "trade-documentation-specialist",
       "scope": "co-export",
       "capability": "trade-documentation-specialist",
-      "content_hash": "4b5f8d302152cb35",
+      "content_hash": "1ffdc569a6cdec37",
       "version": "1.2.1",
       "mirrors": [
         "templates/co-export/agents/trade-documentation-specialist.md"
@@ -1652,7 +1652,7 @@
       "name": "arcade-designer",
       "scope": "co-game",
       "capability": "arcade-designer",
-      "content_hash": "097be004959f4c74",
+      "content_hash": "5c07461670760ca9",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/arcade-designer.md"
@@ -1665,7 +1665,7 @@
       "name": "architect",
       "scope": "co-game",
       "capability": "architect",
-      "content_hash": "36c43686f3b1877a",
+      "content_hash": "2783b559555c1cf4",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/architect.md"
@@ -1678,7 +1678,7 @@
       "name": "designer",
       "scope": "co-game",
       "capability": "designer",
-      "content_hash": "615c99bdc3fca0d1",
+      "content_hash": "cf752c0df9f6b379",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/designer.md"
@@ -1691,7 +1691,7 @@
       "name": "game-debugger",
       "scope": "co-game",
       "capability": "game-debugger",
-      "content_hash": "b0d1cf65f08ea5b0",
+      "content_hash": "c882d057df4bce18",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-game/agents/game-debugger.md"
@@ -1704,7 +1704,7 @@
       "name": "game-designer",
       "scope": "co-game",
       "capability": "game-designer",
-      "content_hash": "8b218e82c9bd5534",
+      "content_hash": "22e295743b01672f",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/game-designer.md"
@@ -1717,7 +1717,7 @@
       "name": "game-developer",
       "scope": "co-game",
       "capability": "game-developer",
-      "content_hash": "462a275191a75be8",
+      "content_hash": "744dfce2e27c894b",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-game/agents/game-developer.md"
@@ -1730,7 +1730,7 @@
       "name": "puzzle-designer",
       "scope": "co-game",
       "capability": "puzzle-designer",
-      "content_hash": "9930583e9b67b862",
+      "content_hash": "34645bc0bfdb57ba",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/puzzle-designer.md"
@@ -1743,7 +1743,7 @@
       "name": "security-monitor",
       "scope": "co-game",
       "capability": "security-monitor",
-      "content_hash": "bab2ce39731db2a6",
+      "content_hash": "dc9d7b81e6a87292",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/security-monitor.md"
@@ -1756,7 +1756,7 @@
       "name": "sound-designer",
       "scope": "co-game",
       "capability": "sound-designer",
-      "content_hash": "0f6fca5e2af0e779",
+      "content_hash": "36eeeedf51e8d94d",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-game/agents/sound-designer.md"
@@ -1769,7 +1769,7 @@
       "name": "stack-setup",
       "scope": "co-game",
       "capability": "stack-setup",
-      "content_hash": "01fae45cd5f339f1",
+      "content_hash": "25ef945a7d5ea637",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/stack-setup.md"
@@ -1782,7 +1782,7 @@
       "name": "test-runner",
       "scope": "co-game",
       "capability": "test-runner",
-      "content_hash": "fea85c33f2b4f604",
+      "content_hash": "bd94727d0a9426df",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/test-runner.md"
@@ -1795,7 +1795,7 @@
       "name": "visual-artist",
       "scope": "co-game",
       "capability": "visual-artist",
-      "content_hash": "80186ace20c3c77f",
+      "content_hash": "873f3032bb9d712d",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-game/agents/visual-artist.md"
@@ -1808,7 +1808,7 @@
       "name": "career-succession-consultant",
       "scope": "co-hr",
       "capability": "career-succession-consultant",
-      "content_hash": "f31da691d811e42c",
+      "content_hash": "f95afac5a86a5c74",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-hr/agents/career-succession-consultant.md"
@@ -1821,7 +1821,7 @@
       "name": "change-management-partner",
       "scope": "co-hr",
       "capability": "change-management-partner",
-      "content_hash": "1ba9046ceb1e6915",
+      "content_hash": "32ddf0a816a5e8dd",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/change-management-partner.md"
@@ -1834,7 +1834,7 @@
       "name": "compensation-benefits-analyst",
       "scope": "co-hr",
       "capability": "compensation-benefits-analyst",
-      "content_hash": "0243b79e184a1b8e",
+      "content_hash": "2d4ff72130c79792",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/compensation-benefits-analyst.md"
@@ -1847,7 +1847,7 @@
       "name": "data-analyst",
       "scope": "co-hr",
       "capability": "data-analyst",
-      "content_hash": "cd4c219c686b4eb3",
+      "content_hash": "049f6b88c3a6b700",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/data-analyst.md"
@@ -1874,7 +1874,7 @@
       "name": "labor-compliance-analyst",
       "scope": "co-hr",
       "capability": "labor-compliance-analyst",
-      "content_hash": "9c62d9b30caf7f51",
+      "content_hash": "f10c5578170bb377",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/labor-compliance-analyst.md"
@@ -1887,7 +1887,7 @@
       "name": "labor-relations-specialist",
       "scope": "co-hr",
       "capability": "labor-relations-specialist",
-      "content_hash": "466d9ed3911a8447",
+      "content_hash": "d241f8c0ba007df0",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/labor-relations-specialist.md"
@@ -1900,7 +1900,7 @@
       "name": "learning-development-specialist",
       "scope": "co-hr",
       "capability": "learning-development-specialist",
-      "content_hash": "51d660bd714f4af9",
+      "content_hash": "a22a17353aceda83",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-hr/agents/learning-development-specialist.md"
@@ -1913,7 +1913,7 @@
       "name": "org-design-consultant",
       "scope": "co-hr",
       "capability": "org-design-consultant",
-      "content_hash": "fef7c7c002df36de",
+      "content_hash": "1850e865eb3952b4",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/org-design-consultant.md"
@@ -1926,7 +1926,7 @@
       "name": "performance-management-consultant",
       "scope": "co-hr",
       "capability": "performance-management-consultant",
-      "content_hash": "e4f2376612b81aa1",
+      "content_hash": "4ab9e93ca7e80464",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-hr/agents/performance-management-consultant.md"
@@ -1952,7 +1952,7 @@
       "name": "safety-health-officer",
       "scope": "co-hr",
       "capability": "safety-health-officer",
-      "content_hash": "d739a9d74c79b63b",
+      "content_hash": "9e905e2de5aa5358",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/safety-health-officer.md"
@@ -1965,7 +1965,7 @@
       "name": "talent-acquisition-specialist",
       "scope": "co-hr",
       "capability": "talent-acquisition-specialist",
-      "content_hash": "fa199b2a2b1e3d00",
+      "content_hash": "0e0d23228ce96ff4",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-hr/agents/talent-acquisition-specialist.md"
@@ -1978,7 +1978,7 @@
       "name": "exam-bank-steward",
       "scope": "co-learning",
       "capability": "exam-bank-steward",
-      "content_hash": "dc9764bc6871db24",
+      "content_hash": "3cccd7583898aa64",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-learning/agents/exam-bank-steward.md"
@@ -1991,7 +1991,7 @@
       "name": "fact-checker",
       "scope": "co-news",
       "capability": "fact-checker",
-      "content_hash": "7fa9189535438c33",
+      "content_hash": "fb075b3991ac8263",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-news/agents/fact-checker.md"
@@ -2004,7 +2004,7 @@
       "name": "financial-analyst",
       "scope": "co-news",
       "capability": "financial-analyst",
-      "content_hash": "ee91d37a73c054e8",
+      "content_hash": "4c0afe8fa8ef9bf3",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-news/agents/financial-analyst.md"
@@ -2017,7 +2017,7 @@
       "name": "legal-researcher",
       "scope": "co-news",
       "capability": "legal-researcher",
-      "content_hash": "848a32093a837542",
+      "content_hash": "53ed32bb211f3439",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-news/agents/legal-researcher.md"
@@ -2043,7 +2043,7 @@
       "name": "reporter",
       "scope": "co-news",
       "capability": "reporter",
-      "content_hash": "65878f0348c38406",
+      "content_hash": "a145c0d0917b2844",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-news/agents/reporter.md"
@@ -2056,7 +2056,7 @@
       "name": "style-editor",
       "scope": "co-news",
       "capability": "style-editor",
-      "content_hash": "3df7d09c72c3a9f8",
+      "content_hash": "0055e9060e6e0f1a",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-news/agents/style-editor.md"
@@ -2069,7 +2069,7 @@
       "name": "visual-editor",
       "scope": "co-news",
       "capability": "visual-editor",
-      "content_hash": "45cab665825f5870",
+      "content_hash": "ce450884c60c6236",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-news/agents/visual-editor.md"
@@ -2316,7 +2316,7 @@
       "name": "patch-engineer",
       "scope": "co-security",
       "capability": "patch-engineer",
-      "content_hash": "07fef9a0e4c0031a",
+      "content_hash": "f168bc0f275adcbb",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/patch-engineer.md"
@@ -2329,7 +2329,7 @@
       "name": "pentester",
       "scope": "co-security",
       "capability": "pentester",
-      "content_hash": "6f0a84af48739454",
+      "content_hash": "a2719479060ab1fc",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/pentester.md"
@@ -2342,7 +2342,7 @@
       "name": "red-team-lead",
       "scope": "co-security",
       "capability": "red-team-lead",
-      "content_hash": "abc5c4906c4bc31f",
+      "content_hash": "3cdbb731f711f805",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/red-team-lead.md"
@@ -2355,7 +2355,7 @@
       "name": "report-writer",
       "scope": "co-security",
       "capability": "report-writer",
-      "content_hash": "c4eb71de62704c70",
+      "content_hash": "329a4d371d6d3918",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/report-writer.md"
@@ -2368,7 +2368,7 @@
       "name": "threat-modeler",
       "scope": "co-security",
       "capability": "threat-modeler",
-      "content_hash": "944c59ed93f3b832",
+      "content_hash": "6ab39b16cd356e8c",
       "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/threat-modeler.md"
@@ -2381,7 +2381,7 @@
       "name": "analyst",
       "scope": "co-work",
       "capability": "analyst",
-      "content_hash": "5294cd277beb4fba",
+      "content_hash": "7402d04a2a00692b",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-work/agents/analyst.md"
@@ -2394,7 +2394,7 @@
       "name": "content-writer",
       "scope": "co-work",
       "capability": "content-writer",
-      "content_hash": "4234472dd1d5cac9",
+      "content_hash": "3dcfe69ec78ffc59",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-work/agents/content-writer.md"
@@ -2407,7 +2407,7 @@
       "name": "deck-builder",
       "scope": "co-work",
       "capability": "deck-builder",
-      "content_hash": "97e7de69813dce4f",
+      "content_hash": "4f1fff75deb1f37c",
       "version": "1.1.0",
       "mirrors": [
         "templates/co-work/agents/deck-builder.md"
@@ -2420,7 +2420,7 @@
       "name": "ms365-expert",
       "scope": "co-work",
       "capability": "ms365-expert",
-      "content_hash": "36b741969fc7c126",
+      "content_hash": "a594ed3b82d29066",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-work/agents/ms365-expert.md"
@@ -2433,7 +2433,7 @@
       "name": "project-coordinator",
       "scope": "co-work",
       "capability": "project-coordinator",
-      "content_hash": "63cd0f0aeba2c7b9",
+      "content_hash": "ef8c8cfa0d84a851",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-work/agents/project-coordinator.md"
@@ -2446,7 +2446,7 @@
       "name": "storyteller",
       "scope": "co-work",
       "capability": "org-culture-narrative",
-      "content_hash": "2ed2b548e901c274",
+      "content_hash": "59f73855a6fa6b51",
       "version": "1.2.1",
       "mirrors": [
         "templates/co-work/agents/storyteller.md"
@@ -2459,7 +2459,7 @@
       "name": "technical-writer",
       "scope": "co-work",
       "capability": "technical-writer",
-      "content_hash": "3ddb63112eb30ac9",
+      "content_hash": "c050a9c6969b9564",
       "version": "1.1.1",
       "mirrors": [
         "templates/co-work/agents/technical-writer.md"
@@ -2472,7 +2472,7 @@
       "name": "i18n-specialist",
       "scope": "common",
       "capability": "i18n-specialist",
-      "content_hash": "64b97e47581e6757",
+      "content_hash": "e0bd9ada16cc7d02",
       "version": "1.3.2",
       "mirrors": [
         "templates/common/agents/i18n-specialist.md"
@@ -2498,7 +2498,7 @@
       "name": "architect",
       "scope": "root",
       "capability": "architect",
-      "content_hash": "e24a6bf8a3295d6f",
+      "content_hash": "805ceafffe8ec037",
       "version": "1.0.0",
       "mirrors": [
         "agents/architect.md"
@@ -2511,7 +2511,7 @@
       "name": "auditor",
       "scope": "root",
       "capability": "auditor",
-      "content_hash": "c5fcbc63a93c6f63",
+      "content_hash": "1866b9261ad75d5d",
       "version": "1.0.0",
       "mirrors": [
         "agents/auditor.md"
@@ -2524,7 +2524,7 @@
       "name": "automation-engineer",
       "scope": "root",
       "capability": "automation-engineer",
-      "content_hash": "8dcdf3da249cacc4",
+      "content_hash": "6071c47d7e632d82",
       "version": "1.0.0",
       "mirrors": [
         "agents/automation-engineer.md"
@@ -2537,7 +2537,7 @@
       "name": "docs-writer",
       "scope": "root",
       "capability": "docs-writer",
-      "content_hash": "f567f865886bffa6",
+      "content_hash": "b539e145eb7513bb",
       "version": "1.0.0",
       "mirrors": [
         "agents/docs-writer.md"
@@ -2576,7 +2576,7 @@
       "name": "scaffolding-expert",
       "scope": "root",
       "capability": "scaffolding-expert",
-      "content_hash": "fc435e1eb80fc3b3",
+      "content_hash": "f7f656d5fdb783ba",
       "version": "1.0.0",
       "mirrors": [
         "agents/scaffolding-expert.md"
@@ -2589,7 +2589,7 @@
       "name": "security-expert",
       "scope": "root",
       "capability": "security-expert",
-      "content_hash": "9c0525b06ff13b64",
+      "content_hash": "5320155d2419cd9d",
       "version": "1.0.0",
       "mirrors": [
         "agents/security-expert.md"
@@ -2804,6 +2804,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261110-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -2894,12 +2899,97 @@
       "layer": "variant:co-architect"
     },
     {
+      "id": "doc:co-architect/agents/analyst.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/architect.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/automation-engineer.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
       "id": "doc:co-architect/agents/bylaw-expert.md",
       "type": "doc",
       "layer": "variant:co-architect"
     },
     {
+      "id": "doc:co-architect/agents/content-writer.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/design-lead.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/design-storyteller.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/ms365-expert.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
       "id": "doc:co-architect/agents/pm.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/project-coordinator.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/prototype-engineer.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/service-designer.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/sketchup-modeler.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/storyteller.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/technical-writer.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/typography-expert.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/ux-researcher.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/visual-designer.md",
+      "type": "doc",
+      "layer": "variant:co-architect"
+    },
+    {
+      "id": "doc:co-architect/agents/zwcad-drafter.md",
       "type": "doc",
       "layer": "variant:co-architect"
     },
@@ -2915,6 +3005,56 @@
     },
     {
       "id": "doc:co-consult/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/change-management-partner.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/communications-lead.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/data-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/delivery-manager.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/industry-expert.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/sme.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/solutions-architect.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/strategy-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/technology-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-consult"
+    },
+    {
+      "id": "doc:co-consult/agents/workstream-lead.md",
       "type": "doc",
       "layer": "variant:co-consult"
     },
@@ -2974,6 +3114,21 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "doc:co-deck/agents/diagram-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/handbook-reviewer.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/handbook-writer.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "doc:co-deck/agents/html-build.md",
       "type": "doc",
       "layer": "variant:co-deck"
@@ -3000,6 +3155,11 @@
     },
     {
       "id": "doc:co-deck/agents/research.md",
+      "type": "doc",
+      "layer": "variant:co-deck"
+    },
+    {
+      "id": "doc:co-deck/agents/source-verifier.md",
       "type": "doc",
       "layer": "variant:co-deck"
     },
@@ -3049,6 +3209,41 @@
       "layer": "variant:co-design"
     },
     {
+      "id": "doc:co-design/agents/design-lead.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/agents/prototype-engineer.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/agents/service-designer.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/agents/storyteller.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/agents/typography-expert.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/agents/ux-researcher.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
+      "id": "doc:co-design/agents/visual-designer.md",
+      "type": "doc",
+      "layer": "variant:co-design"
+    },
+    {
       "id": "doc:co-design/docs/co-design.context.md",
       "type": "doc",
       "layer": "variant:co-design"
@@ -3084,7 +3279,32 @@
       "layer": "variant:co-develop"
     },
     {
+      "id": "doc:co-develop/agents/architect.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/agents/code-writer.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
       "id": "doc:co-develop/agents/designer.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/agents/security-monitor.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/agents/stack-setup.md",
+      "type": "doc",
+      "layer": "variant:co-develop"
+    },
+    {
+      "id": "doc:co-develop/agents/test-runner.md",
       "type": "doc",
       "layer": "variant:co-develop"
     },
@@ -3115,6 +3335,51 @@
     },
     {
       "id": "doc:co-export/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/customs-duty-drawback-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/export-control-compliance-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/foreign-regulatory-intelligence-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/fta-origin-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/halal-certification-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/hs-classification-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/logistics-coordinator.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/market-entry-strategist.md",
+      "type": "doc",
+      "layer": "variant:co-export"
+    },
+    {
+      "id": "doc:co-export/agents/trade-documentation-specialist.md",
       "type": "doc",
       "layer": "variant:co-export"
     },
@@ -3154,6 +3419,66 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "doc:co-game/agents/arcade-designer.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/architect.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/designer.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/game-debugger.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/game-designer.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/game-developer.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/puzzle-designer.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/security-monitor.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/sound-designer.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/stack-setup.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/test-runner.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
+      "id": "doc:co-game/agents/visual-artist.md",
+      "type": "doc",
+      "layer": "variant:co-game"
+    },
+    {
       "id": "doc:co-game/docs/co-game.context.md",
       "type": "doc",
       "layer": "variant:co-game"
@@ -3175,6 +3500,61 @@
     },
     {
       "id": "doc:co-hr/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/career-succession-consultant.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/change-management-partner.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/compensation-benefits-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/data-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/labor-compliance-analyst.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/labor-relations-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/learning-development-specialist.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/org-design-consultant.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/performance-management-consultant.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/safety-health-officer.md",
+      "type": "doc",
+      "layer": "variant:co-hr"
+    },
+    {
+      "id": "doc:co-hr/agents/talent-acquisition-specialist.md",
       "type": "doc",
       "layer": "variant:co-hr"
     },
@@ -3219,6 +3599,11 @@
       "layer": "variant:co-learning"
     },
     {
+      "id": "doc:co-learning/agents/exam-bank-steward.md",
+      "type": "doc",
+      "layer": "variant:co-learning"
+    },
+    {
       "id": "doc:co-learning/docs/co-learning.context.md",
       "type": "doc",
       "layer": "variant:co-learning"
@@ -3245,6 +3630,11 @@
     },
     {
       "id": "doc:co-news/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-news"
+    },
+    {
+      "id": "doc:co-news/agents/fact-checker.md",
       "type": "doc",
       "layer": "variant:co-news"
     },
@@ -3569,7 +3959,37 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "doc:co-work/agents/analyst.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/agents/content-writer.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "doc:co-work/agents/deck-builder.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/agents/ms365-expert.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/agents/project-coordinator.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/agents/storyteller.md",
+      "type": "doc",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "doc:co-work/agents/technical-writer.md",
       "type": "doc",
       "layer": "variant:co-work"
     },
@@ -10402,8 +10822,50 @@
     },
     {
       "type": "references",
+      "from": "agent:co-architect/analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/architect",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/automation-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:co-architect/bylaw-expert",
       "to": "skill:common/k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/content-writer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/design-lead",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/design-storyteller",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/ms365-expert",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10419,6 +10881,84 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "agent:co-architect/project-coordinator",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/prototype-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/service-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/sketchup-modeler",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/storyteller",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/technical-writer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/typography-expert",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/ux-researcher",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/visual-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-architect/zwcad-drafter",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/change-management-partner",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/communications-lead",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/data-analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-consult/delivery-manager",
       "to": "procedure.co-consult.engagement-closeout",
@@ -10429,6 +10969,30 @@
       "from": "agent:co-consult/delivery-manager",
       "to": "procedure.co-consult.solution-delivery",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/delivery-manager",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/industry-expert",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/sme",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/solutions-architect",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10449,6 +11013,48 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-consult/strategy-analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/technology-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-consult/workstream-lead",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-deck/design",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-deck/diagram-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-deck/handbook-reviewer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-deck/handbook-writer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-deck/html-build",
       "to": "procedure.co-deck.deck-build-and-export",
@@ -10461,10 +11067,28 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "agent:co-deck/image-curator",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-deck/measure",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-deck/pdf-export",
       "to": "procedure.co-deck.deck-publish-and-version",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-deck/pdf-export",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10473,10 +11097,22 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-deck/source-verifier",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-deck/storyline",
       "to": "procedure.co-deck.storyline-development",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-deck/storyline",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10515,10 +11151,22 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-deck/version",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-design/design-lead",
       "to": "procedure.co-design.design-definition",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-design/design-lead",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10527,10 +11175,34 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-design/prototype-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-design/service-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-design/storyteller",
       "to": "procedure.co-design.narrative-discovery",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-design/storyteller",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-design/typography-expert",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10539,10 +11211,34 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-design/ux-researcher",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-design/visual-designer",
       "to": "procedure.co-design.visual-implementation",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-design/visual-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-develop/architect",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-develop/code-writer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -10569,10 +11265,70 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "agent:co-develop/designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-develop/security-monitor",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-develop/stack-setup",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-develop/test-runner",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-export/customs-duty-drawback-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-export/export-control-compliance-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-export/foreign-regulatory-intelligence-analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-export/fta-origin-analyst",
       "to": "procedure.co-export.compliance-determination",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-export/fta-origin-analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-export/halal-certification-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-export/hs-classification-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10587,10 +11343,22 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-export/logistics-coordinator",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-export/market-entry-strategist",
       "to": "procedure.co-export.market-entry-assessment",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-export/market-entry-strategist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10599,10 +11367,28 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-export/trade-documentation-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/arcade-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-game/architect",
       "to": "procedure.co-game.game-architecture-design",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/architect",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10611,10 +11397,22 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-game/designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-game/game-debugger",
       "to": "procedure.co-game.game-release-verification",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/game-debugger",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10623,10 +11421,28 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-game/game-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-game/game-developer",
       "to": "procedure.co-game.gameplay-feature-loop",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/game-developer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/puzzle-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10635,16 +11451,88 @@
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-game/security-monitor",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/sound-designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-game/stack-setup",
       "to": "procedure.co-game.game-security-bootstrap",
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "agent:co-game/stack-setup",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/test-runner",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-game/visual-artist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/career-succession-consultant",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/change-management-partner",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-hr/compensation-benefits-analyst",
       "to": "procedure.co-hr.compensation-benchmarking",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/compensation-benefits-analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/data-analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/labor-compliance-analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/labor-relations-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/learning-development-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -10666,8 +11554,50 @@
     },
     {
       "type": "references",
+      "from": "agent:co-hr/org-design-consultant",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/performance-management-consultant",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/safety-health-officer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-hr/talent-acquisition-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-learning/exam-bank-steward",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-news/fact-checker",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:co-news/financial-analyst",
       "to": "skill:common/k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-news/financial-analyst",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10678,8 +11608,20 @@
     },
     {
       "type": "references",
+      "from": "agent:co-news/legal-researcher",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:co-news/reporter",
       "to": "skill:co-news/financial-journalism-style",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-news/reporter",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10696,8 +11638,20 @@
     },
     {
       "type": "references",
+      "from": "agent:co-news/style-editor",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:co-news/visual-editor",
       "to": "skill:co-news/financial-infographic-svg",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-news/visual-editor",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10798,8 +11752,20 @@
     },
     {
       "type": "references",
+      "from": "agent:co-security/patch-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:co-security/pentester",
       "to": "skill:co-security/verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-security/pentester",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10812,6 +11778,12 @@
       "type": "references",
       "from": "agent:co-security/red-team-lead",
       "to": "skill:co-security/verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-security/red-team-lead",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10830,6 +11802,12 @@
       "type": "references",
       "from": "agent:co-security/report-writer",
       "to": "skill:co-security/verify-authorization",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-security/report-writer",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10852,6 +11830,24 @@
     },
     {
       "type": "references",
+      "from": "agent:co-security/threat-modeler",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/analyst",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/content-writer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:co-work/deck-builder",
       "to": "skill:co-work/pptx-export",
       "source": "prose"
@@ -10866,6 +11862,36 @@
       "type": "references",
       "from": "agent:co-work/deck-builder",
       "to": "skill:co-work/svg-slide-authoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/deck-builder",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/ms365-expert",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/project-coordinator",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/storyteller",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:co-work/technical-writer",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -10918,6 +11944,12 @@
     },
     {
       "type": "references",
+      "from": "agent:common/i18n-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:common/pm",
       "to": "skill:common/decision-record",
       "source": "prose"
@@ -10938,6 +11970,30 @@
       "type": "references",
       "from": "agent:common/pm",
       "to": "skill:root/upgrade-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/architect",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/auditor",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/automation-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/docs-writer",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -11003,7 +12059,19 @@
     {
       "type": "references",
       "from": "agent:root/scaffolding-expert",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/scaffolding-expert",
       "to": "skill:root/new-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/security-expert",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -11710,8 +12778,50 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-architect/agents/analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/architect.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/automation-engineer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-architect/agents/bylaw-expert.md",
       "to": "skill:common/k-law",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/content-writer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/design-lead.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/design-storyteller.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/ms365-expert.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -11724,6 +12834,66 @@
       "type": "cites_skill",
       "from": "doc:co-architect/agents/pm.md",
       "to": "skill:root/upgrade-project",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/project-coordinator.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/prototype-engineer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/service-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/sketchup-modeler.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/storyteller.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/technical-writer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/typography-expert.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/ux-researcher.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/visual-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-architect/agents/zwcad-drafter.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -12096,6 +13266,66 @@
       "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
       "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/change-management-partner.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/communications-lead.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/data-analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/delivery-manager.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/industry-expert.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/sme.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/solutions-architect.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/strategy-analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/technology-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-consult/agents/workstream-lead.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -12814,6 +14044,30 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-deck/agents/design.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/diagram-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/handbook-reviewer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/handbook-writer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-deck/agents/html-build.md",
       "to": "skill:co-deck/html-build",
       "source": "workflow-doc"
@@ -12826,14 +14080,32 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-deck/agents/image-curator.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-deck/agents/measure.md",
       "to": "skill:co-deck/prep-pdf",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-deck/agents/measure.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-deck/agents/pdf-export.md",
       "to": "skill:co-deck/pdf-export",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/pdf-export.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -12856,14 +14128,32 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-deck/agents/source-verifier.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-deck/agents/storyline.md",
       "to": "skill:co-deck/storyline",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-deck/agents/storyline.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-deck/agents/version.md",
       "to": "skill:co-deck/version",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-deck/agents/version.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -13234,6 +14524,48 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-design/agents/design-lead.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/prototype-engineer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/service-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/storyteller.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/typography-expert.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/ux-researcher.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/agents/visual-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-design/docs/co-design.context.md",
       "to": "skill:root/agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -13408,6 +14740,18 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-develop/agents/architect.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/code-writer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-develop/agents/designer.md",
       "to": "skill:co-develop/code-review",
       "source": "workflow-doc"
@@ -13433,7 +14777,31 @@
     {
       "type": "cites_skill",
       "from": "doc:co-develop/agents/designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/designer.md",
       "to": "skill:root/ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/security-monitor.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/stack-setup.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-develop/agents/test-runner.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -13606,6 +14974,60 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-export/agents/customs-duty-drawback-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/export-control-compliance-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/foreign-regulatory-intelligence-analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/fta-origin-analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/halal-certification-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/hs-classification-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/logistics-coordinator.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/market-entry-strategist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-export/agents/trade-documentation-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-export/docs/co-export.context.md",
       "to": "skill:co-export/customs-duty-drawback-workflow",
       "source": "workflow-doc"
@@ -13914,6 +15336,78 @@
       "type": "cites_skill",
       "from": "doc:co-game/AGENTS.md",
       "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/arcade-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/architect.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/game-debugger.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/game-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/game-developer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/puzzle-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/security-monitor.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/sound-designer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/stack-setup.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/test-runner.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-game/agents/visual-artist.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -14100,6 +15594,72 @@
       "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
       "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/career-succession-consultant.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/change-management-partner.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/compensation-benefits-analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/data-analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/labor-compliance-analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/labor-relations-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/learning-development-specialist.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/org-design-consultant.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/performance-management-consultant.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/safety-health-officer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-hr/agents/talent-acquisition-specialist.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -14500,6 +16060,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-learning/agents/exam-bank-steward.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-learning/docs/co-learning.context.md",
       "to": "skill:root/agent-lifecycle-manager",
       "source": "workflow-doc"
@@ -14650,8 +16216,20 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-news/agents/fact-checker.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-news/agents/financial-analyst.md",
       "to": "skill:common/k-dart",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/financial-analyst.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -14662,8 +16240,20 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-news/agents/legal-researcher.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-news/agents/reporter.md",
       "to": "skill:co-news/financial-journalism-style",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/reporter.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -14680,8 +16270,20 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-news/agents/style-editor.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-news/agents/visual-editor.md",
       "to": "skill:co-news/financial-infographic-svg",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-news/agents/visual-editor.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -15952,8 +17554,20 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-security/agents/patch-engineer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-security/agents/pentester.md",
       "to": "skill:co-security/verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/pentester.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -15976,14 +17590,32 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-security/agents/red-team-lead.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-security/agents/report-writer.md",
       "to": "skill:co-security/verify-authorization",
       "source": "workflow-doc"
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-security/agents/report-writer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-security/agents/threat-modeler.md",
       "to": "skill:co-security/verify-authorization",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-security/agents/threat-modeler.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -16186,6 +17818,18 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-work/agents/analyst.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/content-writer.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-work/agents/deck-builder.md",
       "to": "skill:co-work/pptx-export",
       "source": "workflow-doc"
@@ -16200,6 +17844,36 @@
       "type": "cites_skill",
       "from": "doc:co-work/agents/deck-builder.md",
       "to": "skill:co-work/svg-slide-authoring",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/deck-builder.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/ms365-expert.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/project-coordinator.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/storyteller.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/agents/technical-writer.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {

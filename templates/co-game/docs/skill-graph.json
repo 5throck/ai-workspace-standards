@@ -63,6 +63,11 @@
       "layer": "variant:co-game"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.approved_implementation_plan",
       "type": "output_type",
       "layer": "variant:co-game"
@@ -255,6 +260,12 @@
   ],
   "edges": [
     {
+      "type": "references",
+      "from": "arcade-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "arcade-physics",
       "to": "code-review",
@@ -398,6 +409,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "architect",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "architect",
       "to": "procedure.co-game.game-architecture-design",
@@ -474,6 +491,12 @@
       }
     },
     {
+      "type": "references",
+      "from": "designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "designer",
       "to": "procedure.co-game.game-content-production",
@@ -486,16 +509,34 @@
       "source": "procedure_schema"
     },
     {
+      "type": "references",
+      "from": "game-debugger",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "game-debugger",
       "to": "procedure.co-game.game-release-verification",
       "source": "raci_matrix"
     },
     {
+      "type": "references",
+      "from": "game-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "game-designer",
       "to": "procedure.co-game.game-concept-design",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "game-developer",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -921,6 +962,12 @@
       "source": "procedure_schema"
     },
     {
+      "type": "references",
+      "from": "puzzle-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "refactoring",
       "to": "code-review",
@@ -975,10 +1022,22 @@
       "source": "procedure_schema"
     },
     {
+      "type": "references",
+      "from": "security-monitor",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "security-monitor",
       "to": "procedure.co-game.game-security-retrospective",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "sound-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "follows",
@@ -1020,6 +1079,12 @@
       "from": "sound-synth",
       "to": "sound-designer",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "stack-setup",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -1115,6 +1180,18 @@
       "from": "test-driven-development",
       "to": "test-runner",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "test-runner",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "visual-artist",
+      "to": "meeting-facilitation",
+      "source": "prose"
     }
   ]
 }

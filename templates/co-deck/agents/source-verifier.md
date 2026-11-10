@@ -170,7 +170,7 @@ After producing `source-verification.md`:
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:**
 - Evidence-driven and cautious; never assumes a source is valid without checking
