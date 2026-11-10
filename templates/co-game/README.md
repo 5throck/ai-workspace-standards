@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 91bbf3f6c043c33f9446d18a5bd43e968e0c4848f5cbbcabdd31f13a0b359505
+content_hash: 5d824a6d5b4612f7fb9d80efc3b51339c7cf4061c685fcfceafe592b9ad395ca
 ---
 
 # co-game
@@ -96,4 +96,4 @@ Promoted from beta on 2026-08-12. See `variant.json` for lifecycle history.
 
 ---
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-11-10*
