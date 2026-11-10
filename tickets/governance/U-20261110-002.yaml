@@ -1,0 +1,68 @@
+schemaVersion: 1
+id: U-20261110-002
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-10T14:42:42.111+09:00'
+history:
+  - at: '2026-11-10T14:42:42.111+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-10T17:24:01.048+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The canonical rebuild order documented in the workspace-managed
+    agents/html-build.md ("Canonical rebuild order (U-20261105-007)":
+    build-theme-deck.ts -> optional style patch -> bun
+    scripts/co-deck/inject-video-players.ts) does not instruct agents to check
+    project-local rebuild documentation before rebuilding, and does not state
+    that a project-documented rebuild order (project VERSIONS.md rebuild note +
+    project-local injector script headers) takes precedence over the canonical
+    default. co-deck projects can ship their own injectors with project-specific
+    slide styling (e.g.
+    presentations/2026-11-consumer-goods-market-shift/inject_video_players.py
+    hides the slide text card on video pages and renders a slim title bar —
+    styling the generic TS injector does not reproduce). Rebuilding such a deck
+    by following the canonical section literally produces a build that silently
+    loses the project-specific styling (no error, no warning).
+  affected_paths:
+    - agents/html-build.md
+  identity_source: cwd
+  repro: >-
+    1. Read agents/html-build.md section "Canonical rebuild order
+    (U-20261105-007)" — it prescribes build → patch (only zen+white-bubble, "or
+    as configured") → bun scripts/co-deck/inject-video-players.ts, with no
+    instruction to check project-local rebuild notes. 2. Rebuild a deck whose
+    project documents its own rebuild order and ships a project-specific
+    injector with different video-slide styling (e.g.
+    Projects/co-deck/presentations/2026-11-consumer-goods-market-shift:
+    VERSIONS.md and inject_video_players.py header document build ->
+    tests/patch-zen-white-bubble.ts -> python3 inject_video_players.py, where
+    the python injector applies "video-page text box hidden, title-only slim
+    bar" styling). 3. Follow the canonical doc literally: the generic TS
+    injector injects its default cdk player instead, silently dropping the
+    project styling (verified 2026-11-10: rebuilt v4 initially shipped generic
+    styling; user-visible text-box regression). Expected: the canonical section
+    should instruct agents to check the project's VERSIONS.md / project injector
+    headers first and state that a project-documented rebuild order overrides
+    the canonical default.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery agents/html-build.md=true
+  dedupe_key: ea464df90728e8d67301d465228613fb122906f5e3676e5239b950bc53a2c917
+  duplicates:
+    - project: co-deck
+      at: '2026-11-10T14:42:42.111+09:00'

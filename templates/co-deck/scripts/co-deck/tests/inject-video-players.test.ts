@@ -3,9 +3,14 @@
  * docs/designs/2026-10-09-co-deck-injector-promotion-design.md): idempotent
  * marker-based injection, triple fallback wiring, no-video hard exit.
  *
+ * v1.2.0 (T-20261110-005, design
+ * docs/designs/2026-11-10-co-deck-root-tooling-design.md): --slidedata default
+ * anchored beside the deck HTML (runs from an unrelated CWD need no flag),
+ * missing-slidedata named-path failure, warn-only project-local injector WARNING.
+ *
  * Runs the real CLI against a synthetic deck fixture (bun test scripts/co-deck/tests/).
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -14,10 +19,14 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const TOOL = join(import.meta.dir, '..', 'inject-video-players.ts');
+// An empty directory unrelated to any deck — the CWD for the default-resolution
+// cases, so a CWD-relative 'slidedata.json' default could never resolve there.
 let root = '';
 let deck = '';
 
-function fixture(withVideos: boolean, withLocal: boolean): string {
+interface FixtureOpts { omitSlidedata?: boolean; withLocalInjector?: boolean }
+
+function fixture(withVideos: boolean, withLocal: boolean, opts: FixtureOpts = {}): string {
   const dir = mkdtempSync(join(tmpdir(), 'cdk-inject-'));
   const slides = withVideos
     ? [
@@ -26,7 +35,10 @@ function fixture(withVideos: boolean, withLocal: boolean): string {
         { title: 'local-clip', videoId: 'abc123defg', ...(withLocal ? { videoLocal: 'clip-local.mp4' } : {}) },
       ]
     : [{ title: 'cover' }, { title: 'no media' }];
-  writeFileSync(join(dir, 'slidedata.json'), JSON.stringify(slides));
+  if (!opts.omitSlidedata) writeFileSync(join(dir, 'slidedata.json'), JSON.stringify(slides));
+  if (opts.withLocalInjector) {
+    writeFileSync(join(dir, 'inject_video_players.py'), '"""REBUILD ORDER: build -> patch -> this script."""\n');
+  }
   writeFileSync(
     join(dir, 'deck.html'),
     '<html><body><div id="presentation"><div id="slide-0"></div><div id="slide-1"></div><div id="slide-2"></div></div></body></html>',
@@ -42,9 +54,15 @@ function run(dir: string) {
   return spawnSync('bun', [TOOL, join(dir, 'deck.html'), '--slidedata', join(dir, 'slidedata.json'), '--assets-dir', join(dir, 'assets', 'videos')], { encoding: 'utf-8' });
 }
 
+// v1.2.0: no --slidedata, CWD = an unrelated empty directory.
+function runDefault(dir: string) {
+  return spawnSync('bun', [TOOL, join(dir, 'deck.html')], { encoding: 'utf-8', cwd: root });
+}
+
 describe('inject-video-players (T-20261007-008 promotion pin)', () => {
   let d1: string;
   beforeAll(() => {
+    root = mkdtempSync(join(tmpdir(), 'cdk-inject-cwd-'));
     d1 = fixture(true, true);
     deck = join(d1, 'deck.html');
   });
@@ -97,5 +115,44 @@ describe('inject-video-players (T-20261007-008 promotion pin)', () => {
     // ...and the vids array still lists the video (skip happens at binding time).
     expect(out).toContain('dQw4w9WgXcQ');
     rmSync(d3, { recursive: true, force: true });
+  });
+
+  // T-20261110-005 (v1.2.0): the --slidedata default is anchored to the deck
+  // HTML's own directory — a manual re-run from the repo root (or any other
+  // CWD) needs no flag and no longer ENOENTs on a CWD-relative default.
+  test('default --slidedata resolves beside the deck HTML from an unrelated CWD', () => {
+    const d4 = fixture(true, false);
+    const res = runDefault(d4);
+    expect(res.status).toBe(0);
+    expect(res.stderr).not.toContain('ENOENT');
+    expect(res.stderr).not.toContain('WARNING'); // no local injector -> no warning
+    expect(readFileSync(join(d4, 'deck.html'), 'utf8')).toContain('<style id="cdk-video-players">');
+    rmSync(d4, { recursive: true, force: true });
+  });
+
+  test('missing slidedata exits 1 with a named-path error and leaves the deck untouched', () => {
+    const d5 = fixture(true, false, { omitSlidedata: true });
+    const deck5 = join(d5, 'deck.html');
+    const before = readFileSync(deck5, 'utf8');
+    const res = runDefault(d5);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('slidedata not found at');
+    expect(res.stderr).toContain(join(d5, 'slidedata.json')); // names the attempted path
+    expect(res.stderr).toContain('--slidedata'); // names the remedy
+    expect(res.stderr).not.toContain('ENOENT'); // no raw stack
+    expect(readFileSync(deck5, 'utf8')).toBe(before);
+    rmSync(d5, { recursive: true, force: true });
+  });
+
+  test('project-local injector in the deck dir triggers a warn-only stderr WARNING', () => {
+    const d6 = fixture(true, false, { withLocalInjector: true });
+    const res = runDefault(d6);
+    expect(res.status).toBe(0); // warn-only: exit code unchanged
+    expect(res.stderr).toContain('WARNING: project-local injector(s) found: inject_video_players.py');
+    expect(res.stderr).toContain('REBUILD ORDER');
+    expect(res.stderr).toContain('VERSIONS.md');
+    // Output unchanged by the warning: the generic injection still lands.
+    expect(readFileSync(join(d6, 'deck.html'), 'utf8')).toContain('<style id="cdk-video-players">');
+    rmSync(d6, { recursive: true, force: true });
   });
 });

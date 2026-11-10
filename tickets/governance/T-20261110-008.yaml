@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261110-008
+kind: manual
+title: >-
+  co-deck CI: every job (Documentation Audit / Dependency Audit / Secret Scan /
+  Unit Tests) fails in 3-5s with no logs on all PRs and main pushes since
+  2026-11-08 (e.g. run 42762849791; job logs BlobNotFound) — diagnose Actions
+  quota/billing vs workflow env (setup-bun 1.4.x pinned, actions pinned by SHA);
+  PRs are landing with red CI on precedent — restore a trustworthy CI signal;
+  likely needs account-level Actions billing check
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-10T14:44:07.997+09:00'
+history:
+  - at: '2026-11-10T14:44:07.997+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-10T19:19:40.778+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null

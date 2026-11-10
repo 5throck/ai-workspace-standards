@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261110-003
+kind: manual
+title: >-
+  co-deck: run visual-regression suite after the 2026-11-10 CSS restore
+  (U-20261110-001, PR #215) — baselines were recaptured 2026-11-07 in patch-era
+  rendering so they should match the restored rendering; recapture with
+  UPDATE_BASELINES=1 only with evidence. Verification recipe notes: navigate
+  decks with showSlide(idx) (absolute), not changeSlide(delta); render project
+  PDFs with pdftocairo — poppler splash (pdftoppm) misrenders
+  2026-11-consumer-goods-market-shift.pdf pages 3-4 as cover art
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-10T14:44:07.884+09:00'
+history:
+  - at: '2026-11-10T14:44:07.884+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

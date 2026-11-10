@@ -9,6 +9,8 @@
  *   <link rel="stylesheet" href="../../docs/html-themes/styles/base.css">
  *   <link rel="stylesheet" href="../../docs/html-themes/styles/<style>/style.css">
  *   <html data-theme="<theme>" data-style="<style>">
+ *
+ * @version 1.2.0
  */
 
 /* ── Color Palette ──────────────────────────────────────────────── */
@@ -210,17 +212,25 @@ html, body {
   line-height: var(--line-height-body);
 }
 
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — port of merged upstream fix
+   (workspace PR #1864, U-20261105-004): flex split bare text and each inline
+   <strong> into separate anonymous flex columns; block + negative text-indent
+   reproduces the hanging indent while bold spans stay inline. text-align:left
+   guards against zen card centering. Restore-on-upgrade-delivery. */
 .bullet-item {
-  display: flex;
-  gap: var(--bullet-indent);
+  display: block;
+  padding-left: var(--bullet-indent);
+  text-indent: calc(var(--bullet-indent) * -1);
+  text-align: left;
   color: var(--text-primary);
 }
 
 .bullet-item::before {
   content: var(--bullet-marker);
   color: var(--bullet-color);
-  flex-shrink: 0;
-  margin-top: 0.1em;
+  display: inline-block;
+  width: var(--bullet-indent);
+  text-indent: 0;
 }
 
 .right-panel {

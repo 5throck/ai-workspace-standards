@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261110-004
+kind: manual
+title: >-
+  co-deck: regenerate stale 2026-11-consumer-goods-market-shift_sample5.pdf
+  (2026-11-05 17:15, predates the 2026-11-07 hygiene revision — contains removed
+  [Source: Rn] footers, pre-revision bullets, lacks the S103 references slide;
+  full PDF 2026-11-07 is current) via the standard Gate 5 sample flow
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-10T14:44:07.907+09:00'
+history:
+  - at: '2026-11-10T14:44:07.907+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

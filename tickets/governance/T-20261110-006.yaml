@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261110-006
+kind: manual
+title: >-
+  co-deck: scripts/co-deck/snapshot.ts writes broken restore commands in
+  VERSIONS.md (bun scripts/snapshot.ts --restore ...; actual path is
+  scripts/co-deck/snapshot.ts) — emit a working command
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-10T14:44:07.952+09:00'
+history:
+  - at: '2026-11-10T14:44:07.952+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

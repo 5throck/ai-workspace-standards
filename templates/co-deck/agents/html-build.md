@@ -1,7 +1,7 @@
 ---
 name: html-build
-version: "1.3.3"
-last_updated: 2026-11-06
+version: "1.4.0"
+last_updated: 2026-11-10
 role: HTML slide builder and image integration specialist
 status: active
 tier: low
@@ -137,7 +137,11 @@ The deterministic `build-theme-deck.ts` builder handles the following; html-buil
 ### Canonical rebuild order (U-20261105-007)
 
 Every deck rebuild MUST follow this order — a rebuild silently drops the video
-players and any local style patch otherwise:
+players and any local style patch otherwise. BEFORE rebuilding, check the
+project's own rebuild documentation: the project's VERSIONS.md rebuild-order
+note and any project-local injector script headers (a `REBUILD ORDER:` line in
+e.g. `inject_video_players.py`). A project-documented rebuild order overrides
+this canonical default:
 
 ```
 1. build    bun scripts/co-deck/build-theme-deck.ts --project presentations/<name>
@@ -157,6 +161,12 @@ Notes:
   re-downloads a good file.
 - A rebuild regenerates the HTML from templates: re-apply the style patch (step 2) and
   let step 3 re-inject — never assume a previous build's patches survive.
+- **Project-local rebuild order takes precedence.** If the deck's project ships its own
+  injector (e.g. `presentations/<name>/inject_video_players.py`) or documents a different
+  rebuild order, follow THAT order — the project injector may apply project-specific
+  video-slide styling (e.g. hidden text card, slim title bar) that the generic injector
+  does not reproduce. Following this section literally on such a deck silently loses
+  the project styling.
 
 ## Constraints
 

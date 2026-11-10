@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (T-20261110-005, design docs/designs/2026-11-10-co-deck-root-tooling-design.md):
+// --slidedata now defaults to <deck dir>/slidedata.json (anchored beside the deck
+// HTML instead of the CWD — manual re-runs from the repo root no longer ENOENT);
+// a missing slidedata file exits 1 with a named-path error naming the --slidedata
+// remedy before any write; and a warn-only stderr warning fires when the deck
+// directory contains a project-local injector (inject_*.py|js|mjs|ts) — the
+// generic injector does not reproduce project video-slide styling, follow the
+// project's documented rebuild order there.
 // v1.1.0 (U-20261029-005): the binding loop skips slides the template rendered
 // natively as chrome-free video slides (marked data-video="1" by the shared
 // ppt-engine VideoSlide component), so the documented re-run-after-every-rebuild
@@ -22,12 +30,15 @@
 //
 // Usage:
 //   bun scripts/co-deck/inject-video-players.ts <deck.html> [--slidedata <path>] [--assets-dir <dir>]
-//     --slidedata   slidedata SSOT (default: ./slidedata.json)
+//     --slidedata   slidedata SSOT (default: <deck dir>/slidedata.json — beside the deck
+//                   HTML, independent of the CWD; an explicit value keeps CWD semantics)
 //     --assets-dir  local video root; videos resolved as <assets-dir>/yt-<videoId>.mp4
 //                   (default: <deck dir>/../assets/videos)
 // Exit codes: 0 = injected (or nothing to do); 1 = fatal (missing input, no video slides).
+// A project-local injector in the deck directory (inject_*.py|js|mjs|ts) triggers a
+// warn-only stderr WARNING — exit code and output are unchanged.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, normalize, relative, resolve } from 'node:path';
 
 interface SlideEntry { videoId?: string; videoLocal?: string }
@@ -43,12 +54,35 @@ if (!htmlPath || htmlPath.startsWith('--')) {
   console.error('Usage: bun scripts/co-deck/inject-video-players.ts <deck.html> [--slidedata <path>] [--assets-dir <dir>]');
   process.exit(1);
 }
-const slidedataPath = argValue('--slidedata') ?? 'slidedata.json';
 const deckDir = dirname(resolve(htmlPath));
+// v1.2.0: the default is anchored to the deck HTML's own directory (the deck
+// project dir — slidedata.json is a sibling of lecture_vN.html), matching the
+// --assets-dir precedent below. An explicit --slidedata keeps CWD semantics.
+const slidedataPath = argValue('--slidedata') ?? join(deckDir, 'slidedata.json');
 const assetsDir = argValue('--assets-dir') ?? normalize(join(deckDir, '..', 'assets', 'videos'));
+
+// v1.2.0: named-path failure instead of a raw ENOENT stack — exits before any write.
+if (!existsSync(slidedataPath)) {
+  console.error(`inject-video-players: slidedata not found at ${slidedataPath} (default resolves beside the deck HTML; pass --slidedata <path> to override)`);
+  process.exit(1);
+}
 
 const html = readFileSync(htmlPath, 'utf8');
 const slides: SlideEntry[] = JSON.parse(readFileSync(slidedataPath, 'utf8'));
+
+// v1.2.0: warn-only detection of project-local injectors (non-recursive scan of the
+// deck directory). Glob over a known-name list on purpose — a false-positive warning
+// on a like-named helper is harmless, a miss would be silent. Never changes the exit
+// code or the output file.
+const LOCAL_INJECTOR_RE = /^inject_.*players?\.(py|js|mjs|ts)$/i;
+const localInjectors = readdirSync(deckDir).filter((name) => LOCAL_INJECTOR_RE.test(name)).sort();
+if (localInjectors.length > 0) {
+  console.error(
+    `WARNING: project-local injector(s) found: ${localInjectors.join(', ')} — its video-slide styling is NOT reproduced by this generic injector; ` +
+      `follow the project's documented rebuild order (local injector docstring REBUILD ORDER / project VERSIONS.md) instead. ` +
+      `Double-marker hazard: project-video-players and cdk-video-players blocks can coexist on one rebuild.`,
+  );
+}
 
 const vids: Vid[] = [];
 for (let i = 0; i < slides.length; i++) {
