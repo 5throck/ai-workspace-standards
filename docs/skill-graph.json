@@ -14050,6 +14050,12 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-game/README.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-hr/AGENTS.md",
       "to": "skill:common/sync",
       "source": "workflow-doc"
