@@ -7,6 +7,7 @@ import { chownTree, recordProgress, runtimeHomeDir, seedHermesHome, sweepTenantS
 import { attachScratchDir, ATTACH_KIND } from "./attach";
 import { dirSize, moveDir } from "./util";
 import { HttpError } from "./http";
+import { exportTenantLoopRegistry } from "./tenant-loop";
 import type { GatewayState } from "./state";
 import { callerPrincipal, callerPolicyFor, requireTenantAccess, assertProvisioningAllowed, assertTenantCap } from "./access";
 import type { EffectivePolicy } from "./policy";
@@ -420,6 +421,12 @@ export async function deleteTenantData(state: GatewayState, rec: TenantRecord, a
     state.chatLocks.delete(tenantId);
     state.activeProcs.delete(tenantId);
     state.audit.record(actor, "tenant.detach", tenantId, `attached ${rec.attachHub ? basename(rec.attachHub) : rec.projectDir}`);
+    // Export trigger (round-2 amendment C): the tenant left the registry, so its coverage
+    // set changed. Emitted HERE — inside the shared delete implementation — so every caller
+    // (owner DELETE /tenants/:id, admin bulk delete, admin user delete) refreshes the export;
+    // the admin routes' own trigger then re-writes the same file (the atomic temp+rename
+    // makes the redundant write harmless).
+    exportTenantLoopRegistry(state);
     return;
   }
   if (guardFailure) {
@@ -456,4 +463,10 @@ export async function deleteTenantData(state: GatewayState, rec: TenantRecord, a
   state.chatLocks.delete(tenantId);
   state.activeProcs.delete(tenantId);
   state.audit.record(actor, "tenant.delete", tenantId, rec.variant);
+  // Export trigger (round-2 amendment C): the tenant left the registry, so its coverage set
+  // changed. Emitted HERE — inside the shared delete implementation — so every caller (the
+  // owner self-delete DELETE /tenants/:id route previously had NO trigger; admin bulk delete
+  // and admin user delete already did and now simply write twice — the atomic temp+rename
+  // makes the redundant write harmless).
+  exportTenantLoopRegistry(state);
 }

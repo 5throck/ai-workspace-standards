@@ -1,15 +1,16 @@
-/* Admin console (design 2026-11-09-gw-admin-console-design §9). Hash-routed panels over the
- * /admin API. Every non-GET request sends x-requested-with. Destructive actions re-confirm the
+/* Admin console (design 2026-11-09-gw-admin-console-design §9, round-2 unit-model amendment:
+ * docs/designs/2026-11-09-gw-admin-console-round2-plan.md). Hash-routed panels over the /admin
+ * API. Every non-GET request sends x-requested-with. Destructive actions re-confirm the
  * operator password: it is sent as x-admin-password for that one request and never stored. */
 
 import {
   LOOP_SCOPE_KEYS,
+  POLICY_NUMERIC_KEYS,
+  buildEnrollmentPayload,
   createUpgradeFlow,
   esc,
   prepareDonutSlices,
-  validateLoopConfigJson,
-  validateLoopWindowsClient,
-  validateTenantId,
+  validatePolicyLimits,
 } from "./app-helpers.js";
 
 const view = document.getElementById("view");
@@ -37,7 +38,6 @@ const TITLES = {
 const ERROR_TEXT = {
   self_lockout: "You cannot suspend, delete or demote your own account",
   last_admin: "This would leave no active admin",
-  loop_group_readonly: "Loop groups are managed in Tenant Loop",
   payload_too_large: "The request is too large",
   invalid_request: "The request is invalid",
   invalid_policy: "The policy is invalid",
@@ -415,7 +415,6 @@ async function renderUsers(args, live) {
   usersState.total = listRes.data.total ?? 0;
   usersState.rows = new Map(users.map((u) => [u.id, u]));
   const groupName = (id) => usersState.groups.find((g) => g.groupId === id)?.name ?? id;
-  const generalGroups = usersState.groups.filter((g) => g.kind === "general");
   const selectedCount = usersState.selected.size;
   const allOnPage = users.length > 0 && users.every((u) => usersState.selected.has(u.id));
 
@@ -434,7 +433,7 @@ async function renderUsers(args, live) {
   paint(`
     <div class="toolbar">
       <input id="uQ" type="search" placeholder="Search login ID or name" value="${esc(usersState.q)}" aria-label="Search users" style="width:240px">
-      <select id="uGroup" aria-label="Filter by group">${[option("", "all groups", usersState.group), ...usersState.groups.map((g) => option(g.groupId, `${g.name} (${g.kind})`, usersState.group))].join("")}</select>
+      <select id="uGroup" aria-label="Filter by group">${[option("", "all groups", usersState.group), ...usersState.groups.map((g) => option(g.groupId, g.name, usersState.group))].join("")}</select>
       <select id="uStatus" aria-label="Filter by status">${[["", "any status"], ["active", "active"], ["pending", "pending"], ["suspended", "suspended"], ["deleted", "deleted"]].map(([v, l]) => option(v, l, usersState.status)).join("")}</select>
       <select id="uRole" aria-label="Filter by role">${[["", "any role"], ["user", "user"], ["admin", "admin"]].map(([v, l]) => option(v, l, usersState.role)).join("")}</select>
       <span class="spacer"></span>
@@ -447,7 +446,7 @@ async function renderUsers(args, live) {
       <button class="ghost" type="button" data-bulk="activate">Activate</button>
       <select id="bulkRole" aria-label="Role for set-role">${option("user", "user")}${option("admin", "admin")}</select>
       <button class="ghost" type="button" data-bulk="set-role">Set role</button>
-      <select id="bulkGroup" aria-label="General group">${generalGroups.length ? generalGroups.map((g) => option(g.groupId, g.name)).join("") : '<option value="">no general groups</option>'}</select>
+      <select id="bulkGroup" aria-label="Group">${usersState.groups.length ? usersState.groups.map((g) => option(g.groupId, g.name)).join("") : '<option value="">no groups</option>'}</select>
       <button class="ghost" type="button" data-bulk="add-group">Add to group</button>
       <button class="ghost" type="button" data-bulk="remove-group">Remove from group</button>
       <button class="danger" type="button" data-bulk="delete">Delete…</button>
@@ -684,8 +683,10 @@ function showTempPassword(loginId, tempPassword) {
   wrap.querySelector("#tp-close").addEventListener("click", () => wrap.remove());
 }
 
-/** Row drawer (design §9.3): details, groups, effective policy, owned tenants, and the
- * rename and reset-password actions kept from the old panel. */
+/** Row drawer (design §9.3, round-2 unit model): details, groups, the loop memberships the
+ * user's groups carry, the effective policy with its contributing sources (read view —
+ * policies attach to GROUPS ONLY, there is no per-user assignment UI), owned tenants, and
+ * the rename and reset-password actions kept from the old panel. */
 async function openUserDrawer(id, live) {
   let user = usersState.rows.get(id);
   if (!user) {
@@ -695,18 +696,30 @@ async function openUserDrawer(id, live) {
   if (!live()) return;
   if (!user) return flash("User not found in the current listing.");
   const enc = encodeURIComponent(user.id);
-  const [policyRes, tenantsRes] = await Promise.all([
+  const [policyRes, tenantsRes, enrollRes] = await Promise.all([
     api(`/admin/users/${enc}/effective-policy`),
     api(`/admin/tenants?owner=${encodeURIComponent(user.principal)}&size=200`),
+    api("/admin/tenant-loop/enrollments"),
   ]);
   if (!live()) return;
   const pol = policyRes.data ?? {};
   const tenants = tenantsRes.data?.tenants ?? [];
   const policyRows = POLICY_NUMERIC.map(([key, label]) => {
     const v = pol[key];
-    return `<tr><td>${esc(label)}</td><td>${v ? fmtCount(v) : '<span class="hint">unlimited</span>'}</td><td class="hint">${esc((pol.sources?.[key] ?? []).join(", ") || "—")}</td></tr>`;
+    return `<tr><td>${esc(label)}</td><td>${v ? fmtCount(v) : '<span class="hint">unlimited</span>'}</td></tr>`;
   }).join("") +
-    `<tr><td>Allowed variants</td><td>${pol.allowedVariants ? esc(pol.allowedVariants.join(", ")) : '<span class="hint">any configured variant</span>'}</td><td class="hint">${esc((pol.sources?.allowedVariants ?? []).join(", ") || "—")}</td></tr>`;
+    `<tr><td>Allowed variants</td><td>${pol.allowedVariants ? esc(pol.allowedVariants.join(", ")) : '<span class="hint">any configured variant</span>'}</td></tr>`;
+  // Sources are PolicySourceRef[] (policyId, policyName, via group) — the named policies
+  // pulled in through the user's groups.
+  const sourceChips = (pol.sources ?? [])
+    .map((s) => `<span class="chip">${esc(s.policyName)} <span class="hint">via ${esc(s.via)}</span></span>`)
+    .join("") || '<span class="hint">none — gateway baseline only</span>';
+  // Loop membership: the (group, variant) enrollments of the user's groups.
+  const memberGroups = new Set((pol.groups ?? []).map((g) => g.groupId));
+  const loopChips = (enrollRes.res.ok ? enrollRes.data.enrollments ?? [] : [])
+    .filter((e) => memberGroups.has(e.groupId))
+    .map((e) => `<span class="chip"><code>${esc(e.groupId)}/${esc(e.variant)}</code> ${badge(e.status, e.status)}</span>`)
+    .join("") || '<span class="hint">none</span>';
   drawer.innerHTML = `
     <div class="toolbar"><h2 style="margin:0">@${esc(user.loginId)}</h2><span class="spacer"></span><button class="ghost" type="button" data-close>Close</button></div>
     <h3>Details</h3>
@@ -720,8 +733,13 @@ async function openUserDrawer(id, live) {
     </table>
     <h3>Groups</h3>
     <div>${(pol.groups ?? []).map((g) => `<span class="chip">${esc(g.name)} <span class="hint">${esc(g.groupId)}</span></span>`).join("") || '<span class="hint">none</span>'}</div>
+    <h3>Loop membership</h3>
+    <div>${loopChips}</div>
     <h3>Effective policy</h3>
-    <table><thead><tr><th>Limit</th><th>Value</th><th>Set by</th></tr></thead><tbody>${policyRows}</tbody></table>
+    <div class="hint">The strictest of the gateway baseline and every named policy assigned to the user's groups (group-only assignment — the unit model has no per-user targets).</div><br>
+    <table><thead><tr><th>Limit</th><th>Value</th></tr></thead><tbody>${policyRows}</tbody></table>
+    <h3>Contributing policies</h3>
+    <div>${sourceChips}</div>
     <h3>Owned tenants (${fmtCount(tenants.length)})</h3>
     ${tenants.length
       ? `<table><thead><tr><th>Tenant</th><th>Variant</th><th>Status</th><th class="num">Sessions</th></tr></thead><tbody>` +
@@ -758,39 +776,109 @@ function closeDrawer() {
   drawer.innerHTML = "";
 }
 
+// ── Shared loop-enrollment pieces (round-2 unit model) — used by the Tenant Loop page and
+// the group detail's Tenant-loop tab. Coverage is keyed (group_id, variant) with "*" = all
+// variants; the per-tenant register/suspend/deregister surface is gone (410). ──
+function scopesHtml(scopes) {
+  const short = { upgrade: "upg", upstreamFile: "file", backportReview: "backport", nightlyFleet: "fleet" };
+  return LOOP_SCOPE_KEYS.map((k) => {
+    const on = scopes?.[k] === true;
+    return `<span class="tlScope ${on ? "on" : "off"}" title="${esc(k)}: ${on ? "on" : "off"}">${short[k] ?? k} ${on ? "✓" : "✗"}</span>`;
+  }).join("");
+}
+
+function windowsHtml(w) {
+  if (!w || typeof w !== "object") return "";
+  const days = Array.isArray(w.days) ? w.days.map((d) => TL_DAY_NAMES[d] ?? d).join(",") : "?";
+  return `${esc(String(w.tz ?? "?"))} · ${esc(days)} · ${esc(String(w.start ?? "?"))}–${esc(String(w.end ?? "?"))}`;
+}
+
+/** The scopes/windows/gitRemote half of an enrollment form, ids prefixed with `p`. Every
+ * control carries a for= label; checkboxes are wrapped. Shared by both enroll forms. */
+function enrollmentFormHtml(p) {
+  return `
+    <div class="field">Scopes — a scope exports on only when EVERY covering enrollment has it on
+      ${LOOP_SCOPE_KEYS.map((k) => `<label class="betaPick"><input type="checkbox" id="${p}-scope-${k}" style="width:auto"> ${esc(k)}</label>`).join("")}
+    </div>
+    <div class="field"><label for="${p}-tz">Window time zone (IANA)</label><input id="${p}-tz" value="Asia/Seoul" autocomplete="off"></div>
+    <div class="field">Window days (0 = Sunday)
+      ${TL_DAY_NAMES.map((d, i) => `<label class="betaPick" style="display:inline-flex; margin-right:8px;"><input type="checkbox" id="${p}-day-${i}" checked style="width:auto"> ${d}</label>`).join("")}
+    </div>
+    <div class="field" style="flex-direction:row; gap:8px;"><span style="flex:1;"><label for="${p}-start">Start (HH:MM, inclusive)</label><input id="${p}-start" value="00:00" autocomplete="off"></span>` +
+    `<span style="flex:1;"><label for="${p}-end">End (HH:MM, exclusive)</label><input id="${p}-end" value="23:59" autocomplete="off"></span></div>
+    <div class="field"><label for="${p}-remote">git remote (backup branch safety net)</label><select id="${p}-remote"><option value="local-only">local-only</option><option value="url">url</option></select></div>
+    <div class="field gws-hidden" id="${p}-url-row"><label for="${p}-url">Remote URL</label><input id="${p}-url" placeholder="https://git.example.team/team/project.git" autocomplete="off"></div>`;
+}
+
+/** Read the fields rendered by enrollmentFormHtml(p) inside `root` into the PUT body half
+ * (client-validated by buildEnrollmentPayload — the server re-validates authoritatively). */
+function readEnrollmentForm(root, p) {
+  const scopes = Object.fromEntries(LOOP_SCOPE_KEYS.map((k) => [k, root.querySelector(`#${p}-scope-${k}`).checked]));
+  const windows = {
+    tz: root.querySelector(`#${p}-tz`).value.trim(),
+    days: TL_DAY_NAMES.map((_, i) => i).filter((i) => root.querySelector(`#${p}-day-${i}`).checked),
+    start: root.querySelector(`#${p}-start`).value.trim(),
+    end: root.querySelector(`#${p}-end`).value.trim(),
+  };
+  return buildEnrollmentPayload(scopes, windows, root.querySelector(`#${p}-remote`).value, root.querySelector(`#${p}-url`).value);
+}
+
+function bindRemoteToggle(root, p) {
+  root.querySelector(`#${p}-remote`).addEventListener("change", () => {
+    root.querySelector(`#${p}-url-row`).classList.toggle("gws-hidden", root.querySelector(`#${p}-remote`).value !== "url");
+  });
+}
+
+/** PUT/DELETE one (group, variant) enrollment — admin + reauth (x-admin-password per
+ * request, never stored). The PUT body must be COMPLETE: status + full scopes + windows. */
+function enrollmentApi(groupId, variant, { method, body, password }) {
+  return api(`/admin/tenant-loop/enrollments/${encodeURIComponent(groupId)}/${encodeURIComponent(variant)}`, { method, body, password });
+}
+
+/** Render a preview payload (GET /admin/tenant-loop/preview): covered tenants with their
+ * resolved strictest-wins scopes/windows, plus any window_intersection_unrepresentable
+ * reason row. not_covered rows are omitted — uncovered tenants need enrollment and never
+ * appear in the registry. */
+function previewPanelHtml(tenants) {
+  const rows = tenants.filter((t) => t.covered || t.reason === "window_intersection_unrepresentable");
+  const omitted = tenants.length - rows.length;
+  if (!rows.length) return `<div class="hint">No covered tenants${omitted ? ` (${fmtCount(omitted)} uncovered omitted — they need enrollment)` : ""}.</div>`;
+  return `<table><thead><tr><th>Tenant</th><th>Owner</th><th>Variant</th><th>Status</th><th>Scopes</th><th>Windows</th><th>Reason</th></tr></thead><tbody>` +
+    rows.map((t) => t.covered
+      ? `<tr><td><code>${esc(t.tenantId)}</code></td><td>${esc(t.owner)}</td><td>${esc(t.variant)}</td><td>${badge("covered", "active")}</td><td>${scopesHtml(t.scopes)}</td><td>${windowsHtml(t.windows)}</td><td></td></tr>`
+      : `<tr><td><code>${esc(t.tenantId)}</code></td><td>${esc(t.owner)}</td><td>${esc(t.variant)}</td><td>${badge("uncovered", "suspended")}</td><td>—</td><td>—</td>` +
+        `<td><span class="hint">${esc(t.reason)}: ${esc(t.detail)}</span></td></tr>`).join("") +
+    `</tbody></table>` +
+    (omitted ? `<div class="hint">${fmtCount(omitted)} uncovered tenant(s) omitted — they need enrollment.</div>` : "");
+}
+
 // ── Groups ──
-const groupsState = { kind: "", list: [] };
+const groupsState = { list: [] };
 
 async function renderGroups(args, live) {
-  if (args[0]) return renderGroupDetail(args[0], args[1] === "policy" ? "policy" : "members", live);
-  const { res, data } = await api(`/admin/groups${groupsState.kind ? `?kind=${groupsState.kind}` : ""}`);
+  if (args[0]) return renderGroupDetail(args[0], ["members", "policies", "loop"].includes(args[1]) ? args[1] : "members", live);
+  const { res, data } = await api("/admin/groups");
   if (!live()) return;
   if (!res.ok) return paint(`<div class="flash err">⚠ ${esc(errorText(res, data))}</div>`);
   groupsState.list = data.groups ?? [];
   paint(`
     <div class="toolbar">
-      <select id="gKind" aria-label="Filter by kind">${[["", "all kinds"], ["general", "general"], ["loop", "loop"]].map(([v, l]) => option(v, l, groupsState.kind)).join("")}</select>
+      <span class="hint">Groups carry members, named policies and loop enrollments — the loop/general split is gone.</span>
       <span class="spacer"></span>
       <button id="gNew" type="button">New group</button>
     </div>
     <table>
-      <thead><tr><th>Name</th><th>Group id</th><th>Kind</th><th class="num">Members</th><th>Policy</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Name</th><th>Group id</th><th class="num">Members</th><th>Actions</th></tr></thead>
       <tbody>${groupsState.list.map((g) => {
-        const loop = g.kind === "loop";
-        const why = loop ? 'title="Loop groups are edited in Tenant Loop"' : "";
         const enc = encodeURIComponent(g.groupId);
         return `<tr><td>${esc(g.name)}${g.description ? `<div class="hint">${esc(g.description)}</div>` : ""}</td>` +
-          `<td><code>${esc(g.groupId)}</code></td><td>${badge(g.kind, g.kind)}</td>` +
-          `<td class="num">${fmtCount(g.memberCount)}</td><td>${policySummary(g.policy)}</td>` +
-          `<td style="white-space:nowrap;"><a class="linkish" href="#/groups/${enc}/members">Members</a> · <a class="linkish" href="#/groups/${enc}/policy">Policy</a> · ` +
-          `<button class="ghost" type="button" data-edit="${esc(g.groupId)}"${loop ? ` disabled ${why}` : ""}>Edit</button> ` +
-          `<button class="danger" type="button" data-delete="${esc(g.groupId)}"${loop ? ` disabled ${why}` : ""}>Delete</button></td></tr>`;
-      }).join("") || '<tr><td colspan="6" class="hint">No groups yet</td></tr>'}</tbody>
+          `<td><code>${esc(g.groupId)}</code></td>` +
+          `<td class="num">${fmtCount(g.memberCount)}</td>` +
+          `<td style="white-space:nowrap;"><a class="linkish" href="#/groups/${enc}/members">Members</a> · <a class="linkish" href="#/groups/${enc}/policies">Policies</a> · <a class="linkish" href="#/groups/${enc}/loop">Tenant loop</a> · ` +
+          `<button class="ghost" type="button" data-edit="${esc(g.groupId)}">Edit</button> ` +
+          `<button class="danger" type="button" data-delete="${esc(g.groupId)}">Delete</button></td></tr>`;
+      }).join("") || '<tr><td colspan="4" class="hint">No groups yet</td></tr>'}</tbody>
     </table>`);
-  view.querySelector("#gKind").addEventListener("change", (e) => {
-    groupsState.kind = e.target.value;
-    refresh();
-  });
   view.querySelector("#gNew").addEventListener("click", () => createGroupFlow());
   for (const btn of view.querySelectorAll("[data-edit]")) {
     btn.addEventListener("click", () => editGroupFlow(groupsState.list.find((g) => g.groupId === btn.dataset.edit)));
@@ -800,31 +888,41 @@ async function renderGroups(args, live) {
   }
 }
 
-function policySummary(policy) {
-  if (!policy) return '<span class="hint">—</span>';
-  return Object.entries(policy)
-    .map(([k, v]) => `<span class="chip">${esc(k)}=${esc(Array.isArray(v) ? v.join("|") : v)}</span>`)
-    .join("");
-}
-
-async function createGroupFlow() {
-  const v = await promptModal({
+/** New-group modal (round-2 group-create fix): name + description ONLY — the server
+ * generates the id as an ASCII slug of the name. Errors come back as {error, field} and
+ * render inline on the named field (never in a flash that disappears). Success opens the
+ * new group's Members tab. */
+function createGroupFlow() {
+  const wrap = showModal({
     title: "New group",
-    fields: [
-      { name: "groupId", label: "Group id (a-z, 0-9, hyphen; 2-40 chars)", placeholder: "team-a", required: true },
-      { name: "name", label: "Name (1-80 chars)", required: true },
-      { name: "description", label: "Description (optional, up to 500 chars)" },
-    ],
-    confirmLabel: "Create",
+    bodyHtml: `
+      <div class="field"><label for="cg-name">Name (1-80 chars)</label><input id="cg-name" autocomplete="off"></div>
+      <div class="formErr" id="cg-name-err" role="alert"></div>
+      <div class="field"><label for="cg-desc">Description (optional, up to 500 chars)</label><input id="cg-desc" autocomplete="off"></div>
+      <div class="formErr" id="cg-desc-err" role="alert"></div>
+      <div class="formErr" id="cg-err" role="alert"></div>
+      <div class="row"><span class="spacer"></span><button class="ghost" id="cg-cancel" type="button">Cancel</button><button id="cg-ok" type="button">Create</button></div>`,
   });
-  if (!v) return;
-  const groupId = v.groupId.trim();
-  const { res, data } = await api("/admin/groups", {
-    method: "POST",
-    body: { groupId, name: v.name.trim(), description: v.description.trim() || undefined },
+  wrap.querySelector("#cg-cancel").addEventListener("click", () => wrap.remove());
+  wrap.querySelector("#cg-ok").addEventListener("click", async () => {
+    for (const id of ["cg-name-err", "cg-desc-err", "cg-err"]) wrap.querySelector(`#${id}`).textContent = "";
+    const name = wrap.querySelector("#cg-name").value.trim();
+    const description = wrap.querySelector("#cg-desc").value.trim();
+    if (!name) {
+      wrap.querySelector("#cg-name-err").textContent = "⚠ Name is required";
+      return;
+    }
+    // Slug-free payload: name + description only — no manual id field.
+    const { res, data } = await api("/admin/groups", { method: "POST", body: { name, description: description || undefined } });
+    if (!res.ok) {
+      const slot = data?.field === "name" ? "#cg-name-err" : data?.field === "description" ? "#cg-desc-err" : "#cg-err";
+      wrap.querySelector(slot).textContent = `⚠ ${errorText(res, data)}`;
+      return;
+    }
+    wrap.remove();
+    location.hash = `#/groups/${encodeURIComponent(data.groupId)}/members`;
   });
-  if (!res.ok) return flash(errorText(res, data));
-  notify(`Group ${groupId} created.`, true);
+  wrap.querySelector("#cg-name").focus();
 }
 
 async function editGroupFlow(group) {
@@ -849,7 +947,7 @@ async function editGroupFlow(group) {
 async function deleteGroupFlow(groupId) {
   const password = await askPassword(
     `Delete group ${groupId}`,
-    "Every membership in this group is removed and the group's policy stops applying. The users are kept. This cannot be undone.",
+    "Every membership is removed, and the group's policy assignments and loop enrollments are cleaned up with it (its members' tenants may leave the loop registry). The users are kept. This cannot be undone.",
   );
   if (password === null) return;
   const { res, data } = await api(`/admin/groups/${encodeURIComponent(groupId)}`, { method: "DELETE", password });
@@ -857,36 +955,171 @@ async function deleteGroupFlow(groupId) {
   notify(`Group ${groupId} deleted.`, true);
 }
 
+/** Group detail with three tabs: Members (paste-list flow), Policies (assigned named
+ * policies with assign/unassign under reauth), Tenant loop ((group, variant) enrollments
+ * with enroll/suspend/activate/unenroll + the covered-tenants preview). */
 async function renderGroupDetail(groupId, tab, live) {
   const { res, data: group } = await api(`/admin/groups/${encodeURIComponent(groupId)}`);
   if (!live()) return;
   if (!res.ok) return paint(`<div class="flash err">⚠ ${esc(errorText(res, group))}</div><a class="linkish" href="#/groups">← Groups</a>`);
-  const variants = tab === "policy" ? await loadVariants() : [];
-  if (!live()) return;
   const enc = encodeURIComponent(group.groupId);
   const members = group.members ?? [];
-  const head = `<div class="toolbar"><a class="linkish" href="#/groups">← Groups</a><h2 style="margin:0">${esc(group.name)}</h2>${badge(group.kind, group.kind)}<span class="hint"><code>${esc(group.groupId)}</code></span></div>` +
-    `<nav class="tabs"><a href="#/groups/${enc}/members" class="${tab === "members" ? "active" : ""}">Members (${fmtCount(members.length)})</a><a href="#/groups/${enc}/policy" class="${tab === "policy" ? "active" : ""}">Policy</a></nav>`;
-  if (tab === "policy") {
-    paint(head + policyFormHtml(group, variants));
-    bindPolicyForm(group);
-    return;
-  }
-  const isLoop = group.kind === "loop";
-  paint(head + (isLoop
-    ? `<div class="card"><div class="hint">Loop group membership is managed through the group loop config in Tenant Loop. Shown read-only here.</div></div>`
-    : `<div class="card wide"><h3 style="margin-top:0">Add members</h3>` +
-      `<div class="toolbar"><input id="gmSearch" type="search" placeholder="Search users by login ID or name" aria-label="Search users to add" style="width:300px"></div>` +
-      `<div id="gmResults"></div>` +
-      `<h3>Paste a list</h3><div class="hint">Login IDs separated by commas, spaces or new lines. Up to 500 per request.</div>` +
-      `<textarea id="gmPaste" rows="4" spellcheck="false" aria-label="Login IDs to add"></textarea>` +
-      `<div class="toolbar"><button id="gmPasteGo" type="button">Add pasted list</button></div></div>`) +
+  const head = `<div class="toolbar"><a class="linkish" href="#/groups">← Groups</a><h2 style="margin:0">${esc(group.name)}</h2><span class="hint"><code>${esc(group.groupId)}</code></span></div>` +
+    `<nav class="tabs">` +
+    `<a href="#/groups/${enc}/members" class="${tab === "members" ? "active" : ""}">Members (${fmtCount(members.length)})</a>` +
+    `<a href="#/groups/${enc}/policies" class="${tab === "policies" ? "active" : ""}">Policies</a>` +
+    `<a href="#/groups/${enc}/loop" class="${tab === "loop" ? "active" : ""}">Tenant loop</a></nav>`;
+  if (tab === "policies") return renderGroupPoliciesTab(group, head, live);
+  if (tab === "loop") return renderGroupLoopTab(group, head, live);
+  paint(head +
+    `<div class="card wide"><h3 style="margin-top:0">Add members</h3>` +
+    `<div class="toolbar"><input id="gmSearch" type="search" placeholder="Search users by login ID or name" aria-label="Search users to add" style="width:300px"></div>` +
+    `<div id="gmResults"></div>` +
+    `<h3>Paste a list</h3><div class="hint">Login IDs separated by commas, spaces or new lines. Up to 500 per request.</div>` +
+    `<textarea id="gmPaste" rows="4" spellcheck="false" aria-label="Login IDs to add"></textarea>` +
+    `<div class="toolbar"><button id="gmPasteGo" type="button">Add pasted list</button></div></div>` +
     `<h3>Members</h3>` +
-    `<table><thead><tr><th>Login ID</th>${isLoop ? "" : "<th></th>"}</tr></thead><tbody>` +
-    (members.map((p) => `<tr><td>${esc(p)}</td>${isLoop ? "" : `<td class="num"><button class="ghost" type="button" data-remove="${esc(p)}">Remove</button></td>`}</tr>`).join("") ||
+    `<table><thead><tr><th>Login ID</th><th></th></tr></thead><tbody>` +
+    (members.map((p) => `<tr><td>${esc(p)}</td><td class="num"><button class="ghost" type="button" data-remove="${esc(p)}">Remove</button></td></tr>`).join("") ||
       `<tr><td colspan="2" class="hint">No members yet</td></tr>`) +
     `</tbody></table>`);
-  if (!isLoop) bindMembers(group, members);
+  bindMembers(group, members);
+}
+
+/** Policies tab: the named policies assigned to this group (unassign under reauth) and the
+ * assign picker. The API exposes assignments per policy, so the group's set resolves from
+ * the per-policy detail views. */
+async function renderGroupPoliciesTab(group, head, live) {
+  const listRes = await api("/admin/policies");
+  if (!live()) return;
+  if (!listRes.res.ok) return paint(head + `<div class="flash err">⚠ ${esc(errorText(listRes.res, listRes.data))}</div>`);
+  const policies = listRes.data.policies ?? [];
+  const details = await Promise.all(policies.map((p) => api(`/admin/policies/${encodeURIComponent(p.policyId)}`)));
+  if (!live()) return;
+  const assigned = [];
+  const unassigned = [];
+  for (const d of details) {
+    if (!d.res.ok) continue;
+    ((d.data.assignments ?? []).some((a) => a.targetId === group.groupId) ? assigned : unassigned).push(d.data.policy);
+  }
+  paint(head +
+    `<div class="card wide"><h3 style="margin-top:0">Assigned policies</h3>` +
+    (assigned.length
+      ? `<table><thead><tr><th>Policy</th><th>Limits</th><th></th></tr></thead><tbody>` +
+        assigned.map((p) => `<tr><td>${esc(p.name)} <span class="hint"><code>${esc(p.policyId)}</code></span></td><td>${limitsSummary(p.limits)}</td>` +
+          `<td class="num"><button class="ghost" type="button" data-unassign="${esc(p.policyId)}">Unassign</button></td></tr>`).join("") +
+        `</tbody></table>`
+      : '<div class="hint">No policies assigned — members get the gateway baseline.</div>') +
+    `<h3>Assign a policy</h3>` +
+    `<div class="toolbar"><select id="gp-pick" aria-label="Policy to assign">${unassigned.length ? unassigned.map((p) => option(p.policyId, p.name)).join("") : '<option value="">no unassigned policies</option>'}</select>` +
+    `<button id="gp-assign" type="button"${unassigned.length ? "" : " disabled"}>Assign…</button></div>` +
+    `<div class="hint">Assignment re-confirms the operator password. A member's effective limit is the strictest across their groups' policies and the gateway baseline.</div>` +
+    `<div class="formErr" id="gp-err" role="alert"></div></div>`);
+  const err = (msg) => {
+    view.querySelector("#gp-err").textContent = `⚠ ${msg}`;
+  };
+  for (const btn of view.querySelectorAll("[data-unassign]")) {
+    btn.addEventListener("click", async () => {
+      const policyId = btn.dataset.unassign;
+      const password = await askPassword(`Unassign a policy from ${group.groupId}`, "The policy stops applying to the group's members immediately; their limits fall back to the baseline.");
+      if (password === null) return;
+      const { res, data } = await api(`/admin/policies/${encodeURIComponent(policyId)}/assignments`, { method: "DELETE", body: { groupId: group.groupId }, password });
+      if (!res.ok) return err(errorText(res, data));
+      notify("Policy unassigned.", true);
+    });
+  }
+  view.querySelector("#gp-assign").addEventListener("click", async () => {
+    const policyId = view.querySelector("#gp-pick").value;
+    if (!policyId) return;
+    const password = await askPassword(`Assign a policy to ${group.groupId}`, "The strictest-wins limits apply to every member on their next request.");
+    if (password === null) return;
+    const { res, data } = await api(`/admin/policies/${encodeURIComponent(policyId)}/assignments`, { method: "POST", body: { groupId: group.groupId }, password });
+    if (!res.ok) return err(errorText(res, data));
+    notify("Policy assigned.", true);
+  });
+}
+
+/** Tenant-loop tab: this group's (group, variant) enrollments with enroll /
+ * suspend-activate / unenroll (all under reauth) and the covered-tenants preview. */
+async function renderGroupLoopTab(group, head, live) {
+  const [enrollRes, variants] = await Promise.all([api("/admin/tenant-loop/enrollments"), loadVariants()]);
+  if (!live()) return;
+  if (!enrollRes.res.ok) return paint(head + `<div class="flash err">⚠ ${esc(errorText(enrollRes.res, enrollRes.data))}</div>`);
+  const rows = (enrollRes.data.enrollments ?? []).filter((e) => e.groupId === group.groupId);
+  paint(head +
+    `<div class="card wide"><h3 style="margin-top:0">Enrollments for <code>${esc(group.groupId)}</code></h3>` +
+    (rows.length
+      ? `<table><thead><tr><th>Variant</th><th>Status</th><th>Scopes</th><th>Windows</th><th>git remote</th><th>Actions</th></tr></thead><tbody>` +
+        rows.map((e) => `<tr><td><code>${esc(e.variant)}</code></td><td>${badge(e.status, e.status)}</td><td>${scopesHtml(e.scopes)}</td><td>${windowsHtml(e.windows)}</td><td>${esc(e.gitRemote ?? "local-only")}</td>` +
+          `<td style="white-space:nowrap;"><button class="ghost" type="button" data-en-toggle="${esc(e.variant)}">${e.status === "active" ? "Suspend" : "Activate"}</button> ` +
+          `<button class="ghost" type="button" data-en-preview="${esc(e.variant)}">Covered tenants</button> ` +
+          `<button class="danger" type="button" data-en-remove="${esc(e.variant)}">Unenroll</button></td></tr>`).join("") +
+        `</tbody></table>`
+      : '<div class="hint">Not enrolled — the members\' tenants are fail-closed out of the loop registry until this group is enrolled.</div>') +
+    `<div class="formErr" id="gl-err" role="alert"></div></div>` +
+    `<div class="card wide" id="gl-preview" style="display:none;"><h3 style="margin-top:0">Covered tenants — <span id="gl-preview-title"></span></h3><div id="gl-preview-body"></div></div>` +
+    `<div class="card wide"><h3 style="margin-top:0">Enroll</h3>` +
+    `<div class="field"><label for="gl-en-variant">Variant</label><select id="gl-en-variant">${option("*", "* (all variants)", "*")}${variants.map((v) => option(v, v)).join("")}</select></div>` +
+    enrollmentFormHtml("gl-en") +
+    `<div style="display:flex; gap:8px; margin-top:8px;"><button id="gl-en-submit" type="button">Enroll</button></div>` +
+    `<div class="formErr" id="gl-en-err" role="alert"></div></div>`);
+  bindRemoteToggle(view, "gl-en");
+  const err = (msg) => {
+    view.querySelector("#gl-err").textContent = `⚠ ${msg}`;
+  };
+  const byVariant = (variant) => rows.find((r) => r.variant === variant);
+  for (const btn of view.querySelectorAll("[data-en-toggle]")) {
+    btn.addEventListener("click", async () => {
+      const variant = btn.dataset.enToggle;
+      const e = byVariant(variant);
+      const status = e.status === "active" ? "suspended" : "active";
+      const password = await askPassword(`${status === "suspended" ? "Suspend" : "Activate"} ${group.groupId}/${variant}`, "The registry export refreshes immediately.");
+      if (password === null) return;
+      // The PUT body is complete — the stored scopes/windows are resent verbatim (no
+      // default fill exists server-side).
+      const { res, data } = await enrollmentApi(group.groupId, variant, { method: "PUT", body: { status, scopes: e.scopes, windows: e.windows, gitRemote: e.gitRemote }, password });
+      if (!res.ok) return err(errorText(res, data));
+      notify(`Enrollment ${group.groupId}/${variant} ${status}.`, true);
+    });
+  }
+  for (const btn of view.querySelectorAll("[data-en-remove]")) {
+    btn.addEventListener("click", async () => {
+      const variant = btn.dataset.enRemove;
+      const password = await askPassword(`Unenroll ${group.groupId}/${variant}`, "The group's members' covered tenants leave the registry export immediately.");
+      if (password === null) return;
+      const { res, data } = await enrollmentApi(group.groupId, variant, { method: "DELETE", password });
+      if (!res.ok) return err(errorText(res, data));
+      notify(`Unenrolled ${group.groupId}/${variant}.`, true);
+    });
+  }
+  for (const btn of view.querySelectorAll("[data-en-preview]")) {
+    btn.addEventListener("click", async () => {
+      const variant = btn.dataset.enPreview;
+      const panel = view.querySelector("#gl-preview");
+      panel.style.display = "";
+      view.querySelector("#gl-preview-title").textContent = `${group.groupId}/${variant}`;
+      const bodyEl = view.querySelector("#gl-preview-body");
+      bodyEl.textContent = "loading…";
+      const { res, data } = await api(`/admin/tenant-loop/preview?groupId=${encodeURIComponent(group.groupId)}&variant=${encodeURIComponent(variant)}`);
+      if (data?.code === "tenant_loop_disabled") { err(errorText(res, data)); return; }
+      if (!res.ok) { bodyEl.innerHTML = `<div class="flash err">⚠ ${esc(errorText(res, data))}</div>`; return; }
+      bodyEl.innerHTML = previewPanelHtml(data.tenants ?? []);
+    });
+  }
+  view.querySelector("#gl-en-submit").addEventListener("click", async () => {
+    const errEl = view.querySelector("#gl-en-err");
+    errEl.textContent = "";
+    const variant = view.querySelector("#gl-en-variant").value;
+    if (!variant) { errEl.textContent = "⚠ pick a variant"; return; }
+    const parsed = readEnrollmentForm(view, "gl-en");
+    if (!parsed.ok) { errEl.textContent = `⚠ ${parsed.error}`; return; }
+    const password = await askPassword(`Enroll ${group.groupId}/${variant}`, "The group's members' covered tenants export with these scopes and windows immediately.");
+    if (password === null) return;
+    errEl.textContent = "enrolling…";
+    const { res, data } = await enrollmentApi(group.groupId, variant, { method: "PUT", body: { status: "active", ...parsed.value }, password });
+    if (!res.ok) { errEl.textContent = `⚠ ${errorText(res, data)}`; return; }
+    notify(`Enrolled ${group.groupId}/${variant}.`, true);
+  });
 }
 
 function bindMembers(group, members) {
@@ -948,51 +1181,6 @@ async function addMembers(group, principals, message) {
   const { res, data } = await api(`/admin/groups/${encodeURIComponent(group.groupId)}/members`, { method: "POST", body: { principals } });
   if (!res.ok) return flash(errorText(res, data));
   notify(data.unknown?.length ? `No live user for: ${data.unknown.join(", ")}.` : message, !data.unknown?.length);
-}
-
-function policyFormHtml(group, variants) {
-  const p = group.policy ?? {};
-  const restrict = Array.isArray(p.allowedVariants);
-  return `<div class="card wide"><h3 style="margin-top:0">Policy</h3>` +
-    `<div class="hint">Policies only tighten. A member's effective limit is the strictest of the gateway baseline and every group they belong to. Leave a field empty to leave it unset.</div><br>` +
-    POLICY_NUMERIC.map(([key, label, hint]) =>
-      `<div class="field"><label for="pol-${key}">${esc(label)} — ${esc(hint)}</label>` +
-      `<input id="pol-${key}" type="number" min="1" step="1" value="${esc(p[key] ?? "")}" placeholder="not set" style="max-width:220px"></div>`).join("") +
-    `<div class="field"><label class="betaPick"><input type="checkbox" id="pol-restrict"${restrict ? " checked" : ""}> Restrict provisioning to selected variants</label>` +
-    `<div>${variants.map((v) => `<label class="betaPick"><input type="checkbox" data-variant value="${esc(v)}"${restrict && p.allowedVariants.includes(v) ? " checked" : ""}> ${esc(v)}</label>`).join("") || '<span class="hint">no variants reported</span>'}</div></div>` +
-    `<div class="toolbar"><button id="pol-save" type="button">Save policy</button><button id="pol-clear" type="button" class="ghost">Clear policy</button></div>` +
-    `<div class="formErr" id="pol-err" role="alert"></div></div>`;
-}
-
-function bindPolicyForm(group) {
-  const enc = encodeURIComponent(group.groupId);
-  const err = (msg) => {
-    view.querySelector("#pol-err").textContent = `⚠ ${msg}`;
-  };
-  const save = async (policy) => {
-    const password = await askPassword(`Save policy for ${group.groupId}`, "The limits apply to every member on their next request.");
-    if (password === null) return;
-    const { res, data } = await api(`/admin/groups/${enc}/policy`, { method: "PUT", body: policy, password });
-    if (!res.ok) return err(errorText(res, data));
-    notify(policy ? `Policy saved for ${group.groupId}.` : `Policy cleared for ${group.groupId}.`, true);
-  };
-  view.querySelector("#pol-save").addEventListener("click", () => {
-    const body = {};
-    for (const [key, label] of POLICY_NUMERIC) {
-      const raw = view.querySelector(`#pol-${key}`).value.trim();
-      if (raw === "") continue;
-      const n = Number(raw);
-      if (!Number.isInteger(n) || n < 1) return err(`${label} must be a positive whole number`);
-      body[key] = n;
-    }
-    if (view.querySelector("#pol-restrict").checked) {
-      const list = [...view.querySelectorAll("[data-variant]:checked")].map((c) => c.value);
-      if (!list.length) return err("Select at least one variant, or turn the restriction off.");
-      body.allowedVariants = list;
-    }
-    save(Object.keys(body).length ? body : null);
-  });
-  view.querySelector("#pol-clear").addEventListener("click", () => save(null));
 }
 
 // ── Tenants ──
@@ -1103,73 +1291,231 @@ async function bulkTenants(action) {
   refresh();
 }
 
-// ── Policies (read-only matrix) ──
-async function renderPolicies(_args, live) {
-  const { res, data } = await api("/admin/groups");
-  if (!live()) return;
-  if (!res.ok) return paint(`<div class="flash err">⚠ ${esc(errorText(res, data))}</div>`);
-  const groups = data.groups ?? [];
-  paint(`
-    <div class="hint">Read-only. Each group's limits, with the members' effective limit being the strictest across the groups they belong to and the gateway baseline. Edit a group's policy from Groups. The gateway baseline itself (the <code>CO_WORKSPACE_TENANT_*</code> values) is not exposed by this API.</div><br>
-    <table>
-      <thead><tr><th>Group</th><th>Kind</th>${POLICY_NUMERIC.map(([, label]) => `<th class="num">${esc(label)}</th>`).join("")}<th>Allowed variants</th></tr></thead>
-      <tbody>${groups.map((g) => {
-        const p = g.policy ?? {};
-        return `<tr><td><a class="linkish" href="#/groups/${encodeURIComponent(g.groupId)}/policy">${esc(g.name)}</a> <span class="hint"><code>${esc(g.groupId)}</code></span></td>` +
-          `<td>${badge(g.kind, g.kind)}</td>` +
-          POLICY_NUMERIC.map(([key]) => `<td class="num">${p[key] ? fmtCount(p[key]) : '<span class="hint">—</span>'}</td>`).join("") +
-          `<td>${Array.isArray(p.allowedVariants) ? esc(p.allowedVariants.join(", ")) : '<span class="hint">—</span>'}</td></tr>`;
-      }).join("") || '<tr><td colspan="7" class="hint">No groups yet</td></tr>'}</tbody>
-    </table>`);
+// ── Policies (round-2 named-policy CRUD; group-only assignments per the unit model) ──
+const policiesState = { list: [] };
+
+function limitsSummary(limits) {
+  const parts = POLICY_NUMERIC.filter(([key]) => limits?.[key] !== undefined)
+    .map(([key]) => `<span class="chip">${esc(key)}=${fmtCount(limits[key])}</span>`);
+  if (Array.isArray(limits?.allowedVariants) && limits.allowedVariants.length) {
+    parts.push(`<span class="chip">allowedVariants=${esc(limits.allowedVariants.join("|"))}</span>`);
+  }
+  return parts.join("") || '<span class="hint">no limits set</span>';
 }
 
-// ── Tenant Loop (moved unchanged from web/index.html; the DOM root is now #tl-root) ──
+async function renderPolicies(args, live) {
+  if (args[0]) return renderPolicyDetail(args[0], live);
+  const { res, data } = await api("/admin/policies");
+  if (!live()) return;
+  if (!res.ok) return paint(`<div class="flash err">⚠ ${esc(errorText(res, data))}</div>`);
+  policiesState.list = data.policies ?? [];
+  paint(`
+    <div class="toolbar">
+      <span class="hint">Named policies attach to GROUPS only; a member's effective limit is the strictest of the gateway baseline and every policy assigned to their groups. The gateway baseline itself (the <code>CO_WORKSPACE_TENANT_*</code> values) is not exposed by this API.</span>
+      <span class="spacer"></span>
+      <button id="pNew" type="button">New policy</button>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Description</th><th>Limits</th><th class="num">Assignments</th><th>Actions</th></tr></thead>
+      <tbody>${policiesState.list.map((p) => {
+        const enc = encodeURIComponent(p.policyId);
+        return `<tr><td>${esc(p.name)} <span class="hint"><code>${esc(p.policyId)}</code></span></td>` +
+          `<td>${esc(p.description ?? "")}</td><td>${limitsSummary(p.limits)}</td><td class="num">${fmtCount(p.assignmentCount)}</td>` +
+          `<td style="white-space:nowrap;"><a class="linkish" href="#/policies/${enc}">Detail</a> · ` +
+          `<button class="ghost" type="button" data-edit="${esc(p.policyId)}">Edit</button> ` +
+          `<button class="danger" type="button" data-delete="${esc(p.policyId)}">Delete</button></td></tr>`;
+      }).join("") || '<tr><td colspan="5" class="hint">No policies yet</td></tr>'}</tbody>
+    </table>`);
+  view.querySelector("#pNew").addEventListener("click", () => policyModal(null));
+  for (const btn of view.querySelectorAll("[data-edit]")) {
+    btn.addEventListener("click", () => policyModal(policiesState.list.find((p) => p.policyId === btn.dataset.edit)));
+  }
+  for (const btn of view.querySelectorAll("[data-delete]")) {
+    btn.addEventListener("click", () => deletePolicyFlow(btn.dataset.delete));
+  }
+}
+
+/** Create/edit modal for a named policy: name, description and a field per limit — the 4
+ * numeric fields plus the allowedVariants multi-select fed from the variant catalog. Form
+ * errors render inline (never a flash). Create needs no reauth; PATCH re-confirms the
+ * password. A create carrying inline assignments is refused 409 server-side — the UI never
+ * sends one. */
+async function policyModal(policy) {
+  const editing = Boolean(policy);
+  const variants = await loadVariants();
+  const selected = new Set(editing && Array.isArray(policy.limits?.allowedVariants) ? policy.limits.allowedVariants : []);
+  const wrap = showModal({
+    title: editing ? `Edit policy ${policy.name}` : "New policy",
+    bodyHtml: `
+      <div class="field"><label for="pf-name">Name (1-80 chars, unique)</label><input id="pf-name" value="${esc(policy?.name ?? "")}" autocomplete="off"></div>
+      <div class="formErr" id="pf-name-err" role="alert"></div>
+      <div class="field"><label for="pf-desc">Description (optional, up to 500 chars)</label><input id="pf-desc" value="${esc(policy?.description ?? "")}" autocomplete="off"></div>
+      <div class="field">Limits — leave a field empty to leave it unset (a policy only tightens)</div>
+      ${POLICY_NUMERIC.map(([key, label, hint]) =>
+        `<div class="field"><label for="pf-${key}">${esc(label)} — ${esc(hint)}</label>` +
+        `<input id="pf-${key}" type="number" min="1" step="1" value="${esc(policy?.limits?.[key] ?? "")}" placeholder="not set" style="max-width:220px"></div>`).join("")}
+      <div class="field"><label for="pf-variants">Allowed variants (multi-select; empty = any configured variant)</label>
+        <select id="pf-variants" multiple size="${Math.max(2, variants.length)}" aria-label="Allowed variants">${variants.map((v) => `<option value="${esc(v)}"${selected.has(v) ? " selected" : ""}>${esc(v)}</option>`).join("") || '<option value="" disabled>no variants reported</option>'}</select></div>
+      <div class="formErr" id="pf-err" role="alert"></div>
+      <div class="row"><span class="spacer"></span><button class="ghost" id="pf-cancel" type="button">Cancel</button><button id="pf-ok" type="button">${editing ? "Save" : "Create"}</button></div>`,
+  });
+  wrap.querySelector("#pf-cancel").addEventListener("click", () => wrap.remove());
+  wrap.querySelector("#pf-ok").addEventListener("click", async () => {
+    for (const id of ["pf-name-err", "pf-err"]) wrap.querySelector(`#${id}`).textContent = "";
+    const name = wrap.querySelector("#pf-name").value.trim();
+    if (!name) {
+      wrap.querySelector("#pf-name-err").textContent = "⚠ Name is required";
+      return;
+    }
+    const numerics = Object.fromEntries(POLICY_NUMERIC_KEYS.map((key) => [key, wrap.querySelector(`#pf-${key}`).value]));
+    const allowedVariants = [...wrap.querySelector("#pf-variants").selectedOptions].map((o) => o.value).filter(Boolean);
+    const parsed = validatePolicyLimits(numerics, allowedVariants);
+    if (!parsed.ok) {
+      wrap.querySelector("#pf-err").textContent = `⚠ ${parsed.error}`;
+      return;
+    }
+    const body = { name, description: wrap.querySelector("#pf-desc").value.trim() || null, limits: parsed.limits };
+    let res, data;
+    if (editing) {
+      const password = await askPassword(`Save policy ${policy.name}`, "The tightened limits apply to every member on their next request.");
+      if (password === null) return;
+      ({ res, data } = await api(`/admin/policies/${encodeURIComponent(policy.policyId)}`, { method: "PATCH", body, password }));
+    } else {
+      ({ res, data } = await api("/admin/policies", { method: "POST", body }));
+    }
+    if (!res.ok) {
+      const slot = data?.error === "invalid_name" ? "#pf-name-err" : "#pf-err";
+      wrap.querySelector(slot).textContent = `⚠ ${errorText(res, data)}`;
+      return;
+    }
+    wrap.remove();
+    notify(`Policy ${data.policy.name} ${editing ? "updated" : "created"}.`, true);
+  });
+  wrap.querySelector("#pf-name").focus();
+}
+
+/** Delete a policy; the confirmation names the assignment count (assignments cascade).
+ * `errSel` (optional) inlines the error on the detail page instead of the view flash. */
+async function deletePolicyFlow(policyId, errSel) {
+  const detail = await api(`/admin/policies/${encodeURIComponent(policyId)}`);
+  if (!detail.res.ok) return flash(errorText(detail.res, detail.data));
+  const policy = detail.data.policy;
+  const count = (detail.data.assignments ?? []).length;
+  const password = await askPassword(
+    `Delete policy ${policy.name}`,
+    `This policy is assigned to ${fmtCount(count)} group(s); deleting it removes those assignments and the members' limits fall back to the gateway baseline. This cannot be undone.`,
+  );
+  if (password === null) return;
+  const { res, data } = await api(`/admin/policies/${encodeURIComponent(policyId)}`, { method: "DELETE", password });
+  if (!res.ok) {
+    const inline = errSel ? view.querySelector(errSel) : null;
+    if (inline) inline.textContent = `⚠ ${errorText(res, data)}`;
+    else flash(errorText(res, data));
+    return;
+  }
+  notify(`Policy ${policy.name} deleted.`, true);
+}
+
+/** Policy detail: the stored limits (edit via the modal), and the assignments "tab" —
+ * search groups, assign and unassign (both under reauth, inline errors). */
+async function renderPolicyDetail(policyId, live) {
+  const [detailRes, groupsRes] = await Promise.all([api(`/admin/policies/${encodeURIComponent(policyId)}`), api("/admin/groups")]);
+  if (!live()) return;
+  if (!detailRes.res.ok) return paint(`<div class="flash err">⚠ ${esc(errorText(detailRes.res, detailRes.data))}</div><a class="linkish" href="#/policies">← Policies</a>`);
+  const policy = detailRes.data.policy;
+  const assignments = detailRes.data.assignments ?? [];
+  const groups = groupsRes.res.ok ? groupsRes.data.groups ?? [] : [];
+  const groupName = (id) => groups.find((g) => g.groupId === id)?.name ?? id;
+  const assignedIds = new Set(assignments.map((a) => a.targetId));
+  const candidates = groups.filter((g) => !assignedIds.has(g.groupId));
+  paint(`<div class="toolbar"><a class="linkish" href="#/policies">← Policies</a><h2 style="margin:0">${esc(policy.name)}</h2><span class="hint"><code>${esc(policy.policyId)}</code></span></div>` +
+    `<div class="card wide"><h3 style="margin-top:0">Limits</h3>` +
+    `<table class="kv"><tr><td>Description</td><td>${esc(policy.description ?? "—")}</td></tr>` +
+    POLICY_NUMERIC.map(([key, label]) => `<tr><td>${esc(label)}</td><td>${policy.limits?.[key] ? fmtCount(policy.limits[key]) : '<span class="hint">not set</span>'}</td></tr>`).join("") +
+    `<tr><td>Allowed variants</td><td>${Array.isArray(policy.limits?.allowedVariants) ? esc(policy.limits.allowedVariants.join(", ")) : '<span class="hint">any configured variant</span>'}</td></tr></table>` +
+    `<div class="toolbar"><button id="pd-edit" type="button">Edit…</button><button id="pd-delete" type="button" class="danger">Delete…</button></div>` +
+    `<div class="formErr" id="pd-err" role="alert"></div></div>` +
+    `<div class="card wide"><h3 style="margin-top:0">Assignments (${fmtCount(assignments.length)})</h3>` +
+    (assignments.length
+      ? `<table><thead><tr><th>Group</th><th></th></tr></thead><tbody>` +
+        assignments.map((a) => `<tr><td>${esc(groupName(a.targetId))} <span class="hint"><code>${esc(a.targetId)}</code></span></td>` +
+          `<td class="num"><button class="ghost" type="button" data-unassign="${esc(a.targetId)}">Unassign</button></td></tr>`).join("") +
+        `</tbody></table>`
+      : '<div class="hint">Not assigned to any group.</div>') +
+    `<h3>Assign to a group</h3>` +
+    `<div class="toolbar"><input id="pa-search" type="search" placeholder="Filter groups" aria-label="Filter groups" style="width:200px">` +
+    `<select id="pa-pick" aria-label="Group to assign">${candidates.length ? candidates.map((g) => option(g.groupId, g.name)).join("") : '<option value="">no unassigned groups</option>'}</select>` +
+    `<button id="pa-assign" type="button"${candidates.length ? "" : " disabled"}>Assign…</button></div>` +
+    `<div class="hint">Assignment re-confirms the operator password. Group-only targets — there is no per-user assignment in the unit model.</div>` +
+    `<div class="formErr" id="pa-err" role="alert"></div></div>`);
+  view.querySelector("#pd-edit").addEventListener("click", () => policyModal(policy));
+  view.querySelector("#pd-delete").addEventListener("click", () => deletePolicyFlow(policy.policyId, "#pd-err"));
+  const paErr = (msg) => {
+    view.querySelector("#pa-err").textContent = `⚠ ${msg}`;
+  };
+  view.querySelector("#pa-search").addEventListener("input", (e) => {
+    const term = e.target.value.trim().toLowerCase();
+    const pick = view.querySelector("#pa-pick");
+    for (const opt of pick.options) {
+      const group = groups.find((g) => g.groupId === opt.value);
+      const hay = `${group?.name ?? ""} ${opt.value}`.toLowerCase();
+      opt.hidden = Boolean(term) && !hay.includes(term);
+    }
+  });
+  for (const btn of view.querySelectorAll("[data-unassign]")) {
+    btn.addEventListener("click", async () => {
+      const groupId = btn.dataset.unassign;
+      const password = await askPassword(`Unassign from ${groupId}`, "The policy stops applying to the group's members immediately; their limits fall back to the baseline.");
+      if (password === null) return;
+      const { res, data } = await api(`/admin/policies/${encodeURIComponent(policy.policyId)}/assignments`, { method: "DELETE", body: { groupId }, password });
+      if (!res.ok) return paErr(errorText(res, data));
+      notify("Policy unassigned.", true);
+    });
+  }
+  view.querySelector("#pa-assign").addEventListener("click", async () => {
+    const groupId = view.querySelector("#pa-pick").value;
+    if (!groupId) return;
+    const password = await askPassword(`Assign to ${groupName(groupId)}`, "The strictest-wins limits apply to every member on their next request.");
+    if (password === null) return;
+    const { res, data } = await api(`/admin/policies/${encodeURIComponent(policy.policyId)}/assignments`, { method: "POST", body: { groupId }, password });
+    if (!res.ok) return paErr(errorText(res, data));
+    notify("Policy assigned.", true);
+  });
+}
+
+// ── Tenant Loop (round-2 unit model: coverage is driven by (group, variant) ENROLLMENTS on
+// general groups. The per-tenant register/suspend/deregister forms and the group config
+// editor are REMOVED — their routes answer 410. The registry preview lists covered tenants
+// only; uncovered tenants need enrollment. Kill switch first: ANY response carrying the
+// typed code "tenant_loop_disabled" (403) replaces the whole section with a persistent
+// banner. ──
 function tenantLoopMarkup() {
   return `<div class="tlBanner gws-hidden" id="tl-banner" role="alert">Tenant loop is disabled via CO_WORKSPACE_TENANT_LOOP_DISABLED — every tenant-loop route answers 403 and the registry export marks every tenant suspended.</div>` +
     `<div id="tl-body" style="display:flex; flex-direction:column; gap:12px;">` +
+    `<div class="card wide" id="tl-enroll"><h2 style="margin-top:0;">Enroll a group</h2>` +
+    `<div class="field"><label for="tl-en-group">Group</label><select id="tl-en-group"><option value="">loading groups…</option></select></div>` +
+    `<div class="field"><label for="tl-en-variant">Variant</label><select id="tl-en-variant"><option value="*">* (all variants)</option></select></div>` +
+    enrollmentFormHtml("tl-en") +
+    `<div style="display:flex; gap:8px; margin-top:8px;"><button id="tl-en-submit" type="button">Enroll</button></div>` +
+    `<div class="formErr" id="tl-en-err" role="alert"></div></div>` +
+    `<div class="card wide" id="tl-enrollments"><h2>Enrollments</h2>` +
+    `<table><thead><tr><th>Group</th><th>Variant</th><th>Status</th><th>Scopes</th><th>Windows</th><th>git remote</th><th class="num">Covered tenants</th><th>Actions</th></tr></thead><tbody id="tl-en-rows"></tbody></table>` +
+    `<div class="hint" id="tl-en-empty" style="min-height:1em;">loading…</div>` +
+    `<div class="formErr" id="tl-en-status" role="alert"></div></div>` +
+    `<div class="card wide" id="tl-preview" style="display:none;"><h2 style="margin-top:0;">Covered tenants — <span id="tl-preview-title"></span></h2><div id="tl-preview-body"></div></div>` +
     `<div class="card wide" id="tl-registry"><h2 style="display:flex; align-items:center; justify-content:space-between; gap:8px;">Gateway registry export` +
     `<button id="tl-refresh" type="button" class="ghost" style="font-size:.74rem;">↻ Refresh</button></h2>` +
     `<div class="hint" id="tl-fresh"></div><div class="hint" id="tl-empty" style="margin-top:6px;">loading…</div>` +
     `<div id="tl-table-wrap" class="gws-hidden" style="overflow-x:auto; margin-top:6px;">` +
     `<table><thead><tr><th>id</th><th>principal</th><th>variant</th><th>status</th><th>scopes</th><th>windows</th><th>git remote</th><th>actions</th></tr></thead><tbody id="tl-rows"></tbody></table></div></div>` +
-    `<div class="card" id="tl-register"><h2>Register tenant</h2>` +
-    `<div class="field"><label for="tl-reg-pick">Existing tenant (id · variant · owner)</label><select id="tl-reg-pick"><option value="">pick a tenant…</option></select></div>` +
-    `<div class="hint" id="tl-reg-meta" style="min-height:1em;"></div>` +
-    `<div class="field"><label for="tl-reg-id">Tenant id</label><input id="tl-reg-id" placeholder="gw-0123456789ab" autocomplete="off"></div>` +
-    `<div class="field"><label for="tl-reg-group">Loop group (optional — default "default")</label><input id="tl-reg-group" placeholder="default" autocomplete="off"></div>` +
-    `<div class="field">Scopes (per-tenant overrides — unset keys inherit the group defaults)` +
-    `<label class="betaPick" style="margin-top:2px;"><input type="checkbox" id="tl-reg-scope-upgrade" style="width:auto"> upgrade</label>` +
-    `<label class="betaPick"><input type="checkbox" id="tl-reg-scope-upstreamFile" style="width:auto"> upstreamFile</label>` +
-    `<label class="betaPick"><input type="checkbox" id="tl-reg-scope-backportReview" style="width:auto"> backportReview</label>` +
-    `<label class="betaPick"><input type="checkbox" id="tl-reg-scope-nightlyFleet" style="width:auto"> nightlyFleet</label></div>` +
-    `<div class="field"><label for="tl-reg-tz">Window time zone (IANA)</label><input id="tl-reg-tz" value="Asia/Seoul" autocomplete="off"></div>` +
-    `<div class="field">Window days (0 = Sunday)` +
-    TL_DAY_NAMES.map((d, i) => `<label class="betaPick" style="display:inline-flex; margin-right:8px;"><input type="checkbox" id="tl-reg-day-${i}" checked style="width:auto"> ${d}</label>`).join("") +
-    `</div>` +
-    `<div class="field" style="flex-direction:row; gap:8px;"><span style="flex:1;"><label for="tl-reg-start">Start (HH:MM, inclusive)</label><input id="tl-reg-start" value="00:00" autocomplete="off"></span>` +
-    `<span style="flex:1;"><label for="tl-reg-end">End (HH:MM, exclusive)</label><input id="tl-reg-end" value="23:59" autocomplete="off"></span></div>` +
-    `<div class="field"><label for="tl-reg-remote">git remote (backup branch safety net)</label><select id="tl-reg-remote"><option value="local-only">local-only</option><option value="url">url</option></select></div>` +
-    `<div class="field gws-hidden" id="tl-reg-url-row"><label for="tl-reg-url">Remote URL</label><input id="tl-reg-url" placeholder="https://git.example.team/team/project.git" autocomplete="off"></div>` +
-    `<div style="display:flex; gap:8px; margin-top:8px;"><button id="tl-reg-submit" type="button">Register</button></div>` +
-    `<div class="formErr" id="tl-reg-err" role="alert"></div></div>` +
-    `<div class="card" id="tl-config"><h2>Group loop config</h2>` +
-    `<div class="field"><label for="tl-config-json">loop_config JSON — group id, designatedUsers, scope/window defaults</label>` +
-    `<textarea id="tl-config-json" rows="8" spellcheck="false"></textarea></div>` +
-    `<div style="display:flex; gap:8px; margin-top:8px;">` +
-    `<button id="tl-config-validate" type="button" class="ghost">Validate</button>` +
-    `<button id="tl-config-save" type="button">Save to group</button></div>` +
-    `<div class="formErr" id="tl-config-err" role="status"></div></div>` +
     `<div class="formErr" id="tl-status" role="status"></div></div>`;
 }
 
-function renderTenantLoop() {
+async function renderTenantLoop(_args, live) {
+  const variants = await loadVariants();
+  if (!live()) return;
   paint(`<div id="tl-root">${tenantLoopMarkup()}</div>`);
   const root = view.querySelector("#tl-root");
-  // ── Tenant loop (design 2026-11-08-gw-tenant-loop-and-hardening-design §4, admin UI):
-  // registry export preview, register/suspend/deregister, dry-run→confirm upgrade, and
-  // the group loop-config editor. Kill switch first: ANY response carrying the typed
-  // code "tenant_loop_disabled" (403) replaces the whole section with a persistent
-  // banner — the forms cannot work while CO_WORKSPACE_TENANT_LOOP_DISABLED is set. ──
   const authHeaders = { "content-type": "application/json", "x-requested-with": "co-workspace" };
   const tlBanner = root.querySelector("#tl-banner");
   const tlBody = root.querySelector("#tl-body");
@@ -1188,28 +1534,160 @@ function renderTenantLoop() {
     tlStatus.textContent = text;
   }
 
-  // Server errors surface verbatim (message + typed code when present).
+  // Server errors surface verbatim (message + typed code when present) — including the
+  // round-2 refusal reasons tenant_loop_not_covered (409) and
+  // tenant_loop_window_unrepresentable (403) on the upgrade route.
   function tlErrText(res, body) {
     return `⚠ ${body?.error ?? `HTTP ${res.status}`}${body?.code ? ` (${body.code})` : ""}`;
   }
 
-  function tlScopesHtml(scopes) {
-    const short = { upgrade: "upg", upstreamFile: "file", backportReview: "backport", nightlyFleet: "fleet" };
-    return LOOP_SCOPE_KEYS.map((k) => {
-      const on = scopes?.[k] === true;
-      return `<span class="tlScope ${on ? "on" : "off"}" title="${esc(k)}: ${on ? "on" : "off"}">${short[k] ?? k} ${on ? "✓" : "✗"}</span>`;
-    }).join("");
-  }
-
-  function tlWindowsHtml(w) {
-    if (!w || typeof w !== "object") return "";
-    const days = Array.isArray(w.days) ? w.days.map((d) => TL_DAY_NAMES[d] ?? d).join(",") : "?";
-    return `${esc(String(w.tz ?? "?"))} · ${esc(days)} · ${esc(String(w.start ?? "?"))}–${esc(String(w.end ?? "?"))}`;
-  }
-
+  // The upgrade POST (dry-run and confirm) — the only per-tenant op left post-v4.
   function tlPost(tenantId, op, bodyOut) {
     return fetch(`/admin/tenant-loop/tenants/${encodeURIComponent(tenantId)}/${op}`, { method: "POST", headers: authHeaders, body: JSON.stringify(bodyOut ?? {}) });
   }
+
+  // ── Enrollments table: (group, variant) rows with status/scopes/windows/gitRemote and a
+  // covered-tenant count resolved from the preview endpoint. ──
+  async function tlLoadEnrollments() {
+    const empty = root.querySelector("#tl-en-empty");
+    const rows = root.querySelector("#tl-en-rows");
+    const status = root.querySelector("#tl-en-status");
+    empty.textContent = "loading…";
+    rows.innerHTML = "";
+    status.textContent = "";
+    let res, body;
+    try {
+      res = await fetch("/admin/tenant-loop/enrollments");
+      body = await res.json().catch(() => ({}));
+    } catch (err) {
+      empty.textContent = `⚠ ${err.message}`;
+      return;
+    }
+    if (tlDisabled(body)) return;
+    if (!res.ok) {
+      empty.textContent = tlErrText(res, body);
+      return;
+    }
+    const enrollments = body.enrollments ?? [];
+    if (!enrollments.length) {
+      empty.textContent = "no enrollments — enroll a group below or from a group's Tenant-loop tab; uncovered tenants are fail-closed out of the export";
+      return;
+    }
+    empty.textContent = "";
+    // Covered-tenant count per (group, variant): the preview's covered rows.
+    const counts = await Promise.all(enrollments.map((e) =>
+      fetch(`/admin/tenant-loop/preview?groupId=${encodeURIComponent(e.groupId)}&variant=${encodeURIComponent(e.variant)}`)
+        .then((r) => r.json().catch(() => ({})))
+        .then((b) => (Array.isArray(b.tenants) ? b.tenants.filter((t) => t.covered).length : null))
+        .catch(() => null)));
+    if (!live()) return;
+    rows.innerHTML = enrollments.map((e, i) =>
+      `<tr><td><code>${esc(e.groupId)}</code></td><td><code>${esc(e.variant)}</code></td><td>${badge(e.status, e.status)}</td>` +
+      `<td>${scopesHtml(e.scopes)}</td><td>${windowsHtml(e.windows)}</td><td>${esc(e.gitRemote ?? "local-only")}</td>` +
+      `<td class="num">${counts[i] === null ? '<span class="hint">?</span>' : fmtCount(counts[i])}</td>` +
+      `<td style="white-space:nowrap;">` +
+      `<button class="ghost" data-en-act="toggle" data-gid="${esc(e.groupId)}" data-variant="${esc(e.variant)}">${e.status === "active" ? "Suspend" : "Activate"}</button> ` +
+      `<button class="ghost" data-en-act="preview" data-gid="${esc(e.groupId)}" data-variant="${esc(e.variant)}">Covered tenants</button> ` +
+      `<button class="danger" data-en-act="unenroll" data-gid="${esc(e.groupId)}" data-variant="${esc(e.variant)}">Unenroll</button></td></tr>`).join("");
+    for (const btn of root.querySelectorAll("[data-en-act]")) {
+      const e = enrollments.find((en) => en.groupId === btn.dataset.gid && en.variant === btn.dataset.variant);
+      btn.addEventListener("click", () => {
+        if (!e) return;
+        if (btn.dataset.enAct === "preview") tlPreview(e);
+        else tlEnrollmentAction(e, btn.dataset.enAct);
+      });
+    }
+  }
+
+  // Suspend/activate (PUT resends the stored scopes/windows — the body must be complete)
+  // and unenroll (DELETE). Both are admin + reauth: the password rides x-admin-password
+  // for that one request and is never stored.
+  async function tlEnrollmentAction(e, action) {
+    const status = root.querySelector("#tl-en-status");
+    status.textContent = "";
+    let res, data;
+    if (action === "unenroll") {
+      const password = await askPassword(`Unenroll ${e.groupId}/${e.variant}`, "The group's members' covered tenants leave the registry export immediately.");
+      if (password === null) return;
+      ({ res, data } = await enrollmentApi(e.groupId, e.variant, { method: "DELETE", password }));
+    } else {
+      const next = e.status === "active" ? "suspended" : "active";
+      const password = await askPassword(`${next === "suspended" ? "Suspend" : "Activate"} ${e.groupId}/${e.variant}`, "The registry export refreshes immediately.");
+      if (password === null) return;
+      ({ res, data } = await enrollmentApi(e.groupId, e.variant, { method: "PUT", body: { status: next, scopes: e.scopes, windows: e.windows, gitRemote: e.gitRemote }, password }));
+    }
+    if (tlDisabled(data)) return;
+    if (!res.ok) {
+      status.textContent = tlErrText(res, data);
+      return;
+    }
+    tlNote(`✔ ${e.groupId}/${e.variant} ${action === "unenroll" ? "unenrolled" : `${data.enrollment?.status ?? "updated"}`}`, true);
+    await Promise.all([tlLoadEnrollments(), tlLoadRegistry()]);
+  }
+
+  // Covered-tenants preview for ONE enrollment: tenants + resolved scopes/windows + any
+  // window_intersection_unrepresentable reason row.
+  async function tlPreview(e) {
+    const panel = root.querySelector("#tl-preview");
+    panel.style.display = "";
+    root.querySelector("#tl-preview-title").textContent = `${e.groupId}/${e.variant}`;
+    const bodyEl = root.querySelector("#tl-preview-body");
+    bodyEl.textContent = "loading…";
+    const { res, data } = await api(`/admin/tenant-loop/preview?groupId=${encodeURIComponent(e.groupId)}&variant=${encodeURIComponent(e.variant)}`);
+    if (tlDisabled(data)) return;
+    if (!res.ok) {
+      bodyEl.innerHTML = `<div class="flash err">⚠ ${esc(errorText(res, data))}</div>`;
+      return;
+    }
+    bodyEl.innerHTML = previewPanelHtml(data.tenants ?? []);
+  }
+
+  // Group picker for the enroll form.
+  (async () => {
+    const pick = root.querySelector("#tl-en-group");
+    const { res, data } = await api("/admin/groups");
+    if (!live()) return;
+    const groups = res.ok ? data.groups ?? [] : [];
+    pick.innerHTML = groups.length
+      ? `<option value="">pick a group…</option>` + groups.map((g) => `<option value="${esc(g.groupId)}">${esc(g.name)} (${esc(g.groupId)})</option>`).join("")
+      : `<option value="">no groups — create one under Groups</option>`;
+  })();
+  root.querySelector("#tl-en-variant").innerHTML = option("*", "* (all variants)", "*") + variants.map((v) => option(v, v)).join("");
+  bindRemoteToggle(root, "tl-en");
+
+  root.querySelector("#tl-en-submit").addEventListener("click", async () => {
+    const err = root.querySelector("#tl-en-err");
+    err.textContent = "";
+    const groupId = root.querySelector("#tl-en-group").value;
+    const variant = root.querySelector("#tl-en-variant").value;
+    if (!groupId) {
+      err.textContent = "⚠ pick a group";
+      return;
+    }
+    // Client-side validation mirrors the gateway's write-time rules (app-helpers.js,
+    // unit-tested); the server re-validates authoritatively and its errors surface
+    // verbatim in the form below.
+    const parsed = readEnrollmentForm(root, "tl-en");
+    if (!parsed.ok) {
+      err.textContent = `⚠ ${parsed.error}`;
+      return;
+    }
+    const password = await askPassword(`Enroll ${groupId}/${variant}`, "The group's members' covered tenants export with these scopes and windows immediately.");
+    if (password === null) return;
+    err.textContent = "enrolling…";
+    const { res, data } = await enrollmentApi(groupId, variant, { method: "PUT", body: { status: "active", ...parsed.value }, password });
+    if (tlDisabled(data)) {
+      err.textContent = "";
+      return;
+    }
+    if (!res.ok) {
+      err.textContent = tlErrText(res, data);
+      return;
+    }
+    err.textContent = "";
+    tlNote(`✔ enrolled ${groupId}/${variant} — export ${data.export?.ok ? `written (${data.export.tenants} tenant(s), ${data.export.skipped} skipped)` : `FAILED: ${data.export?.error ?? "?"}`}`, Boolean(data.export?.ok));
+    await Promise.all([tlLoadEnrollments(), tlLoadRegistry()]);
+  });
 
   async function tlLoadRegistry() {
     const fresh = root.querySelector("#tl-fresh");
@@ -1238,58 +1716,22 @@ function renderTenantLoop() {
         ? `<span class="tlStale">no timestamp</span>`
         : `<span class="${stale ? "tlStale" : "tlFresh"}">${stale ? `stale — ${Math.round(ageH)}h old (readers fail closed past 24h)` : "fresh"}</span>`);
     if (rows.length === 0) {
-      empty.textContent = "no registry export — the gateway writes it here after config changes; readers treat absence as zero tenants";
+      empty.textContent = "no covered tenants in the export — the gateway rewrites it after enrollment, membership or tenant changes; readers treat absence as zero tenants. Uncovered tenants never appear here: enroll their owner's group.";
       return;
     }
     empty.textContent = "";
     wrap.classList.remove("gws-hidden");
+    // Covered tenants only (the resolver omits uncovered ones — fail-closed). Per-tenant
+    // suspend/deregister are gone (410): status is driven by the enrollments above.
     root.querySelector("#tl-rows").innerHTML = rows.map((t) =>
       `<tr><td>${esc(String(t.id))}</td><td>${esc(String(t.principal))}</td><td>${esc(String(t.variant))}</td>` +
       `<td><span class="tlBadge ${esc(String(t.status))}">${esc(String(t.status))}</span></td>` +
-      `<td>${tlScopesHtml(t.scopes)}</td><td>${tlWindowsHtml(t.windows)}</td><td>${esc(String(t.gitRemote ?? ""))}</td>` +
+      `<td>${scopesHtml(t.scopes)}</td><td>${windowsHtml(t.windows)}</td><td>${esc(String(t.gitRemote ?? ""))}</td>` +
       `<td style="white-space:nowrap;">` +
-      `<button class="ghost" data-tl-suspend="${esc(String(t.id))}">suspend</button> ` +
-      `<button class="danger" data-tl-dereg="${esc(String(t.id))}">deregister</button> ` +
       `<button class="ghost" data-tl-upgrade="${esc(String(t.id))}">upgrade</button></td></tr>`).join("");
-    for (const btn of root.querySelectorAll("[data-tl-suspend]")) btn.addEventListener("click", () => tlSuspend(btn.getAttribute("data-tl-suspend")));
-    for (const btn of root.querySelectorAll("[data-tl-dereg]")) btn.addEventListener("click", () => tlDeregister(btn.getAttribute("data-tl-dereg")));
     for (const btn of root.querySelectorAll("[data-tl-upgrade]")) btn.addEventListener("click", () => tlUpgrade(btn.getAttribute("data-tl-upgrade")));
   }
   root.querySelector("#tl-refresh").addEventListener("click", () => tlLoadRegistry());
-
-  function tlSuspend(tenantId) {
-    const wrap = showModal({ title: `Suspend ${tenantId}`, bodyHtml: `
-      <div class="field">The registry export marks the tenant suspended — the gateway and every workspace reader treat it as out of the loop until it is re-registered. The tenant itself and its files are untouched.</div>
-      <div class="formErr" id="tl-sus-err" role="alert"></div>
-      <div class="row"><span class="spacer"></span><button id="tl-sus-cancel" type="button" class="ghost">Cancel</button><button id="tl-sus-go">Suspend</button></div>` });
-    wrap.querySelector("#tl-sus-cancel").addEventListener("click", () => wrap.remove());
-    wrap.querySelector("#tl-sus-go").addEventListener("click", async () => {
-      const res = await tlPost(tenantId, "suspend");
-      const body = await res.json().catch(() => ({}));
-      if (tlDisabled(body)) { wrap.remove(); return; }
-      if (!res.ok) { wrap.querySelector("#tl-sus-err").textContent = tlErrText(res, body); return; }
-      wrap.remove();
-      tlNote(`✔ ${tenantId} suspended`, true);
-      tlLoadRegistry();
-    });
-  }
-
-  function tlDeregister(tenantId) {
-    const wrap = showModal({ title: `Deregister ${tenantId}`, bodyHtml: `
-      <div class="field">This ends the tenant's loop participation (§4.4): its loop group, scope/window overrides and git remote are cleared from the gateway registry. The tenant itself, its project files and its chat history are kept.</div>
-      <div class="formErr" id="tl-drg-err" role="alert"></div>
-      <div class="row"><span class="spacer"></span><button id="tl-drg-cancel" type="button" class="ghost">Cancel</button><button id="tl-drg-go" class="danger">Deregister</button></div>` });
-    wrap.querySelector("#tl-drg-cancel").addEventListener("click", () => wrap.remove());
-    wrap.querySelector("#tl-drg-go").addEventListener("click", async () => {
-      const res = await tlPost(tenantId, "deregister");
-      const body = await res.json().catch(() => ({}));
-      if (tlDisabled(body)) { wrap.remove(); return; }
-      if (!res.ok) { wrap.querySelector("#tl-drg-err").textContent = tlErrText(res, body); return; }
-      wrap.remove();
-      tlNote(`✔ ${tenantId} deregistered — the tenant itself is kept`, true);
-      tlLoadRegistry();
-    });
-  }
 
   async function tlUpgrade(tenantId) {
     tlNote("");
@@ -1341,97 +1783,7 @@ function renderTenantLoop() {
     });
   }
 
-  // Register form. Tenant picker: a password-set admin sees ALL tenants (GET /tenants) —
-  // picking one fills the id and shows variant · owner; manual entry stays possible.
-  (async () => {
-    const pick = root.querySelector("#tl-reg-pick");
-    const meta = root.querySelector("#tl-reg-meta");
-    try {
-      const res = await fetch("/tenants");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const list = ((await res.json()).tenants ?? []).slice().reverse();
-      pick.innerHTML = `<option value="">pick a tenant…</option>` +
-        list.map((t) => `<option value="${esc(String(t.tenantId))}" data-variant="${esc(String(t.variant))}" data-owner="${esc(String(t.ownerPrincipal ?? "anonymous"))}">${esc(String(t.tenantId))} · ${esc(String(t.variant))} · ${esc(String(t.ownerPrincipal ?? "anonymous"))}</option>`).join("");
-      pick.addEventListener("change", () => {
-        const opt = pick.selectedOptions[0];
-        root.querySelector("#tl-reg-id").value = pick.value;
-        meta.textContent = opt?.dataset.variant ? `variant: ${opt.dataset.variant} · owner: ${opt.dataset.owner}` : "";
-      });
-    } catch {
-      pick.innerHTML = `<option value="">tenant list unavailable — enter the id below</option>`;
-    }
-  })();
-
-  root.querySelector("#tl-reg-remote").addEventListener("change", () => {
-    root.querySelector("#tl-reg-url-row").classList.toggle("gws-hidden", root.querySelector("#tl-reg-remote").value !== "url");
-  });
-
-  root.querySelector("#tl-reg-submit").addEventListener("click", async () => {
-    const err = root.querySelector("#tl-reg-err");
-    err.textContent = "";
-    const id = root.querySelector("#tl-reg-id").value.trim();
-    const group = root.querySelector("#tl-reg-group").value.trim();
-    const scopes = Object.fromEntries(LOOP_SCOPE_KEYS.map((k) => [k, root.querySelector(`#tl-reg-scope-${k}`).checked]));
-    const windows = {
-      tz: root.querySelector("#tl-reg-tz").value.trim(),
-      days: TL_DAY_NAMES.map((_, i) => i).filter((i) => root.querySelector(`#tl-reg-day-${i}`).checked),
-      start: root.querySelector("#tl-reg-start").value.trim(),
-      end: root.querySelector("#tl-reg-end").value.trim(),
-    };
-    // Client-side validation mirrors the gateway's write-time rules (app-helpers.js,
-    // unit-tested); the server re-validates authoritatively and its errors surface
-    // verbatim in the form below.
-    const idErr = validateTenantId(id);
-    if (idErr) { err.textContent = `⚠ ${idErr}`; return; }
-    const winErr = validateLoopWindowsClient(windows);
-    if (winErr) { err.textContent = `⚠ ${winErr}`; return; }
-    let gitRemote = "local-only";
-    if (root.querySelector("#tl-reg-remote").value === "url") {
-      gitRemote = root.querySelector("#tl-reg-url").value.trim();
-      if (!gitRemote) { err.textContent = "⚠ a remote URL is required when git remote is 'url'"; return; }
-    }
-    err.textContent = "registering…";
-    const res = await tlPost(id, "register", { scopes, windows, gitRemote, ...(group ? { group } : {}) });
-    const body = await res.json().catch(() => ({}));
-    if (tlDisabled(body)) return;
-    if (!res.ok) { err.textContent = tlErrText(res, body); return; }
-    err.textContent = "";
-    tlNote(`✔ ${id} registered (group ${body.loopGroup ?? "?"}, export ${body.export?.ok ? `written, ${body.export.tenants} tenant(s)` : "FAILED"})`, true);
-    tlLoadRegistry();
-  });
-
-  // Config editor: JSON textarea preflight-validated client-side, saved via
-  // PUT /admin/tenant-loop/config (the server is authoritative; its validation errors
-  // surface verbatim).
-  const tlConfigTa = root.querySelector("#tl-config-json");
-  tlConfigTa.value = JSON.stringify({
-    group: "default",
-    designatedUsers: [],
-    scopes: { upgrade: false, upstreamFile: false, backportReview: false, nightlyFleet: false },
-    windows: { tz: "Asia/Seoul", days: [0, 1, 2, 3, 4, 5, 6], start: "00:00", end: "23:59" },
-  }, null, 2);
-  const tlConfigErr = root.querySelector("#tl-config-err");
-  root.querySelector("#tl-config-validate").addEventListener("click", () => {
-    tlConfigErr.style.color = "";
-    const parsed = validateLoopConfigJson(tlConfigTa.value);
-    tlConfigErr.textContent = parsed.ok ? "✔ JSON valid — fields check out (the server re-validates on save)" : `⚠ ${parsed.error}`;
-    if (parsed.ok) tlConfigErr.style.color = "#3fb950";
-  });
-  root.querySelector("#tl-config-save").addEventListener("click", async () => {
-    tlConfigErr.style.color = "";
-    tlConfigErr.textContent = "";
-    const parsed = validateLoopConfigJson(tlConfigTa.value);
-    if (!parsed.ok) { tlConfigErr.textContent = `⚠ ${parsed.error}`; return; }
-    tlConfigErr.textContent = "saving…";
-    const res = await fetch("/admin/tenant-loop/config", { method: "PUT", headers: authHeaders, body: JSON.stringify(parsed.value) });
-    const body = await res.json().catch(() => ({}));
-    if (tlDisabled(body)) return;
-    if (!res.ok) { tlConfigErr.textContent = tlErrText(res, body); return; }
-    tlConfigErr.style.color = "#3fb950";
-    tlConfigErr.textContent = `✔ group "${body.group?.groupId ?? "?"}" saved — export ${body.export?.ok ? `written (${body.export.tenants} tenant(s), ${body.export.skipped} skipped)` : `FAILED: ${body.export?.error ?? "?"}`}`;
-    tlLoadRegistry();
-  });
-
+  tlLoadEnrollments();
   tlLoadRegistry();
 }
 // ── end Tenant loop ──

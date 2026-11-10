@@ -4,6 +4,7 @@
 import { deleteTenantData } from "../../lifecycle";
 import { effectivePolicyFor } from "../../policy";
 import { isReservedLoginId, requireAdminReady, requireAdminReauth } from "../../access";
+import { exportTenantLoopRegistry } from "../../tenant-loop";
 import { HttpError, NO_STORE_HEADERS, jsonResponse, readJsonBody } from "../../http";
 import type { GatewayState } from "../../state";
 import type { UserQuery, UserRecord } from "../../users";
@@ -47,6 +48,9 @@ export async function deleteUserWithTenants(
     throw new HttpError(409, "last_admin");
   }
   state.users.softDeleteUser(target.id);
+  // removePrincipalFromAllGroups also drops the principal's loop_operator rows (round-2
+  // amendment C cascade). Both dispositions change loop coverage (membership + tenant set),
+  // so the registry export is refreshed before returning.
   state.users.removePrincipalFromAllGroups(target.principal);
   let handled = 0;
   const errors: Array<{ tenantId: string; error: string }> = [];
@@ -68,6 +72,10 @@ export async function deleteUserWithTenants(
     }
     handled += 1;
   }
+  // Export trigger (round-2 amendment C): the tenant delete path rewrites the registry — the
+  // deleted owner's memberships no longer cover anything. The archive disposition triggers
+  // too: its membership removal changes coverage the same way.
+  exportTenantLoopRegistry(state);
   return { tenantsHandled: handled, errors };
 }
 
@@ -261,7 +269,7 @@ export async function handleUsers(state: GatewayState, req: Request, ctx: Ctx): 
       state.users.setRole(allowed.map((i) => i.user.id), role);
       for (const item of allowed) state.audit.record(caller.principal, "user.set-role", item.user.principal, `role=${role}`);
     } else {
-      // add-group / remove-group: general groups only; loop membership is edited via tenant-loop.
+      // add-group / remove-group: general groups only; loop membership is enrollment-driven.
       const groupId = typeof body.groupId === "string" ? body.groupId : "";
       const group = state.users.getGroupRecord(groupId);
       if (!group) throw new HttpError(404, "not_found");
@@ -274,6 +282,8 @@ export async function handleUsers(state: GatewayState, req: Request, ctx: Ctx): 
         state.users.removeMembers(groupId, principals);
         for (const p of principals) state.audit.record(caller.principal, "group.member.remove", p, groupId);
       }
+      // Export trigger (round-2 amendment C): a member change alters the group's coverage.
+      exportTenantLoopRegistry(state);
     }
 
     const ok = bulkAction === "delete" ? deleted : allowed.length;
@@ -355,6 +365,9 @@ export async function handleUsers(state: GatewayState, req: Request, ctx: Ctx): 
         `created=${created.length} skipped=${skipped.length} reasons=${reasons}${failure ? ` error=${failure}` : ""}`,
       );
     }
+    // Export trigger (round-2 amendment C): the import's member adds alter the enrolled
+    // groups' coverage — the same trigger the bulk add-group path above carries.
+    exportTenantLoopRegistry(state);
     return jsonResponse({ dryRun: false, created, skipped }, 200, NO_STORE_HEADERS);
   }
 

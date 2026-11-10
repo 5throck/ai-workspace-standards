@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-11-09-gw-admin-console-design`
 - **Date**: 2026-11-09
-- **Status**: proposed
+- **Status**: implemented (PRs #1938, #1939)
 - **Author**: architect (PM-dispatched, Design Gate Row 0, design only)
 - **Decision provenance**: approved plan `co-workspace-admin-serene-possum` (user-confirmed scope: users, groups, bulk operations, and group policy, delivered as a separate `/admin` page)
 - **Related**: `docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md` §4.1 (groups tables, migration runner), session-hardening D4 (`requireAdminReauth`), T-20261003-027 (`requireAdminReady`), SEC-05 (tenant cap / principal quota), SEC-09 (CSRF header)

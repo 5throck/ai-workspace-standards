@@ -159,7 +159,7 @@ Run with `cd services/co-workspace && bun run test`, then `bun test tests/unit/`
 ## 16. Relationship to prior docs
 
 - **Round 1** — `docs/designs/2026-11-09-gw-admin-console-design.md`: the `groups` / `user_groups` tables, `groups.kind`, `GroupPolicy`/`EffectivePolicy` strictest-wins resolution, and the admin console this design's UI extends. Shared teams sit **on top of** that group model — no group schema change in round 3.
-- **Round 2** — `docs/designs/2026-11-09-gw-admin-console-round2-plan.md`: named policies (migration v4) and the **(group × variant) enrollment model** (`loop_enrollments`). Shared teams sit **on top of** that enrollment model: a shared team needs no enrollment of its own — its owning group's enrollment covers it (§10), and its quota ceiling is the group's resolved policy (§8).
+- **Round 2** — `docs/designs/2026-11-09-gw-admin-console-round2-plan.md`: named policies (migration v4) and the **(group × variant) enrollment model** (`loop_enrollments`). Shared teams sit **on top of** that enrollment model: a shared team needs no enrollment of its own — its owning group's enrollment covers it (§10), and its quota ceiling is the group's resolved policy (§8). Round 2's v4 migration (`policies` / `loop_enrollments` / `loop_operators`) is this design's **prerequisite** — shared teams consume the same (group × variant) enrollment resolver, so round 2 must land first.
 - **2026-11-08 hardening design** — the migration runner (§4.1) both §4 migrations ride, the registry export schema and mutation-triggered rewrite discipline (§3.1/§4.5) that §10 depends on.
 
 ## References

@@ -186,10 +186,12 @@ export function formatTurnActivity(elapsedSec, lastActivity) {
   return lastActivity ? `${base} · ${lastActivity}` : base;
 }
 
-// ── Tenant loop (design 2026-11-08-gw-tenant-loop-and-hardening-design §4, admin UI):
-// pure client-side mirrors of the gateway's write-time validation (src/tenant-loop.ts) so
-// the register form rejects malformed input before a round trip, and a dry-run → confirm
-// gate for the upgrade flow (the Confirm call must not fire without a prior plan render).
+// ── Tenant loop + policies (design 2026-11-09-gw-admin-console-round2-plan.md, 2026-11-09
+// unit-model amendment, admin UI): pure client-side mirrors of the gateway's write-time
+// validation (src/tenant-loop.ts validateLoopWindows, src/policy.ts validateGroupPolicy) so
+// the enrollment and policy forms reject malformed input before a round trip, and a dry-run
+// → confirm gate for the upgrade flow (the Confirm call must not fire without a prior plan
+// render). The per-tenant register/config validators are gone with their 410'd routes.
 // Unit-tested by tests/unit/co-workspace-admin-ui.test.ts. ──
 
 /** HTML-escape any value for interpolation into markup (shared by index.html and admin.js). */
@@ -197,22 +199,13 @@ export function esc(value) {
   return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-/** Same shape the gateway's TENANT_ID_RE enforces (src/tenant-loop.ts) — a different
- * namespace from fleet ids (`co-*`). */
-export const TENANT_ID_RE = /^gw-[0-9a-f]{12}$/;
-
 /** Exact scope keys the gateway accepts in `scopes` (validateLoopScopes). */
 export const LOOP_SCOPE_KEYS = ["upgrade", "upstreamFile", "backportReview", "nightlyFleet"];
 
-const LOOP_GROUP_RE = /^[\w-]{1,64}$/;
 const LOOP_HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-/** null when `value` is a well-formed tenant id, else the error message for the form. */
-export function validateTenantId(value) {
-  return typeof value === "string" && TENANT_ID_RE.test(value)
-    ? null
-    : "tenant id must be gw- followed by 12 hex chars (e.g. gw-0123456789ab)";
-}
+/** The 5 GroupPolicy limit fields (src/policy.ts) in form order; allowedVariants is the 5th. */
+export const POLICY_NUMERIC_KEYS = ["maxTenants", "maxTurns", "maxTokens", "maxPrincipalTokens"];
 
 /** Client mirror of validateLoopWindows: {tz valid IANA, days non-empty ints 0-6,
  * start/end HH:MM, start !== end}. Returns null when valid, else the error message. */
@@ -237,43 +230,47 @@ export function validateLoopWindowsClient(windows) {
   return null;
 }
 
-/** Pre-flight parse+validate of the config editor's JSON (a client mirror of the PUT
- * /admin/tenant-loop/config rules — the server stays authoritative and re-validates).
- * Returns { ok: true, value } with the parsed body, or { ok: false, error }. */
-export function validateLoopConfigJson(text) {
-  let raw;
-  try {
-    raw = JSON.parse(text);
-  } catch {
-    return { ok: false, error: "config must be valid JSON" };
+/** Pre-flight validate of the policy form's limits (a client mirror of validateGroupPolicy —
+ * the server stays authoritative and re-validates; its invalid_policy/conflict answers
+ * surface verbatim). `numerics` maps the 4 numeric fields to raw form values (string,
+ * number or empty); `allowedVariants` is the multi-select's string array (empty → unset).
+ * Returns { ok: true, limits } — omitting unset fields, since a policy can only tighten —
+ * or { ok: false, error }. */
+export function validatePolicyLimits(numerics, allowedVariants) {
+  const limits = {};
+  for (const key of POLICY_NUMERIC_KEYS) {
+    const raw = numerics?.[key];
+    if (raw === undefined || raw === null || String(raw).trim() === "") continue;
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n <= 0) return { ok: false, error: `${key} must be a positive whole number (or left empty)` };
+    limits[key] = n;
   }
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
-    return { ok: false, error: "config must be a JSON object" };
-  }
-  if (raw.group !== undefined && (typeof raw.group !== "string" || !LOOP_GROUP_RE.test(raw.group))) {
-    return { ok: false, error: `group must match ${LOOP_GROUP_RE.source}` };
-  }
-  if (raw.designatedUsers !== undefined) {
-    const du = raw.designatedUsers;
-    if (!Array.isArray(du) || !du.every((u) => typeof u === "string" && u.trim().length > 0 && u.trim().length <= 128)) {
-      return { ok: false, error: "designatedUsers must be an array of principal strings" };
+  if (Array.isArray(allowedVariants) && allowedVariants.length > 0) {
+    if (!allowedVariants.every((v) => typeof v === "string" && v.trim().length > 0)) {
+      return { ok: false, error: "allowedVariants must be a list of variant names" };
     }
+    limits.allowedVariants = [...new Set(allowedVariants.map((v) => String(v).trim()))];
   }
-  if (raw.scopes !== undefined) {
-    const sc = raw.scopes;
-    if (typeof sc !== "object" || sc === null || Array.isArray(sc)) {
-      return { ok: false, error: "scopes must be a JSON object" };
-    }
-    for (const [k, v] of Object.entries(sc)) {
-      if (!LOOP_SCOPE_KEYS.includes(k)) return { ok: false, error: `unknown scope key "${k}" (allowed: ${LOOP_SCOPE_KEYS.join(", ")})` };
-      if (typeof v !== "boolean") return { ok: false, error: `scope "${k}" must be a boolean` };
-    }
+  return { ok: true, limits };
+}
+
+/** Pre-flight validate of an enrollment form's scopes/windows/gitRemote (client mirror of
+ * validateLoopScopes + validateLoopWindows + the route's gitRemote rule — the server stays
+ * authoritative and re-validates). `scopes` maps every LOOP_SCOPE_KEY to a boolean; empty
+ * keys are OFF (the enrollment body is complete — no default fill server-side). Returns
+ * { ok: true, value: { scopes, windows, gitRemote } } or { ok: false, error }. */
+export function buildEnrollmentPayload(scopes, windows, gitRemoteChoice, remoteUrl) {
+  const out = {};
+  for (const k of LOOP_SCOPE_KEYS) out[k] = scopes?.[k] === true;
+  const winErr = validateLoopWindowsClient(windows);
+  if (winErr) return { ok: false, error: winErr };
+  const windowsOut = { tz: windows.tz, days: [...windows.days], start: windows.start, end: windows.end };
+  let gitRemote = null;
+  if (gitRemoteChoice === "url") {
+    gitRemote = typeof remoteUrl === "string" ? remoteUrl.trim() : "";
+    if (!gitRemote) return { ok: false, error: "a remote URL is required when git remote is 'url'" };
   }
-  if (raw.windows !== undefined) {
-    const err = validateLoopWindowsClient(raw.windows);
-    if (err) return { ok: false, error: err };
-  }
-  return { ok: true, value: raw };
+  return { ok: true, value: { scopes: out, windows: windowsOut, gitRemote } };
 }
 
 /**

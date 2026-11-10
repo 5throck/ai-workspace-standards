@@ -43,13 +43,17 @@ export interface LoopWindows {
   end: string;
 }
 
-/** Sparse per-tenant override; unset keys inherit the governing group (§4.1). */
+/** Sparse per-tenant override. DEPRECATED at migration v4 (round-2 unit-model amendment):
+ * TenantRecord.loopStatus/loopGroup/loopOverride/loopGitRemote are NEVER read after v4 —
+ * the fields stay on the record solely so old rows keep parsing. */
 export interface TenantLoopOverride {
   scopes?: Partial<LoopScopes>;
   windows?: LoopWindows;
 }
 
-/** Group-default loop config (the `groups.loop_config` JSON payload, §4.1). */
+/** Group-default loop config (the `groups.loop_config` JSON payload, §4.1). DEPRECATED at
+ * migration v4: the kind='loop' group kind no longer exists — loop settings live in the
+ * (group_id, variant) loop_enrollments table. The type remains for the legacy row readers. */
 export interface LoopGroupConfig {
   groupId: string;
   name: string;
@@ -144,7 +148,47 @@ export function isValidTimeZone(tz: string): boolean {
   }
 }
 
-// ── Effective config resolution ─────────────────────────────────────────────
+// ── Enrollment resolution (round-2 unit model) ──────────────────────────────
+
+export const ENROLLMENT_VARIANT_RE = /^co-[a-z0-9-]+$/;
+
+/** An enrollment's variant: '*' (all variants) or a concrete co-* catalog id. Store-level
+ * shape check only — catalog membership is the routes' job (they have the cfg catalog). */
+export function validateEnrollmentVariant(value: unknown): string {
+  if (value === "*") return value;
+  if (typeof value !== "string" || !ENROLLMENT_VARIANT_RE.test(value)) {
+    throw new HttpError(400, `variant must be "*" or match ${ENROLLMENT_VARIANT_RE}, got ${JSON.stringify(value)}`);
+  }
+  return value;
+}
+
+/** One loop enrollment as the resolver sees it (the stored record's structural subset). */
+export interface LoopEnrollmentInput {
+  groupId: string;
+  variant: string;
+  status: "active" | "suspended";
+  scopes: LoopScopes;
+  windows: LoopWindows;
+  gitRemote: string | null;
+}
+
+export type EnrollmentResolution =
+  | {
+      covered: true;
+      scopes: LoopScopes;
+      windows: LoopWindows;
+      gitRemote: string;
+      /** Group ids of every ACTIVE enrollment covering the tenant, sorted ascending — the
+       * co-governance set the ACL attributes decisions to. */
+      coveringGroups: string[];
+    }
+  | { covered: false; reason: "not_covered" | "window_intersection_unrepresentable"; detail: string };
+
+/** Group memberships as the resolver consumes them: one entry per group. */
+export interface GroupMembershipInput {
+  groupId: string;
+  principals: string[];
+}
 
 function minuteOf(hhmm: string): number | null {
   if (!HHMM_RE.test(hhmm)) return null;
@@ -212,20 +256,251 @@ export function loopWindowVerdict(
     : { ok: false, reason: `outside window ${windows.start}-${windows.end} ${windows.tz}` };
 }
 
-/** Merge a group + per-tenant override into the effective config (§4.1): override > group >
- * defaults, scopes merged per key, windows taken whole. */
-export function effectiveLoopConfig(
-  rec: TenantRecord,
-  groups: LoopGroupConfig[],
-): { scopes: LoopScopes; windows: LoopWindows; group: LoopGroupConfig | undefined } {
-  const group = rec.loopGroup ? groups.find((g) => g.groupId === rec.loopGroup) : undefined;
-  const scopes: LoopScopes = {
-    ...DEFAULT_LOOP_SCOPES,
-    ...(group?.scopes ?? {}),
-    ...(rec.loopOverride?.scopes ?? {}),
+// ── Cross-timezone window algebra (resolveEnrollment support) ───────────────
+
+/** Per-weekday open intervals in wall-clock minutes: segments[d] = sorted, disjoint,
+ * non-wrapping [start, end) pieces on weekday d. Wrap-midnight windows split at 24:00 into
+ * a "head" ([start, 1440)) on the window day and a "tail" ([0, end)) on the next day. */
+type DaySegments = Array<Array<[number, number]>>;
+
+/** The fixed anchor instant for cross-timezone window conversion. A weekly LoopWindows is
+ * shifted into the reference time zone using the UTC offsets at this instant. DST-season
+ * misalignment BETWEEN two zones is deliberately not modeled (a weekly window has no single
+ * offset pair across a DST boundary); intersections that only work under a seasonal offset
+ * fall to the fail-closed unrepresentable path at the other season. Fixed, documented,
+ * deterministic — never "now". */
+const WINDOW_CONV_ANCHOR = new Date("2026-01-15T12:00:00Z");
+
+/** Minutes east of UTC at `instant` for `tz`; null = unusable tz (fail-closed caller). */
+function tzOffsetMinutes(tz: string, instant: Date): number | null {
+  try {
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = fmt.formatToParts(instant);
+    const get = (type: string): number => Number(parts.find((p) => p.type === type)?.value);
+    const asUTC = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour") % 24, get("minute"), get("second"));
+    return (asUTC - instant.getTime()) / 60000;
+  } catch {
+    return null;
+  }
+}
+
+function emptySegments(): DaySegments {
+  return Array.from({ length: 7 }, () => [] as Array<[number, number]>);
+}
+
+function normalizeSegments(segs: DaySegments): DaySegments {
+  for (let d = 0; d < 7; d += 1) {
+    const sorted = segs[d].slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const merged: Array<[number, number]> = [];
+    for (const [s, e] of sorted) {
+      const last = merged[merged.length - 1];
+      if (last && s <= last[1]) last[1] = Math.max(last[1], e);
+      else merged.push([s, e]);
+    }
+    segs[d] = merged;
+  }
+  return segs;
+}
+
+/** A LoopWindows as per-weekday segments in its OWN tz. Unparseable bounds → empty segments
+ * (the intersection with anything is then empty → fail-closed unrepresentable). */
+function segmentsOfWindow(w: LoopWindows): DaySegments {
+  const segs = emptySegments();
+  const s = minuteOf(w.start);
+  const e = minuteOf(w.end);
+  if (s === null || e === null) return normalizeSegments(segs);
+  if (s < e) {
+    for (const d of w.days) segs[((d % 7) + 7) % 7].push([s, e]);
+  } else {
+    for (const d of w.days) {
+      segs[((d % 7) + 7) % 7].push([s, 1440]);
+      if (e > 0) segs[((d + 1) % 7 + 7) % 7].push([0, e]);
+    }
+  }
+  return normalizeSegments(segs);
+}
+
+/** Shift per-weekday segments by `delta` wall-clock minutes (reference tz − window tz),
+ * splitting pieces at midnight. Uses absolute minute coordinates so negative days and
+ * multi-day shifts (date-line-crossing offset pairs) split correctly. */
+function shiftSegments(segs: DaySegments, delta: number): DaySegments {
+  const out = emptySegments();
+  for (let d = 0; d < 7; d += 1) {
+    for (const [s, e] of segs[d]) {
+      const absStart = d * 1440 + s + delta;
+      const absEnd = d * 1440 + e + delta;
+      const firstDay = Math.floor(absStart / 1440);
+      const lastDay = Math.floor((absEnd - 1) / 1440);
+      for (let m = firstDay; m <= lastDay; m += 1) {
+        const start = Math.max(absStart, m * 1440) - m * 1440;
+        const end = Math.min(absEnd, (m + 1) * 1440) - m * 1440;
+        if (end > start) out[((m % 7) + 7) % 7].push([start, end]);
+      }
+    }
+  }
+  return normalizeSegments(out);
+}
+
+function intersectSegments(a: DaySegments, b: DaySegments): DaySegments {
+  const out = emptySegments();
+  for (let d = 0; d < 7; d += 1) {
+    for (const [as, ae] of a[d]) {
+      for (const [bs, be] of b[d]) {
+        const s = Math.max(as, bs);
+        const e = Math.min(ae, be);
+        if (e > s) out[d].push([s, e]);
+      }
+    }
+  }
+  return normalizeSegments(out);
+}
+
+const fmtHHMM = (m: number): string => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+
+function sameSortedDays(a: number[], b: number[]): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+/** Re-express per-weekday segments as ONE LoopWindows (one tz, one day-set, one interval),
+ * or null when the set is empty or not representable as a single window — the fail-closed
+ * shape the round-2 amendment calls "window_intersection_unrepresentable". A full-day
+ * [0,1440) piece has no HH:MM representation (end would be 24:00) and is unrepresentable by
+ * design; the pre-v4 default window's own 23:59 end keeps the common cases representable. */
+function representableWindow(segs: DaySegments, tz: string): LoopWindows | null {
+  const nonEmpty = [0, 1, 2, 3, 4, 5, 6].filter((d) => segs[d].length > 0);
+  if (nonEmpty.length === 0) return null;
+  // Non-wrap shape: every non-empty day carries the exact same single interval.
+  const first = segs[nonEmpty[0]][0];
+  if (nonEmpty.every((d) => segs[d].length === 1 && segs[d][0][0] === first[0] && segs[d][0][1] === first[1])) {
+    const [s, e] = first;
+    if (s < e && e <= 1439) return { tz, days: nonEmpty, start: fmtHHMM(s), end: fmtHHMM(e) };
+  }
+  // Wrap shape: "head" pieces run to 24:00, "tail" pieces start at 00:00, every tail sits
+  // exactly one weekday after its head, and start > end. Anything else is unrepresentable.
+  const heads = new Map<number, number>();
+  const tails = new Map<number, number>();
+  for (const d of nonEmpty) {
+    for (const [s, e] of segs[d]) {
+      if (e === 1440) heads.set(d, s);
+      else if (s === 0) tails.set(d, e);
+      else return null; // a mid piece only fits the non-wrap shape (checked above)
+    }
+  }
+  if (heads.size === 0) return null;
+  const starts = new Set(heads.values());
+  if (starts.size !== 1) return null;
+  const start = [...starts][0];
+  const headDays = [...heads.keys()].sort((a, b) => a - b);
+  const tailEnds = new Set(tails.values());
+  if (tailEnds.size > 1) return null;
+  const tailEnd = tailEnds.size === 1 ? [...tailEnds][0] : 0;
+  if (tailEnd > 0) {
+    const expectedTailDays = headDays.map((d) => (d + 1) % 7).sort((a, b) => a - b);
+    if (!sameSortedDays([...tails.keys()].sort((a, b) => a - b), expectedTailDays)) return null;
+  } else if (tails.size > 0) {
+    return null; // e = 0 admits no tail pieces
+  }
+  if (start <= tailEnd) return null; // start === end is a zero-length window; start < end is the non-wrap shape
+  return { tz, days: headDays, start: fmtHHMM(start), end: fmtHHMM(tailEnd) };
+}
+
+/** Resolve one tenant's loop coverage from its owner's GROUP enrollments (round-2 unit-model
+ * amendment — pure, and deliberately free of tenant-exception inputs: the deprecated
+ * TenantRecord.loopStatus/loopGroup/loopOverride/loopGitRemote fields are never read).
+ *
+ * Cover rule: tenant.ownerPrincipal ∈ group members ∧ (enrollment.variant === tenant.variant
+ * ∨ '*'). Multiple coverings resolve strictest-wins: scopes AND per key; windows intersect,
+ * computed in the tz of the lexically-first covering enrollment (all others converted via
+ * Intl at a fixed anchor). A non-contiguous or empty intersection is NOT improvised into a
+ * window: the caller omits the tenant (export) or refuses the operation (upgrade). */
+export function resolveEnrollment(
+  tenant: Pick<TenantRecord, "ownerPrincipal" | "variant">,
+  enrollments: LoopEnrollmentInput[],
+  groupMemberships: GroupMembershipInput[],
+): EnrollmentResolution {
+  const owner = tenant.ownerPrincipal ?? "anonymous";
+  const memberOf = new Set(groupMemberships.filter((m) => m.principals.includes(owner)).map((m) => m.groupId));
+  const covering = enrollments
+    .filter((e) => e.status === "active" && memberOf.has(e.groupId) && (e.variant === "*" || e.variant === tenant.variant))
+    .sort((a, b) => (a.groupId === b.groupId ? a.variant.localeCompare(b.variant) : a.groupId.localeCompare(b.groupId)));
+  const coveringNames = () => covering.map((c) => c.groupId).join(",");
+  if (covering.length === 0) {
+    return {
+      covered: false,
+      reason: "not_covered",
+      detail: `owner ${owner} is in no group with an active enrollment for variant ${tenant.variant} or "*"`,
+    };
+  }
+  // Scopes: per-key AND across every covering enrollment.
+  const scopes: LoopScopes = { ...covering[0].scopes };
+  for (const e of covering.slice(1)) {
+    for (const key of SCOPE_KEYS) scopes[key] = scopes[key] && e.scopes[key];
+  }
+  // Windows: intersect in the reference tz of the lexically-first covering enrollment.
+  const referenceTz = covering[0].windows.tz;
+  const referenceOffset = tzOffsetMinutes(referenceTz, WINDOW_CONV_ANCHOR);
+  if (referenceOffset === null) {
+    return {
+      covered: false,
+      reason: "window_intersection_unrepresentable",
+      detail: `covering groups ${coveringNames()}: reference time zone ${JSON.stringify(referenceTz)} is invalid`,
+    };
+  }
+  let segments = shiftSegments(segmentsOfWindow(covering[0].windows), 0);
+  for (const e of covering.slice(1)) {
+    const offset = tzOffsetMinutes(e.windows.tz, WINDOW_CONV_ANCHOR);
+    if (offset === null) {
+      return {
+        covered: false,
+        reason: "window_intersection_unrepresentable",
+        detail: `covering groups ${coveringNames()}: enrollment time zone ${JSON.stringify(e.windows.tz)} is invalid`,
+      };
+    }
+    segments = intersectSegments(segments, shiftSegments(segmentsOfWindow(e.windows), referenceOffset - offset));
+  }
+  const windows = representableWindow(segments, referenceTz);
+  if (!windows) {
+    return {
+      covered: false,
+      reason: "window_intersection_unrepresentable",
+      detail: `covering groups ${coveringNames()}: the window intersection in ${referenceTz} is empty or not a single contiguous interval`,
+    };
+  }
+  return {
+    covered: true,
+    scopes,
+    windows,
+    gitRemote: covering[0].gitRemote ?? "local-only",
+    coveringGroups: covering.map((c) => c.groupId), // sorted above
   };
-  const windows = rec.loopOverride?.windows ?? group?.windows ?? DEFAULT_LOOP_WINDOWS;
-  return { scopes, windows, group };
+}
+
+/** Group raw (group_id, principal) membership rows into the resolver's input shape. */
+export function groupMembershipInputs(rows: Array<{ groupId: string; principal: string }>): GroupMembershipInput[] {
+  const map = new Map<string, string[]>();
+  for (const r of rows) {
+    const list = map.get(r.groupId);
+    if (list) list.push(r.principal);
+    else map.set(r.groupId, [r.principal]);
+  }
+  return [...map.entries()].map(([groupId, principals]) => ({ groupId, principals }));
+}
+
+/** Enrollment inputs for the live stores (resolver/export share this derivation). */
+function enrollmentInputsFor(state: GatewayState): { enrollments: LoopEnrollmentInput[]; groupMemberships: GroupMembershipInput[] } {
+  return {
+    enrollments: state.users.listEnrollments(),
+    groupMemberships: groupMembershipInputs(state.users.groupMembershipList()),
+  };
 }
 
 // ── Registry export (§3.1 schema, §4.5 discipline) ──────────────────────────
@@ -289,39 +564,53 @@ function exportRowSchemaError(row: TenantLoopTenantRow): string | null {
   return null;
 }
 
-/** Build the exact JSON that would be written. Rows are sorted by id; under the kill switch
+/** Build the exact JSON that would be written (round-2 unit model: rows ONLY for tenants
+ * covered by their owner's group enrollments). Rows are sorted by id; under the kill switch
  * every row reads suspended (§4.4). Malformed stored rows — bad id (pre-existing) or any
  * §3.1 schema violation (QA F2) — are skipped with a console warn + audit row: one
  * hand-edited row must not take the whole export down (the reader hard-fails malformed
- * files, so a bad row would blind every tenant consumer). `skipped` counts the dropped
- * rows so callers can surface the loss. */
+ * files, so a bad row would blind every tenant consumer).
+ *
+ * Fail-closed coverage per the amendment: an UNCOVERED tenant is simply not exported (no
+ * audit — it was never in the loop); a tenant whose covering enrollments intersect to an
+ * unrepresentable window is omitted WITH an audit row `tenant.loop.export.window_unrepresentable`
+ * (tenant + reason) and counted in `omitted`. The JSON schema is byte-compatible with the
+ * pre-v4 export (schemaVersion 1, per-tenant rows). */
 function buildTenantLoopExportDetailed(
   records: TenantRecord[],
-  groups: LoopGroupConfig[],
+  inputs: { enrollments: LoopEnrollmentInput[]; groupMemberships: GroupMembershipInput[] },
   now: Date,
   audit?: ExportAudit,
-): { payload: TenantLoopRegistryExport; skipped: number } {
+): { payload: TenantLoopRegistryExport; skipped: number; omitted: number } {
   const disabled = tenantLoopDisabled();
   const tenants: TenantLoopTenantRow[] = [];
   let skipped = 0;
+  let omitted = 0;
   for (const rec of records) {
-    if (!rec.loopStatus) continue; // not loop-registered
+    const resolution = resolveEnrollment(rec, inputs.enrollments, inputs.groupMemberships);
+    if (!resolution.covered) {
+      if (resolution.reason === "window_intersection_unrepresentable") {
+        console.warn(`[co-workspace] tenant-loop export: omitting ${rec.tenantId}: ${resolution.detail}`);
+        audit?.record("system", "tenant.loop.export.window_unrepresentable", rec.tenantId, resolution.detail);
+        omitted += 1;
+      }
+      continue; // not_covered → fail-closed: the tenant is simply not exported
+    }
     if (!TENANT_ID_RE.test(rec.tenantId)) {
       console.warn(`[co-workspace] tenant-loop export: skipping malformed tenant id ${rec.tenantId}`);
       audit?.record("system", "tenant.loop.export.row.skipped", rec.tenantId, "tenant id does not match ^gw-[0-9a-f]{12}$");
       skipped += 1;
       continue;
     }
-    const { scopes, windows } = effectiveLoopConfig(rec, groups);
     const row: TenantLoopTenantRow = {
       id: rec.tenantId,
       principal: rec.ownerPrincipal ?? "anonymous",
       variant: rec.variant,
       projectDir: rec.projectDir,
-      status: disabled ? "suspended" : rec.loopStatus,
-      scopes,
-      windows,
-      gitRemote: rec.loopGitRemote ?? "local-only",
+      status: disabled ? "suspended" : "active",
+      scopes: resolution.scopes,
+      windows: resolution.windows,
+      gitRemote: resolution.gitRemote,
     };
     // [QA F2] same policy as the id case: a schema-invalid row is dropped, not written —
     // the workspace reader treats one malformed row as a malformed FILE (fail-closed).
@@ -335,21 +624,21 @@ function buildTenantLoopExportDetailed(
     tenants.push(row);
   }
   tenants.sort((a, b) => a.id.localeCompare(b.id));
-  return { payload: { schemaVersion: SCHEMA_VERSION, writtenAt: now.toISOString(), tenants }, skipped };
+  return { payload: { schemaVersion: SCHEMA_VERSION, writtenAt: now.toISOString(), tenants }, skipped, omitted };
 }
 
 /** Build the exact JSON that would be written (the audit/count-aware detailed builder,
  * payload only — the admin registry-preview route reads this shape). */
 export function buildTenantLoopExport(
   records: TenantRecord[],
-  groups: LoopGroupConfig[],
+  inputs: { enrollments: LoopEnrollmentInput[]; groupMemberships: GroupMembershipInput[] },
   now: Date = new Date(),
 ): TenantLoopRegistryExport {
-  return buildTenantLoopExportDetailed(records, groups, now).payload;
+  return buildTenantLoopExportDetailed(records, inputs, now).payload;
 }
 
 export type TenantLoopExportResult =
-  | { ok: true; path: string; tenants: number; skipped: number }
+  | { ok: true; path: string; tenants: number; skipped: number; omitted: number }
   | { ok: false; path: string; error: string };
 
 /** Atomic (temp + rename, same directory) write of the export. On failure the previous file
@@ -359,12 +648,12 @@ export type TenantLoopExportResult =
 export function writeTenantLoopExport(
   workspaceDir: string,
   records: TenantRecord[],
-  groups: LoopGroupConfig[],
+  inputs: { enrollments: LoopEnrollmentInput[]; groupMemberships: GroupMembershipInput[] },
   audit?: ExportAudit,
   now: Date = new Date(),
 ): TenantLoopExportResult {
   const path = tenantLoopRegistryPath(workspaceDir);
-  const { payload, skipped } = buildTenantLoopExportDetailed(records, groups, now, audit);
+  const { payload, skipped, omitted } = buildTenantLoopExportDetailed(records, inputs, now, audit);
   const tmp = `${path}.${process.pid}.tmp`;
   try {
     mkdirSync(dirname(path), { recursive: true });
@@ -373,7 +662,7 @@ export function writeTenantLoopExport(
     if (skipped > 0) {
       audit?.record("system", "tenant.loop.export.rows.skipped", path, `${skipped} schema-invalid row(s) dropped`);
     }
-    return { ok: true, path, tenants: payload.tenants.length, skipped };
+    return { ok: true, path, tenants: payload.tenants.length, skipped, omitted };
   } catch (err) {
     const error = (err as Error).message;
     console.error(`[co-workspace] tenant-loop registry export FAILED (${path}); previous file left in place: ${error}`);
@@ -389,7 +678,7 @@ export function writeTenantLoopExport(
 
 /** Gateway-state convenience: export from the live stores (used by admin routes + boot). */
 export function exportTenantLoopRegistry(state: GatewayState, now: Date = new Date()): TenantLoopExportResult {
-  return writeTenantLoopExport(state.cfg.workspaceDir, state.registry.list(), state.users.listGroups(), state.audit, now);
+  return writeTenantLoopExport(state.cfg.workspaceDir, state.registry.list(), enrollmentInputsFor(state), state.audit, now);
 }
 
 /** Preview-only read of the CURRENT export file (the GET /admin/tenant-loop/registry route
@@ -536,14 +825,18 @@ export async function evaluateTenantUpgrade(
   opts: { confirm?: boolean; now?: Date; cap?: number; deps?: TenantLoopExecDeps } = {},
 ): Promise<{ plan: TenantUpgradePlan } | { execution: TenantUpgradeExecution }> {
   const now = opts.now ?? new Date();
-  const groups = state.users.listGroups();
-  const { scopes, windows } = effectiveLoopConfig(rec, groups);
-  if (!rec.loopStatus) {
-    throw new HttpError(409, "tenant is not registered in the tenant loop", "tenant_loop_not_registered");
+  // Round-2 unit model: coverage comes from the owner's group enrollments — the deprecated
+  // per-tenant loop fields are never read. Uncovered → refuse with the explicit reason;
+  // an unrepresentable window intersection → refuse with the SAME reason string the export
+  // audit row and the preview carry (fail-closed both ways).
+  const resolution = resolveEnrollment(rec, state.users.listEnrollments(), groupMembershipInputs(state.users.groupMembershipList()));
+  if (!resolution.covered) {
+    if (resolution.reason === "not_covered") {
+      throw new HttpError(409, `tenant is not covered by any active loop enrollment (${resolution.detail})`, "tenant_loop_not_covered");
+    }
+    throw new HttpError(403, `tenant loop windows are unrepresentable (${resolution.detail})`, "tenant_loop_window_unrepresentable");
   }
-  if (rec.loopStatus === "suspended") {
-    throw new HttpError(409, "tenant loop participation is suspended", "tenant_loop_suspended");
-  }
+  const { scopes, windows, gitRemote } = resolution;
   if (scopes.upgrade !== true) {
     throw new HttpError(403, "tenant scopes.upgrade is false", "tenant_loop_scope_off");
   }
@@ -594,7 +887,7 @@ export async function evaluateTenantUpgrade(
     projectDir: rec.projectDir,
     templateVersion: readTemplateVersion(rec.projectDir),
     snapshotBranch: snapshotBranchName(now),
-    localOnlyBackup: (rec.loopGitRemote ?? "local-only") === "local-only",
+    localOnlyBackup: gitRemote === "local-only",
     window,
     quota: { day, used: upgradesUsedToday(rec, day), cap: opts.cap ?? TENANT_LOOP_UPGRADE_DAILY_CAP },
     command,
