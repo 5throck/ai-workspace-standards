@@ -16,6 +16,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { genId } from "./util";
 import type { TenantRecord } from "./tenant";
+import { REGISTRY_MIGRATION_STEPS, runMigrations } from "./migrations";
 
 export class TenantRegistry {
   private readonly db: Database;
@@ -39,10 +40,25 @@ export class TenantRegistry {
       created_at TEXT NOT NULL,
       data TEXT NOT NULL
     );`);
-    this.db.exec("CREATE INDEX IF NOT EXISTS idx_tenants_key ON tenants(key);");
+    // Note: no plain idx_tenants_key is created here any more — registry migration v5
+    // replaces it with the UNIQUE idx_tenants_key_unique (shared-teams design §4). Creating
+    // the non-unique twin at every boot would resurrect a dropped index on migrated DBs.
     this.db.exec("CREATE INDEX IF NOT EXISTS idx_tenants_owner ON tenants(owner_principal);");
     // Migration: import the legacy registry.json on first run with an empty table.
     this.migrateLegacy(join(dataDir, "tenants", "registry.json"));
+    // Registry migrations run through the SAME versioned runner as users.db (PRAGMA
+    // user_version, downgrade guard) against this store's own steps — the registry versions
+    // separately (see migrations.ts). A duplicate-key database throws RegistryKeyCollisionError
+    // out of this constructor: the gateway refuses to boot (fail-closed, design §4).
+    // QA S3 (2026-11-11): the refusal must not leak the handle — an object whose constructor
+    // threw is unreachable, so nothing could ever close it (the UserStore pattern, users.ts);
+    // on Windows the locked registry.db then blocks deletion/repair until process exit.
+    try {
+      runMigrations(this.db, REGISTRY_MIGRATION_STEPS);
+    } catch (err) {
+      this.db.close();
+      throw err;
+    }
   }
 
   /** Release the SQLite handle (checkpoints WAL); needed before deleting the data dir on Windows. */
@@ -87,12 +103,13 @@ export class TenantRegistry {
   upsert(rec: TenantRecord): void {
     this.db
       .query(
-        `INSERT INTO tenants (tenant_id, variant, status, name, owner_principal, key, created_at, data)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO tenants (tenant_id, variant, status, name, owner_principal, key, created_at, data, team_kind, owner_group)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(tenant_id) DO UPDATE SET
            variant=excluded.variant, status=excluded.status, name=excluded.name,
            owner_principal=excluded.owner_principal, key=excluded.key,
-           created_at=excluded.created_at, data=excluded.data`,
+           created_at=excluded.created_at, data=excluded.data,
+           team_kind=excluded.team_kind, owner_group=excluded.owner_group`,
       )
       .run(
         rec.tenantId,
@@ -103,6 +120,8 @@ export class TenantRegistry {
         rec.key ?? null,
         rec.createdAt,
         JSON.stringify(rec),
+        rec.teamKind ?? "personal",
+        rec.ownerGroup ?? null,
       );
   }
 
@@ -122,6 +141,10 @@ export class TenantRegistry {
     name?: string;
     description?: string;
     ownerPrincipal?: string;
+    /** Shared teams (round-3 D-S1): the record is owned by a user group — `ownerPrincipal`
+     * carries the synthetic `group:<id>` principal and `ownerGroup` the raw group id. */
+    teamKind?: "shared";
+    ownerGroup?: string;
     /** ADR-0092 Addendum 17 attach-mode: `kind: "attached"` requires `projectDir` (the
      * resolved existing checkout under Projects/co-*) and skips the storage `project` leaf —
      * the per-session scratch is created there by the attach provisioning branch instead. */
@@ -134,8 +157,12 @@ export class TenantRegistry {
     const tenantId = genId("gw");
     // Storage layout (user request): tenants live under <dataDir>/storage/<principal>/<name>/
     // — per-user grouping on disk. The scaffold still runs in the workspace clone's Projects/
-    // (engine constraint) and is relocated here immediately after.
-    const principal = init.ownerPrincipal ?? "shared";
+    // (engine constraint) and is relocated here immediately after. Shared teams keep the same
+    // two-segment shape with the literal `shared` top segment (a `group:<id>` string is not a
+    // filesystem-safe principal segment) — tenantFolderOf still resolves their real folder, so
+    // sweepOrphanedStorage keeps them.
+    const shared = init.teamKind === "shared";
+    const principal = shared ? "shared" : (init.ownerPrincipal ?? "shared");
     const folder = init.name || tenantId;
     const storageRoot = join(this.dataDir, "storage", principal, folder);
     const attached = init.kind === "attached";
@@ -152,6 +179,7 @@ export class TenantRegistry {
       description: init.description,
       name: init.name,
       ownerPrincipal: init.ownerPrincipal,
+      ...(shared ? { teamKind: "shared" as const, ownerGroup: init.ownerGroup } : {}),
       sessions: 0,
       inputTokens: 0,
       outputTokens: 0,

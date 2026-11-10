@@ -31,8 +31,11 @@ const server = createServer(state);
 const base = `http://127.0.0.1:${server.port}`;
 afterAll(() => server.stop(true));
 
-function makeTenant(owner: string) {
-  const rec = state.registry.create({ dataDir, variant: "co-consult", key: `co-consult::${owner}`, ownerPrincipal: owner });
+// `keySuffix` keeps two fixture tenants of one owner on DISTINCT registry keys — registry
+// migration v5 made tenants.key UNIQUE (shared-teams design §4), so a duplicate key is now a
+// refused state, not a benign degenerate case.
+function makeTenant(owner: string, keySuffix = "") {
+  const rec = state.registry.create({ dataDir, variant: "co-consult", key: `co-consult::${owner}${keySuffix}`, ownerPrincipal: owner });
   mkdirSync(rec.projectDir, { recursive: true });
   mkdirSync(rec.hermesHome, { recursive: true });
   writeFileSync(join(rec.projectDir, "f.txt"), "x");
@@ -76,7 +79,7 @@ describe("admin user delete with tenants=delete", () => {
     const cookie = `gw_session=${state.users.createSession(admin!.id)}`;
     const victim = state.users.createUser({ email: "vic@test.local", name: "vic", password: "victimpw123", role: "user" });
     const good = makeTenant(victim!.principal);
-    const bad = makeTenant(victim!.principal);
+    const bad = makeTenant(victim!.principal, "-tampered");
     const outside = join(tmp(), "outside");
     mkdirSync(outside, { recursive: true });
     writeFileSync(join(outside, "keep.txt"), "k");

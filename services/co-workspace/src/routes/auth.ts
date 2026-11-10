@@ -179,6 +179,21 @@ export async function handleAuth(state: GatewayState, req: Request, ctx: Ctx): P
     });
   }
 
+  // Round-3 shared teams (D-S10): the signed-in caller's groups WITH their member sets —
+  // feeds the New-team group picker, the sidebar `shared · <group>` badge and the strong
+  // delete confirm's member list. Scope: a member sees the rosters of their OWN groups only
+  // (no cross-group exposure; admin-wide rosters stay behind the admin console).
+  if (req.method === "GET" && path === "/auth/me/groups") {
+    const user = state.users.resolveSession(sessionTokenFromCookie(req));
+    if (!user) throw new HttpError(401, "not signed in");
+    const groups = state.users.groupsOf(user.principal).map((g) => ({
+      groupId: g.groupId,
+      name: g.name,
+      members: state.users.listMembers(g.groupId),
+    }));
+    return jsonResponse({ groups });
+  }
+
   if (req.method === "PATCH" && path === "/auth/me") {
     const user = state.users.resolveSession(sessionTokenFromCookie(req));
     if (!user) throw new HttpError(401, "not signed in");

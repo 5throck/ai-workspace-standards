@@ -7,6 +7,7 @@
  * tenant-loop registry export (a member change alters loop coverage). */
 
 import { isReservedLoginId, requireAdminReady, requireAdminReauth } from "../../access";
+import { quarantineGroupSharedTeams } from "../../lifecycle";
 import { GroupConflictError } from "../../users";
 import { exportTenantLoopRegistry } from "../../tenant-loop";
 import { HttpError, jsonResponse, readJsonBody } from "../../http";
@@ -145,6 +146,10 @@ export async function handleGroups(state: GatewayState, req: Request, ctx: Ctx):
       // loop_operators rows (round-2 amendment C — group ids are reusable).
       state.users.deleteGeneralGroup(groupId);
       state.audit.record(caller.principal, "group.delete", groupId, `members=${members}`);
+      // Round-3 QA (S2): group ids are reusable, so the group's shared teams are QUARANTINED
+      // (archived + audited) — a recreated group id must never inherit the old team. Runs
+      // after the successful delete: the teams belong to a group id that no longer exists.
+      quarantineGroupSharedTeams(state, groupId, caller.principal);
       // A deleted group can no longer cover tenants — refresh the registry export.
       const exported = exportTenantLoopRegistry(state);
       return jsonResponse({ ok: true, export: exported });

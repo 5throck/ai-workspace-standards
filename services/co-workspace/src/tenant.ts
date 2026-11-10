@@ -56,8 +56,17 @@ export interface TenantRecord {
   conversationId?: string;
   /** Operator/user-facing project name (P7). Falls back to `tenantId` when unset. */
   name?: string;
-  /** Trusted principal owning this tenant (P9) — from the key-file label, or "anonymous". */
+  /** Trusted principal owning this tenant (P9) — from the key-file label, or "anonymous".
+   * Round-3 shared teams (D-S1): for a shared team this is the SYNTHETIC `group:<group_id>`
+   * principal (the single ownership field; requireTenantAccess interprets it via group
+   * membership). */
   ownerPrincipal?: string;
+  /** Round-3 shared teams (D-S1): `personal` (the default — unset legacy rows read as
+   * personal) or `shared` (owned by a user group, key `<variant>::group:<id>`). */
+  teamKind?: "personal" | "shared";
+  /** Round-3 shared teams (D-S1): the owning group's raw id (NULL/unset for personal teams).
+   * Direct lookup — hot paths never prefix-parse ownerPrincipal. */
+  ownerGroup?: string;
   /** Admin console: set by archive; an archived tenant refuses turns (409 tenant_archived) but
    * still counts toward the owner's tenant cap. Cleared by restore. */
   archivedAt?: string;
@@ -271,6 +280,10 @@ export function publicTenant(rec: TenantRecord) {
     usage: { inputTokens: rec.inputTokens, outputTokens: rec.outputTokens },
     progress: rec.progress,
     error: rec.error,
+    // Round-3 shared teams (D-S1/D-S10): the UI badge, the group-scoped delete confirm and
+    // the composer all read the kind; unset legacy rows read as personal.
+    teamKind: rec.teamKind ?? "personal",
+    ownerGroup: rec.ownerGroup,
     ...(rec.kind === "attached" ? { kind: rec.kind, hub: rec.attachHub ? basename(rec.attachHub) : undefined } : {}),
   };
 }

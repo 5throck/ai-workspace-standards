@@ -1,6 +1,6 @@
 import { estimateTokens as geminiEstimateTokens, parseGeminiRequest } from "../gemini";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
-import { assertPrincipalQuota, assertQuota } from "../access";
+import { assertPrincipalQuota, assertQuota, callerPrincipal } from "../access";
 import { effectivePolicyFor } from "../policy";
 import { ensureReady, resolveLazyTenant } from "../lifecycle";
 import { geminiChatResponse } from "../responses";
@@ -41,7 +41,7 @@ export async function handleGemini(state: GatewayState, req: Request, ctx: Ctx):
     const ready = await ensureReady(state, rec);
     assertQuota(state.cfg, ready, undefined, effectivePolicyFor(state, ready.ownerPrincipal ?? "anonymous"));
     assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
-    return await geminiChatResponse(state, ready, parsed.req.message, geminiAction[2] === "streamGenerateContent");
+    return await geminiChatResponse(state, ready, parsed.req.message, geminiAction[2] === "streamGenerateContent", callerPrincipal(state, req) ?? "anonymous");
   }
 
   return null;

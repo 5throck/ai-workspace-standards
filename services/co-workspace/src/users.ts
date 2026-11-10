@@ -1011,6 +1011,27 @@ export class UserStore {
     }));
   }
 
+  /** Round-3 shared teams (D-S6): the named policies assigned to ONE group directly — the
+   * policy source for a group-owned team's effective policy (the synthetic `group:<id>`
+   * owner resolves here; no user_groups membership join). */
+  policyAssignmentsForGroup(groupId: string): Array<{ policyId: string; policyName: string; via: string; policy: GroupPolicy }> {
+    const rows = this.db
+      .query(
+        `SELECT p.policy_id, p.name, pa.target_id, p.limits
+         FROM policy_assignments pa
+         JOIN policies p ON p.policy_id = pa.policy_id
+         WHERE pa.target_kind = 'group' AND pa.target_id = ?
+         ORDER BY p.policy_id ASC, pa.target_id ASC`,
+      )
+      .all(groupId) as Array<{ policy_id: string; name: string; target_id: string; limits: string }>;
+    return rows.map((r) => ({
+      policyId: r.policy_id,
+      policyName: r.name,
+      via: r.target_id,
+      policy: sanitizeGroupPolicyShape(JSON.parse(r.limits)),
+    }));
+  }
+
   private rowToEnrollment(r: Record<string, unknown>): LoopEnrollmentRecord {
     // Read-side canonicalization reuses the write-time validators (single implementation);
     // a hand-edited row degrades to the pre-v4 defaults instead of poisoning the resolver.

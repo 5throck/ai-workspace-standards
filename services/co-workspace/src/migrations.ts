@@ -260,6 +260,77 @@ export const MIGRATION_HEAD = MIGRATION_STEPS[MIGRATION_STEPS.length - 1].versio
 /** Refusal signal for a database newer than this code knows (downgrade guard). */
 export class MigrationDowngradeError extends Error {}
 
+// ── registry.db migrations (TenantRegistry, src/registry-db.ts) ─────────────
+// The registry store versioned SEPARATELY from users.db (each store owns its
+// PRAGMA user_version) but through the same runner and the same step numbering
+// sequence, so "v5 = shared teams" names the same change on both stores. There
+// is no users.db v5 step: round 3 needs no users.db change (groups/enrollments
+// already exist), so MIGRATION_HEAD stays 4.
+
+/** Refusal signal for the registry v5 pre-check: the design (§4) mandates REFUSAL, not
+ * dedupe — two rows sharing a registry key make findByKey first-row-wins, i.e. team
+ * resolution, quota accounting and the loop export could disagree about which team is
+ * "the" team. Only the operator can resolve which row is real. */
+export class RegistryKeyCollisionError extends Error {}
+
+export const REGISTRY_MIGRATION_STEPS: MigrationStep[] = [
+  {
+    // Shared teams (design docs/designs/2026-11-09-gw-shared-teams-design.md §3-§4, D-S1/D-S2):
+    // the team kind rides REAL columns (team_kind/owner_group — the task brief supersedes the
+    // design's original "rides tenants.data JSON" reading) so the registry key uniqueness and
+    // the owner group are schema-visible, and tenants.key becomes UNIQUE.
+    //
+    // ONE-WAY: the duplicate-key refusal has no automated recovery (the operator resolves the
+    // duplicate rows by hand; the pre-migration backup is the safety net) — same posture as
+    // the users.db v4 step.
+    //
+    // ORDERING (corrected 2026-11-11 QA S3 — the old comment claimed the pre-check ran
+    // before any DDL, which was not the execution order): inside the one transaction the
+    // guarded ALTERs run FIRST, then the duplicate pre-check, then the index swap. What
+    // leaves a duplicate-key database with its registry schema untouched is the TRANSACTION
+    // ROLLBACK, not the statement order: the throw unwinds the already-executed ALTERs, so
+    // the refused database still boots-fails at user_version 0 with no v5 columns.
+    version: 5,
+    name: "shared teams: tenants.key UNIQUE + team_kind/owner_group columns [ONE-WAY]",
+    up(db: Database): void {
+      db.transaction(() => {
+        for (const stmt of [
+          "ALTER TABLE tenants ADD COLUMN team_kind TEXT NOT NULL DEFAULT 'personal'",
+          "ALTER TABLE tenants ADD COLUMN owner_group TEXT",
+        ]) {
+          try {
+            db.exec(stmt);
+          } catch (err) {
+            // Only "already applied" is benign (the v3 pattern); anything else is a real
+            // schema problem and must stop the migration.
+            if (!(err instanceof Error && err.message.includes("duplicate column name"))) throw err;
+          }
+        }
+        // Pre-migration duplicate check (design §4 step 1): any key carried by more than one
+        // row refuses the boot, naming the keys. NULL keys (native/attach rows) are exempt —
+        // UNIQUE indexes never conflict on NULL in SQLite.
+        type DupRow = { key: string; n: number };
+        const dups = db
+          .query("SELECT key, COUNT(*) AS n FROM tenants WHERE key IS NOT NULL GROUP BY key HAVING COUNT(*) > 1")
+          .all() as DupRow[];
+        if (dups.length > 0) {
+          const named = dups.map((d) => `${d.key} (${d.n} rows)`).join(", ");
+          throw new RegistryKeyCollisionError(
+            `registry migration v5 refused: duplicate tenants.key values make team resolution non-deterministic — ` +
+              `resolve by hand before upgrading: ${named}`,
+          );
+        }
+        // The old non-unique index is dropped in the same step (the unique index covers the
+        // lookup); findByKey keeps its LIMIT 1 shape, now deterministic by constraint.
+        db.exec("DROP INDEX IF EXISTS idx_tenants_key");
+        db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_tenants_key_unique ON tenants(key)");
+      })();
+    },
+  },
+];
+
+export const REGISTRY_MIGRATION_HEAD = REGISTRY_MIGRATION_STEPS[REGISTRY_MIGRATION_STEPS.length - 1].version;
+
 function currentUserVersion(db: Database): number {
   const row = db.query("PRAGMA user_version").get() as { user_version: number };
   return Number(row.user_version);

@@ -81,9 +81,18 @@ export function requireAdminReady(state: GatewayState, req: Request): UserRecord
   return user;
 }
 
-/** SEC-01: tenant access requires owner match, admin role, or the Phase 0 open mode
- * (no keys, no login requirement, anonymous-owned tenant). */
+/** SEC-01: tenant access requires owner match, admin role, live group membership (shared
+ * teams), or the Phase 0 open mode (no keys, no login requirement, anonymous-owned tenant). */
 export function requireTenantAccess(state: GatewayState, req: Request, rec: TenantRecord): void {
+  // Round-3 quarantine (group-delete side effect, QA S2): an archived tenant is inaccessible
+  // to EVERYONE through the member surfaces — no detail view, no files, no turns. Checked
+  // BEFORE the admin bypass so a quarantined team stays sealed; the console's archive,
+  // restore and bulk delete act through their own routes, which bypass this gate. The typed
+  // code matches the quota refusal (assertQuota) that already stopped turns on archived rows.
+  if (rec.archivedAt) {
+    state.audit.record(callerPrincipal(state, req) ?? "anonymous", "tenant.access.denied", rec.tenantId, "archived");
+    throw new HttpError(409, "tenant is archived", "tenant_archived");
+  }
   // T-20261003-027 (sub-feature 4): the admin-wide bypass requires the one-time password
   // set to be complete — a passwordless (bootstrap/SSO) admin keeps only their own access
   // until they set one. Key-authenticated callers resolve no session, unchanged.
@@ -92,6 +101,15 @@ export function requireTenantAccess(state: GatewayState, req: Request, rec: Tena
   if (openMode && (rec.ownerPrincipal ?? "anonymous") === "anonymous") return;
   const caller = callerPrincipal(state, req);
   if (caller && rec.ownerPrincipal && rec.ownerPrincipal === caller) return;
+  // Round-3 shared teams (D-S5): the caller's group memberships are queried LIVE at request
+  // time — group removal ends access on the very next request (no cached grant). The owner
+  // check above is skipped for shared teams: the owner is the synthetic `group:<id>`
+  // principal, never a caller. In-flight turns complete (no change to the chatLock queue).
+  if (caller && rec.teamKind === "shared") {
+    const ownerGroup = rec.ownerGroup
+      ?? (rec.ownerPrincipal?.startsWith("group:") ? rec.ownerPrincipal.slice("group:".length) : undefined);
+    if (ownerGroup && state.users.groupsOf(caller).some((g) => g.groupId === ownerGroup)) return;
+  }
   // 2026-10-03 review M1: the client message used to name the owner principal — a probing
   // caller learned who owns a tenant id. Keep the detail in the audit trail only.
   state.audit.record(caller ?? "anonymous", "tenant.access.denied", rec.tenantId, `owner=${rec.ownerPrincipal ?? "anonymous"}`);

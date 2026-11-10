@@ -421,14 +421,23 @@ function representableWindow(segs: DaySegments, tz: string): LoopWindows | null 
  * ∨ '*'). Multiple coverings resolve strictest-wins: scopes AND per key; windows intersect,
  * computed in the tz of the lexically-first covering enrollment (all others converted via
  * Intl at a fixed anchor). A non-contiguous or empty intersection is NOT improvised into a
- * window: the caller omits the tenant (export) or refuses the operation (upgrade). */
+ * window: the caller omits the tenant (export) or refuses the operation (upgrade).
+ *
+ * Round-3 shared teams (D-S8): an owner of `group:<id>` IS the owning group — the
+ * membership check maps to "the group owns the team", so its own active enrollments for the
+ * variant cover it directly (no user_groups join: the synthetic principal is a member of
+ * nothing). The export row's `principal` keeps the same `group:<id>` string (the workspace
+ * reader accepts any non-empty principal). */
 export function resolveEnrollment(
   tenant: Pick<TenantRecord, "ownerPrincipal" | "variant">,
   enrollments: LoopEnrollmentInput[],
   groupMemberships: GroupMembershipInput[],
 ): EnrollmentResolution {
   const owner = tenant.ownerPrincipal ?? "anonymous";
-  const memberOf = new Set(groupMemberships.filter((m) => m.principals.includes(owner)).map((m) => m.groupId));
+  const ownerGroupId = owner.startsWith("group:") ? owner.slice("group:".length) : undefined;
+  const memberOf = ownerGroupId !== undefined
+    ? new Set([ownerGroupId]) // group owns the team — its enrollments cover it directly
+    : new Set(groupMemberships.filter((m) => m.principals.includes(owner)).map((m) => m.groupId));
   const covering = enrollments
     .filter((e) => e.status === "active" && memberOf.has(e.groupId) && (e.variant === "*" || e.variant === tenant.variant))
     .sort((a, b) => (a.groupId === b.groupId ? a.variant.localeCompare(b.variant) : a.groupId.localeCompare(b.groupId)));
@@ -437,7 +446,9 @@ export function resolveEnrollment(
     return {
       covered: false,
       reason: "not_covered",
-      detail: `owner ${owner} is in no group with an active enrollment for variant ${tenant.variant} or "*"`,
+      detail: ownerGroupId !== undefined
+        ? `owning group ${ownerGroupId} has no active enrollment for variant ${tenant.variant} or "*"`
+        : `owner ${owner} is in no group with an active enrollment for variant ${tenant.variant} or "*"`,
     };
   }
   // Scopes: per-key AND across every covering enrollment.

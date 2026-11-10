@@ -7,7 +7,7 @@
  */
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { keyEntryExpired, readKeyEntries } from "./config";
+import { isReservedPrincipalLabel, keyEntryExpired, readKeyEntries } from "./config";
 
 // GET /login must stay keyless: with keys configured, a fresh browser has no session yet,
 // so gating the sign-in page makes sign-in itself impossible. The page holds no data and
@@ -78,7 +78,14 @@ export function principalFor(cfg: { apiKeys: string[]; apiKeysFile?: string }, p
   const expired = new Set(entries.filter((e) => keyEntryExpired(e)).map((e) => e.key));
   for (const e of entries) {
     if (keyEntryExpired(e)) continue;
-    if (constantTimeEquals(e.key, presented)) return e.spokeId || e.label;
+    if (constantTimeEquals(e.key, presented)) {
+      // Reserved namespace (shared teams, QA S3): a `group:`-prefixed label/spoke-id would
+      // mint the synthetic group-owner principal from a personal credential — never resolve
+      // one. readKeyEntries already drops such entries; this skip is defense in depth.
+      const principal = e.spokeId || e.label;
+      if (isReservedPrincipalLabel(principal)) continue;
+      return principal;
+    }
   }
   for (const key of cfg.apiKeys) {
     if (expired.has(key)) continue;

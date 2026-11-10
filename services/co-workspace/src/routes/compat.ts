@@ -3,7 +3,7 @@ import { requireAdminReauth } from "../access";
 import { countTokensPayload, estimateTokens, parseAnthropicRequest } from "../anthropic";
 import { parseChatRequest } from "../openai";
 import { HttpError, jsonResponse, readJsonBody } from "../http";
-import { isAdminCaller, assertPrincipalQuota, assertQuota } from "../access";
+import { callerPrincipal, isAdminCaller, assertPrincipalQuota, assertQuota } from "../access";
 import { effectivePolicyFor } from "../policy";
 import { ensureReady, resolveLazyTenant } from "../lifecycle";
 import { openaiChatResponse, anthropicChatResponse } from "../responses";
@@ -23,7 +23,8 @@ export async function handleCompat(state: GatewayState, req: Request, ctx: Ctx):
     const ready = await ensureReady(state, rec);
     assertQuota(state.cfg, ready, undefined, effectivePolicyFor(state, ready.ownerPrincipal ?? "anonymous"));
     assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
-    return await openaiChatResponse(state, ready, parsed.req.message, parsed.req.stream, promise ?? undefined);
+    // D-S4: the turn is attributed to the authenticated caller (personal teams only on the wires — D-S9).
+    return await openaiChatResponse(state, ready, parsed.req.message, parsed.req.stream, promise ?? undefined, callerPrincipal(state, req) ?? "anonymous");
   }
 
   if (req.method === "POST" && path === "/v1/messages") {
@@ -38,7 +39,7 @@ export async function handleCompat(state: GatewayState, req: Request, ctx: Ctx):
     const ready = await ensureReady(state, rec);
     assertQuota(state.cfg, ready, undefined, effectivePolicyFor(state, ready.ownerPrincipal ?? "anonymous"));
     assertPrincipalQuota(state, ready.ownerPrincipal ?? "anonymous");
-    return await anthropicChatResponse(state, ready, parsed.req.message, parsed.req.stream);
+    return await anthropicChatResponse(state, ready, parsed.req.message, parsed.req.stream, callerPrincipal(state, req) ?? "anonymous");
   }
 
   // Phase 2 key rotation: re-read the key file and re-union with the process-immutable env
