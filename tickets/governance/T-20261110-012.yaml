@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261110-012
+kind: manual
+title: >-
+  test-file version-gating gap (surfaced by the 2026-11-10 co-deck template
+  sync, PR co-deck#217): delivered security-validator.ts v1.3.0 breaks the
+  project-local security-validator.test.ts ('validate complete extends chain
+  with security' — passes at main, fails at post-sync HEAD). Root cause: the
+  template's newer test file carries NO @version header, so version-gating kept
+  the project's stale test copy while delivering the new script. Related:
+  T-20261110-010 covers variant SCRIPT parity for @version-carrying files; this
+  ticket covers TEST files (and any non-@version files) where the gating basis
+  is absent. Candidate fixes: require @version on delivered test files, or
+  parity-check test files by hash like README pairs, or treat test files as
+  always-deliver. Adjudicate the failing co-deck test first (project-local
+  assertion vs template behavior change), then design. Refs: co-deck PR #217
+  leftovers.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-10T21:15:58.959+09:00'
+history:
+  - at: '2026-11-10T21:15:58.959+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

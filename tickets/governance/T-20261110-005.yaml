@@ -8,12 +8,28 @@ title: >-
   inject_video_players.py) whose video-slide styling the generic injector does
   not reproduce
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-10T14:44:07.929+09:00'
 history:
   - at: '2026-11-10T14:44:07.929+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T21:17:59.886+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T21:17:59.903+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T21:17:59.920+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented via workspace PR #1952 (merge f7d06a11): inject-video-players.ts
+  v1.2.0 — --slidedata defaults beside the deck HTML
+  (dirname(resolve(htmlPath))), missing file exits 1 with a named-path message,
+  warn-only notice on project-local injector presence (glob). 3 new test cases;
+  functional check from repo root against a /tmp fixture passed (default
+  resolves, no ENOENT). Delivered to Projects/co-deck in co-deck PR #217 (merged
+  daa9cbd5), v1.2.0 byte-identical.
 error: null

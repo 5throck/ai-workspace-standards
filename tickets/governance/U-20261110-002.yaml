@@ -3,7 +3,7 @@ id: U-20261110-002
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-10T14:42:42.111+09:00'
 history:
@@ -13,7 +13,17 @@ history:
   - at: '2026-11-10T17:24:01.048+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-10T21:17:21.964+09:00'
+    from: review
+    to: done
+result: >-
+  L1 doc defect confirmed: agents/html-build.md
+  (templates/co-deck/agents/html-build.md) canonical rebuild order did not
+  instruct checking project-local rebuild documentation. Fixed via workspace PR
+  #1952 (merge f7d06a11): html-build.md v1.4.0 append-only amendment — check
+  project rebuild docs first; a project-documented order overrides the canonical
+  default. Delivered to the project in co-deck PR #217 (merged daa9cbd5) and
+  byte-verified.
 error: null
 upstream:
   project: co-deck
@@ -66,3 +76,15 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-10T14:42:42.111+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1952
+    template_version: unreleased
+    summary: >-
+      L1 doc defect confirmed: agents/html-build.md
+      (templates/co-deck/agents/html-build.md) canonical rebuild order did not
+      instruct checking project-local rebuild documentation. Fixed via workspace
+      PR #1952 (merge f7d06a11): html-build.md v1.4.0 append-only amendment —
+      check project rebuild docs first; a project-documented order overrides the
+      canonical default. Delivered to the project in co-deck PR #217 (merged
+      daa9cbd5) and byte-verified.

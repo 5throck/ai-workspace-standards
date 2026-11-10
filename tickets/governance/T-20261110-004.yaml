@@ -7,12 +7,28 @@ title: >-
   [Source: Rn] footers, pre-revision bullets, lacks the S103 references slide;
   full PDF 2026-11-07 is current) via the standard Gate 5 sample flow
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-10T14:44:07.907+09:00'
 history:
   - at: '2026-11-10T14:44:07.907+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T21:18:00.041+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T21:18:00.058+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T21:18:00.075+09:00'
+    from: review
+    to: done
+result: >-
+  Executed 2026-11-10 (co-deck PR #217 merged daa9cbd5): regenerated
+  2026-11-consumer-goods-market-shift_sample5.pdf via the standard Gate 5 sample
+  flow (slidedata re-extracted from v4 HTML, S103 references present at source;
+  gen-slides-pdf.ts --sample 5; pdftocairo render check). Verified 0 stale
+  [Source: Rn] footers (pdftotext) and correct cover. Output under gitignored
+  presentations/ — nothing to commit. Gate 5 user review of the regenerated
+  sample remains open per the flow.
 error: null

@@ -19,5 +19,31 @@ history:
   - at: '2026-11-10T19:19:40.778+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-10T21:18:00.108+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T21:18:00.126+09:00'
+    from: review
+    to: done
+  - at: '2026-11-10T21:19:31.396+09:00'
+    from: done
+    to: waiting
+result: >-
+  Diagnosed 2026-11-10 (evidence in session log and this ticket's symptom):
+  every job fails in 3-5s with runner_id 0 and zero steps — the GitHub-generated
+  annotation reads 'recent account payments have failed or your spending limit
+  needs to be increased'. Decisive discriminator: 13 PRIVATE repos all fail
+  while public repos (ai-workspace-standards, co-newbiz, co-abap-plugin) succeed
+  on the same hosted runner pool — account-level Actions billing wall, not
+  storage corruption (BlobNotFound is a side effect of jobs never starting; the
+  T-20261027-014 precedent carried the same annotation) and not a workflow
+  regression (failures began 2026-11-03, five days before the only workflow
+  change; setup-bun/SHA pins are never reached). Onset correction: 2026-11-03,
+  not 2026-11-08. REMEDIATION IS USER-ONLY: GitHub Settings > Billing & plans —
+  fix the failed payment and/or raise the spending limit. After the user
+  confirms, automation verifies via gh run rerun 42777487491 --repo
+  5throck/co-deck (expect runner assigned + steps > 0). Do not re-run before the
+  fix (precedent: reruns failing during the wall, T-20261007-025). PRs #202-#216
+  merged without CI evidence by necessity; a green main run after the fix covers
+  the current tree.
 error: null
