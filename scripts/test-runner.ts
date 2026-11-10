@@ -1,7 +1,16 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.11.0
+ * @version 1.12.0
  *
+ * v1.12.0 (2026-11-11, T-20261111-003 follow-up): `co-workspace-composer-wire-regression.test.ts`
+ *          joins FILE_TIME_BUDGETS (suite 300s / test 45s) — windows-latest run 42913762200: the
+ *          round-3 wire-regression suite (server bootstrap + argon2 hashing + per-request
+ *          shared-team resolution) hit the 15000ms default ceiling at 15.58s while the same
+ *          commit passed macos. Same first-time row shape as v1.11.0/v1.12.0 predecessors.
+ *
+ * v1.11.0 (2026-11-10, T-20261110-001 — spec
+ *          docs/designs/2026-11-10-workspace-console-ci-flake-design.md):
+ *          `co-workspace-admin-console.test.ts` joins FILE_TIME_BUDGETS
  * v1.11.0 (2026-11-10, T-20261110-001 — spec
  *          docs/designs/2026-11-10-workspace-console-ci-flake-design.md):
  *          `co-workspace-admin-console.test.ts` joins FILE_TIME_BUDGETS
@@ -196,6 +205,30 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // exists so any runtime drift on the extracted file is visible without a
   // registry diff.
   "upgrade-policy-decisions.test.ts": { suite: 120000, test: 15000 },
+  // T-20261111-003 (windows-latest, main CI run 42881762644): the PR #1956
+  // shared-teams merge pushed three argon2-heavy co-workspace unit files over
+  // the 15000ms per-test ceiling on win32 — each individual test's assertions
+  // pass, but bun's timeout abort runs the file's afterAll BEFORE the aborted
+  // test's finally has closed its sqlite stores, so cleanup then dies with
+  // EBUSY rm on the still-locked tmpdir fixture (the timeout is the cause, the
+  // EBUSY is the symptom). Same family as the co-workspace-admin-console
+  // entry: sqlite stores, tmpdir fixtures, argon2 hashing (createState admin
+  // bootstrap + password re-confirmation verifies). First-time entries, not
+  // raises. Observed win32 worst case: D4 re-auth 16.8s, shared-team ACL 18.5s,
+  // loop export 17.1s; local arm64 mac runs the same three files in <1s total.
+  // Test ceiling 45s (~2.7x observed) follows the hub-bootstrap precedent;
+  // 300s suite absorbs the win32 FS-pressure variance band (the access file
+  // seeds ten states through the same argon2 path).
+  "co-workspace-review-remediation.test.ts": { suite: 300000, test: 45000 },
+  "co-workspace-shared-team-access.test.ts": { suite: 300000, test: 45000 },
+  "co-workspace-shared-team-loop.test.ts": { suite: 300000, test: 45000 },
+  // T-20261111-003 follow-up (windows-latest, run 42913762200): the round-3
+  // wire-regression suite (server bootstrap + argon2 hashing + per-request
+  // shared-team resolution) hit the 15000ms default ceiling at 15.58s on
+  // win32 while the same commit passed macos; the three raised budgets above
+  // cover the round-2 suites but missed this round-3 file. Same first-time
+  // entry shape (family 300s / test 45s).
+  "co-workspace-composer-wire-regression.test.ts": { suite: 300000, test: 45000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {

@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261111-003
+kind: manual
+title: >-
+  win32 CI: shared-teams/argon2-heavy unit suites exceed the 15000ms per-test
+  ceiling (main run 42881762644) — FILE_TIME_BUDGETS first-time entries for
+  three co-workspace files
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-11T07:17:30.576+09:00'
+history:
+  - at: '2026-11-11T07:17:30.576+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
