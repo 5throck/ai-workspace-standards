@@ -97,6 +97,10 @@ export interface TurnRecord {
   inputTokens: number;
   outputTokens: number;
   at: string;
+  /** Round-3 shared teams (D-S4): the authenticated principal that issued the turn.
+   * NULL = legacy row (pre-migration) or a callerless surface — personal-team rendering
+   * treats NULL exactly as before ("legacy" tag in the web history). */
+  actingPrincipal: string | null;
 }
 
 const MAX_TURNS_PER_TENANT = 100;
@@ -121,9 +125,21 @@ export class TurnStore {
       at TEXT NOT NULL,
       PRIMARY KEY (tenant_id, seq)
     );`);
+    // Round-3 shared teams (D-S4): per-turn attribution. Additive ALTER through this store's
+    // existing ensure pattern (CREATE IF NOT EXISTS + guarded ALTER — there is no versioned
+    // runner here and the column needs none): legacy rows keep acting_principal = NULL, no
+    // backfill, no rewrite of final_text blobs.
+    try {
+      this.db.exec("ALTER TABLE turns ADD COLUMN acting_principal TEXT");
+    } catch (err) {
+      if (!(err instanceof Error && err.message.includes("duplicate column name"))) throw err;
+    }
   }
 
-  record(tenantId: string, turn: Omit<TurnRecord, "tenantId" | "seq" | "at">): void {
+  record(
+    tenantId: string,
+    turn: Omit<TurnRecord, "tenantId" | "seq" | "at" | "actingPrincipal"> & { actingPrincipal?: string | null },
+  ): void {
     // SINGLE-PROCESS ONLY (2026-10-03 review): MAX(seq)+1 + INSERT is race-free under the
     // gateway's one-process + per-tenant chatLock assumptions. A second gateway process
     // sharing this dataDir would hit PK conflicts AFTER the turn completed. Same invariant
@@ -134,8 +150,8 @@ export class TurnStore {
     const seq = row.max + 1;
     this.db
       .query(
-        `INSERT INTO turns (tenant_id, seq, session_id, exit_code, final_text, input_tokens, output_tokens, at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO turns (tenant_id, seq, session_id, exit_code, final_text, input_tokens, output_tokens, at, acting_principal)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         tenantId,
@@ -146,6 +162,7 @@ export class TurnStore {
         turn.inputTokens,
         turn.outputTokens,
         new Date().toISOString(),
+        turn.actingPrincipal ?? null,
       );
     // C4: prune to the last MAX_TURNS_PER_TENANT per tenant.
     this.db
@@ -198,6 +215,7 @@ export class TurnStore {
       inputTokens: (r.input_tokens as number) ?? 0,
       outputTokens: (r.output_tokens as number) ?? 0,
       at: r.at as string,
+      actingPrincipal: (r.acting_principal as string | null) ?? null,
     }));
   }
 }

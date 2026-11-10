@@ -169,11 +169,20 @@ export function resolveEffectivePolicy(cfg: GatewayConfig, assignments: PolicyAs
 
 /** The effective policy for a principal (tenant owner or caller): the named policies
  * assigned (group-only) to the principal's groups, resolved strictest-wins against the cfg
- * baseline. Principals in no policy-bearing group resolve to the cfg values exactly. */
+ * baseline. Principals in no policy-bearing group resolve to the cfg values exactly.
+ *
+ * Round-3 shared teams (D-S6): the SYNTHETIC `group:<id>` owner principal of a shared team
+ * resolves through the policies assigned to that group DIRECTLY (no membership join — the
+ * group owns the team, it does not "belong" to groups). Every consumer of the owner's policy
+ * (assertTenantCap, assertQuota, assertPrincipalQuota) is therefore group-aware without its
+ * own branch. */
 export function effectivePolicyFor(state: GatewayState, principal: string): EffectivePolicy {
   // v4 unit model: the round-1 `kind==='general'` groups.policy blob read is REMOVED —
   // migration v4 migrated every blob into a named policy assigned to its group and NULLed
   // the column, so the blob can never contribute again (superseding the M1 rule, which
   // existed to keep LOOP blobs out; now NO blob is read, loop or general).
+  if (principal.startsWith("group:")) {
+    return resolveEffectivePolicy(state.cfg, state.users.policyAssignmentsForGroup(principal.slice("group:".length)));
+  }
   return resolveEffectivePolicy(state.cfg, state.users.policyAssignmentsFor(principal));
 }

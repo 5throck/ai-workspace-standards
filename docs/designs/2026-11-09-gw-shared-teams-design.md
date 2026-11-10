@@ -162,6 +162,40 @@ Run with `cd services/co-workspace && bun run test`, then `bun test tests/unit/`
 - **Round 2** — `docs/designs/2026-11-09-gw-admin-console-round2-plan.md`: named policies (migration v4) and the **(group × variant) enrollment model** (`loop_enrollments`). Shared teams sit **on top of** that enrollment model: a shared team needs no enrollment of its own — its owning group's enrollment covers it (§10), and its quota ceiling is the group's resolved policy (§8). Round 2's v4 migration (`policies` / `loop_enrollments` / `loop_operators`) is this design's **prerequisite** — shared teams consume the same (group × variant) enrollment resolver, so round 2 must land first.
 - **2026-11-08 hardening design** — the migration runner (§4.1) both §4 migrations ride, the registry export schema and mutation-triggered rewrite discipline (§3.1/§4.5) that §10 depends on.
 
+## 17. Implementation notes (2026-11-11)
+
+As-built record from the round-3 landing (follow-up to round 2, PR #1955). The design text
+above is left unchanged; deviations and one addition are recorded here.
+
+- **Deviation 1 — real DDL columns instead of the `tenants.data` JSON (§3).** The kind and
+  owner fields landed as REAL `tenants` columns `team_kind` / `owner_group` (record fields
+  `teamKind` / `ownerGroup`; the design's names were `kind` / `ownerGroupId`), added by
+  registry migration v5 — not as fields inside the versionable `tenants.data` JSON. Why:
+  the §4 uniqueness invariant had to be schema-visible (a UNIQUE index cannot back a JSON
+  blob, and the v5 duplicate pre-check must query column-level state), and the group-owned
+  cap/ACL paths read the owner group directly (queryable, typed migration — no JSON
+  parsing in hot paths). Fully additive: migrated rows default to `team_kind='personal'`.
+- **Deviation 2 — the `queued (ahead: <member>)` UI was omitted (§5, §12).** The per-tenant
+  `chatLock` exposes no queue ledger (an in-memory promise chain, no FIFO position or
+  front-of-queue attribution), so the visibility UI would have been invented state; §5
+  already marked it best-effort. Turns queue unchanged; the UI shows the plain in-progress
+  state. The design's best-effort caveat stands as the recorded tradeoff.
+- **Addition beyond the design — group-delete quarantine (2026-11-11 QA, S2).** Group ids
+  are deliberately reusable, so deleting a group that owns shared teams would let a LATER
+  group recreated with the same id inherit the dead group's teams (live membership checks
+  pass; `findByKey` returns the old team). Defense in depth: the group-delete route
+  archives every shared team owned by the group (`quarantineGroupSharedTeams` —
+  `status='archived'` + `archivedAt`, audit action `tenant.archived.group_deleted`; a full
+  `deleteTenantData` was rejected as too destructive for a group-delete side effect, the
+  team stays on disk for admin restore/inspection); archived teams are excluded from the
+  member listing (the composer/sidebar source) and `requireTenantAccess` denies archived
+  rows before every other check; `getOrStartTenant`'s shared branch asserts
+  `teamKind === 'shared' && ownerGroup === <id>` on any existing-key match (a collision row
+  → 409 `shared_team_conflict`, an archived match → 409 `tenant_archived` — never a silent
+  reuse); and `group:`-prefixed API-key labels/spoke-ids are refused at key-file parse
+  (such a label would mint a personal principal whose tenant key collides with a shared
+  team key). Tests: `tests/unit/co-workspace-shared-team-quarantine.test.ts`.
+
 ## References
 
 - `services/co-workspace/README.md:16-19` (team model — exactly one active team per (user, variant))

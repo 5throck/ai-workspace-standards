@@ -743,7 +743,7 @@ async function openUserDrawer(id, live) {
     <h3>Owned tenants (${fmtCount(tenants.length)})</h3>
     ${tenants.length
       ? `<table><thead><tr><th>Tenant</th><th>Variant</th><th>Status</th><th class="num">Sessions</th></tr></thead><tbody>` +
-        tenants.map((t) => `<tr><td>${esc(t.tenantId)}${t.name ? `<div class="hint">${esc(t.name)}</div>` : ""}</td><td>${esc(t.variant)}</td><td>${t.archivedAt ? badge("archived") : badge("active")}</td><td class="num">${fmtCount(t.sessions)}</td></tr>`).join("") +
+        tenants.map((t) => `<tr><td>${esc(t.tenantId)}${t.name ? `<div class="hint">${esc(t.name)}</div>` : ""}</td><td>${esc(t.variant)}</td><td>${t.archivedAt ? badge("archived") : badge("active")}${t.teamKind === "shared" ? " " + badge("shared") : ""}</td><td class="num">${fmtCount(t.sessions)}</td></tr>`).join("") +
         `</tbody></table>`
       : '<div class="hint">no tenants</div>'}
     <div class="row"><button class="ghost" type="button" data-rename>Rename</button><button class="ghost" type="button" data-reset>Reset password…</button></div>`;

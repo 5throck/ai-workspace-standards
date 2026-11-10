@@ -18,6 +18,9 @@ only that team's files. See [Security model](#security-model).
   The registry keys teams by `<variant>::<principal>`; there is exactly one active team
   per pair, and the web UI never auto-creates one — creation is explicit
   (**+ New team** → pick a variant, optional name → `POST /sessions`).
+  Shared teams (round 3) add a group-owned kind keyed `<variant>::group:<id>` — one team
+  per (group, variant), accessible to the group's live members; personal teams keep the
+  one-per-pair rule.
 - The web composer always targets the selected team (`POST /tenants/:id/chat`), so a
   team can only be chatted in after it exists. Deleting a team removes the tenant
   (registry row, project files, Hermes home, history) permanently.

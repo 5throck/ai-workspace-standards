@@ -188,6 +188,17 @@ export interface KeyEntry {
 
 const warnedBadExpiryKeys = new Set<string>();
 
+/** Round-3 shared teams (QA S3): `group:`-prefixed labels and spoke-ids are RESERVED. The
+ * synthetic owner principal of a group-owned team is `group:<id>`, so a key labelled
+ * `group:x` would resolve a principal whose personal tenant key `<variant>::group:x` equals
+ * group x's shared team key (findByKey would alias a personal team onto the group's team).
+ * Case-insensitive, matching isReservedLoginId's namespace comparisons. */
+export function isReservedPrincipalLabel(value: string | undefined): boolean {
+  return typeof value === "string" && value.toLowerCase().startsWith("group:");
+}
+
+const warnedReservedLabelKeys = new Set<string>();
+
 /** True when the entry's `expires` timestamp has passed (or is unparseable — a malformed
  * expiry fails CLOSED so a typo can never silently extend a key's life). */
 export function keyEntryExpired(e: KeyEntry, now: number = Date.now()): boolean {
@@ -236,12 +247,26 @@ export function readKeyEntries(path: string | undefined): KeyEntry[] {
       if (idx > 0) {
         const labelPart = line.slice(idx + 1).trim();
         const fields = labelPart.split(",").map((s) => s.trim());
-        entries.push({
+        const entry: KeyEntry = {
           key: line.slice(0, idx).trim(),
           label: fields[0] || "default",
           ...(fields[1] ? { expires: fields[1] } : {}),
           ...(fields[2] ? { spokeId: fields[2] } : {}),
-        });
+        };
+        // Reserved-namespace refusal (shared teams, QA S3): the entry is DROPPED at parse —
+        // the key never reaches cfg.apiKeys, so it cannot authenticate at all — with a loud
+        // warn-once (the keyEntryExpired fail-closed posture; a throw here would take down
+        // every OTHER key in the file with it). Env keys carry no labels and are unaffected.
+        if (isReservedPrincipalLabel(entry.label) || isReservedPrincipalLabel(entry.spokeId)) {
+          if (!warnedReservedLabelKeys.has(line)) {
+            warnedReservedLabelKeys.add(line);
+            console.warn(
+              `[co-workspace] API key entry dropped: label/spoke-id "${entry.label}${entry.spokeId ? `"/${entry.spokeId}` : ""}" uses the RESERVED "group:" prefix (shared-team owner namespace) — a key with such a label would collide with a group's shared team keys. Rename the label in the key file.`,
+            );
+          }
+          continue;
+        }
+        entries.push(entry);
       } else {
         entries.push({
           key: line,

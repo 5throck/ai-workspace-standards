@@ -135,6 +135,11 @@
   .modal .copyStatus { color: var(--muted); font-size: .74rem; }
   .gws-hidden { display: none !important; }
   .empty b { color: var(--fg); font-size: 1.05rem; display: block; margin-bottom: 6px; }
+  /* Round-3 shared teams: kind picker, shared badge, group picker. */
+  .ntKind { background: var(--input-bg); color: var(--muted); border: 1px solid var(--border2); border-radius: 7px; padding: 5px 12px; font: inherit; cursor: pointer; font-size: .78rem; }
+  .ntKindActive { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+  .sharedTag { background: rgba(31,111,235,.16); color: #4a9eff; border-radius: 5px; padding: 1px 5px; font-size: .68rem; white-space: nowrap; }
+  .modal select { background: var(--input-bg); color: var(--fg); border: 1px solid var(--border2); border-radius: 7px; padding: 7px 9px; font: inherit; width: 100%; }
 </style>
 </head>
 <body>
@@ -210,6 +215,17 @@
   let currentModel = "";
   let me = null;
   let currentUserName = () => (me?.loginId ?? "default");
+  // Round-3 shared teams (D-S10): the signed-in user's groups — the New-team group picker,
+  // the `shared · <group>` badge and the strong delete confirm's member list all read this.
+  // Refreshed on boot/auth changes and at modal-open time.
+  let myGroups = [];
+  async function loadMyGroups() {
+    try {
+      const res = await fetch("/auth/me/groups");
+      myGroups = res.ok ? ((await res.json()).groups ?? []) : [];
+    } catch { myGroups = []; }
+  }
+  const groupNameOf = (id) => myGroups.find((g) => g.groupId === id)?.name ?? id;
 
   function bubble(role, text = "") {
     document.querySelector(".empty")?.remove();
@@ -234,7 +250,7 @@
     for (const t of myTeams) {
       const opt = document.createElement("option");
       opt.value = t.tenantId;
-      opt.textContent = t.variant + (t.name ? ` · ${t.name}` : "");
+      opt.textContent = t.variant + (t.name ? ` · ${t.name}` : "") + (t.teamKind === "shared" ? " · shared" : "");
       modelSel.appendChild(opt);
     }
     if (currentTenantId) modelSel.value = currentTenantId;
@@ -245,9 +261,17 @@
   });
 
   // R7: explicit team creation from the catalog (beta behind its own toggle, persisted).
+  // Round-3 shared teams (D-S10): the modal gains a kind choice — Personal (default, the
+  // unchanged path) or Shared (a group-owned team created idempotently on the group key).
   function openNewTeamModal(presetMessage = "") {
     const authHeaders = { "content-type": "application/json", "x-requested-with": "co-workspace" };
     const wrap = showModal({ title: "New team", bodyHtml: `
+      <div class="field" style="flex-direction:row; gap:6px; align-items:center;">
+        <button type="button" id="nt-kind-personal" class="ntKind ntKindActive">Personal</button>
+        <button type="button" id="nt-kind-shared" class="ntKind">Shared</button>
+        <span class="hint" id="nt-kind-hint" style="flex:1">just for you</span>
+      </div>
+      <div class="field gws-hidden" id="nt-group-row"><label for="nt-group">Owner group (all members share this team)</label><select id="nt-group" aria-label="Owner group"></select></div>
       <div class="field"><input id="nt-name" placeholder="Team name (optional)"></div>
       <label class="betaPick" style="margin: 2px 0 8px;"><input type="checkbox" id="nt-beta" style="width:auto"> include beta variants</label>
       <div id="nt-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow:auto;"></div>
@@ -255,6 +279,22 @@
       <div class="row"><span class="spacer"></span><button id="nt-close" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Close</button></div>` });
     const betaBox2 = wrap.querySelector("#nt-beta");
     betaBox2.checked = localStorage.getItem("gw-beta") === "1";
+    let kind = "personal";
+    const groupSel = wrap.querySelector("#nt-group");
+    const renderGroups = () => {
+      groupSel.innerHTML = myGroups.length
+        ? myGroups.map((g) => `<option value="${esc(g.groupId)}">${esc(g.name || g.groupId)} · ${g.members?.length ?? g.memberCount ?? 0} members</option>`).join("")
+        : `<option value="">(no groups — you are not a member of any group)</option>`;
+    };
+    const renderKind = () => {
+      wrap.querySelector("#nt-kind-personal").classList.toggle("ntKindActive", kind === "personal");
+      wrap.querySelector("#nt-kind-shared").classList.toggle("ntKindActive", kind === "shared");
+      wrap.querySelector("#nt-group-row").classList.toggle("gws-hidden", kind !== "shared");
+      wrap.querySelector("#nt-kind-hint").textContent =
+        kind === "shared" ? "every group member works in this team" : "just for you";
+    };
+    wrap.querySelector("#nt-kind-personal").addEventListener("click", () => { kind = "personal"; renderKind(); });
+    wrap.querySelector("#nt-kind-shared").addEventListener("click", () => { kind = "shared"; loadMyGroups().then(() => { renderGroups(); renderKind(); }); renderGroups(); renderKind(); });
     const renderList = () => {
       const list = catalog.filter((m) => betaBox2.checked || m.meta?.status !== "beta");
       wrap.querySelector("#nt-list").innerHTML = list
@@ -268,7 +308,14 @@
     wrap.querySelector("#nt-close").addEventListener("click", () => wrap.remove());
     const createTeam = async (variant) => {
       const name = wrap.querySelector("#nt-name").value.trim();
-      const res = await fetch("/sessions", { method: "POST", headers: authHeaders, body: JSON.stringify({ variant, name: name || undefined }) });
+      if (kind === "shared" && !groupSel.value) {
+        wrap.querySelector("#nt-err").textContent = "⚠ pick an owner group first (or switch back to Personal)";
+        return;
+      }
+      const res = await fetch("/sessions", { method: "POST", headers: authHeaders, body: JSON.stringify({
+        variant, name: name || undefined,
+        ...(kind === "shared" ? { group: groupSel.value } : {}),
+      }) });
       const body = await res.json().catch(() => ({}));
       if (res.status === 202 || res.status === 200) {
         wrap.remove();
@@ -281,6 +328,8 @@
         if (presetMessage) input.value = presetMessage; // never lose the typed message
       }
     };
+    renderGroups();
+    renderKind();
     renderList();
   }
   $("newTeam").addEventListener("click", () => openNewTeamModal());
@@ -407,17 +456,22 @@
       row.dataset.tid = t.tenantId;
       const name = displayName(t);
       const tag = t.status === "failed" ? " ⚠" : t.status === "provisioning" ? " ⏳" : "";
+      // Round-3 shared teams (D-S10): a `shared · <group>` badge marks group-owned teams.
+      const sharedBadge = t.teamKind === "shared" ? ` <span class="sharedTag">shared · ${esc(groupNameOf(t.ownerGroup))}</span>` : "";
       const todayBadge = collapsible && new Date(t.createdAt).toDateString() === today ? '<span class="todayBadge">Today</span>' : "";
       // In variant grouping the row sits inside its variant group — the tag would be redundant.
       const meta = collapsible
         ? `${t.sessions} turns`
         : `<span class="vtag">${esc(t.variant)}</span> · ${t.sessions} turns`;
-      row.innerHTML = `<div><div class="nm">${esc(name)}${tag}${todayBadge}</div>` +
+      row.innerHTML = `<div><div class="nm">${esc(name)}${sharedBadge}${tag}${todayBadge}</div>` +
         `<div class="meta">${meta}</div></div>`;
         const del = document.createElement("button");
         del.className = "del"; del.textContent = "Delete"; del.title = "Delete session";
         del.addEventListener("click", async (e) => {
           e.stopPropagation();
+          // Round-3 shared teams (D-S10): a shared delete destroys the whole group's context —
+          // it gets the strong confirm (owner group + member set + explicit ack), not a bare confirm().
+          if (t.teamKind === "shared") { confirmSharedDelete(t, name); return; }
           if (!confirm(`Delete "${name}"? Project files will be removed.`)) return;
           const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE", headers: { "x-requested-with": "co-workspace" } });
           if (res.status === 200) {
@@ -431,6 +485,42 @@
     }
   }
 
+  // Round-3 shared teams (D-S10): the strong delete confirm — the member set is fetched at
+  // modal-open time (live, not a snapshot), the ack is explicit, and the delete is audited
+  // server-side with the acting principal (design §14).
+  async function confirmSharedDelete(t, name) {
+    let groupName = t.ownerGroup ?? "unknown group";
+    let members = [];
+    try {
+      await loadMyGroups();
+      const g = myGroups.find((g2) => g2.groupId === t.ownerGroup);
+      if (g) { groupName = g.name || groupName; members = g.members ?? []; }
+    } catch { /* fall back to the group id — the confirm still shows */ }
+    const wrap = showModal({ title: "Delete shared team", bodyHtml: `
+      <div class="field">"${esc(name)}" is owned by the group <b>${esc(groupName)}</b>. Deleting permanently removes its project files and history — <b>every member loses access</b>:</div>
+      <div class="field">${members.length ? members.map((m) => `• ${esc(m)}`).join("<br>") : "(member list unavailable — the group still loses everything)"}</div>
+      <label class="field" style="flex-direction:row; align-items:center; gap:6px;"><input type="checkbox" id="sd-ack" style="width:auto"> I understand every member loses access</label>
+      <div class="formErr" id="sd-err" role="status"></div>
+      <div class="row"><span class="spacer"></span><button id="sd-cancel" type="button" style="background:transparent;color:var(--muted);border:1px solid var(--border2);">Cancel</button><button id="sd-go" disabled>Delete shared team</button></div>` });
+    const ack = wrap.querySelector("#sd-ack");
+    const go = wrap.querySelector("#sd-go");
+    ack.addEventListener("change", () => { go.disabled = !ack.checked; });
+    wrap.querySelector("#sd-cancel").addEventListener("click", () => wrap.remove());
+    go.addEventListener("click", async () => {
+      go.disabled = true;
+      const res = await fetch(`/tenants/${t.tenantId}`, { method: "DELETE", headers: { "x-requested-with": "co-workspace" } });
+      if (res.status === 200) {
+        if (t.tenantId === currentTenantId) { currentTenantId = ""; pnameLabel.textContent = ""; }
+        wrap.remove();
+        loadSessions();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        wrap.querySelector("#sd-err").textContent = `⚠ ${body.error ?? "delete failed"}`;
+        go.disabled = false;
+      }
+    });
+  }
+
   async function selectSession(t) {
     if (currentTenantId === t.tenantId && provisionPollTimer) return; // already watching this provisioning tenant
     currentTenantId = t.tenantId;
@@ -438,13 +528,19 @@
     modelSel.value = t.tenantId;
     const name = displayName(t);
     const usage = t.usage ? ` · ${t.usage.inputTokens ?? 0}→${t.usage.outputTokens ?? 0} tok` : "";
-    pnameLabel.innerHTML = `project: <b>${esc(name)}</b> · ${t.sessions} turns${usage}`;
+    // Round-3 shared teams (D-S10): the header names the owner group and the member count
+    // (live /auth/me/groups data; omitted when the group is unknown to this caller).
+    const sharedGroup = t.teamKind === "shared" ? myGroups.find((g) => g.groupId === t.ownerGroup) : null;
+    const sharedInfo = t.teamKind === "shared"
+      ? ` · <span class="sharedTag">shared · ${esc(groupNameOf(t.ownerGroup))}</span>${sharedGroup?.members?.length ? ` · ${sharedGroup.members.length} members` : ""}`
+      : "";
+    pnameLabel.innerHTML = `project: <b>${esc(name)}</b> · ${t.sessions} turns${usage}${sharedInfo}`;
     log.innerHTML = "";
     // QA-09: replay recent turns as read-only bubbles
     try {
       const { turns } = await (await fetch(`/tenants/${t.tenantId}/history`)).json();
       for (const turn of turns.slice(-10).reverse()) {
-        if (turn.finalText) bubble("assistant", `[#${turn.seq}] ${turn.finalText}`);
+        if (turn.finalText) bubble("assistant", `[#${turn.seq}${turn.actingPrincipal ? ` · ${turn.actingPrincipal}` : ""}] ${turn.finalText}`);
       }
     } catch { /* history is best-effort */ }
     if (t.status === "provisioning") {
@@ -912,7 +1008,9 @@
     for (const t of turns) {
       const div = document.createElement("div");
       div.className = "turnRow";
-      div.innerHTML = `<div class="meta">#${t.seq} · ${esc(t.at)} · exit ${t.exitCode} · ${t.inputTokens}→${t.outputTokens} tok</div>` +
+      // Round-3 shared teams (D-S6/§6): the author tag rides each turn; NULL = legacy row
+      // (rendered as "legacy", never a fabricated attribution).
+      div.innerHTML = `<div class="meta">#${t.seq} · ${esc(t.at)} · exit ${t.exitCode} · ${t.inputTokens}→${t.outputTokens} tok · ${esc(t.actingPrincipal ?? "legacy")}</div>` +
         `<div class="txt">${esc((t.finalText || "(empty)").slice(0, 220))}</div>`;
       artContent.appendChild(div);
     }
@@ -1230,6 +1328,8 @@
       if (me.mustChangePassword) forcePasswordChange();
       else if (me.passwordSetRequired) forcePasswordChange("Your admin account has no password yet. Choose one to unlock admin actions.");
     }
+    await loadMyGroups();
+    loadSessions();
     renderAuthCard();
     applyComposerLock();
   })();

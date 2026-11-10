@@ -6,7 +6,7 @@ import { HttpError, jsonResponse, readJsonBody } from "../http";
 import { variantStatus } from "../pages";
 import { callerPrincipal, callerPolicyFor, isPasswordSetAdmin, requireTenantAccess, assertPrincipalQuota, assertQuota, assertProvisioningAllowed, assertTenantCap } from "../access";
 import { effectivePolicyFor } from "../policy";
-import { sanitizeProjectName, tenantKeyFor, startProvisioning, deleteTenantData } from "../lifecycle";
+import { getOrStartTenant, sanitizeProjectName, tenantKeyFor, startProvisioning, deleteTenantData } from "../lifecycle";
 import { allocateAttachProviderKey, assertAttachHubAdmittable, ATTACH_KIND, resolveAttachDir } from "../attach";
 import { nativeChatResponse } from "../responses";
 import type { GatewayState } from "../state";
@@ -48,6 +48,40 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     // Identity is derived from the VERIFIED KEY only (Decision 6): client-asserted identity
     // fields (`principal`, `spoke_id`, `ownerPrincipal`) are never read for ownership.
     const attachRaw = attachRawFromBody(body);
+    let name = typeof body.name === "string" ? sanitizeProjectName(body.name) : "";
+    if (name) {
+      if (state.registry.list().some((r) => r.name === name)) name = `${name}-${genId("").slice(0, 6)}`;
+    }
+    // ── Round-3 shared teams (D-S1/D-S5): an explicit `group` target creates — or
+    // idempotently returns — the group's ONE shared team for this variant. Attach mode is
+    // exclusive (a shared team is a scaffolded group workspace, never a hub checkout);
+    // creation requires an authenticated principal who is a live member of the group (or a
+    // password-set admin); the per-group team cap is enforced inside getOrStartTenant
+    // against the GOVERNING group's policy (D-S6). ──
+    const groupRaw = typeof body.group === "string" ? body.group.trim() : "";
+    if (groupRaw) {
+      if (attachRaw) {
+        throw new HttpError(400, "a shared team cannot attach to an existing checkout — omit attach_dir", "shared_attach_conflict");
+      }
+      const caller = callerPrincipal(state, req);
+      if (!caller) {
+        state.audit.record("anonymous", "tenant.create.denied", groupRaw, "shared-team create requires an authenticated principal");
+        throw new HttpError(403, "sign in to create a shared team");
+      }
+      if (!state.users.getGroupRecord(groupRaw)) {
+        throw new HttpError(404, `group ${groupRaw} not found`);
+      }
+      if (!isPasswordSetAdmin(state, req) && !state.users.groupsOf(caller).some((g) => g.groupId === groupRaw)) {
+        state.audit.record(caller, "tenant.create.denied", groupRaw, `shared-team create: not a member of ${groupRaw}`);
+        throw new HttpError(403, "you are not a member of this group");
+      }
+      const started = getOrStartTenant(state, variant, caller, caller, undefined, { groupId: groupRaw, name: name || undefined });
+      const existing = !started.promise;
+      return jsonResponse(
+        { tenantId: started.rec.tenantId, name: started.rec.name, status: started.rec.status, ...(existing ? { existing: true } : {}) },
+        existing ? 200 : 202,
+      );
+    }
     let hubDir: string | null = null;
     if (attachRaw) {
       // Decision 4: docker isolation ONLY — process-isolated attach sessions would share the
@@ -71,10 +105,6 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
       // Decisions 9/10: hub UNAVAILABLE → cancel its active attach sessions, refuse; then the
       // per-hub concurrent-session cap.
       assertAttachHubAdmittable(state, hubDir, callerPrincipal(state, req) ?? "anonymous");
-    }
-    let name = typeof body.name === "string" ? sanitizeProjectName(body.name) : "";
-    if (name) {
-      if (state.registry.list().some((r) => r.name === name)) name = `${name}-${genId("").slice(0, 6)}`;
     }
     const owner = callerPrincipal(state, req) ?? "anonymous";
     // One active team per (principal, variant): creation is keyed and idempotent, so a
@@ -136,11 +166,26 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     // `?mine=1` remains accepted for backwards compat (same as the default for
     // non-admin callers).
     let list = state.registry.list();
+    // Archived teams leave the member-facing list entirely (the admin console's
+    // /admin/tenants?status=archived view manages them). Round-3 quarantine (QA S2): this is
+    // the listing the composer and sidebar render, so an archived — in particular a
+    // group-delete-quarantined — shared team is never offered for chat or shown to the
+    // members of a recreated group id.
+    list = list.filter((r) => !r.archivedAt);
     // T-20261003-027 (sub-feature 4): the admin-wide listing needs the one-time password set
     // complete — a passwordless admin sees their own tenants like any user until then.
     if (!isPasswordSetAdmin(state, req)) {
       const principal = callerPrincipal(state, req) ?? "anonymous";
-      list = list.filter((r) => (r.ownerPrincipal ?? "anonymous") === principal);
+      // Round-3 shared teams (D-S5/D-S10): members see the teams their groups own — the
+      // live membership query, the same rule requireTenantAccess enforces — so the composer
+      // lists a shared team next to the personal ones. The group's team is still hidden
+      // from outsiders.
+      const memberOf = new Set(state.users.groupsOf(principal).map((g) => g.groupId));
+      list = list.filter(
+        (r) =>
+          (r.ownerPrincipal ?? "anonymous") === principal ||
+          (r.teamKind === "shared" && r.ownerGroup !== undefined && memberOf.has(r.ownerGroup)),
+      );
     }
     return jsonResponse({ tenants: list.map(publicTenant) });
   }
@@ -201,7 +246,8 @@ export async function handleTenants(state: GatewayState, req: Request, ctx: Ctx)
     }
     // The stream starts immediately: provisioning progress is streamed as `: …` comment
     // frames while the team prepares, instead of the response blocking until ready.
-    return nativeChatResponse(state, rec, message);
+    // Round-3 shared teams (D-S4): the turn is attributed to the calling principal.
+    return nativeChatResponse(state, rec, message, callerPrincipal(state, req) ?? "anonymous");
   }
 
   return null;

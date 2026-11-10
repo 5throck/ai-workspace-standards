@@ -10,7 +10,7 @@ import { HttpError } from "./http";
 import { exportTenantLoopRegistry } from "./tenant-loop";
 import type { GatewayState } from "./state";
 import { callerPrincipal, callerPolicyFor, requireTenantAccess, assertProvisioningAllowed, assertTenantCap } from "./access";
-import type { EffectivePolicy } from "./policy";
+import { effectivePolicyFor, type EffectivePolicy } from "./policy";
 
 /** Addendum 17 Decision 2: attach provisioning — NO scaffold, NO relocate. The existing
  * checkout IS `rec.projectDir`; the gateway creates only its own artifacts (the per-session
@@ -249,6 +249,25 @@ export function tenantKeyFor(variant: string, user: string): string {
   return `${variant}::${user}`;
 }
 
+/** Round-3 shared teams (D-S1/D-S2): the synthetic owner principal for a group-owned team.
+ * The `group:` prefix is the namespace guard — group ids and principals share the
+ * `[a-z0-9-]` character space, but principals can never contain a colon, so
+ * `<variant>::group:<id>` is disjoint from every personal key by construction. */
+export function groupOwnerPrincipalFor(groupId: string): string {
+  return `group:${groupId}`;
+}
+
+/** Round-3 shared teams (D-S2): the registry key of a group's single team for one variant. */
+export function sharedTeamKeyFor(variant: string, groupId: string): string {
+  return `${variant}::${groupOwnerPrincipalFor(groupId)}`;
+}
+
+/** True when the record is a shared (group-owned) team. Unset teamKind = a legacy row =
+ * personal (fully additive: no existing row changes kind). */
+export function isSharedTeam(rec: Pick<TenantRecord, "teamKind">): boolean {
+  return rec.teamKind === "shared";
+}
+
 // R5: walking every tenant's file tree per panel-open is O(total files); a 60s TTL keeps
 // the admin panel instant at many tenants (freshness tradeoff is fine for stats).
 export const diskSizeCache = new Map<string, { bytes: number; at: number }>();
@@ -305,17 +324,68 @@ export function hostSidePath(cfg: GatewayConfig, absPath: string): string | unde
  * per-principal cap is enforced here — at creation time only, after the existing-key
  * short-circuit — so it covers the lazy surfaces, which previously skipped it entirely
  * (2026-10-02 gate design G4). Creation is audited (`tenant.create.lazy`); POST /sessions
- * creation is audited at its call site. */
+ * creation is audited at its call site.
+ *
+ * Round-3 shared teams (D-S1): passing `sharedTeam` targets a GROUP-owned team — the key
+ * becomes `<variant>::group:<id>`, the owner the synthetic `group:<id>` principal, and the
+ * cap source the governing group's own policy (D-S6), not the creating member's. The lookup
+ * is idempotent on the group key: two members creating the same (group, variant) team land
+ * on the same record. */
 export function getOrStartTenant(
   state: GatewayState,
   variant: string,
   user: string,
   ownerPrincipal?: string,
   policy?: EffectivePolicy,
+  sharedTeam?: { groupId: string; name?: string },
 ): { rec: TenantRecord; promise?: Promise<void> } {
-  const key = tenantKeyFor(variant, user);
+  const key = sharedTeam ? sharedTeamKeyFor(variant, sharedTeam.groupId) : tenantKeyFor(variant, user);
   const existing = state.registry.findByKey(key);
-  if (existing) return { rec: existing };
+  if (existing) {
+    if (sharedTeam) {
+      // Round-3 QA (S2, defense in depth — layer 2): the key namespace is disjoint by
+      // construction (principals cannot contain a colon), so a row found under a group key
+      // that is NOT that group's shared team is a corrupted/legacy collision — refuse with
+      // the typed 409 instead of silently reusing another team. An ARCHIVED match is refused
+      // for the same reason: the group id was reused after a group-delete quarantine, and the
+      // old team must never resurrect into the new group's hands — an admin restores or
+      // deletes it (the key stays taken, so no fresh team can be minted over it either).
+      if (existing.teamKind !== "shared" || existing.ownerGroup !== sharedTeam.groupId) {
+        throw new HttpError(
+          409,
+          `registry key ${key} is held by a non-shared team — refusing to attach it to group ${sharedTeam.groupId}`,
+          "shared_team_conflict",
+        );
+      }
+      if (existing.archivedAt) {
+        throw new HttpError(
+          409,
+          `the previous shared team of group ${sharedTeam.groupId} is archived (group-delete quarantine) — an admin must restore or delete it`,
+          "tenant_archived",
+        );
+      }
+    }
+    return { rec: existing };
+  }
+  if (sharedTeam) {
+    const groupOwner = groupOwnerPrincipalFor(sharedTeam.groupId);
+    // D-S6: a shared team counts against a GROUP cap resolved through the governing group's
+    // policy; the creating member's personal cap is untouched by it.
+    assertTenantCap(state, groupOwner, effectivePolicyFor(state, groupOwner));
+    const rec = state.registry.create({
+      variant,
+      key,
+      name: sharedTeam.name,
+      ownerPrincipal: groupOwner,
+      teamKind: "shared",
+      ownerGroup: sharedTeam.groupId,
+      description: `shared team for ${key}`,
+    });
+    // An explicit shared-team target is a deliberate console creation — audited as
+    // tenant.create with the kind/owner detail (design §14), not the `.lazy` action.
+    state.audit.record(ownerPrincipal ?? "anonymous", "tenant.create", rec.tenantId, `kind=shared owner=${sharedTeam.groupId} variant=${variant}`);
+    return { rec, promise: startProvisioning(state, rec) };
+  }
   assertTenantCap(state, ownerPrincipal ?? "anonymous", policy);
   const rec = state.registry.create({
     variant,
@@ -331,7 +401,12 @@ export function getOrStartTenant(
  * the provisioning gate runs BEFORE any registry row or Projects/ directory exists
  * (previously the create ran first and the access check after — an unauthenticated
  * request in open mode could spawn a full scaffold). The tenant is keyed on the
- * authenticated principal (same key as /sessions), never on a client-supplied body user. */
+ * authenticated principal (same key as /sessions), never on a client-supplied body user.
+ *
+ * D-S9 wire guard: the wires are personal-team surfaces — no wire route accepts a
+ * shared-team target and the lazy lookup can never produce one (the personal key cannot
+ * contain a colon). The defensive check turns a hypothetical key collision into a clear
+ * refusal instead of silently chatting into a group's team. */
 export function resolveLazyTenant(
   state: GatewayState,
   req: Request,
@@ -340,6 +415,10 @@ export function resolveLazyTenant(
   assertProvisioningAllowed(state, req, variant);
   const principal = callerPrincipal(state, req) ?? "anonymous";
   const found = getOrStartTenant(state, variant, principal, principal, callerPolicyFor(state, req));
+  if (isSharedTeam(found.rec)) {
+    state.audit.record(principal, "tenant.access.denied", found.rec.tenantId, "shared team on a wire surface");
+    throw new HttpError(403, "shared teams are web-console targets only — open the gateway console to chat in a shared team");
+  }
   requireTenantAccess(state, req, found.rec);
   return found;
 }
@@ -348,6 +427,31 @@ export async function waitForTenant(state: GatewayState, tenantId: string): Prom
   const rec = state.registry.get(tenantId);
   if (!rec) throw new HttpError(404, `tenant ${tenantId} not found`);
   return ensureReady(state, rec);
+}
+
+/** Round-3 QA (S2, defense in depth — layer 1): GROUP-DELETE QUARANTINE. Group ids are
+ * deliberately reusable, so a deleted group's shared teams must not be inheritable by a
+ * LATER group with the same id (the members of the recreated group would pass the live
+ * membership check and gain the old team's files/thread/history). deleteGeneralGroup
+ * cascades the users.db rows but cannot reach the registry (a separate SQLite store), so
+ * the group-delete route calls THIS after the delete: every shared team owned by the group
+ * is archived with the deleteUserWithTenants archive shape (status='archived' + archivedAt)
+ * — which excludes it from member listings, denies requireTenantAccess, and refuses turns
+ * (assertQuota). A full deleteTenantData is too destructive for a group-delete side effect:
+ * the team stays on disk for admin restore/inspection. Each archived team is audited as
+ * `tenant.archived.group_deleted`. Idempotent: already-archived rows are left untouched. */
+export function quarantineGroupSharedTeams(state: GatewayState, groupId: string, actor: string): TenantRecord[] {
+  const quarantined: TenantRecord[] = [];
+  for (const rec of state.registry.list()) {
+    if (rec.teamKind !== "shared" || rec.ownerGroup !== groupId) continue;
+    if (rec.archivedAt) continue;
+    rec.status = "archived";
+    rec.archivedAt = new Date().toISOString();
+    state.registry.upsert(rec);
+    state.audit.record(actor, "tenant.archived.group_deleted", rec.tenantId, `group=${groupId} variant=${rec.variant}`);
+    quarantined.push(rec);
+  }
+  return quarantined;
 }
 
 export const DELETE_WAIT_MS = 30_000;
@@ -462,7 +566,9 @@ export async function deleteTenantData(state: GatewayState, rec: TenantRecord, a
   state.registry.delete(tenantId);
   state.chatLocks.delete(tenantId);
   state.activeProcs.delete(tenantId);
-  state.audit.record(actor, "tenant.delete", tenantId, rec.variant);
+  // Shared teams (D-S1/§14): the delete audit names the owner group — the deleted context
+  // belonged to the whole group, not one principal.
+  state.audit.record(actor, "tenant.delete", tenantId, rec.teamKind === "shared" ? `${rec.variant} owner=${rec.ownerPrincipal ?? "group:?"}` : rec.variant);
   // Export trigger (round-2 amendment C): the tenant left the registry, so its coverage set
   // changed. Emitted HERE — inside the shared delete implementation — so every caller (the
   // owner self-delete DELETE /tenants/:id route previously had NO trigger; admin bulk delete

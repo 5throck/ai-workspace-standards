@@ -40,7 +40,7 @@ title: >-
   ACL, export integrity); (6) QA: tests + tsc + audit + live-DB dry-run + /sync
   + redeploy after user go.
 priority: high
-status: running
+status: done
 attempts: 0
 created_at: '2026-11-11T00:42:25.877+09:00'
 history:
@@ -53,5 +53,22 @@ history:
   - at: '2026-11-11T00:43:36.979+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-11-11T03:36:37.604+09:00'
+    from: running
+    to: review
+  - at: '2026-11-11T03:36:37.623+09:00'
+    from: review
+    to: done
+result: >-
+  Landed as PR #1955 (merge 1162ccc56): migration v4 + UserStore
+  named-policy/enrollment/operator methods + strictest-wins resolvers +
+  co-governance ACL (assertTenantLoopAllowed on loop_operators) +
+  policies/enrollments routes with the reauth matrix + console UI (Groups tabs,
+  Policies CRUD, Tenant Loop rebuild) + tests (v4 migration on v3 fixture,
+  resolution matrices, export schema pins, ACL regression, UI pins) + QA (unit
+  suite green, tsc clean, audit pass). Cascades landed per amendment C
+  (group/user delete clean the v4 rows; group-id-reuse inheritance escalation
+  closed). Round-2 unit-model amendment recorded in
+  docs/designs/2026-11-09-gw-admin-console-round2-plan.md; round-1 spec
+  registered implemented (PRs #1938/#1939).
 error: null

@@ -20,8 +20,9 @@ function sseErrorMessage(err: unknown): string {
   return "internal error during turn";
 }
 
-/** Native chat → raw Hermes events (SSE) + a terminal done event. */
-export function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: string): Response {
+/** Native chat → raw Hermes events (SSE) + a terminal done event. `actingPrincipal` is the
+ * authenticated caller, persisted on the turn row (round-3 shared-teams attribution, D-S4). */
+export function nativeChatResponse(state: GatewayState, rec: TenantRecord, message: string, actingPrincipal?: string | null): Response {
   const stream = sseStream(async (sink) => {
       try {
         // R7 UX: while the team is still provisioning, stream its progress stages as `: …`
@@ -64,7 +65,7 @@ export function nativeChatResponse(state: GatewayState, rec: TenantRecord, messa
             timing.mark("t_first_sse_frame", { surface: "native", evt: evt.type });
           }
           sink.enqueue(sseData(evt));
-        }, sink.onProc);
+        }, sink.onProc, actingPrincipal);
         sink.enqueue(
           sseData({
             type: "done",
@@ -89,9 +90,10 @@ export async function openaiChatResponse(
   message: string,
   stream: boolean,
   provisioning?: Promise<void>,
+  actingPrincipal?: string | null,
 ): Promise<Response> {
   if (!stream) {
-    const result = await runChat(state, rec, message);
+    const result = await runChat(state, rec, message, undefined, undefined, actingPrincipal);
     return jsonResponse(
       completionPayload(
         completionId(),
@@ -159,7 +161,7 @@ export async function openaiChatResponse(
             sink.enqueue(enc.encode(chunkData(id, model, created, { role: "assistant" }, null)));
           }
           sink.enqueue(enc.encode(chunkData(id, model, created, { content: evt.text }, null)));
-        }, sink.onProc);
+        }, sink.onProc, actingPrincipal);
         sink.enqueue(enc.encode(chunkData(id, model, created, {}, "stop")));
         sink.enqueue(enc.encode(doneData()));
       } catch (err) {
@@ -181,9 +183,10 @@ export async function anthropicChatResponse(
   rec: TenantRecord,
   message: string,
   stream: boolean,
+  actingPrincipal?: string | null,
 ): Promise<Response> {
   if (!stream) {
-    const result = await runChat(state, rec, message);
+    const result = await runChat(state, rec, message, undefined, undefined, actingPrincipal);
     const tokens = (result.tokens ?? {}) as Record<string, unknown>;
     const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
     return jsonResponse(
@@ -221,7 +224,7 @@ export async function anthropicChatResponse(
             enqueue(frames.contentStart());
           }
           enqueue(frames.contentDelta(evt.text));
-        }, sink.onProc);
+        }, sink.onProc, actingPrincipal);
         if (startedContent) enqueue(frames.contentStop());
         const tokens = (result.tokens ?? {}) as Record<string, unknown>;
         const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
@@ -246,9 +249,10 @@ export async function geminiChatResponse(
   rec: TenantRecord,
   message: string,
   stream: boolean,
+  actingPrincipal?: string | null,
 ): Promise<Response> {
   if (!stream) {
-    const result = await runChat(state, rec, message);
+    const result = await runChat(state, rec, message, undefined, undefined, actingPrincipal);
     const tokens = (result.tokens ?? {}) as Record<string, unknown>;
     const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
     return jsonResponse(
@@ -278,7 +282,7 @@ export async function geminiChatResponse(
           if (progress) sink.enqueue(enc.encode(progress));
           if (evt.type !== "text" || typeof evt.text !== "string") return;
           frames.delta(evt.text).forEach((f) => sink.enqueue(f));
-        }, sink.onProc);
+        }, sink.onProc, actingPrincipal);
         const tokens = (result.tokens ?? {}) as Record<string, unknown>;
         const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
         frames.end(n(tokens.input), n(tokens.output)).forEach((f) => sink.enqueue(f));

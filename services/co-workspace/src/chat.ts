@@ -24,6 +24,9 @@ export async function runChat(
   message: string,
   onEvent?: (evt: HermesEvent) => void,
   onProc?: (proc: { kill: (code?: number) => void }) => void,
+  /** Round-3 shared teams (D-S4): the authenticated principal that issued this turn,
+   * persisted on the turn row (NULL = legacy/anonymous — renders as before). */
+  actingPrincipal?: string | null,
 ): Promise<HermesTurnResult> {
   // Addendum 17 Decision 4: attach sessions launch under docker isolation ONLY — enforced on
   // every turn (the routes gate earlier with the same 409; this covers every surface).
@@ -341,6 +344,7 @@ export async function runChat(
       finalText: result.finalText,
       inputTokens: n(tokens.input),
       outputTokens: n(tokens.output),
+      actingPrincipal: actingPrincipal ?? null,
     });
   }
   return result;
