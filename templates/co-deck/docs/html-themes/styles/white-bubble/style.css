@@ -9,6 +9,15 @@
  * General surfaces (chrome, cards) are a warm light theme so any theme
  * can pair with it; the zen-specific bubble behavior is scoped to
  * [data-theme="zen"].
+ *
+ * LOCAL-PATCH(upstream-request: U-20261110-001) — the 0.30.0 template upgrade
+ * delivery (commit 302217b) dropped the LOCAL-PATCH content that upstream fix
+ * PR #1864 (U-20261105-004, outcome=fixed) had merged. The zen blocks below
+ * are restored from the pre-302217b file; the .bullet-item root fix lives in
+ * styles/base.css. Remove these LOCAL-PATCH blocks once U-20261110-001 shows
+ * fixed AND the upgrade pipeline re-delivers them.
+ *
+ * @version 1.2.0
  */
 
 :root {
@@ -68,8 +77,8 @@
 
 /* ── Zen pairing: "White Bubble" (2008 signature) ────────────────────
    Photos stay vivid under a faint dark wash; sentence slides carry
-   their text inside a white rounded bubble card; the cover keeps white
-   serif type directly on the photo, like the 2008 original. */
+   their text inside a white rounded bubble card — cover included
+   (the 2008 original kept white serif type directly on the photo). */
 [data-theme="zen"] {
   --zen-overlay-color-top:    rgba(20, 20, 20, 0.28);
   --zen-overlay-color-bottom: rgba(20, 20, 20, 0.18);
@@ -80,8 +89,9 @@
   --accent-color:             #e8590c;
 }
 
-/* White bubble card on every slide except the cover */
-[data-theme="zen"] .slide:not([data-type="cover"]) .slide-content {
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* White bubble card on every slide — cover, divider, punchline, contact included */
+[data-theme="zen"] .slide .slide-content {
   flex: 0 0 auto;
   width: fit-content;
   max-width: 88%;
@@ -90,6 +100,8 @@
   border-radius: 14px;
   padding: 2rem 2.75rem;
   box-shadow: 0 10px 34px rgba(20, 20, 20, 0.22);
+  max-height: calc(100% - 3rem);
+  overflow: hidden;
 }
 
 [data-theme="zen"] .slide-card .slide-title { color: #1f2a44; text-shadow: none; }
@@ -99,18 +111,103 @@
 [data-theme="zen"] .slide-card .contact-item { color: rgba(31, 42, 68, 0.55); }
 
 /* Keyword highlight — **word** in slideData renders <strong> */
-[data-theme="zen"] .slide-card strong { color: #e8590c; }
+[data-theme="zen"] .slide-card strong { color: var(--accent-color, #e8590c); }
 
-/* Cover: serif white type directly on the photo, warm highlight */
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* Cover: serif navy title inside the white bubble card */
 [data-theme="zen"] .slide[data-type="cover"] .slide-title {
   font-family: 'Noto Serif KR', 'Georgia', 'Batang', serif;
-  color: #ffffff;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+  color: #1f2a44;
+  text-shadow: none;
 }
 [data-theme="zen"] .slide[data-type="cover"] .slide-subtitle {
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(31, 42, 68, 0.68);
 }
 [data-theme="zen"] .slide[data-type="cover"] .cover-meta {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(31, 42, 68, 0.55);
 }
-[data-theme="zen"] .slide[data-type="cover"] .slide-card strong { color: #ffc078; }
+[data-theme="zen"] .slide[data-type="cover"] .slide-card strong { color: var(--accent-color, #e8590c); }
+
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* Punchline / contact: navy on the card (theme.css sets these to the white
+   --cover-text / rgba(255,255,255,.8) for dark-photo styles). */
+[data-theme="zen"] .slide[data-type="punchline"] .slide-title { color: #1f2a44; text-shadow: none; }
+[data-theme="zen"] .slide[data-type="contact"] .contact-item { color: rgba(31, 42, 68, 0.55); }
+
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* Korean word-safe wrapping inside the card */
+[data-theme="zen"] .slide-card .slide-title,
+[data-theme="zen"] .slide-card .slide-subtitle,
+[data-theme="zen"] .slide-card .bullet-item,
+[data-theme="zen"] .slide-card .contact-item,
+[data-theme="zen"] .slide-card .cover-meta {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* keep card inside slide frame; contact card min-width; zen visual cap */
+[data-theme="zen"] .slide[data-type="contact"] .slide-content { min-width: min(28rem, 80%); text-align: center; }
+[data-theme="zen"] .slide .zen-visual { max-height: 24vh; }
+
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* bullets left-aligned inside the centered card (title stays centered);
+   the display/hanging-indent mechanics live in the base.css .bullet-item
+   root fix, so only the explicit alignment guard is kept here */
+[data-theme="zen"] .slide-card .bullet-item { text-align: left; }
+
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* zen visual panel (visualTitle + visualDisplay) rendered inside the white
+   card as a distinct sub-box aligned with the bullets column. Selectors are
+   .slide-card-scoped to outrank project overrides. */
+[data-theme="zen"] .slide-card .zen-visual-panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 600px;
+  margin: 1rem auto 0;
+  padding: 0.9rem 1.2rem;
+  background: var(--accent-light, rgba(31, 42, 68, 0.04));
+  border: 1px solid rgba(31, 42, 68, 0.10);
+  border-left: 3px solid var(--accent-color, #e8590c);
+  border-radius: 10px;
+  text-align: left;
+}
+[data-theme="zen"] .slide-card .zen-visual-panel .visual-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--accent-color, #e8590c);
+  margin: 0 0 0.4rem;
+  text-align: left;
+  word-break: keep-all;
+}
+[data-theme="zen"] .slide-card .zen-visual-panel .visual-item {
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: rgba(31, 42, 68, 0.85);
+  text-align: left;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* LOCAL-PATCH(upstream-request: U-20261110-001) — restored from pre-302217b LOCAL-PATCH (upstream fix PR #1864 missing from 0.30.0 delivery) */
+/* when a visual panel is present, the bullets column takes the same width and
+   left edge as the panel */
+[data-theme="zen"] .slide-card:has(.zen-visual-panel) .bullets-container {
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+/* LOCAL-PATCH (design: 2026-11-10-pretendard-font-parity): PDF engine parity —
+   gen-slides-pdf.ts embeds Pretendard; HTML resolves to fallback fonts when
+   Noto Sans KR is absent. Load local Pretendard TTFs and align the stack.
+   Note: the serif cover accent above ('Noto Serif KR') is intentionally left
+   untouched — it is a design element, not part of the body-font stack. */
+@font-face { font-family: 'Pretendard'; src: url('../../../../presentations/assets/fonts/Pretendard-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('../../../../presentations/assets/fonts/Pretendard-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+
+:root {
+  --font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}

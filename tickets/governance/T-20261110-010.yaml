@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261110-010
+kind: manual
+title: >-
+  fleet-script-parity extension to variant template script sets (design default
+  from 2026-11-10-co-deck-root-tooling-design, DEC-20261110-03):
+  scripts/fleet-script-parity.ts covers only templates/common/scripts/, so the
+  T-20261110-006 drift class is invisible —
+  templates/co-deck/scripts/co-deck/snapshot.ts and its Projects/co-deck copy
+  both declared @version 1.0.0 with divergent content (the project copy emitted
+  broken restore commands). Extend parity checking to variant template script
+  sets (templates/<variant>/scripts/<variant>/**) so
+  same-version/divergent-content pairs between a variant template and its
+  delivered project copy are detected. Design before implementing: decide
+  comparison basis (hash per delivered file vs @version+hash), exception
+  handling for legitimate project-local divergence (LOCAL-PATCH markers), and
+  where the gate runs (audit arm vs upgrade pre-flight).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-10T19:19:40.819+09:00'
+history:
+  - at: '2026-11-10T19:19:40.819+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

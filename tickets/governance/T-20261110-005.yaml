@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261110-005
+kind: manual
+title: >-
+  co-deck: fix scripts/co-deck/inject-video-players.ts --slidedata CWD-relative
+  default (ENOENT when run from repo root; resolve relative to the target HTML's
+  project directory) and warn when a deck ships a project-local injector (e.g.
+  inject_video_players.py) whose video-slide styling the generic injector does
+  not reproduce
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-10T14:44:07.929+09:00'
+history:
+  - at: '2026-11-10T14:44:07.929+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

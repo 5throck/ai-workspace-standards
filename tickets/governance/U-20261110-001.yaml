@@ -1,0 +1,68 @@
+schemaVersion: 1
+id: U-20261110-001
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-10T12:44:09.861+09:00'
+history:
+  - at: '2026-11-10T12:44:09.861+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-10T17:24:01.030+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Template upgrade delivery 0.29.0 -> 0.30.0 (project commit 302217b,
+    2026-11-08) overwrote docs/html-themes/styles/base.css and
+    docs/html-themes/styles/white-bubble/style.css WITHOUT the merged fix
+    content of PR #1864 (upstream request U-20261105-004, status=done/fixed).
+    Delivered base.css still has .bullet-item { display: flex } which splits
+    bare text and inline <strong> into separate flex columns (wrapped bullets
+    render as misaligned columns), and delivered white-bubble/style.css lost:
+    opaque bubble card on cover/punchline/contact with navy type (now white
+    serif directly on photo), word-break: keep-all, card max-height +
+    .zen-visual cap, .zen-visual-panel sub-box styling, var(--accent-color)
+    keyword highlight. Reproduction: any zen+white-bubble deck rebuilt after
+    2026-11-08 (presentations/2026-11-consumer-goods-market-shift
+    lecture_..._v4.html) shows scattered bullet columns and unstyled zen-visual
+    panels in Chromium; the project's approved PDF exports (gen-slides-pdf.ts)
+    show the correct pre-upgrade rendering, so HTML and PDF visibly diverge.
+    Upstream ticket U-20261105-004 was marked fixed, so the project-side
+    LOCAL-PATCH blocks were removed by the upgrade, but the delivered 0.30.0
+    template files do not contain the promised fix — the fix content of PR #1864
+    appears not to have been included in the 0.30.0 delivery snapshot.
+  affected_paths:
+    - docs/html-themes/styles/base.css
+    - docs/html-themes/styles/white-bubble/style.css
+  identity_source: cwd
+  repro: >-
+    1. In a co-deck project, check docs/html-themes/styles/base.css .bullet-item
+    — still display:flex (fix absent). 2. Check
+    docs/html-themes/styles/white-bubble/style.css — card selector excludes
+    cover, no keep-all, no zen-visual-panel rules, hardcoded #e8590c. 3. Rebuild
+    any zen+white-bubble deck: bun scripts/co-deck/build-theme-deck.ts --project
+    presentations/<p> --version vN. 4. Open the built HTML, navigate to a bullet
+    slide with <strong> markup: bullet text splits into spread columns,
+    title/lines centered, zen-visual panel has no box. Expected: PR #1864
+    behavior (block + hanging indent, text-align left, navy
+    cover/punchline/contact on opaque card, keep-all).
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/html-themes/styles/base.css=false
+    - info:in_last_delivery docs/html-themes/styles/white-bubble/style.css=true
+  dedupe_key: 0a35667532858eca115e9d6d73c950279d475923779be44b8b12f427655c32c3
+  duplicates:
+    - project: co-deck
+      at: '2026-11-10T12:44:09.861+09:00'

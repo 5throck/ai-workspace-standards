@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261110-009
+kind: manual
+title: >-
+  upgrade-policy engine gap (residual of T-20261027-004, surfaced by
+  U-20261110-001 verification): a FIRST-TIME template delivery over committed
+  project divergence passes silently as ADOPT/INFO because classifyProjectState
+  returns NO_BASELINE (no prior manifest baseline) and the evolved-content guard
+  only acts on PROJECT_EVOLVED (scripts/lib/upgrade-policy.ts:1584-1586,
+  scripts/upgrade-project.ts:2784). Consequence: project-local patches to
+  never-before-baselined files (e.g. co-deck docs/html-themes CSS) are silently
+  stripped by hash-gated SYNC delivery with only an INFO row, and the pre-flight
+  LOCAL-PATCH re-apply check is suppressed when a resolution record falsely says
+  fixed. Candidate fixes: treat NO_BASELINE with
+  project-content-differs-from-delivered-baseline as at least WARN (or CONFLICT
+  requiring disposition), and/or baseline the delivered bytes at first delivery
+  so later divergence classifies as PROJECT_EVOLVED. Design before implementing
+  — this changes delivery semantics for every variant.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-10T17:51:42.926+09:00'
+history:
+  - at: '2026-11-10T17:51:42.926+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
