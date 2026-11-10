@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261110-002
+kind: manual
+title: >-
+  Stale /meeting agent boilerplate sweep (found during the DEC-20261110-01
+  open-question-2 docs sweep): the sentence 'In a /meeting session, Claude
+  role-plays you inline.' appears in 124 lines across templates/*/agents/*.md in
+  13 templates (co-architect, co-consult, co-deck, co-design, co-develop,
+  co-export, co-game, co-hr, co-learning, co-news, co-security, co-work, common)
+  AND in root agents/*.md files (e.g. agents/docs-writer.md:125). The /meeting
+  command was retired 2026-09-26 and fully removed fleet-wide on 2026-11-10 (PR
+  #1945 + 13-repo sweep; docs/user-guide sweep landed same day). The boilerplate
+  references a command that no longer exists and misdescribes how meetings run
+  (committee-form skill flow via meeting-facilitation, PM-facilitated). Scope:
+  replace or rewrite the sentence per the current doctrine in root agents/*.md
+  (instruction-file cascade — root change propagates via
+  agent-mirror/propagation machinery), then templates/*/agents/*.md via the
+  mirror machinery, and the Projects/ copies via per-repo commits (precedent:
+  T-20261109-003 sweep, per-repo dev-sync). Instruction-file edits touch
+  governance surfaces — root agents/*.md changes need care with the agent-mirror
+  parity gate and the AGENTS.md-adjacent doctrine files. Refs: DEC-20261110-01,
+  docs/designs/2026-11-10-meeting-lineage-hygiene-design.md.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-10T08:44:17.962+09:00'
+history:
+  - at: '2026-11-10T08:44:17.962+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

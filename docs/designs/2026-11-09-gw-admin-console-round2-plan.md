@@ -91,6 +91,9 @@ The user chose these models:
   - The live registry preview and dry-run upgrade are kept.
 
 ## Execution plan (PM Gateway)
+
+> Amended 2026-11-10: the Model/Platform columns below are stale — sessions dispatch on the zcode harness (models resolve via the zai column of the workspace tier map; the Agent tool takes no model parameter), so treat this table as tier+agent guidance only.
+
 | # | Task | Agent | Tier | Model | Platform |
 |---|---|---|---|---|---|
 | 0 | Reproduce the group-create failure on a live-DB copy; amend design doc `docs/designs/2026-11-09-gw-admin-console-design.md` with §R2 (migration v4 DDL + data migration, policy/enrollment resolution, API, UI) — Design Gate | architect | High | opus | Claude Code |
