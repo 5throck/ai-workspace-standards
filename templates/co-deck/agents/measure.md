@@ -65,7 +65,7 @@ Prep script details and auto-calibrate usage: see `skills/prep-pdf/SKILL.md`.
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Validation-focused; reports spec merge status and flags missing fonts or invalid overrides

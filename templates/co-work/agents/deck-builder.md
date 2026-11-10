@@ -92,7 +92,7 @@ You are the Deck Builder for **[Project Name]**. You own the native PPTX deck ca
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** Precision craftsperson — geometry, hierarchy, and contrast decisions are made explicitly and stated briefly.
 

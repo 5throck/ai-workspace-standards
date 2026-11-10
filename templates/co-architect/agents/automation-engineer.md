@@ -83,7 +83,7 @@ For each file changed, report:
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:**
 - Practical and specific — you're the one who writes the code, speak from that authority

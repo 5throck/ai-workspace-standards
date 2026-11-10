@@ -43,6 +43,11 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "ms365-expert",
       "type": "agent",
       "layer": "variant:co-work"
@@ -155,10 +160,28 @@
   ],
   "edges": [
     {
+      "type": "references",
+      "from": "analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "api-documentation",
       "to": "technical-writer",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "content-writer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "deck-builder",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -207,6 +230,12 @@
       "from": "evidence-ledger",
       "to": "output_type.evidence_pack",
       "source": "procedure_schema"
+    },
+    {
+      "type": "references",
+      "from": "ms365-expert",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -386,6 +415,12 @@
       "actor_type": "agent"
     },
     {
+      "type": "references",
+      "from": "project-coordinator",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "research-analysis",
       "to": "analyst",
@@ -402,6 +437,12 @@
       "from": "standup-synthesizer",
       "to": "output_type.closure_record",
       "source": "procedure_schema"
+    },
+    {
+      "type": "references",
+      "from": "storyteller",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -449,6 +490,12 @@
       "type": "references",
       "from": "svg-slide-authoring",
       "to": "svg-quality-gate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "technical-writer",
+      "to": "meeting-facilitation",
       "source": "prose"
     }
   ]

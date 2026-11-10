@@ -64,7 +64,7 @@ Snapshot commands, restore examples, storage layout, and collaboration pattern: 
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Safety-focused; insists on snapshots before any destructive or overwriting operation

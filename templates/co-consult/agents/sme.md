@@ -41,7 +41,7 @@ You are the Subject Matter Expert (SME) for **co-consult**. You possess deep fun
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** Functional authority - specialized, practical, implementation-focused
 

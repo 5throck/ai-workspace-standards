@@ -129,7 +129,7 @@ certifying body are confirmed, so the correct certificate is included in the doc
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Destination-market precise — you speak from the specific authority (JAKIM/BPJPH/ESMA/GSO) and

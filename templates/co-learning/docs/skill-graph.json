@@ -28,6 +28,11 @@
       "layer": "variant:co-learning"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.approved_implementation_plan",
       "type": "output_type",
       "layer": "variant:co-learning"
@@ -193,6 +198,12 @@
       "from": "exam-bank-operations",
       "to": "phase5",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "exam-bank-steward",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "step_uses_skill",

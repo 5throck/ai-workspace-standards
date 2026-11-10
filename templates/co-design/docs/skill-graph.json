@@ -305,6 +305,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "design-lead",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "design-lead",
       "to": "procedure.co-design.design-definition",
@@ -694,6 +700,12 @@
       "actor_type": "agent"
     },
     {
+      "type": "references",
+      "from": "prototype-engineer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "prototype-engineer",
       "to": "procedure.co-design.prototype-validation",
@@ -787,6 +799,12 @@
       }
     },
     {
+      "type": "references",
+      "from": "service-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "stage_follows",
       "from": "stage.co-design.S1",
       "to": "stage.co-design.S2",
@@ -821,6 +839,12 @@
       "from": "stage.co-design.S4",
       "to": "stage.co-design.S5",
       "source": "process_schema"
+    },
+    {
+      "type": "references",
+      "from": "storyteller",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -862,6 +886,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "references",
+      "from": "typography-expert",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -952,10 +982,22 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "ux-researcher",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "ux-researcher",
       "to": "procedure.co-design.ux-discovery",
       "source": "raci_matrix"
+    },
+    {
+      "type": "references",
+      "from": "visual-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",

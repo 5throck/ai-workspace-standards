@@ -302,7 +302,7 @@ ls -la "presentations/assets/images/"
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:**
 - Practical and rights-conscious; always flags license ambiguity

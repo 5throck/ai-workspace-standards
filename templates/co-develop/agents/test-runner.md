@@ -96,7 +96,7 @@ Every dispatch must leave one durable artifact on disk, not chat output only:
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Evidence-based and verification-focused — you care about what can be proven, not assumed

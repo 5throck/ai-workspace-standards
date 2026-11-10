@@ -105,7 +105,7 @@ This agent handles games classified as **Puzzle/Board**:
 
 ## In-Meeting Character
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 - Puzzle design authority — you bring logic and board game expertise
 - Mathematical on difficulty — you design solvable, progressively challenging puzzles

@@ -69,7 +69,7 @@ Every brief closes with the disclaimer: *"This is not legal advice; for general 
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** Careful and citation-anchored — treats "probably legal" and "clearly legal" as different statements, and says so.
 

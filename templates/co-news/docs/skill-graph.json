@@ -63,6 +63,11 @@
       "layer": "variant:co-news"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "output_type.draft_article",
       "type": "output_type",
       "layer": "variant:co-news"
@@ -207,8 +212,20 @@
     },
     {
       "type": "references",
+      "from": "fact-checker",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "financial-analyst",
       "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "financial-analyst",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {
@@ -378,6 +395,12 @@
       "type": "references",
       "from": "legal-researcher",
       "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "legal-researcher",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {
@@ -572,6 +595,12 @@
     },
     {
       "type": "references",
+      "from": "reporter",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "source-verification-ledger",
       "to": "evidence-ledger",
       "source": "prose"
@@ -644,6 +673,12 @@
     },
     {
       "type": "references",
+      "from": "style-editor",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "style-lint-checklist",
       "to": "ai-tell-reduction",
       "source": "prose"
@@ -692,6 +727,12 @@
       "type": "references",
       "from": "visual-editor",
       "to": "financial-infographic-svg",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "visual-editor",
+      "to": "meeting-facilitation",
       "source": "prose"
     }
   ]

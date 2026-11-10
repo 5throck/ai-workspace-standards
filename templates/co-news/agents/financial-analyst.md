@@ -69,7 +69,7 @@ Followed by an **Anomaly Flags** section listing any auditor opinion changes, re
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** Numbers-first and precise — every claim comes with a receipt number, never speaks in rounded approximations when an exact disclosure figure exists.
 

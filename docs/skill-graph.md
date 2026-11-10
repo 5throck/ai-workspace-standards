@@ -460,6 +460,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261108-01` | decision | — | — | — |
 | `dec:DEC-20261109-01` | decision | — | — | — |
 | `dec:DEC-20261110-01` | decision | — | — | — |
+| `dec:DEC-20261110-02` | decision | — | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
@@ -478,11 +479,38 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-abap/docs/user-guide.md` | doc | `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-le`, `co-abap/sap-sd` | — | — |
 | `doc:co-abap/README.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/source-command-celebrate`, `co-develop/code-review`, `root/meeting-facilitation` | — | — |
 | `doc:co-architect/AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-architect/agents/analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/architect.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/automation-engineer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-architect/agents/bylaw-expert.md` | doc | `common/k-law` | — | — |
+| `doc:co-architect/agents/content-writer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/design-lead.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/design-storyteller.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/ms365-expert.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-architect/agents/pm.md` | doc | `root/agent-lifecycle-manager`, `root/upgrade-project` | — | — |
+| `doc:co-architect/agents/project-coordinator.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/prototype-engineer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/service-designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/sketchup-modeler.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/storyteller.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/technical-writer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/typography-expert.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/ux-researcher.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/visual-designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-architect/agents/zwcad-drafter.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-architect/docs/co-architect.context.md` | doc | `co-architect/cad-server-manager`, `co-architect/cad-space-recognition`, `co-architect/cad-svg-preview`, `co-architect/generate-room-elevation`, `co-architect/zwcad-ai-drawing`, `common/decision-record`, `common/evidence-ledger`, `root/agent-lifecycle-manager`, `root/design-foundation`, `root/explain-me`, `root/skill-lifecycle-manager`, `root/standup-synthesizer` | — | — |
 | `doc:co-architect/README.md` | doc | `co-architect/cad-server-manager`, `co-architect/cad-space-recognition`, `co-architect/cad-svg-preview`, `co-architect/generate-room-elevation`, `co-architect/zwcad-ai-drawing`, `common/decision-record`, `common/evidence-ledger`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/accessibility-audit`, `root/agent-lifecycle-manager`, `root/api-documentation`, `root/ci-triage`, `root/design-foundation`, `root/documentation-writing`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/research-analysis`, `root/script-lifecycle-manager`, `root/security-scan`, `root/service-design`, `root/skill-lifecycle-manager`, `root/source-command-commit-push-pr`, `root/standup-synthesizer`, `root/team-builder`, `root/token-usage-lint`, `root/ui-ux-design-intelligence`, `root/update-bun-packages`, `root/zod-contract-gate` | — | — |
 | `doc:co-consult/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-consult/agents/change-management-partner.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/communications-lead.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/data-analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/delivery-manager.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/industry-expert.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/sme.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/solutions-architect.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/strategy-analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/technology-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-consult/agents/workstream-lead.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-consult/docs/co-consult.context.md` | doc | `co-consult/change-impact-assessment`, `co-consult/company-intelligence`, `co-consult/competitive-intelligence`, `co-consult/consulting-report-writing`, `co-consult/executive-presentation`, `co-consult/financial-modeling`, `co-consult/financial-statement-analysis`, `co-consult/insight-synthesis`, `co-consult/narrative-framework`, `co-consult/org-readiness-assessment`, `co-consult/project-delivery`, `co-consult/solution-design`, `co-consult/stakeholder-alignment`, `co-consult/stakeholder-review-management`, `co-consult/technical-feasibility`, `common/k-dart`, `root/agent-lifecycle-manager`, `root/documentation-writing`, `root/meeting-facilitation`, `root/project-review`, `root/research-analysis`, `root/skill-lifecycle-manager`, `root/team-builder` | — | — |
 | `doc:co-consult/docs/disclosure-ingestion-contract.md` | doc | `co-consult/financial-statement-analysis`, `common/k-dart` | — | — |
 | `doc:co-consult/docs/engagement-orchestration.md` | doc | `co-consult/change-impact-assessment`, `co-consult/consulting-report-writing`, `co-consult/executive-presentation`, `co-consult/financial-modeling`, `co-consult/insight-synthesis`, `co-consult/narrative-framework`, `co-consult/org-readiness-assessment`, `co-consult/project-delivery`, `co-consult/solution-design`, `co-consult/stakeholder-alignment`, `co-consult/stakeholder-review-management`, `co-consult/technical-feasibility` | — | — |
@@ -493,15 +521,19 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-consult/docs/user-guide.md` | doc | `co-consult/change-impact-assessment`, `co-consult/company-intelligence`, `co-consult/competitive-intelligence`, `co-consult/consulting-report-writing`, `co-consult/executive-presentation`, `co-consult/financial-modeling`, `co-consult/financial-statement-analysis`, `co-consult/insight-synthesis`, `co-consult/narrative-framework`, `co-consult/org-readiness-assessment`, `co-consult/project-delivery`, `co-consult/solution-design`, `co-consult/stakeholder-alignment`, `co-consult/stakeholder-review-management`, `co-consult/technical-feasibility`, `common/k-dart` | — | — |
 | `doc:co-consult/README.md` | doc | `co-consult/change-impact-assessment`, `co-consult/company-intelligence`, `co-consult/competitive-intelligence`, `co-consult/consulting-report-writing`, `co-consult/executive-presentation`, `co-consult/financial-modeling`, `co-consult/financial-statement-analysis`, `co-consult/insight-synthesis`, `co-consult/mece-logic-auditor`, `co-consult/narrative-framework`, `co-consult/org-readiness-assessment`, `co-consult/project-delivery`, `co-consult/sample-driven-report-writing`, `co-consult/solution-design`, `co-consult/stakeholder-alignment`, `co-consult/stakeholder-review-management`, `co-consult/technical-feasibility`, `root/meeting-facilitation` | — | — |
 | `doc:co-deck/AGENTS.md` | doc | `co-deck/design`, `co-deck/html-build`, `co-deck/pdf-export`, `co-deck/prep-pdf`, `co-deck/research`, `co-deck/storyline`, `co-deck/version`, `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-deck/agents/design.md` | doc | `co-deck/design` | — | — |
+| `doc:co-deck/agents/design.md` | doc | `co-deck/design`, `root/meeting-facilitation` | — | — |
+| `doc:co-deck/agents/diagram-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-deck/agents/handbook-reviewer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-deck/agents/handbook-writer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-deck/agents/html-build.md` | doc | `co-deck/html-build` | — | — |
-| `doc:co-deck/agents/image-curator.md` | doc | `co-deck/html-build` | — | — |
-| `doc:co-deck/agents/measure.md` | doc | `co-deck/prep-pdf` | — | — |
-| `doc:co-deck/agents/pdf-export.md` | doc | `co-deck/pdf-export` | — | — |
+| `doc:co-deck/agents/image-curator.md` | doc | `co-deck/html-build`, `root/meeting-facilitation` | — | — |
+| `doc:co-deck/agents/measure.md` | doc | `co-deck/prep-pdf`, `root/meeting-facilitation` | — | — |
+| `doc:co-deck/agents/pdf-export.md` | doc | `co-deck/pdf-export`, `root/meeting-facilitation` | — | — |
 | `doc:co-deck/agents/README.md` | doc | `co-deck/html-build`, `co-deck/pdf-export` | — | — |
 | `doc:co-deck/agents/research.md` | doc | `co-deck/research` | — | — |
-| `doc:co-deck/agents/storyline.md` | doc | `co-deck/storyline` | — | — |
-| `doc:co-deck/agents/version.md` | doc | `co-deck/version` | — | — |
+| `doc:co-deck/agents/source-verifier.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-deck/agents/storyline.md` | doc | `co-deck/storyline`, `root/meeting-facilitation` | — | — |
+| `doc:co-deck/agents/version.md` | doc | `co-deck/version`, `root/meeting-facilitation` | — | — |
 | `doc:co-deck/docs/co-deck.context.md` | doc | `co-deck/design`, `co-deck/html-build`, `co-deck/pdf-export`, `co-deck/prep-pdf`, `co-deck/presenter-mode`, `co-deck/research`, `co-deck/slide-layout-gate`, `co-deck/storyline`, `co-deck/theme-authoring`, `co-deck/version`, `common/handbook`, `common/handbook-sync-audit`, `root/agent-lifecycle-manager`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-deck/docs/lecture-profile.md` | doc | `co-deck/html-build`, `co-deck/pdf-export`, `co-deck/research`, `co-deck/storyline` | — | — |
 | `doc:co-deck/docs/phase-definitions.md` | doc | `co-deck/pdf-export`, `co-deck/prep-pdf` | — | — |
@@ -509,6 +541,13 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-deck/docs/user-guide.md` | doc | `co-deck/design`, `co-deck/html-build`, `co-deck/pdf-export`, `co-deck/prep-pdf`, `co-deck/research`, `co-deck/storyline`, `co-deck/theme-authoring`, `co-deck/version`, `common/handbook` | — | — |
 | `doc:co-deck/README.md` | doc | `co-deck/html-build`, `co-deck/pdf-export`, `co-deck/prep-pdf`, `co-deck/presenter-mode`, `co-deck/slide-layout-gate`, `co-deck/theme-authoring`, `root/meeting-facilitation` | — | — |
 | `doc:co-design/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-design/agents/design-lead.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-design/agents/prototype-engineer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-design/agents/service-designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-design/agents/storyteller.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-design/agents/typography-expert.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-design/agents/ux-researcher.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-design/agents/visual-designer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-design/docs/co-design.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/component-primitives.md` | doc | `co-design/token-usage-lint`, `root/accessibility-audit` | — | — |
 | `doc:co-design/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
@@ -516,13 +555,27 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-design/docs/user-guide.md` | doc | `co-design/ui-ux-design-intelligence`, `root/meeting-facilitation`, `root/service-design` | — | — |
 | `doc:co-design/README.md` | doc | `co-design/design-foundation`, `co-design/design-review`, `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design` | — | — |
 | `doc:co-develop/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-develop/agents/designer.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/swe-solve`, `co-develop/test-driven-development`, `root/ui-ux-design-intelligence` | — | — |
+| `doc:co-develop/agents/architect.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-develop/agents/code-writer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-develop/agents/designer.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/swe-solve`, `co-develop/test-driven-development`, `root/meeting-facilitation`, `root/ui-ux-design-intelligence` | — | — |
+| `doc:co-develop/agents/security-monitor.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-develop/agents/stack-setup.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-develop/agents/test-runner.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-develop/docs/co-develop.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-develop/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
 | `doc:co-develop/docs/user-guide_ko.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/test-driven-development`, `common/sync`, `root/project-review` | — | — |
 | `doc:co-develop/docs/user-guide.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/test-driven-development`, `common/sync`, `root/project-review` | — | — |
 | `doc:co-develop/README.md` | doc | `co-develop/code-review`, `co-develop/swe-solve`, `co-develop/test-driven-development`, `root/finishing-a-development-branch`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-export/AGENTS.md` | doc | `common/sync`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-export/agents/customs-duty-drawback-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/export-control-compliance-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/foreign-regulatory-intelligence-analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/fta-origin-analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/halal-certification-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/hs-classification-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/logistics-coordinator.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/market-entry-strategist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-export/agents/trade-documentation-specialist.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-export/docs/co-export.context.md` | doc | `co-export/customs-duty-drawback-workflow`, `co-export/export-control-screening`, `co-export/foreign-regulation-monitoring`, `co-export/fta-origin-determination`, `co-export/halal-certification-workflow`, `co-export/hs-classification-workflow`, `co-export/landed-cost-calculation`, `co-export/logistics-coordination`, `co-export/market-entry-strategy`, `co-export/roo-qualification-worksheet`, `co-export/trade-documentation-checklist`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-export/docs/phase-definitions.md` | doc | `co-export/customs-duty-drawback-workflow`, `root/project-review` | — | — |
 | `doc:co-export/docs/tariff-dataset-schema.md` | doc | `co-export/fta-origin-determination`, `co-export/hs-classification-workflow` | — | — |
@@ -530,11 +583,34 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-export/docs/user-guide.md` | doc | `co-export/customs-duty-drawback-workflow`, `co-export/export-control-screening`, `co-export/foreign-regulation-monitoring`, `co-export/fta-origin-determination`, `co-export/halal-certification-workflow`, `co-export/hs-classification-workflow`, `co-export/logistics-coordination`, `co-export/market-entry-strategy`, `co-export/trade-documentation-checklist`, `root/meeting-facilitation` | — | — |
 | `doc:co-export/README.md` | doc | `co-export/customs-duty-drawback-workflow`, `co-export/export-control-screening`, `co-export/foreign-regulation-monitoring`, `co-export/fta-origin-determination`, `co-export/halal-certification-workflow`, `co-export/hs-classification-workflow`, `co-export/landed-cost-calculation`, `co-export/logistics-coordination`, `co-export/market-entry-strategy`, `co-export/roo-qualification-worksheet`, `co-export/trade-documentation-checklist`, `root/meeting-facilitation` | — | — |
 | `doc:co-game/AGENTS.md` | doc | `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-game/agents/arcade-designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/architect.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/game-debugger.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/game-designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/game-developer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/puzzle-designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/security-monitor.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/sound-designer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/stack-setup.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/test-runner.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-game/agents/visual-artist.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-game/docs/co-game.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-game/docs/user-guide_ko.md` | doc | `co-develop/refactoring`, `co-develop/test-driven-development`, `co-game/code-review`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-game/docs/user-guide.md` | doc | `co-develop/refactoring`, `co-develop/test-driven-development`, `co-game/code-review`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-game/README.md` | doc | `co-develop/test-driven-development`, `co-game/arcade-physics`, `co-game/code-review`, `co-game/sound-synth`, `root/meeting-facilitation` | — | — |
 | `doc:co-hr/AGENTS.md` | doc | `common/sync`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-hr/agents/career-succession-consultant.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/change-management-partner.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/compensation-benefits-analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/data-analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/labor-compliance-analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/labor-relations-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/learning-development-specialist.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/org-design-consultant.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/performance-management-consultant.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/safety-health-officer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-hr/agents/talent-acquisition-specialist.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-hr/docs/co-hr.context.md` | doc | `co-hr/career-path-succession-planning`, `co-hr/compensation-benchmarking`, `co-hr/consulting-report-writing`, `co-hr/hr-metrics-analysis`, `co-hr/learning-curriculum-design`, `co-hr/org-design-framework`, `co-hr/org-readiness-assessment`, `co-hr/performance-system-design`, `co-hr/stakeholder-alignment`, `co-hr/talent-acquisition-strategy`, `common/k-kosis`, `common/k-law`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-hr/docs/engagement-orchestration.md` | doc | `co-hr/compensation-benchmarking`, `co-hr/org-readiness-assessment` | — | — |
 | `doc:co-hr/docs/iso-30414-metrics-mapping.md` | doc | `co-hr/hr-metrics-analysis` | — | — |
@@ -543,17 +619,19 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-hr/docs/user-guide.md` | doc | `co-hr/career-path-succession-planning`, `co-hr/compensation-benchmarking`, `co-hr/consulting-report-writing`, `co-hr/hr-metrics-analysis`, `co-hr/learning-curriculum-design`, `co-hr/org-design-framework`, `co-hr/org-readiness-assessment`, `co-hr/performance-system-design`, `co-hr/stakeholder-alignment`, `co-hr/talent-acquisition-strategy`, `common/k-kosis`, `common/k-law`, `root/meeting-facilitation` | — | — |
 | `doc:co-hr/README.md` | doc | `co-hr/career-path-succession-planning`, `co-hr/compensation-benchmarking`, `co-hr/consulting-report-writing`, `co-hr/hr-metrics-analysis`, `co-hr/learning-curriculum-design`, `co-hr/org-design-framework`, `co-hr/org-readiness-assessment`, `co-hr/performance-system-design`, `co-hr/stakeholder-alignment`, `co-hr/talent-acquisition-strategy`, `root/meeting-facilitation` | — | — |
 | `doc:co-learning/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-learning/agents/exam-bank-steward.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-learning/docs/co-learning.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-learning/docs/phase-definitions.md` | doc | `root/project-review`, `root/security-scan` | — | — |
 | `doc:co-learning/docs/user-guide_ko.md` | doc | `co-develop/code-review`, `co-develop/refactoring`, `co-develop/test-driven-development`, `common/sync`, `root/project-review` | — | — |
 | `doc:co-learning/docs/user-guide.md` | doc | `common/sync`, `root/project-review`, `root/security-scan` | — | — |
 | `doc:co-learning/README.md` | doc | `co-learning/exam-bank-operations`, `root/finishing-a-development-branch`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-news/AGENTS.md` | doc | `common/sync`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-news/agents/financial-analyst.md` | doc | `common/k-dart` | — | — |
-| `doc:co-news/agents/legal-researcher.md` | doc | `common/k-law` | — | — |
-| `doc:co-news/agents/reporter.md` | doc | `co-news/financial-journalism-style` | — | — |
-| `doc:co-news/agents/style-editor.md` | doc | `co-news/ai-tell-reduction`, `co-news/financial-journalism-style` | — | — |
-| `doc:co-news/agents/visual-editor.md` | doc | `co-news/financial-infographic-svg` | — | — |
+| `doc:co-news/agents/fact-checker.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-news/agents/financial-analyst.md` | doc | `common/k-dart`, `root/meeting-facilitation` | — | — |
+| `doc:co-news/agents/legal-researcher.md` | doc | `common/k-law`, `root/meeting-facilitation` | — | — |
+| `doc:co-news/agents/reporter.md` | doc | `co-news/financial-journalism-style`, `root/meeting-facilitation` | — | — |
+| `doc:co-news/agents/style-editor.md` | doc | `co-news/ai-tell-reduction`, `co-news/financial-journalism-style`, `root/meeting-facilitation` | — | — |
+| `doc:co-news/agents/visual-editor.md` | doc | `co-news/financial-infographic-svg`, `root/meeting-facilitation` | — | — |
 | `doc:co-news/docs/co-news.context.md` | doc | `co-news/ai-tell-reduction`, `co-news/financial-infographic-svg`, `co-news/financial-journalism-style`, `co-news/financial-narrative-brief`, `co-news/source-verification-ledger`, `co-news/style-lint-checklist`, `common/k-dart`, `common/k-law`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-news/docs/financial-journalism-style-guide.md` | doc | `co-news/ai-tell-reduction`, `co-news/financial-journalism-style` | — | — |
 | `doc:co-news/docs/user-guide_ko.md` | doc | `co-news/ai-tell-reduction`, `co-news/financial-infographic-svg`, `co-news/financial-journalism-style`, `co-news/financial-narrative-brief`, `co-news/source-verification-ledger`, `common/k-dart`, `common/k-law`, `root/meeting-facilitation` | — | — |
@@ -599,13 +677,13 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-safety/workflows/REFERENCE-SPEC.md` | doc | `co-safety/contractor-onboarding`, `co-safety/permit-to-work` | — | — |
 | `doc:co-safety/workflows/schema.yaml` | doc | `co-safety/gmp-deviation-capa` | — | — |
 | `doc:co-security/AGENTS.md` | doc | `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-security/agents/patch-engineer.md` | doc | `co-security/verify-authorization` | — | — |
-| `doc:co-security/agents/pentester.md` | doc | `co-security/verify-authorization` | — | — |
+| `doc:co-security/agents/patch-engineer.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
+| `doc:co-security/agents/pentester.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
 | `doc:co-security/agents/README_ko.md` | doc | `co-security/verify-authorization` | — | — |
 | `doc:co-security/agents/README.md` | doc | `co-security/verify-authorization` | — | — |
-| `doc:co-security/agents/red-team-lead.md` | doc | `co-security/verify-authorization` | — | — |
-| `doc:co-security/agents/report-writer.md` | doc | `co-security/verify-authorization` | — | — |
-| `doc:co-security/agents/threat-modeler.md` | doc | `co-security/verify-authorization` | — | — |
+| `doc:co-security/agents/red-team-lead.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
+| `doc:co-security/agents/report-writer.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
+| `doc:co-security/agents/threat-modeler.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
 | `doc:co-security/docs/authorization-registry.md` | doc | `co-security/verify-authorization`, `root/delegate-to-hub` | — | — |
 | `doc:co-security/docs/co-security.context.md` | doc | `co-security/verify-authorization`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-security/docs/phase-definitions.md` | doc | `co-security/stride-threat-matrix`, `co-security/verify-authorization`, `root/project-review` | — | — |
@@ -613,7 +691,13 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-security/docs/user-guide.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
 | `doc:co-security/README.md` | doc | `co-security/finding-reconciliation`, `co-security/samm-maturity`, `co-security/sarif-exporter`, `co-security/spdx-sbom`, `co-security/stride-threat-matrix`, `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
 | `doc:co-work/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-work/agents/deck-builder.md` | doc | `co-work/pptx-export`, `co-work/svg-quality-gate`, `co-work/svg-slide-authoring` | — | — |
+| `doc:co-work/agents/analyst.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-work/agents/content-writer.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-work/agents/deck-builder.md` | doc | `co-work/pptx-export`, `co-work/svg-quality-gate`, `co-work/svg-slide-authoring`, `root/meeting-facilitation` | — | — |
+| `doc:co-work/agents/ms365-expert.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-work/agents/project-coordinator.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-work/agents/storyteller.md` | doc | `root/meeting-facilitation` | — | — |
+| `doc:co-work/agents/technical-writer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/docs/co-work.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-work/docs/document-style-registry.md` | doc | `co-deck/version`, `co-work/pptx-export`, `co-work/svg-slide-authoring` | — | — |
 | `doc:co-work/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
@@ -810,29 +894,29 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 | Capability | Type | Kind | Nodes (scope@version #hash) |
 |------------|------|------|-----------------------------|
-| `analyst` | agent | version-drift | co-architect@1.1.1 #6e6bb883; co-work@1.1.1 #5294cd27 |
-| `architect` | agent | version-drift | co-abap@1.1.2 #d1860ebb; co-architect@1.0.0 #b7fe7bb2; co-develop@1.2.0 #8ba5b888; co-game@1.1.1 #36c43686; root@1.0.0 #e24a6bf8 |
-| `automation-engineer` | agent | divergence | co-architect@1.0.1 #f3c4b540; root@1.0.0 #8dcdf3da |
-| `change-management-partner` | agent | version-drift | co-consult@1.1.1 #d6f48315; co-hr@1.1.1 #1ba9046c |
-| `code-writer` | agent | divergence | co-abap@1.1.2 #7561e263; co-develop@1.2.0 #6f177c02 |
-| `content-writer` | agent | version-drift | co-architect@1.1.1 #94dd6e9a; co-work@1.1.1 #4234472d |
-| `data-analyst` | agent | version-drift | co-consult@1.1.1 #668344f3; co-hr@1.1.1 #cd4c219c |
-| `design-lead` | agent | version-drift | co-architect@1.1.1 #923c1a7f; co-design@1.1.1 #04a0e18b |
-| `designer` | agent | version-drift | co-develop@1.1.1 #df734345; co-game@1.1.1 #615c99bd |
+| `analyst` | agent | version-drift | co-architect@1.1.1 #c641e931; co-work@1.1.1 #7402d04a |
+| `architect` | agent | version-drift | co-abap@1.1.2 #d1860ebb; co-architect@1.0.0 #7439a5d0; co-develop@1.2.0 #922ac4f7; co-game@1.1.1 #2783b559; root@1.0.0 #805ceaff |
+| `automation-engineer` | agent | divergence | co-architect@1.0.1 #c1e1061c; root@1.0.0 #6071c47d |
+| `change-management-partner` | agent | version-drift | co-consult@1.1.1 #c4de997b; co-hr@1.1.1 #32ddf0a8 |
+| `code-writer` | agent | divergence | co-abap@1.1.2 #7561e263; co-develop@1.2.0 #92b0fde8 |
+| `content-writer` | agent | version-drift | co-architect@1.1.1 #0dfd92b0; co-work@1.1.1 #3dcfe69e |
+| `data-analyst` | agent | version-drift | co-consult@1.1.1 #e9a8cbec; co-hr@1.1.1 #049f6b88 |
+| `design-lead` | agent | version-drift | co-architect@1.1.1 #b5fbb388; co-design@1.1.1 #354436e5 |
+| `designer` | agent | version-drift | co-develop@1.1.1 #d0d0220c; co-game@1.1.1 #cf752c0d |
 | `devops-admin` | agent | divergence | co-abap@1.1.2 #59a99f2f; co-price@2.2.1 #20aad471 |
-| `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; common@1.3.2 #64b97e47 |
-| `ms365-expert` | agent | version-drift | co-architect@1.1.1 #b82c7f15; co-work@1.1.1 #36b74196 |
+| `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; common@1.3.2 #e0bd9ada |
+| `ms365-expert` | agent | version-drift | co-architect@1.1.1 #d66a2884; co-work@1.1.1 #a594ed3b |
 | `pm` | agent | version-drift | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.1 #4077f48a; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.2 #e12dc360; root@1.2.2 #99e82f53 |
-| `project-coordinator` | agent | version-drift | co-architect@1.1.1 #079d7d9d; co-work@1.1.1 #63cd0f0a |
-| `prototype-engineer` | agent | version-drift | co-architect@1.1.1 #eac0f710; co-design@1.1.1 #32d6f634 |
-| `security-monitor` | agent | version-drift | co-abap@1.1.1 #2f8a2b8a; co-develop@1.1.1 #7bffa2b7; co-game@1.1.1 #bab2ce39; co-price@2.2.1 #94b3b224 |
-| `service-designer` | agent | version-drift | co-architect@1.1.1 #49a9a40a; co-design@1.1.1 #6efef328 |
-| `stack-setup` | agent | version-drift | co-develop@1.1.1 #b4974d80; co-game@1.1.1 #01fae45c |
-| `technical-writer` | agent | version-drift | co-architect@1.1.1 #d71945bc; co-work@1.1.1 #3ddb6311 |
-| `test-runner` | agent | divergence | co-abap@1.1.2 #1185805a; co-develop@1.2.0 #758043da; co-game@1.1.1 #fea85c33 |
-| `typography-expert` | agent | version-drift | co-architect@1.1.1 #65e2fbce; co-design@1.1.1 #1a53df68 |
-| `ux-researcher` | agent | divergence | co-architect@1.1.1 #ade7e907; co-design@1.1.2 #d3404037 |
-| `visual-designer` | agent | divergence | co-architect@1.1.1 #04697f74; co-design@1.1.2 #b57bc12e |
+| `project-coordinator` | agent | version-drift | co-architect@1.1.1 #ea0ba5e1; co-work@1.1.1 #ef8c8cfa |
+| `prototype-engineer` | agent | version-drift | co-architect@1.1.1 #5b481cf7; co-design@1.1.1 #f906e607 |
+| `security-monitor` | agent | version-drift | co-abap@1.1.1 #2f8a2b8a; co-develop@1.1.1 #00cd6298; co-game@1.1.1 #dc9d7b81; co-price@2.2.1 #94b3b224 |
+| `service-designer` | agent | version-drift | co-architect@1.1.1 #a3005b50; co-design@1.1.1 #61353f03 |
+| `stack-setup` | agent | version-drift | co-develop@1.1.1 #9964b735; co-game@1.1.1 #25ef945a |
+| `technical-writer` | agent | version-drift | co-architect@1.1.1 #332d16a1; co-work@1.1.1 #c050a9c6 |
+| `test-runner` | agent | divergence | co-abap@1.1.2 #1185805a; co-develop@1.2.0 #48d5f601; co-game@1.1.1 #bd94727d |
+| `typography-expert` | agent | version-drift | co-architect@1.1.1 #678f01ff; co-design@1.1.1 #fbd6379f |
+| `ux-researcher` | agent | divergence | co-architect@1.1.1 #311537c2; co-design@1.1.2 #dd1ba9a2 |
+| `visual-designer` | agent | divergence | co-architect@1.1.1 #5e7475bc; co-design@1.1.2 #ecae363c |
 | `design-foundation` | skill | divergence | co-design@1.3.0 #5cc8c410; root@1.1.0 #0f50cf02 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | version-drift | co-safety@1.5.0 #690ba21e; root@1.5.0 #f4da9e5e |
@@ -851,8 +935,8 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | Type | Count | Nodes |
 |------|-------|-------|
 | adr | 56 | (expected until docs `references` edges are mined) |
-| agent | 23 | co-abap/i18n-specialist, co-architect/architect, co-architect/automation-engineer, co-architect/design-storyteller, co-architect/mep-engineer, co-architect/prototype-engineer, co-architect/sketchup-modeler, co-architect/structural-engineer, co-architect/typography-expert, co-architect/ux-researcher, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, root/architect, root/auditor, root/automation-engineer, root/docs-writer, root/security-expert, root/skill-graph-analyst |
-| decision | 28 | (expected until docs `references` edges are mined) |
+| agent | 11 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, root/skill-graph-analyst |
+| decision | 29 | (expected until docs `references` edges are mined) |
 | skill | 2 | common/gateguard, root/trail |
 
 ## Skills Without `used_by` (G6)

@@ -43,7 +43,7 @@ You are the Labor Relations Specialist for **co-hr**. You support Phase 1 - Rese
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline.
+In a `meeting-facilitation` session, Claude role-plays you inline.
 
 **Voice & Stance:** Strategic and precedent-grounded - measured, risk-aware, mindful of the union/council distinction
 

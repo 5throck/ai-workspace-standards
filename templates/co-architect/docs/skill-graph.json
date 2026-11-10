@@ -98,6 +98,11 @@
       "layer": "common"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "mep-engineer",
       "type": "agent",
       "layer": "variant:co-architect"
@@ -265,10 +270,28 @@
   ],
   "edges": [
     {
+      "type": "references",
+      "from": "analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "api-documentation",
       "to": "technical-writer",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "architect",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "automation-engineer",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -331,6 +354,24 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "content-writer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design-lead",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design-storyteller",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "documentation-writing",
       "to": "content-writer",
@@ -382,6 +423,12 @@
       "type": "references",
       "from": "generate-room-elevation",
       "to": "zwcad-ai-drawing",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "ms365-expert",
+      "to": "meeting-facilitation",
       "source": "prose"
     },
     {
@@ -556,6 +603,18 @@
       "actor_type": "agent"
     },
     {
+      "type": "references",
+      "from": "project-coordinator",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "prototype-engineer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "used_by",
       "from": "research-analysis",
       "to": "analyst",
@@ -580,10 +639,40 @@
       "source": "required_skills"
     },
     {
+      "type": "references",
+      "from": "service-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "sketchup-modeler",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "produces",
       "from": "standup-synthesizer",
       "to": "output_type.closure_record",
       "source": "procedure_schema"
+    },
+    {
+      "type": "references",
+      "from": "storyteller",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "technical-writer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "typography-expert",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "used_by",
@@ -596,6 +685,18 @@
       "from": "ui-ux-design-intelligence",
       "to": "visual-designer",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "ux-researcher",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "visual-designer",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -626,6 +727,12 @@
       "from": "zwcad-ai-drawing",
       "to": "zwcad-drafter",
       "source": "required_skills"
+    },
+    {
+      "type": "references",
+      "from": "zwcad-drafter",
+      "to": "meeting-facilitation",
+      "source": "prose"
     }
   ]
 }

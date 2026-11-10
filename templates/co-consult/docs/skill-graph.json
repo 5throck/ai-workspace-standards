@@ -121,6 +121,11 @@
       "layer": "variant:co-consult"
     },
     {
+      "id": "meeting-facilitation",
+      "type": "skill",
+      "layer": "L0"
+    },
+    {
       "id": "narrative-framework",
       "type": "skill",
       "layer": "variant:co-consult"
@@ -399,6 +404,18 @@
       }
     },
     {
+      "type": "references",
+      "from": "change-management-partner",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "communications-lead",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "company-intelligence",
       "to": "competitive-intelligence",
@@ -657,6 +674,18 @@
       "from": "consulting-report-writing",
       "to": "phase3",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "data-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "delivery-manager",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "accountable_for",
@@ -1014,6 +1043,12 @@
       "from": "gate.co-consult.DG-CONSULT-01",
       "to": "output_type.recommendation_set",
       "source": "decision_model"
+    },
+    {
+      "type": "references",
+      "from": "industry-expert",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "references",
@@ -1783,6 +1818,12 @@
       "source": "skill_manifest"
     },
     {
+      "type": "references",
+      "from": "sme",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "follows",
       "from": "solution-design",
       "to": "financial-modeling",
@@ -1851,6 +1892,12 @@
       "from": "solution-design",
       "to": "technology-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "solutions-architect",
+      "to": "meeting-facilitation",
+      "source": "prose"
     },
     {
       "type": "stage_follows",
@@ -2022,6 +2069,12 @@
       }
     },
     {
+      "type": "references",
+      "from": "strategy-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "strategy-analyst",
       "to": "procedure.co-consult.current-state-diagnosis",
@@ -2155,6 +2208,18 @@
       "from": "technical-feasibility",
       "to": "technology-specialist",
       "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "technology-specialist",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "workstream-lead",
+      "to": "meeting-facilitation",
+      "source": "prose"
     }
   ]
 }

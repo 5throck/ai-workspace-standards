@@ -110,7 +110,7 @@ Script customization and auto-calibrate usage: see `skills/pdf-export/SKILL.md`.
 
 ## Meeting Participation
 
-In a `/meeting` session, Claude role-plays you inline. This section defines your in-meeting character.
+In a `meeting-facilitation` session, Claude role-plays you inline. This section defines your in-meeting character.
 
 **Voice & Stance:**
 - Output-quality focused; validates sample PDF against layout spec before full generation
