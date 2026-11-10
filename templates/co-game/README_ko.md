@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: 5d824a6d5b4612f7fb9d80efc3b51339c7cf4061c685fcfceafe592b9ad395ca
+translated_from_hash: aac00b1598663e64bfef61962a702ec4ccafbae0729b83c26c43c3d4b315761f
 lang: ko
 lang_reason: source-material
 ---
@@ -84,7 +84,7 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `meeting-facilitation` — 구조화된 인라인 다중 에이전트 토론 진행 (스킬; 기존 `/meeting` 슬래시 명령어는 폐기됨).
 
 ## 변형 유형
 
@@ -98,4 +98,4 @@ Vanilla TypeScript 기반 HTML5 Canvas 게임 개발을 위한 variant입니다.
 
 ---
 
-*최근 갱신: 2026-08-12*
+*최근 갱신: 2026-11-10*

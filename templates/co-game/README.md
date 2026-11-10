@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 5d824a6d5b4612f7fb9d80efc3b51339c7cf4061c685fcfceafe592b9ad395ca
+content_hash: aac00b1598663e64bfef61962a702ec4ccafbae0729b83c26c43c3d4b315761f
 ---
 
 # co-game
@@ -82,7 +82,7 @@ Our daily operations are driven by slash commands (registered as Skills by Claud
 - `/sync "feat: ..."` — Full pipeline: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — Add an entry to `CHANGELOG.md`.
 - `/memlog "summary"` — Append a summary to today's session log.
-- `/meeting` — Run a structured, inline multi-agent discussion.
+- `meeting-facilitation` — Run a structured, inline multi-agent discussion (skill; the legacy `/meeting` slash command is retired).
 
 ## Variant Type
 
