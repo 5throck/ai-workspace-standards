@@ -3,7 +3,7 @@ id: U-20261110-001
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-10T12:44:09.861+09:00'
 history:
@@ -13,7 +13,28 @@ history:
   - at: '2026-11-10T17:24:01.030+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-10T21:17:21.945+09:00'
+    from: review
+    to: done
+result: >-
+  Verified NOT L2: an L1 template-content landing defect plus a false resolution
+  record. Workspace PR #1864 (merged 2026-11-06) never committed the
+  U-20261105-004 CSS fix — the co-deck session's worktree modifications were
+  dropped by scoped staging (memory/2026-11-06.md:608) — while CHANGELOG.md, the
+  spec registry (status implemented) and U-20261105-004's resolution (outcome
+  fixed) all recorded it as landed. The 0.30.0 delivery then legitimately
+  overwrote the project's local patch with the still-pre-fix template CSS. Fixed
+  via workspace PR #1952 (merge f7d06a11):
+  templates/co-deck/docs/html-themes/styles/base.css (.bullet-item flex->block
+  with hanging indent) and white-bubble/style.css (zen-block rules + the
+  project's Pretendard font-parity block, so adopt-template deliveries preserve
+  it), v1.2.0 headers; content matches co-deck commit 4edaa8b. Project-side
+  verification: co-deck PR #217 merged (daa9cbd5) — upgrade adopted template for
+  the CONFLICT set, byte-equality confirmed, VR baselines recaptured at fixed
+  rendering (32/32 captured, 27/27 pairs PASS). Residual corrections recorded
+  forward (closed U-20261105-004 upstream fields not hand-edited); template-side
+  stale VR baselines tracked as T-20261110-011; the NO_BASELINE silent-overwrite
+  engine gap as T-20261110-009.
 error: null
 upstream:
   project: co-deck
@@ -66,3 +87,27 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-10T12:44:09.861+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1952
+    template_version: unreleased
+    summary: >-
+      Verified NOT L2: an L1 template-content landing defect plus a false
+      resolution record. Workspace PR #1864 (merged 2026-11-06) never committed
+      the U-20261105-004 CSS fix — the co-deck session's worktree modifications
+      were dropped by scoped staging (memory/2026-11-06.md:608) — while
+      CHANGELOG.md, the spec registry (status implemented) and U-20261105-004's
+      resolution (outcome fixed) all recorded it as landed. The 0.30.0 delivery
+      then legitimately overwrote the project's local patch with the
+      still-pre-fix template CSS. Fixed via workspace PR #1952 (merge f7d06a11):
+      templates/co-deck/docs/html-themes/styles/base.css (.bullet-item
+      flex->block with hanging indent) and white-bubble/style.css (zen-block
+      rules + the project's Pretendard font-parity block, so adopt-template
+      deliveries preserve it), v1.2.0 headers; content matches co-deck commit
+      4edaa8b. Project-side verification: co-deck PR #217 merged (daa9cbd5) —
+      upgrade adopted template for the CONFLICT set, byte-equality confirmed, VR
+      baselines recaptured at fixed rendering (32/32 captured, 27/27 pairs
+      PASS). Residual corrections recorded forward (closed U-20261105-004
+      upstream fields not hand-edited); template-side stale VR baselines tracked
+      as T-20261110-011; the NO_BASELINE silent-overwrite engine gap as
+      T-20261110-009.

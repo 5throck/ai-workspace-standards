@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261110-011
+kind: manual
+title: >-
+  co-deck template VR baselines encode the pre-U-20261105-004 rendering
+  (surfaced by T-20261110-003 execution):
+  templates/co-deck/docs/html-themes/baselines/** still capture the un-fixed
+  rendering (zen/white-bubble cover = white-serif-on-photo, the U-001 regression
+  class) and 42 stale diff-slide-*.png ride along. Consequence: every future
+  project upgrade EVOLVED-delivery re-stales freshly recaptured project
+  baselines (observed 2026-11-10 in Projects/co-deck during the T-003 run —
+  recapture had to run twice). Fix at workspace root: recapture
+  templates/co-deck baselines in the fixed rendering (Chromium IS available
+  project-side; the root run needs the same Playwright setup against the
+  template fixtures) and drop the stale diff artifacts. Refs: PR #1952 (CSS
+  landing), PR co-deck#217 (project recapture, 27/27 PASS at fixed rendering).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-10T21:15:58.930+09:00'
+history:
+  - at: '2026-11-10T21:15:58.930+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

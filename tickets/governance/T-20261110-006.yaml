@@ -6,12 +6,30 @@ title: >-
   VERSIONS.md (bun scripts/snapshot.ts --restore ...; actual path is
   scripts/co-deck/snapshot.ts) — emit a working command
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-10T14:44:07.952+09:00'
 history:
   - at: '2026-11-10T14:44:07.952+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T21:17:59.936+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T21:17:59.952+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T21:17:59.968+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved per design (DEC-20261110-03): the template snapshot.ts was ALREADY
+  correct at all 7 self-referential emission sites (fixed at TS-conversion
+  commit bdffd2d36) — the broken VERSIONS.md restore commands come from the
+  stale Projects/co-deck copy. Workspace PR #1952 adds the pin test
+  templates/co-deck/scripts/co-deck/tests/snapshot-self-reference.test.ts (2
+  pins, fails as intended on a broken-form copy); co-deck PR #217 (merged
+  daa9cbd5) re-synced the project copy via adopt-template delivery — snapshot.ts
+  byte-identical to template, new VERSIONS.md entries emit correct paths (48
+  historical entries in untracked presentation files left as history).
 error: null

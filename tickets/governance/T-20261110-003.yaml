@@ -10,12 +10,29 @@ title: >-
   PDFs with pdftocairo — poppler splash (pdftoppm) misrenders
   2026-11-consumer-goods-market-shift.pdf pages 3-4 as cover art
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-10T14:44:07.884+09:00'
 history:
   - at: '2026-11-10T14:44:07.884+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T21:17:59.985+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T21:18:00.002+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T21:18:00.021+09:00'
+    from: review
+    to: done
+result: >-
+  Executed 2026-11-10 in co-deck PR #217 (merged daa9cbd5). Finding: the
+  ticket's premise was stale — the tracked baselines were the 0.30.0 delivery
+  vintage (byte-equal to template baselines, encoding the UN-FIXED rendering),
+  not 2026-11-07 patch-era. Recaptured with UPDATE_BASELINES=1 (32/32, run twice
+  — the template sync re-staled them once from the still-pre-fix template
+  baselines) at the fixed rendering: final 27/27 pairs PASS in both dev-sync
+  gate runs. Follow-up: template-side baselines still encode the pre-fix
+  rendering — T-20261110-011.
 error: null
