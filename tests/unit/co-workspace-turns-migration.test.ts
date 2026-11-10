@@ -199,10 +199,13 @@ describe("turns.db acting_principal migration (D-S4)", () => {
 
   test("legacy rows keep acting_principal = NULL; new rows record the caller; PK unchanged", () => {
     const root = tempRoot("turns");
-    let store: TurnStore | null = null;
+    // Capture every handle (the store AND the shape-probe reader): all must be closed in the
+    // shared finally BEFORE cleanup's rmSync, or Windows keeps turns.db locked (EBUSY).
+    const handles: Array<{ close(): void }> = [];
     try {
       seedLegacyTurnsDb(root);
-      store = new TurnStore(root);
+      const store = new TurnStore(root);
+      handles.push(store);
       // Legacy row: NULL attribution, rendered as before.
       const legacy = store.list("gw-aaaaaaaaaaaa");
       expect(legacy).toHaveLength(1);
@@ -223,38 +226,33 @@ describe("turns.db acting_principal migration (D-S4)", () => {
       store.record("gw-bbbbbbbbbbbb", { sessionId: "s4", exitCode: 0, finalText: "other tenant", inputTokens: 0, outputTokens: 0, actingPrincipal: "bob" });
       expect(store.list("gw-bbbbbbbbbbbb")[0].seq).toBe(1);
       const dbShape = new Database(join(root, "tenants", "turns.db"));
-      try {
-        const pk = (dbShape.query("PRAGMA table_info(turns)").all() as Array<{ name: string; pk: number }>)
-          .filter((c) => c.pk > 0)
-          .sort((a, b) => a.pk - b.pk)
-          .map((c) => c.name);
-        expect(pk).toEqual(["tenant_id", "seq"]);
-        expect((dbShape.query("PRAGMA table_info(turns)").all() as Array<{ name: string }>).map((c) => c.name)).toContain("acting_principal");
-      } finally {
-        dbShape.close();
-      }
-      store = null; // already closed inside cleanup
-      cleanup(root, []);
-    } catch (err) {
-      if (store) cleanup(root, [store]);
-      throw err;
+      handles.push(dbShape);
+      const pk = (dbShape.query("PRAGMA table_info(turns)").all() as Array<{ name: string; pk: number }>)
+        .filter((c) => c.pk > 0)
+        .sort((a, b) => a.pk - b.pk)
+        .map((c) => c.name);
+      expect(pk).toEqual(["tenant_id", "seq"]);
+      expect((dbShape.query("PRAGMA table_info(turns)").all() as Array<{ name: string }>).map((c) => c.name)).toContain("acting_principal");
+    } finally {
+      cleanup(root, handles);
     }
   });
 
   test("re-opening the store is idempotent (guarded ALTER)", () => {
     const root = tempRoot("turns-reopen");
-    let store: TurnStore | null = null;
+    // Both instances (incl. the reopened one) captured: the second boot's handle must be
+    // closed in the shared finally BEFORE cleanup's rmSync, or Windows EBUSYs the rm.
+    const handles: Array<{ close(): void }> = [];
     try {
       seedLegacyTurnsDb(root);
-      store = new TurnStore(root);
-      store.close();
-      store = new TurnStore(root); // second boot: ALTER throws duplicate column → swallowed
-      expect(store.list("gw-aaaaaaaaaaaa")).toHaveLength(1);
-      store = null;
-      cleanup(root, []);
-    } catch (err) {
-      if (store) cleanup(root, [store]);
-      throw err;
+      const first = new TurnStore(root);
+      handles.push(first);
+      first.close();
+      const second = new TurnStore(root); // second boot: ALTER throws duplicate column → swallowed
+      handles.push(second);
+      expect(second.list("gw-aaaaaaaaaaaa")).toHaveLength(1);
+    } finally {
+      cleanup(root, handles);
     }
   });
 });
