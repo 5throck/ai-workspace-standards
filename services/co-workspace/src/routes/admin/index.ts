@@ -6,6 +6,7 @@ import type { Ctx } from "../ctx";
 import { handleLegacy } from "./legacy";
 import { handleUsers } from "./users";
 import { handleGroups } from "./groups";
+import { handlePolicies } from "./policies";
 import { handleAdminTenants } from "./tenants";
 import { handleTenantLoop } from "./tenant-loop";
 
@@ -20,6 +21,7 @@ export async function handleAdmin(state: GatewayState, req: Request, ctx: Ctx): 
   return (
     (await handleUsers(state, req, ctx)) ??
     (await handleGroups(state, req, ctx)) ??
+    (await handlePolicies(state, req, ctx)) ??
     (await handleAdminTenants(state, req, ctx)) ??
     (await handleLegacy(state, req, ctx)) ??
     (await handleTenantLoop(state, req, ctx))

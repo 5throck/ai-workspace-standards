@@ -11,8 +11,20 @@ import { randomBytes, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { runMigrations } from "./migrations";
-import type { LoopGroupConfig } from "./tenant-loop";
-import type { GroupPolicy } from "./policy";
+import {
+  DEFAULT_LOOP_SCOPES,
+  DEFAULT_LOOP_WINDOWS,
+  validateDesignatedUsers,
+  validateEnrollmentVariant,
+  validateLoopScopes,
+  validateLoopWindows,
+  type LoopEnrollmentInput,
+  type LoopGroupConfig,
+  type LoopScopes,
+  type LoopWindows,
+} from "./tenant-loop";
+import { sanitizeGroupPolicyShape, validateGroupPolicy, type GroupPolicy } from "./policy";
+import { HttpError } from "./http";
 
 /**
  * Password hashing with a test-mode cost floor (root fix for the windows runner
@@ -51,19 +63,12 @@ function newTempPassword(): string {
 }
 
 /** Stored policy JSON is re-validated on read (2026-11-09 review L3): a non-positive or
- * non-numeric limit is dropped (no opinion), and allowedVariants must be a string array. */
-const POLICY_NUMERIC_FIELDS = ["maxTenants", "maxTurns", "maxTokens", "maxPrincipalTokens"] as const;
+ * non-numeric limit is dropped (no opinion), and allowedVariants must be a string array.
+ * Delegates to the shared policy canonicalizer (single implementation — migration v4 and
+ * the assignment join read the same way). */
 function sanitizeStoredPolicy(raw: unknown): GroupPolicy | null {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
-  const obj = raw as Record<string, unknown>;
-  const out: GroupPolicy = {};
-  for (const field of POLICY_NUMERIC_FIELDS) {
-    const value = obj[field];
-    if (typeof value === "number" && Number.isInteger(value) && value > 0) out[field] = value;
-  }
-  const list = obj.allowedVariants;
-  if (Array.isArray(list) && list.every((v) => typeof v === "string")) out.allowedVariants = [...(list as string[])];
-  return out;
+  const out = sanitizeGroupPolicyShape(raw);
+  return Object.keys(out).length > 0 ? out : null;
 }
 
 export interface UserRecord {
@@ -102,6 +107,38 @@ export interface UserQuery {
   role?: "user" | "admin";
   page?: number;
   size?: number;
+}
+
+/** ── Admin console round 2 (v4 unit model): named policies, group-only assignments, and
+ * (group, variant) loop enrollments. Design docs/designs/2026-11-09-gw-admin-console-round2-plan.md,
+ * "2026-11-09 unit-model amendment" — policies attach to GROUPS ONLY and per-tenant loop
+ * exceptions do not exist. ── */
+
+export interface PolicyRecord {
+  policyId: string;
+  name: string;
+  description: string | null;
+  limits: GroupPolicy;
+  createdAt: string | null;
+  updatedAt: string | null;
+  assignmentCount: number;
+}
+
+export interface PolicyAssignmentRecord {
+  policyId: string;
+  targetKind: "group";
+  targetId: string;
+}
+
+/** A loop enrollment row. Extends the resolver's input shape (tenant-loop.ts
+ * LoopEnrollmentInput) with the enrollment timestamp. */
+export interface LoopEnrollmentRecord extends LoopEnrollmentInput {
+  enrolledAt: string | null;
+}
+
+export interface LoopOperatorRecord {
+  groupId: string;
+  principal: string;
 }
 
 /** Thrown on a group-id collision (a loop write onto a general group, a duplicate create) or a
@@ -664,9 +701,14 @@ export class UserStore {
   }
 
   deleteGroup(groupId: string): boolean {
-    const info = this.db.query("DELETE FROM groups WHERE group_id=?").run(groupId);
-    this.db.query("DELETE FROM user_groups WHERE group_id=?").run(groupId);
-    return Number(info.changes) > 0;
+    return this.db.transaction(() => {
+      // Cascade (round-2 amendment C): same group-id-reuse inheritance-escalation rationale
+      // as deleteGeneralGroup — the v4 rows must not outlive the group id.
+      this.deleteGroupDependencyRows(groupId);
+      const info = this.db.query("DELETE FROM groups WHERE group_id=?").run(groupId);
+      this.db.query("DELETE FROM user_groups WHERE group_id=?").run(groupId);
+      return Number(info.changes) > 0;
+    })();
   }
 
   /** ── Admin console (design docs/designs/2026-11-09-gw-admin-console-design.md §4): general
@@ -710,8 +752,11 @@ export class UserStore {
     return rows.map((r) => this.rowToGroupRecord(r));
   }
 
-  /** Create a general group. Throws GroupConflictError when the id is already taken (any kind). */
-  createGroup(init: { groupId: string; name: string; description?: string; policy?: GroupPolicy | null }): GroupRecord {
+  /** Create a general group. Throws GroupConflictError when the id is already taken (any kind).
+   * v4 unit model: there is NO inline-policy parameter — limits live in named policies
+   * assigned through policy_assignments (the deprecated groups.policy column is never
+   * written after migration v4). */
+  createGroup(init: { groupId: string; name: string; description?: string }): GroupRecord {
     this.db.transaction(() => {
       if (this.db.query("SELECT 1 FROM groups WHERE group_id = ?").get(init.groupId)) {
         throw new GroupConflictError(`group ${init.groupId} already exists`);
@@ -719,15 +764,9 @@ export class UserStore {
       this.db
         .query(
           `INSERT INTO groups (group_id, name, loop_config, kind, policy, description, created_at)
-           VALUES (?, ?, '{"designatedUsers":[]}', 'general', ?, ?, ?)`,
+           VALUES (?, ?, '{"designatedUsers":[]}', 'general', NULL, ?, ?)`,
         )
-        .run(
-          init.groupId,
-          init.name,
-          init.policy ? JSON.stringify(init.policy) : null,
-          init.description ?? null,
-          new Date().toISOString(),
-        );
+        .run(init.groupId, init.name, init.description ?? null, new Date().toISOString());
     })();
     return this.getGroupRecord(init.groupId)!;
   }
@@ -747,20 +786,28 @@ export class UserStore {
     return this.getGroupRecord(groupId);
   }
 
-  setGroupPolicy(groupId: string, policy: GroupPolicy | null): GroupRecord | undefined {
-    this.db.query("UPDATE groups SET policy = ? WHERE group_id = ?").run(policy ? JSON.stringify(policy) : null, groupId);
-    return this.getGroupRecord(groupId);
-  }
-
-  /** Delete a general group and its memberships. Refuses loop groups (returns false). */
+  /** Delete a general group and its memberships. Refuses loop groups (returns false).
+   * CASCADE (round-2 amendment C): the group's policy_assignments, loop_enrollments and
+   * loop_operators rows are deleted in the same transaction — group ids are reusable, so a
+   * surviving row would make a LATER group with the same id inherit the old group's policy
+   * limits and loop coverage (inheritance escalation). */
   deleteGeneralGroup(groupId: string): boolean {
     return this.db.transaction(() => {
       const row = this.db.query("SELECT kind FROM groups WHERE group_id = ?").get(groupId) as { kind: string } | null;
       if (!row || row.kind !== "general") return false;
+      this.deleteGroupDependencyRows(groupId);
       this.db.query("DELETE FROM user_groups WHERE group_id = ?").run(groupId);
       this.db.query("DELETE FROM groups WHERE group_id = ?").run(groupId);
       return true;
     })();
+  }
+
+  /** Shared cascade body: every v4 row keyed on a group id. Called inside the caller's
+   * transaction (deleteGeneralGroup / deleteGroup). */
+  private deleteGroupDependencyRows(groupId: string): void {
+    this.db.query("DELETE FROM policy_assignments WHERE target_kind = 'group' AND target_id = ?").run(groupId);
+    this.db.query("DELETE FROM loop_enrollments WHERE group_id = ?").run(groupId);
+    this.db.query("DELETE FROM loop_operators WHERE group_id = ?").run(groupId);
   }
 
   /** Membership edits are for general groups only; anything else is a GroupConflictError. */
@@ -815,9 +862,274 @@ export class UserStore {
     return rows.map((r) => this.rowToGroupRecord(r));
   }
 
-  /** Called by user delete: drops every membership row for the principal. */
+  /** Called by user delete (both dispositions): drops every membership row for the principal
+   * AND the principal's loop_operator rows. CASCADE rationale (round-2 amendment C): a
+   * later account reusing the principal must not inherit the deleted account's operator
+   * grants on loop groups (inheritance escalation). */
   removePrincipalFromAllGroups(principal: string): void {
     this.db.query("DELETE FROM user_groups WHERE principal = ?").run(principal);
+    this.db.query("DELETE FROM loop_operators WHERE principal = ?").run(principal);
+  }
+
+  /** ── Admin console round 2 (v4 unit model): named policies with GROUP-ONLY assignments,
+   * (group, variant) loop enrollments, and loop operators. Tables created by migration v4
+   * (design docs/designs/2026-11-09-gw-admin-console-round2-plan.md, "2026-11-09 unit-model
+   * amendment"). There is deliberately no per-user assignment or enrollment method: the
+   * amendment removed those targets entirely. ── */
+
+  private rowToPolicy(r: Record<string, unknown>): PolicyRecord {
+    let limits: GroupPolicy = {};
+    try {
+      limits = sanitizeGroupPolicyShape(JSON.parse(r.limits as string));
+    } catch {
+      /* unreadable limits → no opinions */
+    }
+    return {
+      policyId: r.policy_id as string,
+      name: r.name as string,
+      description: (r.description as string | null) ?? null,
+      limits,
+      createdAt: (r.created_at as string | null) ?? null,
+      updatedAt: (r.updated_at as string | null) ?? null,
+      assignmentCount: Number(r.assignment_count ?? 0),
+    };
+  }
+
+  private static readonly POLICY_SELECT = `SELECT p.policy_id, p.name, p.description, p.limits, p.created_at, p.updated_at,
+    (SELECT COUNT(*) FROM policy_assignments pa WHERE pa.policy_id = p.policy_id) AS assignment_count
+    FROM policies p`;
+
+  getPolicy(policyId: string): PolicyRecord | undefined {
+    const r = this.db.query(`${UserStore.POLICY_SELECT} WHERE p.policy_id = ?`).get(policyId) as Record<string, unknown> | null;
+    return r ? this.rowToPolicy(r) : undefined;
+  }
+
+  listPolicies(): PolicyRecord[] {
+    const rows = this.db.query(`${UserStore.POLICY_SELECT} ORDER BY p.name COLLATE NOCASE ASC`).all() as Record<string, unknown>[];
+    return rows.map((r) => this.rowToPolicy(r));
+  }
+
+  /** Create a named policy. Throws GroupConflictError when the name is taken (policies.name is
+   * UNIQUE — routes map it to 409 conflict). No inline-assignment parameter exists: the v4
+   * amendment routes every assignment through assignPolicy under reauth. */
+  createPolicy(init: { name: string; description?: string | null; limits: GroupPolicy }): PolicyRecord {
+    if (this.db.query("SELECT 1 FROM policies WHERE name = ?").get(init.name)) {
+      throw new GroupConflictError(`policy name "${init.name}" already exists`);
+    }
+    const policyId = `p-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
+    const now = new Date().toISOString();
+    this.db
+      .query("INSERT INTO policies (policy_id, name, description, limits, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
+      .run(policyId, init.name, init.description ?? null, JSON.stringify(init.limits), now, now);
+    return this.getPolicy(policyId)!;
+  }
+
+  updatePolicy(policyId: string, patch: { name?: string; description?: string | null; limits?: GroupPolicy }): PolicyRecord | undefined {
+    const sets: string[] = [];
+    const values: (string | null)[] = [];
+    if (patch.name !== undefined) {
+      if (this.db.query("SELECT 1 FROM policies WHERE name = ? AND policy_id != ?").get(patch.name, policyId)) {
+        throw new GroupConflictError(`policy name "${patch.name}" already exists`);
+      }
+      sets.push("name = ?");
+      values.push(patch.name);
+    }
+    if (patch.description !== undefined) {
+      sets.push("description = ?");
+      values.push(patch.description);
+    }
+    if (patch.limits !== undefined) {
+      sets.push("limits = ?", "updated_at = ?");
+      values.push(JSON.stringify(patch.limits), new Date().toISOString());
+    }
+    if (sets.length > 0) this.db.query(`UPDATE policies SET ${sets.join(", ")} WHERE policy_id = ?`).run(...values, policyId);
+    return this.getPolicy(policyId);
+  }
+
+  /** Delete a policy and its assignments (one transaction — a half-deleted policy must never
+   * linger as a dangling assignment). */
+  deletePolicy(policyId: string): boolean {
+    return this.db.transaction(() => {
+      this.db.query("DELETE FROM policy_assignments WHERE policy_id = ?").run(policyId);
+      return Number(this.db.query("DELETE FROM policies WHERE policy_id = ?").run(policyId).changes) > 0;
+    })();
+  }
+
+  listAssignments(policyId: string): PolicyAssignmentRecord[] {
+    const rows = this.db
+      .query("SELECT policy_id, target_kind, target_id FROM policy_assignments WHERE policy_id = ? ORDER BY target_id ASC")
+      .all(policyId) as Array<{ policy_id: string; target_kind: string; target_id: string }>;
+    return rows.map((r) => ({ policyId: r.policy_id, targetKind: "group" as const, targetId: r.target_id }));
+  }
+
+  /** Assign a policy to a GROUP (the only target kind — v4 amendment). Both ends must exist;
+   * the group must be a general group. Throws HttpError(404) for either missing end and
+   * GroupConflictError for a loop-group target or a duplicate assignment. */
+  assignPolicy(policyId: string, groupId: string): void {
+    this.db.transaction(() => {
+      if (!this.db.query("SELECT 1 FROM policies WHERE policy_id = ?").get(policyId)) {
+        throw new HttpError(404, "policy_not_found");
+      }
+      const group = this.db.query("SELECT kind FROM groups WHERE group_id = ?").get(groupId) as { kind: string } | null;
+      if (!group) throw new HttpError(404, "unknown_group");
+      if (group.kind !== "general") throw new GroupConflictError(`group ${groupId} is not a general group`);
+      if (this.db.query("SELECT 1 FROM policy_assignments WHERE policy_id = ? AND target_kind = 'group' AND target_id = ?").get(policyId, groupId)) {
+        throw new GroupConflictError(`policy ${policyId} is already assigned to group ${groupId}`);
+      }
+      this.db.query("INSERT INTO policy_assignments (policy_id, target_kind, target_id) VALUES (?, 'group', ?)").run(policyId, groupId);
+    })();
+  }
+
+  unassignPolicy(policyId: string, groupId: string): boolean {
+    return (
+      Number(
+        this.db.query("DELETE FROM policy_assignments WHERE policy_id = ? AND target_kind = 'group' AND target_id = ?").run(policyId, groupId)
+          .changes,
+      ) > 0
+    );
+  }
+
+  /** The named policies assigned to the principal's groups (the effectivePolicyFor input):
+   * one row per (policy, via-group). The deprecated groups.policy blob column is never read
+   * here — migration v4 migrated every blob into this table (see policy.ts). */
+  policyAssignmentsFor(principal: string): Array<{ policyId: string; policyName: string; via: string; policy: GroupPolicy }> {
+    const rows = this.db
+      .query(
+        `SELECT p.policy_id, p.name, pa.target_id, p.limits
+         FROM user_groups ug
+         JOIN policy_assignments pa ON pa.target_kind = 'group' AND pa.target_id = ug.group_id
+         JOIN policies p ON p.policy_id = pa.policy_id
+         WHERE ug.principal = ?
+         ORDER BY p.policy_id ASC, pa.target_id ASC`,
+      )
+      .all(principal) as Array<{ policy_id: string; name: string; target_id: string; limits: string }>;
+    return rows.map((r) => ({
+      policyId: r.policy_id,
+      policyName: r.name,
+      via: r.target_id,
+      policy: sanitizeGroupPolicyShape(JSON.parse(r.limits)),
+    }));
+  }
+
+  private rowToEnrollment(r: Record<string, unknown>): LoopEnrollmentRecord {
+    // Read-side canonicalization reuses the write-time validators (single implementation);
+    // a hand-edited row degrades to the pre-v4 defaults instead of poisoning the resolver.
+    let scopes: Partial<LoopScopes> = {};
+    let windows: LoopWindows = { ...DEFAULT_LOOP_WINDOWS };
+    try {
+      scopes = validateLoopScopes(r.scopes ? JSON.parse(r.scopes as string) : {});
+    } catch {
+      /* unreadable scopes → defaults below */
+    }
+    try {
+      windows = validateLoopWindows(r.windows ? JSON.parse(r.windows as string) : DEFAULT_LOOP_WINDOWS);
+    } catch {
+      /* unreadable windows → defaults below */
+    }
+    return {
+      groupId: r.group_id as string,
+      variant: r.variant as string,
+      status: r.status === "suspended" ? "suspended" : "active",
+      scopes: { ...DEFAULT_LOOP_SCOPES, ...scopes },
+      windows,
+      gitRemote: (r.git_remote as string | null) ?? null,
+      enrolledAt: (r.enrolled_at as string | null) ?? null,
+    };
+  }
+
+  /** Upsert one (group, variant) enrollment. Validation mirrors the HTTP contract at store
+   * level so nothing bypasses it: variant shape ('*' or co-*), status, complete four-key
+   * scopes and a full windows object — all via the shared tenant-loop validators (single
+   * implementation, no duplicate rules). The group must exist and be a general group. */
+  setEnrollment(
+    groupId: string,
+    variant: string,
+    opts: { status: "active" | "suspended"; scopes: LoopScopes; windows: LoopWindows; gitRemote?: string | null },
+  ): LoopEnrollmentRecord {
+    const validatedVariant = validateEnrollmentVariant(variant);
+    if (opts.status !== "active" && opts.status !== "suspended") throw new HttpError(400, "status must be 'active' or 'suspended'");
+    const scopes = validateLoopScopes(opts.scopes);
+    for (const key of ["upgrade", "upstreamFile", "backportReview", "nightlyFleet"] as const) {
+      if (typeof scopes[key] !== "boolean") throw new HttpError(400, `scopes.${key} must be a boolean (all four keys are required)`);
+    }
+    const windows = validateLoopWindows(opts.windows);
+    const gitRemote = typeof opts.gitRemote === "string" && opts.gitRemote.trim() ? opts.gitRemote.trim() : null;
+    this.db.transaction(() => {
+      const group = this.db.query("SELECT kind FROM groups WHERE group_id = ?").get(groupId) as { kind: string } | null;
+      if (!group) throw new HttpError(404, "unknown_group");
+      if (group.kind !== "general") throw new GroupConflictError(`group ${groupId} is not a general group`);
+      this.db
+        .query(
+          `INSERT INTO loop_enrollments (group_id, variant, status, scopes, windows, git_remote, enrolled_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(group_id, variant) DO UPDATE SET status = excluded.status, scopes = excluded.scopes,
+             windows = excluded.windows, git_remote = excluded.git_remote`,
+        )
+        .run(groupId, validatedVariant, opts.status, JSON.stringify(scopes), JSON.stringify(windows), gitRemote, new Date().toISOString());
+    })();
+    return this.getEnrollment(groupId, validatedVariant)!;
+  }
+
+  getEnrollment(groupId: string, variant: string): LoopEnrollmentRecord | undefined {
+    const r = this.db.query("SELECT * FROM loop_enrollments WHERE group_id = ? AND variant = ?").get(groupId, variant) as
+      | Record<string, unknown>
+      | null;
+    return r ? this.rowToEnrollment(r) : undefined;
+  }
+
+  deleteEnrollment(groupId: string, variant: string): boolean {
+    return Number(this.db.query("DELETE FROM loop_enrollments WHERE group_id = ? AND variant = ?").run(groupId, variant).changes) > 0;
+  }
+
+  listEnrollments(groupId?: string): LoopEnrollmentRecord[] {
+    const rows = groupId
+      ? (this.db.query("SELECT * FROM loop_enrollments WHERE group_id = ? ORDER BY group_id ASC, variant ASC").all(groupId) as Record<string, unknown>[])
+      : (this.db.query("SELECT * FROM loop_enrollments ORDER BY group_id ASC, variant ASC").all() as Record<string, unknown>[]);
+    return rows.map((r) => this.rowToEnrollment(r));
+  }
+
+  /** Full replace of a group's operator set (one transaction). Principals are canonicalized
+   * with the shared designatedUsers validator (trim/dedupe/bound). */
+  setLoopOperators(groupId: string, principals: string[]): void {
+    const cleaned = validateDesignatedUsers(principals);
+    this.db.transaction(() => {
+      this.db.query("DELETE FROM loop_operators WHERE group_id = ?").run(groupId);
+      for (const principal of cleaned) {
+        this.db.query("INSERT OR IGNORE INTO loop_operators (group_id, principal) VALUES (?, ?)").run(groupId, principal);
+      }
+    })();
+  }
+
+  listLoopOperators(groupId?: string): LoopOperatorRecord[] {
+    const rows = groupId
+      ? (this.db.query("SELECT group_id, principal FROM loop_operators WHERE group_id = ? ORDER BY group_id ASC, principal ASC").all(groupId) as Array<{
+          group_id: string;
+          principal: string;
+        }>)
+      : (this.db.query("SELECT group_id, principal FROM loop_operators ORDER BY group_id ASC, principal ASC").all() as Array<{
+          group_id: string;
+          principal: string;
+        }>);
+    return rows.map((r) => ({ groupId: r.group_id, principal: r.principal }));
+  }
+
+  /** ACL helper (co-governance): is the principal an operator of ANY of these groups? */
+  isLoopOperatorOfAny(principal: string, groupIds: string[]): boolean {
+    if (!principal || groupIds.length === 0) return false;
+    const placeholders = groupIds.map(() => "?").join(", ");
+    return Boolean(
+      this.db.query(`SELECT 1 FROM loop_operators WHERE principal = ? AND group_id IN (${placeholders})`).get(principal, ...groupIds),
+    );
+  }
+
+  /** Raw membership rows (group_id, principal) — the tenant-loop resolver's group-membership
+   * input, read once per export/preview instead of per tenant. */
+  groupMembershipList(): Array<{ groupId: string; principal: string }> {
+    const rows = this.db.query("SELECT group_id, principal FROM user_groups ORDER BY group_id ASC, principal ASC").all() as Array<{
+      group_id: string;
+      principal: string;
+    }>;
+    return rows.map((r) => ({ groupId: r.group_id, principal: r.principal }));
   }
 
   /** ── Admin console: user queries and bulk state changes ── */

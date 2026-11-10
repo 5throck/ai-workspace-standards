@@ -35,11 +35,11 @@ import type { GatewayConfig } from "../../services/co-workspace/src/config";
 import { handleRequest } from "../../services/co-workspace/src/server";
 import { createState } from "../../services/co-workspace/src/state";
 import type { GatewayState } from "../../services/co-workspace/src/state";
-import { MIGRATION_STEPS, MigrationDowngradeError, runMigrations } from "../../services/co-workspace/src/migrations";
+import { MIGRATION_HEAD, MIGRATION_STEPS, MigrationDowngradeError, runMigrations } from "../../services/co-workspace/src/migrations";
 import { UserStore } from "../../services/co-workspace/src/users";
 import type { UserRecord } from "../../services/co-workspace/src/users";
 import { HttpError } from "../../services/co-workspace/src/http";
-import { resolveEffectivePolicy, effectivePolicyFor, validateGroupPolicy } from "../../services/co-workspace/src/policy";
+import { resolveEffectivePolicy, effectivePolicyFor, validateGroupPolicy, type GroupPolicy } from "../../services/co-workspace/src/policy";
 import {
   assertProvisioningAllowed,
   assertQuota,
@@ -167,8 +167,8 @@ const cfgBase: GatewayConfig = loadConfig({ CO_WORKSPACE_VARIANTS: "co-consult,c
 
 // ── Migration v3 ──────────────────────────────────────────────────────────────
 
-describe("migration v3 (admin console schema)", () => {
-  test("a v2 database keeps its loop groups as kind='loop' with members and data intact", () => {
+describe("migration v3+v4 (admin console schema)", () => {
+  test("a v2 database migrates to the v4 unit model: loop group → general + enrollment + operator", () => {
     const dataDir = scratch("mig-v2");
     const dbDir = join(dataDir, "tenants");
     mkdirSync(dbDir, { recursive: true });
@@ -191,43 +191,60 @@ describe("migration v3 (admin console schema)", () => {
     const store = new UserStore(dataDir);
     CLOSEABLE.push(store);
 
+    // v4 unit model: the loop group is now a general group with an ACTIVE (group_id, '*')
+    // enrollment and its designatedUsers as loop operators.
     const group = store.getGroupRecord("loop-a");
-    expect(group?.kind).toBe("loop");
+    expect(group?.kind).toBe("general");
     expect(group?.policy).toBeNull();
     expect(group?.memberCount).toBe(1);
     expect(store.listMembers("loop-a")).toEqual(["alice"]);
-    expect(store.getGroup("loop-a")?.designatedUsers).toEqual(["alice"]);
+    expect(store.getGroup("loop-a")).toBeUndefined(); // the kind='loop' reader is gone post-v4
+    const enrollment = store.listEnrollments("loop-a");
+    expect(enrollment).toHaveLength(1);
+    expect(enrollment[0].variant).toBe("*");
+    expect(enrollment[0].status).toBe("active");
+    expect(store.listLoopOperators()).toEqual([{ groupId: "loop-a", principal: "alice" }]);
     expect(store.findByPrincipal("alice")?.name).toBe("Alice");
   });
 
-  test("a fresh database reaches v3, and re-opening it is a no-op", () => {
+  test("a fresh database reaches the migration head, and re-opening it is a no-op", () => {
     const dataDir = scratch("mig-fresh");
     const first = new UserStore(dataDir);
     first.close();
     const second = new UserStore(dataDir);
     CLOSEABLE.push(second);
     const raw = new Database(join(dataDir, "tenants", "users.db"));
-    expect((raw.query("PRAGMA user_version").get() as { user_version: number }).user_version).toBe(3);
+    expect((raw.query("PRAGMA user_version").get() as { user_version: number }).user_version).toBe(MIGRATION_HEAD);
     raw.close();
     expect(second.listGroupRecords({ kind: "loop" })).toEqual([]);
   });
 
-  test("a database at user_version 4 trips the downgrade guard", () => {
+  test("a database above the migration head trips the downgrade guard", () => {
     const dataDir = scratch("mig-downgrade");
     mkdirSync(join(dataDir, "tenants"), { recursive: true });
     const raw = new Database(join(dataDir, "tenants", "users.db"));
-    raw.exec("PRAGMA user_version = 4");
+    raw.exec(`PRAGMA user_version = ${MIGRATION_HEAD + 1}`);
     raw.close();
     expect(() => new UserStore(dataDir)).toThrow(MigrationDowngradeError);
   });
 });
 
-// ── Strictest-wins policy ─────────────────────────────────────────────────────
+// ── Strictest-wins policy (v4 unit model: named policies, group-only assignments) ──
 
-describe("strictest-wins group policy (policy.ts)", () => {
+/** A named policy assigned to a group (the v4 store path the resolver reads). */
+function grantGroupPolicy(state: GatewayState, groupId: string, limits: GroupPolicy, name = `pol-${crypto.randomUUID().slice(0, 8)}`): string {
+  const policy = state.users.createPolicy({ name, limits });
+  state.users.assignPolicy(policy.policyId, groupId);
+  return policy.policyId;
+}
+
+describe("strictest-wins named policy resolution (policy.ts, v4 unit model)", () => {
+  const assign = (policyId: string, policyName: string, via: string, policy: GroupPolicy) => ({ policyId, policyName, via, policy });
+
   test("with no policy-bearing group, every field equals the cfg value (cfg 0 included)", () => {
     const zero = resolveEffectivePolicy({ ...cfgBase, tenantMaxPerPrincipal: 0, tenantMaxTurns: 0, tenantMaxTokens: 0, principalMaxTokens: 0 }, []);
     expect(zero).toMatchObject({ maxTenants: 0, maxTurns: 0, maxTokens: 0, maxPrincipalTokens: 0, allowedVariants: null });
+    expect(zero.sources).toEqual([]);
 
     const set = resolveEffectivePolicy(
       { ...cfgBase, tenantMaxPerPrincipal: 3, tenantMaxTurns: 10, tenantMaxTokens: 1000, principalMaxTokens: 5000 },
@@ -236,45 +253,55 @@ describe("strictest-wins group policy (policy.ts)", () => {
     expect(set).toMatchObject({ maxTenants: 3, maxTurns: 10, maxTokens: 1000, maxPrincipalTokens: 5000, allowedVariants: null });
   });
 
-  test("a group tightens a cfg limit and reports its source", () => {
+  test("a policy tightens a cfg limit and reports its (policyId, via) source", () => {
     const cfg = { ...cfgBase, tenantMaxTurns: 10 };
-    const eff = resolveEffectivePolicy(cfg, [{ groupId: "team-a", policy: { maxTurns: 3 } }]);
+    const eff = resolveEffectivePolicy(cfg, [assign("p-1", "Team A limits", "team-a", { maxTurns: 3 })]);
     expect(eff.maxTurns).toBe(3);
-    expect(eff.sources.maxTurns).toEqual(["team-a"]);
+    expect(eff.sources).toEqual([{ policyId: "p-1", policyName: "Team A limits", via: "team-a" }]);
   });
 
-  test("a group cannot loosen a cfg limit", () => {
+  test("a policy cannot loosen a cfg limit", () => {
     const cfg = { ...cfgBase, tenantMaxPerPrincipal: 5 };
-    const eff = resolveEffectivePolicy(cfg, [{ groupId: "team-a", policy: { maxTenants: 50 } }]);
+    const eff = resolveEffectivePolicy(cfg, [assign("p-1", "Wide", "team-a", { maxTenants: 50 })]);
     expect(eff.maxTenants).toBe(5);
-    expect(eff.sources.maxTenants).toEqual(["cfg"]);
   });
 
-  test("a group sets the limit where cfg is unlimited (0)", () => {
-    const eff = resolveEffectivePolicy({ ...cfgBase, tenantMaxTokens: 0 }, [{ groupId: "team-a", policy: { maxTokens: 2 } }]);
+  test("a policy sets the limit where cfg is unlimited (0)", () => {
+    const eff = resolveEffectivePolicy({ ...cfgBase, tenantMaxTokens: 0 }, [assign("p-1", "Tight", "team-a", { maxTokens: 2 })]);
     expect(eff.maxTokens).toBe(2);
   });
 
-  test("the minimum across several groups wins", () => {
+  test("the minimum across several policies wins", () => {
     const cfg = { ...cfgBase, tenantMaxPerPrincipal: 0 };
     const eff = resolveEffectivePolicy(cfg, [
-      { groupId: "g-wide", policy: { maxTenants: 4 } },
-      { groupId: "g-tight", policy: { maxTenants: 2 } },
+      assign("p-1", "Wide", "g-wide", { maxTenants: 4 }),
+      assign("p-2", "Tight", "g-tight", { maxTenants: 2 }),
     ]);
     expect(eff.maxTenants).toBe(2);
-    expect(eff.sources.maxTenants).toEqual(["g-tight"]);
   });
 
-  test("allowedVariants intersects across groups, and an empty intersection denies every variant", () => {
+  test("sources list every contributing assignment, deduplicated and sorted by policyId then via", () => {
+    const eff = resolveEffectivePolicy(cfgBase, [
+      assign("p-2", "Second", "g-b", { maxTurns: 5 }),
+      assign("p-1", "First", "g-a", { maxTurns: 3 }),
+      assign("p-1", "First", "g-a", { maxTurns: 3 }), // duplicate (same policy, same via) → dropped
+    ]);
+    expect(eff.sources).toEqual([
+      { policyId: "p-1", policyName: "First", via: "g-a" },
+      { policyId: "p-2", policyName: "Second", via: "g-b" },
+    ]);
+  });
+
+  test("allowedVariants intersects across policies, and an empty intersection denies every variant", () => {
     const both = resolveEffectivePolicy(cfgBase, [
-      { groupId: "g1", policy: { allowedVariants: ["co-consult", "co-develop"] } },
-      { groupId: "g2", policy: { allowedVariants: ["co-develop"] } },
+      assign("p-1", "A", "g1", { allowedVariants: ["co-consult", "co-develop"] }),
+      assign("p-2", "B", "g2", { allowedVariants: ["co-develop"] }),
     ]);
     expect(both.allowedVariants).toEqual(["co-develop"]);
 
     const none = resolveEffectivePolicy(cfgBase, [
-      { groupId: "g1", policy: { allowedVariants: ["co-develop"] } },
-      { groupId: "g2", policy: { allowedVariants: ["co-consult"] } },
+      assign("p-1", "A", "g1", { allowedVariants: ["co-develop"] }),
+      assign("p-2", "B", "g2", { allowedVariants: ["co-consult"] }),
     ]);
     expect(none.allowedVariants).toEqual([]);
   });
@@ -301,14 +328,19 @@ describe("strictest-wins group policy (policy.ts)", () => {
     });
   });
 
-  test("effectivePolicyFor: a member gets the tightened limit, a non-member gets cfg exactly", () => {
+  test("effectivePolicyFor: a member of a policy-bearing group gets the tightened limit, a non-member gets cfg exactly", () => {
     const state = makeState("policy-db", { CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL: "5" });
     const alice = makeUser(state, "alice");
     makeUser(state, "bob");
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { maxTenants: 1 } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
     state.users.addMembers("team-a", [alice.principal]);
-    expect(effectivePolicyFor(state, "alice").maxTenants).toBe(1);
+    grantGroupPolicy(state, "team-a", { maxTenants: 1 }, "Team A limits");
+    const eff = effectivePolicyFor(state, "alice");
+    expect(eff.maxTenants).toBe(1);
+    expect(eff.sources.map((s) => s.policyName)).toEqual(["Team A limits"]);
+    expect(eff.sources[0].via).toBe("team-a");
     expect(effectivePolicyFor(state, "bob").maxTenants).toBe(5);
+    expect(effectivePolicyFor(state, "bob").sources).toEqual([]);
   });
 });
 
@@ -318,8 +350,9 @@ describe("policy enforcement in access.ts", () => {
   test("tenant cap: a group member at maxTenants=1 gets 429 for a second tenant", () => {
     const state = makeState("cap");
     const alice = makeUser(state, "alice");
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { maxTenants: 1 } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
     state.users.addMembers("team-a", [alice.principal]);
+    grantGroupPolicy(state, "team-a", { maxTenants: 1 });
     state.registry.create({ variant: "co-consult", key: "k-cap-1", ownerPrincipal: "alice", description: "first" });
 
     const sessionReq = new Request("http://x/sessions", { method: "POST", headers: { cookie: `gw_session=${sessionFor(state, alice)}` } });
@@ -330,8 +363,9 @@ describe("policy enforcement in access.ts", () => {
   test("variant allowlist: a group member provisioning a variant outside allowedVariants gets 403 and an audit row", () => {
     const state = makeState("variant");
     const alice = makeUser(state, "alice");
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { allowedVariants: ["co-consult"] } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
     state.users.addMembers("team-a", [alice.principal]);
+    grantGroupPolicy(state, "team-a", { allowedVariants: ["co-consult"] });
     const req = new Request("http://x/sessions", { method: "POST", headers: { cookie: `gw_session=${sessionFor(state, alice)}` } });
 
     const err = catchOf(() => assertProvisioningAllowed(state, req, "co-develop"));
@@ -341,7 +375,7 @@ describe("policy enforcement in access.ts", () => {
     expect(() => assertProvisioningAllowed(state, req, "co-consult")).not.toThrow();
   });
 
-  test("quota: a group maxTurns=2 blocks a tenant at two sessions; no group leaves it open", () => {
+  test("quota: a policy maxTurns=2 blocks a tenant at two sessions; no policy leaves it open", () => {
     const state = makeState("quota");
     const alice = makeUser(state, "alice");
     const rec = state.registry.create({ variant: "co-consult", key: "k-quota", ownerPrincipal: "alice", description: "q" });
@@ -350,8 +384,9 @@ describe("policy enforcement in access.ts", () => {
 
     expect(() => assertQuota({ ...cfgBase, quotaWindow: "lifetime" }, rec, undefined, effectivePolicyFor(state, "alice"))).not.toThrow();
 
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { maxTurns: 2 } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
     state.users.addMembers("team-a", [alice.principal]);
+    grantGroupPolicy(state, "team-a", { maxTurns: 2 });
     const err = catchOf(() => assertQuota({ ...cfgBase, quotaWindow: "lifetime" }, rec, undefined, effectivePolicyFor(state, "alice")));
     expect(err.status).toBe(429);
   });
@@ -382,8 +417,9 @@ describe("API-key callers are bound by their label's group policy (review M3)", 
   test("a key labelled like a user principal gets that user's group limits, same as the session user", () => {
     const state = makeState("apikey-policy", { ...apiKeyEnv("apikey-policy"), CO_WORKSPACE_TENANT_MAX_PER_PRINCIPAL: "9" });
     const alice = makeUser(state, "alice");
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { maxTenants: 1, allowedVariants: ["co-consult"] } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
     state.users.addMembers("team-a", [alice.principal]);
+    grantGroupPolicy(state, "team-a", { maxTenants: 1, allowedVariants: ["co-consult"] });
 
     const keyPolicy = callerPolicyFor(state, apiKeyRequest());
     expect(keyPolicy.maxTenants).toBe(1);
@@ -396,8 +432,9 @@ describe("API-key callers are bound by their label's group policy (review M3)", 
   test("API-key provisioning is narrowed by the label's group, and its tenant cap is tightened", () => {
     const state = makeState("apikey-gate", apiKeyEnv("apikey-gate"));
     const alice = makeUser(state, "alice");
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { maxTenants: 1, allowedVariants: ["co-consult"] } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
     state.users.addMembers("team-a", [alice.principal]);
+    grantGroupPolicy(state, "team-a", { maxTenants: 1, allowedVariants: ["co-consult"] });
     state.registry.create({ variant: "co-consult", key: "k-key-1", ownerPrincipal: "alice", description: "one" });
     state.registry.create({ variant: "co-consult", key: "k-key-2", ownerPrincipal: "alice", description: "two" });
 
@@ -694,24 +731,28 @@ describe("CSV export and import (admin-csv)", () => {
 // ── Groups and tenants ────────────────────────────────────────────────────────
 
 describe("groups and tenants API", () => {
-  test("group CRUD, policy validation, and member batches work for a general group", async () => {
+  test("group CRUD, member batches, and the 410 policy shim work for a general group", async () => {
     const state = makeState("groups-api");
     makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
     const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
     makeUser(state, "alice");
 
-    const created = await send(state, "/admin/groups", { token: adminTok, body: { groupId: "ops-team", name: "Ops", policy: { maxTurns: 3 } } });
+    const created = await send(state, "/admin/groups", { token: adminTok, body: { groupId: "ops-team", name: "Ops" } });
     expect(created.status).toBe(201);
 
     const patched = await send(state, "/admin/groups/ops-team", { method: "PATCH", token: adminTok, body: { name: "Operations" } });
     expect((await json(patched)).name).toBe("Operations");
 
-    const badPolicy = await send(state, "/admin/groups/ops-team/policy", { method: "PUT", token: adminTok, adminPassword: ADMIN_PW, body: { maxTenants: 0 } });
-    expect(badPolicy.status).toBe(400);
-    expect((await json(badPolicy)).error).toBe("invalid_policy");
+    // Round-2 compat shim (amendment C): the group-policy blob route is GONE — 410 Gone
+    // pointing at the policies API, before any auth.
+    const shim = await send(state, "/admin/groups/ops-team/policy", { method: "PUT", token: adminTok, body: { maxTurns: 3 } });
+    expect(shim.status).toBe(410);
+    expect(await json(shim)).toEqual({ error: "policy_route_removed", pointer: "/admin/policies" });
 
     const members = await send(state, "/admin/groups/ops-team/members", { token: adminTok, body: { principals: ["alice", "ghost-user"] } });
-    expect(await json(members)).toEqual({ added: 1, unknown: ["ghost-user"] });
+    const membersBody = await json(members);
+    expect(membersBody.added).toBe(1);
+    expect(membersBody.unknown).toEqual(["ghost-user"]);
 
     const detail = await json(await send(state, "/admin/groups/ops-team", { token: adminTok }));
     expect(detail.members).toEqual(["alice"]);
@@ -722,14 +763,14 @@ describe("groups and tenants API", () => {
     expect(delOk.status).toBe(200);
   });
 
-  test("a policy write on a loop group is refused with 409 loop_group_readonly and nothing is stored (review M1)", async () => {
+  test("the group-policy shim answers 410 for loop groups too, and no policy is stored (review M1, round-2 form)", async () => {
     const state = makeState("loop-policy");
     makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
     const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
     state.users.upsertGroup({ groupId: "loop-a", name: "Loop A", designatedUsers: [] });
     const res = await send(state, "/admin/groups/loop-a/policy", { method: "PUT", token: adminTok, adminPassword: ADMIN_PW, body: { maxTurns: 4 } });
-    expect(res.status).toBe(409);
-    expect((await json(res)).error).toBe("loop_group_readonly");
+    expect(res.status).toBe(410);
+    expect((await json(res)).error).toBe("policy_route_removed");
     expect(state.users.getGroupRecord("loop-a")?.policy).toBeNull();
   });
 
@@ -764,11 +805,17 @@ describe("groups and tenants API", () => {
 
     await send(state, "/admin/groups", { token: adminTok, body: { groupId: "ops-team", name: "Ops" } });
     await send(state, "/admin/groups/ops-team/members", { token: adminTok, body: { principals: ["alice"] } });
-    await send(state, "/admin/groups/ops-team/policy", { method: "PUT", token: adminTok, adminPassword: ADMIN_PW, body: { maxTenants: 2 } });
+    const created = await json(await send(state, "/admin/policies", { token: adminTok, body: { name: "Ops limits", limits: { maxTenants: 2 } } }));
+    await send(state, `/admin/policies/${created.policy.policyId}/assignments`, {
+      method: "POST",
+      token: adminTok,
+      adminPassword: ADMIN_PW,
+      body: { groupId: "ops-team" },
+    });
     await send(state, "/admin/users/bulk", { token: adminTok, adminPassword: ADMIN_PW, body: { ids: [alice.id], action: "suspend" } });
     await send(state, "/admin/users/export.csv", { token: adminTok });
 
-    for (const action of ["group.create", "group.member.add", "group.policy.update", "user.suspend", "user.export", "user.bulk.suspend"]) {
+    for (const action of ["group.create", "group.member.add", "policy.create", "policy.assign", "user.suspend", "user.export", "user.bulk.suspend"]) {
       expect(state.audit.query({ action }).entries.length, action).toBeGreaterThan(0);
     }
   });
@@ -777,7 +824,7 @@ describe("groups and tenants API", () => {
 // ── /auth/me and the /admin page (gaps b and c) ───────────────────────────────
 
 describe("/auth/me effective budget", () => {
-  test("a group policy tightens the reported principal budget; with no policy it is the cfg value", async () => {
+  test("a named group policy tightens the reported principal budget; with no policy it is the cfg value", async () => {
     const state = makeState("auth-me", { CO_WORKSPACE_PRINCIPAL_MAX_TOKENS: "5000" });
     const alice = makeUser(state, "alice");
     const tok = sessionFor(state, alice);
@@ -785,8 +832,9 @@ describe("/auth/me effective budget", () => {
     const plain = await json(await send(state, "/auth/me", { token: tok, method: "GET" }));
     expect(plain.budget).toEqual({ maxTokens: 5000 });
 
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { maxPrincipalTokens: 1000 } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
     state.users.addMembers("team-a", [alice.principal]);
+    grantGroupPolicy(state, "team-a", { maxPrincipalTokens: 1000 });
     const grouped = await json(await send(state, "/auth/me", { token: tok, method: "GET" }));
     expect(grouped.budget).toEqual({ maxTokens: 1000 });
   });
@@ -843,45 +891,88 @@ describe("review H1: data.bak snapshots are gitignored", () => {
   });
 });
 
-describe("review M1: loop groups carry no policy", () => {
-  test("effectivePolicyFor ignores a loop group's policy even when one is stored directly", () => {
+describe("review M1, round-2 form: the deprecated groups.policy blob is never read", () => {
+  test("a legacy blob on a general group does not tighten limits, but a named policy does", () => {
     const state = makeState("m1-effective");
-    makeUser(state, "alice");
-    state.users.upsertGroup({ groupId: "loop-a", name: "Loop A", designatedUsers: ["alice"] });
-    state.users.setGroupPolicy("loop-a", { maxTurns: 1 });
+    const alice = makeUser(state, "alice");
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
+    state.users.addMembers("team-a", [alice.principal]);
+    // Seed a legacy blob directly — after v4 no write path exists (the shim 410s and create
+    // rejects inline policies), which is exactly the point: the column is display-only.
+    const raw = new Database(join(state.cfg.dataDir, "tenants", "users.db"));
+    raw.query("UPDATE groups SET policy = ? WHERE group_id = ?").run(JSON.stringify({ maxTurns: 1 }), "team-a");
+    raw.close();
     const eff = effectivePolicyFor(state, "alice");
-    expect(eff.maxTurns).toBe(state.cfg.tenantMaxTurns);
-    expect(eff.sources.maxTurns).not.toContain("loop-a");
+    expect(eff.maxTurns).toBe(state.cfg.tenantMaxTurns); // the blob is ignored
+    expect(eff.sources).toEqual([]);
+    // The v4 path: a named policy assigned to the group tightens.
+    grantGroupPolicy(state, "team-a", { maxTurns: 2 }, "Team A limits");
+    expect(effectivePolicyFor(state, "alice").maxTurns).toBe(2);
   });
 });
 
-describe("review M4: reauth on membership and policy changes", () => {
-  test("bulk remove-group, member removal, and policy writes need the password; adding members does not", async () => {
+describe("review M4: reauth on membership and policy changes (round-2 policies API)", () => {
+  test("bulk remove-group, member removal, and policy PATCH/delete/assign/unassign need the password; adding members and creating a policy do not", async () => {
     const state = makeState("m4-reauth");
     makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
     const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
     const alice = makeUser(state, "alice");
-    state.users.createGroup({ groupId: "team-a", name: "Team A", policy: { maxTurns: 5 } });
+    state.users.createGroup({ groupId: "team-a", name: "Team A" });
 
     const addNoReauth = await send(state, "/admin/groups/team-a/members", { token: adminTok, body: { principals: ["alice"] } });
     expect(addNoReauth.status).toBe(200);
 
+    // Policy create needs NO reauth (round-2 amendment C)…
+    const created = await json(
+      await send(state, "/admin/policies", { token: adminTok, body: { name: "Team A limits", limits: { maxTurns: 5 } } }),
+    );
+    expect(created.policy.limits).toEqual({ maxTurns: 5 });
+    const policyId = created.policy.policyId as string;
+
+    // …but every other mutation refuses without the password.
     const bulkNo = await send(state, "/admin/users/bulk", { token: adminTok, body: { ids: [alice.id], action: "remove-group", groupId: "team-a" } });
     expect(bulkNo.status).toBe(403);
     const memberNo = await send(state, "/admin/groups/team-a/members", { method: "DELETE", token: adminTok, body: { principals: ["alice"] } });
     expect(memberNo.status).toBe(403);
-    const policyNo = await send(state, "/admin/groups/team-a/policy", { method: "PUT", token: adminTok, body: { maxTurns: 2 } });
-    expect(policyNo.status).toBe(403);
+    const patchNo = await send(state, `/admin/policies/${policyId}`, { method: "PATCH", token: adminTok, body: { limits: { maxTurns: 2 } } });
+    expect(patchNo.status).toBe(403);
+    const assignNo = await send(state, `/admin/policies/${policyId}/assignments`, { method: "POST", token: adminTok, body: { groupId: "team-a" } });
+    expect(assignNo.status).toBe(403);
+    const delNo = await send(state, `/admin/policies/${policyId}`, { method: "DELETE", token: adminTok });
+    expect(delNo.status).toBe(403);
     expect(state.users.listMembers("team-a")).toEqual(["alice"]);
-    expect(state.users.getGroupRecord("team-a")?.policy).toEqual({ maxTurns: 5 });
+    expect(state.users.getPolicy(policyId)?.limits).toEqual({ maxTurns: 5 });
+    expect(state.users.listAssignments(policyId)).toEqual([]);
 
     const bulkYes = await send(state, "/admin/users/bulk", { token: adminTok, adminPassword: ADMIN_PW, body: { ids: [alice.id], action: "remove-group", groupId: "team-a" } });
     expect((await json(bulkYes)).ok).toBe(1);
     expect(state.users.listMembers("team-a")).toEqual([]);
 
-    const policyYes = await send(state, "/admin/groups/team-a/policy", { method: "PUT", token: adminTok, adminPassword: ADMIN_PW, body: { maxTurns: 2 } });
-    expect(policyYes.status).toBe(200);
-    expect(state.users.getGroupRecord("team-a")?.policy).toEqual({ maxTurns: 2 });
+    const assignYes = await send(state, `/admin/policies/${policyId}/assignments`, {
+      method: "POST",
+      token: adminTok,
+      adminPassword: ADMIN_PW,
+      body: { groupId: "team-a" },
+    });
+    expect(assignYes.status).toBe(200);
+    expect(state.users.listAssignments(policyId).map((a) => a.targetId)).toEqual(["team-a"]);
+
+    const patchYes = await send(state, `/admin/policies/${policyId}`, { method: "PATCH", token: adminTok, adminPassword: ADMIN_PW, body: { limits: { maxTurns: 2 } } });
+    expect(patchYes.status).toBe(200);
+    expect(state.users.getPolicy(policyId)?.limits).toEqual({ maxTurns: 2 });
+
+    const unassignYes = await send(state, `/admin/policies/${policyId}/assignments`, {
+      method: "DELETE",
+      token: adminTok,
+      adminPassword: ADMIN_PW,
+      body: { groupId: "team-a" },
+    });
+    expect(unassignYes.status).toBe(200);
+    expect(state.users.listAssignments(policyId)).toEqual([]);
+
+    const delYes = await send(state, `/admin/policies/${policyId}`, { method: "DELETE", token: adminTok, adminPassword: ADMIN_PW });
+    expect(delYes.status).toBe(200);
+    expect(state.users.getPolicy(policyId)).toBeUndefined();
   });
 });
 
@@ -988,7 +1079,7 @@ describe("review L3: stored group policy is re-validated on read", () => {
 });
 
 describe("review L4: migration v3 tolerates only duplicate-column errors", () => {
-  test("a v2 database whose v3 columns already exist migrates cleanly", () => {
+  test("a v2 database whose v3 columns already exist migrates cleanly (through v4)", () => {
     const db = new Database(":memory:");
     db.exec(`CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT, name TEXT NOT NULL, principal TEXT UNIQUE NOT NULL,
       password_hash TEXT, google_sub TEXT, role TEXT NOT NULL DEFAULT 'user', created_at TEXT NOT NULL, deleted_at TEXT,
@@ -997,8 +1088,8 @@ describe("review L4: migration v3 tolerates only duplicate-column errors", () =>
       kind TEXT NOT NULL DEFAULT 'loop', policy TEXT, description TEXT, created_at TEXT);`);
     db.exec("CREATE TABLE user_groups (group_id TEXT NOT NULL, principal TEXT NOT NULL, PRIMARY KEY (group_id, principal));");
     db.exec("PRAGMA user_version = 2");
-    expect(runMigrations(db)).toBe(1);
-    expect((db.query("PRAGMA user_version").get() as { user_version: number }).user_version).toBe(3);
+    expect(runMigrations(db)).toBe(2); // v3 (tolerated duplicates) + v4
+    expect((db.query("PRAGMA user_version").get() as { user_version: number }).user_version).toBe(MIGRATION_HEAD);
     db.close();
   });
 

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+- **[2026-11-11]**: feat(co-workspace): **admin console round 2 — (group × variant) management unit model on migration v4 (T-20261111-001; design `docs/designs/2026-11-09-gw-admin-console-round2-plan.md` + the 2026-11-09 unit-model amendment; round-3 prerequisite for `docs/designs/2026-11-09-gw-shared-teams-design.md`).**
+  - **Migration v4 (ONE-WAY, transaction-wrapped)**: `policies` (name UNIQUE), `policy_assignments` (group-only targets), `loop_enrollments` (`(group_id, variant)` with `'*'` wildcard, scopes/windows JSON), `loop_operators`. Data migration: `groups.policy` blobs → named policies assigned to their group; `kind='loop'` groups → general groups with an active `('*')` enrollment; `designatedUsers` → `loop_operators`.
+  - **Resolution**: `effectivePolicyFor` reads assignments (strictest-wins per field, `sources` as `PolicySourceRef[]`); `resolveEnrollment` — coverage = owner ∈ members ∧ (variant ∨ `'*'`), scopes per-key AND, window intersection in the lexically-first covering tz; empty/non-contiguous intersection → tenant omitted from the export (fail-closed) with audit `tenant.loop.export.window_unrepresentable`; uncovered tenants not exported. Export JSON schema byte-unchanged (workspace reader untouched).
+  - **ACL**: `assertTenantLoopAllowed` rewritten onto co-governance (admins + operators of any covering group; attribution = sorted covering-group set) — the designatedUsers path is deleted in the same change (no silent ACL death).
+  - **Routes**: group create auto-slugs (name/description only; Korean names → `g-<8hex>`); new `/admin/policies` CRUD (reauth on PATCH/delete/assign/unassign; inline assignments 409; audited old+new); `/admin/tenant-loop/enrollments` (admin+reauth) + preview; per-tenant register/suspend/deregister/config and `PUT /admin/groups/:id/policy` answer 410; export triggers on enrollment/group-member/tenant-delete changes (incl. CSV import and owner self-delete).
+  - **Console UI**: Policies CRUD page, Groups create modal (name+description, inline errors) with Members/Policies/Tenant-loop tabs, Tenant Loop page rebuilt around enrollments (uncovered tenants absent by design; window-unrepresentable reasons surfaced), per-tenant register/config UI removed.
+  - Governance: round-1 admin-console design spec-registered (`implemented`), round-2 plan carries the amendment section + SUPERSEDED markers.
+
+
 - **[2026-11-10]**: feat(hardening): **delivery-gating hardening PR-1 — fleet-script-parity variant extension + orphan-test detection + hermetic security-validator test (T-20261110-010/T-012 partial; design `docs/designs/2026-11-10-delivery-gating-hardening-design.md`, DEC-20261110-04).**
   - **Parity variant sets** (`scripts/fleet-script-parity.ts` v1.2.0): scans `templates/<v>/scripts/<v>/**` vs `Projects/<p>/scripts/<v>/**` with hash-primary row classes (`mismatch-equal-version` fork / `version-ahead` pending-port / `version-behind` pending-delivery), LOCAL-PATCH labels, and `orphan-test` (WARN) rows in both scanner sections surfacing project-only test files for L3 adoption or deletion. Still a WARN-level scan. **Latent v1.0 defect fixed in passing:** `listRelativeFiles()` dropped directory prefixes, so subdirectory files ENOENT'd at the hash step and v1 silently compared only ~77 root-level files instead of the 188-file tree.
   - **Hermetic root test** (`tests/unit/security-validator.test.ts` v1.1.0): the environment-sensitive case now pins `workspace_root` (walk-up-to-AGENTS.md derivation) instead of the un-pinned default validator whose `detectWorkspaceRoot` resolves differently under the nested `Projects/` layout — suite now 41/41 from root, from a project cwd, and from `/tmp`.
@@ -1975,8 +1984,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-11-10*
-*Last Updated: 2026-11-10*
+*Last Updated: 2026-11-11*
+*Last Updated: 2026-11-11*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency

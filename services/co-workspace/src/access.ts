@@ -307,13 +307,16 @@ export function openModeWarning(cfg: {
   return null;
 }
 
-/** ── Tenant-loop ACL (design 2026-11-08-gw-tenant-loop-and-hardening-design §4.2):
- * register/suspend/deregister, loop-config change, upgrade trigger. Gate: caller is a
- * password-set session admin (the requireAdminReady posture) OR callerPrincipal ∈
- * designatedUsers of the governing group. Everything else: 403 default deny. Every
- * decision — allow AND deny — is audited as `tenant.loop.<op>.allowed|denied`. ── */
+/** ── Tenant-loop ACL — round-2 CO-GOVERNANCE (design
+ * docs/designs/2026-11-09-gw-admin-console-round2-plan.md, amendment part B, rewriting the
+ * 2026-11-08 design §4.2 gate): the governing set is ALL active enrollment groups covering
+ * the tenant, and the permitted non-admin caller pool is the union of those groups'
+ * `loop_operators`. Everything else: 403 default deny. The pre-v4 per-tenant designated-user
+ * read path is DELETED (no fallback) — it rode the deprecated per-tenant loopGroup, which
+ * the unit model removed. Every decision — allow AND deny — is audited as
+ * `tenant.loop.<op>.allowed|denied` with the sorted covering-group set as the attribution. ── */
 
-export type TenantLoopOp = "register" | "suspend" | "deregister" | "config" | "upgrade";
+export type TenantLoopOp = "upgrade";
 
 /** The kill switch itself lives in tenant-loop.ts; this wrapper records the audit row so
  * the route layer stays one-liner. Returns true (and audited) when disabled. */
@@ -323,29 +326,34 @@ export function tenantLoopSwitchBlocked(state: GatewayState, req: Request, path:
   return true;
 }
 
-/** Default-deny gate for one tenant-loop operation. `governingGroup` is the group whose
- * designatedUsers may act (the tenant's loopGroup, the body-named group, or "default").
- * Returns the acting principal. */
-export function assertTenantLoopAllowed(state: GatewayState, req: Request, op: TenantLoopOp, governingGroup: string): string {
+/** Default-deny gate for one tenant-loop operation. `coveringGroups` is the sorted set of
+ * active enrollment groups covering the tenant (resolveEnrollment's coveringGroups — the
+ * route resolves it BEFORE calling this; an empty set is denied outright, so an uncovered
+ * tenant can never be acted on by naming a group). Returns the acting principal. */
+export function assertTenantLoopAllowed(state: GatewayState, req: Request, op: TenantLoopOp, coveringGroups: string[]): string {
   const principal = callerPrincipal(state, req);
   const caller = principal ?? "anonymous";
+  // Audit attribution: the sorted covering-group set, comma-joined (amendment B).
+  const attribution = coveringGroups.join(",");
   // A nested FUNCTION DECLARATION (not a const arrow) so TS propagates `never` at the
   // call site and the default-deny tail typechecks without an unreachable return.
   function deny(reason: string): never {
-    state.audit.record(caller, `tenant.loop.${op}.denied`, governingGroup, reason);
+    state.audit.record(caller, `tenant.loop.${op}.denied`, attribution || "none", reason);
     throw new HttpError(403, `tenant-loop ${op} forbidden: ${reason}`);
+  }
+  if (coveringGroups.length === 0) {
+    deny("no active enrollment covers this tenant");
   }
   try {
     const admin = requireAdminReady(state, req);
-    state.audit.record(admin.principal, `tenant.loop.${op}.allowed`, governingGroup, "via=admin");
+    state.audit.record(admin.principal, `tenant.loop.${op}.allowed`, attribution, "via=admin");
     return admin.principal;
   } catch {
-    /* not a password-set admin — fall through to designated membership */
+    /* not a password-set admin — fall through to the co-governance operator pool */
   }
-  const designated = state.users.getGroup(governingGroup)?.designatedUsers ?? [];
-  if (principal && designated.includes(principal)) {
-    state.audit.record(principal, `tenant.loop.${op}.allowed`, governingGroup, "via=designated");
+  if (principal && state.users.isLoopOperatorOfAny(principal, coveringGroups)) {
+    state.audit.record(principal, `tenant.loop.${op}.allowed`, attribution, "via=operator");
     return principal;
   }
-  deny(principal ? `not a designated user of group "${governingGroup}"` : "unauthenticated");
+  deny(principal ? `not an operator of any covering group (${attribution})` : "unauthenticated");
 }

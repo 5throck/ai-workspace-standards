@@ -79,17 +79,19 @@ export interface TenantRecord {
    * the full default set. */
   attachToolsets?: string;
   /** ── Tenant-loop participation (design 2026-11-08-gw-tenant-loop-and-hardening-design
-   * §4): set only while the tenant is loop-registered; deregister strips the fields. The
-   * override rides this versionable record (tenants.data JSON column) — no DDL (§4.1). ── */
-  /** Loop participation status; unset = not registered. */
+   * §4). DEPRECATED at migration v4 (round-2 unit-model amendment): per-tenant loop state
+   * no longer exists — coverage comes from the owner's GROUP enrollments
+   * (loop_enrollments/loop_operators). These fields are kept on the record so pre-v4 rows
+   * keep parsing, but they are NEVER read by the resolver, export, or ACL after v4. ── */
+  /** Loop participation status; unset = not registered. DEPRECATED — never read after v4. */
   loopStatus?: "active" | "suspended";
-  /** Governing group id (group defaults live in users.db `groups.loop_config`). */
+  /** Governing group id. DEPRECATED — never read after v4. */
   loopGroup?: string;
-  /** Sparse per-tenant override over the group defaults; unset keys inherit the group. */
+  /** Sparse per-tenant override. DEPRECATED — never read after v4. */
   loopOverride?: { scopes?: Partial<LoopScopes>; windows?: LoopWindows };
-  /** "local-only" or a git URL; the export schema requires the field. */
+  /** "local-only" or a git URL. DEPRECATED — never read after v4. */
   loopGitRemote?: string;
-  /** Daily upgrade quota counter, UTC-day bucket (§4.4). */
+  /** Daily upgrade quota counter, UTC-day bucket (§4.4). Still live (quota bookkeeping). */
   loopState?: { upgradesDay: string; upgradesToday: number };
 }
 

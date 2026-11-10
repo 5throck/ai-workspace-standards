@@ -1,14 +1,14 @@
 /**
- * Admin console pins for the tenant-loop section of the co-workspace web app (design
- * 2026-11-08-gw-tenant-loop-and-hardening-design §4 — the admin-UI half; the API half is
- * pinned by co-workspace-tenant-loop-acl.test.ts). The section moved out of index.html into
- * the /admin console (design 2026-11-09-gw-admin-console-design §9.4), so these pins read
- * web/admin.js and web/admin.html:
- *   (a) admin.js carries the section ids, the fetch paths verbatim, the fail-closed
- *       empty-state text, and the kill-switch banner;
- *   (b) every mutating tenant-loop fetch sends x-requested-with (SEC-09);
- *   (c) the register form's client-side validation (gw-<12hex>, windows, config JSON) is a
- *       pure function in app-helpers.js mirroring src/tenant-loop.ts;
+ * Admin console pins for the round-2 unit-model surface (design
+ * docs/designs/2026-11-09-gw-admin-console-round2-plan.md, "2026-11-09 unit-model
+ * amendment" — named policies with group-only assignments, (group, variant) loop
+ * enrollments, no per-tenant loop state). These pins read web/admin.js and web/admin.html:
+ *   (a) the rebuilt sections carry their ids, the fetch paths verbatim (no invented or
+ *       410'd endpoints), the kill-switch banner, and the covered-only registry text;
+ *   (b) every mutating call sends x-requested-with, and reauth'd verbs carry
+ *       x-admin-password per request (SEC-09 + the round-2 reauth matrix);
+ *   (c) the policy-limits and enrollment-form validators are pure functions in
+ *       app-helpers.js mirroring src/policy.ts and src/tenant-loop.ts;
  *   (d) the dry-run → confirm upgrade flow is gated structurally on a prior plan render;
  *   (e) index.html no longer carries the admin panel, and #adminMenu links to /admin.
  */
@@ -18,19 +18,26 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   LOOP_SCOPE_KEYS,
-  TENANT_ID_RE,
+  POLICY_NUMERIC_KEYS,
+  buildEnrollmentPayload,
   createUpgradeFlow,
-  validateLoopConfigJson,
   validateLoopWindowsClient,
-  validateTenantId,
+  validatePolicyLimits,
 } from "../../services/co-workspace/web/app-helpers.js";
-import { TENANT_ID_RE as SERVER_TENANT_ID_RE } from "../../services/co-workspace/src/tenant-loop";
 
 const webDir = join(import.meta.dir, "..", "..", "services", "co-workspace", "web");
-/** The admin console script: holds the tenant-loop section and the rest of the console. */
+/** The admin console script: holds the rebuilt sections and the rest of the console. */
 const html = readFileSync(join(webDir, "admin.js"), "utf8");
 const adminPage = readFileSync(join(webDir, "admin.html"), "utf8");
 const indexPage = readFileSync(join(webDir, "index.html"), "utf8");
+
+/** The tenant-loop section source (kill-switch banner through the enrollments page). */
+function tenantLoopSection(): string {
+  const start = html.indexOf("// ── Tenant Loop (round-2 unit model");
+  expect(start, "tenant-loop section marker").toBeGreaterThan(-1);
+  const end = html.indexOf("// ── end Tenant loop", start);
+  return html.slice(start, end);
+}
 
 /** Every `fetch(...)` call in `source`, up to its matching close paren. */
 function fetchCalls(source: string): string[] {
@@ -47,70 +54,141 @@ function fetchCalls(source: string): string[] {
   return calls;
 }
 
-describe("(a) tenant-loop section markup + fetch paths", () => {
-  test("section ids are present in the admin view", () => {
+describe("(a) rebuilt sections: markup, fetch paths, no 410'd references", () => {
+  test("tenant-loop section ids are present", () => {
     for (const id of [
       "tl-banner",
       "tl-body",
+      "tl-enroll",
+      "tl-en-group",
+      "tl-en-variant",
+      "tl-en-submit",
+      "tl-en-err",
+      "tl-enrollments",
+      "tl-en-rows",
+      "tl-en-empty",
+      "tl-en-status",
+      "tl-preview",
+      "tl-preview-title",
+      "tl-preview-body",
       "tl-registry",
       "tl-refresh",
       "tl-fresh",
       "tl-empty",
       "tl-rows",
-      "tl-register",
-      "tl-reg-pick",
-      "tl-reg-id",
-      "tl-reg-group",
-      "tl-reg-tz",
-      "tl-reg-start",
-      "tl-reg-end",
-      "tl-reg-remote",
-      "tl-reg-url",
-      "tl-reg-submit",
-      "tl-reg-err",
-      "tl-config",
-      "tl-config-json",
-      "tl-config-validate",
-      "tl-config-save",
-      "tl-config-err",
       "tl-status",
     ]) {
       expect(html, id).toContain(`id="${id}"`);
     }
-    for (const k of LOOP_SCOPE_KEYS) expect(html).toContain(`id="tl-reg-scope-${k}"`);
-    // Day checkboxes are generated (Sun..Sat → tl-reg-day-0..6).
-    expect(html).toContain('id="tl-reg-day-${i}"');
   });
 
-  test("fetch paths match the admin API verbatim (no invented endpoints)", () => {
-    expect(html).toContain('fetch("/admin/tenant-loop/registry")');
-    expect(html).toContain('fetch("/admin/tenant-loop/config", { method: "PUT"');
-    expect(html).toContain("`/admin/tenant-loop/tenants/${encodeURIComponent(tenantId)}/${op}`");
-    for (const op of ["register", "suspend", "deregister", "upgrade"]) {
-      expect(html, op).toMatch(new RegExp(`tlPost\\([^)]*"${op}"`));
-    }
-    // No other /admin/tenant-loop paths exist on the server (routes/admin.ts).
-    const paths = [...html.matchAll(/\/admin\/tenant-loop\/[\w/${}.()]+/g)].map((m) => m[0]);
-    for (const p of paths) {
-      expect(p, p).toMatch(/^\/admin\/tenant-loop\/(registry|config|tenants\/\$\{encodeURIComponent\(tenantId\)\}\/\$\{op\})/);
-    }
-  });
-
-  test("empty state explains the fail-closed behavior; kill-switch banner names the env var", () => {
-    expect(html).toContain("no registry export — the gateway writes it here after config changes; readers treat absence as zero tenants");
-    expect(html).toContain("disabled via CO_WORKSPACE_TENANT_LOOP_DISABLED");
-    // The banner is driven by the typed error code, not by status alone.
-    expect(html).toContain('body?.code !== "tenant_loop_disabled"');
-  });
-
-  test("every tenant-loop input carries a label", () => {
-    const section = html.slice(html.indexOf('id="tl-register"'), html.indexOf('id="tl-status"'));
-    for (const m of section.matchAll(/<(input|select|textarea)\b[^>]*\bid="([^"]+)"/g)) {
+  test("the enrollment form is shared between the Tenant Loop page and the group detail tab", () => {
+    expect(html).toContain('enrollmentFormHtml("tl-en")');
+    expect(html).toContain('enrollmentFormHtml("gl-en")');
+    // The generator emits one scope checkbox per server scope key and one day checkbox
+    // per weekday (Sun..Sat → <p>-day-0..6), with a for= label for every control.
+    expect(html).toContain('id="${p}-scope-${k}"');
+    expect(html).toContain('id="${p}-day-${i}"');
+    const gen = html.slice(html.indexOf("function enrollmentFormHtml("), html.indexOf("function readEnrollmentForm("));
+    for (const m of gen.matchAll(/<(input|select|textarea)\b[^>]*\bid="([^"]+)"/g)) {
       const [, tag, id] = m;
       // Checkboxes are wrapped by their <label>; every other control has a for= label.
       const wrapped = tag === "input" && /type="checkbox"/.test(m[0]);
-      if (!wrapped) expect(section, id).toContain(`for="${id}"`);
+      if (!wrapped) expect(gen, id).toContain(`for="${id}"`);
     }
+  });
+
+  test("fetch paths match the round-2 admin API verbatim (no invented endpoints)", () => {
+    const section = tenantLoopSection();
+    expect(section).toContain('fetch("/admin/tenant-loop/enrollments")');
+    expect(section).toContain('fetch("/admin/tenant-loop/registry")');
+    // PUT/DELETE enrollments are keyed (group, variant) and built by enrollmentApi
+    // (defined in the shared loop-enrollment pieces, used by both enroll surfaces).
+    expect(html).toContain("function enrollmentApi(groupId, variant, { method, body, password })");
+    expect(html).toContain("`/admin/tenant-loop/enrollments/${encodeURIComponent(groupId)}/${encodeURIComponent(variant)}`");
+    expect(section).toContain("{ method: \"PUT\", body: { status: \"active\", ...parsed.value }, password }");
+    // The resolved-coverage preview carries BOTH query params — from the enrollments table
+    // and from the group detail's Tenant-loop tab.
+    expect(section).toContain("`/admin/tenant-loop/preview?groupId=${encodeURIComponent(e.groupId)}&variant=${encodeURIComponent(e.variant)}`");
+    expect(html).toContain("`/admin/tenant-loop/preview?groupId=${encodeURIComponent(group.groupId)}&variant=${encodeURIComponent(variant)}`");
+    // The only per-tenant op left is upgrade (dry-run + confirm).
+    expect(section).toContain('tlPost(tenantId, "upgrade", {})');
+    // The 410'd routes have no client references left.
+    for (const gone of ["tenant-loop/config", "tl-reg-", "tl-config", '"register"', '"deregister"', "data-tl-suspend", "data-tl-dereg"]) {
+      expect(section, gone).not.toContain(gone);
+    }
+    const paths = [...section.matchAll(/\/admin\/tenant-loop\/[\w/${}.()?&="]+/g)].map((m) => m[0]);
+    for (const p of paths) {
+      expect(p, p).toMatch(
+        /^\/admin\/tenant-loop\/(registry|enrollments|preview\?groupId=|tenants\/\$\{encodeURIComponent\(tenantId\)\}\/\$\{op\})/,
+      );
+    }
+  });
+
+  test("the group-create modal is slug-free with per-field inline errors", () => {
+    for (const id of ["cg-name", "cg-desc", "cg-name-err", "cg-desc-err", "cg-err"]) {
+      expect(html, id).toContain(`id="${id}"`);
+    }
+    // Name + description ONLY — the server generates the id as a slug of the name.
+    expect(html).toContain("body: { name, description: description || undefined }");
+    // Errors render inline in the modal (never the disappearing flash), and success opens
+    // the new group's Members tab.
+    const fn = html.slice(html.indexOf("function createGroupFlow("), html.indexOf("async function editGroupFlow("));
+    expect(fn).not.toMatch(/body:\s*\{\s*groupId/); // the create payload carries no manual id
+    expect(fn).toContain('"#cg-name-err"');
+    expect(fn).toContain('location.hash = `#/groups/${encodeURIComponent(data.groupId)}/members`');
+    expect(fn).not.toContain("flash(");
+  });
+
+  test("the group detail carries the three tabs (Members / Policies / Tenant loop)", () => {
+    for (const tab of ["members", "policies", "loop"]) {
+      expect(html, tab).toContain(`href="#/groups/\${enc}/${tab}"`);
+    }
+    // The old per-group policy blob route (now 410) is never called, and no kind badge is
+    // rendered anywhere (loop/general merged).
+    expect(html).not.toContain("/policy\"");
+    expect(html).not.toContain("${g.kind}");
+  });
+
+  test("policies CRUD fetch paths + form fields", () => {
+    expect(html).toContain('api("/admin/policies", { method: "POST", body })');
+    expect(html).toContain("`/admin/policies/${encodeURIComponent(policy.policyId)}`, { method: \"PATCH\"");
+    expect(html).toContain("`/admin/policies/${encodeURIComponent(policyId)}`, { method: \"DELETE\", password }");
+    expect(html).toContain("`/admin/policies/${encodeURIComponent(policyId)}/assignments`, { method: \"DELETE\"");
+    expect(html).toContain("`/admin/policies/${encodeURIComponent(policy.policyId)}/assignments`, { method: \"POST\"");
+    // A field per limit (4 numerics) plus the allowedVariants MULTI-select from the catalog.
+    expect(html).toContain('id="pf-${key}"'); // the per-limit inputs are generated per key
+    expect(html).toContain("POLICY_NUMERIC.map(([key, label, hint])");
+    expect(html).toContain('<select id="pf-variants" multiple');
+    // Inline error slots on the policy form, the group-assign picker and the detail page.
+    for (const id of ["pf-name-err", "pf-err", "gp-err", "pa-err", "pd-err"]) {
+      expect(html, id).toContain(`id="${id}"`);
+    }
+    // Assignment bodies are {groupId} only (group-only targets).
+    expect(html).toContain("body: { groupId: group.groupId }");
+    expect(html).toContain("body: { groupId }");
+    expect(html).not.toContain("targets:");
+  });
+
+  test("the '*' wildcard variant option is offered by both enroll forms", () => {
+    expect([...html.matchAll(/option\("\*", "\* \(all variants\)"/g)].length).toBe(2);
+  });
+
+  test("the user drawer shows the loop membership line and the flat policy sources", () => {
+    expect(html).toContain("<h3>Loop membership</h3>");
+    expect(html).toContain('api("/admin/tenant-loop/enrollments")');
+    // Effective-policy sources are PolicySourceRef[] (policyName + via group) — read view,
+    // no per-user assignment UI.
+    expect(html).toContain("pol.sources ?? []");
+    expect(html).toContain("via ${esc(s.via)}");
+    expect(html).not.toContain("pol.sources?.[");
+  });
+
+  test("empty state explains the covered-only registry; kill-switch banner names the env var", () => {
+    expect(html).toContain("no covered tenants in the export");
+    expect(html).toContain("disabled via CO_WORKSPACE_TENANT_LOOP_DISABLED");
+    // The banner is driven by the typed error code, not by status alone.
+    expect(html).toContain('body?.code !== "tenant_loop_disabled"');
   });
 
   test("admin.js still parses as plain JS and the page loads it as a module", () => {
@@ -119,43 +197,47 @@ describe("(a) tenant-loop section markup + fetch paths", () => {
   });
 });
 
-describe("(b) SEC-09: mutating tenant-loop calls send x-requested-with", () => {
+describe("(b) SEC-09: CSRF header + the round-2 reauth matrix", () => {
   test("the shared tenant-loop headers carry the CSRF header", () => {
-    const start = html.indexOf("// ── Tenant loop (design 2026-11-08");
-    const section = html.slice(start, html.indexOf("// ── end Tenant loop", start));
+    const section = tenantLoopSection();
     const def = section.match(/const authHeaders = (\{[^}]*\})/);
     expect(def, "tenant-loop authHeaders definition").not.toBeNull();
     expect(def![1]).toContain('"x-requested-with": "co-workspace"');
   });
 
-  test("every POST/PUT fetch in the tenant-loop code uses authHeaders or the header literal", () => {
-    const start = html.indexOf("// ── Tenant loop (design 2026-11-08");
-    const section = html.slice(start, html.indexOf("// ── end Tenant loop", start));
+  test("every POST/PUT raw fetch in the tenant-loop section uses authHeaders or the header literal", () => {
+    const section = tenantLoopSection();
     const mutating = fetchCalls(section).filter((c) => /method:\s*"(POST|PUT|PATCH|DELETE)"/.test(c));
-    expect(mutating.length).toBeGreaterThanOrEqual(2); // tlPost (POST) + config (PUT)
+    expect(mutating.length).toBeGreaterThanOrEqual(1); // tlPost (the upgrade POST)
     for (const call of mutating) expect(call, call.slice(0, 90)).toMatch(/authHeaders|x-requested-with/);
+  });
+
+  test("the api() transport itself sends x-requested-with and per-request x-admin-password", () => {
+    expect(html).toContain('headers["x-requested-with"] = "co-workspace"');
+    expect(html).toContain('headers["x-admin-password"] = password');
+  });
+
+  test("reauth'd verbs ask for the password before the call: enrollments PUT/DELETE, policy PATCH/assignments", () => {
+    const section = tenantLoopSection();
+    const toggle = section.slice(section.indexOf("async function tlEnrollmentAction("));
+    const ask = toggle.indexOf("await askPassword(");
+    const put = toggle.indexOf('{ method: "PUT", body: { status: next');
+    const del = toggle.indexOf('{ method: "DELETE", password }');
+    expect(ask).toBeGreaterThan(-1);
+    expect(put).toBeGreaterThan(ask);
+    expect(del).toBeGreaterThan(ask);
+    // The enrollment PUT body is COMPLETE (status + scopes + windows) — no default fill.
+    expect(toggle).toContain("body: { status: next, scopes: e.scopes, windows: e.windows, gitRemote: e.gitRemote }");
+    // Policy edit re-confirms before the PATCH.
+    const modal = html.slice(html.indexOf("async function policyModal("), html.indexOf("async function deletePolicyFlow("));
+    const editAsk = modal.indexOf("await askPassword(");
+    const patch = modal.indexOf('{ method: "PATCH"');
+    expect(editAsk).toBeGreaterThan(-1);
+    expect(patch).toBeGreaterThan(editAsk);
   });
 });
 
-describe("(c) register-form client validation (pure, app-helpers.js)", () => {
-  test("TENANT_ID_RE mirrors the gateway's regex exactly", () => {
-    expect(TENANT_ID_RE.source).toBe(SERVER_TENANT_ID_RE.source);
-    expect(TENANT_ID_RE.flags).toBe(SERVER_TENANT_ID_RE.flags);
-  });
-
-  test("validateTenantId accepts gw-<12 lowercase hex> only", () => {
-    expect(validateTenantId("gw-0123456789ab")).toBeNull();
-    for (const bad of ["", "gw-0123456789a", "gw-0123456789abc", "gw-0123456789AB", "co-0123456789ab", " gw-0123456789ab", "gw-01234567890g", undefined, 42]) {
-      expect(validateTenantId(bad as never), String(bad)).toContain("gw-");
-    }
-  });
-
-  test("the register handler validates the id before posting", () => {
-    const submit = html.slice(html.indexOf('querySelector("#tl-reg-submit")'));
-    expect(submit.indexOf("validateTenantId(id)")).toBeGreaterThan(-1);
-    expect(submit.indexOf("validateTenantId(id)")).toBeLessThan(submit.indexOf('tlPost(id, "register"'));
-  });
-
+describe("(c) form validators (pure, app-helpers.js)", () => {
   test("LOOP_SCOPE_KEYS are the four server scope keys", () => {
     expect([...LOOP_SCOPE_KEYS].sort()).toEqual(["backportReview", "nightlyFleet", "upgrade", "upstreamFile"]);
   });
@@ -175,21 +257,46 @@ describe("(c) register-form client validation (pure, app-helpers.js)", () => {
     expect(validateLoopWindowsClient([ok])).toContain("JSON object");
   });
 
-  test("validateLoopConfigJson preflights the PUT /admin/tenant-loop/config body", () => {
-    const good = validateLoopConfigJson(JSON.stringify({ group: "team-a", designatedUsers: ["alice"], scopes: { upgrade: true } }));
-    expect(good).toEqual({ ok: true, value: { group: "team-a", designatedUsers: ["alice"], scopes: { upgrade: true } } });
-    expect(validateLoopConfigJson("{}")).toEqual({ ok: true, value: {} }); // group defaults server-side
-    expect(validateLoopConfigJson("{not json")).toEqual({ ok: false, error: "config must be valid JSON" });
-    expect(validateLoopConfigJson("[]")).toEqual({ ok: false, error: "config must be a JSON object" });
-    expect(validateLoopConfigJson(JSON.stringify({ group: "bad group!" })).ok).toBe(false);
-    expect(validateLoopConfigJson(JSON.stringify({ designatedUsers: [""] })).ok).toBe(false);
-    expect(validateLoopConfigJson(JSON.stringify({ scopes: { deploy: true } }))).toEqual({
-      ok: false,
-      error: 'unknown scope key "deploy" (allowed: upgrade, upstreamFile, backportReview, nightlyFleet)',
+  test("validatePolicyLimits serializes the 5-limit policy form (mirror of validateGroupPolicy)", () => {
+    // Unset fields are omitted; valid integers pass through.
+    expect(validatePolicyLimits({}, [])).toEqual({ ok: true, limits: {} });
+    expect(validatePolicyLimits({ maxTenants: "5", maxTurns: "", maxTokens: null }, [])).toEqual({ ok: true, limits: { maxTenants: 5 } });
+    expect(validatePolicyLimits({ maxTurns: 12, maxPrincipalTokens: "3000000" }, ["co-develop", "co-develop"])).toEqual({
+      ok: true,
+      limits: { maxTurns: 12, maxPrincipalTokens: 3_000_000, allowedVariants: ["co-develop"] },
     });
-    expect(validateLoopConfigJson(JSON.stringify({ scopes: { upgrade: "yes" } }))).toEqual({ ok: false, error: 'scope "upgrade" must be a boolean' });
-    const win = validateLoopConfigJson(JSON.stringify({ windows: { tz: "UTC", days: [1], start: "09:00", end: "09:00" } }));
-    expect(win).toEqual({ ok: false, error: "windows.start and windows.end must differ" });
+    // A policy can only tighten: 0, negatives, non-integers and junk are refused.
+    // (Whitespace-only reads as "unset" — the form treats it as an empty field.)
+    for (const bad of ["0", "-1", "2.5", "abc"]) {
+      expect(validatePolicyLimits({ maxTenants: bad }, []).ok, bad).toBe(false);
+    }
+    expect(validatePolicyLimits({ maxTenants: " " }, [])).toEqual({ ok: true, limits: {} });
+    expect(validatePolicyLimits({}, ["co-develop"]).ok).toBe(true);
+    expect(validatePolicyLimits({}, [" "]).ok).toBe(false);
+    expect(validatePolicyLimits({ maxTokens: "3" }, [])).toEqual({ ok: true, limits: { maxTokens: 3 } });
+    // The error names the offending field for the inline slot.
+    expect(validatePolicyLimits({ maxPrincipalTokens: "0" }, []).error).toContain("maxPrincipalTokens");
+  });
+
+  test("buildEnrollmentPayload emits COMPLETE scopes/windows and mirrors the gitRemote rule", () => {
+    const windows = { tz: "Asia/Seoul", days: [1, 3], start: "09:00", end: "18:00" };
+    const full = buildEnrollmentPayload({ upgrade: true }, windows, "local-only", "");
+    expect(full).toEqual({
+      ok: true,
+      value: {
+        // Every scope key is present (no default fill server-side): unchecked = false.
+        scopes: { upgrade: true, upstreamFile: false, backportReview: false, nightlyFleet: false },
+        windows: { tz: "Asia/Seoul", days: [1, 3], start: "09:00", end: "18:00" },
+        gitRemote: null,
+      },
+    });
+    const url = buildEnrollmentPayload({}, windows, "url", " https://git.example.team/team/project.git ");
+    expect(url.ok).toBe(true);
+    if (url.ok) expect(url.value.gitRemote).toBe("https://git.example.team/team/project.git");
+    // A remote URL is required when the choice is 'url'; windows errors surface verbatim.
+    expect(buildEnrollmentPayload({}, windows, "url", "  ").error).toContain("remote URL");
+    expect(buildEnrollmentPayload({}, { ...windows, end: "09:00" }, "local-only", "").error).toContain("must differ");
+    expect(buildEnrollmentPayload({}, { ...windows, days: [] }, "local-only", "").error).toContain("windows.days");
   });
 });
 

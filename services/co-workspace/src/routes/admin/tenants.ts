@@ -4,6 +4,7 @@
 
 import { requireAdminReady, requireAdminReauth } from "../../access";
 import { deleteTenantData } from "../../lifecycle";
+import { exportTenantLoopRegistry } from "../../tenant-loop";
 import { HttpError, jsonResponse, readJsonBody } from "../../http";
 import type { GatewayState } from "../../state";
 import type { TenantRecord } from "../../tenant";
@@ -106,6 +107,9 @@ export async function handleAdminTenants(state: GatewayState, req: Request, ctx:
       state.audit.record(caller.principal, AUDIT_ACTION[bulkAction], id);
       ok += 1;
     }
+    // Export trigger (round-2 amendment C): tenant delete (and its inverse, archive, per the
+    // amendment's trigger list) rewrites the loop registry.
+    exportTenantLoopRegistry(state);
     state.audit.record(caller.principal, `tenant.bulk.${bulkAction}`, undefined, `ok=${ok} failed=${failed.length}`);
     return jsonResponse({ ok, failed });
   }

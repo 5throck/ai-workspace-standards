@@ -1,0 +1,57 @@
+schemaVersion: 1
+id: T-20261111-001
+kind: manual
+title: >-
+  Admin console round 2 — unit-model amendment + v4 implementation: on
+  2026-11-09 the user redefined the management unit after plan approval —
+  policies attach to GROUPS ONLY (no per-user targets); loop_enrollments keyed
+  (group_id, variant) with '*' wildcard; TenantRecord
+  loopStatus/loopGroup/loopOverride/loopGitRemote deprecated and never read
+  (per-tenant exceptions/registrations removed; uncovered tenants fail-closed
+  not-exported); multi-enrollment resolution = strictest scopes (per-key AND) +
+  window intersection — an empty or non-contiguous intersection omits the tenant
+  from the export (fail-closed) with audit row
+  tenant.loop.export.window_unrepresentable and an explicit reason in
+  preview/upgrade-403; co-governance ACL: governing = ALL active enrollment
+  groups covering the tenant, operators = loop_operators of any covering group,
+  audit attribution = sorted group set, no user-enrollments,
+  assertTenantLoopAllowed (src/access.ts:329-351) rewritten onto loop_operators
+  in the same commit as the migration (no designatedUsers fallback).
+  Review-ratified: v4 up() wrapped in db.transaction (runner
+  src/migrations.ts:138-157 has no per-step tx); migration declared ONE-WAY
+  (downgrade loses v4 data; recovery = backup restore); reauth matrix (policy
+  create=no but inline-assignments 409; read=no;
+  PATCH/delete/assign/unassign=yes; all audited old+new); enrollment PUT/DELETE
+  = admin+reauth only; PUT /admin/groups/:id/policy becomes 410 Gone; delete
+  cascades (group/user delete cleans
+  policy_assignments/loop_enrollments/loop_operators — group-id reuse
+  inheritance escalation); policies.name UNIQUE with migration name suffixes;
+  limits = the 5 GroupPolicy fields (src/policy.ts:13-19); export triggers =
+  enrollment changes + group member changes + tenant delete paths (no
+  owner-change route exists); preview = requireAdminReady. Design doc amended:
+  docs/designs/2026-11-09-gw-admin-console-round2-plan.md (unit-model amendment
+  section + SUPERSEDED markers, worktree 8943d3d16); round-1 spec
+  docs/designs/2026-11-09-gw-admin-console-design.md registered implemented (PRs
+  #1938, #1939). Phases: (1) migration v4 + UserStore methods + resolvers + ACL
+  rewrite; (2) group-create fix + policies/enrollment routes + export triggers;
+  (3) console UI (Groups tabs, Policies CRUD, Tenant Loop rebuild); (4) tests
+  (v4 migration on v3 fixture, resolution matrices, export schema unchanged, ACL
+  regression, UI pins); (5) security review (assignment escalation, enrollment
+  ACL, export integrity); (6) QA: tests + tsc + audit + live-DB dry-run + /sync
+  + redeploy after user go.
+priority: high
+status: running
+attempts: 0
+created_at: '2026-11-11T00:42:25.877+09:00'
+history:
+  - at: '2026-11-11T00:42:25.877+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-11T00:43:36.960+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-11T00:43:36.979+09:00'
+    from: waiting
+    to: running
+result: null
+error: null

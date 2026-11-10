@@ -4,6 +4,12 @@
  * refuses to open (downgrade guard); the legacy users.ts ad-hoc schema block (PII-safe
  * columns + email-NOT-NULL rebuild) migrates with identical end state. Fixtures are
  * mkdtempSync + absolute tmpdir roots only (T-20261104-003 discipline).
+ *
+ * v4 (2026-11-11, round-2 unit model — docs/designs/2026-11-09-gw-admin-console-round2-plan.md):
+ * the v3-slice fixture seeds loop groups with designatedUsers + groups.policy rows, the full
+ * runner lifts them into named policies (group-only assignments), (group_id, '*') loop
+ * enrollments and loop operators, and NULLs the deprecated blob column. v4 is ONE-WAY: the
+ * step runs inside one transaction and there is no downgrade path (recovery = backup).
  */
 
 import { describe, expect, test } from "bun:test";
@@ -94,6 +100,181 @@ describe("runMigrations — versioned runner", () => {
       } finally {
         probe.close();
       }
+    } finally {
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    }
+  });
+});
+
+describe("migration v4 — round-2 unit model (named policies + enrollments, ONE-WAY)", () => {
+  /** Build a genuine v3 database and seed the pre-v4 shapes: general groups carrying
+   * policy blobs, loop groups with designatedUsers (some with scopes/windows, some bare),
+   * the defensive loop-group-with-policy case, and a policy-name collision pair. */
+  function v3Fixture(db: Database): void {
+    db.exec(`CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT UNIQUE, name TEXT NOT NULL, principal TEXT UNIQUE NOT NULL,
+      password_hash TEXT, google_sub TEXT, role TEXT NOT NULL DEFAULT 'user', created_at TEXT NOT NULL, deleted_at TEXT);`);
+    db.exec("CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires_at TEXT NOT NULL);");
+    db.exec("CREATE TABLE groups (group_id TEXT PRIMARY KEY, name TEXT NOT NULL, loop_config TEXT NOT NULL);");
+    db.exec("CREATE TABLE user_groups (group_id TEXT NOT NULL, principal TEXT NOT NULL, PRIMARY KEY (group_id, principal));");
+    runMigrations(db, MIGRATION_STEPS.filter((s) => s.version <= 3));
+    // A general group with a policy blob (the round-1 shape).
+    db.exec(`INSERT INTO groups (group_id, name, loop_config, kind, policy, created_at)
+      VALUES ('team-a', 'Team A', '{"designatedUsers":[]}', 'general', '{"maxTurns":3}', '2026-11-01T00:00:00.000Z')`);
+    // A SECOND group with the SAME name → the migrated policy names must collide and suffix.
+    db.exec(`INSERT INTO groups (group_id, name, loop_config, kind, policy, created_at)
+      VALUES ('team-a2', 'Team A', '{"designatedUsers":[]}', 'general', '{"maxTenants":2}', '2026-11-01T00:00:00.000Z')`);
+    // A loop group with scopes/windows and designatedUsers.
+    db.exec(`INSERT INTO groups (group_id, name, loop_config, kind, policy, created_at)
+      VALUES ('loop-a', 'Loop A', '{"designatedUsers":["alice","bob"],"scopes":{"upgrade":true},"windows":{"tz":"UTC","days":[1],"start":"09:00","end":"17:00"}}', 'loop', NULL, '2026-11-01T00:00:00.000Z')`);
+    db.exec(`INSERT INTO user_groups (group_id, principal) VALUES ('loop-a', 'alice')`);
+    // A loop group with a BARE loop_config (no scopes/windows → the defaults materialize).
+    db.exec(`INSERT INTO groups (group_id, name, loop_config, kind, policy, created_at)
+      VALUES ('loop-b', 'Loop B', '{"designatedUsers":["carol"]}', 'loop', NULL, '2026-11-01T00:00:00.000Z')`);
+    // Defensive case: a loop group that (against round-1 M1) carries a policy blob.
+    db.exec(`INSERT INTO groups (group_id, name, loop_config, kind, policy, created_at)
+      VALUES ('loop-c', 'Loop C', '{"designatedUsers":["dave"]}', 'loop', '{"maxTokens":9}', '2026-11-01T00:00:00.000Z')`);
+    // A corrupt policy blob → degrades to its valid subset, never loses the row.
+    db.exec(`INSERT INTO groups (group_id, name, loop_config, kind, policy, created_at)
+      VALUES ('team-x', 'Team X', '{"designatedUsers":[]}', 'general', 'not-json{', '2026-11-01T00:00:00.000Z')`);
+  }
+
+  test("v3 slice → v4: policies created+assigned, enrollments with '*', operators mapped, blob NULLed, kind general", () => {
+    const root = tempRoot("v4-data");
+    try {
+      const db = new Database(join(root, "users.db"));
+      v3Fixture(db);
+      expect(runMigrations(db)).toBe(1); // only v4 remains
+      const v = db.query("PRAGMA user_version").get() as { user_version: number };
+      expect(v.user_version).toBe(MIGRATION_HEAD);
+
+      // New tables exist with the declared columns.
+      const policyCols = (db.query("PRAGMA table_info(policies)").all() as Array<{ name: string }>).map((c) => c.name);
+      expect(policyCols).toEqual(["policy_id", "name", "description", "limits", "created_at", "updated_at"]);
+      const assignCols = (db.query("PRAGMA table_info(policy_assignments)").all() as Array<{ name: string }>).map((c) => c.name);
+      expect(assignCols).toEqual(["policy_id", "target_kind", "target_id"]);
+      const enrollCols = (db.query("PRAGMA table_info(loop_enrollments)").all() as Array<{ name: string }>).map((c) => c.name);
+      expect(enrollCols).toEqual(["group_id", "variant", "status", "scopes", "windows", "git_remote", "enrolled_at"]);
+      const opCols = (db.query("PRAGMA table_info(loop_operators)").all() as Array<{ name: string }>).map((c) => c.name);
+      expect(opCols).toEqual(["group_id", "principal"]);
+
+      // Policies: named "<group name> limits" with numeric suffixes on collision; the
+      // defensive loop-c policy migrated too; the corrupt blob degraded to {} (no opinions).
+      const policies = db.query("SELECT name, limits FROM policies ORDER BY name ASC").all() as Array<{ name: string; limits: string }>;
+      expect(policies.map((p) => p.name)).toEqual(["Loop C limits", "Team A limits", "Team A limits 2", "Team X limits"]);
+      expect(JSON.parse(policies[0].limits)).toEqual({ maxTokens: 9 });
+      expect(JSON.parse(policies[1].limits)).toEqual({ maxTurns: 3 });
+      expect(JSON.parse(policies[2].limits)).toEqual({ maxTenants: 2 });
+      expect(JSON.parse(policies[3].limits)).toEqual({});
+
+      // Assignments: group-only, one per migrated blob.
+      const assignments = db
+        .query("SELECT pa.target_kind, pa.target_id, p.name FROM policy_assignments pa JOIN policies p ON p.policy_id = pa.policy_id ORDER BY pa.target_id")
+        .all() as Array<{ target_kind: string; target_id: string; name: string }>;
+      expect(assignments).toEqual([
+        { target_kind: "group", target_id: "loop-c", name: "Loop C limits" },
+        { target_kind: "group", target_id: "team-a", name: "Team A limits" },
+        { target_kind: "group", target_id: "team-a2", name: "Team A limits 2" },
+        { target_kind: "group", target_id: "team-x", name: "Team X limits" },
+      ]);
+
+      // Enrollments: every loop group → ACTIVE (group_id, '*') with its scopes/windows; the
+      // bare loop-b materializes the pre-v4 defaults; git_remote defaults to local-only.
+      const enrollments = db
+        .query("SELECT group_id, variant, status, scopes, windows, git_remote FROM loop_enrollments ORDER BY group_id")
+        .all() as Array<{ group_id: string; variant: string; status: string; scopes: string; windows: string; git_remote: string }>;
+      expect(enrollments.map((e) => [e.group_id, e.variant, e.status, e.git_remote])).toEqual([
+        ["loop-a", "*", "active", "local-only"],
+        ["loop-b", "*", "active", "local-only"],
+        ["loop-c", "*", "active", "local-only"],
+      ]);
+      expect(JSON.parse(enrollments[0].scopes)).toEqual({ upgrade: true, upstreamFile: false, backportReview: false, nightlyFleet: false });
+      expect(JSON.parse(enrollments[0].windows)).toEqual({ tz: "UTC", days: [1], start: "09:00", end: "17:00" });
+      expect(JSON.parse(enrollments[1].scopes)).toEqual({ upgrade: false, upstreamFile: false, backportReview: false, nightlyFleet: false });
+      expect(JSON.parse(enrollments[1].windows)).toEqual({ tz: "Asia/Seoul", days: [0, 1, 2, 3, 4, 5, 6], start: "00:00", end: "23:59" });
+
+      // Operators: designatedUsers → loop_operators.
+      const operators = db.query("SELECT group_id, principal FROM loop_operators ORDER BY group_id, principal").all();
+      expect(operators).toEqual([
+        { group_id: "loop-a", principal: "alice" },
+        { group_id: "loop-a", principal: "bob" },
+        { group_id: "loop-b", principal: "carol" },
+        { group_id: "loop-c", principal: "dave" },
+      ]);
+
+      // The deprecated column is NULLed and every group is kind='general'.
+      const groups = db.query("SELECT group_id, kind, policy FROM groups ORDER BY group_id").all();
+      expect(groups).toEqual([
+        { group_id: "loop-a", kind: "general", policy: null },
+        { group_id: "loop-b", kind: "general", policy: null },
+        { group_id: "loop-c", kind: "general", policy: null },
+        { group_id: "team-a", kind: "general", policy: null },
+        { group_id: "team-a2", kind: "general", policy: null },
+        { group_id: "team-x", kind: "general", policy: null },
+      ]);
+      db.close();
+    } finally {
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    }
+  });
+
+  test("v4 is transactional: a mid-step failure leaves the database at v3 with no half-applied tables", () => {
+    const root = tempRoot("v4-atomic");
+    try {
+      const db = new Database(join(root, "users.db"));
+      v3Fixture(db);
+      // Sabotage: a policies table already exists WITHOUT the expected shape, so v4's first
+      // CREATE TABLE IF NOT EXISTS is a no-op and the INSERT hits missing columns → the
+      // transaction (and only it) rolls back.
+      db.exec("CREATE TABLE policies (bogus TEXT)");
+      expect(() => runMigrations(db)).toThrow();
+      const v = db.query("PRAGMA user_version").get() as { user_version: number };
+      expect(v.user_version).toBe(3); // version stamp not written
+      const leftovers = db.query("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('loop_enrollments','loop_operators','policy_assignments')").all();
+      expect(leftovers).toEqual([]); // the transactional DDL rolled back
+      db.close();
+    } finally {
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    }
+  });
+
+  test("one-way guard message: downgrading below v4 loses data (recovery = backup restore)", () => {
+    const root = tempRoot("v4-oneway");
+    try {
+      const db = new Database(join(root, "users.db"));
+      v3Fixture(db);
+      let error: MigrationDowngradeError | null = null;
+      db.exec(`PRAGMA user_version = ${MIGRATION_HEAD + 1}`);
+      db.close();
+      const probe = new Database(join(root, "users.db"));
+      try {
+        runMigrations(probe);
+      } catch (err) {
+        error = err as MigrationDowngradeError;
+      } finally {
+        probe.close();
+      }
+      expect(error).toBeInstanceOf(MigrationDowngradeError);
+      expect(error?.message).toContain("ONE-WAY");
+      expect(error?.message).toContain("pre-migration backup");
+    } finally {
+      rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    }
+  });
+
+  test("a fresh database runs v1→v4 (head) in one pass", () => {
+    const root = tempRoot("v4-fresh");
+    try {
+      const db = new Database(join(root, "users.db"));
+      db.exec(`CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT UNIQUE, name TEXT NOT NULL, principal TEXT UNIQUE NOT NULL,
+        password_hash TEXT, google_sub TEXT, role TEXT NOT NULL DEFAULT 'user', created_at TEXT NOT NULL, deleted_at TEXT);`);
+      db.exec("CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires_at TEXT NOT NULL);");
+      expect(runMigrations(db)).toBe(MIGRATION_STEPS.length);
+      const v = db.query("PRAGMA user_version").get() as { user_version: number };
+      expect(v.user_version).toBe(MIGRATION_HEAD);
+      for (const table of ["policies", "policy_assignments", "loop_enrollments", "loop_operators"]) {
+        expect(db.query(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get(table)).toBeDefined();
+      }
+      db.close();
     } finally {
       rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
