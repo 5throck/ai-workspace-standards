@@ -16,12 +16,15 @@ title: >-
   assertion vs template behavior change), then design. Refs: co-deck PR #217
   leftovers.
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-10T21:15:58.959+09:00'
 history:
   - at: '2026-11-10T21:15:58.959+09:00'
     from: null
     to: backlog
+  - at: '2026-11-10T21:53:53.226+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

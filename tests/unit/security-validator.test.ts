@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Security Validator Test Suite
- * @version 1.0.2
+ * @version 1.1.0
  *
  * Comprehensive security tests for extends chain validation
  * Implements A-11 security requirements testing
@@ -11,9 +11,21 @@
  * - Invalid override sections
  * - Malicious content injection
  * - Boundary cases
+ *
+ * v1.1.0 (2026-11-10, spec docs/designs/2026-11-10-delivery-gating-hardening-design.md
+ * §4 C-D(b), PR-1): hermetic workspace-root pin. The module-level root was
+ * `process.cwd()`, so the suite passed at the workspace-root cwd and failed
+ * with a project as cwd; the single integration case below additionally
+ * exercised the default (cwd-detecting) validator. The root is now derived
+ * from this test file's own location (walk up to the directory containing
+ * AGENTS.md — the C-C test-authoring contract) and the integration case pins
+ * workspace_root explicitly, so the suite is green from any cwd.
  */
 
 import { describe, test, expect } from 'bun:test';
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   SecurityValidator,
   validateExtendsSecurity,
@@ -26,7 +38,14 @@ import {
 // Test Configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
-const workspaceRoot = process.cwd();
+// Hermetic root (C-D(b)): derive from the test file's own location instead of
+// process.cwd() — walk up to the directory containing AGENTS.md, failing
+// closed to the test file's directory when no marker is found.
+let derivedRoot = dirname(fileURLToPath(import.meta.url));
+while (!existsSync(join(derivedRoot, 'AGENTS.md')) && dirname(derivedRoot) !== derivedRoot) {
+  derivedRoot = dirname(derivedRoot);
+}
+const workspaceRoot = derivedRoot;
 const testValidator = new SecurityValidator({
   workspace_root: workspaceRoot,
   strict_mode: true
@@ -443,9 +462,13 @@ describe('Boundary Cases', () => {
 
 describe('Integration Tests', () => {
   test('should validate complete extends chain with security', () => {
+    // C-D(b): pin workspace_root explicitly — the un-pinned default validator
+    // resolves its boundary from process.cwd(), which is environment-sensitive
+    // in the nested Projects/ layout (this case failed with a project as cwd).
     const result = validateExtendsSecurity(
       'agents/pm.md',
-      `${workspaceRoot}`
+      `${workspaceRoot}`,
+      { workspace_root: workspaceRoot }
     );
 
     expect(result.valid).toBe(true);
