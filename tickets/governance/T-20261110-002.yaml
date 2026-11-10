@@ -21,12 +21,36 @@ title: >-
   parity gate and the AGENTS.md-adjacent doctrine files. Refs: DEC-20261110-01,
   docs/designs/2026-11-10-meeting-lineage-hygiene-design.md.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-10T08:44:17.962+09:00'
 history:
   - at: '2026-11-10T08:44:17.962+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T11:36:47.649+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T11:36:47.668+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T11:36:47.685+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented per
+  docs/designs/2026-11-10-meeting-participation-boilerplate-design.md
+  (DEC-20261110-02, user-approved). Root PR #1950 (merge a8295662):
+  sentence-prefix swap across root agents (6) + template agents trees (104, 13
+  dirs) + co-architect .claude/agents mirrors regenerated via
+  sync-agent-mirrors.ts (17 swapped + 7 SSOT catch-up); grep pin test added (5
+  tests). Project phase: 16 repos, 161 instruction + 135 mirrors regenerated via
+  per-repo sync-agent-mirrors + dev-sync 4.61 parity; ALL PRs MERGED
+  (#246/#106/#396/#122/#214/#84/#208/#71/#73/#27/#40/#856/#26/#184/#106/#43).
+  Pin end-state PASS (0 OLD; 161/135 parity exact); fleet grep zero outside the
+  3 frozen records; co-safety untouched. ADR-0043 correction annotated:
+  templates/*/agents are scripted surfaces, only .claude/agents are generator
+  output. Full occurrence-map matched design. co-newbiz collision with a live
+  session repaired via isolated-worktree cherry-pick (their PR #855 restored;
+  their checkout needs pull --rebase next push).
 error: null
