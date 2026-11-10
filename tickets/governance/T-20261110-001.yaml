@@ -16,12 +16,30 @@ title: >-
   the 500 response before test end), or split the suite. File-time-budget
   mechanism already exists (T-20261106-008) — extend rather than invent.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-10T06:54:03.702+09:00'
 history:
   - at: '2026-11-10T06:54:03.702+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-10T08:39:55.586+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-10T08:39:55.605+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-10T08:39:55.622+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed and merged via PR #1946 (merge 88056647):
+  co-workspace-admin-console.test.ts joined FILE_TIME_BUDGETS (suite 300s / test
+  45s, ticket-evidence policy; healthy win32 ceiling <120s) and the M5 import
+  test drains the async hash settle queue inside its awaited scope so the
+  simulated throw is always consumed by the 500 handler (no assertion changed).
+  test-runner v1.11.0, test file v1.1.0, lockstep records. Verified by
+  windows-latest CI on the PR (success incl. windows job). Design
+  docs/designs/2026-11-10-workspace-console-ci-flake-design.md (spec registered,
+  status implemented).
 error: null
