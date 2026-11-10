@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-10T12:23:19.505Z
+**Generated**: 2026-11-10T15:00:14.460Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -138,7 +138,7 @@
 | external-deps.ts | 1.0.0 | scripts/external-deps.ts | fs, path |
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | fleet-list.ts | 1.0.0 | scripts/fleet-list.ts | path |
-| fleet-script-parity.ts | 1.1.0 | scripts/fleet-script-parity.ts | crypto, fs, path |
+| fleet-script-parity.ts | 1.2.0 | scripts/fleet-script-parity.ts | crypto, fs, path |
 | gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun, fs |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | fs, path |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
