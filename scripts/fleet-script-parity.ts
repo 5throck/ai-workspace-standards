@@ -237,10 +237,7 @@ export function orphanSubjectCandidates(testPath: string): string[] {
  * itself project-only are legitimate project-local tests, not orphans; a
  * tracked X.test.ts is a compared pair, not an orphan.
  */
-export function findOrphanTests(
-  canonical: Record<string, string>,
-  observed: Record<string, string>,
-): string[] {
+export function findOrphanTests(canonical: Record<string, string>, observed: Record<string, string>): string[] {
   const out: string[] = [];
   for (const f of Object.keys(observed).sort()) {
     if (f in canonical) continue;
@@ -352,10 +349,7 @@ function observeTree(dir: string, filterVariantExts: boolean): ObservedTree {
  * null when no marker declares one.
  */
 export function resolveProjectVariant(projectDir: string): string | null {
-  const markers = [
-    join(projectDir, "template-version.txt"),
-    join(projectDir, ".claude", "template-version.txt"),
-  ];
+  const markers = [join(projectDir, "template-version.txt"), join(projectDir, ".claude", "template-version.txt")];
   for (const marker of markers) {
     try {
       const raw = readFileSync(marker, "utf-8").match(/^variant=(.*)$/m)?.[1];
@@ -379,7 +373,13 @@ function localPatchIdMap(projectDir: string, pathPrefix: string): Record<string,
   for (const finding of scanLocalPatches(projectDir)) {
     if (!finding.file.startsWith(pathPrefix)) continue;
     const rel = finding.file.slice(pathPrefix.length);
-    const ids = map[rel] ?? (map[rel] = []);
+    // typed-let separate-assignment shape (noAssignInExpressions — the
+    // scripts/audit.ts ~1715 rewrite precedent)
+    let ids: string[] | undefined = map[rel];
+    if (ids === undefined) {
+      ids = [];
+      map[rel] = ids;
+    }
     if (!ids.includes(finding.id)) ids.push(finding.id);
   }
   return map;
@@ -486,7 +486,10 @@ function main(): void {
       variant,
       common: commonSummary,
       variantSet: variantSummary,
-      rows: { common: commonRows.filter((r) => r.status !== "match"), variant: variantRows.filter((r) => r.status !== "match") },
+      rows: {
+        common: commonRows.filter((r) => r.status !== "match"),
+        variant: variantRows.filter((r) => r.status !== "match"),
+      },
     });
   }
 
