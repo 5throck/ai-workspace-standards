@@ -22,7 +22,8 @@
  * All assertions are byte-verbatim from tests/unit/upgrade-decision-log.test.ts
  * v1.4.0 (the extraction moves describes, never expectations).
  *
- * @version 1.1.0 (2026-11-11: resolveUnbaselinedDisposition four-cell matrix + new verdict severities — T-20261110-009/012)
+ * @version 1.2.0 (2026-11-11: overwrite-protection PR-A — E1 EVOLVED_PRESERVE verdict matrix, E2 marker counting/markerLoss, supersetCheck)
+ * v1.1.0 (2026-11-11: resolveUnbaselinedDisposition four-cell matrix + new verdict severities — T-20261110-009/012)
  */
 import { describe, test, expect } from 'bun:test';
 
@@ -30,14 +31,19 @@ import {
   DECISION_SEVERITY_CONTRACT,
   backfillStubFrontmatter,
   baselineKeyFor,
+  LOCAL_PATCH_MARKER_RE,
   classifyProjectState,
+  countLocalPatchMarkers,
   globToRegExp,
   isDeliveredDiff,
   lifecyclelessText,
   manifestHasUnresolvedErrors,
+  markerLoss,
+  markerLossDetail,
   resolveDisposition,
   resolveUnbaselinedDisposition,
   sha256Hex,
+  supersetCheck,
   tombstoneGuard,
   type DecisionBaseline,
 } from '../../scripts/lib/upgrade-policy.ts';
@@ -122,7 +128,7 @@ describe('upgrade-policy decision-log helpers (sync-overwrite-policy)', () => {
     expect(fired.severity).toBe('ERROR');
   });
 
-  test('resolveDisposition: ERROR default-skip, adopt flip, EVOLVED deliver, non-evolved pass-through', () => {
+  test('resolveDisposition: ERROR default-skip, adopt flip, EVOLVED_PRESERVE skip, non-evolved pass-through', () => {
     const evolvedChanged = { state: 'PROJECT_EVOLVED' as const, matchesDeliverable: false, templateChanged: true };
     const evolvedUnchanged = { state: 'PROJECT_EVOLVED' as const, matchesDeliverable: false, templateChanged: false };
     // Default: CONFLICT (ERROR), delivery skipped.
@@ -138,10 +144,10 @@ describe('upgrade-policy decision-log helpers (sync-overwrite-policy)', () => {
       mode: 'adopt-template', matches: (rel) => globToRegExp('docs/other.md').test(rel),
     });
     expect(narrowed.deliver).toBe(false);
-    // Template content unchanged → deliver as today, EVOLVED (WARN).
+    // Template content unchanged → E1 (DEC-20261111-01 D1): EVOLVED_PRESERVE (WARN), SKIP.
     const unchanged = resolveDisposition(evolvedUnchanged, 'docs/x.md', { mode: 'default' });
-    expect(unchanged.deliver).toBe(true);
-    expect(unchanged.verdict).toBe('EVOLVED');
+    expect(unchanged.deliver).toBe(false);
+    expect(unchanged.verdict).toBe('EVOLVED_PRESERVE');
     expect(unchanged.severity).toBe('WARN');
     // Non-evolved states pass through (the caller logs its own verdict).
     const untouched = resolveDisposition({ state: 'UNTOUCHED', matchesDeliverable: false, templateChanged: true }, 'docs/x.md', { mode: 'default' });
@@ -306,5 +312,124 @@ describe('resolveUnbaselinedDisposition (T-20261110-009 A1 — marker x adopt-gr
     expect(DECISION_SEVERITY_CONTRACT.UNVERSIONED_SKIP).toBe('WARN');
     expect(DECISION_SEVERITY_CONTRACT.BEHAVIOR_REGRESSION).toBe('ERROR');
     expect(DECISION_SEVERITY_CONTRACT.VERIFY_SKIPPED).toBe('INFO');
+  });
+});
+
+describe('E1 EVOLVED_PRESERVE verdict matrix (DEC-20261111-01 D1, design §4.2)', () => {
+  const none = { mode: 'default' as const };
+  const adopt = { mode: 'adopt-template' as const, matches: () => true };
+  const narrow = { mode: 'adopt-template' as const, matches: (rel: string) => rel === 'docs/other.md' };
+  const cell = (state: 'UNTOUCHED' | 'IN_SYNC' | 'PROJECT_EVOLVED' | 'NO_BASELINE', templateChanged: boolean) =>
+    ({ state, matchesDeliverable: state === 'IN_SYNC', templateChanged });
+
+  test('PROJECT_EVOLVED + template unchanged + no grant → EVOLVED_PRESERVE (WARN), SKIP', () => {
+    const o = resolveDisposition(cell('PROJECT_EVOLVED', false), 'docs/x.md', none);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([false, 'EVOLVED_PRESERVE', 'WARN']);
+    expect(o.detail).toContain('baseline kept');
+  });
+  test('PROJECT_EVOLVED + template unchanged + adopt grant → ADOPT (INFO), deliver', () => {
+    const o = resolveDisposition(cell('PROJECT_EVOLVED', false), 'docs/x.md', adopt);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'ADOPT', 'INFO']);
+  });
+  test('a glob grant that does not cover the path still preserves', () => {
+    const o = resolveDisposition(cell('PROJECT_EVOLVED', false), 'docs/x.md', narrow);
+    expect([o.deliver, o.verdict]).toEqual([false, 'EVOLVED_PRESERVE']);
+  });
+  test('PROJECT_EVOLVED + template changed: CONFLICT (ERROR) SKIP unchanged; adopt grant → ADOPT', () => {
+    const c = resolveDisposition(cell('PROJECT_EVOLVED', true), 'docs/x.md', none);
+    expect([c.deliver, c.verdict, c.severity]).toEqual([false, 'CONFLICT', 'ERROR']);
+    const a = resolveDisposition(cell('PROJECT_EVOLVED', true), 'docs/x.md', adopt);
+    expect([a.deliver, a.verdict, a.severity]).toEqual([true, 'ADOPT', 'INFO']);
+  });
+  test.each(['UNTOUCHED', 'IN_SYNC', 'NO_BASELINE'] as const)('%s passes through (caller row, deliver)', (state) => {
+    for (const changed of [true, false]) {
+      const o = resolveDisposition(cell(state, changed), 'docs/x.md', none);
+      expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'UPDATE', 'INFO']);
+    }
+  });
+  test('verdict severities: EVOLVED_PRESERVE WARN, MARKER_LOSS ERROR (joins the D3.1 ERROR set)', () => {
+    expect(DECISION_SEVERITY_CONTRACT.EVOLVED_PRESERVE).toBe('WARN');
+    expect(DECISION_SEVERITY_CONTRACT.MARKER_LOSS).toBe('ERROR');
+    expect(manifestHasUnresolvedErrors({ decisions: [{ severity: DECISION_SEVERITY_CONTRACT.MARKER_LOSS }] })).toBe(true);
+    expect(manifestHasUnresolvedErrors({ decisions: [{ severity: DECISION_SEVERITY_CONTRACT.EVOLVED_PRESERVE }] })).toBe(false);
+  });
+  test('classifier regression: a project-only edit with an unchanged template is PROJECT_EVOLVED/templateChanged=false', () => {
+    // co-deck decisions/gates.yaml shape: baseline = template bytes; project added a gate.
+    const tpl = 'gates:\n  - id: G1\n';
+    const base = { hash: sha256Hex(tpl), templateVersion: '0.0.0' };
+    const v = classifyProjectState('decisions/gates.yaml', `${tpl}  - id: DG-DECK-06\n`, tpl, base);
+    expect(v.state).toBe('PROJECT_EVOLVED');
+    expect(v.templateChanged).toBe(false);
+    expect(resolveDisposition(v, 'decisions/gates.yaml', none).verdict).toBe('EVOLVED_PRESERVE');
+  });
+});
+
+describe('E2 LOCAL-PATCH marker recognition and marker-loss predicate (DEC-20261111-01 D4, design §4.3)', () => {
+  const FORMS = [
+    '/* LOCAL-PATCH(upstream-request: U-20261105-004) */',
+    '/* LOCAL-PATCH (design: DG-DECK-06 Pretendard fallback) */',
+    '# LOCAL-PATCH(project-local): extra CI leg',
+    '<!-- LOCAL-PATCH U-20261108-002 -->',
+  ];
+  test.each(FORMS)('every marker form is recognized and counted: %s', (form) => {
+    expect(LOCAL_PATCH_MARKER_RE.test(`before\n${form}\nafter`)).toBe(true);
+    expect(countLocalPatchMarkers(`a\n${form}\nb`)).toBe(1);
+  });
+  test('count is per occurrence across forms; unmarked text counts 0', () => {
+    expect(countLocalPatchMarkers(FORMS.join('\n'))).toBe(4);
+    expect(countLocalPatchMarkers('plain text, no markers\n')).toBe(0);
+    // word boundary: a longer token is not a marker
+    expect(countLocalPatchMarkers('LOCAL-PATCHES are discussed here')).toBe(0);
+  });
+  test('markerLoss is null when the count is preserved or grows', () => {
+    expect(markerLoss(`x\n${FORMS[0]}\n`, `y\n${FORMS[1]}\n`)).toBeNull(); // replacement keeps the count (documented coarseness)
+    expect(markerLoss('x\n', `y\n${FORMS[0]}\n`)).toBeNull();
+    expect(markerLoss('', '')).toBeNull();
+  });
+  test('markerLoss reports the delta when the count drops', () => {
+    expect(markerLoss(FORMS.join('\n'), FORMS[0])).toEqual({ lost: 3, before: 4, after: 1 });
+    expect(markerLoss(FORMS[2], 'template without markers\n')).toEqual({ lost: 1, before: 1, after: 0 });
+  });
+  test('template prose that mentions the term loses nothing (count-delta, not presence)', () => {
+    const prose = 'Mark patches with `LOCAL-PATCH(upstream-request: <id>)`. LOCAL-PATCH also appears here. LOCAL-PATCH thrice.';
+    expect(markerLoss(prose, prose)).toBeNull();
+    // a project copy with one extra real marker loses exactly one
+    expect(markerLoss(`${prose}\n${FORMS[1]}`, prose)).toEqual({ lost: 1, before: 4, after: 3 });
+  });
+  test('markerLossDetail names the counts and the override', () => {
+    const d = markerLossDetail({ lost: 2, before: 3, after: 1 });
+    expect(d).toContain('3 → 1');
+    expect(d).toContain('MARKER_LOSS');
+    expect(d).toContain('--disposition adopt-template');
+  });
+  test('A1: every marker form flips an unbaselined divergence to CONFLICT (ERROR)', () => {
+    for (const form of FORMS) {
+      const marked = LOCAL_PATCH_MARKER_RE.test(form);
+      const o = resolveUnbaselinedDisposition('docs/x.md', marked, { mode: 'default' });
+      expect([o.deliver, o.verdict, o.severity]).toEqual([false, 'CONFLICT', 'ERROR']);
+    }
+  });
+});
+
+describe('E1 supersetCheck (the automated half of audit remedy R8)', () => {
+  test('passes when the deliverable carries every project-authored line', () => {
+    const base = 'a\nb\n';
+    const project = 'a\nb\nproject line\n';
+    const deliverable = 'a\nb\nproject line\ntemplate extra\n';
+    expect(supersetCheck(project, [base], deliverable)).toEqual({ ok: true, missing: [] });
+  });
+  test('fails and names the project-authored lines the deliverable lacks (U-20261105-004 false "fixed" shape)', () => {
+    const base = 'a\nb\n';
+    const project = 'a\nb\npatch hunk 1\npatch hunk 2\n';
+    const r = supersetCheck(project, [base], 'a\nb\n');
+    expect(r.ok).toBe(false);
+    expect(r.missing).toEqual(['patch hunk 1', 'patch hunk 2']);
+  });
+  test('lines present in any base text are not project-authored; blank lines and CRLF are ignored', () => {
+    const r = supersetCheck('a\r\n\r\nold vintage line\r\n', ['old vintage line\n', 'a\n'], 'a\n');
+    expect(r.ok).toBe(true);
+  });
+  test('without any base every non-blank project line is project-authored', () => {
+    expect(supersetCheck('x\ny\n', [], 'x\n')).toEqual({ ok: false, missing: ['y'] });
   });
 });

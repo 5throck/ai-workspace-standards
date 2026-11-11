@@ -1,4 +1,13 @@
-// @version 1.40.0
+// @version 1.41.0
+// v1.41.0 (2026-11-11, DEC-20261111-01 / design
+//          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md PR-A):
+//          E1 — new verdict EVOLVED_PRESERVE (WARN): resolveDisposition no longer
+//          delivers a PROJECT_EVOLVED file when the template content is unchanged
+//          since the baseline (it preserves and reports; the adopt-template grant
+//          is the only restore path). E2 — LOCAL_PATCH_MARKER_RE counts EVERY
+//          LOCAL-PATCH form; new countLocalPatchMarkers / markerLoss /
+//          markerLossDetail and verdict MARKER_LOSS (ERROR). New supersetCheck
+//          (pure; consumed by the `promoted` ack in a later PR).
 // v1.40.0 (2026-11-11, T-20261110-009 Scope A1 — DEC-20261110-04 PR-2, design
 //          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 A1):
 //          resolveUnbaselinedDisposition — a NO_BASELINE candidate whose project
@@ -1470,7 +1479,14 @@ export type DecisionVerdict =
   | "VERIFY_SKIPPED"
   // A1 (T-20261110-009): first-time delivery over unmarked, never-baselined
   // project divergence — delivered, but no longer silent.
-  | "UNBASELINED_OVERWRITE";
+  | "UNBASELINED_OVERWRITE"
+  // Overwrite-protection design E1 (DEC-20261111-01 D1): the project file evolved
+  // past the template while the template content did not change since the
+  // baseline — the engine preserves the project copy (SKIP) and reports it.
+  | "EVOLVED_PRESERVE"
+  // Overwrite-protection design E2 (DEC-20261111-01 D4): a delivery write would
+  // lower the file's LOCAL-PATCH marker count — the write is skipped.
+  | "MARKER_LOSS";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1501,6 +1517,8 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   BEHAVIOR_REGRESSION: "ERROR",
   VERIFY_SKIPPED: "INFO",
   UNBASELINED_OVERWRITE: "WARN",
+  EVOLVED_PRESERVE: "WARN",
+  MARKER_LOSS: "ERROR",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */
@@ -1633,12 +1651,14 @@ export interface DispositionOutcome {
 
 /**
  * D2 disposition resolution for a PROJECT_EVOLVED candidate under a
- * version-gated content-delivering pass:
- *  - template content unchanged since delivery → deliver as today, log
- *    EVOLVED (WARN) — "deliver only on explicit version gate as today";
+ * version-gated or hash-gated content-delivering pass (amended by the
+ * overwrite-protection design E1, DEC-20261111-01 D1):
+ *  - template content unchanged since delivery → EVOLVED_PRESERVE (WARN):
+ *    SKIP, project copy preserved, baseline kept. An explicit
+ *    --disposition adopt-template[=glob] grant delivers as ADOPT (INFO);
  *  - template content ALSO changed → CONFLICT (ERROR): default SKIP (project
  *    copy preserved, delivery skipped, decision recorded), or deliver as ADOPT
- *    (INFO) under an explicit --disposition adopt-template[=glob] grant.
+ *    (INFO) under the same explicit grant.
  * Callers use this ONLY when state === 'PROJECT_EVOLVED' (other states keep the
  * pass's normal verdict; the agents/ equal-version drift arm forces the
  * CONFLICT row unconditionally per the design's dedicated matrix row).
@@ -1651,23 +1671,24 @@ export function resolveDisposition(
   if (classification.state !== "PROJECT_EVOLVED") {
     return { deliver: true, verdict: "UPDATE", severity: "INFO", detail: "" };
   }
-  if (!classification.templateChanged) {
-    return {
-      deliver: true,
-      verdict: "EVOLVED",
-      severity: "WARN",
-      detail:
-        "project-evolved since delivery; template content unchanged — version-gated delivery proceeds (EVOLVED, WARN)",
-    };
-  }
   const granted = disposition.mode === "adopt-template" && disposition.matches(rel);
   if (granted) {
     return {
       deliver: true,
       verdict: "ADOPT",
       severity: "INFO",
+      detail: classification.templateChanged
+        ? "project-evolved + template changed — delivered via explicit --disposition adopt-template (decision recorded)"
+        : "project-evolved + template unchanged — delivered via explicit --disposition adopt-template (decision recorded)",
+    };
+  }
+  if (!classification.templateChanged) {
+    return {
+      deliver: false,
+      verdict: "EVOLVED_PRESERVE",
+      severity: "WARN",
       detail:
-        "project-evolved + template changed — delivered via explicit --disposition adopt-template (decision recorded)",
+        "project-evolved since delivery; template content unchanged since the baseline — EVOLVED_PRESERVE: delivery SKIPPED, project copy preserved, baseline kept (re-run with --disposition adopt-template[=glob] to take the template copy)",
     };
   }
   return {
@@ -1679,8 +1700,65 @@ export function resolveDisposition(
   };
 }
 
-/** LOCAL-PATCH marker (pm.md "Upstream Reporting Duty"): positive proof of intentional local content. */
-export const LOCAL_PATCH_MARKER_RE = /LOCAL-PATCH\(upstream-request:/;
+/** LOCAL-PATCH marker (pm.md "Upstream Reporting Duty"): positive proof of intentional local content.
+ *  Overwrite-protection design E2 (DEC-20261111-01 D4): EVERY form counts —
+ *  `LOCAL-PATCH(upstream-request: …)`, `LOCAL-PATCH (design: …)`,
+ *  `LOCAL-PATCH(project-local)` and the bare `LOCAL-PATCH U-…` form. */
+export const LOCAL_PATCH_MARKER_RE = /LOCAL-PATCH\b/;
+
+/** Count of LOCAL-PATCH markers (every form) in `text`. */
+export function countLocalPatchMarkers(text: string): number {
+  return (text.match(/LOCAL-PATCH\b/g) ?? []).length;
+}
+
+/**
+ * E2 marker-loss predicate: non-null when delivering `afterText` over
+ * `projectText` would LOWER the LOCAL-PATCH marker count. A count delta (not a
+ * presence test) so template prose that mentions the term, delivered over a
+ * project copy with the same mentions, loses nothing.
+ */
+export function markerLoss(
+  projectText: string,
+  afterText: string,
+): { lost: number; before: number; after: number } | null {
+  const before = countLocalPatchMarkers(projectText);
+  const after = countLocalPatchMarkers(afterText);
+  return after < before ? { lost: before - after, before, after } : null;
+}
+
+/** Detail text of a MARKER_LOSS decision. */
+export function markerLossDetail(loss: { lost: number; before: number; after: number }): string {
+  return `delivery would lower the LOCAL-PATCH marker count ${loss.before} → ${loss.after} (${loss.lost} marker(s) lost) — MARKER_LOSS: write SKIPPED, project copy preserved (re-run with --disposition adopt-template[=glob] only once the template carries the patch hunk)`;
+}
+
+/**
+ * E1 superset check (the automated half of audit remedy R8; consumed by the
+ * `promoted` backport ack in a later PR): every line the project authored must
+ * appear in the deliverable. Project-authored lines are the project lines absent
+ * from every `baseTexts` entry (the baseline bytes / vintage blobs). Blank lines
+ * are ignored. Returns the project-authored lines the deliverable lacks.
+ */
+export function supersetCheck(
+  projectText: string,
+  baseTexts: string[],
+  deliverable: string,
+): { ok: boolean; missing: string[] } {
+  const norm = (t: string): string[] =>
+    t
+      .replace(/\r\n/g, "\n")
+      .split("\n")
+      .map((l) => l.trimEnd());
+  const baseSet = new Set<string>();
+  for (const b of baseTexts) for (const l of norm(b)) baseSet.add(l);
+  const deliverableSet = new Set(norm(deliverable));
+  const missing: string[] = [];
+  for (const l of norm(projectText)) {
+    if (l.trim() === "") continue;
+    if (baseSet.has(l)) continue;
+    if (!deliverableSet.has(l)) missing.push(l);
+  }
+  return { ok: missing.length === 0, missing };
+}
 
 /**
  * A1 (T-20261110-009, DEC-20261110-04 PR-2): disposition for a NO_BASELINE
@@ -1717,7 +1795,7 @@ export function resolveUnbaselinedDisposition(
       verdict: "CONFLICT",
       severity: "ERROR",
       detail:
-        "no delivery baseline + project copy carries a LOCAL-PATCH(upstream-request: …) marker — CONFLICT disposition: delivery SKIPPED, project copy preserved (re-run with --disposition adopt-template[=glob] once the upstream fix is verified in the template)",
+        "no delivery baseline + project copy carries a LOCAL-PATCH marker — CONFLICT disposition: delivery SKIPPED, project copy preserved (re-run with --disposition adopt-template[=glob] once the upstream fix is verified in the template)",
     };
   }
   return {

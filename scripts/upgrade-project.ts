@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.100.0
+// @version 1.101.0
+// v1.101.0 (2026-11-11, DEC-20261111-01 — design
+//          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md PR-A):
+//          (E1) EVOLVED_PRESERVE — a PROJECT_EVOLVED file whose template content is
+//          unchanged since the baseline is no longer re-delivered with an EVOLVED
+//          WARN: evolvedDeliveryGuard preserves it (SKIP, baseline kept) and
+//          records EVOLVED_PRESERVE (WARN); --disposition adopt-template is the
+//          only restore path. (E2) MARKER_LOSS (ERROR) — a marker-count guard
+//          (every LOCAL-PATCH form) runs before every write that replaces an
+//          existing project file: guarded whole-file deliveries, equal-version and
+//          core-locked script restores, agents/ drift restores, skill-directory
+//          copies, ci.yml MERGE, DOCS_MERGE / instruction-file MERGE, docs/context.md
+//          splices, JSON/SCHEMA merges, LOCKED files, prune, and the platform
+//          skill-mirror regeneration; the write is skipped and the project copy
+//          kept. The A1 marker test recognizes every LOCAL-PATCH form. The
+//          LOCAL-PATCH report prints per-file protection status.
 // v1.100.0 (2026-11-11, T-20261110-009 Scope A — DEC-20261110-04 PR-2, design
 //          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 A1/A2):
 //          (A1) evolvedDeliveryGuard consults resolveUnbaselinedDisposition when a
@@ -1254,6 +1269,8 @@ import {
   resolveDisposition,
   resolveUnbaselinedDisposition,
   LOCAL_PATCH_MARKER_RE,
+  markerLoss,
+  markerLossDetail,
   tombstoneGuard,
   type DecisionBaseline,
   type DecisionVerdict,
@@ -2591,6 +2608,7 @@ function mergeWorkspaceManaged(
   let finalMerged = result.merged;
   let snapshotCount = result.snapshots.length;
   const skeletonLog: string[] = [];
+  let skeletonSnapshots: { content: string }[] = [];
   // D3: the skeleton step widens from CLAUDE.md/GEMINI.md to ALL FIVE
   // instruction files (platform-skeleton-merge v1.2.0). With zero registry
   // entries for a rel the call is a no-op — entries land per adjudicated-port
@@ -2629,25 +2647,31 @@ function mergeWorkspaceManaged(
         `adapted skeleton section replace delivered via explicit --disposition adopt-template (instruction-region census gate; pre-skeleton.bak snapshot written)`,
       );
     }
-    if (!dryRun && skeleton.snapshots.length > 0) {
-      // T-20260917-010 pattern: persist the replaced span(s) BEFORE the merged
-      // content lands — a recovery copy that cannot be written means the
-      // guarded skeleton replace must not proceed (fail-closed abort).
-      const bakPath = `${projectFile}.pre-skeleton.bak`;
-      try {
-        writeFileSync(bakPath, skeleton.snapshots.map((s) => s.content).join("\n\n"), "utf8");
-      } catch (err) {
-        throw new Error(
-          `[upgrade-project] cannot write the recovery snapshot ${bakPath} — aborting before the skeleton section replace of ${rel} (${(err as Error).message})`,
-        );
-      }
-      console.log(
-        `    SNAPSHOT: replaced skeleton section(s) of ${rel} saved to ${rel}.pre-skeleton.bak (overwritten per run; gitignored via *.bak)`,
-      );
-      snapshotCount += skeleton.snapshots.length;
-    }
+    skeletonSnapshots = skeleton.snapshots;
   }
 
+  // E2 (DEC-20261111-01 D4): the merged text must not drop LOCAL-PATCH markers.
+  // Runs in dry-run too (parity) and BEFORE any recovery snapshot or write.
+  if (finalMerged && markerLossBlocks(rel, "MERGE_MANAGED", pass, projectFile, finalContent)) {
+    return { merged: false, snapshotCount: 0, skeletonLog };
+  }
+  if (!dryRun && skeletonSnapshots.length > 0) {
+    // T-20260917-010 pattern: persist the replaced span(s) BEFORE the merged
+    // content lands — a recovery copy that cannot be written means the
+    // guarded skeleton replace must not proceed (fail-closed abort).
+    const bakPath = `${projectFile}.pre-skeleton.bak`;
+    try {
+      writeFileSync(bakPath, skeletonSnapshots.map((s) => s.content).join("\n\n"), "utf8");
+    } catch (err) {
+      throw new Error(
+        `[upgrade-project] cannot write the recovery snapshot ${bakPath} — aborting before the skeleton section replace of ${rel} (${(err as Error).message})`,
+      );
+    }
+    console.log(
+      `    SNAPSHOT: replaced skeleton section(s) of ${rel} saved to ${rel}.pre-skeleton.bak (overwritten per run; gitignored via *.bak)`,
+    );
+    snapshotCount += skeletonSnapshots.length;
+  }
   if (!dryRun && finalMerged) {
     // T-20260917-010: persist the replaced span(s) BEFORE the merged content
     // lands — a recovery copy that cannot be written means the destructive
@@ -2696,6 +2720,21 @@ const CI_WORKFLOW_REL = ".github/workflows/ci.yml";
 /** ci.yml MERGE (ADR-0094): fail-closed, atomic. Returns false on validation failure
  *  (nothing written). Dry-run prints the per-project summary and never writes. */
 function mergeCiWorkflowFile(projectFile: string, templateFile: string, rel: string): boolean {
+  // E2 (DEC-20261111-01 D4): probe the merged text (dry-run applyCiWorkflowMerge
+  // computes it without writing) so the marker-loss guard runs identically in
+  // dry-run and apply. A skip is not a validation failure (returns true) — the
+  // MARKER_LOSS (ERROR) row drives the non-zero exit.
+  const probe = applyCiWorkflowMerge(projectFile, templateFile, {
+    dryRun: true,
+    allowTriggerPermDiff: acceptCiPermDiff,
+  });
+  if (
+    probe.status === "would-update" &&
+    probe.result?.content != null &&
+    markerLossBlocks(rel, "MERGE_MANAGED", "MERGE", projectFile, probe.result.content)
+  ) {
+    return true;
+  }
   const outcome = applyCiWorkflowMerge(projectFile, templateFile, { dryRun, allowTriggerPermDiff: acceptCiPermDiff });
   const r = outcome.result;
   for (const w of r?.warnings ?? []) console.log(`    WARN: ${w}`);
@@ -2829,6 +2868,7 @@ function evolvedDeliveryGuard(input: {
   if (!cls) return true; // NEW — nothing evolved
   if (cls.state === "NO_BASELINE" && !cls.matchesDeliverable) {
     // A1 (T-20261110-009): first-time delivery over committed divergence.
+    // E2 (DEC-20261111-01 D4): every LOCAL-PATCH form counts as a marker.
     let marked = false;
     try {
       marked = LOCAL_PATCH_MARKER_RE.test(readFileSync(input.projectFile, "utf8"));
@@ -2841,58 +2881,165 @@ function evolvedDeliveryGuard(input: {
       input.onConflictSkip();
       return false;
     }
+    if (markerLossBlocks(input.rel, input.policy, input.pass, input.projectFile, input.deliverableContent))
+      return false;
     return true;
   }
   if (cls.state !== "PROJECT_EVOLVED") return true;
   const outcome = resolveDisposition(cls, input.rel, disposition);
   const baseline = priorBaselines[input.rel];
   if (outcome.deliver) {
-    if (outcome.verdict === "EVOLVED" && input.agentsOwnership) {
-      // D4 (tombstone-ownership design): agents/ version-gt delivery over an
-      // evolved body is the last silent-overwrite channel for exactly the
-      // content U-20261028-001 names — escalate to the CONFLICT row. The
-      // explicit --disposition adopt-template grant IS the disposition (§5:
-      // "grants delivery + re-baseline"), so a granted path delivers as ADOPT.
-      if (dispositionAdopts(input.rel)) {
-        recordDecision(
-          input.rel,
-          input.policy,
-          input.pass,
-          "ADOPT",
-          "project-evolved since the last delivery — version-gated agents/ delivery granted via explicit --disposition adopt-template (D4 disposition; baseline refreshed at manifest write)",
-          baseline,
-        );
-        console.log(
-          `  ✅ DISPOSITION (adopt-template): ${input.rel} — project-evolved content superseded by the template copy (decision recorded; baseline refreshed at manifest write)`,
-        );
-        return true;
-      }
-      recordDecision(
-        input.rel,
-        input.policy,
-        input.pass,
-        "CONFLICT",
-        "project-evolved since the last delivery — version-gated agents/ delivery reclassified to CONFLICT (ERROR) regardless of templateChanged (D4: the body is template-canonical; project evolution is an explicit disposition)",
-        baseline,
-      );
-      input.onConflictSkip();
+    // E2: an adopt grant overrides the marker-loss guard (DEC-20261111-01 D4),
+    // but the override is recorded so the lost markers stay visible.
+    if (markerLossBlocks(input.rel, input.policy, input.pass, input.projectFile, input.deliverableContent))
       return false;
-    }
     recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail, baseline);
     if (outcome.verdict === "ADOPT") {
       console.log(
         `  ✅ DISPOSITION (adopt-template): ${input.rel} — project-evolved content superseded by the template copy (decision recorded; baseline refreshed at manifest write)`,
       );
-    } else if (outcome.verdict === "EVOLVED") {
-      console.log(
-        `  ℹ️  EVOLVED: ${input.rel} — project-evolved since the last delivery; template content unchanged — version-gated delivery proceeds (decision recorded)`,
-      );
     }
     return true;
   }
+  if (outcome.verdict === "EVOLVED_PRESERVE" && input.agentsOwnership) {
+    // D4 (tombstone-ownership design; kept by the overwrite-protection design
+    // §4.2): agents/ bodies are template-canonical with project evolution as a
+    // first-class disposition — the preserve cell stays CONFLICT (ERROR)
+    // regardless of templateChanged. --disposition adopt-template still grants.
+    recordDecision(
+      input.rel,
+      input.policy,
+      input.pass,
+      "CONFLICT",
+      "project-evolved since the last delivery — version-gated agents/ delivery reclassified to CONFLICT (ERROR) regardless of templateChanged (D4: the body is template-canonical; project evolution is an explicit disposition)",
+      baseline,
+    );
+    input.onConflictSkip();
+    return false;
+  }
   recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail, baseline);
+  if (outcome.verdict === "EVOLVED_PRESERVE") {
+    // E1 (DEC-20261111-01 D1): preserved, not a conflict — the CONFLICT wording
+    // does not apply and onConflictSkip is not called.
+    console.log(
+      `  🛡️  PRESERVE (project-evolved, template unchanged): ${input.rel} — project copy kept, baseline kept (decision recorded, WARN); --disposition adopt-template[=glob] takes the template copy`,
+    );
+    return false;
+  }
   input.onConflictSkip();
   return false;
+}
+
+/**
+ * E2 marker-loss guard (DEC-20261111-01 D4). `afterText` is the exact text a
+ * delivery would leave in `projectFile`. Returns true when the write must be
+ * SKIPPED (MARKER_LOSS recorded at ERROR, project copy kept). A missing project
+ * file never loses markers. An --disposition adopt-template grant for `rel`
+ * overrides: the write proceeds and the override is recorded (ADOPT).
+ */
+function markerLossBlocks(rel: string, policy: string, pass: string, projectFile: string, afterText: string): boolean {
+  let projectText: string;
+  try {
+    if (!existsSync(projectFile)) return false;
+    projectText = readFileSync(projectFile, "utf8");
+  } catch {
+    return false;
+  }
+  // UNTOUCHED (project bytes == the last delivered bytes): no project-authored
+  // content exists, so any marker text came from the template itself — a template
+  // that legitimately drops marker prose must not read as marker loss.
+  const priorBaseline = priorBaselines[rel];
+  if (priorBaseline && baselineKeyFor(rel, projectText) === priorBaseline.hash) return false;
+  const loss = markerLoss(projectText, afterText);
+  if (!loss) return false;
+  if (dispositionAdopts(rel)) {
+    recordDecision(
+      rel,
+      policy,
+      pass,
+      "ADOPT",
+      `LOCAL-PATCH marker count ${loss.before} → ${loss.after} (${loss.lost} lost) overridden by explicit --disposition adopt-template (decision recorded)`,
+      priorBaselines[rel],
+    );
+    console.log(
+      `  ✅ DISPOSITION (adopt-template): ${rel} — ${loss.lost} LOCAL-PATCH marker(s) superseded by the template copy (decision recorded)`,
+    );
+    return false;
+  }
+  recordDecision(rel, policy, pass, "MARKER_LOSS", markerLossDetail(loss), priorBaselines[rel]);
+  console.log(
+    `  ⏭️  MARKER_LOSS (SKIP): ${rel} — delivery would drop ${loss.lost} LOCAL-PATCH marker(s) (${loss.before} → ${loss.after}); project copy PRESERVED (non-zero exit at completion)`,
+  );
+  console.log(
+    "      proceed with --disposition adopt-template[=glob] once the template carries the patch hunk, or port the content template-side per design §6",
+  );
+  return true;
+}
+
+/** MARKER_LOSS guard for a DELETION (prune): removing a file or directory drops
+ *  every LOCAL-PATCH marker it carries (after-text is empty). `abs` is the file
+ *  or directory about to be removed; `rel` its project-relative path. Returns
+ *  true when any file would lose markers (the deletion is then skipped). */
+function deletionMarkerLossBlocks(rel: string, policy: string, pass: string, abs: string): boolean {
+  let blocked = false;
+  const visit = (relPath: string, absPath: string): void => {
+    let isDir = false;
+    try {
+      isDir = statSync(absPath).isDirectory();
+    } catch {
+      return;
+    }
+    if (isDir) {
+      let names: string[] = [];
+      try {
+        names = readdirSync(absPath);
+      } catch {
+        return;
+      }
+      for (const n of names) {
+        if (n === ".git" || n === "node_modules") continue;
+        visit(`${relPath}/${n}`, join(absPath, n));
+      }
+      return;
+    }
+    if (markerLossBlocks(relPath, policy, pass, absPath, "")) blocked = true;
+  };
+  visit(rel, abs);
+  return blocked;
+}
+
+/** MARKER_LOSS guard for a whole template directory copied over a project directory
+ *  (skills/<name>/): every template file overwrites its project counterpart, so
+ *  every counterpart's marker count is checked, not just SKILL.md. Returns true
+ *  when any file would lose markers (the whole-directory copy is then skipped). */
+function dirMarkerLossBlocks(relBase: string, policy: string, pass: string, srcDir: string, dstDir: string): boolean {
+  let blocked = false;
+  const walk = (sub: string): void => {
+    let entries: import("node:fs").Dirent[];
+    try {
+      entries = readdirSync(join(srcDir, sub), { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const rel2 = sub ? `${sub}/${e.name}` : e.name;
+      if (e.isDirectory()) {
+        walk(rel2);
+        continue;
+      }
+      if (!e.isFile()) continue;
+      if (!sub && e.name === "SKILL.md") continue; // already covered by evolvedDeliveryGuard
+      let after: string;
+      try {
+        after = readFileSync(join(srcDir, rel2), "utf8");
+      } catch {
+        continue; // unreadable/binary — cannot carry a text marker
+      }
+      if (markerLossBlocks(`${relBase}/${rel2}`, policy, pass, join(dstDir, rel2), after)) blocked = true;
+    }
+  };
+  walk("");
+  return blocked;
 }
 
 /** The ERROR-severity decisions of this run (D3.1 — they force the non-zero exit). */
@@ -2994,10 +3141,18 @@ const localPatchFindings = scanLocalPatches(projectDir);
 if (localPatchFindings.length > 0) {
   console.log("\n--- LOCAL-PATCH report (upstream-request markers in this project) ---");
   console.log(`  ⚠️  ${localPatchFindings.length} LOCAL-PATCH marker(s) found:`);
-  for (const f of localPatchFindings.slice(0, 40)) console.log(`    ${f.file} — ticket ${f.id}`);
+  // E2 (DEC-20261111-01 D4): per-file protection status. `granted` — an adopt grant
+  // covers the file (its markers may be superseded); `no delivery` — the template
+  // carries no counterpart, so no pass overwrites it; `protected` — the MARKER_LOSS
+  // guard and the A1 CONFLICT skip keep it unless an adopt grant is given.
+  const protectionOf = (file: string): string =>
+    dispositionAdopts(file) ? "granted" : resolveTemplate(file) ? "protected" : "no delivery";
+  for (const f of localPatchFindings.slice(0, 40))
+    console.log(`    ${f.file} — ticket ${f.id}  [${protectionOf(f.file)}]`);
   if (localPatchFindings.length > 40) console.log(`    …and ${localPatchFindings.length - 40} more`);
-  console.log("  This upgrade may overwrite the marked files. Re-apply a patch only if its");
-  console.log("  upstream_request_status does not already report it fixed in a newer template.");
+  console.log("  Marked files are protected: a delivery that would lower a file's LOCAL-PATCH marker");
+  console.log("  count is skipped (MARKER_LOSS). Confirm the template carries the patch hunk BEFORE");
+  console.log("  granting --disposition adopt-template for a marked file.");
   console.log("");
 }
 
@@ -3479,6 +3634,8 @@ for (const rel of LOCKED_FILES) {
     console.log(`  SKIP (no template): ${rel}`);
     continue;
   }
+  // E2 (DEC-20261111-01 D4): even a LOCKED always-overwrite never drops LOCAL-PATCH markers.
+  if (markerLossBlocks(rel, "LOCKED", "LOCKED", dest, readFileSync(src, "utf8"))) continue;
   console.log(`  LOCKED: ${rel}`);
   diffSummary(dest, src);
   if (!dryRun) {
@@ -3933,6 +4090,8 @@ for (const cmdDir of COMMANDS_DIRS) {
       const tplHash = fileHash(src);
       const projHash = fileHash(dest);
       if (tplHash !== projHash) {
+        // E2 (DEC-20261111-01 D4): the hash-gated command overwrite never drops LOCAL-PATCH markers.
+        if (markerLossBlocks(rel, "HASH_SYNC", "COMMANDS_SYNC", dest, readFileSync(src, "utf8"))) continue;
         diffSummary(dest, src);
         if (!dryRun) copyFileSync(src, dest);
         recordDecision(
@@ -4200,6 +4359,8 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     // 11 drifted forks in a single project). Core scripts are canonical: the
     // template copy wins, unconditionally (the integrity rule "core scripts
     // must not be modified" already forbids the local fork).
+    // E2 (DEC-20261111-01 D4): a restore never drops LOCAL-PATCH markers.
+    if (markerLossBlocks(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projFile, readFileSync(tplFile, "utf8"))) continue;
     console.log(
       `  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from L1 at same version — ADR-0085 D3)`,
     );
@@ -4226,7 +4387,9 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     // restore branch above and printed OK forever — the fork survived every
     // future upgrade. AGENTS.md "Pluggable Variant Audit Hooks" forbids
     // modifying dev-sync.ts / audit.ts in L2 projects: the canonical template
-    // copy wins, loudly.
+    // copy wins, loudly. E2 (DEC-20261111-01 D4): a marked fork is MARKER_LOSS
+    // (ERROR) instead of being erased — surfaces the project's own gate.
+    if (markerLossBlocks(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projFile, readFileSync(tplFile, "utf8"))) continue;
     console.log(
       `  ⚠️  CORE-SCRIPT FORK ${rel}  project ${projVer} vs template ${tplVer} — locked core script must not be modified; restored to canonical`,
     );
@@ -4586,7 +4749,15 @@ if (existsSync(variantScriptsSrc)) {
   const variantRegDst = join(variantScriptsDst, "SCRIPTS.md");
   if (
     existsSync(variantRegSrc) &&
-    (!existsSync(variantRegDst) || fileHash(variantRegSrc) !== fileHash(variantRegDst))
+    (!existsSync(variantRegDst) || fileHash(variantRegSrc) !== fileHash(variantRegDst)) &&
+    // E2 (DEC-20261111-01 D4): the registry overwrite never drops LOCAL-PATCH markers.
+    !markerLossBlocks(
+      `scripts/${variant}/SCRIPTS.md`,
+      "SYNC",
+      "VARIANT SCRIPTS",
+      variantRegDst,
+      readFileSync(variantRegSrc, "utf8"),
+    )
   ) {
     console.log(`  UPDATE scripts/${variant}/SCRIPTS.md  (registry)`);
     // v1.91.1 mkdir guard: the project may not have a scripts/<variant>/ directory
@@ -4989,6 +5160,8 @@ for (const agentsDir of tplAgentsDirs) {
         severity = "INFO";
         detail = "tier-block-only drift normalized to the template scalar (ADR-0102, T-20261027-005 delivery)";
       }
+      // E2 (DEC-20261111-01 D4): the canonical restore never drops LOCAL-PATCH markers.
+      if (proceed && markerLossBlocks(rel, "SYNC", "SYNC_IF_NEWER: agents/", projFile, rendered)) continue;
       recordDecision(rel, "SYNC", "SYNC_IF_NEWER: agents/", verdict, detail, priorBaselines[rel], severity);
       // D9 stub version-bump advisory (design §10 Q5 — INFO-only this wave, no
       // validate-templates check): the composed expectation moved since the
@@ -5162,6 +5335,18 @@ if (existsSync(tplSkillsDir)) {
           },
         });
         if (!proceeded) continue;
+        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+        // check every counterpart's marker count, not just SKILL.md.
+        if (
+          dirMarkerLossBlocks(
+            `skills/${skillName}`,
+            "SYNC",
+            "SYNC_IF_NEWER: skills/",
+            join(tplSkillsDir, skillName),
+            join(projectDir, "skills", skillName),
+          )
+        )
+          continue;
         // G05: Warn if project file has local modifications.
         if (isLocallyModified(projSkillFile)) {
           console.log(
@@ -5278,6 +5463,18 @@ if (existsSync(tplSkillsDir)) {
           },
         });
         if (!proceeded) continue;
+        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+        // check every counterpart's marker count, not just SKILL.md.
+        if (
+          dirMarkerLossBlocks(
+            `skills/${skillName}`,
+            "SYNC",
+            "SYNC_IF_NEWER: skills/",
+            join(tplSkillsDir, skillName),
+            join(projectDir, "skills", skillName),
+          )
+        )
+          continue;
         console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
         recordDecision(
           skillRel,
@@ -5400,6 +5597,9 @@ if (existsSync(variantSkillsSrc)) {
           },
         });
         if (!proceeded) continue;
+        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+        // check every counterpart's marker count, not just SKILL.md.
+        if (dirMarkerLossBlocks(`skills/${skillName}`, "SYNC", "VARIANT SKILLS", tplSkillDir, projSkillDir)) continue;
         if (isLocallyModified(projSkillFile)) {
           console.log(
             `  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
@@ -5497,6 +5697,9 @@ if (existsSync(variantSkillsSrc)) {
           },
         });
         if (!proceeded) continue;
+        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+        // check every counterpart's marker count, not just SKILL.md.
+        if (dirMarkerLossBlocks(`skills/${skillName}`, "SYNC", "VARIANT SKILLS", tplSkillDir, projSkillDir)) continue;
         console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
         recordDecision(
           skillRel,
@@ -6002,6 +6205,8 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
             console.log(`  OK     ${rel}  (json merge — in sync)`);
             continue;
           }
+          // E2 (DEC-20261111-01 D4): the merged settings text must not drop LOCAL-PATCH markers.
+          if (markerLossBlocks(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, dest, merged)) continue;
           console.log(
             `  MERGE  ${rel}${preserved.length > 0 ? `  (preserved project-only: ${preserved.join(", ")})` : ""}`,
           );
@@ -6090,6 +6295,8 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           console.log(`  OK     ${rel}  (schema merge — in sync)`);
           continue;
         }
+        // E2 (DEC-20261111-01 D4): the merged schema text must not drop LOCAL-PATCH markers.
+        if (markerLossBlocks(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, dest, result.merged)) continue;
         const deltas = result.templateDeltas;
         // v1.89.0: INFO-severity deltas are template-authoritative landing
         // documentation (the template value WON and landed — PR #1787 class);
@@ -6305,25 +6512,26 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           // sections (e.g. PM Team-Management Authority) are never starved.
           const spliced = spliceCommonContextBlock(readFileSync(dest, "utf8"), readFileSync(abs, "utf8"));
           if (spliced.changed) {
-            if (!dryRun) {
-              // Same placeholder render as the wholesale write below — a template block
-              // carrying tokens must not regress the substituted name under PRESERVE.
-              writeFileSync(
-                dest,
-                applySubstitutions(spliced.content, {
-                  projectName: basename(projectDir),
-                  description: "",
-                  characteristics: "",
-                  variantName: variant,
-                  countryDisplayName: "",
-                }),
+            // Same placeholder render as the wholesale write below — a template block
+            // carrying tokens must not regress the substituted name under PRESERVE.
+            const splicedRendered = applySubstitutions(spliced.content, {
+              projectName: basename(projectDir),
+              description: "",
+              characteristics: "",
+              variantName: variant,
+              countryDisplayName: "",
+            });
+            // E2 (DEC-20261111-01 D4): the splice must not drop LOCAL-PATCH markers.
+            if (!markerLossBlocks(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, dest, splicedRendered)) {
+              if (!dryRun) {
+                writeFileSync(dest, splicedRendered);
+                noteDelivered(rel);
+              }
+              console.log(
+                `      ${dryTag}MERGED COMMON-CONTEXT block in: ${rel} (managed-zone policy content delivers under PRESERVE)`,
               );
-              noteDelivered(rel);
+              treeChanged++;
             }
-            console.log(
-              `      ${dryTag}MERGED COMMON-CONTEXT block in: ${rel} (managed-zone policy content delivers under PRESERVE)`,
-            );
-            treeChanged++;
           }
           continue; // skip the wholesale copy; intentionally NOT counted in treeChanged
         }
@@ -6827,6 +7035,16 @@ let countryPrunedSkills = 0;
       console.log(
         `  ${dryTag}PRUNE  ${skillBase}/${skillName}/  (${scopedCountry}-scoped, project country: ${detectedCountry})`,
       );
+      // E2 (DEC-20261111-01 D4): a prune never silently deletes LOCAL-PATCH markers.
+      if (
+        deletionMarkerLossBlocks(
+          `${skillBase}/${skillName}`,
+          "COUNTRY_SCOPED_PRUNE",
+          "COUNTRY-SCOPED SKILL PRUNE",
+          projSkillDir,
+        )
+      )
+        continue;
       prunedCountrySkills.push(skillName);
       if (!dryRun) rmSync(projSkillDir, { recursive: true, force: true });
       countryPrunedSkills++;
@@ -6971,6 +7189,9 @@ console.log("--- VARIANT-SCOPE SKILL PRUNE ---");
       for (const dir of PLATFORM_SKILL_BASES) {
         const target = join(projectDir, dir, skill);
         if (!existsSync(target)) continue;
+        // E2 (DEC-20261111-01 D4): a prune never silently deletes LOCAL-PATCH markers.
+        if (deletionMarkerLossBlocks(`${dir}/${skill}`, "VARIANT_SCOPE_PRUNE", VARIANT_SCOPE_PRUNE_PASS, target))
+          continue;
         console.log(`  ${dryTag}PRUNE  ${dir}/${skill}/  (owning variant: ${owner})`);
         recordDecision(
           `${dir}/${skill}`,
@@ -7293,6 +7514,8 @@ if (pruneRemoved) {
             );
             continue;
           }
+          // E2 (DEC-20261111-01 D4): a prune never silently deletes LOCAL-PATCH markers.
+          if (deletionMarkerLossBlocks(`${cat.label}${d}`, "PRUNE", "PRUNE REMOVED", join(cat.projDir, d))) continue;
           console.log(`  PRUNE  ${cat.label}${d}/  (retired upstream skill — explicit retirement record)`);
           if (!dryRun) {
             const rm = spawnSync("git", ["-C", projectDir, "rm", "-rf", `${cat.label}${d}`], { encoding: "utf8" });
@@ -7367,6 +7590,8 @@ if (pruneRemoved) {
           );
           continue;
         }
+        // E2 (DEC-20261111-01 D4): a prune never silently deletes LOCAL-PATCH markers.
+        if (deletionMarkerLossBlocks(`${cat.label}${f}`, "PRUNE", "PRUNE REMOVED", join(cat.projDir, f))) continue;
         console.log(`  PRUNE  ${cat.label}${f}`);
         if (!dryRun) {
           const rm = spawnSync("git", ["-C", projectDir, "rm", "-f", `${cat.label}${f}`], { encoding: "utf8" });
@@ -7450,6 +7675,9 @@ if (pruneRemoved) {
       if (!existsSync(join(projMirror, d, "SKILL.md"))) continue;
       if (upstreamSkillNames.has(d) || projSsotNames.has(d)) continue;
       if (!isRetiredSkill(d)) continue;
+      // E2 (DEC-20261111-01 D4): a prune never silently deletes LOCAL-PATCH markers.
+      if (deletionMarkerLossBlocks(`${mirrorRoot}/skills/${d}`, "PRUNE", "PRUNE REMOVED", join(projMirror, d)))
+        continue;
       console.log(`  PRUNE  ${mirrorRoot}/skills/${d}/  (no upstream source — retired skill)`);
       if (!dryRun) {
         const rm = spawnSync("git", ["-C", projectDir, "rm", "-rf", `${mirrorRoot}/skills/${d}`], { encoding: "utf8" });
@@ -7620,7 +7848,63 @@ if (preDeliveryVerify) {
 const syncSkillsScript = join(projectDir, "scripts", "sync-skills.ts");
 if (syncChanged > 0 && existsSync(syncSkillsScript)) {
   console.log("--- Post-upgrade: Running sync-skills.ts for platform skill distribution ---");
-  if (!dryRun) {
+  // E2 (DEC-20261111-01 D4): sync-skills replaces each platform mirror directory
+  // with its skills/ SSOT copy and has no exclude option — so when any mirror
+  // file carries LOCAL-PATCH markers its SSOT counterpart lacks, the whole invoke
+  // is skipped and one MARKER_LOSS row is recorded per affected mirror file.
+  // Evaluated in dry-run too, against the on-disk SSOT (a dry run cannot see
+  // not-yet-delivered SSOT bytes — documented limitation).
+  const mirrorMarkerLossFiles = (): number => {
+    let blocked = 0;
+    const ssotRoot = join(projectDir, "skills");
+    if (!existsSync(ssotRoot)) return 0;
+    for (const name of readdirSync(ssotRoot)) {
+      const ssotSkillDir = join(ssotRoot, name);
+      const skillMd = join(ssotSkillDir, "SKILL.md");
+      if (!existsSync(skillMd)) continue;
+      const head = readFileSync(skillMd, "utf8");
+      if (/^security-gate:\s*true\b/m.test(head) || /^mirror:\s*false\b/m.test(head)) continue;
+      for (const mirrorRoot of [".claude", ".gemini", ".agents", ".codex", ".hermes"]) {
+        const mirrorDir = join(projectDir, mirrorRoot, "skills", name);
+        if (!existsSync(mirrorDir)) continue;
+        const walkMirror = (sub: string): void => {
+          for (const e of readdirSync(join(mirrorDir, sub), { withFileTypes: true })) {
+            const rel2 = sub ? `${sub}/${e.name}` : e.name;
+            if (e.isDirectory()) {
+              walkMirror(rel2);
+              continue;
+            }
+            if (!e.isFile()) continue;
+            let after = "";
+            try {
+              const ssotFile = join(ssotSkillDir, rel2);
+              if (existsSync(ssotFile)) after = readFileSync(ssotFile, "utf8");
+            } catch {
+              /* unreadable SSOT side — treated as absent */
+            }
+            if (
+              markerLossBlocks(
+                `${mirrorRoot}/skills/${name}/${rel2}`,
+                "SYNC",
+                "SKILL MIRROR SYNC",
+                join(mirrorDir, rel2),
+                after,
+              )
+            )
+              blocked++;
+          }
+        };
+        walkMirror("");
+      }
+    }
+    return blocked;
+  };
+  const mirrorBlocked = mirrorMarkerLossFiles();
+  if (mirrorBlocked > 0) {
+    console.log(
+      `  ⏭️  sync-skills.ts invoke SKIPPED — ${mirrorBlocked} platform mirror file(s) carry LOCAL-PATCH markers their skills/ SSOT lacks (MARKER_LOSS, non-zero exit at completion)`,
+    );
+  } else if (!dryRun) {
     // T-20260921-016 (review M-18): 30s was too tight for large skill deliveries —
     // a timeout returns status === null, which the old check treated as any other
     // failure. Treat it explicitly as a partial-sync warning and raise the budget.
@@ -8341,6 +8625,22 @@ if (reportPortCandidates) {
 // M1 (2026-09-15 project review): a failed security check must not read as a
 // green exit for scripted consumers (fleet runners, CI).
 if (import.meta.main && !securityPass) process.exit(1);
+// E1 (DEC-20261111-01 D1): list the project-evolved files this run preserved
+// (EVOLVED_PRESERVE, WARN) so they are not buried in the pass output.
+{
+  const preserved = decisions.filter((d) => d.verdict === "EVOLVED_PRESERVE");
+  if (import.meta.main && preserved.length > 0) {
+    console.log("\n--------------------------------------------------------");
+    console.log(
+      `  PRESERVED (project-evolved, template unchanged) — ${preserved.length} file(s) kept, template copy NOT delivered (severity WARN)`,
+    );
+    console.log("--------------------------------------------------------");
+    for (const d of preserved) console.log(`  ${d.path}   (pass: ${d.pass})`);
+    console.log(
+      "  Backport the project change template-side, or take the template copy with --disposition adopt-template[=glob].",
+    );
+  }
+}
 // D3.1 (T-20261027-004): a run whose decision log carries ERROR-severity
 // entries cannot land silently — non-zero exit with an actionable summary.
 // Earlier passes' deliveries stand; the dispositions are resumable via
