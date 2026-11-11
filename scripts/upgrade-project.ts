@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.98.1
+// @version 1.99.0
+// v1.99.0 (2026-11-11, T-20261110-012 Scope C — DEC-20261110-04 PR-3, design
+//          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 C-A/C-E):
+//          (C-A) post-delivery behavior verification in APPLY mode — before the
+//          first delivery write the run hashes every colocated-test subject under
+//          the project's scripts/ tree and runs its sibling `X.test.ts` in the
+//          project checkout; after the passes it re-runs the siblings of every
+//          delivered subject whose bytes changed (this includes the equal-version
+//          DRIFT_RESTORED class). Test cases failing post-delivery that did not fail
+//          pre-delivery record BEHAVIOR_REGRESSION (ERROR) → unresolved ERROR →
+//          non-zero exit and D3.1 landing refusal. A runner that cannot start
+//          records VERIFY_SKIPPED (INFO). Dry-run never verifies (documented
+//          limitation — nothing was written). Helpers: scripts/lib/post-delivery-verify.ts.
+//          (C-E) the silent `SKIP (no version)` arms of SYNC_IF_NEWER: scripts/ and
+//          the VARIANT SCRIPTS overlay record UNVERSIONED_SKIP (WARN).
 // v1.98.1 (2026-11-09, rogue-commit incident): all git spawns now go through a
 //          local `spawnSync` shim that injects scripts/lib/git-env.ts
 //          gitCleanEnv(). Historically the 23 direct spawnSync('git', …) calls
@@ -1252,6 +1266,13 @@ import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from ".
 import { buildMergedTemplateBlocks, mergeManagedBlocks } from "./lib/managed-block-merge.ts";
 import { mergeSkeletonSections } from "./lib/platform-skeleton-merge.ts";
 import { applyCiWorkflowMerge } from "./lib/ci-workflow-merge.ts";
+import {
+  capturePreDelivery,
+  changedDeliveredSubjects,
+  diffNewFailures,
+  type PreDeliverySnapshot,
+  runTestFile,
+} from "./lib/post-delivery-verify.ts";
 import { composeResolvedAgentContent } from "./helpers/resolve-pm-stub.ts";
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -3378,6 +3399,27 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
   return { changed, failures };
 }
 
+// ── C-A pre-delivery capture (T-20261110-012, DEC-20261110-04 PR-3) ────────────
+// Apply mode only, before the first delivery write: hash every colocated-test
+// subject under scripts/ and run its sibling test, so the post-delivery pass can
+// count only NEW failures. Dry-run: no capture (nothing is written to verify).
+const preDeliveryVerify: PreDeliverySnapshot | null = (() => {
+  if (dryRun || process.env.UPGRADE_SKIP_BEHAVIOR_VERIFY === "1") return null;
+  try {
+    const snap = capturePreDelivery(projectDir);
+    if (snap.outcomes.size > 0) {
+      const preFailing = [...snap.outcomes.values()].filter((o) => o.ran && o.failures.length > 0).length;
+      console.log(
+        `--- BEHAVIOR VERIFY (pre-delivery): ${snap.outcomes.size} colocated test file(s) run; ${preFailing} already failing (baseline, not attributed to this delivery) ---\n`,
+      );
+    }
+    return snap;
+  } catch (e) {
+    console.log(`  ⚠️  BEHAVIOR VERIFY pre-delivery capture failed: ${e instanceof Error ? e.message : String(e)}`);
+    return null;
+  }
+})();
+
 // ── LOCKED files ───────────────────────────────────────────────────────────────
 // (D6: pass output was already suppressed at the validation block when
 // --port-candidates mode is active; the terminal report restores it.)
@@ -4033,7 +4075,16 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
   const projFile = join(projectDir, relPath);
   const tplVer = extractScriptVersion(tplFile);
   if (!tplVer) {
+    // C-E (T-20261110-012, DEC-20261110-04 PR-3): the skip used to be silent —
+    // an unversioned template script can never pass this version gate.
     console.log(`  SKIP (no version): ${relPath}`);
+    recordDecision(
+      relPath,
+      "SYNC",
+      "SYNC_IF_NEWER: scripts/",
+      "UNVERSIONED_SKIP",
+      "template script carries no @version header — the SYNC_IF_NEWER gate cannot deliver it; add @version template-side",
+    );
     continue;
   }
   const projVer = extractScriptVersion(projFile);
@@ -4352,7 +4403,18 @@ if (existsSync(variantScriptsSrc)) {
       const src = join(overlayScriptsTop, entry.name);
       const projFile = join(projectDir, rel2);
       const tplVer = extractScriptVersion(src);
-      if (!tplVer) continue;
+      if (!tplVer) {
+        // C-E: overlay arm — same silent-skip class as the common scripts walk.
+        console.log(`  SKIP (no version): ${rel2}`);
+        recordDecision(
+          rel2,
+          "SYNC",
+          "VARIANT SCRIPTS",
+          "UNVERSIONED_SKIP",
+          "overlay script carries no @version header — cannot be version-gated or delivered; add @version template-side",
+        );
+        continue;
+      }
       const projVer = existsSync(projFile) ? extractScriptVersion(projFile) : "";
       if (!existsSync(projFile)) {
         console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
@@ -7467,6 +7529,47 @@ console.log("--- WORKSPACE-ONLY SKILL SWEEP (l2_propagate: false) ---");
 }
 console.log("");
 
+// ── C-A post-delivery behavior verification (T-20261110-012, DEC-20261110-04 PR-3) ──
+// After every delivery pass, before the manifest is written (so the rows persist):
+// re-run the sibling tests of delivered subjects whose bytes changed and record
+// only the cases that fail now but did not fail before delivery.
+if (preDeliveryVerify) {
+  const changed = changedDeliveredSubjects(projectDir, preDeliveryVerify, deliveredRels);
+  if (changed.length > 0) {
+    console.log("--- BEHAVIOR VERIFY (post-delivery): sibling tests of changed delivered scripts ---");
+    let regressions = 0;
+    for (const subject of changed) {
+      const testFile = `${subject.slice(0, -".ts".length)}.test.ts`;
+      const post = runTestFile(projectDir, testFile);
+      if (!post.ran) {
+        recordDecision(
+          testFile,
+          "VERIFY",
+          "BEHAVIOR VERIFY",
+          "VERIFY_SKIPPED",
+          `test runner could not start — behavior of delivered ${subject} not verified`,
+        );
+        console.log(`  ⏭️  VERIFY_SKIPPED: ${testFile} (runner unavailable)`);
+        continue;
+      }
+      const found = diffNewFailures(subject, testFile, preDeliveryVerify.outcomes.get(testFile), post);
+      for (const r of found) {
+        regressions++;
+        recordDecision(
+          r.testFile,
+          "VERIFY",
+          "BEHAVIOR VERIFY",
+          "BEHAVIOR_REGRESSION",
+          `delivered ${r.subject} breaks "${r.test}" (passed before delivery, fails after) — adjudicate: fix the project test or port the behavior change; rerun after resolving`,
+        );
+        console.log(`  ❌ BEHAVIOR_REGRESSION: ${r.testFile} — "${r.test}" (subject ${r.subject})`);
+      }
+      if (found.length === 0) console.log(`  ✅ ${testFile}: no new failures`);
+    }
+    console.log(`  ${changed.length} subject(s) verified, ${regressions} new failure(s)\n`);
+  }
+}
+
 // ── Post-upgrade: sync-skills.ts for platform skill distribution ──────────────
 const syncSkillsScript = join(projectDir, "scripts", "sync-skills.ts");
 if (syncChanged > 0 && existsSync(syncSkillsScript)) {
@@ -7847,7 +7950,11 @@ if (!dryRun) {
         "",
         `- INFO: ${bySeverity("INFO")} / WARN: ${bySeverity("WARN")} / ERROR: ${bySeverity("ERROR")}`,
         ...(errorList
-          ? ["", "**Unresolved ERROR dispositions** (delivery skipped, project copies preserved):", errorList]
+          ? [
+              "",
+              "**Unresolved ERROR dispositions** (CONFLICT/TOMBSTONED: delivery skipped, project copy preserved; BEHAVIOR_REGRESSION: delivered, new sibling-test failure):",
+              errorList,
+            ]
           : []),
         "",
       ].join("\n");
@@ -8185,10 +8292,26 @@ if (import.meta.main && !securityPass) process.exit(1);
     // U-20261028-001 (§4.3): TOMBSTONED entries get their own resolution menu —
     // --disposition adopt-template does NOT resolve a tombstone (D3b).
     const tombstoneErrors = errors.filter((d) => d.verdict === "TOMBSTONED");
-    const conflictErrors = errors.filter((d) => d.verdict !== "TOMBSTONED");
+    // C-A: behavior regressions are post-delivery findings — the subject WAS
+    // delivered, so they get their own heading and menu (not "PRESERVED").
+    const behaviorErrors = errors.filter((d) => d.verdict === "BEHAVIOR_REGRESSION");
+    const conflictErrors = errors.filter((d) => d.verdict !== "TOMBSTONED" && d.verdict !== "BEHAVIOR_REGRESSION");
     console.log("\n========================================================");
-    console.log(`  DELIVERY CONFLICTS — ${errors.length} file(s) PRESERVED, delivery SKIPPED (severity ERROR)`);
+    if (conflictErrors.length + tombstoneErrors.length > 0) {
+      console.log(
+        `  DELIVERY CONFLICTS — ${conflictErrors.length + tombstoneErrors.length} file(s) PRESERVED, delivery SKIPPED (severity ERROR)`,
+      );
+    }
+    if (behaviorErrors.length > 0) {
+      console.log(
+        `  BEHAVIOR REGRESSIONS — ${behaviorErrors.length} new test failure(s) after delivery (severity ERROR)`,
+      );
+    }
     console.log("========================================================");
+    for (const d of behaviorErrors) {
+      console.log(`  ${d.path}`);
+      console.log(`    ${d.detail}`);
+    }
     for (const d of tombstoneErrors) {
       console.log(`  ${d.path}`);
       console.log(
@@ -8226,6 +8349,13 @@ if (import.meta.main && !securityPass) process.exit(1);
       console.log("      file hash table, post-wave verification), then re-run this upgrade.");
       console.log("   3. Or merge manually, land the project copy, and re-run the upgrade so the");
       console.log("      fresh delivery re-baselines the merged state.");
+    }
+    if (behaviorErrors.length > 0) {
+      console.log("\n  Behavior regressions — how to proceed:");
+      console.log("   1. Adjudicate each failing case: a stale project test (fix/pin the test,");
+      console.log("      as T-20261110-012 did) or a real behavior break (port the fix template-side).");
+      console.log("   2. Re-run the upgrade (or the listed test files) until no new failures remain;");
+      console.log("      --rollback restores the pre-upgrade stash if the delivery must be reverted.");
     }
     console.log("========================================================");
     process.exit(1);
