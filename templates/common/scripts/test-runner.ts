@@ -1,6 +1,8 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.14.0
+ * @version 1.15.0
+ *
+ * v1.15.0 (2026-11-12, CI speed): parallel dispatch is longest-first. windows-latest `test:unit` takes ~345s vs ~60s on ubuntu; the tail is a handful of files (upgrade-decision-log 163s, upgrade-overwrite-protection 119s, co-workspace-admin-console 103s, upgrade-tree-sync 97s, mcp-upstream-server 51s) that start late under alphabetical order and extend the wall clock. New pure exported `orderLongestFirst()` sorts files carrying a FILE_TIME_BUDGETS row first (larger suite budget, then larger test budget), the rest after in original order (stable); results/reporting stay in the original alphabetical order. No budget changed.
  *
  * v1.14.0 (2026-11-12, overwrite-protection PR-B): `upgrade-vintage-pending.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — three full upgrade-project.ts engine spawns per file run (dry-run, apply, apply with a grant); same windows-slow family budget as upgrade-overwrite-protection.
  *
@@ -385,6 +387,28 @@ async function executeTestFile(
   }
 }
 
+/**
+ * Longest-first dispatch order (v1.15.0): files with a FILE_TIME_BUDGETS row
+ * come first (larger suite budget, then larger test budget), then every other
+ * file in its original order. The budget is a cheap proxy for "known slow".
+ * Pure and stable; does not mutate the input.
+ */
+export function orderLongestFirst(
+  files: string[],
+  budgets: Record<string, { suite: number; test: number }> = FILE_TIME_BUDGETS,
+): string[] {
+  const rank = (file: string) => budgets[basename(file)];
+  return files
+    .map((file, index) => ({ file, index, b: rank(file) }))
+    .sort((x, y) => {
+      if (x.b && y.b) return y.b.suite - x.b.suite || y.b.test - x.b.test || x.index - y.index;
+      if (x.b) return -1;
+      if (y.b) return 1;
+      return x.index - y.index;
+    })
+    .map((e) => e.file);
+}
+
 async function runInParallel<T, R>(
   items: T[],
   concurrency: number,
@@ -530,7 +554,8 @@ export async function runTests(suiteName: string = "integration", options: RunOp
     const execMode = suiteName === "scripts" ? ("bun-script" as const) : ("bun-test" as const);
     if (isParallel && concurrency > 1) {
       try {
-        results = await runInParallel(files, concurrency, (file, _, workerId) => {
+        const dispatchOrder = orderLongestFirst(files);
+        const ordered = await runInParallel(dispatchOrder, concurrency, (file, _, workerId) => {
           const budgets = resolveBudgets(file);
           return executeTestFile(
             file,
@@ -540,6 +565,8 @@ export async function runTests(suiteName: string = "integration", options: RunOp
             execMode,
           );
         });
+        // Report in the original (alphabetical) file order, not dispatch order.
+        results = files.map((f) => ordered[dispatchOrder.indexOf(f)]);
       } catch (err: any) {
         console.warn(
           `[test-runner] Warning: Parallel execution failed (${err.message}). Falling back to sequential execution...`,
