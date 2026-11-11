@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-12](2026-11-12.md) | test(ci): budget the upgrade-overwrite-protection re-stale loop test - windows 15.03s vs 15s ceiling |
 | [2026-11-11](2026-11-11.md) | fix(hardening): biome compliance for fleet-script-parity v1.2.0 |
 | [2026-11-10](2026-11-10.md) | docs(skills): meeting-facilitation v1.5.0 — committee-form alignment |
 | [2026-11-10](2026-11-10.md) | feat(scripts): strict biome/tsconfig profile for delivered scripts — Option A compliance sweep |
@@ -15,7 +16,7 @@
 | [2026-11-07](2026-11-07.md) | feat: deck emitter rebase onto ppt-master v6.8.0 - adapter boundary, phase 1 |
 | [2026-11-06](2026-11-06.md) | fix(governance): memory-union gate repaired-at-head semantics + propagate inline-code stripping (T-20261105-002) |
 | [2026-11-05](2026-11-05.md) | docs(governance): project-loss hardening design approval + ticket hygiene (T-20261104-004 re-filed; -002/-008/-009 closed) |
-| [2026-11-04](2026-11-04.md) | chore(templates): workspace sync (26 files) |
+| 2026-11-04 | chore(templates): workspace sync (26 files) |
 | 2026-11-03 | fix(hub-spoke): Phase 4 remediation - lock leak fix, test fixture exclusion, hook integrity lib |
 | 2026-11-02 | feat(hub-spoke): Phase 1 batch E5 - co-architect variant template creation with consumer declaration |
 | 2026-11-01 | chore(parity): drop concurrent-session changelog entry from PR surface |

@@ -1,6 +1,13 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.12.0
+ * @version 1.13.0
+ *
+ * v1.13.0 (2026-11-12, PR #1963 follow-up): `upgrade-overwrite-protection.test.ts` joins
+ *          FILE_TIME_BUDGETS (suite 300s / test 60s) — windows-latest run 43074272486: the file's
+ *          ~7 full upgrade-project.ts engine spawns (shared describe-level runs + in-body
+ *          lifecycles, ~9s on macOS) hit the 120000ms per-file wall on win32 after per-test
+ *          budgets removed the 15s ceiling failures. Same family budget as upgrade-tree-sync /
+ *          upgrade-decision-log; test 60s matches the in-file per-test budgets.
  *
  * v1.12.0 (2026-11-11, T-20261111-003 follow-up): `co-workspace-composer-wire-regression.test.ts`
  *          joins FILE_TIME_BUDGETS (suite 300s / test 45s) — windows-latest run 42913762200: the
@@ -229,6 +236,9 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // cover the round-2 suites but missed this round-3 file. Same first-time
   // entry shape (family 300s / test 45s).
   "co-workspace-composer-wire-regression.test.ts": { suite: 300000, test: 45000 },
+  // PR #1963 (windows-latest run 43074272486): engine-spawn-heavy overwrite-protection suite
+  // hit the 120s per-file wall on win32 (macOS ~9s). Family budget 300s; test 60s.
+  "upgrade-overwrite-protection.test.ts": { suite: 300000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {
