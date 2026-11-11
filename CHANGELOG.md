@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+- **[2026-11-12]**: fix(upgrade): **core-locked fork arm path-prefix fix — upgrade-project v1.101.0 → v1.101.1.** The SYNC_IF_NEWER scripts arm `CORE_LOCKED_SCRIPTS.includes(rel)` compared an unprefixed name against `scripts/dev-sync.ts` / `scripts/audit.ts` and never matched, so a version-bumped project fork of either locked core script fell through to a silent OK. It now compares the prefixed path: the canonical copy wins loudly (CORE-SCRIPT FORK warning, `DRIFT_RESTORED` WARN) and a LOCAL-PATCH-marked fork is `MARKER_LOSS` (ERROR) and kept. Non-core scripts are unaffected. Fleet dry-run across six Projects/co-* showed zero verdict deltas (no project carries a newer-than-template core fork). Tests: `tests/unit/upgrade-core-locked-fork.test.ts` (engine replay, dry-run parity); test-runner v1.13.1 adds its FILE_TIME_BUDGETS row (suite 300s / test 60s).
 - **[2026-11-11]**: feat(upgrade): **overwrite protection PR-A — EVOLVED_PRESERVE verdict + MARKER_LOSS guard on every delivery path — upgrade-project v1.100.0 → v1.101.0, upgrade-policy v1.40.0 → v1.41.0 (DEC-20261111-01; design `docs/designs/2026-11-11-upgrade-overwrite-protection-design.md` §4.2/§4.3)**
   - **E1 `EVOLVED_PRESERVE` (WARN)**: a project file that evolved past the template while the template content is unchanged since the baseline is preserved (SKIP, baseline kept) instead of being re-delivered with an `EVOLVED` WARN; `--disposition adopt-template[=glob]` is the only restore path; agents/ keeps CONFLICT (ERROR); the run summary lists preserved files.
   - **E2 `MARKER_LOSS` (ERROR)**: every `LOCAL-PATCH` form (`upstream-request:`, `design:`, `project-local`, bare `U-…`) counts; a delivery that would lower a file's marker count is skipped and the project copy kept, on whole-file deliveries, equal-version restores, skill-directory copies, ci.yml/instruction-file merges, context.md splice, JSON/SCHEMA merges, LOCKED/COMMANDS_SYNC, prune, and platform skill-mirror regeneration. An adopt grant overrides and is recorded. The A1 unbaselined-divergence check recognizes every marker form; the LOCAL-PATCH report prints per-file protection.
@@ -1996,8 +1997,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-*Last Updated: 2026-11-11*
-*Last Updated: 2026-11-11*
+*Last Updated: 2026-11-12*
+*Last Updated: 2026-11-12*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency

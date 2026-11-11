@@ -58,7 +58,8 @@
  *          the fail-closed direction (a differently-styled leak still refuses), and the
  *          both-sides seam wiring of both probes.
  *
- * @version 1.3.1 (2026-11-11: registry gains upgrade-overwrite-protection.test.ts — overwrite-protection PR-A)
+ * @version 1.3.2 (2026-11-12: registry gains upgrade-core-locked-fork.test.ts — core-locked fork arm fix)
+ * v1.3.1 (2026-11-11: registry gains upgrade-overwrite-protection.test.ts — overwrite-protection PR-A)
  */
 import { describe, expect, test, afterAll } from "bun:test";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, realpathSync, writeFileSync } from "node:fs";
@@ -94,6 +95,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "project-target-guards.test.ts",
   "repo-integrity.test.ts",
   "upgrade-decision-log.test.ts",
+  "upgrade-core-locked-fork.test.ts",
   "upgrade-overwrite-protection.test.ts",
   "upgrade-project-tenant-guard.test.ts",
   "workspace-hygiene.test.ts",
