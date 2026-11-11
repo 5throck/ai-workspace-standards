@@ -47,8 +47,8 @@
 | `co-consult/stakeholder-review-management` | variant:co-consult | 1.0.0 | co-consult/delivery-manager | co-consult/phase 4 | co-consult/project-delivery (composes_with) | — | — |
 | `co-consult/technical-feasibility` | variant:co-consult | 1.0.0 | co-consult/sme, co-consult/solutions-architect, co-consult/technology-specialist | co-consult/phase 1, co-consult/phase 2, co-consult/phase 3, co-consult/phase 4 | co-consult/change-impact-assessment (follows), co-consult/company-intelligence (composes_with), co-consult/executive-presentation (enables), co-consult/project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
 | `co-deck/design` | variant:co-deck | 1.2.1 | co-deck/design | co-deck/phase 3 | co-deck/html-build (enables), co-deck/html-build (follows), co-deck/pdf-export (composes_with), co-deck/research (composes_with) | storyline-outline | design-spec, theme-lock |
-| `co-deck/html-build` | variant:co-deck | 1.6.1 | co-deck/html-build | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows), co-deck/research (composes_with), co-deck/slide-layout-gate (follows), co-deck/storyline (composes_with) | slide-deck-draft, design-spec | slide-html |
-| `co-deck/pdf-export` | variant:co-deck | 2.1.1 | co-deck/pdf-export | co-deck/phase 4, co-deck/phase 5 | co-deck/research (composes_with), co-deck/storyline (composes_with) | slide-html | final-pdf |
+| `co-deck/html-build` | variant:co-deck | 1.7.0 | co-deck/html-build | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows), co-deck/research (composes_with), co-deck/slide-layout-gate (follows), co-deck/storyline (composes_with) | slide-deck-draft, design-spec | slide-html |
+| `co-deck/pdf-export` | variant:co-deck | 2.1.2 | co-deck/pdf-export | co-deck/phase 4, co-deck/phase 5 | co-deck/research (composes_with), co-deck/storyline (composes_with) | slide-html | final-pdf |
 | `co-deck/prep-pdf` | variant:co-deck | 2.0.0 | co-deck/measure, co-deck/pdf-export | co-deck/phase 4 | co-deck/version (follows) | — | — |
 | `co-deck/presenter-mode` | variant:co-deck | 1.0.1 | co-deck/html-build | co-deck/phase 4 | — | — | — |
 | `co-deck/research` | variant:co-deck | 1.2.1 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
@@ -922,7 +922,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `design-foundation` | skill | divergence | co-design@1.3.0 #5cc8c410; root@1.1.0 #0f50cf02 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
 | `meeting-facilitation` | skill | version-drift | co-safety@1.5.0 #690ba21e; root@1.5.0 #f4da9e5e |
-| `pdf-export` | skill | divergence | co-deck@2.1.1 #ca2003c3; co-price@1.1.0 #e11de512 |
+| `pdf-export` | skill | divergence | co-deck@2.1.2 #63cf9c38; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |

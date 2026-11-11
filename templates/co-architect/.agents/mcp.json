@@ -1,7 +1,7 @@
 {
   "mcpServers": {
-    "graft": {
-      "command": "graft",
+    "trail": {
+      "command": "trail",
       "args": [
         "mcp"
       ]

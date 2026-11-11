@@ -6,39 +6,19 @@ Reference screenshots for theme×style combinations, used by the visual regressi
 
 ```
 baselines/
-├── outline/
-│   ├── classic/          slide-1.png, slide-2.png
-│   ├── minimal/
-│   ├── premium-dark/
-│   ├── academic/
-│   └── visual-heavy/
-├── pitch/
-│   ├── classic/
-│   ├── minimal/
-│   └── premium-dark/
-├── pitch-enhanced/
-│   ├── classic/
-│   ├── minimal/
-│   ├── premium-dark/
-│   └── academic/
-├── vertical/
-│   ├── classic/
-│   ├── minimal/
-│   ├── premium-dark/
-│   ├── academic/
-│   └── visual-heavy/
-└── zen/
-    ├── classic/
-    ├── minimal/
-    ├── premium-dark/
-    └── academic/
+├── outline/         academic, classic, minimal, premium-dark, visual-heavy, white-bubble
+├── outlook/         academic, classic, minimal, premium-dark, visual-heavy, white-bubble
+├── pitch/           classic, minimal, premium-dark, white-bubble
+├── pitch-enhanced/  academic, classic, minimal, premium-dark, white-bubble
+├── vertical/        academic, classic, minimal, premium-dark, visual-heavy, white-bubble
+└── zen/             academic, classic, minimal, premium-dark, white-bubble
 ```
 
-Each `theme/style/` directory contains:
+32 theme×style pairs, 64 PNGs. Each `theme/style/` directory contains:
 - `slide-1.png` — cover slide screenshot
 - `slide-2.png` — standard content slide screenshot
 
-Only **fully compatible** theme×style pairs have baselines. Partial and incompatible pairs are excluded.
+Pairs are derived automatically from each theme's `theme.json` (partial and incompatible pairs are excluded). Only `slide-*.png` files belong here.
 
 ## Running Tests
 
@@ -71,7 +51,7 @@ Default: **0.5%** of total bytes. Configurable via environment variable:
 VISUAL_THRESHOLD=0.01 bun run test:visual
 ```
 
-If a comparison exceeds the threshold, the fresh screenshot is saved as `diff-slide-N.png` in the baseline directory.
+If a comparison exceeds the threshold, the pair is re-captured once (load-jitter retry, browser script v0.2.0). A fresh screenshot that still exceeds the threshold is saved under the transient `presentations/_smoke_test/vr_fresh/<theme>/<style>/` directory. Diff copies are never stored in `baselines/`.
 
 ### Screenshot Timing
 After navigating to a slide, the test waits for `requestAnimationFrame` + 500ms before capturing, ensuring CSS transitions and layout have settled.
@@ -79,25 +59,16 @@ After navigating to a slide, the test waits for `requestAnimationFrame` + 500ms 
 ## Environment Notes
 
 - Baselines are **environment-specific** — they depend on system fonts, rendering engine version (Chromium), and OS.
-- Baselines were generated on Windows with Playwright's bundled Chromium.
+- Baselines were regenerated on 2026-11-11 on macOS arm64 with Playwright **1.63.0** (`chromium-1243`) — the template pins `playwright` to the exact version so template and project captures use the same browser build.
 - If baselines are regenerated on a different OS or with a different Chromium version, they will differ from the originals.
 - For CI environments, generate baselines on the same platform used in CI to avoid false positives.
 
 ## Adding New Baselines
 
-### For a new theme/style combination
-
-1. Add the theme and style to the `FULLY_COMPATIBLE_PAIRS` array in
-   `scripts/co-deck/tests/theme-visual-regression.test.ts`
-2. Run `bun run test:visual:update` to capture baselines for the new pair
-3. Commit the new PNG files
-
-### For a new theme
-
-1. Ensure the theme's `theme.json` declares `compatible_styles`
-2. Add all fully compatible pairs to the test's pair list
-3. Capture baselines with `bun run test:visual:update`
-4. Commit
+1. Declare the pairing in the theme's `theme.json` (`compatible_styles`); pairs are derived from it automatically.
+2. Run `bun run test:visual:update` to capture baselines for the new pair.
+3. Run `bun run test:visual` twice; both runs must report zero failures.
+4. Commit the new `slide-*.png` files.
 
 ## Troubleshooting
 

@@ -7,8 +7,8 @@ Curated registry for the co-deck variant-exclusive skills (T-20260924-009). One 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `design` | 1.2.1 | active | design | 2026-08-24 | — | co-deck only — visual style locking — layout, palette, fonts |
-| `html-build` | 1.6.1 | active | html-build | 2026-10-07 | — | co-deck only — HTML slide generation; v1.6.1 adds the canonical rebuild order (build → style patch → video inject, U-20261105-007) |
-| `pdf-export` | 2.1.1 | active | pdf-export | 2026-08-25 | — | co-deck only — PDF generation from the measured layout spec |
+| `html-build` | 1.7.0 | active | html-build | 2026-11-10 | — | co-deck only — HTML slide generation; v1.7.0 adds the mandatory Font Parity (PDF ↔ HTML) section — typography SSOT = the PDF engine font family, embedded via @font-face and verified with document.fonts.check() (backport of co-deck DEC-20261110-02, U-20261111-004); v1.6.1 adds the canonical rebuild order (build → style patch → video inject, U-20261105-007) |
+| `pdf-export` | 2.1.2 | active | pdf-export | 2026-11-10 | — | co-deck only — PDF generation from the measured layout spec; v2.1.2 names the PDF font family as the deck typography source of truth (Font Parity, U-20261111-004) |
 | `prep-pdf` | 2.0.0 | active | pdf-export | 2026-06-23 | — | co-deck only — PDF layout preparation with estimate-layout.ts calibration |
 | `presenter-mode` | 1.0.1 | active | html-build | 2026-08-16 | — | co-deck only — dual-window presenter state sync (BroadcastChannel) |
 | `research` | 1.2.1 | active | research | 2026-08-23 | — | co-deck only — web research and source collection for lecture topics |

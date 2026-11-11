@@ -1,4 +1,12 @@
-// @version 0.1.0
+// @version 0.2.0
+// v0.2.0 (2026-10-23): retry-once-on-exceed in compare mode — transient paint
+//           jitter under machine load (observed when the suite runs inside the
+//           dev-sync gate) pushed stable pages over the 0.5% threshold on single
+//           captures; a slide now passes if a re-capture lands within threshold,
+//           and only a second consecutive exceed counts as a regression.
+// v0.1.1 (2026-10-23): threshold-exceed diff copies now land in the transient
+//           vr_fresh dir instead of baselines/ — the old path committed 42
+//           diff-slide-*.png artifacts inside the baseline tree.
 // theme-visual-regression.browser.mjs — Playwright screenshot capture & comparison.
 //
 // Uses Node.js (not bun) because bun has issues with Playwright subprocess handling
@@ -351,19 +359,35 @@ async function main() {
             console.log(`    ✓ slide-${slideNum}: within threshold (${(comparison.diffRatio * 100).toFixed(3)}%)`);
             slideResults.push({ slide: Number(slideNum), status: 'pass', identical: false, diffRatio: comparison.diffRatio });
           } else {
-            console.log(`    ❌ slide-${slideNum}: EXCEEDS threshold (${(comparison.diffRatio * 100).toFixed(3)}% > ${(DEFAULT_THRESHOLD * 100).toFixed(1)}%)`);
+            // Transient paint jitter under machine load can push a stable page
+            // just over the threshold on a single capture. Re-capture the whole
+            // pair once and re-compare; only a second consecutive exceed counts
+            // as a regression. A real visual change exceeds both times.
+            console.log(`    ⚠️  slide-${slideNum}: exceeds threshold on first capture (${(comparison.diffRatio * 100).toFixed(3)}%) — re-capturing once`);
+            const retry = await captureScreenshots(browser, pair.theme, pair.style, freshDir);
+            const retryPath = retry.screenshots[slideNum];
+            const second = retryPath ? compareScreenshots(retryPath, baselinePath) : null;
+            if (second && second.diffRatio <= DEFAULT_THRESHOLD) {
+              console.log(`    ✓ slide-${slideNum}: within threshold on re-capture (${(second.diffRatio * 100).toFixed(3)}%) — transient jitter, not a regression`);
+              slideResults.push({ slide: Number(slideNum), status: 'pass', identical: false, diffRatio: second.diffRatio, retried: true, firstDiffRatio: comparison.diffRatio });
+            } else {
+              const final = second ?? comparison;
+              const finalPath = retryPath ?? freshPath;
+              console.log(`    ❌ slide-${slideNum}: EXCEEDS threshold on re-capture too (${(final.diffRatio * 100).toFixed(3)}% > ${(DEFAULT_THRESHOLD * 100).toFixed(1)}%)`);
 
-            // Save diff screenshot (just the fresh capture for now)
-            const diffPath = join(baselineDir, `diff-slide-${slideNum}.png`);
-            writeFileSync(diffPath, readFileSync(freshPath));
-            slideResults.push({
-              slide: Number(slideNum),
-              status: 'fail',
-              diffRatio: comparison.diffRatio,
-              diffPath,
-              details: comparison,
-            });
-            allPassed = false;
+              // Save diff screenshot (just the fresh capture for now) — kept in the
+              // transient vr_fresh dir, never inside baselines/ (committed artifact pollution)
+              const diffPath = join(freshDir, `diff-slide-${slideNum}.png`);
+              writeFileSync(diffPath, readFileSync(finalPath));
+              slideResults.push({
+                slide: Number(slideNum),
+                status: 'fail',
+                diffRatio: final.diffRatio,
+                diffPath,
+                details: final,
+              });
+              allPassed = false;
+            }
           }
         }
 

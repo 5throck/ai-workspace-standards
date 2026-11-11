@@ -20,9 +20,7 @@
       "Bash(bun scripts/validate-templates.ts *)",
       "WebSearch(*)",
       "WebFetch(*)",
-      "Bash(graft:*)",
-      "Bash(npx graft:*)",
-      "Bash(graft-dev:*)",
+      "Bash(trail:*)",
       "Bash(node dist/cli.js:*)",
       "Bash(bun scripts/co-safety/safety-audit.ts *)"
     ],

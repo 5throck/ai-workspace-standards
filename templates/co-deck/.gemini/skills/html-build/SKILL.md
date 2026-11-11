@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: 1.6.1
+version: 1.7.0
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -11,7 +11,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: 2026-10-07
+last_reviewed: 2026-11-10
 prerequisites: design
 relates_to:
   - skill: pdf-export
@@ -151,6 +151,24 @@ initPPT({ transition: 'fade', showTimer: true, showThumbnails: false,
 **Image paths:** Photos live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix. Diagrams (SVG/PNG) live in the shared pool at `presentations/assets/diagrams/`. Use `../assets/diagrams/<stem>.png` for diagram slides. Paths are auto-rewritten by `gen-visual-images.ts` when run.
 
 **Canonical rebuild order (U-20261105-007):** every rebuild follows build → style patch → video inject — a rebuild silently drops video players and style patches otherwise. `build-theme-deck.ts` runs the video injection itself after a successful build (idempotent, video-less decks untouched); pass `--download-videos` to pre-fetch the deck's YouTube videos into `presentations/assets/videos/yt-<id>.mp4` before injection so offline playback binds local files. Re-apply the style patch after every rebuild.
+
+#### Font Parity (PDF ↔ HTML) — mandatory
+
+A deck's typography has ONE source of truth: the font family the PDF engine
+loads from `presentations/assets/fonts/` (currently `Pretendard-Regular/Bold.ttf`,
+per `gen-slides-pdf.ts` `--font-dir` default). Every HTML build MUST:
+
+1. Embed that same family via `@font-face` from those same TTF files (CSS url
+   relative to the stylesheet's own location) and set it FIRST in `--font-family`.
+2. Keep system-font fallbacks (Noto Sans KR, Apple SD Gothic Neo) as resilience
+   only — they are never the delivered look.
+3. Verify before hand-off: Playwright `document.fonts.check('400 16px <Family>')`
+   and `document.fonts.check('700 24px <Family>')` must both be true.
+
+Any typography change (family, weights, font files) updates the PDF engine and
+the HTML theme/patch in the SAME change (spec activity per ADR-0074).
+Design: `docs/designs/2026-11-10-font-parity-ssot-principle-design.md`; gate
+record: `decisions/gates.yaml` DG-DECK-06 (S10 sample review).
 
 ---
 

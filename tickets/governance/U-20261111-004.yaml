@@ -1,0 +1,63 @@
+schemaVersion: 1
+id: U-20261111-004
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-11T07:30:02.525+09:00'
+history:
+  - at: '2026-11-11T07:30:02.525+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-11T08:38:22.159+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    The 0.30.x variant-template delivery (workspace PR #1952, landed in co-deck
+    via PR #217, merge daa9cbd) clobbers co-deck-local doctrine adopted
+    2026-11-10: (1) docs/co-deck.context.md loses Structural Slide Rule 9 "Font
+    Parity (PDF ↔ HTML)" — the user-approved deck typography SSOT pointer
+    (DEC-20261110-02, co-deck PR #216) — while the delivered file's own version
+    footer still references that rule, i.e. the L2 variant template's context.md
+    predates the rule and whole-file delivery overwrote the variant copy. (2)
+    The delivered agents/html-build.md v1.4.0 carries `phases: [4]`, which
+    contradicts the same co-deck variant doctrine and re-clobbers the variant's
+    corrected `phases: [5, 6, 7, 8]` on every upgrade. Same class as upstream
+    U-20261110-001 (0.30.0 delivery dropped merged PR #1864 CSS content).
+    Expected: the L2 co-deck variant template carries the current co-deck
+    doctrine (rule 9; variant-correct phases) so upgrade deliveries stop
+    regressing user-approved content. Note for the local team: inline
+    LOCAL-PATCH markers are ineffective for these two files because delivery
+    replaces whole files — the durable fix is the template carrying current
+    content.
+  affected_paths:
+    - docs/co-deck.context.md
+    - agents/html-build.md
+  identity_source: cwd
+  repro: >-
+    In any co-deck variant checkout at or after the 0.30.x template delivery:
+    check docs/co-deck.context.md Content Rules — rule 9 (Font Parity) present
+    in 765afd9 (PR #216, 2026-11-10) is absent from the delivered tree, while
+    the file's own version footer still cites "rule 9 (font parity SSOT pointer
+    ... DG-DECK-06)". Also: agents/html-build.md delivered as v1.4.0 still
+    carries `phases: [4]` (the retired co-deck stage scheme; variant doctrine
+    AGENTS.md §4.2 declares Design=4, Build=5-8, Measure=9-10, Export=11).
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/co-deck.context.md=true
+    - info:in_last_delivery agents/html-build.md=true
+  dedupe_key: d7a0eedf6b9d00ede988e33c32fe968989519ca9d0f978ea060aaacff94feaa5
+  duplicates:
+    - project: co-deck
+      at: '2026-11-11T07:30:02.525+09:00'

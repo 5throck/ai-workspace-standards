@@ -8,12 +8,39 @@ title: >-
   (design-spec amendment or gen-slides-pdf change) and align the other side via
   the design flow
 priority: low
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-11-10T14:44:07.975+09:00'
 history:
   - at: '2026-11-10T14:44:07.975+09:00'
     from: null
     to: backlog
+  - at: '2026-11-11T08:56:26.654+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-11T09:53:17.417+09:00'
+    from: waiting
+    to: review
+description: >-
+  PM ruling 2026-11-11 (recommended option, taken under the user's attempt-all
+  directive; FLAGGED for user confirmation): the HTML rendering is authoritative
+  — `**keyword**` on the punchline card renders bold + accent colour, and
+  gen-slides-pdf aligns to it. Rationale: (1) the co-deck PDF engine already
+  defines `**x**` / <strong> as "bold + accent colour inline (HTML .slide-card
+  strong)" (Projects/co-deck/scripts/co-deck/gen-slides-pdf.ts richRuns,
+  LOCAL-PATCH U-20261105-005 v1.14.3) — the punchline branch is the one renderer
+  that does not use richRuns, so all-navy is an engine gap, not a design choice;
+  (2) co-deck content rule 8 (Humanize) protects `**keyword**` markup
+  byte-identically, i.e. the markup is meaningful; (3) aligning the PDF needs no
+  design-spec amendment, while the alternative (all-navy) would need a spec
+  amendment plus an HTML theme change in every theme. Alignment work (not done
+  here — outward-facing co-deck repo): in Projects/co-deck route the punchline
+  text through richRuns/richLines with C_ACCENT for bold runs, re-render S104 of
+  2026-11-consumer-goods-market-shift, re-run Gate 5 sample review, then port
+  the gen-slides-pdf change template-side (templates/co-deck is at v1.10.0 vs
+  project v1.14.4).
+blocked_reason: >-
+  awaiting user confirmation of the recommended ruling (HTML authoritative) and
+  a co-deck design-flow PR for the gen-slides-pdf punchline alignment
 result: null
 error: null
