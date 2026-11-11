@@ -4,7 +4,7 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.77.0
+- **Version**: 1.78.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-11
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-11 | production | production | v1.77.0 → v1.78.0 (DEC-20261111-01 PR-D): blocking check CV-02 same-version-content-change — modified templates/** versioned files whose content changed without a version bump (base: CV02_BASE, else merge-base HEAD origin/main, else HEAD). | automation-engineer |
 | 2026-11-11 | production | production | v1.76.1 → v1.77.0 (T-20261110-012 Scope C2): blocking check CV-01 common-script-version — @version on every templates/common/scripts/**/*.ts. | automation-engineer |
 | 2026-11-11 | production | production | v1.76.0 → v1.76.1 (U-20261111-001): removed the import-time process.exit(1) for a missing templates/ dir; main() returns 0 with "not applicable" in L3 project roots. | automation-engineer |
 | 2026-11-07 | production | production | v1.74.0 (spec docs/designs/2026-11-07-external-deps-standard-design.md §5.4 E2, T-20261107-005): new arm external-dep-license — every external-deps.json seed (common + co-*) strictly parsed (schema v1/v2, R3 collisions) and gated: license deny / undeclared / GPL-without-decision FAIL, review-without-decision WARN; new entry off external/<id> FAIL (installed → WARN); adapter not delivered by the variant/common tree FAIL; excluded component on a template install surface FAIL. Verdicts from lib/external-deps.ts v1.1.0. | automation-engineer |
