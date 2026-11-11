@@ -4,9 +4,9 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.12.0
+- **Version**: 1.13.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-11 (v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
+- **Last Updated**: 2026-11-12 (v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
 
 ## Description
 
@@ -19,6 +19,7 @@ default suite `integration`).
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-12 | production | production | v1.13.0 (PR #1963): `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — windows-latest run 43074272486 hit the 120000ms per-file wall (engine-spawn-heavy suite, ~9s on macOS). Same family budget. | automation-engineer |
 | 2026-11-11 | production | production | v1.12.0 (T-20261111-003): `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 45s) — win32 run 42913762200: the round-3 wire-regression suite (bootstrap + argon2 + per-request shared-team resolution) hit the 15000ms default at 15.58s while the same commit passed macos. First-time row, same family budget. | automation-engineer |
 | 2026-11-10 | production | production | v1.11.0 (T-20261110-001, spec 2026-11-10-workspace-console-ci-flake-design): `co-workspace-admin-console.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 45s) — win32 run 42656818953 (PR #1942): the heavy async service suite (66 tests) hit the 120s unit-suite wall (mode a) while macOS total ~1s and healthy win32 attempts completed inside the cap. First-time row under the v1.9.0 evidence policy; single family budget (no per-platform rows exist) keeps ≥2.5x over the observed healthy win32 ceiling (<120s). Companion test containment (mode b) in the test file itself (v1.1.0). | automation-engineer |
 | 2026-11-06 | production | production | v1.10.0 (T-20261106-008): `hub-bootstrap.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 45s) — win32 run 42078112151: spawn-heavy bootstrap E2E at 15.1s/16.1s vs the 15000ms default per-test ceiling (the same commit passed macos 1m55s). First-time row under the v1.9.0 evidence policy. | automation-engineer |

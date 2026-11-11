@@ -21,7 +21,7 @@
  * real workspace templates (the upgrade-decision-log pattern). One run per
  * seeded shape; scenarios ride the shared run as read-only assertions.
  *
- * @version 1.0.2 (every test that spawns an engine run in its body gets the 60s per-test budget)
+ * @version 1.0.3 (file joins the test-runner FILE_TIME_BUDGETS; every in-body engine spawn carries a 60s per-test budget)
  * v1.0.1 (re-stale loop test gets a 60s per-test budget — windows-latest 15.03s vs 15s ceiling)
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
