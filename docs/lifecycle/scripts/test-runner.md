@@ -4,9 +4,9 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.13.1
+- **Version**: 1.14.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-12 (v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
+- **Last Updated**: 2026-11-12 (v1.14.0 `upgrade-vintage-pending.test.ts` budget row, overwrite-protection PR-B; v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
 
 ## Description
 
@@ -19,6 +19,7 @@ default suite `integration`).
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-12 | production | production | v1.14.0 (overwrite-protection PR-B): `upgrade-vintage-pending.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — three full upgrade-project.ts engine spawns per file run; same windows-slow family budget. | automation-engineer |
 | 2026-11-12 | production | production | v1.13.1: `upgrade-core-locked-fork.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s). | automation-engineer |
 | 2026-11-12 | production | production | v1.13.0 (PR #1963): `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — windows-latest run 43074272486 hit the 120000ms per-file wall (engine-spawn-heavy suite, ~9s on macOS). Same family budget. | automation-engineer |
 | 2026-11-11 | production | production | v1.12.0 (T-20261111-003): `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 45s) — win32 run 42913762200: the round-3 wire-regression suite (bootstrap + argon2 + per-request shared-team resolution) hit the 15000ms default at 15.58s while the same commit passed macos. First-time row, same family budget. | automation-engineer |

@@ -7,7 +7,7 @@
  * (project @version above the template's) fell through to a silent OK. Documented
  * intent (AGENTS.md "Pluggable Variant Audit Hooks"): the canonical copy wins,
  * loudly (DRIFT_RESTORED, WARN); a LOCAL-PATCH-marked fork is MARKER_LOSS (ERROR)
- * and kept. A non-core script with a bumped version stays untouched (OK).
+ * and kept. A non-core script with a bumped version stays untouched and is recorded PROJECT_AHEAD (WARN, PR-B).
  *
  * Engine runs spawn scripts/upgrade-project.ts against a temp project and the real
  * workspace templates; every spawn-bearing test carries a 60s per-test budget
@@ -112,8 +112,8 @@ describe('core-locked fork arm — version-bumped forks of dev-sync.ts / audit.t
     expect(apply.status).toBe(1);
   }, 60000);
 
-  test('non-core script with a bumped version is unaffected (OK, kept)', () => {
-    expect(apply.out).toContain(`OK     lib/git-env.ts  ${BUMPED}`);
+  test('non-core script with a bumped version is kept and recorded PROJECT_AHEAD (E3, PR-B)', () => {
+    expect(verdicts(applyProject, NON_CORE)).toContain('PROJECT_AHEAD');
     expect(verdicts(applyProject, NON_CORE)).not.toContain('DRIFT_RESTORED');
     expect(read(applyProject, NON_CORE)).toContain('// bumped non-core script');
   }, 60000);

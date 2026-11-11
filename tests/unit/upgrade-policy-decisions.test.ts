@@ -22,7 +22,8 @@
  * All assertions are byte-verbatim from tests/unit/upgrade-decision-log.test.ts
  * v1.4.0 (the extraction moves describes, never expectations).
  *
- * @version 1.2.0 (2026-11-11: overwrite-protection PR-A — E1 EVOLVED_PRESERVE verdict matrix, E2 marker counting/markerLoss, supersetCheck)
+ * @version 1.3.0 (2026-11-12: overwrite-protection PR-B — E3 resolveEqualVersionDisposition table, vintage UNBASELINED row, PROJECT_AHEAD verdict, E4 pendingKindForDecision / mergePendingBackport)
+ * v1.2.0 (2026-11-11: overwrite-protection PR-A — E1 EVOLVED_PRESERVE verdict matrix, E2 marker counting/markerLoss, supersetCheck)
  * v1.1.0 (2026-11-11: resolveUnbaselinedDisposition four-cell matrix + new verdict severities — T-20261110-009/012)
  */
 import { describe, test, expect } from 'bun:test';
@@ -40,12 +41,17 @@ import {
   manifestHasUnresolvedErrors,
   markerLoss,
   markerLossDetail,
+  mergePendingBackport,
+  pendingKindForDecision,
   resolveDisposition,
+  resolveEqualVersionDisposition,
   resolveUnbaselinedDisposition,
   sha256Hex,
   supersetCheck,
   tombstoneGuard,
   type DecisionBaseline,
+  type PendingBackportEntry,
+  type ProjectStateVerdict,
 } from '../../scripts/lib/upgrade-policy.ts';
 
 /** The L1 file whose co-design deletion is the U-001 resurrection vector —
@@ -431,5 +437,88 @@ describe('E1 supersetCheck (the automated half of audit remedy R8)', () => {
   });
   test('without any base every non-blank project line is project-authored', () => {
     expect(supersetCheck('x\ny\n', [], 'x\n')).toEqual({ ok: false, missing: ['y'] });
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PR-B: E3 equal-version resolver, vintage row, PROJECT_AHEAD, E4 pending writer rule
+// ═════════════════════════════════════════════════════════════════════════════
+describe('E3 resolveEqualVersionDisposition (design §4.4 table)', () => {
+  const cls = (state: ProjectStateVerdict['state']): ProjectStateVerdict => ({
+    state,
+    matchesDeliverable: false,
+    templateChanged: state === 'UNTOUCHED',
+  });
+  test('baseline-untouched provenance: DRIFT_RESTORED at INFO, restore', () => {
+    const o = resolveEqualVersionDisposition(cls('UNTOUCHED'), 'baseline', false);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'DRIFT_RESTORED', 'INFO']);
+  });
+  test('vintage provenance (any state): DRIFT_RESTORED at INFO, restore — the cdf316143 suppress rule', () => {
+    for (const st of ['NO_BASELINE', 'PROJECT_EVOLVED'] as const) {
+      const o = resolveEqualVersionDisposition(cls(st), 'vintage', false);
+      expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'DRIFT_RESTORED', 'INFO']);
+      expect(o.detail).toContain('vintage');
+    }
+  });
+  test('no provenance, PROJECT_EVOLVED or NO_BASELINE, no grant: CONFLICT (ERROR), SKIP', () => {
+    for (const st of ['NO_BASELINE', 'PROJECT_EVOLVED'] as const) {
+      const o = resolveEqualVersionDisposition(cls(st), 'none', false);
+      expect([o.deliver, o.verdict, o.severity]).toEqual([false, 'CONFLICT', 'ERROR']);
+    }
+  });
+  test('no provenance with an adopt grant: ADOPT (INFO), restore', () => {
+    const o = resolveEqualVersionDisposition(cls('PROJECT_EVOLVED'), 'none', true);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'ADOPT', 'INFO']);
+  });
+});
+
+describe('E3 resolveUnbaselinedDisposition vintage row', () => {
+  const none = { mode: 'default' } as const;
+  test('vintage-proven, no grant: ADOPT (INFO) — even when the copy carries a marker', () => {
+    for (const marked of [false, true]) {
+      const o = resolveUnbaselinedDisposition('x.css', marked, none, true);
+      expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'ADOPT', 'INFO']);
+      expect(o.detail).toContain('vintage-proven');
+    }
+  });
+  test('non-vintage rows are unchanged: unmarked WARN-deliver, marked CONFLICT-skip', () => {
+    expect(resolveUnbaselinedDisposition('x.css', false, none, false).verdict).toBe('UNBASELINED_OVERWRITE');
+    expect(resolveUnbaselinedDisposition('x.css', true, none).verdict).toBe('CONFLICT');
+  });
+});
+
+describe('E3/E4 PROJECT_AHEAD verdict and pending writer rule', () => {
+  test('PROJECT_AHEAD is WARN in the severity contract', () => {
+    expect(DECISION_SEVERITY_CONTRACT.PROJECT_AHEAD).toBe('WARN');
+  });
+  test('pendingKindForDecision maps the gate-set verdicts; WARN CONFLICT and others are not candidates', () => {
+    expect(pendingKindForDecision('PROJECT_AHEAD', 'WARN')).toBe('PROJECT_AHEAD');
+    expect(pendingKindForDecision('EVOLVED_PRESERVE', 'WARN')).toBe('EVOLVED_PRESERVE');
+    expect(pendingKindForDecision('UNBASELINED_OVERWRITE', 'WARN')).toBe('UNBASELINED');
+    expect(pendingKindForDecision('MARKER_LOSS', 'ERROR')).toBe('MARKER_LOSS');
+    expect(pendingKindForDecision('CONFLICT', 'ERROR')).toBe('CONFLICT');
+    expect(pendingKindForDecision('CONFLICT', 'WARN')).toBeNull();
+    expect(pendingKindForDecision('DRIFT_RESTORED', 'INFO')).toBeNull();
+    expect(pendingKindForDecision('ADOPT', 'INFO')).toBeNull();
+  });
+  test('mergePendingBackport carries firstSeen forward while pending, stamps new paths, drops departed ones, sorts, dedups', () => {
+    const prior: PendingBackportEntry[] = [
+      { path: 'a.ts', kind: 'PROJECT_AHEAD', projectHash: 'h1', firstSeen: '2026-01-02', firstSeenTemplateVersion: '0.20.0' },
+      { path: 'gone.ts', kind: 'CONFLICT', projectHash: 'h2', firstSeen: '2026-01-03', firstSeenTemplateVersion: '0.20.0' },
+    ];
+    const out = mergePendingBackport(
+      [
+        { path: 'z.ts', kind: 'EVOLVED_PRESERVE', projectHash: 'h3' },
+        { path: 'a.ts', kind: 'PROJECT_AHEAD', projectHash: 'h1b', projectVersion: '2.0.0', templateVersion: '1.0.0' },
+        { path: 'a.ts', kind: 'MARKER_LOSS', projectHash: 'dup' },
+      ],
+      prior,
+      '2026-11-12',
+      '0.30.0',
+    );
+    expect(out.map((e) => e.path)).toEqual(['a.ts', 'z.ts']);
+    expect(out[0]).toMatchObject({ kind: 'PROJECT_AHEAD', projectHash: 'h1b', firstSeen: '2026-01-02', firstSeenTemplateVersion: '0.20.0' });
+    expect(out[1]).toMatchObject({ firstSeen: '2026-11-12', firstSeenTemplateVersion: '0.30.0' });
+    expect(mergePendingBackport([], prior, '2026-11-12', '0.30.0')).toEqual([]);
   });
 });

@@ -361,13 +361,14 @@ describe('E2 MARKER_LOSS — every delivery path (DEC-20261111-01 D4)', () => {
     expect(apply.out).toContain('DELIVERY CONFLICTS');
   });
 
-  test('equal-version script restore: marked fork is MARKER_LOSS + kept; unmarked control is DRIFT_RESTORED', () => {
+  test('equal-version script restore: marked fork is MARKER_LOSS + kept; unmarked unproven control is CONFLICT + kept (E3)', () => {
     expect(tplVersion(EQUAL_SCRIPT)).not.toBe('');
     expect(lossRows(EQUAL_SCRIPT).length).toBe(1);
     expect(read(applyProject, EQUAL_SCRIPT)).toContain('LOCAL-PATCH(project-local)');
     expect(verdictsFor(m, EQUAL_SCRIPT)).not.toContain('DRIFT_RESTORED');
-    expect(verdictsFor(m, EQUAL_CONTROL)).toContain('DRIFT_RESTORED');
-    expect(read(applyProject, EQUAL_CONTROL)).toBe(templateBytes(EQUAL_CONTROL));
+    expect(verdictsFor(m, EQUAL_CONTROL)).toContain('CONFLICT');
+    expect(verdictsFor(m, EQUAL_CONTROL)).not.toContain('DRIFT_RESTORED');
+    expect(read(applyProject, EQUAL_CONTROL)).toContain('// unmarked local fork');
   });
 
   test('core scripts (dev-sync.ts / audit.ts) equal-version fork: marked is MARKER_LOSS + kept; unmarked is restored', () => {

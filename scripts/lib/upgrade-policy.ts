@@ -1,4 +1,11 @@
-// @version 1.41.0
+// @version 1.42.0
+// v1.42.0 (2026-11-12, DEC-20261111-01, design 2026-11-11-upgrade-overwrite-protection PR-B): E3/E4 — PROJECT_AHEAD (WARN) verdict
+//          (project version greater than the template: never delivered, pending backport);
+//          resolveEqualVersionDisposition (baseline/vintage-proven equal-version restore -> DRIFT_RESTORED INFO;
+//          unproven fork -> CONFLICT ERROR; adopt grant -> ADOPT); resolveUnbaselinedDisposition gains a vintage
+//          row (vintage-proven -> ADOPT INFO); E4 manifest types (PendingBackportEntry, pendingBackport/templateDirty/
+//          engineVersion on DeliveryManifestV2, DecisionBaseline.provenance/blob, DeliveryDecision.grant) plus the pure
+//          pendingKindForDecision / mergePendingBackport writer rule (firstSeen carry-forward).
 // v1.41.0 (2026-11-11, DEC-20261111-01 / design
 //          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md PR-A):
 //          E1 — new verdict EVOLVED_PRESERVE (WARN): resolveDisposition no longer
@@ -1486,7 +1493,10 @@ export type DecisionVerdict =
   | "EVOLVED_PRESERVE"
   // Overwrite-protection design E2 (DEC-20261111-01 D4): a delivery write would
   // lower the file's LOCAL-PATCH marker count — the write is skipped.
-  | "MARKER_LOSS";
+  | "MARKER_LOSS"
+  // Overwrite-protection design E3 (PR-B): the project file's version is GREATER
+  // than the template's — never delivered, recorded for backport (pendingBackport).
+  | "PROJECT_AHEAD";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1519,6 +1529,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   UNBASELINED_OVERWRITE: "WARN",
   EVOLVED_PRESERVE: "WARN",
   MARKER_LOSS: "ERROR",
+  PROJECT_AHEAD: "WARN",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */
@@ -1531,6 +1542,9 @@ export interface DeliveryDecision {
   /** The delivered-baseline provenance this decision was judged against (when one exists). */
   baseline?: DecisionBaseline;
   detail: string;
+  /** E4: the explicit grant that produced this row (adopt-template glob). Lets L1 and
+   *  audits find granted overwrites without parsing `detail`. */
+  grant?: "adopt-template" | "backport-ack";
 }
 
 /** Per-file delivered-baseline provenance (design D1): SHA-256 of the delivered
@@ -1538,6 +1552,80 @@ export interface DeliveryDecision {
 export interface DecisionBaseline {
   hash: string;
   templateVersion: string;
+  /** E4: how the baseline was established. Missing means "delivered". */
+  provenance?: "delivered" | "parity" | "vintage";
+  /** E4: git blob id of the delivered bytes (three-way-merge base lookup, P3). */
+  blob?: string;
+}
+
+/** E4 backport-ack verdict (the ack file itself lands with the backport gate, PR-C). */
+export type AckVerdict = "promoted" | "stays-project" | "adopt";
+
+export type PendingBackportKind = "PROJECT_AHEAD" | "EVOLVED_PRESERVE" | "UNBASELINED" | "MARKER_LOSS" | "CONFLICT";
+
+/** One path awaiting a backport verdict (E4). */
+export interface PendingBackportEntry {
+  path: string;
+  kind: PendingBackportKind;
+  /** baselineKeyFor(rel, projectBytes). */
+  projectHash: string;
+  /** baselineKeyFor(rel, deliverable), when a deliverable exists. */
+  deliverableHash?: string;
+  projectVersion?: string;
+  templateVersion?: string;
+  /** ISO date, carried forward while the path stays pending. */
+  firstSeen: string;
+  firstSeenTemplateVersion: string;
+  ack?: { verdict: AckVerdict; ref?: string };
+}
+
+/** Gate-set kind of a decision row, or null when the row is not a backport candidate. */
+export function pendingKindForDecision(
+  verdict: DecisionVerdict,
+  severity: DecisionSeverity,
+): PendingBackportKind | null {
+  switch (verdict) {
+    case "PROJECT_AHEAD":
+      return "PROJECT_AHEAD";
+    case "EVOLVED_PRESERVE":
+      return "EVOLVED_PRESERVE";
+    case "UNBASELINED_OVERWRITE":
+      return "UNBASELINED";
+    case "MARKER_LOSS":
+      return "MARKER_LOSS";
+    case "CONFLICT":
+      return severity === "ERROR" ? "CONFLICT" : null;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Writer rule (E4): `pendingBackport` is recomputed on every apply from this run's
+ * candidates. `firstSeen` / `firstSeenTemplateVersion` carry forward from the prior
+ * manifest while the path stays pending; a path that left the gate set drops out.
+ * One entry per path (first candidate wins). Sorted by path.
+ */
+export function mergePendingBackport(
+  current: Array<Omit<PendingBackportEntry, "firstSeen" | "firstSeenTemplateVersion">>,
+  prior: PendingBackportEntry[] | undefined,
+  today: string,
+  templateVersion: string,
+): PendingBackportEntry[] {
+  const priorByPath = new Map((prior ?? []).map((e) => [e.path, e]));
+  const seen = new Set<string>();
+  const out: PendingBackportEntry[] = [];
+  for (const c of current) {
+    if (seen.has(c.path)) continue;
+    seen.add(c.path);
+    const p = priorByPath.get(c.path);
+    out.push({
+      ...c,
+      firstSeen: p?.firstSeen ?? today,
+      firstSeenTemplateVersion: p?.firstSeenTemplateVersion ?? templateVersion,
+    });
+  }
+  return out.sort((a, b) => a.path.localeCompare(b.path));
 }
 
 /** One recorded delivery tombstone (tombstone-ownership design D1): the
@@ -1573,6 +1661,12 @@ export interface DeliveryManifestV2 {
   baselines: Record<string, DecisionBaseline>;
   decisions: DeliveryDecision[];
   tombstones?: Record<string, TombstoneEntry>;
+  /** E4: paths awaiting a backport verdict (recomputed on every apply). */
+  pendingBackport?: PendingBackportEntry[];
+  /** E4: workspace templates/ had uncommitted changes at delivery time. */
+  templateDirty?: boolean;
+  /** E4: upgrade-project.ts @version that wrote the manifest. */
+  engineVersion?: string;
 }
 
 /** How a project file relates to its delivered baseline and today's deliverable (design D1). */
@@ -1760,6 +1854,56 @@ export function supersetCheck(
   return { ok: missing.length === 0, missing };
 }
 
+/** Provenance of a project file's bytes (E3): `baseline` = UNTOUCHED against the delivered
+ *  baseline, `vintage` = equals a historical template blob, `none` = neither. */
+export type FileProvenance = "baseline" | "vintage" | "none";
+
+/**
+ * E3 equal-version arm resolver (scripts / variant scripts): the project and template
+ * versions are equal but the bytes differ.
+ *
+ * | provenance          | grant | verdict          | severity | delivery |
+ * |---------------------|-------|------------------|----------|----------|
+ * | baseline / vintage  | —     | DRIFT_RESTORED   | INFO     | restore  |
+ * | none                | no    | CONFLICT         | ERROR    | SKIP     |
+ * | none                | yes   | ADOPT            | INFO     | restore  |
+ *
+ * A provenance-proven restore destroys no project content, so it is INFO (the
+ * suppress rule for the unbumped Biome-reformat noise).
+ */
+export function resolveEqualVersionDisposition(
+  cls: ProjectStateVerdict,
+  provenance: FileProvenance,
+  granted: boolean,
+): DispositionOutcome {
+  if (provenance === "baseline" || provenance === "vintage") {
+    return {
+      deliver: true,
+      verdict: "DRIFT_RESTORED",
+      severity: "INFO",
+      detail:
+        provenance === "baseline"
+          ? "equal-version content drift on a baseline-untouched file — restored to the template copy (no project-authored content)"
+          : "equal-version content drift; project bytes equal a historical template revision (vintage-proven) — restored to the template copy",
+    };
+  }
+  if (granted) {
+    return {
+      deliver: true,
+      verdict: "ADOPT",
+      severity: "INFO",
+      detail:
+        "equal-version drift on unproven content — template copy delivered via explicit --disposition adopt-template (decision recorded)",
+    };
+  }
+  return {
+    deliver: false,
+    verdict: "CONFLICT",
+    severity: "ERROR",
+    detail: `equal-version drift with no provenance (${cls.state === "PROJECT_EVOLVED" ? "project-evolved since the last delivery" : "no delivery baseline and no template-vintage match"}) — CONFLICT disposition: restore SKIPPED, project copy preserved (a content change must bump the version template-side; re-run with --disposition adopt-template[=glob] to take the template copy)`,
+  };
+}
+
 /**
  * A1 (T-20261110-009, DEC-20261110-04 PR-2): disposition for a NO_BASELINE
  * candidate whose project copy differs from the deliverable (callers check
@@ -1773,13 +1917,28 @@ export function supersetCheck(
  * | yes | yes | ADOPT (INFO), deliver |
  * | no  | no  | UNBASELINED_OVERWRITE (WARN), deliver |
  * | no  | yes | ADOPT (INFO), deliver |
+ *
+ * E3 (PR-B): `vintageProven` (project bytes equal a historical template blob)
+ * short-circuits to ADOPT (INFO) when no grant applies.
  */
 export function resolveUnbaselinedDisposition(
   rel: string,
   hasLocalPatchMarker: boolean,
   disposition: DispositionFlag,
+  vintageProven = false,
 ): DispositionOutcome {
   const granted = disposition.mode === "adopt-template" && disposition.matches(rel);
+  if (vintageProven && !granted) {
+    // E3 (PR-B): the project bytes equal a historical template revision — untouched
+    // template vintage, no project content to lose. Plain ADOPT (INFO), no marker check.
+    return {
+      deliver: true,
+      verdict: "ADOPT",
+      severity: "INFO",
+      detail:
+        "no delivery baseline; project bytes equal a historical revision of the template (vintage-proven — no project-authored content) — delivered",
+    };
+  }
   if (granted) {
     return {
       deliver: true,

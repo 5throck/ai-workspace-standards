@@ -1,5 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.101.1
+// @version 1.102.0
+// v1.102.0 (2026-11-12, DEC-20261111-01 — design 2026-11-11-upgrade-overwrite-protection PR-B):
+//          (E3) lib/template-vintage.ts — a project file whose bytes equal ANY historical
+//          template revision (git blob history, CRLF-normalized, horizon 2026-06-01) is
+//          vintage-proven. The scripts / variant-scripts equal-version arm now uses
+//          resolveEqualVersionDisposition: baseline/vintage-proven restore is DRIFT_RESTORED
+//          INFO; an unproven fork is CONFLICT (ERROR, skipped); vintage-proven
+//          UNBASELINED_OVERWRITE becomes ADOPT (INFO). (E3) PROJECT_AHEAD (WARN) wherever the
+//          project version exceeds the template (scripts, variant/overlay scripts, agents, skills
+//          + variant skills incl. the catch-up rows, TEMPLATE TREE SYNC inline-version docs);
+//          never delivered. (E3) MERGE_DROP — ci.yml and DOCS_MERGE merges override the MERGE row
+//          to WARN when project-authored lines are dropped. (E4) manifest gains pendingBackport[]
+//          (firstSeen carry-forward), templateDirty, engineVersion; baselines gain provenance and
+//          blob; decisions gain grant. The exit summary prints a PENDING BACKPORT block.
 // v1.101.1 (2026-11-12, core-locked fork arm fix): the CORE_LOCKED_SCRIPTS arm compared the unprefixed `rel` against `scripts/…` entries and never matched, so a version-bumped fork of dev-sync.ts / audit.ts fell through to a silent OK; it now compares `relPath`. Intended semantics (T-20260921-010, AGENTS.md Pluggable Variant Audit Hooks): canonical copy wins, loudly (CORE-SCRIPT FORK, DRIFT_RESTORED WARN); a LOCAL-PATCH-marked fork is MARKER_LOSS (ERROR) and kept. Fleet dry-run (6 Projects/co-*): zero verdict deltas.
 // v1.101.0 (2026-11-11, DEC-20261111-01 — design
 //          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md PR-A):
@@ -1268,7 +1281,10 @@ import {
   normalizeAgentTierFrontmatter,
   resolveClaim,
   resolveDisposition,
+  resolveEqualVersionDisposition,
   resolveUnbaselinedDisposition,
+  pendingKindForDecision,
+  mergePendingBackport,
   LOCAL_PATCH_MARKER_RE,
   markerLoss,
   markerLossDetail,
@@ -1277,10 +1293,20 @@ import {
   type DecisionVerdict,
   type DeliveryDecision,
   type DispositionFlag,
+  type FileProvenance,
+  type PendingBackportEntry,
   type PriorDeliveryState,
   type ProjectStateVerdict,
   type TombstoneEntry,
 } from "./lib/upgrade-policy.ts";
+import {
+  blobIdOf,
+  blobIdsFor,
+  loadTemplateBlobHistory,
+  readBlobTexts,
+  vintageMatch,
+  type TemplateBlobHistory,
+} from "./lib/template-vintage.ts";
 import { missingDependencies, scanDeliveredScripts } from "./lib/dependency-guard.ts";
 import {
   parseExternalDepsManifest,
@@ -2484,6 +2510,33 @@ function lineDiffCounts(a: string[], b: string[]): { added: number; removed: num
   return { removed: n - lcs, added: m - lcs };
 }
 
+/**
+ * E3 MERGE_DROP (PR-B): count the project-authored lines a merge drops. A line counts when it
+ * is present in the project copy, absent from the merged text, absent from the current
+ * template(s), and absent from every historical (vintage) blob of the path. Blank lines and
+ * trailing whitespace are ignored. Vintage blobs are read only when candidates remain.
+ */
+function countMergeDrop(rel: string, projectText: string, mergedText: string, templateTexts: string[]): number {
+  const lines = (t: string): string[] =>
+    t
+      .replace(/\r\n/g, "\n")
+      .split("\n")
+      .map((l) => l.trimEnd());
+  const keep = new Set<string>(lines(mergedText));
+  for (const t of templateTexts) for (const l of lines(t)) keep.add(l);
+  let candidates = new Set(lines(projectText).filter((l) => l.trim() !== "" && !keep.has(l)));
+  if (candidates.size === 0) return 0;
+  const blobTexts = readBlobTexts(workspaceRoot, blobIdsFor(vintageCandidates(rel), getVintageHistory()));
+  for (const t of blobTexts) {
+    for (const l of lines(t)) candidates.delete(l);
+    if (candidates.size === 0) return 0;
+  }
+  return candidates.size;
+}
+function mergeDropDetail(n: number): string {
+  return `MERGE_DROP: ${n} project-authored line(s) dropped outside the project region (absent from the merged text, the template and every template revision) — review the diff and port or restore`;
+}
+
 /** Managed-block merge (WORKSPACE-MANAGED / COMMON-* / VARIANT-INJECT /
  *  DYNAMIC_SKILLS zones): marker patterns, keyed+positional merge semantics,
  *  and the merge core live in scripts/lib/managed-block-merge.ts (T-20260916-012
@@ -2501,7 +2554,7 @@ function mergeWorkspaceManaged(
   templateFile: string,
   rel: string,
   pass: "MERGE" | "DOCS_MERGE",
-): { merged: boolean; snapshotCount: number; skeletonLog: string[] } {
+): { merged: boolean; snapshotCount: number; skeletonLog: string[]; dropped?: number } {
   const tplContent = readFileSync(templateFile, "utf8");
   let commonContent: string | null = null;
 
@@ -2656,6 +2709,11 @@ function mergeWorkspaceManaged(
   if (finalMerged && markerLossBlocks(rel, "MERGE_MANAGED", pass, projectFile, finalContent)) {
     return { merged: false, snapshotCount: 0, skeletonLog };
   }
+  // E3 MERGE_DROP (PR-B): DOCS_MERGE only (ci.yml has its own call site).
+  const dropped =
+    pass === "DOCS_MERGE" && finalMerged
+      ? countMergeDrop(rel, projContent, finalContent, commonContent ? [tplContent, commonContent] : [tplContent])
+      : 0;
   if (!dryRun && skeletonSnapshots.length > 0) {
     // T-20260917-010 pattern: persist the replaced span(s) BEFORE the merged
     // content lands — a recovery copy that cannot be written means the
@@ -2695,7 +2753,7 @@ function mergeWorkspaceManaged(
     writeFileSync(projectFile, finalContent, "utf8");
     noteDelivered(rel);
   }
-  return { merged: finalMerged, snapshotCount, skeletonLog };
+  return { merged: finalMerged, snapshotCount, skeletonLog, dropped };
 }
 
 /** SKELETON_COLLISION decisions (design D6b): the skeleton lib reports guarded
@@ -2736,6 +2794,13 @@ function mergeCiWorkflowFile(projectFile: string, templateFile: string, rel: str
   ) {
     return true;
   }
+  // E3 MERGE_DROP input: the project bytes BEFORE the (apply-mode) merge replaces them.
+  let projectBefore: string | null = null;
+  try {
+    projectBefore = readFileSync(projectFile, "utf8");
+  } catch {
+    /* absent project copy — nothing to drop */
+  }
   const outcome = applyCiWorkflowMerge(projectFile, templateFile, { dryRun, allowTriggerPermDiff: acceptCiPermDiff });
   const r = outcome.result;
   for (const w of r?.warnings ?? []) console.log(`    WARN: ${w}`);
@@ -2754,12 +2819,26 @@ function mergeCiWorkflowFile(projectFile: string, templateFile: string, rel: str
     default: {
       const migrated = r && r.migrated.length > 0 ? ` — MIGRATED PROJECT-JOBS: ${r.migrated.join(", ")}` : "";
       console.log(`    ${dryTag}${outcome.status === "would-update" ? "WOULD UPDATE" : "UPDATED"}: ${rel}${migrated}`);
+      // E3 MERGE_DROP (PR-B): project-authored lines the merged text drops.
+      let dropped = 0;
+      if (probe.result?.content != null) {
+        try {
+          const tplTexts = [readFileSync(templateFile, "utf8")];
+          const commonCi = join(commonDir, rel);
+          if (existsSync(commonCi) && commonCi !== templateFile) tplTexts.push(readFileSync(commonCi, "utf8"));
+          if (projectBefore !== null) dropped = countMergeDrop(rel, projectBefore, probe.result.content, tplTexts);
+        } catch {
+          /* unreadable — no MERGE_DROP signal */
+        }
+      }
       recordDecision(
         rel,
         "MERGE_MANAGED",
         "MERGE",
         "MERGE",
-        `ci.yml merge delivered — template-owned jobs authoritative, PROJECT-JOBS region preserved${migrated}`,
+        `ci.yml merge delivered — template-owned jobs authoritative, PROJECT-JOBS region preserved${migrated}${dropped > 0 ? ` — ${mergeDropDetail(dropped)}` : ""}`,
+        undefined,
+        dropped > 0 ? "WARN" : undefined,
       );
     }
   }
@@ -2806,7 +2885,9 @@ function recordDecision(
   detail: string,
   baseline?: DecisionBaseline,
   severityOverride?: DeliveryDecision["severity"],
+  grant?: DeliveryDecision["grant"],
 ): void {
+  const severity = severityOverride ?? DECISION_SEVERITY_CONTRACT[verdict];
   decisions.push({
     path,
     policy,
@@ -2814,8 +2895,97 @@ function recordDecision(
     verdict,
     detail,
     ...(baseline ? { baseline } : {}),
-    severity: severityOverride ?? DECISION_SEVERITY_CONTRACT[verdict],
+    ...(grant ? { grant } : {}),
+    severity,
   });
+  notePendingCandidate(path, verdict, severity);
+}
+
+// ── E3 template-vintage provenance (PR-B) ────────────────────────────────────
+// A project file whose bytes equal ANY historical revision of its template counterpart is
+// untouched template vintage (no project-authored content). History is loaded lazily — one
+// `git log --raw` per template root — the first time a classification needs it.
+let vintageHistory: TemplateBlobHistory | null = null;
+function getVintageHistory(): TemplateBlobHistory {
+  if (!vintageHistory) {
+    vintageHistory = loadTemplateBlobHistory(workspaceRoot, [`templates/${variant}`, "templates/common"]);
+  }
+  return vintageHistory;
+}
+/** Workspace-relative template paths a project path may descend from (variant, then common). */
+function vintageCandidates(rel: string): string[] {
+  return [`templates/${variant}/${rel}`, `templates/common/${rel}`];
+}
+/** Vintage-proven: raw-bytes passes only — rendered / merged deliverables never match (design §4.4). */
+function isVintageProven(rel: string, projectContent: string): boolean {
+  if (rel === "docs/context.md" || rel.startsWith("agents/")) return false;
+  return vintageMatch(rel, projectContent, vintageCandidates(rel), getVintageHistory());
+}
+/** Vintage-proven paths observed this run (apply mode) — their baselines carry provenance "vintage". */
+const vintageRels = new Set<string>();
+function noteVintage(rel: string): void {
+  if (!dryRun) vintageRels.add(rel);
+}
+
+// ── E4 pendingBackport candidates (PR-B) ─────────────────────────────────────
+// Every decision whose verdict is a backport-gate kind records a candidate; the hashes are
+// taken from the project file at decision time (before any write). Enriched by call sites that
+// know the deliverable / versions.
+type PendingNote = Omit<PendingBackportEntry, "firstSeen" | "firstSeenTemplateVersion">;
+const pendingNotes = new Map<string, PendingNote>();
+function notePendingCandidate(path: string, verdict: DecisionVerdict, severity: DeliveryDecision["severity"]): void {
+  const kind = pendingKindForDecision(verdict, severity);
+  if (!kind || pendingNotes.has(path)) return;
+  let projectHash = "";
+  try {
+    projectHash = baselineKeyFor(path, readFileSync(join(projectDir, path), "utf8"));
+  } catch {
+    /* directory or unreadable path — no content hash */
+  }
+  pendingNotes.set(path, { path, kind, projectHash });
+}
+/** Enrich a pending candidate with the deliverable hash and the two versions. */
+function enrichPending(
+  path: string,
+  info: { deliverable?: string; projectVersion?: string; templateVersion?: string },
+): void {
+  const n = pendingNotes.get(path);
+  if (!n) return;
+  if (info.deliverable !== undefined) n.deliverableHash = baselineKeyFor(path, info.deliverable);
+  if (info.projectVersion) n.projectVersion = info.projectVersion;
+  if (info.templateVersion) n.templateVersion = info.templateVersion;
+}
+/** The recomputed pendingBackport[] (E4 writer rule): this run's candidates with firstSeen
+ *  carried forward from the prior manifest while the path stays pending. */
+function pendingBackportList(): PendingBackportEntry[] {
+  return mergePendingBackport(
+    [...pendingNotes.values()],
+    (priorManifest as { pendingBackport?: PendingBackportEntry[] } | null)?.pendingBackport,
+    new Date().toISOString().slice(0, 10),
+    currentVersion,
+  );
+}
+/** PROJECT_AHEAD (E3): the project version exceeds the template's — never delivered. */
+function recordProjectAhead(
+  rel: string,
+  policy: string,
+  pass: string,
+  projVer: string,
+  tplVer: string,
+  deliverable?: string,
+): void {
+  recordDecision(
+    rel,
+    policy,
+    pass,
+    "PROJECT_AHEAD",
+    `project version ${projVer} is ahead of the template ${tplVer} — never delivered over a newer project copy; port the content template-side (pendingBackport)`,
+    priorBaselines[rel],
+  );
+  enrichPending(rel, { deliverable, projectVersion: projVer, templateVersion: tplVer });
+  console.log(
+    `  🔼 PROJECT_AHEAD: ${rel}  project ${projVer} > template ${tplVer} — preserved, backport pending (WARN)`,
+  );
 }
 
 /** Mark a delivered path (apply mode only) — baselines are hashed from disk at manifest time. */
@@ -2871,17 +3041,39 @@ function evolvedDeliveryGuard(input: {
     // A1 (T-20261110-009): first-time delivery over committed divergence.
     // E2 (DEC-20261111-01 D4): every LOCAL-PATCH form counts as a marker.
     let marked = false;
+    let vintage = false;
     try {
-      marked = LOCAL_PATCH_MARKER_RE.test(readFileSync(input.projectFile, "utf8"));
+      const projectText = readFileSync(input.projectFile, "utf8");
+      marked = LOCAL_PATCH_MARKER_RE.test(projectText);
+      // E3: vintage-proven (project bytes equal a historical template revision) — raw-bytes
+      // passes only; agents/ and docs/context.md are rendered deliverables.
+      vintage = !input.agentsOwnership && isVintageProven(input.rel, projectText);
     } catch {
       /* unreadable — treat as unmarked */
     }
-    const outcome = resolveUnbaselinedDisposition(input.rel, marked, disposition);
-    recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail);
+    const outcome = resolveUnbaselinedDisposition(input.rel, marked, disposition, vintage);
+    const adoptGranted = dispositionAdopts(input.rel);
+    recordDecision(
+      input.rel,
+      input.policy,
+      input.pass,
+      outcome.verdict,
+      outcome.detail,
+      undefined,
+      undefined,
+      adoptGranted && outcome.verdict === "ADOPT" ? "adopt-template" : undefined,
+    );
     if (!outcome.deliver) {
+      enrichPending(input.rel, { deliverable: input.deliverableContent });
       input.onConflictSkip();
       return false;
     }
+    if (vintage && !adoptGranted) {
+      noteVintage(input.rel);
+      return true; // provenance proves no project-authored content — nothing for E2 to protect
+    }
+    if (outcome.verdict === "UNBASELINED_OVERWRITE")
+      enrichPending(input.rel, { deliverable: input.deliverableContent });
     if (markerLossBlocks(input.rel, input.policy, input.pass, input.projectFile, input.deliverableContent))
       return false;
     return true;
@@ -2894,7 +3086,16 @@ function evolvedDeliveryGuard(input: {
     // but the override is recorded so the lost markers stay visible.
     if (markerLossBlocks(input.rel, input.policy, input.pass, input.projectFile, input.deliverableContent))
       return false;
-    recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail, baseline);
+    recordDecision(
+      input.rel,
+      input.policy,
+      input.pass,
+      outcome.verdict,
+      outcome.detail,
+      baseline,
+      undefined,
+      outcome.verdict === "ADOPT" ? "adopt-template" : undefined,
+    );
     if (outcome.verdict === "ADOPT") {
       console.log(
         `  ✅ DISPOSITION (adopt-template): ${input.rel} — project-evolved content superseded by the template copy (decision recorded; baseline refreshed at manifest write)`,
@@ -2915,10 +3116,12 @@ function evolvedDeliveryGuard(input: {
       "project-evolved since the last delivery — version-gated agents/ delivery reclassified to CONFLICT (ERROR) regardless of templateChanged (D4: the body is template-canonical; project evolution is an explicit disposition)",
       baseline,
     );
+    enrichPending(input.rel, { deliverable: input.deliverableContent });
     input.onConflictSkip();
     return false;
   }
   recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail, baseline);
+  enrichPending(input.rel, { deliverable: input.deliverableContent });
   if (outcome.verdict === "EVOLVED_PRESERVE") {
     // E1 (DEC-20261111-01 D1): preserved, not a conflict — the CONFLICT wording
     // does not apply and onConflictSkip is not called.
@@ -2953,6 +3156,9 @@ function markerLossBlocks(rel: string, policy: string, pass: string, projectFile
   if (priorBaseline && baselineKeyFor(rel, projectText) === priorBaseline.hash) return false;
   const loss = markerLoss(projectText, afterText);
   if (!loss) return false;
+  // E3: vintage-proven bytes carry no project-authored content — any marker text came from an
+  // older template revision (checked only on an actual loss: the lookup is lazy).
+  if (isVintageProven(rel, projectText)) return false;
   if (dispositionAdopts(rel)) {
     recordDecision(
       rel,
@@ -2961,6 +3167,8 @@ function markerLossBlocks(rel: string, policy: string, pass: string, projectFile
       "ADOPT",
       `LOCAL-PATCH marker count ${loss.before} → ${loss.after} (${loss.lost} lost) overridden by explicit --disposition adopt-template (decision recorded)`,
       priorBaselines[rel],
+      undefined,
+      "adopt-template",
     );
     console.log(
       `  ✅ DISPOSITION (adopt-template): ${rel} — ${loss.lost} LOCAL-PATCH marker(s) superseded by the template copy (decision recorded)`,
@@ -2968,11 +3176,74 @@ function markerLossBlocks(rel: string, policy: string, pass: string, projectFile
     return false;
   }
   recordDecision(rel, policy, pass, "MARKER_LOSS", markerLossDetail(loss), priorBaselines[rel]);
+  enrichPending(rel, { deliverable: afterText });
   console.log(
     `  ⏭️  MARKER_LOSS (SKIP): ${rel} — delivery would drop ${loss.lost} LOCAL-PATCH marker(s) (${loss.before} → ${loss.after}); project copy PRESERVED (non-zero exit at completion)`,
   );
   console.log(
     "      proceed with --disposition adopt-template[=glob] once the template carries the patch hunk, or port the content template-side per design §6",
+  );
+  return true;
+}
+
+/**
+ * E3 equal-version restore decision (scripts / variant scripts; DEC-20261111-01 PR-B).
+ * Project and template versions are equal but the bytes differ. Provenance decides:
+ * baseline-untouched or vintage-proven -> DRIFT_RESTORED (INFO), restore; an unproven fork
+ * -> CONFLICT (ERROR), skipped; an adopt grant -> ADOPT. Returns true when the template
+ * copy should be delivered. Logs the verdict line; the caller performs the copy.
+ */
+function equalVersionRestore(
+  rel: string,
+  policy: string,
+  pass: string,
+  projFile: string,
+  deliverable: string,
+  version: string,
+): boolean {
+  const cls = classifyCandidate(rel, projFile, deliverable);
+  if (!cls) return true;
+  let projectText = "";
+  try {
+    projectText = readFileSync(projFile, "utf8");
+  } catch {
+    /* unreadable — treated as provenance none */
+  }
+  let provenance: FileProvenance = "none";
+  if (cls.state === "UNTOUCHED") provenance = "baseline";
+  else if (projectText !== "" && isVintageProven(rel, projectText)) provenance = "vintage";
+  const granted = dispositionAdopts(rel);
+  const outcome = resolveEqualVersionDisposition(cls, provenance, granted);
+  // E2 first (PR-A behavior kept): a restore never drops LOCAL-PATCH markers — a marked
+  // unproven fork reports the more specific MARKER_LOSS (UNTOUCHED / vintage bytes are exempt
+  // inside the guard; an adopt grant overrides and is recorded).
+  if (markerLossBlocks(rel, policy, pass, projFile, deliverable)) return false;
+  if (!outcome.deliver) {
+    recordDecision(rel, policy, pass, outcome.verdict, outcome.detail, priorBaselines[rel], outcome.severity);
+    enrichPending(rel, { deliverable, projectVersion: version, templateVersion: version });
+    console.log(
+      `  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel}  ${version}  — equal-version content drift with no provenance (project-evolved or unbaselined non-vintage); project copy PRESERVED (non-zero exit at completion)`,
+    );
+    console.log(
+      "      bump the version template-side if the template content is intended, port the project content template-side, or re-run with --disposition adopt-template[=glob]",
+    );
+    return false;
+  }
+  recordDecision(
+    rel,
+    policy,
+    pass,
+    outcome.verdict,
+    `${version} ${outcome.detail}`,
+    priorBaselines[rel],
+    outcome.severity,
+    outcome.verdict === "ADOPT" ? "adopt-template" : undefined,
+  );
+  if (provenance === "vintage") noteVintage(rel);
+  console.log(
+    outcome.verdict === "DRIFT_RESTORED"
+      ? `  ♻️  DRIFT (restored, ${provenance}-proven) ${rel}  ${version} (equal-version content differs — no project-authored content lost)`
+      : `  ✅ DISPOSITION (adopt-template): ${rel}  ${version} (equal-version drift — template copy delivered)`,
   );
   return true;
 }
@@ -3836,11 +4107,12 @@ for (const rel of DOCS_MERGE_FILES) {
       "MERGE_MANAGED",
       "DOCS_MERGE",
       "MERGE",
-      mergeResult.snapshotCount > 0
+      (mergeResult.snapshotCount > 0
         ? `managed-zone merge delivered (in-zone replace — ${mergeResult.snapshotCount} recovery snapshot(s) written)`
-        : "managed-zone merge delivered (non-destructive union/insert)",
+        : "managed-zone merge delivered (non-destructive union/insert)") +
+        ((mergeResult.dropped ?? 0) > 0 ? ` — ${mergeDropDetail(mergeResult.dropped ?? 0)}` : ""),
       undefined,
-      mergeResult.snapshotCount > 0 ? "WARN" : undefined,
+      mergeResult.snapshotCount > 0 || (mergeResult.dropped ?? 0) > 0 ? "WARN" : undefined,
     );
   }
   mergeChanged++;
@@ -4361,20 +4633,29 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     // template copy wins, unconditionally (the integrity rule "core scripts
     // must not be modified" already forbids the local fork).
     // E2 (DEC-20261111-01 D4): a restore never drops LOCAL-PATCH markers.
-    if (markerLossBlocks(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projFile, readFileSync(tplFile, "utf8"))) continue;
-    console.log(
-      `  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from L1 at same version — ADR-0085 D3)`,
-    );
-    // D3 decision log: the canonical restore is sanctioned (ADR-0085 D3) but
-    // always worth reading — DRIFT_RESTORED (WARN).
-    recordDecision(
-      relPath,
-      "SYNC",
-      "SYNC_IF_NEWER: scripts/",
-      "DRIFT_RESTORED",
-      `${projVer} equal-version content drift — restored to canonical (ADR-0085 D3 integrity rule)`,
-      priorBaselines[relPath],
-    );
+    // E3 (PR-B): non-core scripts restore only on baseline / vintage provenance (INFO), an
+    // unproven fork is CONFLICT (ERROR). Locked core scripts keep the unconditional restore.
+    if (CORE_LOCKED_SCRIPTS.includes(relPath)) {
+      if (markerLossBlocks(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projFile, readFileSync(tplFile, "utf8")))
+        continue;
+      console.log(
+        `  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from L1 at same version — ADR-0085 D3)`,
+      );
+      // D3 decision log: the canonical restore is sanctioned (ADR-0085 D3) but
+      // always worth reading — DRIFT_RESTORED (WARN).
+      recordDecision(
+        relPath,
+        "SYNC",
+        "SYNC_IF_NEWER: scripts/",
+        "DRIFT_RESTORED",
+        `${projVer} equal-version content drift — restored to canonical (ADR-0085 D3 integrity rule)`,
+        priorBaselines[relPath],
+      );
+    } else if (
+      !equalVersionRestore(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projFile, readFileSync(tplFile, "utf8"), projVer)
+    ) {
+      continue;
+    }
     if (!dryRun) {
       copyFileSync(tplFile, projFile);
       reconcileScriptRegistry(rel);
@@ -4409,6 +4690,10 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     }
     console.log(`  ${dryTag}COPIED: ${rel}`);
     syncChanged++;
+  } else if (semverGt(projVer, tplVer)) {
+    // E3 (PR-B): project-ahead — never delivered, recorded for backport. Locked core scripts
+    // were handled by the restore arm above (they keep the both-directions restore).
+    recordProjectAhead(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projVer, tplVer, readFileSync(tplFile, "utf8"));
   } else {
     console.log(`  OK     ${rel}  ${projVer}`);
     if (fileHash(tplFile) === fileHash(projFile)) noteParity(relPath); // A2
@@ -4508,6 +4793,19 @@ if (existsSync(variantScriptsSrc)) {
             }
             console.log(`  ${dryTag}COPIED: ${rel2}`);
             syncChanged++;
+          } else if (projVer === tplVer && fileHash(abs) !== fileHash(projFile)) {
+            // E3 (PR-B): equal-version fork — restore only on baseline / vintage provenance.
+            if (equalVersionRestore(rel2, "SYNC", "VARIANT SCRIPTS", projFile, readFileSync(abs, "utf8"), projVer)) {
+              if (!dryRun) {
+                copyFileSync(abs, projFile);
+                reconcileScriptRegistry(rel2);
+                noteDelivered(rel2);
+              }
+              console.log(`  ${dryTag}COPIED: ${rel2}`);
+              syncChanged++;
+            }
+          } else if (semverGt(projVer, tplVer)) {
+            recordProjectAhead(rel2, "SYNC", "VARIANT SCRIPTS", projVer, tplVer, readFileSync(abs, "utf8"));
           } else {
             console.log(`  OK     ${rel2}  ${projVer}`);
             if (fileHash(abs) === fileHash(projFile)) noteParity(rel2); // A2
@@ -4681,6 +4979,8 @@ if (existsSync(variantScriptsSrc)) {
           console.log(`  ${dryTag}COPIED: ${rel2}`);
         }
         syncChanged++;
+      } else if (semverGt(projVer, tplVer)) {
+        recordProjectAhead(rel2, "SYNC", "VARIANT SCRIPTS", projVer, tplVer, readFileSync(src, "utf8"));
       } else {
         console.log(`  OK     ${rel2}`);
       }
@@ -5107,6 +5407,13 @@ for (const agentsDir of tplAgentsDirs) {
       noteDelivered(rel);
       console.log(`  ${dryTag}COPIED: ${rel}`);
       syncChanged++;
+    } else if (stubComposed === null && semverGt(projVer, tplVer) && !dispositionAdopts(rel)) {
+      // E3 (PR-B): the project agent is AHEAD of the template — never restored over a newer
+      // project copy; recorded for backport (an explicit adopt grant falls through to the
+      // drift arm below and delivers, as before). Extends-stub deliveries (D9) keep the drift
+      // arm: the composed stub version can sit below the bare extends-target's version, so a
+      // pre-D9 bare-target copy reads "ahead" numerically yet must still heal to composed bytes.
+      recordProjectAhead(rel, "SYNC", "SYNC_IF_NEWER: agents/", projVer, tplVer, deliverableContent());
     } else if (lifecyclelessText(deliverableContent()) !== lifecyclelessText(readFileSync(projFile, "utf8"))) {
       // v1.35.0 drift reconciliation (T-20260920-002): equal frontmatter version
       // but lifecycle-stripped content differs — the same version-gated skip that
@@ -5390,7 +5697,7 @@ if (existsSync(tplSkillsDir)) {
           );
           noteDelivered(`skills/${skillName}`);
           syncChanged++;
-        } else if (drifted.length === 0) {
+        } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
           console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
         }
         for (const d of drifted) {
@@ -5404,6 +5711,18 @@ if (existsSync(tplSkillsDir)) {
             "DRIFT_PRESERVE",
             "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
             priorBaselines[`skills/${skillName}/${d}`],
+          );
+        }
+        // E3 (PR-B): the additive catch-up above still ran; a project-ahead skill also gets the
+        // PROJECT_AHEAD row (after the catch-up row).
+        if (semverGt(projVer, tplVer)) {
+          recordProjectAhead(
+            `skills/${skillName}/SKILL.md`,
+            "SYNC",
+            "SYNC_IF_NEWER: skills/",
+            projVer,
+            tplVer,
+            readFileSync(tplSkillFile, "utf8"),
           );
         }
       }
@@ -5643,7 +5962,7 @@ if (existsSync(variantSkillsSrc)) {
           );
           noteDelivered(`skills/${skillName}`);
           syncChanged++;
-        } else if (drifted.length === 0) {
+        } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
           console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
         }
         for (const d of drifted) {
@@ -5657,6 +5976,16 @@ if (existsSync(variantSkillsSrc)) {
             "DRIFT_PRESERVE",
             "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
             priorBaselines[`skills/${skillName}/${d}`],
+          );
+        }
+        if (semverGt(projVer, tplVer)) {
+          recordProjectAhead(
+            `skills/${skillName}/SKILL.md`,
+            "SYNC",
+            "VARIANT SKILLS",
+            projVer,
+            tplVer,
+            readFileSync(tplSkillFile, "utf8"),
           );
         }
       }
@@ -6468,6 +6797,11 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
       const projVer = extractInlineVersion(dest);
       if (!projVer) reason = `(no version) → v${tplInlineVer}`;
       else if (inlineVersionGt(tplInlineVer, projVer)) reason = `v${projVer} → v${tplInlineVer}`;
+      else if (inlineVersionGt(projVer, tplInlineVer)) {
+        // E3 (PR-B): the project doc's inline version exceeds the template's — preserved (it
+        // never delivered; was a silent reason === ""), now recorded for backport.
+        recordProjectAhead(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, `v${projVer}`, `v${tplInlineVer}`);
+      }
     } else if (fileHash(abs) !== fileHash(dest)) {
       reason = "(content changed)";
     }
@@ -8117,7 +8451,13 @@ if (!dryRun) {
       }
       if (!st.isFile()) return;
       try {
-        baselines[rel] = { hash: baselineKeyFor(rel, readFileSync(abs, "utf8")), templateVersion: currentVersion };
+        const text = readFileSync(abs, "utf8");
+        baselines[rel] = {
+          hash: baselineKeyFor(rel, text),
+          templateVersion: currentVersion,
+          ...(vintageRels.has(rel) ? { provenance: "vintage" as const } : {}),
+          blob: blobIdOf(text),
+        };
       } catch {
         /* unreadable — no baseline for this file */
       }
@@ -8181,9 +8521,29 @@ if (!dryRun) {
     for (const rel of [...parityRels].sort()) {
       if (baselines[rel]) continue;
       try {
+        const text = readFileSync(join(projectDir, rel), "utf8");
         baselines[rel] = {
-          hash: baselineKeyFor(rel, readFileSync(join(projectDir, rel), "utf8")),
+          hash: baselineKeyFor(rel, text),
           templateVersion: currentVersion,
+          provenance: "parity",
+          blob: blobIdOf(text),
+        };
+      } catch {
+        /* unreadable — no baseline */
+      }
+    }
+    // E3 vintage baselines (PR-B): a vintage-proven path that was NOT delivered this run (so it
+    // holds no fresh baseline) is baselined from disk with provenance "vintage". Same A2 seam:
+    // baselines only, never files[].
+    for (const rel of [...vintageRels].sort()) {
+      if (baselines[rel]) continue;
+      try {
+        const text = readFileSync(join(projectDir, rel), "utf8");
+        baselines[rel] = {
+          hash: baselineKeyFor(rel, text),
+          templateVersion: currentVersion,
+          provenance: "vintage",
+          blob: blobIdOf(text),
         };
       } catch {
         /* unreadable — no baseline */
@@ -8256,6 +8616,13 @@ if (!dryRun) {
       baselines,
       decisions,
       tombstones,
+      pendingBackport: pendingBackportList(),
+      templateDirty:
+        (
+          spawnSync("git", ["-C", workspaceRoot, "status", "--porcelain", "--", "templates"], { encoding: "utf8" })
+            .stdout || ""
+        ).trim() !== "",
+      engineVersion: extractScriptVersion(import.meta.path),
     };
     mkdirSync(join(projectDir, ".claude"), { recursive: true });
     writeFileSync(
@@ -8640,6 +9007,29 @@ if (import.meta.main && !securityPass) process.exit(1);
     console.log(
       "  Backport the project change template-side, or take the template copy with --disposition adopt-template[=glob].",
     );
+  }
+}
+// E4 (PR-B): list the paths awaiting a backport verdict (dry runs print and persist nothing).
+{
+  const pending = pendingBackportList();
+  if (import.meta.main && pending.length > 0) {
+    console.log("\n--------------------------------------------------------");
+    console.log(
+      `  PENDING BACKPORT — ${pending.length} path(s) awaiting a backport verdict (project content not in the template)`,
+    );
+    console.log("--------------------------------------------------------");
+    const today = Date.now();
+    for (const e of pending) {
+      const ageDays = Math.max(0, Math.floor((today - Date.parse(e.firstSeen)) / 86400000));
+      const ver =
+        e.projectVersion || e.templateVersion
+          ? `  ${e.projectVersion ?? "?"} vs template ${e.templateVersion ?? "?"}`
+          : "";
+      console.log(
+        `  ${e.path}   [${e.kind}]${ver}   first seen ${e.firstSeen} (${Number.isNaN(ageDays) ? "?" : ageDays}d)`,
+      );
+    }
+    console.log("  Port the project content template-side (or record a decision) so a later delivery cannot lose it.");
   }
 }
 // D3.1 (T-20261027-004): a run whose decision log carries ERROR-severity

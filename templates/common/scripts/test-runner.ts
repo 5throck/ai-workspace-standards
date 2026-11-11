@@ -1,6 +1,8 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.13.1
+ * @version 1.14.0
+ *
+ * v1.14.0 (2026-11-12, overwrite-protection PR-B): `upgrade-vintage-pending.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — three full upgrade-project.ts engine spawns per file run (dry-run, apply, apply with a grant); same windows-slow family budget as upgrade-overwrite-protection.
  *
  * v1.13.1 (2026-11-12): `upgrade-core-locked-fork.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — two full upgrade-project.ts engine spawns per file run (windows-slow family budget, same as upgrade-overwrite-protection).
  *
@@ -243,6 +245,8 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   "upgrade-overwrite-protection.test.ts": { suite: 300000, test: 60000 },
   // Core-locked fork arm replay: two full engine spawns (one dry-run, one apply) per file run.
   "upgrade-core-locked-fork.test.ts": { suite: 300000, test: 60000 },
+  // Overwrite-protection PR-B replay: three engine spawns (dry-run, apply, apply + grant) per file run.
+  "upgrade-vintage-pending.test.ts": { suite: 300000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {
