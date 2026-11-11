@@ -21,6 +21,9 @@ history:
   - at: '2026-11-11T09:53:17.417+09:00'
     from: waiting
     to: review
+  - at: '2026-11-12T08:54:36.885+09:00'
+    from: review
+    to: review
 description: >-
   PM ruling 2026-11-11 (recommended option, taken under the user's attempt-all
   directive; FLAGGED for user confirmation): the HTML rendering is authoritative
