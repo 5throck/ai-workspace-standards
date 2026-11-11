@@ -84,6 +84,18 @@ Standard directory layout for all projects in this workspace:
 
 ---
 
+### Agent Frontmatter
+
+Every agent file under `agents/` starts with a YAML frontmatter block. The rules below come from the validators, so a reader can check them.
+
+- **Required fields** (`validate-templates.ts`): `name`, `status`, `tier`, `description`, `examples`.
+- **`status`**: one of `active`, `deprecated`, `experimental`.
+- **`tier`**: one scalar, `high`, `medium`, or `low` (no per-platform map).
+- **`lifecycle`** (`validate-agents.ts`): `lifecycle.phase` and `lifecycle.governance` are required in the own frontmatter of each `agents/*.md` file, including `extends` stubs. Only the roster-schema checks skip stubs.
+- **`extends`**: a relative path to a base agent file. For a stub, the required-field check in `validate-templates.ts` resolves the base file's fields for `name`, `status`, `tier`, `description`, and `examples`. A dangling `extends` path is reported by `validate-agents.ts`.
+
+---
+
 ## Key Files
 
 | File | Purpose |
@@ -588,4 +600,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*
+*context.md version: 2.15 — Agent Frontmatter section added (U-20261112-002); 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*

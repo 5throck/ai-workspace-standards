@@ -1,4 +1,7 @@
-// @version 1.46.1
+// @version 1.46.2
+// v1.46.2 (2026-11-12, U-20261112-007): the missing-spec hint cited "AGENTS.md §5.1.1" for the E1-E5
+//          exemption categories; they now live in docs/governance/agents/execution-plan-templates.md §5.1.1.
+//          Message string only, no behavior change.
 // v1.46.1 (2026-11-10, design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md
 //          §4.3, U-20261108-001 / DEC-20261109-01): strict-profile compliance sweep —
 //          formatting reflow (double quotes, 2-space, lineWidth 120) and the enumerated
@@ -1264,7 +1267,7 @@ if (fs.existsSync(specRegPath)) {
       console.error("  The diff touches code (scripts/templates/agents) with no relevant spec activity.");
       console.error("  Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the");
       console.error(
-        "  sync with --spec-exempt=E1..E5 (AGENTS.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).",
+        "  sync with --spec-exempt=E1..E5 (docs/governance/agents/execution-plan-templates.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).",
       );
       if (import.meta.main) process.exit(1);
     }

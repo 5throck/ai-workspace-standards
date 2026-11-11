@@ -111,7 +111,7 @@ This change touches more than 3 template files. It is **high-risk by the archite
 - [x] `bun run test:visual:update` exits 0 and reports 32/32 pairs captured.
 - [x] `find templates/co-deck/docs/html-themes/baselines -name 'slide-*.png' | wc -l` prints 64.
 - [x] `bun run test:visual` exits 0 on two consecutive runs, with `failed: 0` both times.
-- [ ] `git status --porcelain templates/co-deck/docs/html-themes/baselines` is empty after the second compare run (zero diffs, zero new files).
+- [x] `git status --porcelain templates/co-deck/docs/html-themes/baselines` is empty after the second compare run (zero diffs, zero new files).
 - [x] `git ls-files templates/co-deck/docs/html-themes/baselines | grep -c diff-slide-` prints 0.
 - [x] `zen/white-bubble/slide-1.png` shows the opaque bubble card with navy type (visual check against the project copy).
 - [x] `bun scripts/upgrade-project.ts Projects/co-deck --dry-run` shows **zero** `EVOLVED` rows under `docs/html-themes/baselines/`. Every baseline row is absent (parity), `CONFLICT`, or `ADOPT`.

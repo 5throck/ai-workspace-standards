@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-11T19:46:11.481Z
+**Generated**: 2026-11-11T21:35:37.782Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -113,7 +113,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | fs, path |
-| audit.ts | 2.66.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
+| audit.ts | 2.66.1 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
 | backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
@@ -129,7 +129,7 @@
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
-| dev-sync.ts | 1.46.1 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| dev-sync.ts | 1.46.2 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |
@@ -203,7 +203,7 @@
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | child_process, fs, path |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
-| test-new-project.ts | 1.11.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
+| test-new-project.ts | 1.11.1 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.14.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |

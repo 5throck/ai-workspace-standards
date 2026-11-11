@@ -1,0 +1,34 @@
+schemaVersion: 1
+id: U-20261112-010
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-12T04:16:32.197+09:00
+history:
+  - at: 2026-11-12T04:16:32.197+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.30.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: docs/context.md (pipeline-maintained, hand edits prohibited) carries a stale Claude Low-tier model mapping "claude-haiku-4-5" while every other governance surface (AGENTS.md, CLAUDE.md, docs/VERSION_MANIFEST.md, agents frontmatter) uses "claude-haiku-5-5". The pipeline that regenerates context.md's tier mapping appears to have missed the 5-4→5-5 model rename.
+  affected_paths:
+    - docs/context.md
+  identity_source: cwd
+  repro: 'In Projects/co-develop: grep -n "haiku-4-5" docs/context.md AGENTS.md CLAUDE.md docs/VERSION_MANIFEST.md → sole haiku-4-5 hit is docs/context.md:37; all others are haiku-5-5. docs/context.md:8 header states the file is pipeline-maintained.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/context.md=false
+  dedupe_key: efef3ababd597e4051673eb08f7bbff8dc7f0d09d11b57e551f036fbf2110169
+  duplicates:
+    - project: co-develop
+      at: 2026-11-12T04:16:32.197+09:00

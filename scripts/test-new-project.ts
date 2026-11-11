@@ -2,7 +2,9 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.11.0
+ * @version 1.11.1
+ * v1.11.1 (2026-11-12): Test 27 footer pin 2.14 → 2.15 — templates/common/docs/context.md gained an Agent
+ *         Frontmatter section (U-20261112-002) and its footer moved to 2.15. Pin and messages only.
  * v1.11.0 (2026-11-06, T-20261106-004 class B): Test 25 normalizes the raw-template
  *         governance_workflow expectation through applySubstitutions() (the same
  *         placeholder map the scaffold's substitution pass applies) before the
@@ -1054,7 +1056,7 @@ try {
   // The main harness scaffold carries NO --description/--type, so docs/project.md
   // must keep the TODO(project-overview) fallback (matching the audit.ts
   // placeholder regex family), docs/context.md must carry the byte-stable pointer
-  // section (heading kept, literal placeholders gone, footer 2.14), and the raw
+  // section (heading kept, literal placeholders gone, footer 2.15), and the raw
   // project.template.md copy must be absent from the delivered tree.
   console.log("\nTest 27: Identity seed — TODO fallback, context.md pointer, no raw template copy");
   if (requireScaffold("Test 27")) {
@@ -1087,10 +1089,10 @@ try {
           if (ctx.includes("[One-sentence description"))
             ctxProblems.push("literal description placeholder still present");
           if (ctx.includes("web | cli | api | mcp")) ctxProblems.push("literal Type placeholder still present");
-          if (!/\*context\.md version: 2\.14\b/.test(ctx)) ctxProblems.push("version footer is not 2.14");
+          if (!/\*context\.md version: 2\.15\b/.test(ctx)) ctxProblems.push("version footer is not 2.15");
           if (ctxProblems.length > 0) fail("Test 27 (AC3 pointer)", ctxProblems.join("; "));
           else
-            pass("Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.14");
+            pass("Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.15");
         } catch (e) {
           fail("Test 27 (AC3 pointer)", String(e));
         }

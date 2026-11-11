@@ -1,4 +1,7 @@
-// @version 2.66.0
+// @version 2.66.1
+// v2.66.1 (2026-11-12, U-20261112-007): the --spec-exempt comment and the invalid-code error message
+//          cited "AGENTS.md §5.1.1"; the Design Gate exemption categories now live in
+//          docs/governance/agents/execution-plan-templates.md §5.1.1. Strings only, no behavior change.
 // v2.66.0 (2026-11-11, T-20261110-012 Scope C-C — DEC-20261110-04 PR-3, design
 //          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 C-C): new
 //          WARN arm `hermetic-test-roots` (workspace root only) — flags
@@ -383,7 +386,7 @@ const SPEC_CHECK = process.argv.includes("--spec-check");
 const GOVERNANCE_CHECK = process.argv.includes("--governance-check");
 
 // ADR-0055 Stage 2: spec-relevance exemption escape hatch (--spec-exempt=E3[,E5] or SYNC_SPEC_EXEMPT env).
-// Valid codes map 1:1 to the AGENTS.md §5.1.1 Design Gate exemption categories.
+// Valid codes map 1:1 to the docs/governance/agents/execution-plan-templates.md §5.1.1 Design Gate exemption categories.
 const SPEC_EXEMPT_CATEGORIES: Record<string, string> = {
   E1: "memory-log",
   E2: "changelog",
@@ -3877,7 +3880,7 @@ if (SPEC_CHECK) {
     const invalidCodes = SPEC_EXEMPT_CODES.filter((c) => !SPEC_EXEMPT_CATEGORIES[c]);
     if (invalidCodes.length > 0) {
       Fail(
-        `Invalid --spec-exempt code(s): ${invalidCodes.join(", ")} — valid codes: E1 (memory-log), E2 (changelog), E3 (hotfix-typo), E4 (pure-readme), E5 (sync-only) (AGENTS.md §5.1.1)`,
+        `Invalid --spec-exempt code(s): ${invalidCodes.join(", ")} — valid codes: E1 (memory-log), E2 (changelog), E3 (hotfix-typo), E4 (pure-readme), E5 (sync-only) (docs/governance/agents/execution-plan-templates.md §5.1.1)`,
       );
       // Skip the rest of spec-check on invalid codes (the Fail alone produces exit 1)
       // Note: we must exit the SPEC_CHECK block early here

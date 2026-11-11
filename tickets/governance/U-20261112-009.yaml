@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: U-20261112-009
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-12T04:16:32.188+09:00
+history:
+  - at: 2026-11-12T04:16:32.188+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.30.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'generate-version-manifest.ts counts agents/README_ko.md as an agent. Generated docs/VERSION_MANIFEST.md shows "Agents: 9" with a row "| README_ko | agents/README_ko.md | N/A | — |" while agents/ contains 8 real agent definitions (AGENTS.md roster and agent-lifecycle-audit both report 8).'
+  affected_paths:
+    - scripts/generate-version-manifest.ts
+    - docs/VERSION_MANIFEST.md
+  identity_source: cwd
+  repro: Run the manifest generator in a variant whose agents/ contains README_ko.md; the generated Agents table gains a non-agent row and the summary count is inflated by 1.
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: docs/VERSION_MANIFEST.md'
+    - info:in_last_delivery scripts/generate-version-manifest.ts=false
+    - info:in_last_delivery docs/VERSION_MANIFEST.md=false
+  dedupe_key: 55e348bd6f8044b919b1fdc7e7d2456cabd0ca9bacad252dd7c6846ee5317a28
+  duplicates:
+    - project: co-develop
+      at: 2026-11-12T04:16:32.188+09:00

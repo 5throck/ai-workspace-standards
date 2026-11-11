@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261112-003
+kind: manual
+title: Upstream request from co-consult
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-12T03:12:02.487+09:00
+history:
+  - at: 2026-11-12T03:12:02.487+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-consult
+  variant: co-consult
+  template_version: 0.30.0
+  source: project/co-consult
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'The upgrade pipeline updates template-version.txt (version=0.30.0, upgraded=2026-11-08) but does not rewrite the "## Template Provenance" footer block inside docs/<variant>.context.md. In co-consult L3 the provenance block still reads "Template-Version: 0.5.3" while template-version.txt says 0.30.0 — 10 minor versions stale. Repro: after upgrade-project delivery v0.30.0, read docs/co-consult.context.md footer vs template-version.txt — values diverge. Expected: upgrade pipeline rewrites the provenance block from template-version.txt (or the block is removed in favor of the single version file).'
+  affected_paths:
+    - docs/co-consult.context.md
+    - template-version.txt
+  identity_source: cwd
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: template-version.txt'
+    - info:in_last_delivery docs/co-consult.context.md=false
+    - info:in_last_delivery template-version.txt=true
+  dedupe_key: b6622394997975bdaddd7ac23172d9df69dad438e06352fbca7a46fbe569478a
+  duplicates:
+    - project: co-consult
+      at: 2026-11-12T03:12:02.487+09:00

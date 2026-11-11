@@ -15,7 +15,7 @@ title: >-
   template fixtures) and drop the stale diff artifacts. Refs: PR #1952 (CSS
   landing), PR co-deck#217 (project recapture, 27/27 PASS at fixed rendering).
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-10T21:15:58.930+09:00'
 history:
@@ -28,5 +28,14 @@ history:
   - at: '2026-11-11T08:55:42.804+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-12T05:11:07.109+09:00'
+    from: review
+    to: done
+result: >-
+  Verified 2026-11-12 in a fresh worktree off origin/main (templates/co-deck,
+  Playwright 1.63.0, chromium-1243 present): bun run test:visual run twice
+  consecutively, both '27 pairs compared, 2 pass / 0 fail' (failed: 0, exit 0;
+  59.26s and 57.52s); git status --porcelain
+  templates/co-deck/docs/html-themes/baselines empty after the second run (zero
+  diffs, zero new files). Design §6 acceptance box ticked.
 error: null

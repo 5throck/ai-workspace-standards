@@ -1,0 +1,62 @@
+schemaVersion: 1
+id: U-20261112-001
+kind: manual
+title: Upstream request from co-consult
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-12T03:12:02.427+09:00'
+history:
+  - at: '2026-11-12T03:12:02.427+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-12T05:11:07.065+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-12T05:11:07.065+09:00'
+    from: review
+    to: done
+result: >-
+  Duplicate of U-20261111-001, already fixed by PR #1959; the fix reaches
+  projects at the next template release (templates/VERSION is 0.30.0).
+error: null
+upstream:
+  project: co-consult
+  variant: co-consult
+  template_version: 0.30.0
+  source: project/co-consult
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    scripts/validate-templates.ts exits with code 1 and "[ERROR] templates/
+    directory not found" when run in a variant (L3) project that has no
+    templates/ directory. The script's own changelog (line ~267) states v1.50.2
+    added: "When templates/common is absent (variant or project context), main()
+    returns 0 and reports 'not applicable'". But a module-level guard at lines
+    ~635-640 checks existsSync(TEMPLATES_DIR) and calls process.exit(1) BEFORE
+    main() (line ~6804) runs, so the documented L3 guard never executes. Repro:
+    cd into any L3 variant project without templates/ and run `bun
+    scripts/validate-templates.ts` → exit 1. The script row is pre-allowlisted
+    for agents (e.g. .claude/settings.json permissions.allow "Bash(bun
+    scripts/validate-templates.ts *)"), so every agent invocation in variant
+    projects produces a false failure. Expected: exit 0 with "not applicable"
+    report per the v1.50.2 changelog contract, or a registry/allowlist
+    reclassification if L0-only by design.
+  affected_paths:
+    - scripts/validate-templates.ts
+    - scripts/SCRIPTS.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/validate-templates.ts=true
+    - info:in_last_delivery scripts/SCRIPTS.md=true
+  dedupe_key: 27154d90096ba5c66811945f27a7051f4e2d4f6ca9918aa6a70109cee3cea61f
+  duplicates:
+    - project: co-consult
+      at: '2026-11-12T03:12:02.427+09:00'
+  resolution:
+    outcome: duplicate
+    summary: >-
+      Duplicate of U-20261111-001, already fixed by PR #1959; the fix reaches
+      projects at the next template release (templates/VERSION is 0.30.0).
