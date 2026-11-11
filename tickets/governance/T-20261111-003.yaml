@@ -6,12 +6,31 @@ title: >-
   ceiling (main run 42881762644) — FILE_TIME_BUDGETS first-time entries for
   three co-workspace files
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-11T07:17:30.576+09:00'
 history:
   - at: '2026-11-11T07:17:30.576+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-11T08:26:58.906+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-11T08:26:58.932+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-11T08:26:58.955+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by scripts/test-runner.ts FILE_TIME_BUDGETS first-time entries (suite
+  300s / test 45s) for co-workspace-review-remediation,
+  co-workspace-shared-team-access and co-workspace-shared-team-loop (commit
+  50c8e2803), plus the follow-up co-workspace-composer-wire-regression row
+  (c02a45f7b, test-runner v1.12.0, mirrored to templates/common), landed in PR
+  #1957 (merge 5796312b5). Verification: main Test Suite run 42918430321 on
+  5796312b5 concluded success (the failing run 42881762644 was on a450923de).
+  Cosmetic leftover: the v1.12.0 header in scripts/test-runner.ts repeats the
+  v1.11.0 changelog line twice; fix opportunistically on the next version bump.
+  Closed 2026-11-11 by PM ticket sweep.
 error: null

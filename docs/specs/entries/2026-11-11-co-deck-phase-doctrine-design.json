@@ -1,0 +1,10 @@
+{
+  "id": "2026-11-11-co-deck-phase-doctrine-design",
+  "title": "co deck phase doctrine design",
+  "file": "docs/designs/2026-11-11-co-deck-phase-doctrine-design.md",
+  "status": "approved",
+  "source": "architect",
+  "created": "2026-11-11",
+  "last_updated": "2026-11-11",
+  "review_notes": "User selected Option A on 2026-11-11 (co-deck phases use lecture-workflow stage numbers). Revised design scopes it as the opt-in process_manifest.phase_axis: stage; ADR-0104 drafted as Proposed. Implementation tickets T1-T8 not created; awaiting ADR acceptance and PM approval."
+}

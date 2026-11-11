@@ -1,0 +1,53 @@
+schemaVersion: 1
+id: U-20261111-002
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-11T01:25:13.318+09:00'
+history:
+  - at: '2026-11-11T01:25:13.318+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-11T08:32:21.345+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The L1→L2 merge pass (merge-frontmatter.ts) strips CONSTITUTION.md
+    references from generated instruction files, but body-level textual
+    citations survive in CODEX.md output. The delivered L2 CODEX.md carries the
+    L0-ONLY marker at the top ("L1/L2 projects must NOT reference
+    CONSTITUTION.md ... merge-frontmatter.ts strips CONSTITUTION.md lines from
+    L2 output") while its body still contains a live citation "(CONSTITUTION
+    §11)". This ships in the workspace-root CODEX.md and in sibling variant
+    projects (verified in Projects/co-develop/CODEX.md lines 4 and 25), so every
+    project rendered from the same template shows a self-contradicting
+    governance file.
+  affected_paths:
+    - CODEX.md
+  identity_source: cwd
+  repro: >-
+    Compare any L2 variant CODEX.md (e.g. Projects/co-deck/CODEX.md,
+    Projects/co-develop/CODEX.md) line 4 (L0-ONLY marker stating CONSTITUTION.md
+    lines are stripped from L2 output) against line 25, which still cites
+    "(CONSTITUTION §11)". Same pattern in the L0 workspace-root CODEX.md.
+    AGENTS.md / CLAUDE.md / GEMINI.md have no CONSTITUTION hits, so the strip
+    pass covers those surfaces but not CODEX body text.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery CODEX.md=false
+  dedupe_key: 80853f79dc2340a5098136299bd70d5209c9fff244f7e5a699a0a58a06b36786
+  duplicates:
+    - project: co-deck
+      at: '2026-11-11T01:25:13.318+09:00'

@@ -29,7 +29,7 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 ### 1. Enforcement & Hook Status
 
-Codex now ships a lifecycle-hooks framework, and the PM Gateway identity chain is wired through it (`.codex/hooks.json`, spec `docs/designs/2026-10-18-codex-user-prompt-gate-design.md`): `SessionStart` runs `pm-role-bootstrap.ts` (PM bootstrap reminder + session marker) and `UserPromptSubmit` runs `codex-user-prompt-gate.ts` (blocks slash-style prompts that invoke rostered specialists directly from non-PM sessions). Everything else remains **prompt-enforced**: the agent self-enforces the remaining gates, exactly as Antigravity sessions do (CONSTITUTION §11).
+Codex now ships a lifecycle-hooks framework, and the PM Gateway identity chain is wired through it (`.codex/hooks.json`, spec `docs/designs/2026-10-18-codex-user-prompt-gate-design.md`): `SessionStart` runs `pm-role-bootstrap.ts` (PM bootstrap reminder + session marker) and `UserPromptSubmit` runs `codex-user-prompt-gate.ts` (blocks slash-style prompts that invoke rostered specialists directly from non-PM sessions). Everything else remains **prompt-enforced**: the agent self-enforces the remaining gates, exactly as Antigravity sessions do (context.md §11).
 
 | Gate | Codex CLI | Codex Desktop App | Codex IDE extension | Manual fallback |
 |------|:---------:|:-----------------:|:-------------------:|-----------------|

@@ -11,8 +11,13 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.23.0
+ * @version 1.23.1
  * @phase: Complete pipeline orchestration
+ *
+ * v1.23.1 (2026-11-11, U-20261111-003): the PHASE 3.5 AGENTS.md auto-fix passes
+ *          `--from-template` to regenerate-agents-md.ts (v1.5.0 defaults to an
+ *          in-place managed-block update when the target has VARIANT-* markers);
+ *          the pipeline keeps its full-rebuild semantics unchanged.
  *
  * v1.23.0 (2026-11-07, design docs/designs/2026-11-07-external-deps-machinery-design.md
  *          D4 — implements the upstream external-dependency machinery): PHASE 2.6 (new,
@@ -1120,14 +1125,18 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
             // Map L3 path to templates/<variant> if it lives under templates/
             const isInTemplates = config.l3ProjectPath.replace(/\\/g, "/").includes("templates/");
             if (isInTemplates) {
-              efs("bun", ["scripts/regenerate-agents-md.ts", "--variant", variantDirName], { stdio: "inherit" });
+              efs("bun", ["scripts/regenerate-agents-md.ts", "--variant", variantDirName, "--from-template"], {
+                stdio: "inherit",
+              });
               console.log(`   ✅ AGENTS.md regenerated for ${variantDirName}`);
             } else {
               // L3 source outside templates/ (e.g. Projects/<name>/) — regenerate
               // in place via --source mode (roster scanned from agents/*.md).
               // Previously this branch skipped auto-fix with a manual-run hint,
               // making --auto-fix-agents-md a no-op for every Projects/ source.
-              efs("bun", ["scripts/regenerate-agents-md.ts", "--source", config.l3ProjectPath], { stdio: "inherit" });
+              efs("bun", ["scripts/regenerate-agents-md.ts", "--source", config.l3ProjectPath, "--from-template"], {
+                stdio: "inherit",
+              });
               console.log(`   ✅ AGENTS.md regenerated in place at ${config.l3ProjectPath}`);
             }
           } catch (fixErr) {

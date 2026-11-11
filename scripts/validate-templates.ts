@@ -1,7 +1,24 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.76.0
+ * @version 1.77.0
+ *
+ * v1.77.0 (2026-11-11, T-20261110-012 Scope C2 — DEC-20261110-04 PR-3, design
+ *          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 C-E):
+ *          new blocking check CV-01 `common-script-version` — every .ts under
+ *          templates/common/scripts/ (tests included) carries an @version header;
+ *          an unversioned common script can never pass upgrade-project's
+ *          SYNC_IF_NEWER gate. Named CV-01 because B-10 is the variant
+ *          scripts-layout check.
+ *
+ * v1.76.1 (2026-11-11, U-20261111-001 from co-deck, spec
+ *          docs/designs/2026-11-11-co-deck-upstream-fixes-design.md §U-001): drop the
+ *          module top-level `templates/ directory not found` guard and its
+ *          import-time process.exit(1). In a project (L3) root without templates/
+ *          that exit preempted main()'s own "not applicable" skip, so the direct
+ *          run exited 1 instead of 0. main() is now the only absence handler.
+ *          Also carries the graft-mcp-surfaces pattern extension (.agents/mcp.json
+ *          surface, enabledMcpjsonServers list entries, graft Bash/MCP permissions).
  *
  * v1.76.0 (2026-11-08, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md
  *          R2, T-20261108-010): new check `graft-mcp-surfaces` — every template MCP
@@ -662,12 +679,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const TEMPLATES_DIR = join(ROOT, "templates");
 
-if (!existsSync(TEMPLATES_DIR)) {
-  console.error(`\x1b[31m[ERROR] templates/ directory not found at: ${TEMPLATES_DIR}\x1b[0m`);
-  if (import.meta.main) {
-    process.exit(1);
-  }
-}
+// No import-time guard for a missing templates/ (U-20261111-001): project (L3)
+// roots carry no templates/ tree, and main() already skips cleanly with exit 0
+// ("not applicable: no templates/common"). An import-time process.exit(1) here
+// preempted that skip and made every project review baseline fail falsely.
 
 const args = process.argv.slice(2);
 const JSON_MODE = args.includes("--json");
@@ -682,12 +697,21 @@ const issues: ValidationIssue[] = [];
  * carries ZERO graft-era registrations — pins the 2026-11-08 mcpServers flip
  * (PR #1927). Renaming-documentation prose is not scanned. */
 function checkGraftMcpSurfaces(): void {
-  const GRAFT_PATTERNS = [/"graft"\s*:/, /\[mcp_servers\.graft\]/, /"command"\s*:\s*"graft"/, /@nanonets\/graft/];
+  const GRAFT_PATTERNS = [
+    /"graft"\s*:/,
+    /\[mcp_servers\.graft\]/,
+    /"command"\s*:\s*"graft"/,
+    /@nanonets\/graft/,
+    /"graft"\s*[,\]]/, // enabledMcpjsonServers-style list entry
+    /Bash\((?:npx )?graft(?:-dev)?:/, // graft-era Bash permissions
+    /mcp__graft__graft_/, // graft-era MCP tool permissions
+  ];
   const SURFACES = [
     ".gemini/settings.json",
     ".codex/config.toml",
     "opencode.json",
     ".mcp.json",
+    ".agents/mcp.json",
     ".claude/settings.json",
   ];
   const dirs = [{ label: "common", dir: join(TEMPLATES_DIR, "common") }];
@@ -3019,6 +3043,47 @@ function checkVariantScriptsLayout(variant: string): void {
   }
   if (layoutErrors === 0) {
     pass(`${variant}/scripts/${variant}/: layout convention OK`);
+  }
+}
+
+// Check CV-01 (v1.77.0; T-20261110-012 Scope C2, DEC-20261110-04 PR-3): every
+// .ts under templates/common/scripts/ (tests included) carries an @version
+// header. upgrade-project's SYNC_IF_NEWER gate cannot deliver an unversioned
+// script (it records UNVERSIONED_SKIP), so a missing header silently freezes
+// every project copy. Blocking from day one (census 2026-11-10: 0 of 183
+// unversioned). Same detection as helpers/upgrade-versions.ts extractScriptVersion.
+function checkCommonScriptVersions(): void {
+  const root = join(TEMPLATES_DIR, "common", "scripts");
+  if (!existsSync(root)) return;
+  if (!JSON_MODE) console.log("\n=== Check CV-01: @version on every templates/common/scripts/**/*.ts ===");
+  const missing: string[] = [];
+  let scanned = 0;
+  const walk = (dir: string): void => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name.startsWith(".") || e.name === "node_modules") continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) {
+        walk(p);
+        continue;
+      }
+      if (!e.name.endsWith(".ts")) continue;
+      scanned++;
+      if (!/@version\s+\d+\.\d+\.\d+/.test(readFileSync(p, "utf-8"))) {
+        missing.push(p.slice(root.length + 1).replace(/\\/g, "/"));
+      }
+    }
+  };
+  walk(root);
+  if (missing.length > 0) {
+    for (const rel of missing) {
+      fail(
+        "common",
+        "common-script-version",
+        `templates/common/scripts/${rel} has no @version header — upgrade-project cannot deliver it (UNVERSIONED_SKIP); add \`// @version X.Y.Z\` at the L0 source`,
+      );
+    }
+  } else {
+    pass(`templates/common/scripts/: all ${scanned} .ts file(s) carry @version`);
   }
 }
 
@@ -8288,6 +8353,7 @@ function main(): number {
   checkCountryProfileDivergence(); // B-05: cross-variant last_verified divergence
 
   checkL0L1ScriptParity();
+  checkCommonScriptVersions(); // CV-01: @version on every common script (T-20261110-012 C2)
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();

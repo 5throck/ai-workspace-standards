@@ -1,0 +1,54 @@
+schemaVersion: 1
+id: U-20261111-003
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-11T01:47:32.707+09:00'
+history:
+  - at: '2026-11-11T01:47:32.707+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-11T08:35:01.305+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    scripts/regenerate-agents-md.ts (the designated repair tool for stale
+    AGENTS.md managed blocks) produces unusable output against a real variant:
+    (1) tier extraction maps frontmatter `tier: low` agents to "Medium" in the
+    regenerated roster/detail tables; (2) agent role text is degraded to the
+    literal string "specialist" instead of the frontmatter role; (3) the
+    regenerated file loses ~425 lines of static content that lives outside the
+    managed marker blocks. In co-deck this turned the H-2 fix (stale
+    tier/Playwright wording in AGENTS.md) into hand edits, because the
+    designated regeneration path cannot be used. Defect class is systemic: every
+    variant relying on the regen script to sync managed blocks inherits the
+    wrong tiers and lost content.
+  affected_paths:
+    - scripts/regenerate-agents-md.ts
+  identity_source: cwd
+  repro: >-
+    From the L0 workspace root, run the variant regeneration against a variant
+    whose agents declare `tier: low` (e.g. co-deck
+    html-build/image-curator/measure/pdf-export). Observed: the regenerated
+    VARIANT-* blocks list those agents as "Medium", degrade agent roles to
+    generic strings (e.g. i18n-specialist role → "specialist"), and clobber ~425
+    lines of static content in AGENTS.md.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/regenerate-agents-md.ts=false
+  dedupe_key: 680d90ec35d07c056ba5e8664c35c1ae39beef073b576e0c37e44333f7174075
+  duplicates:
+    - project: co-deck
+      at: '2026-11-11T01:47:32.707+09:00'

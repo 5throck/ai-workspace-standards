@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.76.0
+- **Version**: 1.77.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-08
+- **Last Updated**: 2026-11-11
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,8 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-11 | production | production | v1.76.1 → v1.77.0 (T-20261110-012 Scope C2): blocking check CV-01 common-script-version — @version on every templates/common/scripts/**/*.ts. | automation-engineer |
+| 2026-11-11 | production | production | v1.76.0 → v1.76.1 (U-20261111-001): removed the import-time process.exit(1) for a missing templates/ dir; main() returns 0 with "not applicable" in L3 project roots. | automation-engineer |
 | 2026-11-07 | production | production | v1.74.0 (spec docs/designs/2026-11-07-external-deps-standard-design.md §5.4 E2, T-20261107-005): new arm external-dep-license — every external-deps.json seed (common + co-*) strictly parsed (schema v1/v2, R3 collisions) and gated: license deny / undeclared / GPL-without-decision FAIL, review-without-decision WARN; new entry off external/<id> FAIL (installed → WARN); adapter not delivered by the variant/common tree FAIL; excluded component on a template install surface FAIL. Verdicts from lib/external-deps.ts v1.1.0. | automation-engineer |
 | 2026-11-07 | production | production | v1.71.0 → v1.72.0 (design docs/designs/2026-11-07-external-deps-machinery-design.md D4 — implements the upstream external-dependency machinery): new FAIL arm `external-dep-vendoring` — if any external-deps.json manifest install_dir path exists as a real directory (or any file below one) inside templates/common or a templates/co-* tree, validation FAILS (the vendoring guard: the fastest way to detect a `external/ppt-master/` accidentally committed into a template; external code is cloned at scaffold time into a gitignored project-local directory and never vendors into a template; variant promotion inherits the guard because it runs through this validation). Detection core: scripts/lib/external-deps.ts v1.0.0 (findVendoredInstallDirs + extractInstallDirsLoose, loose parse so the guard works on legacy/interim manifest shapes). Detection logic unit-pinned by tests/unit/external-deps.test.ts. | automation-engineer |
 | 2026-11-05 | production | production | v1.70.0 → v1.71.0 (design docs/designs/2026-11-04-project-loss-hardening-design.md §5.4, T-20261104-004 item 4): new WARN arm `agents-md-destructive-file-ops-pin` — every template AGENTS.md §7 (templates/common + every co-* variant) must carry the "Destructive File Operations" baseline bullet (the 2026-11-04 rm -rf Projects incident lesson: never recursive-delete a workspace path that does or could contain .git children; dry-run list first; reviewed ALLOW_RECURSIVE_DELETE=1 escape only). Missing §7 section or missing marker phrase warns, machine-pinning the multi-file §7 propagation wave (PM-04b checks only the COMMON-AGENTS zone). Unit-pinned by tests/unit/validate-templates-destructive-file-ops-pin.test.ts. | automation-engineer |

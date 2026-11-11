@@ -16,12 +16,32 @@ title: >-
   handling for legitimate project-local divergence (LOCAL-PATCH markers), and
   where the gate runs (audit arm vs upgrade pre-flight).
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-10T19:19:40.819+09:00'
 history:
   - at: '2026-11-10T19:19:40.819+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-11T00:24:22.454+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-11T00:24:22.474+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-11T00:24:22.495+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented via workspace PR #1954 (merge 8943d3d1, PR-1 of the
+  delivery-gating hardening design DEC-20261110-04): fleet-script-parity.ts
+  v1.2.0 extends scanning to variant script sets (templates/<v>/scripts/<v>/**
+  vs Projects/<p>/scripts/<v>/**) with hash-primary row classes (fork
+  mismatch-equal-version / version-ahead / version-behind), LOCAL-PATCH labels,
+  and orphan-test WARN rows in both scanner sections. Bonus: fixed the latent
+  v1.0 listRelativeFiles directory-prefix defect (v1 silently compared only ~77
+  root-level files of the 188-file tree). Fleet census recorded for PR-2 sizing
+  (156-162 fork rows per stale repo; co-deck variant parity FULL). Remaining
+  related work tracked separately: PR-2 (T-20261110-009, Scope A) and PR-3
+  (T-20261110-012 remainder, Scope C-A/C-E/C-C) pending user rollout decision.
 error: null
