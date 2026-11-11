@@ -17,7 +17,7 @@ title: >-
   so later divergence classifies as PROJECT_EVOLVED. Design before implementing
   — this changes delivery semantics for every variant.
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-10T17:51:42.926+09:00'
 history:
@@ -30,5 +30,18 @@ history:
   - at: '2026-11-11T08:50:27.051+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-12T04:32:31.262+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: Scope A of docs/designs/2026-11-10-delivery-gating-hardening-design
+  implemented and merged in workspace PR #1961 (upgrade-project 1.100.0,
+  upgrade-policy 1.40.0): A1 resolveUnbaselinedDisposition (NO_BASELINE +
+  divergent content: LOCAL-PATCH marker -> CONFLICT/ERROR skip, unmarked ->
+  UNBASELINED_OVERWRITE WARN) and A2 parity baselining (baselines recorded, not
+  in manifest files[]); covered by upgrade-policy-decisions.test.ts and
+  upgrade-decision-log.test.ts. Verified on origin/main
+  (resolveUnbaselinedDisposition present in scripts/lib/upgrade-policy.ts).
+  Fleet dry-run showed zero A1 rows; the co-deck canary apply is a rollout gate
+  tracked with the fleet dry-run, not part of this ticket's acceptance.
 error: null

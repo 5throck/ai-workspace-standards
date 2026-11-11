@@ -3,7 +3,7 @@ id: U-20261111-004
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-11T07:30:02.525+09:00'
 history:
@@ -13,7 +13,18 @@ history:
   - at: '2026-11-11T08:38:22.159+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-12T04:32:47.068+09:00'
+    from: review
+    to: done
+result: >-
+  Template side (workspace PR #1958): templates/co-deck/docs/co-deck.context.md
+  carries Content Rule 7 Font Parity (PDF-HTML), v4.7, with html-build SKILL
+  v1.7.0 and pdf-export SKILL v2.1.2 on all five platform mirrors. Not adopted,
+  with recorded rationale (design 2026-11-11-co-deck-upstream-fixes-design):
+  stage-numbered phases frontmatter (html-build [5,6,7,8]);
+  templates/co-deck/docs/phase-definitions.md remains the authority and maps
+  html-build [4] to Stages 5-8, so changing it needs a co-deck design flow.
+  Later P0 restorations were ported in PR #1966.
 error: null
 upstream:
   project: co-deck
@@ -61,3 +72,17 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-11T07:30:02.525+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1958
+    template_version: unreleased
+    summary: >-
+      Template side (workspace PR #1958):
+      templates/co-deck/docs/co-deck.context.md carries Content Rule 7 Font
+      Parity (PDF-HTML), v4.7, with html-build SKILL v1.7.0 and pdf-export SKILL
+      v2.1.2 on all five platform mirrors. Not adopted, with recorded rationale
+      (design 2026-11-11-co-deck-upstream-fixes-design): stage-numbered phases
+      frontmatter (html-build [5,6,7,8]);
+      templates/co-deck/docs/phase-definitions.md remains the authority and maps
+      html-build [4] to Stages 5-8, so changing it needs a co-deck design flow.
+      Later P0 restorations were ported in PR #1966.
