@@ -3,14 +3,25 @@ id: U-20261112-002
 kind: manual
 title: Upstream request from co-consult
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-12T03:12:02.476+09:00
+created_at: '2026-11-12T03:12:02.476+09:00'
 history:
-  - at: 2026-11-12T03:12:02.476+09:00
+  - at: '2026-11-12T03:12:02.476+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-12T05:14:33.061+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-12T05:14:33.061+09:00'
+    from: review
+    to: done
+result: >-
+  PARTIAL fix only. Added an Agent Frontmatter section to the delivered
+  docs/context.md (v2.15) so the two AGENTS.md references resolve. NOT done: the
+  ticket's second request, a spec for the two coexisting agent frontmatter
+  shapes (extends-stub core agents vs variant specialists), remains open; the
+  section only names the shapes in one sentence.
 error: null
 upstream:
   project: co-consult
@@ -19,7 +30,22 @@ upstream:
   source: project/co-consult
   trust: untrusted
   suspected_layer: L2
-  symptom: 'docs/context.md (pipeline-maintained L1 common doc, delivered to variant projects) contains no agent/skill YAML frontmatter specification section. However AGENTS.md (delivered with the variant) references it in at least 4 places: §4.1 "Agent frontmatter specification: All agent files must include YAML frontmatter as defined in docs/context.md" and §9 maintenance rules pointing to docs/context.md for the frontmatter spec of agents and skills. Verified: docs/context.md (565 lines in co-consult L3 delivery) has no frontmatter schema content — only the lang/lang_reason Korean-exception block (lines ~226-268). Consequence: agents/*.md frontmatter conformance (name/description/tier/phases/status/lifecycle fields) cannot be validated against the declared SSOT, and two coexisting frontmatter shapes (extends-stub core agents vs variant specialists) are undocumented. Repro: open any delivered docs/context.md and search for "frontmatter" — no schema section exists. Expected: docs/context.md carries the frontmatter specification section (or AGENTS.md references stop pointing at it).'
+  symptom: >-
+    docs/context.md (pipeline-maintained L1 common doc, delivered to variant
+    projects) contains no agent/skill YAML frontmatter specification section.
+    However AGENTS.md (delivered with the variant) references it in at least 4
+    places: §4.1 "Agent frontmatter specification: All agent files must include
+    YAML frontmatter as defined in docs/context.md" and §9 maintenance rules
+    pointing to docs/context.md for the frontmatter spec of agents and skills.
+    Verified: docs/context.md (565 lines in co-consult L3 delivery) has no
+    frontmatter schema content — only the lang/lang_reason Korean-exception
+    block (lines ~226-268). Consequence: agents/*.md frontmatter conformance
+    (name/description/tier/phases/status/lifecycle fields) cannot be validated
+    against the declared SSOT, and two coexisting frontmatter shapes
+    (extends-stub core agents vs variant specialists) are undocumented. Repro:
+    open any delivered docs/context.md and search for "frontmatter" — no schema
+    section exists. Expected: docs/context.md carries the frontmatter
+    specification section (or AGENTS.md references stop pointing at it).
   affected_paths:
     - docs/context.md
     - AGENTS.md
@@ -32,4 +58,13 @@ upstream:
   dedupe_key: 6e418a8dd1c4291eccf5ae6651de5eaad0eb6bfcd625a83306e71b8908abcf81
   duplicates:
     - project: co-consult
-      at: 2026-11-12T03:12:02.476+09:00
+      at: '2026-11-12T03:12:02.476+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1968
+    summary: >-
+      PARTIAL fix only. Added an Agent Frontmatter section to the delivered
+      docs/context.md (v2.15) so the two AGENTS.md references resolve. NOT done:
+      the ticket's second request, a spec for the two coexisting agent
+      frontmatter shapes (extends-stub core agents vs variant specialists),
+      remains open; the section only names the shapes in one sentence.

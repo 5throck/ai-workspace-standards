@@ -3,14 +3,24 @@ id: U-20261112-007
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-12T04:16:32.170+09:00
+created_at: '2026-11-12T04:16:32.170+09:00'
 history:
-  - at: 2026-11-12T04:16:32.170+09:00
+  - at: '2026-11-12T04:16:32.170+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-12T05:14:33.034+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-12T05:14:33.034+09:00'
+    from: review
+    to: done
+result: >-
+  Repointed the stale AGENTS.md §5.1.1 citations to
+  docs/governance/agents/execution-plan-templates.md §5.1.1 in audit.ts (comment
+  + --spec-exempt error, v2.66.1) and dev-sync.ts (hint, v1.46.2); mirrors in
+  templates/common/scripts. Reaches projects at the next template release.
 error: null
 upstream:
   project: co-develop
@@ -19,11 +29,24 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/audit.ts (core standardized script) cites "AGENTS.md §5.1.1" for Design Gate exemption categories in two places: a comment (~line 350) and the user-facing error message (~line 3460). After the W4 thin-dispatcher refactor, AGENTS.md §5 is a bare pointer and §5.1.1 lives only in docs/governance/agents/execution-plan-templates.md. The audit.ts pointer is stale. Note: audit.ts is a core standardized script, so the fix must land upstream — local modification is forbidden by the core-script integrity rule.'
+  symptom: >-
+    scripts/audit.ts (core standardized script) cites "AGENTS.md §5.1.1" for
+    Design Gate exemption categories in two places: a comment (~line 350) and
+    the user-facing error message (~line 3460). After the W4 thin-dispatcher
+    refactor, AGENTS.md §5 is a bare pointer and §5.1.1 lives only in
+    docs/governance/agents/execution-plan-templates.md. The audit.ts pointer is
+    stale. Note: audit.ts is a core standardized script, so the fix must land
+    upstream — local modification is forbidden by the core-script integrity
+    rule.
   affected_paths:
     - scripts/audit.ts
   identity_source: cwd
-  repro: 'In Projects/co-develop (or any delivered variant): grep -n "5.1.1" scripts/audit.ts AGENTS.md → audit.ts:350 and audit.ts:3460 cite AGENTS.md §5.1.1; AGENTS.md §5 is now a bare thin-dispatcher pointer with no §5.1.1 subsection. CLAUDE.md:233 and GEMINI.md:199 already cite docs/governance/agents/execution-plan-templates.md §5.1.1 correctly.'
+  repro: >-
+    In Projects/co-develop (or any delivered variant): grep -n "5.1.1"
+    scripts/audit.ts AGENTS.md → audit.ts:350 and audit.ts:3460 cite AGENTS.md
+    §5.1.1; AGENTS.md §5 is now a bare thin-dispatcher pointer with no §5.1.1
+    subsection. CLAUDE.md:233 and GEMINI.md:199 already cite
+    docs/governance/agents/execution-plan-templates.md §5.1.1 correctly.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +54,13 @@ upstream:
   dedupe_key: 9095d799a801039e634ae7384d456fd853b5d067fea119f677c9d77253c445f2
   duplicates:
     - project: co-develop
-      at: 2026-11-12T04:16:32.170+09:00
+      at: '2026-11-12T04:16:32.170+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1968
+    summary: >-
+      Repointed the stale AGENTS.md §5.1.1 citations to
+      docs/governance/agents/execution-plan-templates.md §5.1.1 in audit.ts
+      (comment + --spec-exempt error, v2.66.1) and dev-sync.ts (hint, v1.46.2);
+      mirrors in templates/common/scripts. Reaches projects at the next template
+      release.
