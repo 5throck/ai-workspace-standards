@@ -61,3 +61,16 @@ gates:
       - proceed
       - rework
     record_kind: DEC
+  - id: DG-DECK-06
+    title: "Font parity: sample PDF and HTML deck render the same typeface family from presentations/assets/fonts/."
+    stage: S10
+    decider_agent: pdf-export
+    inputs:
+      - pdf_deck
+      - html_deck
+    criteria:
+      - "Font parity: sample PDF and HTML deck render the same typeface family from presentations/assets/fonts/ (document.fonts.check true; Gate 5 visual spot-check)."
+    outcomes:
+      - proceed
+      - rework
+    record_kind: DEC

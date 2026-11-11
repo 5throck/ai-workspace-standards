@@ -79,4 +79,4 @@ Gate authority is `docs/user-guide.md` §4: **Gates 2 and 5 are mandatory**; Gat
 | Gate 4 | Build / Layout Review | Stage 8 → 9 handoff | html-build; slide-layout-gate checks run before export | Optional |
 | Gate 5 | Sample PDF Approval | Stage 11 | pdf-export produces; user approves via pm | **Mandatory** |
 
-The machine-readable decision records for the procedure-derived checks live in `decisions/gates.yaml` (DG-DECK-01..05), bound to stages S3, S5, S8, S9, and S10 respectively. The H-Stage handbook pipeline has no numbered gates — H-5 (handbook-reviewer validation) and H-7 (PM secret scan + verify) serve that role.
+The machine-readable decision records for the procedure-derived checks live in `decisions/gates.yaml` (DG-DECK-01..06), bound to stages S3, S5, S8, S9, and S10 respectively; DG-DECK-06 (font parity, S10) is verified at the Gate 5 sample review — rule body: html-build SKILL "Font Parity". The H-Stage handbook pipeline has no numbered gates — H-5 (handbook-reviewer validation) and H-7 (PM secret scan + verify) serve that role.

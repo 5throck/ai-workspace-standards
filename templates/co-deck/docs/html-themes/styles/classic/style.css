@@ -97,3 +97,13 @@
   padding: 1.75rem 2.5rem;
   box-shadow: 0 8px 28px rgba(26, 26, 46, 0.10);
 }
+
+/* PDF engine parity (design: 2026-11-10-pretendard-font-parity): gen-slides-pdf.ts embeds
+   Pretendard; HTML resolves to fallback fonts when Noto Sans KR is absent. Load the local
+   Pretendard TTFs and align the stack. */
+@font-face { font-family: 'Pretendard'; src: url('../../../../presentations/assets/fonts/Pretendard-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('../../../../presentations/assets/fonts/Pretendard-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+
+:root {
+  --font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
