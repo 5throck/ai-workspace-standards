@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.101.0
+// @version 1.101.1
+// v1.101.1 (2026-11-12, core-locked fork arm fix): the CORE_LOCKED_SCRIPTS arm compared the unprefixed `rel` against `scripts/…` entries and never matched, so a version-bumped fork of dev-sync.ts / audit.ts fell through to a silent OK; it now compares `relPath`. Intended semantics (T-20260921-010, AGENTS.md Pluggable Variant Audit Hooks): canonical copy wins, loudly (CORE-SCRIPT FORK, DRIFT_RESTORED WARN); a LOCAL-PATCH-marked fork is MARKER_LOSS (ERROR) and kept. Fleet dry-run (6 Projects/co-*): zero verdict deltas.
 // v1.101.0 (2026-11-11, DEC-20261111-01 — design
 //          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md PR-A):
 //          (E1) EVOLVED_PRESERVE — a PROJECT_EVOLVED file whose template content is
@@ -4381,7 +4382,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     }
     console.log(`  ${dryTag}COPIED: ${rel}`);
     syncChanged++;
-  } else if (CORE_LOCKED_SCRIPTS.includes(rel) && projVer !== tplVer) {
+  } else if (CORE_LOCKED_SCRIPTS.includes(relPath) && projVer !== tplVer) {
     // T-20260921-010 (review H-4): a version-bumped fork of a locked core script
     // (project @version != template @version in either direction) matched no
     // restore branch above and printed OK forever — the fork survived every
