@@ -86,9 +86,13 @@ Standard directory layout for all projects in this workspace:
 
 ### Agent Frontmatter
 
-Every agent file under `agents/` starts with a YAML frontmatter block. Required fields: `name`, `description`, `status` (`active|deprecated`), `tier` (one scalar `high|medium|low`), and `examples`. Agents that carry their own lifecycle also declare `role`, `version`, `last_reviewed`, and a `lifecycle` block (`phase`, `created`, `last_updated`, `governance`). Optional: `color`, `extends`, `formal_name`, `tier_semantics`, `handoff_to`/`handoff_from`. A deprecated agent adds `removal_review:` with a date.
+Every agent file under `agents/` starts with a YAML frontmatter block. The rules below come from the validators, so a reader can check them.
 
-Specialist agents use the full field set; core agents delivered as thin stubs use `extends:` to inherit the workspace body.
+- **Required fields** (`validate-templates.ts`): `name`, `status`, `tier`, `description`, `examples`.
+- **`status`**: one of `active`, `deprecated`, `experimental`.
+- **`tier`**: one scalar, `high`, `medium`, or `low` (no per-platform map).
+- **`lifecycle`** (`validate-agents.ts`): `lifecycle.phase` and `lifecycle.governance` are required on each `agents/*.md` file it scans. The delivered `extends` stub for `pm.md` does not carry a `lifecycle` block, and the roster-schema checks skip `extends` stubs.
+- **`extends`**: a relative path to a base agent file. `validate-templates.ts` merges the base file's frontmatter into the stub before checking the required fields, so a stub inherits fields it omits. A dangling `extends` path is reported by `validate-agents.ts`.
 
 ---
 
