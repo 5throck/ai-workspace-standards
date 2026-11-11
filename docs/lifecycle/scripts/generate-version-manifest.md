@@ -4,9 +4,9 @@
 
 - **Script**: generate-version-manifest
 - **Status**: active
-- **Version**: 1.12.0
+- **Version**: 1.12.1
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-09
+- **Last Updated**: 2026-11-12
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Regenerates docs/VERSION_MANIFEST.md (the declared skill/version SSOT) from the 
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-12 | production | production | v1.12.0 → v1.12.1 (U-20261112-009): collectAgents no longer counts locale READMEs (agents/README_ko.md) as agents — shares the validate-agents.ts isAgentFile filter (README(_xx).md and `_`-prefixed excluded), exported as isAgentFileName. Pinned by tests/unit/generate-version-manifest-agent-filter.test.ts. | automation-engineer |
 | 2026-11-10 | production | production | v1.11.2 → v1.12.0 (design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md §4.4, U-20261108-001 / DEC-20261109-01): extractScriptDependencies rewritten quote-agnostic and shape-complete — the old three-probe extractor's node-import branch was dead (`/import \* from/` cannot match `import * as x from`), its bun probe never matched a real line, bare builtins (fs/path) were misclassified as external deps, and @scope/pkg was truncated to @scope. node:<name> → <name> (protocol stripped, so the import-protocol sweep causes no manifest churn), bare builtins → builtin dep (not external), @scope/pkg kept whole. Pinned by tests/unit/extract-script-dependencies.test.ts. | automation-engineer |
 | 2026-11-09 | production | production | v1.11.1 → v1.11.2 (2026-11-09, P0 correctness fix): getGitTimestamp's Bun Shell probe now uses gitCleanEnvForShell() (full env minus redirection keys) instead of the deleted gitEnvUnset(); Bun Shell's `.env()` replaces the child env, so the unset map ran `git` with no PATH. spawnSync probes keep gitCleanEnv() — spawnSync merges over process.env. | automation-engineer |
 | 2026-11-09 | production | production | v1.11.0 → v1.11.1 (2026-11-09, rogue-commit incident): all four git probes (resolveRepoRoot, isShallowRepository, getTrackedFiles, getGitTimestamp) run under scripts/lib/git-env.ts (gitCleanEnv for spawns, gitEnvUnset for the Bun Shell call — replaced by gitCleanEnvForShell in v1.11.2) — an inherited GIT_DIR made resolveRepoRoot() resolve the INVOKING repository, so fixture runs generated and wrote the wrong manifest. | automation-engineer |

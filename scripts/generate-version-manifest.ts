@@ -1,4 +1,7 @@
-// @version 1.12.0
+// @version 1.12.1
+// v1.12.1 (2026-11-12, U-20261112-009): collectAgents no longer counts locale READMEs (agents/README_ko.md etc.)
+//          as agents — same filter as validate-agents.ts isAgentFile (/^README(_\w+)?\.md$/, `_`-prefixed excluded),
+//          exported as isAgentFileName for unit pinning.
 // v1.12.0 (2026-11-10, design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md
 //          §4.4, U-20261108-001 / DEC-20261109-01): extractScriptDependencies rewritten
 //          quote-agnostic and shape-complete. The old three-probe extractor's node-import
@@ -486,6 +489,11 @@ function hasGeminiParitySkip(content: string): boolean {
   return /^gemini-parity:\s*skip/m.test(content);
 }
 
+// Same predicate as validate-agents.ts isAgentFile (inlined: that module runs validation on import).
+export function isAgentFileName(file: string): boolean {
+  return file.endsWith(".md") && !/^README(_\w+)?\.md$/.test(file) && !file.startsWith("_");
+}
+
 async function collectAgents(): Promise<AgentInfo[]> {
   const agents: AgentInfo[] = [];
   const agentsDir = "agents";
@@ -494,7 +502,7 @@ async function collectAgents(): Promise<AgentInfo[]> {
   const keep = trackedFilterForRoot(tracked, agentsDir);
 
   for (const file of fs.readdirSync(agentsDir)) {
-    if (!file.endsWith(".md") || file === "_COMMON.md" || file === "README.md") continue;
+    if (!isAgentFileName(file)) continue;
     const filePath = path.join(agentsDir, file);
     if (!keep(filePath)) continue;
     const content = fs.readFileSync(filePath, "utf-8");
