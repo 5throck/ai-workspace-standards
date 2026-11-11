@@ -3,7 +3,7 @@ id: U-20261111-003
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-11T01:47:32.707+09:00'
 history:
@@ -13,7 +13,16 @@ history:
   - at: '2026-11-11T08:35:01.305+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-12T04:32:47.047+09:00'
+    from: review
+    to: done
+result: >-
+  scripts/regenerate-agents-md.ts v1.5.0 (workspace PR #1959): flat 'tier: low'
+  honored, single-token category roles fall back to the description, and an
+  in-place mode updates existing VARIANT-* blocks while preserving static
+  content (full rebuild kept for --from-template / unmarked targets;
+  l3-to-variant-pipeline.ts v1.23.1 passes --from-template). Tests:
+  tests/unit/regenerate-agents-md.test.ts.
 error: null
 upstream:
   project: co-deck
@@ -52,3 +61,14 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-11T01:47:32.707+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1959
+    template_version: unreleased
+    summary: >-
+      scripts/regenerate-agents-md.ts v1.5.0 (workspace PR #1959): flat 'tier:
+      low' honored, single-token category roles fall back to the description,
+      and an in-place mode updates existing VARIANT-* blocks while preserving
+      static content (full rebuild kept for --from-template / unmarked targets;
+      l3-to-variant-pipeline.ts v1.23.1 passes --from-template). Tests:
+      tests/unit/regenerate-agents-md.test.ts.

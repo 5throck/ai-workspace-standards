@@ -3,7 +3,7 @@ id: U-20261111-001
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-11T01:20:52.915+09:00'
 history:
@@ -13,7 +13,16 @@ history:
   - at: '2026-11-11T08:30:01.973+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-12T04:32:47.005+09:00'
+    from: review
+    to: done
+result: >-
+  Removed the module top-level import-time process.exit(1) templates/ guard from
+  scripts/validate-templates.ts (workspace PR #1959, merge 620b4c9dd); main()
+  already returns 0 with 'not applicable: no templates/common (variant/project
+  context)'. Regression test tests/unit/validate-templates-l3-skip.test.ts; L1
+  mirror templates/common/scripts/validate-templates.ts carries the fix. Reaches
+  projects with the next template release.
 error: null
 upstream:
   project: co-deck
@@ -54,3 +63,15 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-11T01:20:52.915+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1959
+    template_version: unreleased
+    summary: >-
+      Removed the module top-level import-time process.exit(1) templates/ guard
+      from scripts/validate-templates.ts (workspace PR #1959, merge 620b4c9dd);
+      main() already returns 0 with 'not applicable: no templates/common
+      (variant/project context)'. Regression test
+      tests/unit/validate-templates-l3-skip.test.ts; L1 mirror
+      templates/common/scripts/validate-templates.ts carries the fix. Reaches
+      projects with the next template release.

@@ -3,7 +3,7 @@ id: U-20261111-002
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-11T01:25:13.318+09:00'
 history:
@@ -13,7 +13,16 @@ history:
   - at: '2026-11-11T08:32:21.345+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-12T04:32:47.026+09:00'
+    from: review
+    to: done
+result: >-
+  Added scrub rule A-10 (bare 'CONSTITUTION §N' -> 'context.md §N', prose arm
+  only) to scripts/lib/constitution-scrub.ts v1.3.0 (workspace PR #1959);
+  covered by tests/unit/scrub-constitution-refs.test.ts. The L1 copy
+  templates/common/CODEX.md no longer carries the citation. Known residual: the
+  variant-authored templates/co-architect/CODEX.md still has one '(CONSTITUTION
+  §11)' body citation (not produced by the L0-to-L1 scrub).
 error: null
 upstream:
   project: co-deck
@@ -51,3 +60,14 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-11T01:25:13.318+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1959
+    template_version: unreleased
+    summary: >-
+      Added scrub rule A-10 (bare 'CONSTITUTION §N' -> 'context.md §N', prose
+      arm only) to scripts/lib/constitution-scrub.ts v1.3.0 (workspace PR
+      #1959); covered by tests/unit/scrub-constitution-refs.test.ts. The L1 copy
+      templates/common/CODEX.md no longer carries the citation. Known residual:
+      the variant-authored templates/co-architect/CODEX.md still has one
+      '(CONSTITUTION §11)' body citation (not produced by the L0-to-L1 scrub).
