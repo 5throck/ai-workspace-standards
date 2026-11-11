@@ -1,7 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.77.0
+ * @version 1.78.0
+ *
+ * v1.78.0 (2026-11-11, DEC-20261111-01 PR-D, design
+ *          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md §4.8 V1):
+ *          new blocking check CV-02 `same-version-content-change` — a modified
+ *          templates/** file (.ts/.mjs @version, SKILL.md/agents frontmatter version,
+ *          doc inline footer version) whose bytes differ from the base (CV02_BASE, else
+ *          merge-base HEAD origin/main, else HEAD) while its version is unchanged.
  *
  * v1.77.0 (2026-11-11, T-20261110-012 Scope C2 — DEC-20261110-04 PR-3, design
  *          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 C-E):
@@ -3084,6 +3091,82 @@ function checkCommonScriptVersions(): void {
     }
   } else {
     pass(`templates/common/scripts/: all ${scanned} .ts file(s) carry @version`);
+  }
+}
+
+// Check CV-02 (v1.78.0; DEC-20261111-01, design docs/designs/2026-11-11-upgrade-overwrite-protection-design.md
+// §4.8 V1): same-version-content-change. A changed templates/** file that carries a
+// version must bump it — upgrade-project treats an equal version as "same content", so
+// an unbumped edit is either never delivered or clobbers project copies by hash.
+// Universe: modified tracked files with a version — .ts/.mjs (@version), SKILL.md and
+// agents/*.md (frontmatter version), docs with an inline `*<name> version: N.M` footer.
+// Base: env CV02_BASE, else merge-base HEAD origin/main, else HEAD. Added/deleted/renamed
+// files are out of scope. No exemption (format sweeps bump the patch version).
+export function extractCv02Version(relPath: string, content: string): string | undefined {
+  const name = basename(relPath);
+  if (/\.(ts|mjs)$/.test(name)) return content.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1];
+  if (name === "SKILL.md" || /(^|\/)agents\/[^/]+\.md$/.test(relPath)) return extractFrontmatterVersion(content);
+  if (name.endsWith(".md")) {
+    const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return content.match(new RegExp(`\\*${esc}\\s+version:\\s*(\\d+\\.\\d+)`, "m"))?.[1];
+  }
+  return undefined;
+}
+
+export interface SameVersionChange {
+  path: string;
+  version: string;
+}
+
+/** Pure core: files whose bytes differ while the extracted version is equal. */
+export function findSameVersionContentChanges(
+  files: Array<{ path: string; base: string; head: string }>,
+): SameVersionChange[] {
+  const out: SameVersionChange[] = [];
+  for (const f of files) {
+    if (f.base === f.head) continue;
+    const bv = extractCv02Version(f.path, f.base);
+    const hv = extractCv02Version(f.path, f.head);
+    if (bv !== undefined && bv === hv) out.push({ path: f.path, version: hv });
+  }
+  return out;
+}
+
+function checkSameVersionContentChange(): void {
+  if (!JSON_MODE) console.log("\n=== Check CV-02: same-version-content-change under templates/** ===");
+  const git = (args: string[]): string | null => {
+    const r = spawnSync("git", args, { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+    return r.status === 0 ? r.stdout : null;
+  };
+  let base = process.env.CV02_BASE?.trim() || "";
+  if (!base) base = git(["merge-base", "HEAD", "origin/main"])?.trim() || "HEAD";
+  const names = git(["diff", "--name-only", "--no-renames", "--diff-filter=M", base, "--", "templates"]);
+  if (names === null) {
+    pass(`CV-02: cannot diff against base '${base}' — vacuous pass`);
+    return;
+  }
+  const files: Array<{ path: string; base: string; head: string }> = [];
+  for (const rel of names.split("\n").filter(Boolean)) {
+    if (!/\.(ts|mjs|md)$/.test(rel)) continue;
+    const abs = join(ROOT, rel);
+    const baseContent = git(["show", `${base}:${rel}`]);
+    if (baseContent === null || !existsSync(abs)) continue;
+    files.push({ path: rel, base: baseContent, head: readFileSync(abs, "utf-8") });
+  }
+  const bad = findSameVersionContentChanges(files);
+  if (bad.length === 0) {
+    pass(
+      `CV-02: ${files.length} changed versioned-candidate file(s) vs ${base.slice(0, 12)} — no same-version content change`,
+    );
+    return;
+  }
+  for (const b of bad) {
+    fail(
+      "common",
+      "same-version-content-change",
+      `${b.path} content changed vs ${base.slice(0, 12)} but version is still ${b.version} — upgrade-project cannot tell old from new; bump the version`,
+      "Bump the @version / frontmatter version / inline footer version (format sweeps bump the patch)",
+    );
   }
 }
 
@@ -8354,6 +8437,7 @@ function main(): number {
 
   checkL0L1ScriptParity();
   checkCommonScriptVersions(); // CV-01: @version on every common script (T-20261110-012 C2)
+  checkSameVersionContentChange(); // CV-02: same-version content change (DEC-20261111-01 V1)
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();
