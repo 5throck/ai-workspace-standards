@@ -21,7 +21,8 @@
  * real workspace templates (the upgrade-decision-log pattern). One run per
  * seeded shape; scenarios ride the shared run as read-only assertions.
  *
- * @version 1.0.1 (re-stale loop test gets a 60s per-test budget — windows-latest 15.03s vs 15s ceiling)
+ * @version 1.0.2 (every test that spawns an engine run in its body gets the 60s per-test budget)
+ * v1.0.1 (re-stale loop test gets a 60s per-test budget — windows-latest 15.03s vs 15s ceiling)
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -215,7 +216,7 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
       expect(read(tmp, rel)).toBe(evolvedOf(rel));
       expect(verdictsFor(m, rel)).toEqual(['EVOLVED_PRESERVE']);
     }
-  });
+  }, 60000);
 
   test('regression guard: template changed + project evolved is still CONFLICT (ERROR), exit 1', () => {
     const tmp = makeTempProject();
@@ -228,7 +229,7 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
     const rows = rowsFor(readManifest(tmp), PHASE_DEFS);
     expect(rows.map((x) => x.verdict)).toEqual(['CONFLICT']);
     expect(rows[0].severity).toBe('ERROR');
-  });
+  }, 60000);
 
   test('UNTOUCHED + template changed still delivers (preserve fires only for project evolution)', () => {
     const tmp = makeTempProject();
@@ -239,7 +240,7 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
     const r = runUpgrade(tmp);
     expect(r.status).toBe(0);
     expect(read(tmp, PHASE_DEFS)).toBe(templateBytes(PHASE_DEFS));
-  });
+  }, 60000);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -279,7 +280,7 @@ describe('A1 marker forms — NO_BASELINE divergence is CONFLICT for every LOCAL
     expect(r2.status).toBe(0);
     expect(verdictsFor(readManifest(t2), rel)).toContain('UNBASELINED_OVERWRITE');
     expect(read(t2, rel)).toBe(templateBytes(rel));
-  });
+  }, 60000);
 
   test('an adopt grant overrides the A1 CONFLICT for the marked path', () => {
     const c = CASES[2];
@@ -289,7 +290,7 @@ describe('A1 marker forms — NO_BASELINE divergence is CONFLICT for every LOCAL
     const r3 = runUpgrade(t3, ['--disposition', `adopt-template=${c.rel}`]);
     expect(r3.status).toBe(0);
     expect(read(t3, c.rel)).toBe(templateBytes(c.rel));
-  });
+  }, 60000);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -428,7 +429,7 @@ describe('E2 MARKER_LOSS — every delivery path (DEC-20261111-01 D4)', () => {
     // other marked paths remain protected -> still a non-zero exit
     expect(r.status).toBe(1);
     expect(rowsFor(mm, CORE_MARKED).some((d) => d.verdict === 'MARKER_LOSS')).toBe(true);
-  });
+  }, 60000);
 });
 
 describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
@@ -466,7 +467,7 @@ describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
     expect(unmarked.status).toBe(0);
     expect(existsSync(join(unmarked.tmp, PRUNED))).toBe(false);
     expect(unmarked.out).toContain(`PRUNE  ${PRUNED}`);
-  });
+  }, 60000);
 
   test('instruction-file MERGE: a marker inside a replaced managed zone is MARKER_LOSS and the merge write is skipped', () => {
     const tmp = makeTempProject();
@@ -485,5 +486,5 @@ describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
     expect(verdictsFor(mm, 'CLAUDE.md')).toContain('MARKER_LOSS');
     expect(read(tmp, 'CLAUDE.md')).toBe(marked);
     expect(r.status).toBe(1);
-  });
+  }, 60000);
 });
