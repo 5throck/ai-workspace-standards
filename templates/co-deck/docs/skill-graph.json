@@ -50,6 +50,11 @@
       "layer": "variant:co-deck"
     },
     {
+      "id": "gate.co-deck.DG-DECK-06",
+      "type": "decision_gate",
+      "layer": "variant:co-deck"
+    },
+    {
       "id": "handbook",
       "type": "skill",
       "layer": "common"
@@ -494,6 +499,18 @@
       "type": "decides_on",
       "from": "gate.co-deck.DG-DECK-05",
       "to": "output_type.version_record",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-deck.DG-DECK-06",
+      "to": "output_type.html_deck",
+      "source": "decision_model"
+    },
+    {
+      "type": "decides_on",
+      "from": "gate.co-deck.DG-DECK-06",
+      "to": "output_type.pdf_deck",
       "source": "decision_model"
     },
     {
@@ -1487,6 +1504,12 @@
       "type": "gated_by",
       "from": "stage.co-deck.S10",
       "to": "gate.co-deck.DG-DECK-02",
+      "source": "decision_model"
+    },
+    {
+      "type": "gated_by",
+      "from": "stage.co-deck.S10",
+      "to": "gate.co-deck.DG-DECK-06",
       "source": "decision_model"
     },
     {

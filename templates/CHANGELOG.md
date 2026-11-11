@@ -4,6 +4,7 @@ All notable changes to the template variants are documented here.
 
 ## [Unreleased]
 ### Changed
+- **[2026-11-12]**: P0 overwrite-protection restorations ported template-side (fleet audit §6 / design §8 step 1): co-deck `decisions/gates.yaml` DG-DECK-06 (font parity, S10), co-deck `docs/phase-definitions.md` DG-DECK-01..06 + Gate 5 note, co-deck classic theme Pretendard `@font-face` + font stack, co-design `docs/security.md` "Dependency Overrides" section.
 - **[2026-11-11]**: graft -> trail cleanup in template surfaces: removed leftover `graft` MCP entries from `.claude/settings.json` (11 variants plus co-abap, co-architect, co-consult, co-deck) and `.agents/mcp.json` (co-abap, co-architect).
 - **[2026-11-11]**: co-deck Font Parity rule and html-build / pdf-export skill sync across all platform mirrors (U-20261111-004; design `2026-11-11-co-deck-upstream-fixes-design`).
 - **[2026-11-11]**: co-deck VR baselines recaptured (T-20261110-011): 42 stale `diff-slide-*.png` deleted, 54 baselines refreshed, 10 white-bubble baselines added; baselines README and the visual-regression runner updated.
