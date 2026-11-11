@@ -34,7 +34,11 @@
  *        both servers end up in the merged file, the preserved list names the
  *        project-only entry, and the template server arrives (design D6).
  *
- * @version 1.5.1
+ * @version 1.6.0
+ * v1.6.0 (2026-11-12, upgrade-policy v1.43.0): `.mcp.json` left TRAIL_RETIRED_SEEDS (trail 0.29
+ *          stores its `trail mcp` server there). Migrated-shape test now asserts `.mcp.json` IS seeded
+ *          (no retired-surface SEED_SKIP for it); new test: a `.trail/` project with an existing
+ *          `.mcp.json` is JSON-merged, preserving a project-local extra server.
  * v1.5.1 (2026-11-01, spec 2026-10-31-graft-trail-migration-design R2.5 addendum):
  *          MCP JSON MERGE seed key graft → trail (template .mcp.json seed flipped to
  *          trail-era entries; merge mechanism under test unchanged).
@@ -754,7 +758,7 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
     return manifest.decisions ?? [];
   }
 
-  test('migrated shape (.trail/ present): retired seeds withheld with SEED_SKIP (retired-surface); no graft hook re-add', () => {
+  test('migrated shape (.trail/ present): graft helpers not re-seeded, .mcp.json seeded; no graft hook re-add', () => {
     const tmp = makeTempProject();
     try {
       mkdirSync(join(tmp, '.trail'), { recursive: true }); // the migration marker
@@ -770,14 +774,14 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
       expect(result.status).toBe(0);
       const out = result.stdout ?? '';
 
-      // (b) Retired-seed guard: .mcp.json absent + .trail/ present → withheld.
-      expect(existsSync(join(tmp, '.mcp.json'))).toBe(false);
-      expect(out).toContain('retired-surface');
+      // (b) .mcp.json left the retired list (upgrade-policy v1.43.0): absent + .trail/ → seeded.
+      expect(existsSync(join(tmp, '.mcp.json'))).toBe(true);
+      const mcp = JSON.parse(readFileSync(join(tmp, '.mcp.json'), 'utf8'));
+      expect(mcp.mcpServers.trail).toEqual({ command: 'trail', args: ['mcp'] });
       const decisions = readDecisionLog(tmp);
-      const seedSkip = decisions.find((d) => d.path === '.mcp.json');
-      expect(seedSkip).toBeDefined();
-      expect(seedSkip?.verdict).toBe('SEED_SKIP');
-      expect(seedSkip?.detail).toContain('retired-surface');
+      expect(decisions.find((d) => d.path === '.mcp.json' && d.verdict === 'SEED_SKIP')).toBeUndefined();
+      // The graft helpers stay retired.
+      expect(existsSync(join(tmp, '.claude', 'helpers', 'graft-hooks.cjs'))).toBe(false);
 
       // (a) Hook-entry guard: the trail-rewritten hooks survive; the template's
       // graft-era hook entries (referencing the deleted helper) are not merged.
@@ -789,6 +793,27 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
       rmSync(tmp, { recursive: true, force: true });
     }
   }, 300000);
+
+  test('.trail/ project WITH an existing .mcp.json: merged (not overwritten), project-local server preserved', () => {
+    const tmp = makeTempProject();
+    try {
+      mkdirSync(join(tmp, '.trail'), { recursive: true });
+      writeTrailSettings(tmp);
+      writeFileSync(join(tmp, '.mcp.json'), JSON.stringify({
+        mcpServers: { 'my-local': { command: 'node', args: ['local.js'] } },
+      }, null, 2) + '\n');
+      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
+      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: trail project with local mcp'], { cwd: tmp });
+
+      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'], { encoding: 'utf-8', timeout: 300000 });
+      expect(result.status).toBe(0);
+      const mcp = JSON.parse(readFileSync(join(tmp, '.mcp.json'), 'utf8'));
+      expect(mcp.mcpServers['my-local']).toEqual({ command: 'node', args: ['local.js'] });
+      expect(mcp.mcpServers.trail).toEqual({ command: 'trail', args: ['mcp'] });
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  }, 60000);
 
   test('unmigrated shape (no .trail/, helper present): .mcp.json is seeded and template graft hooks merge (unchanged behavior)', () => {
     const tmp = makeTempProject();

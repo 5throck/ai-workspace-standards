@@ -66,7 +66,7 @@ describe('TRAIL_RETIRED_SEEDS regression (graft-era guard untouched)', () => {
       expect(rel.startsWith('.trail/')).toBe(false);
       expect(isTrailRetiredSeed(rel)).toBe(true);
     }
-    expect(TRAIL_RETIRED_SEEDS.length).toBeGreaterThanOrEqual(3);
+    expect(TRAIL_RETIRED_SEEDS.length).toBeGreaterThanOrEqual(2);
   });
 
   test('none of the new trail-era skeleton seeds is retired', () => {

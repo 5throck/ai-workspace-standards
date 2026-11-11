@@ -1,4 +1,10 @@
-// @version 1.42.0
+// @version 1.43.0
+// v1.43.0 (2026-11-12, U-20261112-011, user decision): `.mcp.json` REMOVED from TRAIL_RETIRED_SEEDS (explicit,
+//          documented shrink of the design 2026-10-31-graft-trail-migration R2.4/R2.6 list). Reason: trail 0.29
+//          stores its `trail mcp` server in the root `.mcp.json` (the migration no longer deletes it), and the
+//          template seed is the single `trail` entry (command trail, args ["mcp"]). A `.trail/` project lacking
+//          `.mcp.json` is now re-seeded; an existing one is JSON-merged via JSON_MERGE_FILES (project-local
+//          servers preserved). The graft helper seeds stay retired. JSON_MERGE_FILES doc re-centered on trail.
 // v1.42.0 (2026-11-12, DEC-20261111-01, design 2026-11-11-upgrade-overwrite-protection PR-B): E3/E4 — PROJECT_AHEAD (WARN) verdict
 //          (project version greater than the template: never delivered, pending backport);
 //          resolveEqualVersionDisposition (baseline/vintage-proven equal-version restore -> DRIFT_RESTORED INFO;
@@ -455,7 +461,8 @@ export const WORKSPACE_DOC_DIRS = [
 ] as const;
 
 /** Platform settings files merged (not overwritten) by the TEMPLATE TREE SYNC pass.
- *  graft (ADR-0076): .mcp.json and opencode.json carry MCP server registrations — projects
+ *  ADR-0076 (originally the graft registration, now the `trail` MCP server — root `.mcp.json`
+ *  holds a single `trail` server with args ["mcp"]): .mcp.json and opencode.json carry MCP server registrations — projects
  *  may hold project-only servers (co-newbiz, co-safety, co-abap), so they deep-merge like
  *  the platform settings instead of syncing. `.agents/mcp.json` joined in v1.16.0 (registry
  *  completeness R4.1, design D6): same genus as root `.mcp.json` — pure JSON of the same
@@ -481,12 +488,10 @@ export const JSON_MERGE_FILES = [
  *  upgrade TEMPLATE TREE SYNC pass withholds them and decision-logs
  *  `SEED_SKIP` (retired-surface) instead. Kept as a data export so the guard is
  *  unit-pinnable; the list never shrinks silently (design R2.6: graft-era
- *  tolerance stays while any project is pre-migration). */
-export const TRAIL_RETIRED_SEEDS = [
-  ".mcp.json",
-  ".claude/helpers/graft-hooks.cjs",
-  ".claude/helpers/graft-statusline.cjs",
-] as const;
+ *  tolerance stays while any project is pre-migration). Shrink record: v1.43.0
+ *  (2026-11-12) removed `.mcp.json` — trail 0.29 keeps its `trail mcp` server there
+ *  and `trail init` no longer deletes it, so it is a live seed (JSON-merged). */
+export const TRAIL_RETIRED_SEEDS = [".claude/helpers/graft-hooks.cjs", ".claude/helpers/graft-statusline.cjs"] as const;
 
 /** True when `rel` is a graft-era seed retired by the trail migration. */
 export function isTrailRetiredSeed(rel: string): boolean {

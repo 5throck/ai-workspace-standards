@@ -141,13 +141,12 @@ describe('dropMissingPathHookEntries (trail-migration JSON_MERGE guard, R2.4 arm
 });
 
 describe('isTrailRetiredSeed (trail-migration retired-seed vocabulary, R2.4 arm b)', () => {
-  test('the three design-named graft-era seeds are retired', () => {
+  test('the graft-era helper seeds are retired (.mcp.json left the list in upgrade-policy v1.43.0: trail 0.29 stores its `trail mcp` server there)', () => {
     expect(TRAIL_RETIRED_SEEDS).toEqual([
-      '.mcp.json',
       '.claude/helpers/graft-hooks.cjs',
       '.claude/helpers/graft-statusline.cjs',
     ]);
-    expect(isTrailRetiredSeed('.mcp.json')).toBe(true);
+    expect(isTrailRetiredSeed('.mcp.json')).toBe(false);
     expect(isTrailRetiredSeed('.claude/helpers/graft-hooks.cjs')).toBe(true);
     expect(isTrailRetiredSeed('.claude/helpers/graft-statusline.cjs')).toBe(true);
   });
