@@ -91,8 +91,8 @@ Every agent file under `agents/` starts with a YAML frontmatter block. The rules
 - **Required fields** (`validate-templates.ts`): `name`, `status`, `tier`, `description`, `examples`.
 - **`status`**: one of `active`, `deprecated`, `experimental`.
 - **`tier`**: one scalar, `high`, `medium`, or `low` (no per-platform map).
-- **`lifecycle`** (`validate-agents.ts`): `lifecycle.phase` and `lifecycle.governance` are required on each `agents/*.md` file it scans. The delivered `extends` stub for `pm.md` does not carry a `lifecycle` block, and the roster-schema checks skip `extends` stubs.
-- **`extends`**: a relative path to a base agent file. `validate-templates.ts` merges the base file's frontmatter into the stub before checking the required fields, so a stub inherits fields it omits. A dangling `extends` path is reported by `validate-agents.ts`.
+- **`lifecycle`** (`validate-agents.ts`): `lifecycle.phase` and `lifecycle.governance` are required in the own frontmatter of each `agents/*.md` file, including `extends` stubs. Only the roster-schema checks skip stubs.
+- **`extends`**: a relative path to a base agent file. For a stub, the required-field check in `validate-templates.ts` resolves the base file's fields for `name`, `status`, `tier`, `description`, and `examples`. A dangling `extends` path is reported by `validate-agents.ts`.
 
 ---
 
