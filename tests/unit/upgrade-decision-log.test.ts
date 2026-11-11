@@ -222,6 +222,8 @@ function seedPriorTombstone(tmp: string, rel: string, baselineContent: string, r
 const OLD_DELIVERED = '# phase definitions — old delivered revision\n\nstale body the template no longer ships\n';
 const OLD_PHASE_DEFS = OLD_DELIVERED;
 const EVOLVED_PHASE_DEFS = '# phase definitions — project evolved\n\ncommitted project-side customization\n';
+const MARKED_PHASE_DEFS =
+  '# phase definitions — locally patched\n\n<!-- LOCAL-PATCH(upstream-request: U-20991231-001): project fix pending upstream -->\ncommitted project-side fix\n';
 const commonAgentTpl = readFileSync(join(workspaceRoot, 'templates', 'common', 'agents', 'i18n-specialist.md'), 'utf8');
 // D9 (T-20261028-013): for the extends-stub i18n-specialist, "today's
 // deliverable" is the stub-composed bytes — the stub frontmatter (co-develop
@@ -351,6 +353,26 @@ const SHAPES: Record<string, { args: string[]; setup: (tmp: string) => void }> =
       mkdirSync(join(tmp, 'agents'), { recursive: true });
       writeFileSync(join(tmp, 'agents', 'pm.md'), stalePmStub());
       commitAll(tmp, 'chore: fresh governance seeds (license, changelog, evolved doc, stale stub)');
+    },
+  },
+  // T-20261110-009 A1 (U-001 replay): a never-baselined, committed project
+  // copy carrying a LOCAL-PATCH marker → CONFLICT (ERROR) skip, exit 1.
+  'unbaselined-marked': {
+    args: [],
+    setup: (tmp: string): void => {
+      mkdirSync(join(tmp, 'docs'), { recursive: true });
+      writeFileSync(join(tmp, PHASE_DEFS_REL), MARKED_PHASE_DEFS);
+      commitAll(tmp, 'chore: never-baselined doc with a LOCAL-PATCH marker');
+    },
+  },
+  // T-20261110-009 A2: a never-baselined project copy byte-identical to the
+  // template → baseline recorded at manifest write, NOT added to files[].
+  'parity-baseline': {
+    args: [],
+    setup: (tmp: string): void => {
+      mkdirSync(join(tmp, 'docs'), { recursive: true });
+      writeFileSync(join(tmp, PHASE_DEFS_REL), phaseDefsTemplate);
+      commitAll(tmp, 'chore: never-baselined doc identical to the template');
     },
   },
   // Members: phase-definitions CONFLICT default-skip, workflows TOMBSTONED
@@ -965,6 +987,34 @@ describe('upgrade-project.ts agents/ version-gt escalation + NO_BASELINE detail 
 // delivered) − paths delivered this run, --clear-tombstone also resets
 // matched baselines, template-departed entries pruned.
 // ═════════════════════════════════════════════════════════════════════════════
+
+describe('upgrade-project.ts NO_BASELINE dispositions (T-20261110-009 A1/A2)', () => {
+  test('A1 marked: never-baselined LOCAL-PATCH copy → CONFLICT (ERROR) skip, project copy preserved, exit 1', () => {
+    const { tmp, status, manifest } = useShape('unbaselined-marked');
+    expect(status).toBe(1);
+    expect(readFileSync(join(tmp, PHASE_DEFS_REL), 'utf8')).toBe(MARKED_PHASE_DEFS);
+    const row = manifest.decisions.find((d) => d.path === PHASE_DEFS_REL && d.verdict === 'CONFLICT');
+    expect(row).toBeDefined();
+    expect(row!.severity).toBe('ERROR');
+    expect(row!.detail).toContain('LOCAL-PATCH');
+    expect(manifestHasUnresolvedErrors(manifest)).toBe(true);
+  }, 180000);
+
+  test('A1 unmarked: never-baselined divergence → UNBASELINED_OVERWRITE (WARN) row, delivered', () => {
+    const { tmp, manifest } = useShape('fresh-governance');
+    expect(readFileSync(join(tmp, PHASE_DEFS_REL), 'utf8')).toBe(phaseDefsTemplate);
+    const row = manifest.decisions.find((d) => d.path === PHASE_DEFS_REL && d.verdict === 'UNBASELINED_OVERWRITE');
+    expect(row).toBeDefined();
+    expect(row!.severity).toBe('WARN');
+  }, 180000);
+
+  test('A2: a parity-observed path is baselined but never enters files[]', () => {
+    const { status, manifest } = useShape('parity-baseline');
+    expect(status).toBe(0);
+    expect(manifest.baselines[PHASE_DEFS_REL]?.hash).toBe(baselineKeyFor(PHASE_DEFS_REL, phaseDefsTemplate));
+    expect(manifest.files).not.toContain(PHASE_DEFS_REL);
+  }, 180000);
+});
 
 describe('upgrade-project.ts baselines carry-forward (T-20261028-014)', () => {
   /** The co-design canary shape: template content + the project-canonical

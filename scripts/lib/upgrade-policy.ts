@@ -1,4 +1,11 @@
-// @version 1.39.0
+// @version 1.40.0
+// v1.40.0 (2026-11-11, T-20261110-009 Scope A1 — DEC-20261110-04 PR-2, design
+//          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 A1):
+//          resolveUnbaselinedDisposition — a NO_BASELINE candidate whose project
+//          copy differs from the deliverable is no longer silent: a file carrying a
+//          LOCAL-PATCH(upstream-request: …) marker → CONFLICT (ERROR, SKIP;
+//          --disposition adopt-template grants ADOPT); unmarked divergence → new
+//          verdict UNBASELINED_OVERWRITE (WARN, delivers).
 // v1.39.0 (2026-11-11, T-20261110-012 Scope C — DEC-20261110-04 PR-3): DecisionVerdict
 //          gains UNVERSIONED_SKIP (WARN, C-E), BEHAVIOR_REGRESSION (ERROR, C-A) and
 //          VERIFY_SKIPPED (INFO, C-A) with their DECISION_SEVERITY_CONTRACT rows.
@@ -1460,7 +1467,10 @@ export type DecisionVerdict =
   // C-A: a delivered script broke a sibling test that passed before delivery.
   | "BEHAVIOR_REGRESSION"
   // C-A: post-delivery verification could not run (runner unavailable).
-  | "VERIFY_SKIPPED";
+  | "VERIFY_SKIPPED"
+  // A1 (T-20261110-009): first-time delivery over unmarked, never-baselined
+  // project divergence — delivered, but no longer silent.
+  | "UNBASELINED_OVERWRITE";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1490,6 +1500,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   UNVERSIONED_SKIP: "WARN",
   BEHAVIOR_REGRESSION: "ERROR",
   VERIFY_SKIPPED: "INFO",
+  UNBASELINED_OVERWRITE: "WARN",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */
@@ -1665,6 +1676,56 @@ export function resolveDisposition(
     severity: "ERROR",
     detail:
       "project-evolved since the last delivery AND template changed — CONFLICT disposition: delivery SKIPPED, project copy preserved",
+  };
+}
+
+/** LOCAL-PATCH marker (pm.md "Upstream Reporting Duty"): positive proof of intentional local content. */
+export const LOCAL_PATCH_MARKER_RE = /LOCAL-PATCH\(upstream-request:/;
+
+/**
+ * A1 (T-20261110-009, DEC-20261110-04 PR-2): disposition for a NO_BASELINE
+ * candidate whose project copy differs from the deliverable (callers check
+ * `state === "NO_BASELINE" && !matchesDeliverable`). Independent of any upstream
+ * resolution record — the marker alone decides (the U-20261110-001 suppression
+ * is fixed structurally).
+ *
+ * | marker | adopt grant | outcome |
+ * |---|---|---|
+ * | yes | no  | CONFLICT (ERROR), SKIP |
+ * | yes | yes | ADOPT (INFO), deliver |
+ * | no  | no  | UNBASELINED_OVERWRITE (WARN), deliver |
+ * | no  | yes | ADOPT (INFO), deliver |
+ */
+export function resolveUnbaselinedDisposition(
+  rel: string,
+  hasLocalPatchMarker: boolean,
+  disposition: DispositionFlag,
+): DispositionOutcome {
+  const granted = disposition.mode === "adopt-template" && disposition.matches(rel);
+  if (granted) {
+    return {
+      deliver: true,
+      verdict: "ADOPT",
+      severity: "INFO",
+      detail:
+        "no delivery baseline + project content differs — delivered via explicit --disposition adopt-template (baseline recorded at manifest write)",
+    };
+  }
+  if (hasLocalPatchMarker) {
+    return {
+      deliver: false,
+      verdict: "CONFLICT",
+      severity: "ERROR",
+      detail:
+        "no delivery baseline + project copy carries a LOCAL-PATCH(upstream-request: …) marker — CONFLICT disposition: delivery SKIPPED, project copy preserved (re-run with --disposition adopt-template[=glob] once the upstream fix is verified in the template)",
+    };
+  }
+  return {
+    deliver: true,
+    verdict: "UNBASELINED_OVERWRITE",
+    severity: "WARN",
+    detail:
+      "no delivery baseline + project content differs (unmarked — usually pre-policy template vintage) — delivered over the project copy; review the diff (pre-upgrade stash covers rollback)",
   };
 }
 

@@ -116,8 +116,8 @@ The old hard sequencing rule ("C lands after A because C creates new delivery ca
 
 ## 7. Acceptance criteria
 
-- [ ] A1: `resolveUnbaselinedDisposition` unit-tested for all four cells (marker × adopt-grant); U-001 replay fixture passes as specified in §5.2.
-- [ ] A2: parity-baselined rels appear in `manifest.baselines` but **not** in `manifest.files` (asserted in `tests/unit/upgrade-decision-log.test.ts`); a second dry-run of the same project shows no NO_BASELINE rows for previously parity-observed paths; co-deck dry-run post-merge classifies the 11 live parity rels as baselined.
+- [x] A1: `resolveUnbaselinedDisposition` unit-tested for all four cells (marker × adopt-grant); U-001 replay fixture passes as specified in §5.2.
+- [x] A2: parity-baselined rels appear in `manifest.baselines` but **not** in `manifest.files` (asserted in `tests/unit/upgrade-decision-log.test.ts`); a second dry-run of the same project shows no NO_BASELINE rows for previously parity-observed paths; co-deck dry-run post-merge classifies the 11 live parity rels as baselined.
 - [ ] B/C-B: `bun scripts/fleet-script-parity.ts` emits per-variant sections; co-deck shows `mismatch-equal-version` for `extract_slidedata.mjs`, `version-ahead` for `gen-slides-pdf.ts` and `theme-visual-regression.browser.mjs`, `local-patch` labels for marker files, and `orphan-test` for `scripts/helpers/security-validator.test.ts` in the common section; exit code 0; excluded projects produce no rows.
 - [ ] C-A: the §5.3 replay fixture asserts a `BEHAVIOR_REGRESSION` (ERROR) row + non-zero exit for a new post-delivery failure, no row for a pre-existing failure, `VERIFY_SKIPPED` when `bun` is absent, and zero verification rows in dry-run.
 - [ ] C-D(b): `tests/unit/security-validator.test.ts` green when invoked from a non-root cwd, at `@version 1.1.0`.
@@ -125,3 +125,32 @@ The old hard sequencing rule ("C lands after A because C creates new delivery ca
 - [x] C-C: `bun scripts/audit.ts` flags a seeded `const workspaceRoot = process.cwd()` in a test file (WARN) and is clean on the current tree after C-D(b) lands.
 - [x] C-E/C2: an unversioned template `.ts` under `scripts/` records `UNVERSIONED_SKIP` (WARN) and does not deliver; `bun scripts/validate-templates.ts` fails on a seeded unversioned non-test `.ts` under `templates/common/scripts/` and passes on the current tree (183 files).
 - [ ] §5.4 sweep diff reviewed and attached to PR 2.
+
+### 7.1 Implementation status (2026-11-11, PM ticket sweep)
+
+PR-3 (C-A, C-E, C-C, C2) and PR-2 (A1, A2) are implemented in the working tree. They are not yet landed. Land them as two separate PRs (attribution; §5). Facts:
+
+- **C-A**: `scripts/lib/post-delivery-verify.ts` v1.0.0 plus wiring in `upgrade-project.ts` v1.99.0. The capture runs before the LOCKED pass. Verification runs after the passes and before the manifest write. The exit summary separates BEHAVIOR REGRESSIONS from DELIVERY CONFLICTS. `UPGRADE_SKIP_BEHAVIOR_VERIFY=1` opts out. Tests: `tests/unit/upgrade-post-delivery-verify.test.ts` (the §5.3 replay at helper level: a new failure produces a row, a pre-existing failure produces no row, an unchanged subject does not trigger, an unavailable runner reports ran=false). **Not done**: an end-to-end `upgrade-project.ts` apply fixture that asserts the ERROR row and the non-zero exit.
+- **C-E**: UNVERSIONED_SKIP (WARN) rows at the SYNC_IF_NEWER: scripts/ and the VARIANT SCRIPTS overlay arms. **C2**: `validate-templates.ts` v1.77.0 check **CV-01** `common-script-version`. It is named CV-01 because B-10 is already the variant scripts-layout check. The current tree has 183 of 183 files versioned.
+- **C-C**: `scripts/lib/hermetic-test-roots.ts` plus the `audit.ts` v2.66.0 WARN arm. Root-like names only (`originalCwd` save/restore idioms are not flagged). The current tree has 0 hits. The four `const ROOT = cwd()` (node:process import) test files are outside the narrow v1 rule. They are a candidate for the generalization follow-up.
+- **A1/A2**: `upgrade-policy.ts` v1.40.0 and `upgrade-project.ts` v1.100.0. Tests: four-cell matrix in `upgrade-policy-decisions.test.ts`; engine cases in `upgrade-decision-log.test.ts` (marked: CONFLICT plus exit 1; unmarked: UNBASELINED_OVERWRITE WARN; parity: baselined and not in files[]).
+- **§5.4 sweep**: after-only dry-run over all 16 fleet members with the new engine. Zero A1 rows fleet-wide. The existing ERROR rows (co-deck 5 agents/ equal-version drift; co-game 2; co-newbiz 8; co-safety 1) are pre-existing PROJECT_EVOLVED CONFLICTs and are not caused by this change. A before/after diff was not produced. The co-deck canary apply and `simulate-pipeline` E2E were not run. Both remain gating steps before the fleet apply.
+- **C-D(a)** (co-deck test pin) is still open in the co-deck repo. `Projects/co-deck/scripts/helpers/security-validator.test.ts` still fails 1/41 at co-deck main (c04d4a3).
+
+## 8. Rollback
+
+Per-PR `git revert` (§5). No data migration; manifests remain readable by older engines. C-A adds no persistent state beyond decision rows; its verification step degrades to a no-op when reverted. The only persistent artifact of PR 2 is additional baselines entries, which the carry-forward prune rules already age out when a path leaves the template tree (`upgrade-project.ts:7742`).
+
+## 9. Open questions (Design Gate)
+
+- **Q1** — A1 severity for unmarked divergence: WARN + deliver is the recommendation. Should specific path classes (e.g. `docs/html-themes/styles/**`) escalate to CONFLICT even unmarked? Data from the PR-1 census should decide.
+- **Q2** — Should A2's parity baselining also cover MERGE/JSON_MERGE passes (deliverable ≠ raw bytes, needs post-merge hash capture), or stay raw-bytes only? Recommendation: raw-bytes only in PR 2.
+- **Q3** — B's `mismatch-equal-version` is report-only. Should VARIANT SCRIPTS gain the common set's unconditional DRIFT_RESTORED arm? The snapshot.ts restore suggests the engine already heals variant `.ts` in-run (v1.95.0), but `.mjs`/`.json` have no such arm. If wanted, it is a separate ticket — restore semantics for variant content are not self-evident (the project may be the fixed side).
+- **Q4 (recommended new ticket)** — the EVOLVED (WARN) + deliver row reverts project evolution whenever the candidate reason is satisfied without template content change (hash-gated files: project-side change alone; versioned files: version-bump-only). This is the engine root cause of the T-20261110-011 re-stale loop. Proposed rule: deliver requires `templateChanged` OR a version gate that also implies content change.
+- **Q5** — C-A test scope: sibling-suffix only in v1. Should the step optionally run the project's full suite behind a flag (`--verify-suite=all`), and should nondeterministic new failures get a retry-once (the VR suite's jitter precedent) before the ERROR lands?
+- **Q6** — Orphan-test disposition ownership: after C-B surfaces an orphan, who owns the adopt-vs-delete call and on what cadence? The T-012 adjudication resolved its instance (pin, keep, L3); a default SLA (e.g. next quarterly skill/roster review) needs a home.
+- **Q7** — Should the authoring contract (C-C) be promoted from this design into `docs/standards/` as its own SSOT with the generalized lint, and should co-deck add a `test:unit` package script so its CI job (currently a skip notice, `ci.yml:140-149`) runs the suite whenever billing allows? Both are one-line enablers; neither is required by this design.
+
+## 10. Accessibility exemption note
+
+Engine semantics, fleet scanners, a template validator, hermetic test fixes, and unit tests. No UI, no rendered content, no style changes. No accessibility review required.

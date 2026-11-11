@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.99.0
+// @version 1.100.0
+// v1.100.0 (2026-11-11, T-20261110-009 Scope A — DEC-20261110-04 PR-2, design
+//          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 A1/A2):
+//          (A1) evolvedDeliveryGuard consults resolveUnbaselinedDisposition when a
+//          candidate is NO_BASELINE and its project copy differs from the
+//          deliverable — a LOCAL-PATCH-marked copy is CONFLICT (ERROR, SKIP;
+//          --disposition adopt-template grants ADOPT), unmarked divergence records
+//          UNBASELINED_OVERWRITE (WARN) and delivers (the caller's own row stays,
+//          the EVOLVED guard-row + caller-row convention). First-time delivery over
+//          committed project divergence is no longer a silent ADOPT/INFO.
+//          (A2) parity baselining — raw-bytes passes (SYNC_IF_NEWER: scripts/,
+//          VARIANT SCRIPTS, TEMPLATE TREE SYNC SYNC) note NO_BASELINE files whose
+//          project bytes equal the template bytes; the manifest writer records a
+//          baseline for them (provenance provable) WITHOUT adding them to files[]
+//          (files[] drives isDeliveredDiff / E5 attribution at dev-sync 3.9).
+//          Later divergence then classifies PROJECT_EVOLVED instead of NO_BASELINE.
 // v1.99.0 (2026-11-11, T-20261110-012 Scope C — DEC-20261110-04 PR-3, design
 //          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 C-A/C-E):
 //          (C-A) post-delivery behavior verification in APPLY mode — before the
@@ -1237,6 +1252,8 @@ import {
   normalizeAgentTierFrontmatter,
   resolveClaim,
   resolveDisposition,
+  resolveUnbaselinedDisposition,
+  LOCAL_PATCH_MARKER_RE,
   tombstoneGuard,
   type DecisionBaseline,
   type DecisionVerdict,
@@ -2766,6 +2783,14 @@ function noteDelivered(rel: string): void {
   if (!dryRun) deliveredRels.add(rel);
 }
 
+/** A2 (T-20261110-009): NO_BASELINE files observed byte-identical to the template
+ *  in a raw-bytes pass. Baselined at manifest write; NEVER added to files[]. */
+const parityRels = new Set<string>();
+function noteParity(rel: string): void {
+  if (dryRun || priorBaselines[rel]) return;
+  parityRels.add(rel);
+}
+
 /** Classify a delivery candidate (D1) — null when the project copy does not exist (NEW). */
 function classifyCandidate(rel: string, projectFile: string, deliverableContent: string): ProjectStateVerdict | null {
   if (!existsSync(projectFile)) return null;
@@ -2802,6 +2827,22 @@ function evolvedDeliveryGuard(input: {
 }): boolean {
   const cls = classifyCandidate(input.rel, input.projectFile, input.deliverableContent);
   if (!cls) return true; // NEW — nothing evolved
+  if (cls.state === "NO_BASELINE" && !cls.matchesDeliverable) {
+    // A1 (T-20261110-009): first-time delivery over committed divergence.
+    let marked = false;
+    try {
+      marked = LOCAL_PATCH_MARKER_RE.test(readFileSync(input.projectFile, "utf8"));
+    } catch {
+      /* unreadable — treat as unmarked */
+    }
+    const outcome = resolveUnbaselinedDisposition(input.rel, marked, disposition);
+    recordDecision(input.rel, input.policy, input.pass, outcome.verdict, outcome.detail);
+    if (!outcome.deliver) {
+      input.onConflictSkip();
+      return false;
+    }
+    return true;
+  }
   if (cls.state !== "PROJECT_EVOLVED") return true;
   const outcome = resolveDisposition(cls, input.rel, disposition);
   const baseline = priorBaselines[input.rel];
@@ -4206,6 +4247,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     syncChanged++;
   } else {
     console.log(`  OK     ${rel}  ${projVer}`);
+    if (fileHash(tplFile) === fileHash(projFile)) noteParity(relPath); // A2
   }
 }
 console.log("");
@@ -4304,6 +4346,7 @@ if (existsSync(variantScriptsSrc)) {
             syncChanged++;
           } else {
             console.log(`  OK     ${rel2}  ${projVer}`);
+            if (fileHash(abs) === fileHash(projFile)) noteParity(rel2); // A2
           }
         } else {
           // Unversioned file — template is canonical; compare by content hash.
@@ -4363,6 +4406,7 @@ if (existsSync(variantScriptsSrc)) {
             syncChanged++;
           } else {
             console.log(`  OK     ${rel2}  (hash match)`);
+            noteParity(rel2); // A2
           }
         }
       }
@@ -6219,6 +6263,8 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
     } else if (fileHash(abs) !== fileHash(dest)) {
       reason = "(content changed)";
     }
+    // A2: raw copies only — the rendered docs/context.md never parity-baselines.
+    if (reason === "" && rel !== "docs/context.md" && fileHash(abs) === fileHash(dest)) noteParity(rel);
     if (reason !== "") {
       // v1.25.0 docs/context.md project-only preservation (T-20260912-001): before
       // overwriting, detect content the overwrite would destroy. Project-only top-level
@@ -7844,6 +7890,19 @@ if (!dryRun) {
       if (deliveredFileSet.has(rel)) continue; // delivered this run — fresh baseline above
       if (!existsSync(join(templatesDir, rel)) && !existsSync(join(commonDir, rel))) continue; // template-departed — pruned
       baselines[rel] = entry;
+    }
+    // A2 parity baselines (T-20261110-009): hashed from disk; baselines only —
+    // parity rels must never enter files[] (isDeliveredDiff / E5 attribution).
+    for (const rel of [...parityRels].sort()) {
+      if (baselines[rel]) continue;
+      try {
+        baselines[rel] = {
+          hash: baselineKeyFor(rel, readFileSync(join(projectDir, rel), "utf8")),
+          templateVersion: currentVersion,
+        };
+      } catch {
+        /* unreadable — no baseline */
+      }
     }
     const tombstones: Record<string, TombstoneEntry> = {};
     for (const [rel, entry] of Object.entries(priorManifest?.tombstones ?? {})) {

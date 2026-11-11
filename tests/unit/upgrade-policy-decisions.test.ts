@@ -22,7 +22,7 @@
  * All assertions are byte-verbatim from tests/unit/upgrade-decision-log.test.ts
  * v1.4.0 (the extraction moves describes, never expectations).
  *
- * @version 1.1.0 (2026-11-11: new verdict severities — T-20261110-012)
+ * @version 1.1.0 (2026-11-11: resolveUnbaselinedDisposition four-cell matrix + new verdict severities — T-20261110-009/012)
  */
 import { describe, test, expect } from 'bun:test';
 
@@ -36,6 +36,7 @@ import {
   lifecyclelessText,
   manifestHasUnresolvedErrors,
   resolveDisposition,
+  resolveUnbaselinedDisposition,
   sha256Hex,
   tombstoneGuard,
   type DecisionBaseline,
@@ -281,8 +282,27 @@ describe('backfillStubFrontmatter (T-20261028-010 stub FM backfill)', () => {
   });
 });
 
-describe('new verdict severities (T-20261110-012)', () => {
-  test('UNVERSIONED_SKIP / BEHAVIOR_REGRESSION / VERIFY_SKIPPED', () => {
+describe('resolveUnbaselinedDisposition (T-20261110-009 A1 — marker x adopt-grant)', () => {
+  const none = { mode: 'default' as const };
+  const adopt = { mode: 'adopt-template' as const, matches: () => true };
+  test('marked, no grant → CONFLICT (ERROR), no delivery', () => {
+    const o = resolveUnbaselinedDisposition('docs/x.md', true, none);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([false, 'CONFLICT', 'ERROR']);
+  });
+  test('marked, adopt grant → ADOPT (INFO), deliver', () => {
+    const o = resolveUnbaselinedDisposition('docs/x.md', true, adopt);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'ADOPT', 'INFO']);
+  });
+  test('unmarked, no grant → UNBASELINED_OVERWRITE (WARN), deliver', () => {
+    const o = resolveUnbaselinedDisposition('docs/x.md', false, none);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'UNBASELINED_OVERWRITE', 'WARN']);
+  });
+  test('unmarked, adopt grant → ADOPT (INFO), deliver', () => {
+    const o = resolveUnbaselinedDisposition('docs/x.md', false, adopt);
+    expect([o.deliver, o.verdict, o.severity]).toEqual([true, 'ADOPT', 'INFO']);
+  });
+  test('new verdict severities (T-20261110-009/012)', () => {
+    expect(DECISION_SEVERITY_CONTRACT.UNBASELINED_OVERWRITE).toBe('WARN');
     expect(DECISION_SEVERITY_CONTRACT.UNVERSIONED_SKIP).toBe('WARN');
     expect(DECISION_SEVERITY_CONTRACT.BEHAVIOR_REGRESSION).toBe('ERROR');
     expect(DECISION_SEVERITY_CONTRACT.VERIFY_SKIPPED).toBe('INFO');
