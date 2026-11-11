@@ -1,0 +1,55 @@
+schemaVersion: 1
+id: U-20261112-006
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-12T04:16:32.159+09:00
+history:
+  - at: 2026-11-12T04:16:32.159+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.30.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: Delivered template text still references two retired surfaces. (1) AGENTS.md §3 links docs/governance/agents/pm-gateway-workflow.md as the thin-dispatcher SSOT, and .claude/agents/pm.md references the same path — but the file was deliberately retired (deleted in commit 533f934, 2026-10-28, DEC-20261028-05); the pointers were never scrubbed. (2) The /meeting slash command was retired 2026-09-26 (T-20261109-003), yet AGENTS.md:340 documents "/meeting --agents --rounds --dialogue" invocation syntax without a retirement note, README.md:79 and README_ko.md:81 list /meeting as a live command, and memlog/project-review command mirrors in .claude/commands/, .codex/prompts/, .gemini/commands/ instruct registering output via --meeting or delegating to /meeting. The correct wording (already applied at workspace root) is to invoke the meeting-facilitation skill directly.
+  affected_paths:
+    - AGENTS.md
+    - .claude/agents/pm.md
+    - README.md
+    - README_ko.md
+    - .claude/commands/memlog.md
+    - .claude/commands/project-review.md
+    - .codex/prompts/memlog.md
+    - .codex/prompts/project-review.md
+    - .gemini/commands/memlog.md
+    - .gemini/commands/project-review.md
+  identity_source: cwd
+  repro: 'In Projects/co-develop: grep -rn "pm-gateway-workflow" AGENTS.md .claude/agents/pm.md → 3 hits pointing to a file deleted by 533f934 (2026-10-28, DEC-20261028-05). grep -rn "/meeting" AGENTS.md README.md README_ko.md .claude/commands/ .codex/prompts/ .gemini/commands/ → 9 surfaces still instruct the retired command; the workspace root''s own cleanup (T-20261109-003, commit d9b02c0) removed the command stubs but not the variant-template instruction text.'
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: .claude/agents/pm.md'
+    - info:in_last_delivery AGENTS.md=false
+    - info:in_last_delivery .claude/agents/pm.md=false
+    - info:in_last_delivery README.md=false
+    - info:in_last_delivery README_ko.md=false
+    - info:in_last_delivery .claude/commands/memlog.md=false
+    - info:in_last_delivery .claude/commands/project-review.md=false
+    - info:in_last_delivery .codex/prompts/memlog.md=false
+    - info:in_last_delivery .codex/prompts/project-review.md=false
+    - info:l0_origin .gemini/commands/memlog.md <- .gemini/commands/memlog.md
+    - info:in_last_delivery .gemini/commands/memlog.md=false
+    - info:l0_origin .gemini/commands/project-review.md <- .gemini/commands/project-review.md
+    - info:in_last_delivery .gemini/commands/project-review.md=false
+  dedupe_key: a74b043089b5e1765710819baf555c4f0c9392c81866287007a2bafbc9930d35
+  duplicates:
+    - project: co-develop
+      at: 2026-11-12T04:16:32.159+09:00
