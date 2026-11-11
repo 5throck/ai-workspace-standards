@@ -1,0 +1,61 @@
+schemaVersion: 1
+id: U-20261112-004
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-12T04:16:32.112+09:00'
+history:
+  - at: '2026-11-12T04:16:32.112+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-12T05:11:07.087+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-12T05:11:07.087+09:00'
+    from: review
+    to: done
+result: >-
+  Duplicate of U-20261111-001, already fixed by PR #1959; the fix reaches
+  projects at the next template release (templates/VERSION is 0.30.0).
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.30.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    validate-templates.ts exits 1 with "[ERROR] templates/ directory not found"
+    when run in an L3 variant project. The script's main() already contains a
+    graceful "not applicable: no templates/common (variant/project context)"
+    skip arm (added 2026-10-01, commit 0ced9c0), but a module-level guard near
+    the top (const TEMPLATES_DIR = join(ROOT,'templates'); if
+    (!existsSync(TEMPLATES_DIR)) { ... exit(1); }) executes at import time and
+    exits before main() is reached, making the skip arm unreachable. Expected
+    behavior: mirror scripts/verify-scripts.ts context-layer discipline — treat
+    wholly-absent templates/ as "not applicable" and exit 0 at L3.
+  affected_paths:
+    - scripts/validate-templates.ts
+  identity_source: cwd
+  repro: >-
+    In a variant project without templates/ (e.g. Projects/co-develop), run: bun
+    scripts/validate-templates.ts — prints "[ERROR] templates/ directory not
+    found" and exits 1 before main() is reached. The graceful skip arm at the
+    file's main() ("not applicable: no templates/common (variant/project
+    context)") is dead code in exactly the context it was written for.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/validate-templates.ts=false
+  dedupe_key: a071ded13df1fbe5a851b468adb068fa66ba1171dec3b25811e242188b167d88
+  duplicates:
+    - project: co-develop
+      at: '2026-11-12T04:16:32.112+09:00'
+  resolution:
+    outcome: duplicate
+    summary: >-
+      Duplicate of U-20261111-001, already fixed by PR #1959; the fix reaches
+      projects at the next template release (templates/VERSION is 0.30.0).

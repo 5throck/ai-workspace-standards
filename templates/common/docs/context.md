@@ -84,6 +84,14 @@ Standard directory layout for all projects in this workspace:
 
 ---
 
+### Agent Frontmatter
+
+Every agent file under `agents/` starts with a YAML frontmatter block. Required fields: `name`, `description`, `status` (`active|deprecated`), `tier` (one scalar `high|medium|low`), and `examples`. Agents that carry their own lifecycle also declare `role`, `version`, `last_reviewed`, and a `lifecycle` block (`phase`, `created`, `last_updated`, `governance`). Optional: `color`, `extends`, `formal_name`, `tier_semantics`, `handoff_to`/`handoff_from`. A deprecated agent adds `removal_review:` with a date.
+
+Specialist agents use the full field set; core agents delivered as thin stubs use `extends:` to inherit the workspace body.
+
+---
+
 ## Key Files
 
 | File | Purpose |
@@ -588,4 +596,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*
+*context.md version: 2.15 — Agent Frontmatter section added (U-20261112-002); 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*

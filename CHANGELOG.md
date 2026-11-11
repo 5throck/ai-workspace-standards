@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+- **[2026-11-12]**: fix(governance): **stale `AGENTS.md §5.1.1` citations repointed to `docs/governance/agents/execution-plan-templates.md §5.1.1` (U-20261112-007) — audit.ts v2.66.0 → v2.66.1, dev-sync.ts v1.46.1 → v1.46.2; delivered `docs/context.md` gains an Agent Frontmatter section (v2.15, U-20261112-002 partial); ingests 7 upstream-request tickets.** Strings and docs only, no behavior change.
 - **[2026-11-12]**: feat(upgrade): **overwrite protection PR-B — template-vintage provenance, equal-version resolver, PROJECT_AHEAD, MERGE_DROP, manifest `pendingBackport` — upgrade-project v1.101.1 → v1.102.0, upgrade-policy v1.41.0 → v1.42.0, new `lib/template-vintage.ts` v1.0.0 (DEC-20261111-01; design `docs/designs/2026-11-11-upgrade-overwrite-protection-design.md` E3/E4).**
   - **E3 vintage**: a project file whose bytes equal any historical template revision (git blob history, CRLF-normalized, horizon 2026-06-01) is provenance-proven. Equal-version scripts and variant scripts restore only on baseline/vintage proof (`DRIFT_RESTORED` at INFO); an unproven fork is `CONFLICT` (ERROR, kept); vintage-proven `UNBASELINED_OVERWRITE` becomes `ADOPT` (INFO). Locked core scripts keep the unconditional restore.
   - **E3 `PROJECT_AHEAD` (WARN)**: a project version greater than the template is never delivered over (scripts, variant/overlay scripts, agents, skills with the catch-up row first, variant skills, inline-version docs) and enters `pendingBackport`.

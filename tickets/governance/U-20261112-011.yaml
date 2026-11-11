@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261112-011
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-12T04:25:15.880+09:00
+history:
+  - at: 2026-11-12T04:25:15.880+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.30.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/lib/upgrade-policy.ts still includes ''.mcp.json'' in its tracked/merge file-set arrays (approximately lines 434 and 450), and docs/workspace-schema.json (approximately line 197) lists ".mcp.json" as a schema file. The .mcp.json surface is being retired in favor of .agents/mcp.json (project-level registry consolidation after the graft→trail migration), so a delivery/upgrade sync that honors these arrays can resurrect a deleted .mcp.json and re-create the duplication the retirement removes. Suggested fix: remove .mcp.json from those arrays and the schema, or annotate it as a retired surface following the existing pattern near upgrade-policy.ts line 64.'
+  affected_paths:
+    - scripts/lib/upgrade-policy.ts
+    - docs/workspace-schema.json
+  identity_source: cwd
+  repro: 'In a variant where .mcp.json has been deleted (retired surface): run the next template-delivery sync; upgrade-policy treats .mcp.json as tracked/merge file-set per the arrays at those lines and the schema listing, so the deleted file can be regenerated, re-creating duplication with .agents/mcp.json.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/lib/upgrade-policy.ts=false
+    - info:in_last_delivery docs/workspace-schema.json=false
+  dedupe_key: 88df8272700dffe84991452e01ad47920a45bccb9dc22e45821e5558d22e0f62
+  duplicates:
+    - project: co-develop
+      at: 2026-11-12T04:25:15.880+09:00
