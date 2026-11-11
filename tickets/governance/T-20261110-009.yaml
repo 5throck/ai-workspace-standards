@@ -17,12 +17,18 @@ title: >-
   so later divergence classifies as PROJECT_EVOLVED. Design before implementing
   — this changes delivery semantics for every variant.
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-11-10T17:51:42.926+09:00'
 history:
   - at: '2026-11-10T17:51:42.926+09:00'
     from: null
     to: backlog
+  - at: '2026-11-11T08:50:27.034+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-11T08:50:27.051+09:00'
+    from: waiting
+    to: review
 result: null
 error: null
