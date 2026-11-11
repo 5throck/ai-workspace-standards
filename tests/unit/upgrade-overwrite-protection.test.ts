@@ -21,7 +21,7 @@
  * real workspace templates (the upgrade-decision-log pattern). One run per
  * seeded shape; scenarios ride the shared run as read-only assertions.
  *
- * @version 1.0.0
+ * @version 1.0.1 (re-stale loop test gets a 60s per-test budget — windows-latest 15.03s vs 15s ceiling)
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -197,7 +197,10 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
       expect(read(applyProject, rel)).toBe(evolvedOf(rel));
       expect(m2.baselines[rel].hash).toBe(baselineKeyFor(rel, templateBytes(rel)));
     }
-  });
+    // This test spawns a full engine run inside the test body (a multi-step lifecycle that
+    // cannot ride the shared run); windows-latest measured 15.03s against the 15s default
+    // ceiling (PR #1963), so it carries an explicit per-test budget. Assertions unchanged.
+  }, 60000);
 
   test('--disposition adopt-template=<path> is the only restore path and covers only that path', () => {
     const tmp = seed();
