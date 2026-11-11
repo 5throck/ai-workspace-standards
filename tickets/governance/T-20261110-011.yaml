@@ -15,7 +15,7 @@ title: >-
   template fixtures) and drop the stale diff artifacts. Refs: PR #1952 (CSS
   landing), PR co-deck#217 (project recapture, 27/27 PASS at fixed rendering).
 priority: normal
-status: done
+status: review
 attempts: 0
 created_at: '2026-11-10T21:15:58.930+09:00'
 history:
@@ -28,17 +28,5 @@ history:
   - at: '2026-11-11T08:55:42.804+09:00'
     from: waiting
     to: review
-  - at: '2026-11-12T04:32:31.242+09:00'
-    from: review
-    to: done
-result: >-
-  Closed: template VR baselines recaptured in the fixed rendering via workspace
-  PR #1958 (merged 2026-11-11, merge 'feat(templates): graft->trail cleanup,
-  co-deck upstream fixes, VR baselines recapture, punchline accent'): 42 stale
-  diff-slide-*.png deleted (git ls-files shows 0 diff-slide files), 54 baselines
-  refreshed, 10 white-bubble added, 64 slide-*.png present; design
-  2026-11-10-co-deck-vr-baselines-recapture-design acceptance checked (two
-  consecutive test:visual runs failed:0; upgrade dry-run shows zero EVOLVED rows
-  under baselines). The engine-side re-stale root cause is addressed separately
-  by PR #1963 (EVOLVED_PRESERVE).
+result: null
 error: null
