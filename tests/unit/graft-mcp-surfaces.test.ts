@@ -11,12 +11,15 @@ import { join, resolve } from 'node:path';
 
 const ROOT = resolve(__dirname, '../..');
 const TEMPLATES_DIR = join(ROOT, 'templates');
-const SURFACES = ['.gemini/settings.json', '.codex/config.toml', 'opencode.json', '.mcp.json', '.claude/settings.json'];
+const SURFACES = ['.gemini/settings.json', '.codex/config.toml', 'opencode.json', '.mcp.json', '.agents/mcp.json', '.claude/settings.json'];
 const GRAFT_PATTERNS = [
   /"graft"\s*:/,
   /\[mcp_servers\.graft\]/,
   /"command"\s*:\s*"graft"/,
   /@nanonets\/graft/,
+  /"graft"\s*[,\]]/,
+  /Bash\((?:npx )?graft(?:-dev)?:/,
+  /mcp__graft__graft_/,
 ];
 
 function templateDirs(): Array<{ label: string; dir: string }> {
@@ -45,5 +48,13 @@ describe('graft→trail: template MCP surfaces carry zero graft-era registration
   test('at least one template MCP surface exists (scan is not vacuous)', () => {
     const scanned = templateDirs().reduce((n, { dir }) => n + SURFACES.filter((s) => existsSync(join(dir, s))).length, 0);
     expect(scanned).toBeGreaterThan(0);
+  });
+
+  test('common MCP surfaces register the trail server (trail mcp)', () => {
+    const common = join(TEMPLATES_DIR, 'common');
+    for (const surf of ['.mcp.json', '.agents/mcp.json', 'opencode.json']) {
+      expect(readFileSync(join(common, surf), 'utf-8')).toMatch(/"trail"/);
+    }
+    expect(readFileSync(join(common, '.codex/config.toml'), 'utf-8')).toMatch(/\[mcp_servers\.trail\]/);
   });
 });

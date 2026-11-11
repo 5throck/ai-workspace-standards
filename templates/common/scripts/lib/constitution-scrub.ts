@@ -1,6 +1,14 @@
-// @version 1.2.0
+// @version 1.3.0
 /**
  * constitution-scrub.ts — shared context.md reference scrubber
+ *
+ * v1.3.0 (2026-11-11, U-20261111-002 from co-deck, spec
+ *          docs/designs/2026-11-11-co-deck-upstream-fixes-design.md §U-002): new
+ *          prose rule A-10 — bare section citations without the .md suffix
+ *          (`CONSTITUTION §11`) project to `context.md §11`, like A-4 does for
+ *          `context.md §N`. The L1 CODEX.md body kept "(CONSTITUTION §11)"
+ *          under an L0-ONLY marker that claimed the strip was complete. Code
+ *          files and JSON are unchanged (prose arm only).
  *
  * v1.2.0 (2026-10-19, T-20261019-001): rule A-6 generalizes from the
  *          self-reference special case to full target-depth relativization —
@@ -169,6 +177,11 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
   work = work.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, "](docs/context.md)");
   // A-4. Plain-text mentions.
   work = work.replace(/CONSTITUTION\.md/g, "context.md");
+  // A-10. Bare section citations without the .md suffix ("(CONSTITUTION §11)") —
+  // A-4 keys on the filename, so these leaked into L1 CODEX.md body text while
+  // the L0-ONLY marker above them said the strip was complete (U-20261111-002).
+  // Same projection as A-4: the section number stays as visible text.
+  work = work.replace(/\bCONSTITUTION(?=\s*§)/g, "context.md");
   // A-5. Part-file links into docs/constitution/ (e.g. 06-skill-lifecycle.md) whose
   // link text does NOT mention context.md (those are already covered by A-2).
   // L1/L2 trees have no docs/constitution/ directory — the projected home is

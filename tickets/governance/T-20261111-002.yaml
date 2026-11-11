@@ -3,7 +3,7 @@ id: T-20261111-002
 kind: manual
 title: Shared teams — round 3 implementation
 priority: high
-status: running
+status: done
 attempts: 0
 created_at: '2026-11-11T03:36:42.015+09:00'
 history:
@@ -16,5 +16,19 @@ history:
   - at: '2026-11-11T03:36:44.665+09:00'
     from: waiting
     to: running
-result: null
+  - at: '2026-11-11T08:26:53.446+09:00'
+    from: running
+    to: review
+  - at: '2026-11-11T08:26:53.477+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via workspace PR #1956 (feature commit eed8af79d, merge a450923de):
+  shared teams round 3 — group-owned team kind on registry v5, plus QA fix wave
+  (S2 group-id-reuse quarantine: deleting a general group archives its shared
+  teams with tenant.archived.group_deleted audit; shared-branch kind assertion;
+  reserved group: key labels; registry boot-refusal handle close). Post-merge
+  win32 CI timeouts were budgeted under T-20261111-003 (PRs #1957
+  c02a45f7b/50c8e2803); main Test Suite run 42918430321 on 5796312b5 is green.
+  Closed 2026-11-11 by PM ticket sweep.
 error: null

@@ -1,7 +1,26 @@
 #!/usr/bin/env bun
 /**
  * regenerate-agents-md.ts
- * @version 1.4.0
+ * @version 1.5.0
+ *
+ * v1.5.0 (2026-11-11, U-20261111-003 from co-deck, spec
+ *         docs/designs/2026-11-11-co-deck-upstream-fixes-design.md §U-003): three
+ *         defects that made the regen path unusable on a real variant.
+ *         (1) Tier: a flat `tier: low` frontmatter key was ignored (only the
+ *         nested `tier:\n  claude:` form was read), so every flat-tier agent
+ *         rendered as the "medium" default. The flat key is now the fallback.
+ *         (2) Role: a bare category token (`role: specialist`, inherited from
+ *         the L1 i18n-specialist) was printed verbatim as the role text. A
+ *         single-word role now falls back to the description (minus its
+ *         `Use when:` trailer and wrapping quotes).
+ *         (3) Static content: the target AGENTS.md was always rebuilt from the
+ *         L1 common template, discarding every variant-authored line outside
+ *         the VARIANT-* blocks (~425 lines in co-deck). When the target already
+ *         carries any VARIANT-*-START/END marker pair, the present managed
+ *         blocks are rewritten in place (absent blocks are reported, not
+ *         invented). A target with no markers, or an explicit
+ *         `--from-template`, keeps the original full rebuild (the
+ *         l3-to-variant-pipeline auto-fix passes `--from-template`).
  *
  * v1.4.0 (2026-10-29, U-20261028-009): VARIANT-PHASE-GATE blocks emit the same
  *         header+separator shape as the sibling VARIANT-DISPATCH-TRIGGERS block
@@ -47,7 +66,7 @@ interface AgentMeta {
   description: string;
 }
 
-function parseSimpleFrontmatter(content: string): Record<string, string> {
+export function parseSimpleFrontmatter(content: string): Record<string, string> {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   const result: Record<string, string> = {};
@@ -93,17 +112,51 @@ function parseSimpleFrontmatter(content: string): Record<string, string> {
   return result;
 }
 
+/** Strip wrapping YAML quotes and the trailing `Use when: ...` trigger list. */
+export function cleanDescription(raw: string | undefined): string {
+  if (!raw) return "";
+  let d = raw.trim();
+  if ((d.startsWith("'") && d.endsWith("'")) || (d.startsWith('"') && d.endsWith('"'))) {
+    d = d.slice(1, -1).trim();
+  }
+  return d
+    .replace(/\s*Use when:.*$/s, "")
+    .replace(/\.$/, "")
+    .trim();
+}
+
+/**
+ * U-20261111-003 (1): nested `tier:\n  claude: <t>` wins; the flat `tier: <t>`
+ * key is the fallback (co-deck agents declare the flat form). "medium" only
+ * when neither exists.
+ */
+export function resolveTier(fm: Record<string, string>): string {
+  const flat = (fm["tier"] ?? "").trim();
+  return (fm["tier.claude"] || flat || "medium").toLowerCase();
+}
+
+/**
+ * U-20261111-003 (2): a single-token role (`specialist`, `orchestrator`) is a
+ * category, not role text — fall back to the cleaned description.
+ */
+export function resolveRole(fm: Record<string, string>, agentName: string): string {
+  const role = (fm["role"] ?? "").trim();
+  const description = cleanDescription(fm["description"]);
+  if (role && /\s/.test(role)) return role;
+  return description || role || agentName;
+}
+
 function readAgentMeta(variantDir: string, agentName: string): AgentMeta {
   const agentFile = path.join(variantDir, "agents", `${agentName}.md`);
   const content = fs.readFileSync(agentFile, "utf-8");
   const fm = parseSimpleFrontmatter(content);
 
-  const tier = fm["tier.claude"] || "medium";
+  const tier = resolveTier(fm);
   const phasesRaw = fm["phases"] || "";
   // Convert [1, 2] → "1, 2"
   const phases = phasesRaw.replace(/[\[\]]/g, "").replace(/,\s*/g, ", ");
-  const role = fm["role"] || fm["description"] || agentName;
-  const description = fm["description"] || role;
+  const role = resolveRole(fm, agentName);
+  const description = cleanDescription(fm["description"]) || role;
 
   return {
     name: agentName,
@@ -261,7 +314,35 @@ function generateVariantBlocks(agents: AgentMeta[]): Record<string, string> {
   };
 }
 
-function injectBlocks(template: string, blocks: Record<string, string>): string {
+export const VARIANT_BLOCK_KEYS = [
+  "VARIANT-AGENTS",
+  "VARIANT-AGENT-DETAILS",
+  "VARIANT-DISPATCH-TRIGGERS",
+  "VARIANT-PHASE-GATE",
+  "VARIANT-SUBAGENT-ROSTER",
+  "VARIANT-ROLE-BOUNDARY",
+] as const;
+
+/** VARIANT-* keys whose START/END marker pair is present in `content`. */
+export function presentVariantMarkers(content: string): string[] {
+  return VARIANT_BLOCK_KEYS.filter(
+    (k) => content.includes(`<!-- ${k}-START -->`) && content.includes(`<!-- ${k}-END -->`),
+  );
+}
+
+/**
+ * U-20261111-003 (3): choose the base document. An existing target carrying at
+ * least one VARIANT-* marker pair is updated in place — present blocks are
+ * rewritten, static content is preserved, and absent blocks are reported (not
+ * invented). A target with no markers, or --from-template, uses the L1 common
+ * template as the base (full rebuild — the script's original purpose).
+ */
+export function selectBase(existing: string | null, template: string, fromTemplate: boolean): string {
+  if (!fromTemplate && existing !== null && presentVariantMarkers(existing).length > 0) return existing;
+  return template;
+}
+
+export function injectBlocks(template: string, blocks: Record<string, string>): string {
   let result = template;
   for (const [key, content] of Object.entries(blocks)) {
     const startMarker = `<!-- ${key}-START -->`;
@@ -269,7 +350,9 @@ function injectBlocks(template: string, blocks: Record<string, string>): string 
     const startIdx = result.indexOf(startMarker);
     const endIdx = result.indexOf(endMarker);
     if (startIdx === -1 || endIdx === -1) {
-      console.warn(`  ⚠️  Marker not found: ${key}-START/END in template`);
+      console.warn(
+        `  ⚠️  Marker not found: ${key}-START/END — block skipped (--from-template rebuilds with all markers)`,
+      );
       continue;
     }
     const before = result.slice(0, startIdx + startMarker.length);
@@ -279,7 +362,7 @@ function injectBlocks(template: string, blocks: Record<string, string>): string 
   return result;
 }
 
-function regenerateVariant(variantName: string, dryRun: boolean): void {
+function regenerateVariant(variantName: string, dryRun: boolean, fromTemplate: boolean): void {
   const variantDir = path.join(TEMPLATES_DIR, variantName);
   const variantJson = path.join(variantDir, "variant.json");
   const outputPath = path.join(variantDir, "AGENTS.md");
@@ -312,14 +395,17 @@ function regenerateVariant(variantName: string, dryRun: boolean): void {
     agents.push(readAgentMeta(variantDir, name));
   }
 
-  // Read L1 template
+  // Read L1 template; an existing fully-marked AGENTS.md is updated in place
   const template = fs.readFileSync(COMMON_AGENTS_TEMPLATE, "utf-8");
+  const existing = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, "utf-8") : null;
+  const base = selectBase(existing, template, fromTemplate);
+  console.log(`   Mode: ${base === template ? "full rebuild from L1 template" : "in-place managed-block update"}`);
 
   // Generate variant-specific blocks
   const blocks = generateVariantBlocks(agents);
 
-  // Inject into template
-  const generated = injectBlocks(template, blocks);
+  // Inject into the chosen base
+  const generated = injectBlocks(base, blocks);
 
   if (dryRun) {
     console.log(`\n--- DRY RUN: Would write to ${outputPath} ---`);
@@ -358,7 +444,7 @@ function pruneUndeliveredSkillRows(generated: string, sourceDir: string): string
     .join("\n");
 }
 
-function regenerateSource(sourceDir: string, dryRun: boolean): void {
+function regenerateSource(sourceDir: string, dryRun: boolean, fromTemplate: boolean): void {
   const agentsDir = path.join(sourceDir, "agents");
   if (!fs.existsSync(agentsDir)) {
     console.error(`  ❌ agents/ directory not found: ${agentsDir}`);
@@ -385,9 +471,16 @@ function regenerateSource(sourceDir: string, dryRun: boolean): void {
   }
 
   const template = fs.readFileSync(COMMON_AGENTS_TEMPLATE, "utf-8");
-  const blocks = generateVariantBlocks(agents);
-  const generated = pruneUndeliveredSkillRows(injectBlocks(template, blocks), sourceDir);
   const outputPath = path.join(sourceDir, "AGENTS.md");
+  const existing = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, "utf-8") : null;
+  const base = selectBase(existing, template, fromTemplate);
+  const inPlace = base !== template;
+  console.log(`   Mode: ${inPlace ? "in-place managed-block update" : "full rebuild from L1 template"}`);
+  const blocks = generateVariantBlocks(agents);
+  const injected = injectBlocks(base, blocks);
+  // The §6 skill-row prune targets the L1 superset table; an in-place update
+  // leaves the project's own static content untouched.
+  const generated = inPlace ? injected : pruneUndeliveredSkillRows(injected, sourceDir);
 
   if (dryRun) {
     console.log(`\n--- DRY RUN: Would write to ${outputPath} ---`);
@@ -399,41 +492,47 @@ function regenerateSource(sourceDir: string, dryRun: boolean): void {
   console.log(`  ✅ Written: ${outputPath}`);
 }
 
-// CLI entry point
-const args = process.argv.slice(2);
-const isDryRun = args.includes("--dry-run");
-const allFlag = args.includes("--all");
-const variantIdx = args.indexOf("--variant");
-const variantName = variantIdx !== -1 ? args[variantIdx + 1] : null;
-const sourceIdx = args.indexOf("--source");
-const sourceDir = sourceIdx !== -1 ? args[sourceIdx + 1] : null;
+// CLI entry point (guarded so unit tests can import the pure helpers)
+if (import.meta.main) {
+  const args = process.argv.slice(2);
+  const isDryRun = args.includes("--dry-run");
+  const allFlag = args.includes("--all");
+  const fromTemplate = args.includes("--from-template");
+  const variantIdx = args.indexOf("--variant");
+  const variantName = variantIdx !== -1 ? args[variantIdx + 1] : null;
+  const sourceIdx = args.indexOf("--source");
+  const sourceDir = sourceIdx !== -1 ? args[sourceIdx + 1] : null;
 
-const MISALIGNED_VARIANTS = ["co-consult", "co-work", "co-security", "co-design"];
+  const MISALIGNED_VARIANTS = ["co-consult", "co-work", "co-security", "co-design"];
 
-if (!COMMON_AGENTS_TEMPLATE || !fs.existsSync(COMMON_AGENTS_TEMPLATE)) {
-  console.error(`❌ L1 template not found: ${COMMON_AGENTS_TEMPLATE}`);
-  if (import.meta.main) {
-    process.exit(1);
+  if (!COMMON_AGENTS_TEMPLATE || !fs.existsSync(COMMON_AGENTS_TEMPLATE)) {
+    console.error(`❌ L1 template not found: ${COMMON_AGENTS_TEMPLATE}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
-}
 
-if (allFlag) {
-  for (const v of MISALIGNED_VARIANTS) {
-    regenerateVariant(v, isDryRun);
-  }
-} else if (sourceDir) {
-  regenerateSource(path.resolve(sourceDir), isDryRun);
-} else if (variantName) {
-  regenerateVariant(variantName, isDryRun);
-} else {
-  console.log(`Usage:
+  if (allFlag) {
+    for (const v of MISALIGNED_VARIANTS) {
+      regenerateVariant(v, isDryRun, fromTemplate);
+    }
+  } else if (sourceDir) {
+    regenerateSource(path.resolve(sourceDir), isDryRun, fromTemplate);
+  } else if (variantName) {
+    regenerateVariant(variantName, isDryRun, fromTemplate);
+  } else {
+    console.log(`Usage:
   bun scripts/regenerate-agents-md.ts --variant <name>   # Single variant
   bun scripts/regenerate-agents-md.ts --all              # All misaligned variants
   bun scripts/regenerate-agents-md.ts --source <dir>     # L3 source, in place
   bun scripts/regenerate-agents-md.ts --dry-run --all    # Preview without writing
+  --from-template  force a full rebuild from the L1 template (default: in-place
+                   managed-block update when the target has VARIANT-* markers;
+                   use --from-template to add missing marker blocks)
 
 Misaligned variants: ${MISALIGNED_VARIANTS.join(", ")}`);
-  if (import.meta.main) {
-    process.exit(0);
+    if (import.meta.main) {
+      process.exit(0);
+    }
   }
 }

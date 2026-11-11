@@ -433,6 +433,11 @@
       "layer": "L0"
     },
     {
+      "id": "adr:0104",
+      "type": "adr",
+      "layer": "L0"
+    },
+    {
       "id": "agent:co-abap/architect",
       "type": "agent",
       "layer": "variant:co-abap",
@@ -2815,6 +2820,11 @@
     },
     {
       "id": "dec:DEC-20261110-04",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261111-01",
       "type": "decision",
       "layer": "L0"
     },
@@ -10789,6 +10799,12 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "adr:0104",
+      "to": "skill:root/upgrade-project",
+      "source": "prose"
+    },
+    {
       "type": "accountable_for",
       "from": "agent:co-abap/architect",
       "to": "procedure.co-abap.solution-blueprint",
@@ -12143,6 +12159,24 @@
       "from": "dec:DEC-20261106-02",
       "to": "dec:DEC-20261106-01",
       "source": "prose"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261111-01",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261111-01",
+      "to": "skill:root/project-resync",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261111-01",
+      "to": "skill:root/upgrade-project",
+      "source": "skills_used"
     },
     {
       "type": "cites_skill",

@@ -1,0 +1,56 @@
+schemaVersion: 1
+id: U-20261111-001
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-11T01:20:52.915+09:00'
+history:
+  - at: '2026-11-11T01:20:52.915+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-11T08:30:01.973+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Running `bun scripts/validate-templates.ts` in an L3 variant project (no
+    templates/ directory) exits 1 with "[ERROR] templates/ directory not found
+    at: <project>/templates". Expected behavior: clean "not applicable" skip
+    with exit 0, like scripts/verify-scripts.ts does ("Context: L3 (project —
+    L0-only entries skipped)"). Root cause (verified in the variant copy): a
+    module top-level guard calls process.exit(1) at import time when templates/
+    is absent, which preempts main()'s own built-in skip — main() already
+    contains `if (!existsSync(join(TEMPLATES_DIR, 'common')))` → prints "not
+    applicable: no templates/common (variant/project context)" and returns 0,
+    but that branch is dead code in the direct-run path because the process
+    exits first. Every variant project that runs the standard review baseline
+    battery hits this false failure. Suggested fix: remove the `if
+    (import.meta.main) { process.exit(1); }` inside the top-level guard, or gate
+    the hard exit on an L0 signal (e.g., workspace-root markers) the way
+    verify-scripts.ts detectContextLayer() does.
+  affected_paths:
+    - scripts/validate-templates.ts
+  identity_source: cwd
+  repro: >-
+    cd any L3 variant project without a templates/ directory; run `bun
+    scripts/validate-templates.ts`; observe exit code 1 with "[ERROR] templates/
+    directory not found" instead of the documented "not applicable: no
+    templates/common (variant/project context)" skip.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/validate-templates.ts=true
+  dedupe_key: df353c9e3cdbb7adcbeaeca0ada009bb5b100cad9a432f0fb791567128808645
+  duplicates:
+    - project: co-deck
+      at: '2026-11-11T01:20:52.915+09:00'

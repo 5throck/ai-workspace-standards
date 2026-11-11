@@ -9,7 +9,7 @@
  * ](context.md). No targetPath → output byte-identical to the pre-A-6
  * (legacy) behavior.
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 import { describe, test, expect } from 'bun:test';
 import { scrubConstitutionRefs } from '../../scripts/propagate-to-templates.ts';
@@ -184,5 +184,28 @@ describe('scrubConstitutionRefs policy self-description comment guard (T-2026091
   test('an HTML comment WITHOUT the self-description markers is still scrubbed', () => {
     const doc = '<!-- see CONSTITUTION.md for details -->\n';
     expect(scrubConstitutionRefs(doc)).toBe('<!-- see context.md for details -->\n');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rule A-10 (U-20261111-002): bare section citations without the .md suffix
+// ---------------------------------------------------------------------------
+
+describe('scrubConstitutionRefs rule A-10 (bare CONSTITUTION §N citations)', () => {
+  test('projects "(CONSTITUTION §11)" in prose to "(context.md §11)"', () => {
+    const out = scrubConstitutionRefs('exactly as Antigravity sessions do (CONSTITUTION §11).', 'CODEX.md');
+    expect(out).toBe('exactly as Antigravity sessions do (context.md §11).');
+  });
+
+  test('leaves the word CONSTITUTION alone when no § follows', () => {
+    const src = 'The CONSTITUTION governs the workspace root.';
+    expect(scrubConstitutionRefs(src, 'CODEX.md')).toBe(src);
+  });
+
+  test('does not touch code string literals or JSON', () => {
+    const code = 'const msg = "See CONSTITUTION §3.3";';
+    expect(scrubConstitutionRefs(code, 'scripts/x.ts')).toBe(code);
+    const json = '{ "_note": "policy (CONSTITUTION §6.7)" }';
+    expect(scrubConstitutionRefs(json, 'refs/terms.json')).toBe(json);
   });
 });

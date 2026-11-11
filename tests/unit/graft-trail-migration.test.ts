@@ -170,7 +170,7 @@ describe('upgrade JSON_MERGE composition on the two fixture shapes (R5 acceptanc
   }
 
   const templateRaw = JSON.stringify({
-    permissions: { allow: ['WebSearch(*)', 'Bash(graft:*)'] },
+    permissions: { allow: ['WebSearch(*)', 'Bash(trail:*)'] },
     hooks: {
       SessionStart: [{
         matcher: '',
@@ -195,7 +195,7 @@ describe('upgrade JSON_MERGE composition on the two fixture shapes (R5 acceptanc
     // The trail hook the tool installed survives.
     expect(JSON.stringify(parsed.hooks)).toContain('.trail/hook.cjs');
     // Project-only permission entries survive the merge (project-wins union).
-    expect(parsed.permissions.allow).toContain('Bash(graft:*)'); // template-side, outside the hook guard's scope (design R2.5/R2.6 residual)
+    expect(parsed.permissions.allow).toContain('Bash(trail:*)'); // template-side trail permission survives the merge
     expect(JSON.stringify(parsed)).not.toContain('missingFlag');
   });
 

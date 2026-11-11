@@ -28,6 +28,12 @@ history:
   - at: '2026-11-10T21:19:31.396+09:00'
     from: done
     to: waiting
+blocked_reason: >-
+  user-only: GitHub Settings > Billing & plans (fix the failed payment
+  and/or raise the Actions spending limit). Re-checked 2026-11-11: co-deck
+  CI still fails (main run 42915218703, 2026-11-10T22:30Z). After the user
+  confirms, verify with gh run rerun 42777487491 --repo 5throck/co-deck
+  (outward-facing; needs the go-ahead).
 result: >-
   Diagnosed 2026-11-10 (evidence in session log and this ticket's symptom):
   every job fails in 3-5s with runner_id 0 and zero steps — the GitHub-generated
