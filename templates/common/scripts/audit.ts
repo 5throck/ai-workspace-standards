@@ -1,4 +1,13 @@
-// @version 2.65.0
+// @version 2.66.0
+// v2.66.0 (2026-11-11, T-20261110-012 Scope C-C — DEC-20261110-04 PR-3, design
+//          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 C-C): new
+//          WARN arm `hermetic-test-roots` (workspace root only) — flags
+//          `const <root-like name> = process.cwd()` in tests/unit/**/*.test.ts and
+//          templates/**/tests/**/*.test.ts. A cwd-derived workspace root makes a
+//          test pass at the root and fail with a project as cwd (the
+//          security-validator.test.ts landmine). Detector:
+//          scripts/lib/hermetic-test-roots.ts. WARN-only; generalization is a
+//          follow-up.
 // v2.65.0 (2026-11-10, design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md
 //          §4.5, U-20261108-001 / DEC-20261109-01): new check arm — Biome strict-profile
 //          gate. When @biomejs/biome resolves in the invoking tree, runs `biome check`
@@ -331,6 +340,7 @@ import { classifySpecHeader } from "./helpers/spec-header-consistency.ts";
 import * as url from "node:url";
 import { safeFetch } from "./lib/ssrf.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
+import { findCwdRootAssignments, isContractTestPath } from "./lib/hermetic-test-roots.ts";
 import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from "./lib/encoding-utils.ts";
 import { variantContextPlacement } from "./helpers/variant-context.ts";
 import {
@@ -2745,6 +2755,33 @@ const IS_WORKSPACE_ROOT = fs.existsSync("CONSTITUTION.md") && !fs.existsSync("va
     }
   } else {
     Warn("Tracked node_modules guard skipped (git ls-files failed — not a git worktree?)");
+  }
+}
+
+// ── hermetic-test-roots (v2.66.0; T-20261110-012 Scope C-C) ──────────────────
+// Workspace root only, WARN-only: tests must not derive the workspace root from
+// process.cwd(). Tracked files only (git ls-files), so scratch trees never warn.
+if (IS_WORKSPACE_ROOT) {
+  const ls = Bun.spawnSync(["git", "ls-files", "--", "tests", "templates"], { stdout: "pipe", stderr: "pipe" });
+  if (ls.exitCode === 0) {
+    const files = new TextDecoder().decode(ls.stdout).split("\n").filter(isContractTestPath);
+    const hits: string[] = [];
+    for (const rel of files) {
+      try {
+        for (const line of findCwdRootAssignments(fs.readFileSync(rel, "utf8"))) hits.push(`${rel}:${line}`);
+      } catch {
+        // unreadable (deleted in the worktree) — not a contract violation
+      }
+    }
+    if (hits.length > 0) {
+      Warn(
+        `hermetic-test-roots: ${hits.length} cwd-derived workspace root(s) in tests — ${hits.slice(0, 5).join(", ")}${hits.length > 5 ? " …" : ""} — derive the root from the test file location (import.meta.dir), not process.cwd()`,
+      );
+    } else {
+      Pass(`hermetic-test-roots: clean (${files.length} test file(s) scanned)`);
+    }
+  } else {
+    Warn("hermetic-test-roots skipped (git ls-files failed — not a git worktree?)");
   }
 }
 

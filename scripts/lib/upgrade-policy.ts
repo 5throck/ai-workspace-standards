@@ -1,4 +1,7 @@
-// @version 1.38.0
+// @version 1.39.0
+// v1.39.0 (2026-11-11, T-20261110-012 Scope C — DEC-20261110-04 PR-3): DecisionVerdict
+//          gains UNVERSIONED_SKIP (WARN, C-E), BEHAVIOR_REGRESSION (ERROR, C-A) and
+//          VERIFY_SKIPPED (INFO, C-A) with their DECISION_SEVERITY_CONTRACT rows.
 // v1.38.0 (2026-11-08, spec docs/designs/2026-11-08-trail-fleet-standard-design.md
 //          — DEC-20261108-01 R2): ADD_IF_MISSING_FILES gains the three .trail
 //          skeleton wiring files (`.trail/hook.cjs`, `.trail/README.md`,
@@ -1450,7 +1453,14 @@ export type DecisionVerdict =
   | "TOMBSTONED_SKIP"
   | "TOMBSTONE_CLEARED"
   | "CONFLICT"
-  | "DELETE";
+  | "DELETE"
+  // T-20261110-012 Scope C (DEC-20261110-04 PR-3): a template script with no
+  // @version cannot pass the SYNC_IF_NEWER gate and never delivers (C-E).
+  | "UNVERSIONED_SKIP"
+  // C-A: a delivered script broke a sibling test that passed before delivery.
+  | "BEHAVIOR_REGRESSION"
+  // C-A: post-delivery verification could not run (runner unavailable).
+  | "VERIFY_SKIPPED";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1477,6 +1487,9 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   TOMBSTONE_CLEARED: "INFO",
   CONFLICT: "ERROR",
   DELETE: "WARN",
+  UNVERSIONED_SKIP: "WARN",
+  BEHAVIOR_REGRESSION: "ERROR",
+  VERIFY_SKIPPED: "INFO",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */

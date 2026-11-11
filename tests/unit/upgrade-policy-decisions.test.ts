@@ -22,7 +22,7 @@
  * All assertions are byte-verbatim from tests/unit/upgrade-decision-log.test.ts
  * v1.4.0 (the extraction moves describes, never expectations).
  *
- * @version 1.0.0
+ * @version 1.1.0 (2026-11-11: new verdict severities — T-20261110-012)
  */
 import { describe, test, expect } from 'bun:test';
 
@@ -278,5 +278,13 @@ describe('backfillStubFrontmatter (T-20261028-010 stub FM backfill)', () => {
     const badDate = backfillStubFrontmatter(stub, counterpart, '2026-10-28T00:00:00Z');
     expect(badDate.filled).toEqual(['tier', 'version']);
     expect(badDate.content).not.toContain('last_updated:');
+  });
+});
+
+describe('new verdict severities (T-20261110-012)', () => {
+  test('UNVERSIONED_SKIP / BEHAVIOR_REGRESSION / VERIFY_SKIPPED', () => {
+    expect(DECISION_SEVERITY_CONTRACT.UNVERSIONED_SKIP).toBe('WARN');
+    expect(DECISION_SEVERITY_CONTRACT.BEHAVIOR_REGRESSION).toBe('ERROR');
+    expect(DECISION_SEVERITY_CONTRACT.VERIFY_SKIPPED).toBe('INFO');
   });
 });
