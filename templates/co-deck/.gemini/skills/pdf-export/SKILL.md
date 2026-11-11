@@ -2,7 +2,7 @@
 catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: pdf-export
 scope: co-deck
-version: 2.1.1
+version: 2.1.2
 description: >
   Generates PDF from slide data using pdf-lib. Extracts slidedata.json, runs sample
   (5-slide) then full PDF generation scripts, reviews results. Reads the 4-layer
@@ -11,7 +11,7 @@ description: >
   the lecture workflow.
 status: active
 owner: pdf-export
-last_reviewed: 2026-08-25
+last_reviewed: 2026-11-10
 prerequisites: prep-pdf
 relates_to:
   - skill: research
@@ -59,6 +59,12 @@ All inputs must exist before starting:
 - `pdf-lib` — PDF generation
 - `fflate` — compression
 - `@pdf-lib/fontkit` — Korean font embedding
+
+**Font source of truth**: the sample/full PDF embeds fonts from
+`presentations/assets/fonts/` (default Pretendard Regular/Bold). That family is
+the deck's typographic reference — the HTML deck must embed the same family
+(html-build SKILL, "Font Parity"). Any font change lands in BOTH engines in one
+change. Gate 5 sample review includes a font-parity spot-check (DG-DECK-06).
 
 ---
 

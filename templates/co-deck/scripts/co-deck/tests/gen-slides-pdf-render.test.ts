@@ -1,4 +1,4 @@
-// @version 1.0.0
+// @version 1.1.0 — punchline **keyword** bold-accent (v1.10.1) no literal asterisks
 // gen-slides-pdf-render.test.ts — e2e render-path regression pin for the
 // U-20261105-002/-005 fixes. Skipped when no Pretendard/MaruBuri font pair is
 // available (CI has none; dev machines carry the project font pool).
@@ -72,7 +72,7 @@ function makeProject(): { dir: string; rel: string } {
   writeFileSync(join(dir, 'slidedata.json'), JSON.stringify([
     { section: 'S1', title: 'Visual **Bold** Slide', bullets: ['bullet **one** here', 'bullet two', 'bullet three'], visualImage: 'images/test.png' },
     { section: 'S1', title: 'Footnotes', bullets: ['one two three four five', 'six seven eight nine ten', 'eleven twelve thirteen fourteen'], footnotes: ['SMR: Small Modular Reactor'] },
-    { isPunchlineSlide: true, title: 'Punch Head', text: 'The key message lands here', sub: 'support' },
+    { isPunchlineSlide: true, title: 'Punch Head', text: 'The key **message** lands here', sub: 'support' },
     { isContactSlide: true, title: '감사합니다', contactEmail: 'a@b.c', contactPhone: '010-1234-5678', contactNote: 'CTA' },
   ]));
   return { dir, rel: join('presentations', name) };
@@ -130,7 +130,8 @@ describe.skipIf(!haveFonts)('gen-slides-pdf render-path regressions', () => {
   test('U-002(c): isPunchlineSlide statement renders', () => {
     const txt = extractText(pdfPath);
     if (txt === null) return;
-    expect(txt).toContain('The key message lands here');
+    expect(txt!.replace(/\s+/g, ' ')).toContain('The key message lands here');
+    expect(txt).not.toContain('**');
     expect(txt).toContain('support');
   });
 

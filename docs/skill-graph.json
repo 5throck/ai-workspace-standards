@@ -6288,8 +6288,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "f5d8051aa1a3e7a8",
-      "version": "1.6.1",
+      "content_hash": "68f8fd7de4b562a4",
+      "version": "1.7.0",
       "mirrors": [
         "templates/co-deck/skills/html-build/SKILL.md"
       ],
@@ -6308,8 +6308,8 @@
       "name": "pdf-export",
       "scope": "co-deck",
       "capability": "pdf-export",
-      "content_hash": "ca2003c3a64b9a66",
-      "version": "2.1.1",
+      "content_hash": "63cf9c38c93aa19c",
+      "version": "2.1.2",
       "mirrors": [
         "templates/co-deck/skills/pdf-export/SKILL.md"
       ],

@@ -16,9 +16,7 @@
       "Bash(curl -sI *)",
       "WebFetch(*)",
       "Bash(node dist/cli.js:*)",
-      "Bash(graft:*)",
-      "Bash(npx graft:*)",
-      "Bash(graft-dev:*)"
+      "Bash(trail:*)"
     ]
   },
   "env": {

@@ -2,7 +2,7 @@
 
 - **Spec ID**: `2026-11-10-co-deck-vr-baselines-recapture-design`
 - **Date**: 2026-11-10
-- **Status**: proposed
+- **Status**: implemented (2026-11-11, PM ticket sweep — see §6.1)
 - **Author**: architect (PM-dispatched, Design Gate Row 0 — design only)
 - **Tracking tickets**: T-20261110-011
 - **Related**: U-20261105-004, U-20261110-001, workspace PR #1952 (CSS landing, merge `f7d06a11`), co-deck PR #217 (project recapture), T-20261110-009 / T-20261110-010 (`2026-11-10-delivery-gating-hardening-design`), ADR-0074
@@ -106,16 +106,25 @@ This change touches more than 3 template files. It is **high-risk by the archite
 
 ## 6. Acceptance criteria
 
-- [ ] `cmp` reports the template and project `theme-visual-regression.browser.mjs` byte-identical, both `@version 0.2.0`.
-- [ ] In `templates/co-deck`, `chromium.executablePath()` contains `chromium-1243` and the file exists.
-- [ ] `bun run test:visual:update` exits 0 and reports 32/32 pairs captured.
-- [ ] `find templates/co-deck/docs/html-themes/baselines -name 'slide-*.png' | wc -l` prints 64.
-- [ ] `bun run test:visual` exits 0 on two consecutive runs, with `failed: 0` both times.
+- [x] `cmp` reports the template and project `theme-visual-regression.browser.mjs` byte-identical, both `@version 0.2.0`.
+- [x] In `templates/co-deck`, `chromium.executablePath()` contains `chromium-1243` and the file exists.
+- [x] `bun run test:visual:update` exits 0 and reports 32/32 pairs captured.
+- [x] `find templates/co-deck/docs/html-themes/baselines -name 'slide-*.png' | wc -l` prints 64.
+- [x] `bun run test:visual` exits 0 on two consecutive runs, with `failed: 0` both times.
 - [ ] `git status --porcelain templates/co-deck/docs/html-themes/baselines` is empty after the second compare run (zero diffs, zero new files).
-- [ ] `git ls-files templates/co-deck/docs/html-themes/baselines | grep -c diff-slide-` prints 0.
-- [ ] `zen/white-bubble/slide-1.png` shows the opaque bubble card with navy type (visual check against the project copy).
-- [ ] `bun scripts/upgrade-project.ts Projects/co-deck --dry-run` shows **zero** `EVOLVED` rows under `docs/html-themes/baselines/`. Every baseline row is absent (parity), `CONFLICT`, or `ADOPT`.
-- [ ] The count of byte-identical `slide-*.png` pairs between the two trees (of 64) is recorded in the PR body. Every non-identical pair passes the project `bun run test:visual` threshold after adoption.
+- [x] `git ls-files templates/co-deck/docs/html-themes/baselines | grep -c diff-slide-` prints 0.
+- [x] `zen/white-bubble/slide-1.png` shows the opaque bubble card with navy type (visual check against the project copy).
+- [x] `bun scripts/upgrade-project.ts Projects/co-deck --dry-run` shows **zero** `EVOLVED` rows under `docs/html-themes/baselines/`. Every baseline row is absent (parity), `CONFLICT`, or `ADOPT`.
+- [x] The count of byte-identical `slide-*.png` pairs between the two trees (of 64) is recorded in the PR body. Every non-identical pair passes the project `bun run test:visual` threshold after adoption.
+
+### 6.1 Execution record (2026-11-11)
+
+- D1: project `theme-visual-regression.browser.mjs` v0.2.0 copied byte-identical. D2: `playwright` pinned to `1.63.0`; `chromium.executablePath()` resolves `chromium-1243` after `bun install` (the generated, untracked `bun.lock` was removed — the template does not track one).
+- D3: `bun run test:visual:update` exit 0, 32/32 pairs captured, 64 `slide-*.png`. Two compare runs exit 0 (2 pass / 0 fail each). The second run left no new diffs.
+- D4: the 42 tracked `diff-slide-*.png` were deleted from the working tree (the commit stages the deletions). **Deferred**: the root `.gitignore` guard rule. It is a root file, and CLAUDE.md §9 keeps root and template changes in separate tasks. A template-local `.gitignore` was rejected because it would deliver to projects. D1 removes the cause.
+- D5: README refreshed (structure, macOS arm64 / Playwright 1.63.0 / chromium-1243, transient `vr_fresh`, derived pairs).
+- Byte identity versus `Projects/co-deck`: 52 of 64 `slide-*.png` are identical. The 12 that differ are the 6 `white-bubble` pairs.
+- `upgrade-project.ts Projects/co-deck --dry-run` (new engine): zero `EVOLVED` rows under `docs/html-themes/baselines/`. 10 `white-bubble` PNGs plus `README.md` UPDATE. The 2 `zen/white-bubble` PNGs are CONFLICT (ERROR), the expected D6 row. Grant `--disposition adopt-template='docs/html-themes/baselines/**'` at the co-deck upgrade, then run the project `bun run test:visual`. That last step is not verified here.
 
 ## 7. Rollback
 

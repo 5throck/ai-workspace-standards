@@ -1,4 +1,5 @@
-// @version 1.10.0 — render-path parity batch (U-20261105-002/-003/-005):
+// @version 1.10.1 — punchline statement renders **keyword** bold-accent runs (HTML `.punch-text strong` parity; ported from Projects/co-deck v1.14.5 LOCAL-PATCH U-20261105-005) via richRuns/richLines; no literal asterisks.
+//   v1.10.0 — render-path parity batch (U-20261105-002/-003/-005):
 //   • U-20261105-002(a): full-bleed visual path — when the theme's visual
 //     region overlaps the content region from the left (zen: visual = full
 //     page), the visual is drawn as a BACKGROUND before title/bullets instead
@@ -906,6 +907,46 @@ async function renderDividerSlide(ctx: RenderCtx) {
   }
 }
 
+// Rich (bold-accent) runs for the punchline statement: `**x**` / <strong>x</strong>
+// = bold + accent colour inline (HTML `.punch-text strong`). Ported from the
+// Projects/co-deck v1.14.5 LOCAL-PATCH (U-20261105-005).
+type RichRun = { t: string; b: boolean };
+function richRuns(raw: string | undefined | null): RichRun[] {
+  const src = (raw ?? '').replace(/<\/?(strong|b)\s*>/gi, '**').replace(/<[^>]+>/g, '');
+  const out: RichRun[] = [];
+  src.split('**').forEach((t, i) => { if (t) out.push({ t, b: i % 2 === 1 }); });
+  return out;
+}
+function richRunW(r: Renderer, run: RichRun, sizePt: number, forceBold = false): number {
+  r.setFont(run.b || forceBold, sizePt);
+  return r.stringWidth(run.t);
+}
+// Greedy word wrap (same rule as Renderer.wrapText) over styled runs.
+function richLines(r: Renderer, raw: string, maxW: number, sizePt: number, forceBold = false): RichRun[][] {
+  const atoms: RichRun[][] = [];
+  let cur: RichRun[] = [];
+  for (const run of richRuns(raw)) {
+    const parts = run.t.split(' ');
+    parts.forEach((w, i) => {
+      const last = i === parts.length - 1;
+      const txt = last ? w : w + ' ';
+      if (txt) cur.push({ t: txt, b: run.b });
+      if (!last) { atoms.push(cur); cur = []; }
+    });
+  }
+  if (cur.length) atoms.push(cur);
+  const lines: RichRun[][] = [];
+  let line: RichRun[] = [], lineW = 0;
+  for (const atom of atoms) {
+    const aw = atom.reduce((a, x) => a + richRunW(r, x, sizePt, forceBold), 0);
+    if (lineW > 0 && lineW + aw > maxW) { lines.push(line); line = [...atom]; lineW = aw; }
+    else { line.push(...atom); lineW += aw; }
+  }
+  lines.push(line);
+  for (const l of lines) if (l.length) l[l.length - 1] = { ...l[l.length - 1], t: l[l.length - 1].t.trimEnd() };
+  return lines;
+}
+
 function renderPunchlineSlide(ctx: RenderCtx) {
   const { r, data, spec, coords, colors, sizes, region } = ctx;
   const { C_BG, C_ACCENT, C_WHITE, C_BODY } = colors;
@@ -923,11 +964,15 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   // wraps to ~2 centered lines. Reproduce that exact max-width (measured from slide-7,
   // whose natural width 169.3mm > 160.6mm → wraps). Count the wrapped lines so blockH /
   // vertical centering accounts for the ACTUAL statement height.
-  const statement = strip(data.text) || strip(data.title);
+  // Keep the raw `**keyword**` markup (HTML `.punch-text strong` = accent) and
+  // wrap/draw through richLines (ported from Projects/co-deck v1.14.5).
+  const statementRaw = (data.text ?? '').replace(/<[^>]+>/g, '').trim() ? (data.text as string) : (data.title ?? '');
+  const statement = strip(statementRaw);
   r.setFont(true, T_PUNCH_TEXT);
   const textBand = Math.min(bandW, coords.px2mm(607));
   const textX    = box.x + (bandW - textBand) / 2;
-  const textLineH = (statement ? r.wrapText(statement, textBand).length : 1) * LH_PUNCH_TEXT;
+  const stmtLines = statement ? richLines(r, statementRaw, textBand, T_PUNCH_TEXT, true) : [];
+  const textLineH = (stmtLines.length || 1) * LH_PUNCH_TEXT;
 
   const blockH = LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK + LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT + textLineH + GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB;
   let y = box.y + Math.max(0, (box.h - blockH) / 2);
@@ -951,9 +996,19 @@ function renderPunchlineSlide(ctx: RenderCtx) {
 
   // punch-text (WHITE, bold) — the statement (data.text, fallback title), wrapped at the
   // HTML max-width (textBand), centered on the same axis as the tag/mark/sub above.
-  r.setFont(true, T_PUNCH_TEXT); r.setColor(C_WHITE);
-  const afterText = r.multiCell(textBand, LH_PUNCH_TEXT, statement, textX, y, 'C');
-  y = afterText + GAP_PUNCH_TEXT_SUB;
+  // **keyword** runs render in the accent colour; the rest stays C_WHITE.
+  r.setFont(true, T_PUNCH_TEXT);
+  let sy = y;
+  for (const ln of stmtLines) {
+    let lx = textX + (textBand - ln.reduce((a, x) => a + richRunW(r, x, T_PUNCH_TEXT, true), 0)) / 2;
+    for (const run of ln) {
+      r.setFont(true, T_PUNCH_TEXT); r.setColor(run.b ? C_ACCENT : C_WHITE);
+      if (run.t) r.cell(1, LH_PUNCH_TEXT, run.t, lx, sy, 'L');
+      lx += richRunW(r, run, T_PUNCH_TEXT, true);
+    }
+    sy += LH_PUNCH_TEXT;
+  }
+  y = sy + GAP_PUNCH_TEXT_SUB;
 
   // punch-sub (slate) — support line (data.sub, fallback subtitle/bullets)
   const subText = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);

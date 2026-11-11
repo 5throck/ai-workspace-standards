@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-10-30
+# Last Updated: 2026-11-11
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -453,6 +453,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 4. Speaker intro (slide 2) and contact (last slide) are mandatory
 5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
 6. **Uniform Layout Principle**: All content slides within a single deck MUST use `standard` type. Special types (`punchline`, `divider`, `profile`) are reserved for their designated structural purpose only. `punchline` is allowed ONLY as the last content slide with a single-statement message (≤1 line, no bullets). Mixing slide types for content slides is prohibited — each type has a distinct CSS layout (2-column vs center-aligned), and mixing breaks visual consistency.
+7. **Font Parity (PDF ↔ HTML)**: a deck's typography SSOT is the font family the PDF engine loads from `presentations/assets/fonts/` (currently Pretendard); every HTML build embeds the same family via `@font-face` and verifies `document.fonts.check()` before hand-off — rule body: html-build SKILL "Font Parity"; gate record DG-DECK-06.
 
 ### Design Rules
 1. 8-role color palette: defined in design_spec.md CSS variable block
@@ -680,6 +681,7 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 *co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
 *co-deck.context.md version: 4.5 — updated 2026-10-05: theme/style registry sync (outlook + white-bubble rows, 6×6 compatibility matrix, gen-slides-pdf v1.9.0); skills table synced to variant.json (added slide-layout-gate/presenter-mode; removed dead handbook/graft/agent-lifecycle-manager paths); gate model aligned to user-guide §4 (Gates 2 and 5 mandatory; 1.5, 3, 4 optional).*
 *co-deck.context.md version: 4.6 — updated 2026-10-30: backport: generalized structural slide rules from Projects/co-deck 2026-10-30 (DEC-20261030-01 lineage) — video quality policy (`already-max`), injector order contract, background semantic `matches` rationale, diagram label convention, generalized caption policy (sidecar VTT contract, `manual|auto|translated|translated-llm` vocabulary, merge-on-refetch, CC selector, OFF default, video-box-relative cue sizing).*
+*co-deck.context.md version: 4.7 — updated 2026-11-11: Content Rule 7 — Font Parity (PDF ↔ HTML) typography SSOT pointer, backported from Projects/co-deck rule 9 (DEC-20261110-02, co-deck PR #216; upstream request U-20261111-004) so template deliveries stop dropping it; rule body lives in the html-build SKILL "Font Parity" section (v1.7.0).*
 
 ## Template Provenance
 

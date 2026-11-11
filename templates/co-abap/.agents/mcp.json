@@ -14,8 +14,8 @@
         "SAP_DISPATCH_ROW": "$SAP_DISPATCH_ROW"
       }
     },
-    "graft": {
-      "command": "graft",
+    "trail": {
+      "command": "trail",
       "args": [
         "mcp"
       ]
