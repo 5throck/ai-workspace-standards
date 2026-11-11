@@ -1,8 +1,11 @@
 name: Test Suite
 
 on:
+  # No `pr/**` push trigger: the pull_request event already covers every PR
+  # push, and having both ran the 3-OS matrix twice per push (different
+  # github.ref per event, so the concurrency group never cancelled the twin).
   push:
-    branches: [ main, 'pr/**' ]
+    branches: [ main ]
   pull_request:
     branches: [ main, 'pr/**' ]
   workflow_dispatch:
