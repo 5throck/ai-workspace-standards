@@ -1,0 +1,13 @@
+{
+  "$schema": "internal-note://ai-workspace.prompts-manifest — no formal JSON schema; shape is {generatedAt, entries[{id,title,sha256}], doc} and consumers are the prompt-integrity verifier (T-20261112-003) and human governance review; see doc for the update invariant",
+  "generatedAt": "2026-11-12T15:15:00+09:00",
+  "entries": [
+    {
+      "id": "automation-dfba3ff1-a1df-42e3-b358-7c641f974648",
+      "title": "매일 오전 3시 통합 배치 — 티켓·리뷰·리싱크·업그레이드 (meeting-hardened)",
+      "sha256": "f50f1ef60eb53d3dbc32db07cc5a1f1a81163ec849fef1108d23f3f649fb8128"
+    }
+  ],
+  "doc": "Expected SHA256 of each authority-bearing automation prompt. Any change to an automation prompt MUST update this manifest in the same governance change set; drift is detected daily at 06:00 KST by the prompt-integrity verifier (T-20261112-003, ADR-0105 §Prompt-Integrity). Provenance of the initial hashes: the automation records were read out-of-band from the ZCode session log of the dispatching session on 2026-11-12 (CronList/CronCreate are not callable from a dispatched subagent session — the verifier automation itself must be created by the user from a fresh chat; its creation prompt ships in PR #1990's body). The verifier, once created, hashes the live automation 'prompt' fields byte-exact (temp file + shasum -a 256) and compares against this manifest; its own id joins entries at creation time via the same-PR rule.",
+  "coverage": "manifest-only wave: the unified 03:00 batch runner. The 06:00 prompt-integrity verifier (T-20261112-003) is NOT yet created (scheduling is user-side); when created it must be added here in the same governance change set."
+}

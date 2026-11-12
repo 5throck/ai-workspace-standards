@@ -2,16 +2,34 @@ schemaVersion: 1
 id: T-20261112-002
 kind: manual
 title: >-
-  dev-sync first-run unit flake: meeting-command-retirement and
-  meeting-participation-boilerplate 'Projects leg' fail at step 4.85, pass on
-  rerun (suspected transient Projects/ directory)
-priority: low
-status: backlog
+  Out-of-process watchdog + revert drill for the unified 03:00 runner (meeting
+  2026-11-12, auditor S5 + automation-engineer Issue 4 adoption): (1)
+  launchd/cron watchdog (NOT the runner session) writing
+  .pipeline-state/automation-stop at 13:00 KST or on relayed 2-gate-failure;
+  runner honors at step boundaries (no mid-merge kill); kills past deadline+15
+  min and stamps the lock dead for --break-stale; (2) checked-in
+  expected-failure list making 'sanctioned repair' and 'unexpected gate failure'
+  mechanical, not model-judged; (3) revert-runbook DRILL once before 2026-11-13
+  03:00 — drive the reverse-order revert from a run-manifest against a scratch
+  clone; an untested runbook is documentation, not a control. Prompt already
+  references all three; this ticket is the setup + drill execution.
+priority: high
+not_before: '2026-11-12'
+status: review
 attempts: 0
-created_at: '2026-11-12T18:32:25.328+09:00'
+created_at: '2026-11-12T09:53:15.104+09:00'
 history:
   - at: '2026-11-12T18:32:25.328+09:00'
     from: null
     to: backlog
+  - at: '2026-11-12T22:19:11.726+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-12T22:19:11.746+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-12T23:02:26.459+09:00'
+    from: running
+    to: review
 result: null
 error: null

@@ -57,7 +57,10 @@ Root-level loose files are allowed only for: the two indexes (`README.md`,
 (`workspace-schema.json`, `self-managed-surfaces.json`, `skill-graph.json`,
 `skill-graph.md`, `skill-graph.overrides.json`, `surface-gaps.json`), the
 fleet membership SSOT (`fleet-membership.json` — L0-only registry,
-DEC-20261107-01), and the
+DEC-20261107-01), the unified-runner protected-path SSOT
+(`protected-paths.json` — L0-only registry, merge-predicate floor,
+ADR-0105), the unified runner's sanctioned-repairs list
+(`expected-gate-failures.json` — L0-only registry, ADR-0105), and the
 variant planning pair (`variant-roadmap-2026-q3-q4.md`,
 `variant-benchmark-backlog.md`) — indexed in `index.md`. How-to guides live in
 `guides/`; dated reviews live in `reports/` (2026-10-04 consolidation folded

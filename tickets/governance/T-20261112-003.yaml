@@ -2,15 +2,35 @@ schemaVersion: 1
 id: T-20261112-003
 kind: manual
 title: >-
-  Variant READMEs (7 + _ko) carry stale 'PM runs /sync; opens a PR' text from a
-  one-time seed with no regenerate path
-priority: low
-status: backlog
+  Launcher-side prompt integrity gate (meeting 2026-11-12, auditor PRESERVED
+  DISSENT S2): automation prompt files live OUTSIDE the repo, so in-repo
+  protected-path diff gates cannot see the runner (or anything with filesystem
+  access) editing its own next-night prompt at 03:00 — cross-run authority
+  escalation invisible to every in-repo gate. Required mechanism:
+  prompts.manifest.json checked into the root repo carrying SHA256 of every
+  automation prompt file; the automation LAUNCHER (out-of-process, before fire)
+  verifies hashes — mismatch = no fire + morning alert. Effect: any prompt
+  change must transit a repo commit, which is human-visible. PLATFORM-DEPENDENT:
+  requires launcher support from the automation host (ZCode) — file upstream
+  request if the host exposes no pre-fire hook. Auditor position verbatim: 'the
+  launcher hash-manifest gate ... is a required addition, not an option'.
+priority: normal
+not_before: '2026-11-15'
+status: review
 attempts: 0
-created_at: '2026-11-12T18:32:25.353+09:00'
+created_at: '2026-11-12T09:53:15.143+09:00'
 history:
   - at: '2026-11-12T18:32:25.353+09:00'
     from: null
     to: backlog
+  - at: '2026-11-12T23:25:52.039+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-12T23:25:52.059+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-12T23:32:36.004+09:00'
+    from: running
+    to: review
 result: null
 error: null
