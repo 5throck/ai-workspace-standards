@@ -390,3 +390,28 @@ describe("--project mode", () => {
     }
   });
 });
+
+describe("Korean handling (Language Policy)", () => {
+  test("wrapHangulInCode wraps hangul runs, leaves code spans and ASCII alone, and is idempotent", async () => {
+    const { wrapHangulInCode } = await import("../../scripts/generate-skill-lifecycle-records.ts");
+    const once = wrapHangulInCode('stock master (종목기본정보) and `한국거래소` flow (활용신청 → 개발/운영계정)');
+    expect(once).toBe("stock master (`종목기본정보`) and `한국거래소` flow (`활용신청` → `개발`/`운영계정`)");
+    expect(wrapHangulInCode(once)).toBe(once);
+    expect(wrapHangulInCode("plain ascii")).toBe("plain ascii");
+  });
+
+  test("a derived record with Korean in the description carries no bare hangul", () => {
+    const r = deriveRecord({
+      skill: "k",
+      variant: "co-x",
+      frontmatter: { name: "k", status: "active", owner: "pm", description: 'Say "만들어줘" to start' },
+      ownerMap: {},
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const bare = r.content.replace(/`[^`]*`/g, "");
+      expect(/[\uAC00-\uD7A3]/.test(bare)).toBe(false);
+      expect(r.content).toContain("`만들어줘`");
+    }
+  });
+});
