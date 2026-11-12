@@ -1,0 +1,64 @@
+schemaVersion: 1
+id: U-20261112-016
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T10:01:47.792+09:00'
+history:
+  - at: '2026-11-12T10:01:47.792+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-12T23:51:05.413+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-13T02:02:17.956+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    docs/co-abap.context.md content rotted across template upgrades while
+    citations multiplied. (a) The anchor
+    co-abap.context.md#vsp-tool-reference-hyperfocused-mode is cited by 68 files
+    (largest anchor population in the repo) but the "Tool Reference" heading was
+    removed in the 0.18.0 wave (last content change 78adacd); the upstream
+    remediation re-pointed only docs/mcp_usage.md:7,132 to
+    #upstream-vsp-reference-build--test and left the SSOT paragraph instructing
+    agents to cite the dead anchor. (b) The Data Access Rules DA-1..DA-8 section
+    vanished from the file while its version footer (":550 — version 1.1 — added
+    Data Access Rules DA-1..DA-8 (2026-10-10)") claims it exists, and
+    skills/abap-dev/SKILL.md:55,77 plus
+    docs/standards/clean-abap-checklist.md:117 instruct agents to follow those
+    rules — 12 dead anchor citations (#da-3-priority-order-when-in-scope ×7,
+    #data-access-rules-cds-first--sql-quality ×3, #da-8-* ×1, #da-5-* ×1).
+    Expected: restore the DA-1..DA-8 section (SAP-relevant variant content lost
+    in a wave) or re-point citations to where the rules actually live, correct
+    the version footer, and bulk-repoint the 68 vsp-tool-reference citations;
+    the delivery path should retain variant content sections across waves.
+  affected_paths:
+    - docs/co-abap.context.md
+    - skills/abap-dev/SKILL.md
+    - docs/standards/clean-abap-checklist.md
+    - README.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: docs/standards/clean-abap-checklist.md'
+    - info:in_last_delivery docs/co-abap.context.md=false
+    - info:in_last_delivery skills/abap-dev/SKILL.md=false
+    - info:in_last_delivery docs/standards/clean-abap-checklist.md=false
+    - info:in_last_delivery README.md=false
+  dedupe_key: 75cf0a14312363a00624acfbed9f7bc2a92781099d4240376809256f26816aa0
+  duplicates:
+    - project: co-abap
+      at: '2026-11-12T10:01:47.792+09:00'

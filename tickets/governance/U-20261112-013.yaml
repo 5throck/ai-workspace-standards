@@ -1,0 +1,49 @@
+schemaVersion: 1
+id: U-20261112-013
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T10:01:21.256+09:00'
+history:
+  - at: '2026-11-12T10:01:21.256+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-13T01:29:50.712+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    No gate resolves hook command targets declared in platform settings to
+    existing files. lifecycle-sync-audit Check I
+    (lifecycle-sync-audit.ts:1091-1117) only detects duplicate/count drift;
+    audit.ts and validate-abap-platform-parity.ts do not check hook paths
+    either. Deleting .trail/hook.cjs (referenced by .claude/settings.json:73
+    SessionStart) or dangling any hook command path passes audit, platform
+    parity, and CI. Expected: existsSync every command target referenced in
+    settings hooks (would also cover scripts/sync-md.ts and scripts/hooks/*.ts)
+    with a WARN on missing targets.
+  affected_paths:
+    - scripts/lifecycle-sync-audit.ts
+    - .claude/settings.json
+    - .trail/hook.cjs
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/lifecycle-sync-audit.ts=false
+    - info:in_last_delivery .claude/settings.json=true
+    - info:in_last_delivery .trail/hook.cjs=false
+  dedupe_key: ba2189f1ce5dc862a23279b9975e2363a6504568b47bbe1d63a6bf1ef89c1839
+  duplicates:
+    - project: co-abap
+      at: '2026-11-12T10:01:21.256+09:00'

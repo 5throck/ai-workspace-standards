@@ -1,0 +1,49 @@
+schemaVersion: 1
+id: U-20261112-018
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T10:01:47.817+09:00'
+history:
+  - at: '2026-11-12T10:01:47.817+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-13T02:02:17.990+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Delivered .codex/hooks.json is exactly {"hooks":{}} — a dead stub — while
+    scripts/SCRIPTS.md:242 documents codex-user-prompt-gate.ts as "Wired via
+    .codex/hooks.json (SessionStart reuses pm-role-bootstrap + UserPromptSubmit
+    gate)". agent-model-gate.ts is likewise registered and version-checked but
+    never invoked anywhere. Projects/co-abap carries a full .codex/ layer
+    (config.toml, rules, skills, prompts), so the doctrine premise that variants
+    carry no .codex config layer does not hold for this variant — the PM Gateway
+    gates simply never run for Codex sessions here. Expected: wire
+    pm-role-bootstrap + codex-user-prompt-gate into delivered .codex/hooks.json,
+    or stamp the SCRIPTS.md rows with an explicit L3 non-wiring waiver so the
+    registry does not over-claim.
+  affected_paths:
+    - .codex/hooks.json
+    - scripts/SCRIPTS.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery .codex/hooks.json=false
+    - info:in_last_delivery scripts/SCRIPTS.md=true
+  dedupe_key: 0c501a22e73224a795b6bc0fbf49a428687070791dc086aa7383f8aa4dbc3db0
+  duplicates:
+    - project: co-abap
+      at: '2026-11-12T10:01:47.817+09:00'

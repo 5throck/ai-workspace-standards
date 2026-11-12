@@ -184,7 +184,7 @@
     },
     "explain-me": {
       "source": "skills/explain-me/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "overridable": false,
       "description": "Single-file interactive HTML report generation (experimental)"
     },

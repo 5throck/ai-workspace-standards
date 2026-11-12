@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: explain-me
 - **Status**: experimental
-- **Version**: 1.0.0
+- **Version**: 1.0.1
 - **Created**: 2026-08-16
 - **Last Updated**: 2026-08-16
 

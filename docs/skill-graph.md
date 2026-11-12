@@ -222,7 +222,7 @@
 | `root/design-foundation` | L0 | 1.1.1 | common/design-system-lead | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
 | `root/design-token-adoption` | L0 | 1.0.0 | — | — | root/design-foundation, root/token-usage-lint (composes_with) | — | — |
 | `root/documentation-writing` | L0 | 1.0.3 | co-architect/content-writer, co-architect/technical-writer, co-work/content-writer, co-work/technical-writer | — | root/team-builder (composes_with) | — | — |
-| `root/explain-me` | L0 | 1.0.0 | — | — | — | — | — |
+| `root/explain-me` | L0 | 1.0.1 | — | — | — | — | — |
 | `root/finishing-a-development-branch` | L0 | 1.0.1 | — | — | — | — | — |
 | `root/gateguard` | L0 | 1.0.2 | — | — | root/sync | — | — |
 | `root/meeting-facilitation` | L0 | 1.5.0 | — | — | — | — | — |
@@ -909,7 +909,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `devops-admin` | agent | divergence | co-abap@1.1.2 #59a99f2f; co-price@2.2.1 #20aad471 |
 | `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; common@1.3.2 #e0bd9ada |
 | `ms365-expert` | agent | version-drift | co-architect@1.1.1 #d66a2884; co-work@1.1.1 #a594ed3b |
-| `pm` | agent | divergence | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.3 #9264b767; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.4 #6e05a2a4; root@1.3.0 #7a049182 |
+| `pm` | agent | divergence | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.3 #9264b767; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.4 #6e05a2a4; root@1.3.0 #83607a67 |
 | `project-coordinator` | agent | version-drift | co-architect@1.1.1 #ea0ba5e1; co-work@1.1.1 #ef8c8cfa |
 | `prototype-engineer` | agent | version-drift | co-architect@1.1.1 #5b481cf7; co-design@1.1.1 #f906e607 |
 | `security-monitor` | agent | version-drift | co-abap@1.1.1 #2f8a2b8a; co-develop@1.1.1 #00cd6298; co-game@1.1.1 #dc9d7b81; co-price@2.2.1 #94b3b224 |
