@@ -9359,8 +9359,8 @@
       "name": "zod-contract-gate",
       "scope": "root",
       "capability": "zod-contract-gate",
-      "content_hash": "81deab19c0e351e7",
-      "version": "1.0.2",
+      "content_hash": "11e4c739d4dfeedc",
+      "version": "1.0.3",
       "mirrors": [
         "skills/zod-contract-gate/SKILL.md",
         "templates/common/skills/zod-contract-gate/SKILL.md",

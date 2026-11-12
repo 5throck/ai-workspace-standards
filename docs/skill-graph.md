@@ -255,7 +255,7 @@
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
 | `root/upgrade-project` | L0 | 1.6.2 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
 | `root/variant-feature` | L0 | 1.0.0 | — | — | root/upgrade-project (composes_with) | — | — |
-| `root/zod-contract-gate` | L0 | 1.0.2 | common/contract-gate-engineer | — | root/security-scan | — | — |
+| `root/zod-contract-gate` | L0 | 1.0.3 | common/contract-gate-engineer | — | root/security-scan | — | — |
 
 ## Lifecycle Phase Grouping
 
