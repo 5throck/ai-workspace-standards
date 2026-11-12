@@ -22,7 +22,8 @@ co-game follows the workspace-wide **PM Gateway** pattern: you never invoke a sp
    | 5 | Canvas engine + gameplay implementation | `game-developer` | Medium | sonnet |
    | 6 | Bug analysis / fix verification | `game-debugger` | Medium | sonnet |
    | 7 | Test authoring + QA gate | `test-runner` | Medium | sonnet |
-   | 8 | `/sync "feat(...): ..."` — lifecycle + audit + commit + push + PR | pm | Medium | sonnet |
+   | 8 | `/sync "feat(...): ..."` — lifecycle + audit + commit + push + PR | automation-engineer | Medium | sonnet |
+   | 9 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit (sonnet) |
 
 3. **You approve the plan** (or ask for changes) before any specialist is dispatched.
 4. **Specialists execute** in the order shown — design phases (1-2) always precede implementation (Phase 4).
@@ -116,7 +117,7 @@ co-game reuses the workspace's 6-phase model (see [AGENTS.md §3.5 Phase Determi
 | **2** | Analysis / Design Validation | PM synthesizes findings into requirements + acceptance criteria; **user approval gate** |
 | **3** | Design Handoff | `game-designer` produces the universal spec; genre designer produces the genre spec; `visual-artist` + `sound-designer` produce asset specs |
 | **4** | Implementation | `game-developer` → `test-runner` → `game-debugger` execution loop (max 3 iterations on failure) |
-| **5** | Finalization | PM logs decisions to `memory/YYYY-MM-DD.md`; runs `/sync`; opens PR |
+| **5** | Finalization | PM logs decisions to `memory/YYYY-MM-DD.md`; dispatches `/sync` to `automation-engineer`; verifies the PR landing |
 
 **Stable variant status**: co-game is a **stable** variant (v1.0.0) — promoted from beta on 2026-08-12. See `variant.json` for lifecycle history.
 

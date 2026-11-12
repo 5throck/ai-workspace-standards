@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.9.0
+ * @version 1.10.0
+ * v1.10.0 (2026-11-12, CA-2+AE-2): reviewed delivery-gap entries for the four new common agents
+ *          (automation-engineer, public-data-analyst, design-system-lead, contract-gate-engineer) and
+ *          their lifecycle records — same class as agents/i18n-specialist.md (stub-generated for L3
+ *          drafts; real projects receive the common copy at new-project instantiation).
  * v1.9.0 (2026-10-28, spec 2026-10-28-l0-only-governance-doc-cleanup): the
  *          docs/governance/agents/ prefix rule in REVIEWED_DELIVERY_EXCLUSIONS
  *          narrows to per-file exact paths and the pm-gateway-workflow.md rule
@@ -388,6 +392,46 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
     path: "agents/i18n-specialist.md",
     reason:
       "agents/ is stub-generated for L3 drafts (dedicated step); fleet agents reach real projects via the common copy at new-project instantiation",
+  },
+  {
+    path: "agents/automation-engineer.md",
+    reason:
+      "common agent (CA-2+AE-2, designs 2026-11-12-common-agents-for-common-skills / 2026-11-12-sync-ownership-and-common-automation-engineer): agents/ is stub-generated for L3 drafts (dedicated step); the agent reaches real projects via the common copy at new-project instantiation",
+  },
+  {
+    path: "agents/public-data-analyst.md",
+    reason:
+      "common agent (CA-2+AE-2, designs 2026-11-12-common-agents-for-common-skills / 2026-11-12-sync-ownership-and-common-automation-engineer): agents/ is stub-generated for L3 drafts (dedicated step); the agent reaches real projects via the common copy at new-project instantiation",
+  },
+  {
+    path: "agents/design-system-lead.md",
+    reason:
+      "common agent (CA-2+AE-2, designs 2026-11-12-common-agents-for-common-skills / 2026-11-12-sync-ownership-and-common-automation-engineer): agents/ is stub-generated for L3 drafts (dedicated step); the agent reaches real projects via the common copy at new-project instantiation",
+  },
+  {
+    path: "agents/contract-gate-engineer.md",
+    reason:
+      "common agent (CA-2+AE-2, designs 2026-11-12-common-agents-for-common-skills / 2026-11-12-sync-ownership-and-common-automation-engineer): agents/ is stub-generated for L3 drafts (dedicated step); the agent reaches real projects via the common copy at new-project instantiation",
+  },
+  {
+    path: "docs/lifecycle/agents/automation-engineer.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the common agent's record reaches real projects via the common copy at new-project instantiation (H13 reviewed gap)",
+  },
+  {
+    path: "docs/lifecycle/agents/public-data-analyst.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the common agent's record reaches real projects via the common copy at new-project instantiation (H13 reviewed gap)",
+  },
+  {
+    path: "docs/lifecycle/agents/design-system-lead.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the common agent's record reaches real projects via the common copy at new-project instantiation (H13 reviewed gap)",
+  },
+  {
+    path: "docs/lifecycle/agents/contract-gate-engineer.md",
+    reason:
+      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the common agent's record reaches real projects via the common copy at new-project instantiation (H13 reviewed gap)",
   },
   {
     path: "docs/README.template.md",

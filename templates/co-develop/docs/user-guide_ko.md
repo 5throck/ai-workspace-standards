@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 9e236e5c4ed54e5d8d659393a25944f879e8a8ebb83b24d8163ca8493632e1db
+translated_from_hash: c3dbd9fd1f2edbca30401b351df7aa38f3d066a6bd8d7f695aae80de39e7b5e2
 ---
 # co-develop 사용자 가이드
 
@@ -13,7 +13,7 @@ translated_from_hash: 9e236e5c4ed54e5d8d659393a25944f879e8a8ebb83b24d8163ca84936
 
 ## 1. 빠른 시작
 
-co-develop은 전적으로 **PM 게이트웨이 패턴**으로 운영됩니다. 사용자는 PM과 대화하고, PM이 계획을 수립하고, PM이 전문 에이전트를 디스패치하며, PM이 `/sync`로 마무리합니다.
+co-develop은 전적으로 **PM 게이트웨이 패턴**으로 운영됩니다. 사용자는 PM과 대화하고, PM이 계획을 수립하고, PM이 전문 에이전트를 디스패치하며, PM이 `automation-engineer`에 `/sync`를 배치하고 반영을 확인합니다.
 
 1. **작업을 평이한 언어로 설명합니다** — "로그인 엔드포인트를 추가해줘", "결제 흐름의 불안정한 테스트를 고쳐줘", "이 PR을 검토해줘". 전문 에이전트를 직접 호출하려고 하지 마세요. 전문 에이전트는 사용자의 직접 요청을 거부하고 PM으로 리다이렉트합니다.
 2. **PM이 작업을 분류**(Phase Determination)하고, 다단계 작업(2개 이상 파일 또는 2단계 이상 순차 작업)에 대해서는 다른 어떤 작업보다 먼저 **실행 계획 표**를 출력합니다.
@@ -21,12 +21,13 @@ co-develop은 전적으로 **PM 게이트웨이 패턴**으로 운영됩니다. 
    | # | Task | Agent | Tier | Model |
    |---|------|-------|------|-------|
    | 1 | [작업 설명] | [전문 에이전트] | High/Medium/Low | [모델] |
-   | N | `/sync "type(scope): message"` | pm | Medium | [모델] |
+   | N | `/sync "type(scope): message"` | automation-engineer | Medium | sonnet |
+   | N+1 | 반영 확인 — PR 주소, 브랜치, CI 상태, 커밋된 파일 목록 | pm | Medium | inherit ([모델]) |
 
 3. **사용자가 계획을 승인**합니다(또는 수정을 요청합니다). PM은 멀티 에이전트 작업에서 이 단계 없이는 절대 전문 에이전트 디스패치로 넘어가지 않습니다.
 4. **PM이 네이티브 `Agent` 도구로 전문 에이전트를 디스패치**합니다. 표의 각 행마다 하나씩, 순차/병렬 실행 순서를 준수합니다.
 5. **PM이 QA 게이트를 실행**(`bun scripts/audit.ts`)하고 인수 기준(acceptance criteria)을 검증합니다.
-6. **PM이 `/sync "type(scope): message"`로 마무리**합니다 — 이 단일 명령이 전체 파이프라인을 실행합니다: 메모리 로그 → CHANGELOG 항목 → audit → 커밋 → 푸시 → PR. 사용자는 절대 `git commit`/`git push`를 직접 실행하지 않습니다. pre-commit 훅이 `/sync` 외부에서의 실행을 차단합니다.
+6. **PM이 `automation-engineer`에 `/sync "type(scope): message"`를 배치하고 반영을 확인**합니다 — 이 단일 명령이 전체 파이프라인을 실행합니다: 메모리 로그 → CHANGELOG 항목 → audit → 커밋 → 푸시 → PR. 사용자는 절대 `git commit`/`git push`를 직접 실행하지 않습니다. pre-commit 훅이 `/sync` 외부에서의 실행을 차단합니다.
 
 **경험칙**: 에이전트 파일(`agents/code-writer.md` 등)에 직접 무언가를 시키려 하고 있다면 멈추고, 대신 PM을 통해 요청을 전달하세요.
 
@@ -47,7 +48,7 @@ co-develop은 전적으로 **PM 게이트웨이 패턴**으로 운영됩니다. 
 | 테스트 작성 / QA 게이트 / 인수 기준 확인 | `test-runner` | `test-driven-development` | 테스트 스위트와 audit 스크립트를 실행하고, 각 인수 기준별 통과/실패를 보고 |
 | 보안 검토, 시크릿 스캔, 의존성 권고 | `security-monitor` | — | Phase 0(기준선 스캔)과 Phase 5(PR 전 권고 점검)에서 실행 |
 | 아키텍처 결정 / 트레이드오프 평가 | `architect` | — | 코드 작성 전에 구현 계획과 ADR을 산출 |
-| 커밋, 푸시, PR 오픈 | PM | `sync` | 항상 `/sync "type(scope): message"`를 통해 — 절대 직접 `git commit`/`git push` 금지 |
+| 커밋, 푸시, PR 오픈 | `automation-engineer` (PM이 배치) | `sync` | 항상 `/sync "type(scope): message"`를 통해 — 절대 직접 `git commit`/`git push` 금지 |
 | 세션 중간에 changelog 항목 추가 | PM | `changelog` | 최종 `/sync` 이전에 `/changelog "..."` |
 | 전체 sync 없이 세션 메모 기록 | PM | `memlog` | `/memlog "summary"` |
 | 전체 멀티 에이전트 프로젝트 검토 | PM | `project-review` | 구성원을 자동 감지하여 모든 전문 에이전트를 병렬 디스패치하고 Critical/High/Medium/Low 우선순위 계획을 산출 |
@@ -66,7 +67,7 @@ co-develop은 고정된 **파이프라인 순서**를 따릅니다: `architect �
 4. **Code-writer (Phase 4)** — 승인된 계획에 엄격히 따라 구현합니다. 설계를 하지 않고 범위를 결정하지 않습니다 — 외과적(surgical) 변경만 수행합니다.
 5. **Test-runner (Phase 4)** — `bun scripts/audit.ts`(문서/라이프사이클 게이트)와 프로젝트의 테스트 명령을 실행한 후, 각 인수 기준을 개별적으로 체크합니다. `READY FOR PR` 또는 `BLOCKED` 판정을 보고합니다. PM에게 에스컬레이션하기 전까지 최대 3회의 QA 반복이 허용됩니다.
 6. **Security-monitor (Phase 0, Phase 5)** — 초기에 기준선 스캔을, 후반에 PR 전 권고 점검을 실행하며, 특히 인증, 시크릿, 인프라와 관련된 사항에 집중합니다.
-7. **PM 마무리** — 결정 사항을 `memory/YYYY-MM-DD.md`에 기록하고, Phase 5 라이프사이클 트리거(에이전트/스킬/스크립트가 변경되었는가? variant 상태가 변경되었는가?)를 확인한 후 `/sync "type(scope): message"`를 실행합니다.
+7. **PM 마무리** — 결정 사항을 `memory/YYYY-MM-DD.md`에 기록하고, Phase 5 라이프사이클 트리거(에이전트/스킬/스크립트가 변경되었는가? variant 상태가 변경되었는가?)를 확인한 후 `automation-engineer`에 `/sync "type(scope): message"`를 배치하고 반영을 확인합니다.
 
 ### 주요 명령어
 
@@ -94,7 +95,7 @@ co-develop은 표준 선형적이고 게이트가 있는 7단계 모델을 사�
 | 3 | UI/UX 설계 | 범위에 있을 때 `designer`(선택)가 UI/UX 스펙, 와이어프레임, 디자인 토큰을 산출 | — |
 | 4 | 구현 및 QA 게이트 | Code Writer가 구현; Test Runner가 검증; 실패 시 최대 3회 반복 | 코드 검토 통과, 테스트 그린, 심각한 린트 오류 없음 |
 | 5 | 보안 검토 및 라이프사이클 마무리 | `security-monitor`가 PR 전 권고 점검을 실행; PM이 결정을 기록하고 거버넌스 기록을 갱신 | 인증/시크릿/인프라 변경에 대한 보안 권고 점검 통과, 거버넌스 기록 갱신 |
-| 6 | 품질 보증 및 최종 마무리 | PM이 audit과 `/sync`를 실행하고 PR을 오픈; 배포 검증; 문서 갱신 | 배포 검증 완료, 문서 갱신 완료, 회고 완료 |
+| 6 | 품질 보증 및 최종 마무리 | PM이 audit을 실행하고 `automation-engineer`에 `/sync`를 배치한 뒤 PR 반영을 확인; 배포 검증; 문서 갱신 | 배포 검증 완료, 문서 갱신 완료, 회고 완료 |
 
 **티어 상한 규칙**: 에이전트의 티어는 간단한 작업에 대해 낮출 수 있지만, 정의된 기준선보다 절대 높일 수 없습니다 (architect: High, designer/security-monitor/test-runner: Medium, code-writer/stack-setup: Low).
 

@@ -6,8 +6,8 @@ description: >
   parity certificate on success. Use when: adding or removing translation
   keys, syncing locales/*.json with a master locale, auditing glossary
   coverage, or certifying locale parity before a release.
-version: 1.0.0
-owner: pm
+version: 1.0.1
+owner: i18n-specialist
 status: active
 last_reviewed: 2026-08-29
 scope: common

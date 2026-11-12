@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 6f6ae35304032f1d18b54a1ad55820192e6fc066b7930bd420074bfb1233f50e
+translated_from_hash: 73af5bbf6e21698ebb18ac8e59dcaf2da25d03226d151a0a0a380b5dfc0fa2f9
 ---
 # Safety OS 사용자 가이드
 
@@ -15,13 +15,14 @@ translated_from_hash: 6f6ae35304032f1d18b54a1ad55820192e6fc066b7930bd420074bfb12
 
 1. **평상시 말로 작업을 설명합니다.** 예: "화학공장 정비(TAR)가 다음 달 시작돼 — 사전 TAR 위험성평가 패키지를 만들어줘."
 2. **PM/CSO가 요청을 분류**하고 **법적 근거 게이트(legal basis gate)**를 확인합니다(모든 워크플로는 산업안전보건법/중대재해처벌법 및 도메인 법령의 규제 근거 3건 이상을 인용해야 함 — 미달 시 PM은 작업을 배치하지 않음), 필요한 전문가를 결정합니다.
-3. **다단계 작업(2개 이상 파일 또는 순차 작업) 전에 PM이 실행 계획 테이블을 제시**합니다. 모든 계획은 `/sync`로 끝납니다:
+3. **다단계 작업(2개 이상 파일 또는 순차 작업) 전에 PM이 실행 계획 테이블을 제시**합니다. 모든 계획의 마지막 구현 행은 `/sync`이고, 그 뒤에 PM의 반영 확인이 옵니다:
 
    | 작업 | 에이전트 | 티어 | 스킬 |
    |------|---------|------|------|
    | 사전 TAR 위험성평가 패키지 | ehschem-agent | Medium | `tar-planning` |
    | 도급 인력 급증 대응 온보딩 | contractor-safety-agent | Medium | `contractor-onboarding` |
-   | `/sync "feat(tar): pre-TAR package"` — 감사 + 커밋 + 푸시 + PR | pm | High | `sync` |
+   | `/sync "feat(tar): pre-TAR package"` — 감사 + 커밋 + 푸시 + PR | automation-engineer | Medium | `sync` |
+   | 반영 확인 — PR 주소, 브랜치, CI 상태, 커밋된 파일 목록 | pm | Medium | — |
 
 4. **계획을 승인(또는 조정)합니다.** PM은 전문가를 배치합니다 — 파일을 쓰는 작업은 순차, 읽기 전용 리서치/분석은 병렬.
 5. **PM이 결과를 검증**하고 품질 게이트를 실행합니다: `bun scripts/audit.ts`(문서/구조) 및 `bun scripts/co-safety/safety-audit.ts`(legal_basis — 워크플로당 근거 3건 이상, 0 오류 필수).
@@ -102,7 +103,7 @@ PM이 어떤 전문가를 투입할지 가늠하는 표입니다 — 에이전�
 | 1–2 거버넌스 | safety-governance-manager, legal-agent | EHS 전략, KPI 정의, 규제 추적, 법령 해석 |
 | 3–4 운영 | safety-workflow-manager + 기능/도메인 에이전트 | 일일 워크플로 — TBM, PTW, 위험성평가, MSDS, 교육, 컴플라이언스 모니터링, 도메인별 EHS 작업 |
 | 5 조사 | incident-investigation-agent, audit-agent | RCA/CAPA, 감사 대비, 증적 추적 |
-| 6 QA / 마무리 | pm (+ auditor) | 품질 게이트, `/sync`, PR |
+| 6 QA / 마무리 | pm (+ auditor) | 품질 게이트, `automation-engineer`에 `/sync` 배치, 반영 확인, PR |
 
 **쓰기 순차, 읽기 병렬**: 파일을 쓰는 에이전트는 한 번에 하나씩 실행되고, 읽기 전용 리서치/분석 에이전트(법무, 컴플라이언스, 보고)는 병렬 실행될 수 있습니다. PM이 이를 자동으로 강제합니다.
 

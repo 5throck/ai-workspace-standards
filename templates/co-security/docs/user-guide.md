@@ -18,7 +18,8 @@ Every engagement starts and ends through the **PM (Security PM)** — never invo
    | # | Task | Agent | Tier | Model |
    |---|------|-------|------|-------|
    | 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-   | N | `/sync "type(scope): message"` | pm | Medium | [model] |
+   | N | `/sync "type(scope): message"` | automation-engineer | Medium | sonnet |
+   | N+1 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit ([model]) |
 
 4. **You approve the plan** (or ask for changes) before any agent starts work.
 5. **Specialists execute** their phase-scoped tasks (see §2 below for which specialist handles what).

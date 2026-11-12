@@ -110,7 +110,7 @@
 | Agent | File | Role | Status |
 |-------|------|------|--------|
 | Architect | `agents/architect.md` | Team lead; implementation plans, design docs, ADRs for MCP server / CAD-automation backend (Phase 1-2) | active |
-| Automation Engineer | `agents/automation-engineer.md` | Implements approved plans — MCP tools, Python data models, COM handlers, unit tests (Phase 3-4) | active |
+| Automation Engineer | `agents/automation-engineer.md` | Common agent (delivered from the shared template): the `/sync` row, repository automation, and implementation of approved plans — MCP tools, Python data models, COM handlers, unit tests (Phase 3-4). CAD-specific bindings: see "Agent bindings — automation-engineer" below | active |
 
 **Platform Engineering Team Scope**: This team owns the *software* layer (`src/cad_intelligence/`, `src/agent/`, `src/file_curator/`, `src/lisp/`, `src/mcp_connector/`, `src/parser/`) — MCP tool implementation, data models, geometry/COM automation logic. It is distinct from Engineering Team, which owns *CAD drawing production* (SketchUp models, ZWCAD drawings) using the tools this team builds. A feature that needs both (e.g. a new elevation-generation capability) is planned by architect, implemented by automation-engineer, and only then produced as drawings by zwcad-drafter. Also distinct from Design Team (visual/design-system architecture).
 
@@ -204,7 +204,7 @@ Co-Architect PM
 | 3 | Creation / Execution | Specialists produce deliverables in parallel; Engineering Team starts after Phase 2 gate | Specialists |
 | 4 | Delivery / Integration | Handoff, drawing production, publication, stakeholder review | Team Lead |
 | 5 | Quality Assurance | PM runs audit scripts | PM |
-| 6 | PR & Handoff | PM runs /sync, creates PR | PM |
+| 6 | PR & Handoff | PM dispatches /sync to automation-engineer, verifies the landing | PM |
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -286,6 +286,36 @@ ArchitectureGraph (+ GraphIdentity lineage & GraphMetadata OS Kernel; ADR-001/00
 | **Tolerance System**| `common/tolerance.py` ✅ | Hierarchical `ToleranceProfile` with `GeometryTolerance`, `TopologyTolerance`, `SemanticTolerance`, `InferenceTolerance` + `.derive()` method + 3 presets (RESIDENTIAL, OFFICE, FACTORY). |
 | **Evidence Repository** | `features/store.py` (partial), `common/traceability.py` ✅ | `TraceableNode` Protocol + `attach_evidence()`/`attach_derivation()` immutable helpers (ADR-010/011). Graph-level `evidence_ids`/`derivation_ids` on `ArchitectureGraph`; per-node field migration is incremental. |
 | **Fitness Suite** | `tests/test_architecture_fitness.py` ✅ | 8 CI fitness functions enforcing layer imports, immutability, cyclic deps, LOC limits, memory leaks, deterministic reconstruction, traceability, replay consistency. |
+
+### Agent bindings — automation-engineer
+
+The `automation-engineer` agent is a common agent (`agents/automation-engineer.md`, delivered from the shared template). It owns the `/sync` row, repository automation, and implementation of approved platform-layer plans. This subsection holds the co-architect-specific bindings that the common body deliberately leaves out. They apply whenever the agent implements work in the software/platform layer (`src/cad_intelligence/`, `src/agent/`).
+
+**Relationship to zwcad-drafter**: zwcad-drafter produces CAD *drawings* (floor plans, elevations, sections) with the existing MCP tools. The automation-engineer builds and maintains the *tools themselves* — the MCP server, the COM bridge, and the Python backend (`src/agent/server.py`) that zwcad-drafter and the CAD Agent web UI depend on. When a feature needs both new backend capability and new drawings, the architect's plan sequences the automation-engineer first and zwcad-drafter second.
+
+**Scope**: MCP tool handlers (`src/cad_intelligence/`), Python data models, geometry and ZWCAD COM logic, and the associated unit tests. The plan comes from the architect or from a design doc at `docs/designs/<spec-id>-design.md`.
+
+| Binding | Rule |
+|---------|------|
+| Tool registration | Follow the `TOOL_SCHEMAS` / `TOOL_HANDLER_MAP` registration pattern in `src/cad_intelligence/cad_io/server.py` |
+| Handler convention | Follow the `handle_*` function convention in `src/cad_intelligence/cad_io/com_bridge.py`; every new COM-dependent handler gets a non-Windows stub |
+| Platform behaviour | COM-dependent code is Windows-only and degrades to `ZWCADConnectionError` stubs off-Windows; pure-Python modules (for example `models.py`, `room_geometry.py`) must stay import-safe on any OS |
+| JSON config | Use the `_load_*` / `_save_*` pattern of `memory/drawings/*.json`; loaders and savers must be idempotent (edit JSON, re-run the tool) |
+| Encoding | Korean text appears throughout drawing metadata (`memory/drawings/*.json`); all file I/O is UTF-8 explicit |
+| Errors | Reuse `ZWCADConnectionError`, `BoundaryViolationError`, and `LayerOperationError`; do not invent parallel error conventions |
+| Dependencies | The existing `pyproject.toml` set (`shapely`, `ezdxf`, `pywin32`, and the rest) should cover most work; flag any new dependency to the PM or the architect before adding it |
+| Tests | Unit-test everything that does not need a live ZWCAD session (`pytest`), and report what still needs manual or live-session verification |
+| Existing handlers | Work is additive: never remove or modify shipped functionality (for example the v1 / ELEV-001 handlers) unless the plan says so |
+
+**Meeting stance**: ground proposals in the real ZWCAD COM API — COM reliability, Windows-only constraints, test isolation, and cross-platform stub behaviour — and flag anything that cannot be implemented against it as stated.
+
+**Output example**:
+
+```
+✅ src/cad_intelligence/common/models.py - created: 10 dataclasses per design doc §2
+✅ src/cad_intelligence/cad_io/server.py - modified: 3 new TOOL_SCHEMAS entries + handler map
+⚠️  src/cad_intelligence/geometry/room_geometry.py - gap-healing tolerance is a judgment call, flagged for review
+```
 
 ---
 
@@ -377,7 +407,7 @@ Configuration is loaded from `config.py` and can be overridden via environment v
 
 ---
 
-*co-architect.context.md version: 2.1 — updated to current 6-team structure (Design, Research, Project, Engineering, Platform Engineering + PM Orchestration)*
+*co-architect.context.md version: 2.2 — added "Agent bindings — automation-engineer" (CAD-specific rules folded out of the removed variant agent file); previous: 2.1 — updated to current 6-team structure (Design, Research, Project, Engineering, Platform Engineering + PM Orchestration)*
 
 ## Template Provenance
 

@@ -117,7 +117,7 @@ PM (Phase 0: triage + scope)
  │
  ├─▶ Phase 4: logistics-coordinator (delivery/handoff coordination)
  │
- └─▶ Phase 5-6 (PM-owned): audit → /sync → PR
+ └─▶ Phase 5-6 (PM-owned): audit → /sync (automation-engineer) → landing check → PR
 ```
 
 ### Workflow Phases
@@ -129,7 +129,7 @@ PM (Phase 0: triage + scope)
 | 2 | Design Review & Approval | PM synthesizes compliance + strategy findings into a single recommendation — **USER APPROVAL REQUIRED** before Phase 3 | PM |
 | 3 | Execution | Strategy doc, trade documentation, and duty drawback (recurring, once HS is confirmed) produced | market-entry-strategist, trade-documentation-specialist, customs-duty-drawback-specialist |
 | 4 | Delivery | Logistics/Incoterms coordination and final handoff | logistics-coordinator |
-| 5-6 | Lifecycle Finalization & PR | Audit, `/sync`, PR handoff | PM |
+| 5-6 | Lifecycle Finalization & PR | Audit, `/sync` (dispatched to `automation-engineer`), landing check, PR handoff | PM |
 
 ---
 
@@ -218,7 +218,7 @@ PM owns the composition of this project's agent team and rules on skill changes.
 
 *Created 2026-08-08 as part of Phase A scaffold. See `_ORIGIN.md` for provenance.*
 
-*co-export.context.md version: 1.1 — added canonical section structure (Tool Stack, Scripts, Git/PR Workflow, File Organization Policy, Domain Rules), closed VARIANT-INJECT tag, removed redundant Variant-Specific PM Configuration block*
+*co-export.context.md version: 1.2 — Phase 5-6 finalization wording: `/sync` is dispatched to `automation-engineer`; previous: 1.1 — added canonical section structure (Tool Stack, Scripts, Git/PR Workflow, File Organization Policy, Domain Rules), closed VARIANT-INJECT tag, removed redundant Variant-Specific PM Configuration block*
 <!-- COMMON-CONTEXT:START -->
 This project follows the coding standards in the key-rules list below.
 

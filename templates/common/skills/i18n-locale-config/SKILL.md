@@ -6,8 +6,8 @@ description: >
   timezone handling, and the region/language matrix. Use when: choosing
   a locale code, configuring locales/<lang>.json, fixing sort order for
   a language, or deciding which timezone a deliverable should display.
-version: 1.0.0
-owner: pm
+version: 1.0.1
+owner: i18n-specialist
 status: active
 last_reviewed: 2026-08-24
 scope: common

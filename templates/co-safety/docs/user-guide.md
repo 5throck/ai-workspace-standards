@@ -10,13 +10,14 @@ Every task starts the same way: **talk to the PM/CSO, never invoke a specialist 
 
 1. **Describe your task in plain language.** e.g. "Chemical plant turnaround starts next month — build the pre-TAR risk assessment package."
 2. **PM/CSO classifies the request**, checks the **legal basis gate** (every workflow must cite ≥3 Korean regulatory sources from OSHA-KR/SAPA and domain acts — the PM will not dispatch work without them), and determines which specialist(s) are needed.
-3. **PM shows you an execution plan table** before doing anything multi-step (2+ files or 2+ sequential actions). Every plan ends with `/sync`:
+3. **PM shows you an execution plan table** before doing anything multi-step (2+ files or 2+ sequential actions). Every plan's last implementation row is `/sync`, followed by the PM landing verification:
 
    | Task | Agent | Tier | Skill |
    |------|-------|------|-------|
    | Pre-TAR risk assessment package | ehschem-agent | Medium | `tar-planning` |
    | Contractor surge onboarding | contractor-safety-agent | Medium | `contractor-onboarding` |
-   | `/sync "feat(tar): pre-TAR package"` — audit + commit + push + PR | pm | High | `sync` |
+   | `/sync "feat(tar): pre-TAR package"` — audit + commit + push + PR | automation-engineer | Medium | `sync` |
+   | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | — |
 
 4. **You approve (or adjust) the plan.** PM dispatches specialists — serially for anything that writes files, in parallel only for read-only research/analysis.
 5. **PM verifies the output** against your original ask and runs the quality gates: `bun scripts/audit.ts` (documentation/structure) and `bun scripts/co-safety/safety-audit.ts` (legal_basis, ≥3 sources per workflow, 0 errors required).
@@ -97,7 +98,7 @@ Design Approval (execution plan table, ends with /sync)
 | 1–2 Governance | safety-governance-manager, legal-agent | EHS strategy, KPI definition, regulatory tracking, legal interpretation |
 | 3–4 Operations | safety-workflow-manager + functional/domain agents | Daily workflows — TBM, PTW, risk assessment, MSDS, training, compliance monitoring, domain-specific EHS work |
 | 5 Investigation | incident-investigation-agent, audit-agent | RCA/CAPA, audit preparation, evidence traceability |
-| 6 QA / Finalization | pm (+ auditor) | Quality gate, `/sync`, PR |
+| 6 QA / Finalization | pm (+ auditor) | Quality gate, `/sync` dispatch to `automation-engineer`, landing check, PR |
 
 **Serial writes, parallel reads**: agents that write files run one at a time; read-only research/analysis agents (legal, compliance, reporting) may run in parallel. The PM enforces this automatically.
 

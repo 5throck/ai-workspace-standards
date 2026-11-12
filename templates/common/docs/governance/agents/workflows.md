@@ -101,7 +101,7 @@ Phase 6 - Quality Assurance & Finalization (PM-owned in this project)
   PM executes bun scripts/qa-gate.ts
   Validates: project audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
-  Gate passed → PM closes out (not a phase): runs /sync "type: description" → PR opened → hand-off to user
+  Gate passed → PM closes out (not a phase): dispatches /sync "type: description" to automation-engineer → PR opened → PM verifies the landing → hand-off to user
 ```
 
 ---

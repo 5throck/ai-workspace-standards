@@ -47,16 +47,16 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `evidence-ledger` | 1.1.0 | active | pm | 2026-08-25 | — | Fixed-column evidence ledger tracing every claim a decision depends on to a source, reference, and verification state |
 | `handbook` | 0.6.0 | active | pm | 2026-09-20 | — | Document Production Workflow — searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and course modes |
 | `handbook-sync-audit` | 1.0.5 | active | pm | 2026-08-29 | — | Verifies generated handbooks stay aligned with their sources: upstream content reflection, structural linkage, freshness |
-| `i18n-audit` | 1.0.0 | active | pm | 2026-08-29 | — | Locale parity and glossary audit across locale files, with drift reporting and a parity certificate on success |
-| `i18n-formatting` | 1.0.0 | active | pm | 2026-08-24 | — | Locale-specific date/time, number, and currency formatting, units of measure, Korean-scale numerals, print paper sizes |
-| `i18n-layout` | 1.1.0 | active | pm | 2026-11-06 | — | Text layout and encoding guidance: UTF-8, legacy code pages, BOM hazards, RTL/bidi, script-specific fonts |
-| `i18n-locale-config` | 1.0.0 | active | pm | 2026-08-24 | — | BCP 47 locale IDs, language-vs-country doctrine, collation order, timezone handling, region/language matrix |
-| `k-dart` | 2.1.2 | active | strategy-analyst | 2026-08-09 | — | KR-scoped; pruned from region-neutral scaffolds. FSS DART OpenAPI queries: corporate disclosures, financial statements, major reports |
-| `k-ecos` | 1.0.0 | active | financial-analyst | 2026-09-11 | — | KR-scoped; pruned from region-neutral scaffolds. Bank of Korea ECOS Open API: Korean macro-financial statistics |
-| `k-kosis` | 1.0.2 | active | financial-analyst | 2026-08-23 | — | KR-scoped; pruned from region-neutral scaffolds. KOSIS Open API: Korean national statistics tables |
-| `k-krx` | 1.0.2 | active | financial-analyst | 2026-09-11 | — | KR-scoped; pruned from region-neutral scaffolds. KRX Data Marketplace Open API: KOSPI/KOSDAQ market and stock data |
-| `k-law` | 1.0.2 | active | strategy-analyst | 2026-08-09 | — | KR-scoped; pruned from region-neutral scaffolds. Korea Ministry of Government Legislation Open API: statutes, precedents, ordinances |
-| `k-opendata` | 1.2.2 | active | hs-classification-specialist | 2026-09-03 | — | KR-scoped; pruned from region-neutral scaffolds. Korea Public Data Portal (data.go.kr) Open API gateway for government agency datasets |
+| `i18n-audit` | 1.0.1 | active | i18n-specialist | 2026-08-29 | — | Locale parity and glossary audit across locale files, with drift reporting and a parity certificate on success |
+| `i18n-formatting` | 1.0.1 | active | i18n-specialist | 2026-08-24 | — | Locale-specific date/time, number, and currency formatting, units of measure, Korean-scale numerals, print paper sizes |
+| `i18n-layout` | 1.1.1 | active | i18n-specialist | 2026-11-06 | — | Text layout and encoding guidance: UTF-8, legacy code pages, BOM hazards, RTL/bidi, script-specific fonts |
+| `i18n-locale-config` | 1.0.1 | active | i18n-specialist | 2026-08-24 | — | BCP 47 locale IDs, language-vs-country doctrine, collation order, timezone handling, region/language matrix |
+| `k-dart` | 2.1.3 | active | public-data-analyst | 2026-08-09 | — | KR-scoped; pruned from region-neutral scaffolds. FSS DART OpenAPI queries: corporate disclosures, financial statements, major reports |
+| `k-ecos` | 1.0.1 | active | public-data-analyst | 2026-09-11 | — | KR-scoped; pruned from region-neutral scaffolds. Bank of Korea ECOS Open API: Korean macro-financial statistics |
+| `k-kosis` | 1.0.3 | active | public-data-analyst | 2026-08-23 | — | KR-scoped; pruned from region-neutral scaffolds. KOSIS Open API: Korean national statistics tables |
+| `k-krx` | 1.0.3 | active | public-data-analyst | 2026-09-11 | — | KR-scoped; pruned from region-neutral scaffolds. KRX Data Marketplace Open API: KOSPI/KOSDAQ market and stock data |
+| `k-law` | 1.0.3 | active | public-data-analyst | 2026-08-09 | — | KR-scoped; pruned from region-neutral scaffolds. Korea Ministry of Government Legislation Open API: statutes, precedents, ordinances |
+| `k-opendata` | 1.2.3 | active | public-data-analyst | 2026-09-03 | — | KR-scoped; pruned from region-neutral scaffolds. Korea Public Data Portal (data.go.kr) Open API gateway for government agency datasets |
 | `service-design` | 1.1.0 | active | pm | 2026-09-27 | — | Promoted from co-design (upgrade-path propagation per PM ruling 2026-09-27): customer journeys, service blueprints, touchpoint design; ADR-0068 diversity-profile review included |
 | `delegate-to-hub` | 1.0.1 | active | pm | 2026-11-02 | — | Files delegation tickets spoke→hub; 1.0.1 adds the `--hub` flag + lifecycle UNAVAILABLE gate (Phase 3.5, design §4.5) |
 

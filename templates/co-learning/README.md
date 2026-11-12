@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: c9ceacc812479138cd042d9396cbe578d13797b8da1f6d60595683a8c658e8ad
+content_hash: ebf067db80d4bed320231042c2c785f5a3823cc076ed7b8abd3310e790b5a8b6
 ---
 
 # co-learning
@@ -63,7 +63,7 @@ The canonical 7-phase model (see `docs/phase-definitions.md`); co-learning's spe
 3. **Pre-Production Preparation:** Phases without an assigned specialist pass through; locale deliverable needs are noted for `i18n-specialist` (engaged on demand, Phase 5).
 4. **Authoring & QA Gate:** `exam-bank-steward` authors and reviews question-bank items with answer-length bias checks; every rewrite is human-reviewed via the remediation ledger.
 5. **Exam Operations & Lifecycle Finalization:** `exam-bank-steward` prepares cohorts, exam windows, and activation and monitors statistics; the PM runs the pre-PR advisory check, logs decisions, and updates governance records.
-6. **Quality Assurance & Finalization:** The PM runs the audit, `/sync`, and opens a PR.
+6. **Quality Assurance & Finalization:** The PM runs the audit, dispatches `/sync` to `automation-engineer`, and verifies the PR landing.
 
 ### C. Available Commands
 
@@ -84,4 +84,4 @@ This variant focuses on learning and assessment workflows: question-bank quality
 
 ---
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-11-12*

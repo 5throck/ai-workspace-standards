@@ -14,7 +14,7 @@ This document defines the workflow phases used by the `co-work` variant. It foll
 | 3 | Content Creation | Coordinator | `content-writer`, `technical-writer` |
 | 4 | Coordination & Delivery | Coordinator | `ms365-expert`, `project-coordinator` |
 | 5 | Lifecycle Finalization | Owner | PM (updates governance records, logs decisions) |
-| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, `/sync`, creates PR) |
+| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, dispatches `/sync` to `automation-engineer`, verifies the landing) |
 
 ---
 
@@ -65,7 +65,7 @@ This document defines the workflow phases used by the `co-work` variant. It foll
 **PM owns**: finalizes the session.
 - PM runs `project-review` skill (use `baseline-only` mode for docs/link validation)
 - Maximum 2 fix iterations before escalating to user
-- PM runs `/sync` pipeline
+- PM dispatches the `/sync` pipeline to `automation-engineer` and verifies the landing (PR URL, CI state, committed files)
 - PR opened with English title and description
 - Memory log updated
 - **Output**: passing audit report, merged PR or open PR link

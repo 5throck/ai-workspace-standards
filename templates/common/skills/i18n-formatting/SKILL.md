@@ -6,8 +6,8 @@ description: >
   print paper sizes. Use when: writing dates or numbers for a specific
   locale, formatting currency for a market, choosing metric or imperial
   units, applying Korean large-number scales, or picking a paper size.
-version: 1.0.0
-owner: pm
+version: 1.0.1
+owner: i18n-specialist
 status: active
 last_reviewed: 2026-08-24
 scope: common

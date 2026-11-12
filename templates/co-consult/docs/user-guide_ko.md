@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: dbbfb229e1a54e13761e366ea8af0dab44058929fc11356d99a36f7da807f6dc
+translated_from_hash: abfb7595f5496aadb5246b911654012890a68dba19c5fd78cb36a04646cee10d
 ---
 # Co-Consult — 사용자 가이드
 
@@ -23,7 +23,8 @@ PM:   요청을 분석하고 단계를 분류한 뒤 실행 계획을 표시합�
       | # | Task                                   | Agent             | Tier   | Model  |
       |---|-----------------------------------------|--------------------|--------|--------|
       | 1 | 시장/경쟁 분석                            | strategy-analyst   | Medium | sonnet |
-      | 2 | /sync "docs: add EV market analysis"     | pm                 | Medium | sonnet |
+      | 2 | /sync "docs: add EV market analysis"     | automation-engineer | Medium | sonnet |
+      | 3 | 반영 확인 (PR 주소, CI 상태)               | pm                 | Medium | inherit (sonnet) |
 
       Execution Order: Sequential
 PM:   "strategy-analyst를 dispatch할까요?"
@@ -34,7 +35,7 @@ PM:   ▶ strategy-analyst dispatch...
 **협업 규칙**:
 - 항상 PM으로 시작하세요. `agents/*.md` 전문 에이전트를 직접 호출하지 마십시오 — PM 게이트웨이는 도구, 프롬프트, QA 게이트 수준에서 강제됩니다(`AGENTS.md` §3 참고).
 - PM은 전문가를 dispatch하기 **전에** 항상 실행 계획 표를 보여줍니다 — 검토하고 확인하면 작업이 진행됩니다.
-- 기록할 가치가 있는 변경(새로운 산출물, 완료된 분석, 보고서)이 발생하면 계획의 마지막 행은 항상 `/sync "type: message"`입니다 — 이는 memlog → changelog → audit → commit → PR을 하나의 파이프라인으로 실행합니다. 직접 `git commit`을 실행하지 않습니다.
+- 기록할 가치가 있는 변경(새로운 산출물, 완료된 분석, 보고서)이 발생하면 계획의 마지막 구현 행은 항상 `automation-engineer`가 맡는 `/sync "type: message"`입니다 — 이는 memlog → changelog → audit → commit → PR을 하나의 파이프라인으로 실행하며, 이후 PM이 반영 여부를 확인합니다. 직접 `git commit`을 실행하지 않습니다.
 
 ## 2. 어떤 종류의 컨설팅 작업이 필요하신가요?
 
@@ -119,7 +120,7 @@ bun scripts/co-consult/financial-report.ts   # financial-pipeline.ts가 프로�
 | 3 | 콘텐츠 제작 (Content Creation) | communications-lead, solutions-architect, sme, data-analyst |
 | 4 | 조율 및 딜리버리 (Coordination & Delivery) | delivery-manager, workstream-lead, technology-specialist |
 | 5 | 라이프사이클 마무리 (Lifecycle Finalization) | PM (거버넌스 기록 갱신, memory/에 로그) |
-| 6 | 품질 보증 및 마무리 (Quality Assurance & Finalization) | PM (`bun scripts/audit.ts` 실행 후 `/sync`) |
+| 6 | 품질 보증 및 마무리 (Quality Assurance & Finalization) | PM (`bun scripts/audit.ts` 실행 후 `automation-engineer`에 `/sync` 배치, 반영 확인) |
 
 Phase 1.5는 모든 Phase 1 산출물이 완료된 후 `insight-synthesis` 이전에 실행됩니다: 검증 에이전트가 피어 산출물을 교차 확인하고 원본을 수정하지 않고 결과를 보고하며, 산출물당 최대 1회의 수정 주기를 갖습니다 (해결되지 않은 지적사항은 수용 리스크로 기록).
 

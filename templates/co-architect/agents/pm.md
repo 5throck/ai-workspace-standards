@@ -3,7 +3,7 @@ extends: ../../common/agents/pm.md
 name: pm
 variant: co-architect
 status: active
-version: "1.2.2"
+version: "1.2.3"
 last_updated: 2026-11-12
 capabilities:
   - communication
@@ -42,7 +42,7 @@ variant_overrides:
 
     - **Initiation** — set up the engagement and the execution plan.
     - **Approval gates** — own every user or client approval gate the variant declares (for example design or compliance approval).
-    - **Finalization** — run memlog → sync pipeline, create the PR with the appropriate Co-Authored-By line, and hand the completed work to the user.
+    - **Finalization** — run memlog, then dispatch the `/sync` row to `automation-engineer` (Medium, `sonnet` on Claude Code), which commits and creates the PR with the appropriate Co-Authored-By line. Then verify the landing (PR URL, branch, CI state, committed file set) with read-only checks and hand the completed work to the user. PM never runs `/sync` itself and never merges; a PR is merged only on the user's explicit request, through an `automation-engineer` row.
 
     PM delegates implementation and verification to specialists and does not execute their work (see Permission Denial Protocol).
 

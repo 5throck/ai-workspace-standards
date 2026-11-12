@@ -753,19 +753,6 @@
       ]
     },
     {
-      "id": "agent:co-architect/automation-engineer",
-      "type": "agent",
-      "layer": "variant:co-architect",
-      "name": "automation-engineer",
-      "scope": "co-architect",
-      "capability": "automation-engineer",
-      "content_hash": "c1e1061cb894723e",
-      "version": "1.0.1",
-      "mirrors": [
-        "templates/co-architect/agents/automation-engineer.md"
-      ]
-    },
-    {
       "id": "agent:co-architect/bylaw-expert",
       "type": "agent",
       "layer": "variant:co-architect",
@@ -876,8 +863,8 @@
       "name": "pm",
       "scope": "co-architect",
       "capability": "pm",
-      "content_hash": "a59035e45ffa6f6c",
-      "version": "1.2.2",
+      "content_hash": "9264b7670cdea00f",
+      "version": "1.2.3",
       "mirrors": [
         "templates/co-architect/agents/pm.md"
       ]
@@ -2471,6 +2458,45 @@
       ]
     },
     {
+      "id": "agent:common/automation-engineer",
+      "type": "agent",
+      "layer": "common",
+      "name": "automation-engineer",
+      "scope": "common",
+      "capability": "automation-engineer",
+      "content_hash": "a61b5de3f60eab41",
+      "version": "1.1.0",
+      "mirrors": [
+        "templates/common/agents/automation-engineer.md"
+      ]
+    },
+    {
+      "id": "agent:common/contract-gate-engineer",
+      "type": "agent",
+      "layer": "common",
+      "name": "contract-gate-engineer",
+      "scope": "common",
+      "capability": "contract-gate-engineer",
+      "content_hash": "82e37ee3167811cf",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/common/agents/contract-gate-engineer.md"
+      ]
+    },
+    {
+      "id": "agent:common/design-system-lead",
+      "type": "agent",
+      "layer": "common",
+      "name": "design-system-lead",
+      "scope": "common",
+      "capability": "design-system-lead",
+      "content_hash": "3051815d79afa649",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/common/agents/design-system-lead.md"
+      ]
+    },
+    {
       "id": "agent:common/i18n-specialist",
       "type": "agent",
       "layer": "common",
@@ -2490,10 +2516,23 @@
       "name": "pm",
       "scope": "common",
       "capability": "pm",
-      "content_hash": "5017208f344917df",
-      "version": "1.4.3",
+      "content_hash": "6e05a2a4d6428018",
+      "version": "1.4.4",
       "mirrors": [
         "templates/common/agents/pm.md"
+      ]
+    },
+    {
+      "id": "agent:common/public-data-analyst",
+      "type": "agent",
+      "layer": "common",
+      "name": "public-data-analyst",
+      "scope": "common",
+      "capability": "public-data-analyst",
+      "content_hash": "aeb4f3eb74856155",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/common/agents/public-data-analyst.md"
       ]
     },
     {
@@ -2925,11 +2964,6 @@
     },
     {
       "id": "doc:co-architect/agents/architect.md",
-      "type": "doc",
-      "layer": "variant:co-architect"
-    },
-    {
-      "id": "doc:co-architect/agents/automation-engineer.md",
       "type": "doc",
       "layer": "variant:co-architect"
     },
@@ -8330,8 +8364,8 @@
       "name": "i18n-audit",
       "scope": "common",
       "capability": "i18n-audit",
-      "content_hash": "5029572bc159b21d",
-      "version": "1.0.0",
+      "content_hash": "5485334c47dd7ef0",
+      "version": "1.0.1",
       "mirrors": [
         "templates/common/skills/i18n-audit/SKILL.md"
       ]
@@ -8343,8 +8377,8 @@
       "name": "i18n-formatting",
       "scope": "common",
       "capability": "i18n-formatting",
-      "content_hash": "db8381f1fbb2ed31",
-      "version": "1.0.0",
+      "content_hash": "4db7cf2ed408dd22",
+      "version": "1.0.1",
       "mirrors": [
         "templates/common/skills/i18n-formatting/SKILL.md"
       ]
@@ -8356,8 +8390,8 @@
       "name": "i18n-layout",
       "scope": "common",
       "capability": "i18n-layout",
-      "content_hash": "a043d20f098dd093",
-      "version": "1.1.0",
+      "content_hash": "67b31c6f61b62452",
+      "version": "1.1.1",
       "mirrors": [
         "templates/common/skills/i18n-layout/SKILL.md"
       ]
@@ -8369,8 +8403,8 @@
       "name": "i18n-locale-config",
       "scope": "common",
       "capability": "i18n-locale-config",
-      "content_hash": "3878ed90d1fad170",
-      "version": "1.0.0",
+      "content_hash": "7e9e381d9fd82e21",
+      "version": "1.0.1",
       "mirrors": [
         "templates/common/skills/i18n-locale-config/SKILL.md"
       ]
@@ -8382,8 +8416,8 @@
       "name": "k-dart",
       "scope": "common",
       "capability": "k-dart",
-      "content_hash": "5dbc554c5159cf9c",
-      "version": "2.1.2",
+      "content_hash": "504b2be43a8db594",
+      "version": "2.1.3",
       "mirrors": [
         "templates/common/skills/k-dart/SKILL.md"
       ]
@@ -8395,8 +8429,8 @@
       "name": "k-ecos",
       "scope": "common",
       "capability": "k-ecos",
-      "content_hash": "0ed59c1bd4af881a",
-      "version": "1.0.0",
+      "content_hash": "a60b6889af1e140d",
+      "version": "1.0.1",
       "mirrors": [
         "templates/common/skills/k-ecos/SKILL.md"
       ]
@@ -8408,8 +8442,8 @@
       "name": "k-kosis",
       "scope": "common",
       "capability": "k-kosis",
-      "content_hash": "53beb717d9eacffc",
-      "version": "1.0.2",
+      "content_hash": "774769a47ac76f85",
+      "version": "1.0.3",
       "mirrors": [
         "templates/common/skills/k-kosis/SKILL.md"
       ]
@@ -8421,8 +8455,8 @@
       "name": "k-krx",
       "scope": "common",
       "capability": "k-krx",
-      "content_hash": "9d29fbb4b6b46a36",
-      "version": "1.0.2",
+      "content_hash": "4049e38d28de84aa",
+      "version": "1.0.3",
       "mirrors": [
         "templates/common/skills/k-krx/SKILL.md"
       ]
@@ -8434,8 +8468,8 @@
       "name": "k-law",
       "scope": "common",
       "capability": "k-law",
-      "content_hash": "aa926464bd6f6eb4",
-      "version": "1.0.2",
+      "content_hash": "78992697b5acae67",
+      "version": "1.0.3",
       "mirrors": [
         "templates/common/skills/k-law/SKILL.md"
       ]
@@ -8447,8 +8481,8 @@
       "name": "k-opendata",
       "scope": "common",
       "capability": "k-opendata",
-      "content_hash": "f136abc9955a54a0",
-      "version": "1.2.2",
+      "content_hash": "9a7fbbb322def552",
+      "version": "1.2.3",
       "mirrors": [
         "templates/common/skills/k-opendata/SKILL.md"
       ]
@@ -10865,12 +10899,6 @@
     },
     {
       "type": "references",
-      "from": "agent:co-architect/automation-engineer",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
       "from": "agent:co-architect/bylaw-expert",
       "to": "skill:common/k-law",
       "source": "prose"
@@ -11927,6 +11955,60 @@
     },
     {
       "type": "references",
+      "from": "agent:common/automation-engineer",
+      "to": "skill:common/sync",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/automation-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/contract-gate-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/contract-gate-engineer",
+      "to": "skill:root/zod-contract-gate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/design-system-lead",
+      "to": "skill:root/accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/design-system-lead",
+      "to": "skill:root/design-foundation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/design-system-lead",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/design-system-lead",
+      "to": "skill:root/token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/design-system-lead",
+      "to": "skill:root/ui-ux-design-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:common/i18n-specialist",
       "to": "skill:common/i18n-audit",
       "source": "prose"
@@ -12007,6 +12089,48 @@
       "type": "references",
       "from": "agent:common/pm",
       "to": "skill:root/upgrade-project",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/public-data-analyst",
+      "to": "skill:common/k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/public-data-analyst",
+      "to": "skill:common/k-ecos",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/public-data-analyst",
+      "to": "skill:common/k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/public-data-analyst",
+      "to": "skill:common/k-krx",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/public-data-analyst",
+      "to": "skill:common/k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/public-data-analyst",
+      "to": "skill:common/k-opendata",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/public-data-analyst",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {
@@ -12846,12 +12970,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-architect/agents/architect.md",
-      "to": "skill:root/meeting-facilitation",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-architect/agents/automation-engineer.md",
       "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -30728,6 +30846,17 @@
     },
     {
       "type": "used_by",
+      "from": "skill:common/gateguard",
+      "to": "agent:common/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
+      "type": "used_by",
       "from": "skill:common/handbook",
       "to": "agent:co-deck/handbook-reviewer",
       "source": "required_skills",
@@ -30911,6 +31040,17 @@
       "from": "skill:common/i18n-locale-config",
       "to": "skill:common/translate",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:common/k-dart",
+      "to": "agent:common/public-data-analyst",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/public-data-analyst.md",
+        "field": "required_skills",
+        "index": 3
+      }
     },
     {
       "type": "composes_with",
@@ -31258,6 +31398,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:common/k-ecos",
+      "to": "agent:common/public-data-analyst",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/public-data-analyst.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
       "type": "composes_with",
       "from": "skill:common/k-ecos",
       "to": "skill:common/k-dart",
@@ -31572,6 +31723,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:common/k-kosis",
+      "to": "agent:common/public-data-analyst",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/public-data-analyst.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
       "type": "composes_with",
       "from": "skill:common/k-kosis",
       "to": "skill:common/k-dart",
@@ -31726,6 +31888,17 @@
       "provenance": {
         "file": "templates/common/skills/k-kosis/references/terms-ko.json",
         "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:common/k-krx",
+      "to": "agent:common/public-data-analyst",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/public-data-analyst.md",
+        "field": "required_skills",
+        "index": 2
       }
     },
     {
@@ -32181,6 +32354,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:common/k-law",
+      "to": "agent:common/public-data-analyst",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/public-data-analyst.md",
+        "field": "required_skills",
+        "index": 4
+      }
+    },
+    {
       "type": "relates_to",
       "from": "skill:common/k-law",
       "to": "skill:common/k-dart",
@@ -32443,6 +32627,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:common/k-opendata",
+      "to": "agent:common/public-data-analyst",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/public-data-analyst.md",
+        "field": "required_skills",
+        "index": 5
+      }
+    },
+    {
       "type": "references",
       "from": "skill:common/k-opendata",
       "to": "skill:co-export/hs-classification-workflow",
@@ -32702,6 +32897,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:common/sync",
+      "to": "agent:common/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
       "type": "composes_with",
       "from": "skill:common/translate",
       "to": "skill:root/documentation-writing",
@@ -32847,6 +33053,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:root/ci-triage",
+      "to": "agent:common/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "skill:root/ci-triage",
       "to": "skill:root/project-review",
@@ -32978,6 +33195,17 @@
       "from": "skill:root/delegate-to-hub",
       "to": "skill:root/sync",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/design-foundation",
+      "to": "agent:common/design-system-lead",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/design-system-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "composes_with",
@@ -33404,6 +33632,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:root/script-lifecycle-manager",
+      "to": "agent:common/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 3
+      }
+    },
+    {
       "type": "references",
       "from": "skill:root/script-lifecycle-manager",
       "to": "skill:root/new-project",
@@ -33718,6 +33957,17 @@
       "provenance": {
         "file": "skills/variant-feature/SKILL.md",
         "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/zod-contract-gate",
+      "to": "agent:common/contract-gate-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/common/agents/contract-gate-engineer.md",
+        "field": "required_skills",
         "index": 0
       }
     },

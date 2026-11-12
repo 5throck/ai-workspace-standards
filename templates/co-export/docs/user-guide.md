@@ -92,7 +92,7 @@ Never bypass the PM workflow with direct specialist invocation, and never run ra
 | 2 — Compliance synthesis gate | pm → **user** | Findings synthesized; approval required before execution |
 | 3 — Execution | market-entry-strategist, trade-documentation-specialist, customs-duty-drawback-specialist | Strategy docs, trade docs, drawback assessment (drawback needs the confirmed HS code from Phase 1-2) |
 | 4 — Logistics | logistics-coordinator | Delivery / handoff coordination |
-| 5-6 — Finalization | pm | Audit → `/sync` → PR |
+| 5-6 — Finalization | pm | Audit → `/sync` (dispatched to `automation-engineer`) → landing check → PR |
 
 Reads (research, regulation scans) run in parallel; **writes are serialized** — one
 agent writes a given file at a time, coordinated by the PM.

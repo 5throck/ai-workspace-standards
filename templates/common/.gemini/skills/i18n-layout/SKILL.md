@@ -6,8 +6,8 @@ description: >
   script-specific font selection (Hangul focus). Use when: encoding is
   corrupted or mojibake appears, an RTL locale must render correctly,
   fonts must be chosen for a script, or CRLF/BOM issues surface.
-version: 1.1.0
-owner: pm
+version: 1.1.1
+owner: i18n-specialist
 status: active
 last_reviewed: 2026-11-06
 scope: common

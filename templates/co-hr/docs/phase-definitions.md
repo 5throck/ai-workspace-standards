@@ -14,7 +14,7 @@ This document defines the workflow phases used by the `co-hr` variant. It follow
 | 3 | Implementation & Delivery | Coordinator | `org-design-consultant`, `data-analyst` |
 | 4 | Coordination & Delivery | Coordinator | PM (routes specialist outputs) |
 | 5 | Lifecycle Finalization | Owner | PM (updates governance records, logs decisions) |
-| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, `/sync`, creates PR) |
+| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, dispatches `/sync` to `automation-engineer`, verifies the landing) |
 
 ---
 

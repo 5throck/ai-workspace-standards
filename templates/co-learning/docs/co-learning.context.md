@@ -98,7 +98,7 @@ Canonical 7-phase model (see `docs/phase-definitions.md`):
 | 3 | Localization (optional) | `i18n-specialist` engaged when locale deliverables are in scope |
 | 4 | Authoring & QA Gate | Exam Bank Steward authors/reviews items, runs bias checks, operates exams — loop up to 3× on failures |
 | 5 | Content Review & Lifecycle Finalization | Human review of every ledger entry; PM logs decisions and updates governance records |
-| 6 | Quality Assurance & Finalization | PM runs the audit and `/sync`; opens PR |
+| 6 | Quality Assurance & Finalization | PM runs the audit, dispatches `/sync` to `automation-engineer`, and verifies the PR landing |
 
 ---
 
@@ -210,4 +210,4 @@ Key rules:
 
 ---
 
-*co-learning.context.md version: 1.0 — derived from the co-learning canonical template structure (2026-10-06)*
+*co-learning.context.md version: 1.1 — Phase 6 finalization wording: `/sync` is dispatched to `automation-engineer`; previous: 1.0 — derived from the co-learning canonical template structure (2026-10-06)*

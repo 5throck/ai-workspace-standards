@@ -17,7 +17,7 @@ This document defines the **default** workflow phases. A variant follows this st
 | 3 | Execution / Creation | Coordinator | Specialist agents (variant-defined) |
 | 4 | Delivery / Integration | Coordinator | Specialist agents (variant-defined) |
 | 5 | Lifecycle Finalization | Owner | PM (updates governance records, logs decisions) |
-| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, /sync, creates PR) |
+| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, dispatches `/sync` to `automation-engineer`, verifies the landing) |
 
 ---
 
@@ -73,7 +73,7 @@ Some variants combine phases 1 and 2 when research and architecture planning are
 - PM runs `bun scripts/audit.ts` (and the `project-review` skill where available)
 - The variant names its domain reviewers for this gate (for example a fact-checker or QA reviewer); PM collects their sign-off
 - Maximum 2 fix iterations before escalating to user
-- PM runs `/sync` pipeline
+- PM dispatches the `/sync` pipeline to `automation-engineer` and verifies the landing (PR URL, CI state, committed files)
 - PR opened with English title and description
 - Memory log updated
 - **Output**: passing audit report, merged PR or open PR link
@@ -92,7 +92,7 @@ handoff_from: [pm]
 required_skills: [skill-name]
 ```
 
-By default PM owns Phases 0, 5, and 6 and the approval gate in Phase 2, and variants differ in phases 1–4. Variants that remap these (see their own `docs/phase-definitions.md`) must keep the same PM duties: initiation, every approval gate, and finalization (memlog → `/sync` → PR → hand-off).
+By default PM owns Phases 0, 5, and 6 and the approval gate in Phase 2, and variants differ in phases 1–4. Variants that remap these (see their own `docs/phase-definitions.md`) must keep the same PM duties: initiation, every approval gate, and finalization (memlog → `/sync` dispatched to `automation-engineer` → landing verification → hand-off).
 
 ---
 

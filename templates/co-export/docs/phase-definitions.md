@@ -15,7 +15,7 @@ This document defines the standard workflow phases used across all variants. Eac
 | 3 | Execution / Creation | Coordinator | Specialist agents (variant-defined) |
 | 4 | Delivery / Integration | Coordinator | Specialist agents (variant-defined) |
 | 5 | Lifecycle Finalization | Owner | PM (runs audit scripts) |
-| 6 | Quality Assurance & Finalization | Owner | PM (runs /sync, creates PR) |
+| 6 | Quality Assurance & Finalization | Owner | PM (dispatches `/sync` to `automation-engineer`, verifies the landing) |
 
 ---
 
@@ -67,7 +67,7 @@ Some variants combine phases 1 and 2 when research and architecture planning are
 
 ### Phase 6 — PR & Handoff
 **PM owns**: finalizes the session.
-- PM runs `/sync` pipeline
+- PM dispatches the `/sync` pipeline to `automation-engineer` and verifies the landing (PR URL, CI state, committed files)
 - PR opened with English title and description
 - Memory log updated
 - **Output**: merged PR or open PR link

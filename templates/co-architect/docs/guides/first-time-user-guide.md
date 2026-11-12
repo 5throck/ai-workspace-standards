@@ -88,7 +88,7 @@ Never call or prompt a specialist agent directly. Initiate all tasks by addressi
 2. **Research (Phase 1)**: The team conducts research and maps requirements.
 3. **Gate Review (Phase 2)**: **Crucial Gate.** The PM presents the findings and proposed plan. **Wait for user feedback or approval.**
 4. **Execution (Phase 3–4)**: Specialists implement design mockups, 3D models, or 2D drafts.
-5. **QA & PR (Phase 5–6)**: PM runs `audit.ts` and syncs the changes to open a Pull Request.
+5. **QA & PR (Phase 5–6)**: PM runs `audit.ts`, then dispatches `/sync` to `automation-engineer`, which opens the Pull Request.
 
 ---
 

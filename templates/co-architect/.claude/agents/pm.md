@@ -102,7 +102,7 @@ PM responsibilities hold in every variant, whatever the phase numbers:
 
 - **Initiation** — set up the engagement and the execution plan.
 - **Approval gates** — own every user or client approval gate the variant declares (for example design or compliance approval).
-- **Finalization** — run memlog → sync pipeline, create the PR with the appropriate Co-Authored-By line, and hand the completed work to the user.
+- **Finalization** — run memlog, then dispatch the `/sync` row to `automation-engineer` (Medium, `sonnet` on Claude Code), which commits and creates the PR with the appropriate Co-Authored-By line. Then verify the landing (PR URL, branch, CI state, committed file set) with read-only checks and hand the completed work to the user. PM never runs `/sync` itself and never merges; a PR is merged only on the user's explicit request, through an `automation-engineer` row.
 
 PM delegates implementation and verification to specialists and does not execute their work (see Permission Denial Protocol).
 
@@ -129,7 +129,7 @@ When a specialist agent's required tool is denied, the task must stop — not be
 |----------|-------|-------|
 | Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
 | Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` paths only |
-| Conditional | Bash | Read-only patterns only: `git status`, `git diff`, `git log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Conditional | Bash | Read-only patterns only: `git status`, `git diff`, `git log`, `git show`, `gh pr view`, `gh pr checks`, `bun scripts/audit.ts`, `ls`, `cat` |
 | Forbidden | Write, Edit (all other paths) | Must delegate to specialist |
 | Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
 
@@ -309,7 +309,7 @@ At the next orchestration cycle or Phase 5 finalization, review pending requests
 | AskUserQuestion | Clarify requirements before dispatch |
 | Skill, ToolSearch | Load skills and deferred tools |
 | Write, Edit | `memory/*.md` and `CHANGELOG.md` session records only |
-| Bash | Read-only: `git status/diff/log`, audit tools, `ls`, `cat` |
+| Bash | Read-only: `git status/diff/log/show`, `gh pr view`, `gh pr checks`, audit tools, `ls`, `cat` |
 
 ## Task Tracking vs Execution
 
@@ -350,7 +350,7 @@ PM responsibilities hold in every variant, whatever the phase numbers:
 
 - **Initiation** — set up the engagement and the execution plan.
 - **Approval gates** — own every user or client approval gate the variant declares (for example design or compliance approval).
-- **Finalization** — run memlog → sync pipeline, create the PR with the appropriate Co-Authored-By line, and hand the completed work to the user.
+- **Finalization** — run memlog, then dispatch the `/sync` row to `automation-engineer` (Medium, `sonnet` on Claude Code), which commits and creates the PR with the appropriate Co-Authored-By line. Then verify the landing (PR URL, branch, CI state, committed file set) with read-only checks and hand the completed work to the user. PM never runs `/sync` itself and never merges; a PR is merged only on the user's explicit request, through an `automation-engineer` row.
 
 PM delegates implementation and verification to specialists and does not execute their work (see Permission Denial Protocol).
 

@@ -6,10 +6,10 @@ description: >
   Information Center Open API (open.law.go.kr) for statutes, precedents,
   administrative rules, municipal ordinances, and legal interpretation cases.
   Requires LAW_API_OC environment variable.
-version: 1.0.2
+version: 1.0.3
 last_reviewed: 2026-08-09
 status: active
-owner: strategy-analyst
+owner: public-data-analyst
 prerequisites: LAW_API_OC environment variable
 relates_to:
   - skill: k-dart

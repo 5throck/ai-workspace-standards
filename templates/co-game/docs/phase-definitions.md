@@ -13,7 +13,7 @@ This document defines the workflow phases used by the `co-game` variant. It foll
 | 2 | Analysis | Gate Keeper | PM + `architect`, `game-designer`, `arcade-designer` *or* `puzzle-designer` |
 | 3 | Design | Coordinator | `designer`, `visual-artist`, `sound-designer` |
 | 4 | Implementation | Coordinator | `game-developer`, `game-debugger`, `test-runner` |
-| 5 | Finalization | Owner | PM (governance + audit + `/sync` + PR) + `security-monitor` (pre-PR advisory check) |
+| 5 | Finalization | Owner | PM (governance + audit + `/sync` dispatch to `automation-engineer` + landing verification) + `security-monitor` (pre-PR advisory check) |
 
 > `arcade-designer` vs `puzzle-designer` is genre-gated (see `co-game.context.md § Genre-Based Dispatch`): exactly one is active for pure-genre projects; both plus `game-designer` are active for hybrid genres.
 
@@ -70,7 +70,7 @@ This document defines the workflow phases used by the `co-game` variant. It foll
 - PM logs decisions to `memory/YYYY-MM-DD.md`
 - `security-monitor` (Tier: Medium) runs the pre-PR advisory check (read-only) and surfaces any active CRITICAL advisories before merge
 - PM runs the audit gate; maximum 2 fix iterations before escalating to the user
-- PM runs the `/sync` pipeline (memlog → sync-md → changelog → audit → commit → push → PR)
+- PM dispatches the `/sync` pipeline to `automation-engineer` and verifies the landing (memlog → sync-md → changelog → audit → commit → push → PR)
 - PR opened with English title and description
 - **Output**: passing audit report, governance records updated, merged PR or open PR link
 

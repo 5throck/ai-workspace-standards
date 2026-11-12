@@ -195,31 +195,31 @@
 | `co-work/svg-slide-authoring` | variant:co-work | 1.5.1 | co-work/deck-builder | co-work/phase 3 | — | — | — |
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
 | `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
-| `common/gateguard` | common | 1.0.2 | — | — | — | — | — |
+| `common/gateguard` | common | 1.0.2 | common/automation-engineer | — | — | — | — |
 | `common/handbook` | common | 0.6.0 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
 | `common/handbook-sync-audit` | common | 1.0.5 | — | — | — | — | — |
-| `common/i18n-audit` | common | 1.0.0 | common/i18n-specialist | — | — | — | — |
-| `common/i18n-formatting` | common | 1.0.0 | common/i18n-specialist | — | — | — | — |
-| `common/i18n-layout` | common | 1.1.0 | common/i18n-specialist | — | — | — | — |
-| `common/i18n-locale-config` | common | 1.0.0 | common/i18n-specialist | — | — | — | — |
-| `common/k-dart` | common | 2.1.2 | — | — | common/k-ecos (composes_with), common/k-kosis (composes_with), common/k-law | — | — |
-| `common/k-ecos` | common | 1.0.0 | — | — | common/k-dart (composes_with), common/k-kosis (composes_with), common/k-opendata (composes_with) | — | — |
-| `common/k-kosis` | common | 1.0.2 | — | — | common/k-dart (composes_with), common/k-ecos (composes_with), common/k-law | — | — |
-| `common/k-krx` | common | 1.0.2 | — | — | common/k-dart (composes_with), common/k-ecos (composes_with), common/k-kosis (composes_with), common/k-opendata (composes_with) | — | — |
-| `common/k-law` | common | 1.0.2 | — | — | common/k-dart, common/k-kosis | — | — |
-| `common/k-opendata` | common | 1.2.2 | — | — | common/k-ecos (composes_with), common/k-kosis | — | — |
-| `common/sync` | common | 1.9.0 | — | — | — | — | — |
+| `common/i18n-audit` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
+| `common/i18n-formatting` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
+| `common/i18n-layout` | common | 1.1.1 | common/i18n-specialist | — | — | — | — |
+| `common/i18n-locale-config` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
+| `common/k-dart` | common | 2.1.3 | common/public-data-analyst | — | common/k-ecos (composes_with), common/k-kosis (composes_with), common/k-law | — | — |
+| `common/k-ecos` | common | 1.0.1 | common/public-data-analyst | — | common/k-dart (composes_with), common/k-kosis (composes_with), common/k-opendata (composes_with) | — | — |
+| `common/k-kosis` | common | 1.0.3 | common/public-data-analyst | — | common/k-dart (composes_with), common/k-ecos (composes_with), common/k-law | — | — |
+| `common/k-krx` | common | 1.0.3 | common/public-data-analyst | — | common/k-dart (composes_with), common/k-ecos (composes_with), common/k-kosis (composes_with), common/k-opendata (composes_with) | — | — |
+| `common/k-law` | common | 1.0.3 | common/public-data-analyst | — | common/k-dart, common/k-kosis | — | — |
+| `common/k-opendata` | common | 1.2.3 | common/public-data-analyst | — | common/k-ecos (composes_with), common/k-kosis | — | — |
+| `common/sync` | common | 1.9.0 | common/automation-engineer | — | — | — | — |
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/accessibility-audit` | L0 | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
 | `root/adopt-project` | L0 | 1.1.1 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
 | `root/agent-lifecycle-manager` | L0 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L0 | 1.0.2 | co-architect/technical-writer, co-work/technical-writer | — | — | — | — |
-| `root/ci-triage` | L0 | 0.2.0 | — | — | — | — | — |
+| `root/ci-triage` | L0 | 0.2.0 | common/automation-engineer | — | — | — | — |
 | `root/context-commonization-review` | L0 | 1.1.0 | — | — | root/meeting-facilitation (follows), root/promote-variant (follows) | — | — |
 | `root/create-variant` | L0 | 1.4.3 | — | — | root/documentation-writing (follows), root/promote-variant (enables) | — | — |
 | `root/decision-write-integrity` | L0 | 1.0.0 | — | — | root/meeting-facilitation | — | — |
 | `root/delegate-to-hub` | L0 | 1.0.1 | — | — | — | — | — |
-| `root/design-foundation` | L0 | 1.1.0 | — | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
+| `root/design-foundation` | L0 | 1.1.0 | common/design-system-lead | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
 | `root/design-token-adoption` | L0 | 1.0.0 | — | — | root/design-foundation, root/token-usage-lint (composes_with) | — | — |
 | `root/documentation-writing` | L0 | 1.0.3 | co-architect/content-writer, co-architect/technical-writer, co-work/content-writer, co-work/technical-writer | — | root/team-builder (composes_with) | — | — |
 | `root/explain-me` | L0 | 1.0.0 | — | — | — | — | — |
@@ -237,7 +237,7 @@
 | `root/promote-variant` | L0 | 1.4.0 | — | — | root/create-variant (follows), root/sync (follows) | — | — |
 | `root/release-template` | L0 | 1.0.0 | — | — | root/promote-variant | — | — |
 | `root/research-analysis` | L0 | 1.0.2 | co-architect/analyst, co-work/analyst | — | root/documentation-writing (enables) | — | — |
-| `root/script-lifecycle-manager` | L0 | 1.2.2 | — | — | — | — | — |
+| `root/script-lifecycle-manager` | L0 | 1.2.2 | common/automation-engineer | — | — | — | — |
 | `root/security-scan` | L0 | 1.3.0 | — | — | — | — | — |
 | `root/service-design` | L0 | 1.1.0 | co-architect/design-lead, co-architect/service-designer, co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/simulate-pipeline` | L0 | 1.0.2 | — | — | — | — | — |
@@ -255,7 +255,7 @@
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
 | `root/upgrade-project` | L0 | 1.6.2 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
 | `root/variant-feature` | L0 | 1.0.0 | — | — | root/upgrade-project (composes_with) | — | — |
-| `root/zod-contract-gate` | L0 | 1.0.2 | — | — | root/security-scan | — | — |
+| `root/zod-contract-gate` | L0 | 1.0.2 | common/contract-gate-engineer | — | root/security-scan | — | — |
 
 ## Lifecycle Phase Grouping
 
@@ -485,7 +485,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-architect/AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-architect/agents/analyst.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-architect/agents/architect.md` | doc | `root/meeting-facilitation` | — | — |
-| `doc:co-architect/agents/automation-engineer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-architect/agents/bylaw-expert.md` | doc | `common/k-law` | — | — |
 | `doc:co-architect/agents/content-writer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-architect/agents/design-lead.md` | doc | `root/meeting-facilitation` | — | — |
@@ -900,7 +899,6 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------------|------|------|-----------------------------|
 | `analyst` | agent | version-drift | co-architect@1.1.1 #c641e931; co-work@1.1.1 #7402d04a |
 | `architect` | agent | version-drift | co-abap@1.1.2 #d1860ebb; co-architect@1.0.0 #7439a5d0; co-develop@1.2.0 #922ac4f7; co-game@1.1.1 #2783b559; root@1.0.0 #805ceaff |
-| `automation-engineer` | agent | divergence | co-architect@1.0.1 #c1e1061c; root@1.1.0 #68f5e297 |
 | `change-management-partner` | agent | version-drift | co-consult@1.1.1 #c4de997b; co-hr@1.1.1 #32ddf0a8 |
 | `code-writer` | agent | divergence | co-abap@1.1.2 #7561e263; co-develop@1.2.0 #92b0fde8 |
 | `content-writer` | agent | version-drift | co-architect@1.1.1 #0dfd92b0; co-work@1.1.1 #3dcfe69e |
@@ -910,7 +908,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `devops-admin` | agent | divergence | co-abap@1.1.2 #59a99f2f; co-price@2.2.1 #20aad471 |
 | `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; common@1.3.2 #e0bd9ada |
 | `ms365-expert` | agent | version-drift | co-architect@1.1.1 #d66a2884; co-work@1.1.1 #a594ed3b |
-| `pm` | agent | divergence | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.2 #a59035e4; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.3 #5017208f; root@1.3.0 #7a049182 |
+| `pm` | agent | divergence | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.3 #9264b767; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.4 #6e05a2a4; root@1.3.0 #7a049182 |
 | `project-coordinator` | agent | version-drift | co-architect@1.1.1 #ea0ba5e1; co-work@1.1.1 #ef8c8cfa |
 | `prototype-engineer` | agent | version-drift | co-architect@1.1.1 #5b481cf7; co-design@1.1.1 #f906e607 |
 | `security-monitor` | agent | version-drift | co-abap@1.1.1 #2f8a2b8a; co-develop@1.1.1 #00cd6298; co-game@1.1.1 #dc9d7b81; co-price@2.2.1 #94b3b224 |
@@ -922,7 +920,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `ux-researcher` | agent | divergence | co-architect@1.1.1 #311537c2; co-design@1.1.2 #dd1ba9a2 |
 | `visual-designer` | agent | divergence | co-architect@1.1.1 #5e7475bc; co-design@1.1.2 #ecae363c |
 | `design-foundation` | skill | divergence | co-design@1.3.0 #5cc8c410; root@1.1.0 #0f50cf02 |
-| `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.0 #5029572b |
+| `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.1 #5485334c |
 | `meeting-facilitation` | skill | version-drift | co-safety@1.5.0 #690ba21e; root@1.5.0 #f4da9e5e |
 | `pdf-export` | skill | divergence | co-deck@2.1.2 #63cf9c38; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
@@ -941,11 +939,11 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | adr | 56 | (expected until docs `references` edges are mined) |
 | agent | 11 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, root/skill-graph-analyst |
 | decision | 31 | (expected until docs `references` edges are mined) |
-| skill | 2 | common/gateguard, root/trail |
+| skill | 1 | root/trail |
 
 ## Skills Without `used_by` (G6)
 
-146 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+134 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -982,7 +980,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-12), window 90 days. Skill nodes with usage: 3.
 
-- **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/sync, common/sync, root/sync
+- **used-but-unlinked** (usage > 0, no `used_by`) (2): co-safety/sync, root/sync
 - **unused** (0 sessions in 90 days) (243): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 203 more
 
 ## Ambiguous Name Resolutions
