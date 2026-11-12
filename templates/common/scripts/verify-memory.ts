@@ -1,7 +1,16 @@
 #!/usr/bin/env bun
 /**
  * verify-memory.ts — Memory Log Format Verifier
- * @version 1.2.0
+ * @version 1.3.0
+ *
+ * v1.3.0 (U-20261112-007): whole-index link integrity check (Check 3c) — every flat
+ *         .md link anywhere in MEMORY.md (Sessions, Meetings, ADRs) must resolve to a
+ *         file in memory/; missing targets WARN with a count (Sessions dead rows stay
+ *         ERRORS via Check 3b, and Check 3c findings are deduped against them). The
+ *         prior reverse check only covered the Sessions section, so Meetings/ADRs rows
+ *         could dangle forever — the co-safety defect class (56/63 dead index rows
+ *         surviving audit-passing cycles). New exported findMissingIndexLinks() for
+ *         unit tests.
  *
  * v1.2.0: Reverse dead-link check (T-20260909-002) — MEMORY.md Sessions rows whose
  *         session log no longer exists are now ERRORS (the forward/orphan check
@@ -83,6 +92,24 @@ export function parseSessionsSection(content: string): string[] {
     }
   }
   return links;
+}
+
+// Whole-index link integrity (U-20261112-007, Check 3c): every flat .md link
+// anywhere in MEMORY.md (Sessions, Meetings, ADRs) must resolve to a file in the
+// memory/ dir. Fragment anchors (#section) are stripped; links that escape the
+// flat memory dir (e.g. archive/…, ../docs/…) are out of scope — memory/archive/
+// is deliberately git-ignored, so their existence is machine-local and would
+// produce false positives on fresh clones. Returns the missing hrefs (deduped).
+export function findMissingIndexLinks(content: string, memDir: string): string[] {
+  const missing = new Set<string>();
+  for (const line of content.split("\n")) {
+    for (const m of line.matchAll(/\]\(([^)]+\.md)\)/g)) {
+      const href = m[1].split("#")[0];
+      if (href.includes("/")) continue;
+      if (!existsSync(join(memDir, href))) missing.add(href);
+    }
+  }
+  return [...missing];
 }
 
 interface SessionEntry {
@@ -210,13 +237,33 @@ function verify(explicitFiles?: string[]): boolean {
     // Check 3b: Reverse dead-link (T-20260909-002) — Sessions rows whose session log
     // no longer exists. The forward (orphan) check above only catches the opposite
     // direction, so pruned session logs kept their dangling index rows forever.
+    const deadSessionLinks = new Set<string>();
     for (const href of parseSessionsSection(indexContent)) {
       if (href.includes("/")) continue; // relative refs outside the flat memory dir are out of scope
       if (!existsSync(join(memDir, href))) {
+        deadSessionLinks.add(href);
         errors.push(
           `Dead MEMORY.md Sessions row: \`${href}\` — indexed session log no longer exists; prune the row or restore the file`,
         );
       }
+    }
+
+    // Check 3c: Whole-index link integrity (U-20261112-007) — every flat .md link in
+    // ANY index section (Sessions, Meetings, ADRs) must resolve. Check 3b only guarded
+    // the Sessions section, so Meetings/ADRs rows could dangle forever — the co-safety
+    // defect class (56/63 dead index rows surviving audit-passing cycles). WARN stage
+    // with count: repoint or tombstone the rows; deduped against Check 3b's Sessions
+    // ERRORs so a dead Sessions row is never double-reported.
+    const missingLinks = findMissingIndexLinks(indexContent, memDir).filter((href) => !deadSessionLinks.has(href));
+    if (missingLinks.length > 0) {
+      for (const href of missingLinks) {
+        warnings.push(
+          `Missing MEMORY.md index link target: \`${href}\` — referenced from the index but not on disk; repoint or tombstone the row`,
+        );
+      }
+      warnings.push(
+        `${missingLinks.length} MEMORY.md index link target(s) missing from memory/ (Check 3c, WARN stage)`,
+      );
     }
   } else {
     warnings.push("MEMORY.md not found — run `bash scripts/sync-md.sh` to initialize");
