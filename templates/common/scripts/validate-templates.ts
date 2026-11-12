@@ -1,8 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.79.1
+ * @version 1.80.0
  *
+ * v1.80.0 (2026-11-13, U-20261112-010, design
+ *          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-010): TB-01 arm widened —
+ *          (1) HERMES.md/CODEX.md trail parity (templates/common seed == variant copy where the
+ *          variant carries the file); (2) graft-era block detection (Error) in every instruction
+ *          file (AGENTS/CLAUDE/GEMINI/CODEX/HERMES) across templates/common + every variant — the
+ *          2026-11-08 fleet standard missed the 15 variant HERMES.md copies and
+ *          co-architect/CODEX.md, and the tool-owned block sits outside every managed zone so
+ *          nothing else saw the drift. Primitives: lib/trail-block-parity.ts v1.1.0.
  * v1.79.1 (2026-11-12, design docs/designs/2026-11-12-sync-ownership-and-common-automation-engineer-design.md
  *          D2/D5, AE-1): VA-02 WORKSPACE_ROOT_AGENTS drops automation-engineer, which becomes a
  *          common agent (Medium) and may appear in variant AGENTS.md rows.
@@ -658,7 +666,7 @@ import {
   extractCommonAgentsBlock,
   compareCommonAgentsBlock,
 } from "./lib/managed-block-parity.ts";
-import { extractTrailBlock, compareTrailBlock } from "./lib/trail-block-parity.ts";
+import { extractTrailBlock, compareTrailBlock, countGraftBlocks } from "./lib/trail-block-parity.ts";
 import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from "./lib/platform-skeleton-merge.ts";
 import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from "./lib/upgrade-policy.ts";
 import { SCAFFOLD_MARKER_SOURCES, isCanonicalPmStubBody } from "./helpers/scaffold-markers.ts";
@@ -7244,6 +7252,95 @@ function checkTrailBlockParity(): void {
     pass(
       `trail-block-parity: ${checked}/${variants.length} variant AGENTS.md files carry the trail block with content parity`,
     );
+  }
+
+  // U-20261112-010: the 2026-11-08 fleet standard rewrote common's platform
+  // docs but missed the variant HERMES.md copies and co-architect/CODEX.md —
+  // the tool-owned block sits outside every managed zone, so nothing else
+  // sees it, and delivered projects inherit the graft-era prose (a CLI that
+  // no longer exists on PATH). Two extensions, same era-marker contract:
+  // (1) HERMES.md/CODEX.md trail parity (common seed == variant copy where
+  // the variant carries the file); (2) graft-era block detection (Error) in
+  // every instruction file across common + variants. The delivered-side
+  // counterpart is upgrade-project's graft→trail swap (trail-block-parity.ts
+  // swapGraftForTrail), which converges already-delivered copies at the next
+  // upgrade visit.
+  const platformDocRels = ["HERMES.md", "CODEX.md"];
+  let platformChecked = 0;
+  for (const rel of platformDocRels) {
+    const commonDocPath = join(TEMPLATES_DIR, "common", rel);
+    if (!existsSync(commonDocPath)) continue;
+    const commonDocBlock = extractTrailBlock(readFileSync(commonDocPath, "utf-8"));
+    if (commonDocBlock === null) {
+      fail(
+        "common",
+        "trail-block-parity",
+        `templates/common/${rel} carries no trail marker block`,
+        `Copy the root AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/common/${rel}`,
+      );
+      continue;
+    }
+    for (const variant of variants) {
+      const variantDocPath = join(TEMPLATES_DIR, variant, rel);
+      if (!existsSync(variantDocPath)) continue;
+      const variantDocContent = readFileSync(variantDocPath, "utf-8");
+      const violation = compareTrailBlock(commonDocBlock, variantDocContent);
+      if (violation === "missing") {
+        fail(
+          variant,
+          "trail-block-parity",
+          `templates/${variant}/${rel} carries no trail marker block — the fleet standard (DEC-20261108-01 R1) ships it in every instruction file the variant delivers`,
+          `Append the templates/common/${rel} "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to templates/${variant}/${rel}`,
+        );
+      } else if (violation === "duplicate") {
+        fail(
+          variant,
+          "trail-block-parity",
+          `templates/${variant}/${rel} carries MULTIPLE trail marker blocks`,
+          `Delete all but one block, keeping the copy that is byte-identical to templates/common/${rel}'s`,
+        );
+      } else if (violation === "mismatch") {
+        fail(
+          variant,
+          "trail-block-parity",
+          `templates/${variant}/${rel} trail block diverges from templates/common/${rel}`,
+          `Replace the variant's trail block with the common copy (markers included), byte-identical after line normalization`,
+        );
+      } else {
+        platformChecked++;
+      }
+    }
+  }
+  if (platformChecked > 0) {
+    pass(
+      `trail-block-parity: ${platformChecked} variant HERMES.md/CODEX.md copies carry the trail block with content parity`,
+    );
+  }
+
+  // (2) Graft-era residue detection — Error in any instruction file.
+  const instructionRels = ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md"];
+  const eraRoots = ["common", ...variants];
+  let eraChecked = 0;
+  for (const eraRoot of eraRoots) {
+    for (const rel of instructionRels) {
+      const docPath = join(TEMPLATES_DIR, eraRoot, rel);
+      if (!existsSync(docPath)) continue;
+      const docContent = readFileSync(docPath, "utf-8");
+      const graftCount = countGraftBlocks(docContent);
+      if (graftCount > 0) {
+        fail(
+          eraRoot,
+          "trail-block-parity",
+          `templates/${eraRoot}/${rel} carries ${graftCount} graft-era marker block(s) — the vendor renamed graft to trail (0.28) and the graft CLI no longer exists; delivered projects inherit the dead prose because the block sits outside every managed zone`,
+          `Swap the graft block for the trail block from templates/common/${rel} (byte-identical; U-20261112-010)`,
+        );
+      } else {
+        eraChecked++;
+      }
+    }
+  }
+  if (eraChecked > 0) {
+    pass(`trail-block-parity: ${eraChecked} template instruction files carry no graft-era block`);
   }
 }
 

@@ -22,6 +22,9 @@ import {
   extractTrailBlock,
   countTrailBlocks,
   compareTrailBlock,
+  extractGraftBlock,
+  countGraftBlocks,
+  swapGraftForTrail,
 } from '../../scripts/lib/trail-block-parity.ts';
 
 const ROOT = resolve(__dirname, '../..');
@@ -120,6 +123,73 @@ describe('real-template fixture sweep (single-wave landing, DEC-20261108-01 R1)'
       const content = readFileSync(p, 'utf-8');
       expect(countTrailBlocks(content)).toBe(1);
       expect(compareTrailBlock(ref!, content)).toBeNull();
+    }
+  });
+});
+
+describe('graft-era block primitives (v1.1.0, U-20261112-010)', () => {
+  const variants = readdirSync(join(ROOT, 'templates'), { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith('co-'))
+    .map((e) => e.name)
+    .sort();
+  const GRAFT = `<!-- graft:start -->
+## Graft — repo context graph
+
+This repo is indexed in \`graft/\`.
+<!-- graft:end -->`;
+
+  test('extractGraftBlock extracts the marker-inclusive graft block', () => {
+    expect(extractGraftBlock(`before\n${GRAFT}\nafter`)).toBe(GRAFT);
+    expect(extractGraftBlock('no block here')).toBeNull();
+  });
+
+  test('countGraftBlocks counts graft blocks', () => {
+    expect(countGraftBlocks(`${GRAFT}\nmid\n${GRAFT}`)).toBe(2);
+    expect(countGraftBlocks(BLOCK)).toBe(0);
+  });
+
+  test('swapGraftForTrail replaces the graft block with the trail block', () => {
+    const swapped = swapGraftForTrail(`head\n\n${GRAFT}\n\ntail`, `x\n${BLOCK}\ny`, BLOCK);
+    expect(swapped).toBe(`head\n\n${BLOCK}\n\ntail`);
+  });
+
+  test('swapGraftForTrail is idempotent (no graft block → null)', () => {
+    expect(swapGraftForTrail(`a\n${BLOCK}\nb`, `x\n${BLOCK}\ny`, BLOCK)).toBeNull();
+  });
+
+  test('swapGraftForTrail refuses when the template still carries a graft block', () => {
+    expect(swapGraftForTrail(GRAFT, GRAFT, BLOCK)).toBeNull();
+  });
+
+  test('swapGraftForTrail replaces every graft block when several exist', () => {
+    const swapped = swapGraftForTrail(`${GRAFT}\n${GRAFT}`, BLOCK, BLOCK);
+    expect(swapped).toBe(`${BLOCK}\n${BLOCK}`);
+  });
+
+  test('real-template sweep: no instruction file in common or any variant carries a graft-era block', () => {
+    const templatesDir = join(ROOT, 'templates');
+    const roots = ['common', ...variants];
+    const rels = ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md', 'HERMES.md'];
+    for (const rootName of roots) {
+      for (const rel of rels) {
+        const p = join(templatesDir, rootName, rel);
+        if (!existsSync(p)) continue;
+        expect(countGraftBlocks(readFileSync(p, 'utf-8'))).toBe(0);
+      }
+    }
+  });
+
+  test('real-template sweep: every variant HERMES.md/CODEX.md trail block matches common', () => {
+    const templatesDir = join(ROOT, 'templates');
+    for (const rel of ['HERMES.md', 'CODEX.md']) {
+      const commonPath = join(templatesDir, 'common', rel);
+      if (!existsSync(commonPath)) continue;
+      const commonBlock = extractTrailBlock(readFileSync(commonPath, 'utf-8'))!;
+      for (const v of variants) {
+        const p = join(templatesDir, v, rel);
+        if (!existsSync(p)) continue;
+        expect(compareTrailBlock(commonBlock, readFileSync(p, 'utf-8'))).toBeNull();
+      }
     }
   });
 });

@@ -3275,6 +3275,15 @@
       "review_notes": "User decisions recorded in DEC-20261111-01 (2026-11-11): EVOLVED_PRESERVE reverses the DEC-20261110-04 non-goal; blocking backport gate off->shadow->enforce incl. off-cycle runs; apply freeze for co-deck, co-abap, co-hr, co-safety, co-newbiz until PR-A+PR-B land; all LOCAL-PATCH forms protective with a marker-loss guard on every delivery path. Implementation tickets (PR-D, PR-A, PR-B, PR-C, PR-F, PR-E, PR-G, PR-H) not created; they land after PR1/PR3/PR4."
     },
     {
+      "id": "2026-11-12-abap-delivery-docs-batch-design",
+      "title": "abap delivery docs batch design",
+      "file": "docs/designs/2026-11-12-abap-delivery-docs-batch-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-11-12",
+      "last_updated": "2026-11-12"
+    },
+    {
       "id": "2026-11-12-common-agents-for-common-skills-design",
       "title": "common agents for common skills design",
       "file": "docs/designs/2026-11-12-common-agents-for-common-skills-design.md",

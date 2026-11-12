@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.3.1
 // v1.3.0 (2026-11-06/08, T-20261108-004 — E2E nightly red, co-work scaffold
 //          only, 14/15 variants green): PROJECT-MODE external-deps vendoring
 //          — when <rootDir>/external-deps.json exists, its install_dirs
@@ -9,7 +9,11 @@
 //          DEC-20261106-04 "consumed as-is") is self-managed: no owner
 //          frontmatter, no lifecycle record, no falsified provenance.
 //          Workspace root has no external-deps.json (inert at L0).
-// v1.2.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md,
+// v1.3.1 (2026-11-13, U-20261112-017, design
+//          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-017): doc-only — the
+//          v1.2.0 history row's design citation is qualified per the L0-citation convention
+//          (workspace-root: prefix); no logic change.
+// v1.2.0 (2026-10-31, design workspace-root: docs/designs/2026-10-31-graft-trail-migration-design.md,
 //           U-20261031-009): trail-era default paths — the vendor renamed graft to
 //           trail (0.28, @trailhq/trail-code) and `trail init` creates `.trail/` +
 //           `.claude/helpers/trail-*.cjs`. DEFAULT_SELF_MANAGED_PATHS carries BOTH
