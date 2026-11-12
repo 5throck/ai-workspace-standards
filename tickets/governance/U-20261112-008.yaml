@@ -3,14 +3,30 @@ id: U-20261112-008
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-12T04:16:32.178+09:00
+created_at: '2026-11-12T04:16:32.178+09:00'
 history:
-  - at: 2026-11-12T04:16:32.178+09:00
+  - at: '2026-11-12T04:16:32.178+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-13T07:39:59.810+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T07:39:59.810+09:00'
+    from: review
+    to: done
+result: >-
+  already fixed at source: PR #1991 (fleet triage batch
+  U-20261112-006/-008/-012, commit e40f6af8c) reworded L0 AGENTS.md and
+  templates/common/AGENTS.md so the PM row states 'phase numbers are
+  variant-specific; see docs/phase-definitions.md' per ADR-0104; the §4.2
+  renamed-phase and §3 subsection-ordering claims were obsoleted by the ADR-0090
+  thin-dispatcher restructure (sections relocated to docs/governance/agents/*).
+  Independent verification: current L0 AGENTS.md:33 and
+  templates/common/AGENTS.md §1 carry the corrected wording; resolution had been
+  left unrecorded on the store (store-rewrite residue). Triaged by triage-b1
+  session 2026-11-13.
 error: null
 upstream:
   project: co-develop
@@ -19,11 +35,25 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: AGENTS.md ships contradictory phase numbering and phase names. §1 agent table says PM orchestrates "lifecycle finalization (Phase 6)" while §4.1 dispatch rules say PM orchestrates "Phases 0, 2, and 5 (Lifecycle Finalization)"; §4.2 renames phases ("Planning & Architecture" for 1-2; lifecycle finalization at Phase 5; QA at Phase 6) diverging from the canonical docs/phase-definitions.md Phase Overview. Also §3 subsections appear out of order (§3.6 before §3.5) and §3.7 is missing.
+  symptom: >-
+    AGENTS.md ships contradictory phase numbering and phase names. §1 agent
+    table says PM orchestrates "lifecycle finalization (Phase 6)" while §4.1
+    dispatch rules say PM orchestrates "Phases 0, 2, and 5 (Lifecycle
+    Finalization)"; §4.2 renames phases ("Planning & Architecture" for 1-2;
+    lifecycle finalization at Phase 5; QA at Phase 6) diverging from the
+    canonical docs/phase-definitions.md Phase Overview. Also §3 subsections
+    appear out of order (§3.6 before §3.5) and §3.7 is missing.
   affected_paths:
     - AGENTS.md
   identity_source: cwd
-  repro: 'In Projects/co-develop: AGENTS.md:31 says PM orchestrates "lifecycle finalization (Phase 6)"; AGENTS.md:220 says PM orchestrates "Phase 5 (Lifecycle Finalization)"; AGENTS.md §4.2 (lines ~271-285) labels "Phase 5 - Lifecycle Finalization (PM-owned)" / "Phase 6 - Quality Assurance & Finalization" and renames Phase 1-2. Canonical docs/phase-definitions.md defines Phase 5 = Security Review & Lifecycle Finalization, Phase 6 = QA & Finalization, Phase 1 = Analysis & Stack Setup.'
+  repro: >-
+    In Projects/co-develop: AGENTS.md:31 says PM orchestrates "lifecycle
+    finalization (Phase 6)"; AGENTS.md:220 says PM orchestrates "Phase 5
+    (Lifecycle Finalization)"; AGENTS.md §4.2 (lines ~271-285) labels "Phase 5 -
+    Lifecycle Finalization (PM-owned)" / "Phase 6 - Quality Assurance &
+    Finalization" and renames Phase 1-2. Canonical docs/phase-definitions.md
+    defines Phase 5 = Security Review & Lifecycle Finalization, Phase 6 = QA &
+    Finalization, Phase 1 = Analysis & Stack Setup.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +61,18 @@ upstream:
   dedupe_key: 256138b59a6f5494410f15042de75269c4fd55e822309ddd6f01617c66c451ca
   duplicates:
     - project: co-develop
-      at: 2026-11-12T04:16:32.178+09:00
+      at: '2026-11-12T04:16:32.178+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1991
+    summary: >-
+      already fixed at source: PR #1991 (fleet triage batch
+      U-20261112-006/-008/-012, commit e40f6af8c) reworded L0 AGENTS.md and
+      templates/common/AGENTS.md so the PM row states 'phase numbers are
+      variant-specific; see docs/phase-definitions.md' per ADR-0104; the §4.2
+      renamed-phase and §3 subsection-ordering claims were obsoleted by the
+      ADR-0090 thin-dispatcher restructure (sections relocated to
+      docs/governance/agents/*). Independent verification: current L0
+      AGENTS.md:33 and templates/common/AGENTS.md §1 carry the corrected
+      wording; resolution had been left unrecorded on the store (store-rewrite
+      residue). Triaged by triage-b1 session 2026-11-13.

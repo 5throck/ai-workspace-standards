@@ -3,14 +3,32 @@ id: U-20261113-002
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-13T07:11:02.534+09:00
+created_at: '2026-11-13T07:11:02.534+09:00'
 history:
-  - at: 2026-11-13T07:11:02.534+09:00
+  - at: '2026-11-13T07:11:02.534+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-13T07:39:59.848+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T07:39:59.848+09:00'
+    from: review
+    to: done
+result: >-
+  already fixed at source: PR #1994 (design 2026-11-12-abap-delivery-docs-batch
+  §U-010, merged 2026-11-13 03:08 +0900 — ~4h before this re-file) implemented
+  all three asks: (1) trail blocks byte-swapped into all 16 variant template doc
+  sets incl. HERMES/CODEX (verified templates/co-abap/AGENTS.md:584
+  trail:start); (2) TB-01 widened to HERMES/CODEX parity + graft-era Error
+  (validate-templates.ts checkTrailBlockParity); (3) the durable delivery-side
+  cure the ticket asks for — upgrade-project v1.104.0 swapGraftForTrail
+  TOOL_ERA_SWAP (scripts/upgrade-project.ts:4011-4022) replaces delivered graft
+  blocks with the template trail block at the next upgrade visit. Project
+  hand-adoption verified: Projects/co-abap AGENTS.md:564, CLAUDE.md:352,
+  HERMES.md:96, CODEX.md:179, GEMINI.md:314 carry LOCAL-PATCH trail blocks which
+  the TOOL_ERA_SWAP arm respects. Triaged by triage-b1 session 2026-11-13.
 error: null
 upstream:
   project: co-abap
@@ -19,7 +37,29 @@ upstream:
   source: project/co-abap
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Re-file of U-20261112-010 (left the live store overnight after filing — individual lookup returns not found; believed merged into a same-day co-develop request per the L0 governance ticket store). The graft→trail fleet standard (870cd776f, 2026-11-08) updated templates/common/{AGENTS,CLAUDE,GEMINI,HERMES,CODEX}.md and templates/co-abap/AGENTS.md, but the 0.30.0 delivery to Projects/co-abap (ebcacde, 2026-11-08 13:09, AFTER the template commit) delivered neither the trail blocks nor removal of the graft blocks: project AGENTS.md:563-603 still taught `graft map/ask/grep` though the graft binary is uninstalled, HERMES.md:95 was graft-era, CODEX.md:76-81 had graft prose + a `bunx @nanonets/graft` snippet, and CLAUDE.md/GEMINI.md carried no context-graph block at all. Root cause: tool-owned blocks (graft:start/end) sit outside COMMON-*/WORKSPACE-MANAGED merge zones, upgrade-project merge preserves project free text, and `trail init` wired .trail/hook.cjs + settings hooks but did not rewrite the doc blocks in this checkout (the project has since hand-adopted the trail blocks with LOCAL-PATCH markers — the upstream ask is the durable delivery-side cure). TB-01 (scripts/lib/trail-block-parity.ts) enforces root==common==variant only inside validate-templates.ts (L0; delivered-project CI never runs it). Expected: detached projects receive the trail block swap (or trail init completes doc blocks it wired hooks for), and a delivered-side detector flags a tool-owned block instructing a CLI absent from PATH.'
+  symptom: >-
+    Re-file of U-20261112-010 (left the live store overnight after filing —
+    individual lookup returns not found; believed merged into a same-day
+    co-develop request per the L0 governance ticket store). The graft→trail
+    fleet standard (870cd776f, 2026-11-08) updated
+    templates/common/{AGENTS,CLAUDE,GEMINI,HERMES,CODEX}.md and
+    templates/co-abap/AGENTS.md, but the 0.30.0 delivery to Projects/co-abap
+    (ebcacde, 2026-11-08 13:09, AFTER the template commit) delivered neither the
+    trail blocks nor removal of the graft blocks: project AGENTS.md:563-603
+    still taught `graft map/ask/grep` though the graft binary is uninstalled,
+    HERMES.md:95 was graft-era, CODEX.md:76-81 had graft prose + a `bunx
+    @nanonets/graft` snippet, and CLAUDE.md/GEMINI.md carried no context-graph
+    block at all. Root cause: tool-owned blocks (graft:start/end) sit outside
+    COMMON-*/WORKSPACE-MANAGED merge zones, upgrade-project merge preserves
+    project free text, and `trail init` wired .trail/hook.cjs + settings hooks
+    but did not rewrite the doc blocks in this checkout (the project has since
+    hand-adopted the trail blocks with LOCAL-PATCH markers — the upstream ask is
+    the durable delivery-side cure). TB-01 (scripts/lib/trail-block-parity.ts)
+    enforces root==common==variant only inside validate-templates.ts (L0;
+    delivered-project CI never runs it). Expected: detached projects receive the
+    trail block swap (or trail init completes doc blocks it wired hooks for),
+    and a delivered-side detector flags a tool-owned block instructing a CLI
+    absent from PATH.
   affected_paths:
     - AGENTS.md
     - HERMES.md
@@ -40,4 +80,22 @@ upstream:
   dedupe_key: f6984a3dbbeebc328daf27dbb08245fceaff1685499dec0e0badd99d6b6e9803
   duplicates:
     - project: co-abap
-      at: 2026-11-13T07:11:02.534+09:00
+      at: '2026-11-13T07:11:02.534+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1994
+    summary: >-
+      already fixed at source: PR #1994 (design
+      2026-11-12-abap-delivery-docs-batch §U-010, merged 2026-11-13 03:08 +0900
+      — ~4h before this re-file) implemented all three asks: (1) trail blocks
+      byte-swapped into all 16 variant template doc sets incl. HERMES/CODEX
+      (verified templates/co-abap/AGENTS.md:584 trail:start); (2) TB-01 widened
+      to HERMES/CODEX parity + graft-era Error (validate-templates.ts
+      checkTrailBlockParity); (3) the durable delivery-side cure the ticket asks
+      for — upgrade-project v1.104.0 swapGraftForTrail TOOL_ERA_SWAP
+      (scripts/upgrade-project.ts:4011-4022) replaces delivered graft blocks
+      with the template trail block at the next upgrade visit. Project
+      hand-adoption verified: Projects/co-abap AGENTS.md:564, CLAUDE.md:352,
+      HERMES.md:96, CODEX.md:179, GEMINI.md:314 carry LOCAL-PATCH trail blocks
+      which the TOOL_ERA_SWAP arm respects. Triaged by triage-b1 session
+      2026-11-13.

@@ -3,14 +3,33 @@ id: U-20261113-004
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-13T07:15:03.944+09:00
+created_at: '2026-11-13T07:15:03.944+09:00'
 history:
-  - at: 2026-11-13T07:15:03.944+09:00
+  - at: '2026-11-13T07:15:03.944+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-13T07:40:14.236+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T07:40:14.236+09:00'
+    from: review
+    to: done
+result: >-
+  fixed in PR #1999 (triage-b1 worktree batch): the L0 agents/pm.md Upstream
+  Request Tickets section's §3.12 citation (agents/pm.md:267) now carries the
+  sanctioned '(workspace-root-only governance doc)' qualifier per the citation
+  convention established by PR #1994 / design
+  2026-11-12-abap-delivery-docs-batch — same defect class as U-20261112-017.
+  Premise correction: docs/governance/agents/pm-gateway-workflow.md was NOT
+  retired at the workspace root (DEC-20261028-05 retired the delivered template
+  mirror only; the L0 doc remains the §3.12 SSOT and AGENTS.md §3 cites it), so
+  the fix qualifies rather than re-points. Variant .claude/agents/pm.md mirrors
+  converge at the next sync-agent-mirrors run / upgrade visit (mirrors resolve
+  through this L0 body, as the ticket's repro showed). E3 spec exemption
+  (single-line citation qualifier); dev-sync + skill-graph regeneration gates
+  green. Triaged by triage-b1 session 2026-11-13.
 error: null
 upstream:
   project: co-develop
@@ -19,11 +38,27 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The workspace-root SSOT agents/pm.md still links the retired docs/governance/agents/pm-gateway-workflow.md ("Triage procedure: pm-gateway-workflow.md §3.12" in the Upstream Reporting / tickets section). That file was retired by 533f934 / DEC-20261028-05 (same retirement as U-20261112-006, which fixed the template-side copies and common pm.md). Because extends-chain variant mirrors resolve through this L0 body, every regenerated .claude/agents/pm.md mirror re-imports the retired pointer — the residual was reproduced in Projects/co-develop after running sync-agent-mirrors.ts today. Suggested fix: scrub/re-point the §3.12 triage-procedure citation in the L0 agents/pm.md body to the surviving governance doc, then regenerate mirrors.'
+  symptom: >-
+    The workspace-root SSOT agents/pm.md still links the retired
+    docs/governance/agents/pm-gateway-workflow.md ("Triage procedure:
+    pm-gateway-workflow.md §3.12" in the Upstream Reporting / tickets section).
+    That file was retired by 533f934 / DEC-20261028-05 (same retirement as
+    U-20261112-006, which fixed the template-side copies and common pm.md).
+    Because extends-chain variant mirrors resolve through this L0 body, every
+    regenerated .claude/agents/pm.md mirror re-imports the retired pointer — the
+    residual was reproduced in Projects/co-develop after running
+    sync-agent-mirrors.ts today. Suggested fix: scrub/re-point the §3.12
+    triage-procedure citation in the L0 agents/pm.md body to the surviving
+    governance doc, then regenerate mirrors.
   affected_paths:
     - agents/pm.md
   identity_source: cwd
-  repro: 'In a variant whose agents/pm.md is an extends stub pointing at the workspace root (e.g. Projects/co-develop): regenerate mirrors via scripts/sync-agent-mirrors.ts and observe .claude/agents/pm.md line ~255 still cites the retired docs/governance/agents/pm-gateway-workflow.md §3.12 — the reference originates in the L0 SSOT body, not the stub.'
+  repro: >-
+    In a variant whose agents/pm.md is an extends stub pointing at the workspace
+    root (e.g. Projects/co-develop): regenerate mirrors via
+    scripts/sync-agent-mirrors.ts and observe .claude/agents/pm.md line ~255
+    still cites the retired docs/governance/agents/pm-gateway-workflow.md §3.12
+    — the reference originates in the L0 SSOT body, not the stub.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +66,22 @@ upstream:
   dedupe_key: fc84032abaa7bcba11d5203f57ae2ec0ab5dea29324f2bb317b162c602c5b4b8
   duplicates:
     - project: co-develop
-      at: 2026-11-13T07:15:03.944+09:00
+      at: '2026-11-13T07:15:03.944+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1999
+    summary: >-
+      fixed in PR #1999 (triage-b1 worktree batch): the L0 agents/pm.md Upstream
+      Request Tickets section's §3.12 citation (agents/pm.md:267) now carries
+      the sanctioned '(workspace-root-only governance doc)' qualifier per the
+      citation convention established by PR #1994 / design
+      2026-11-12-abap-delivery-docs-batch — same defect class as U-20261112-017.
+      Premise correction: docs/governance/agents/pm-gateway-workflow.md was NOT
+      retired at the workspace root (DEC-20261028-05 retired the delivered
+      template mirror only; the L0 doc remains the §3.12 SSOT and AGENTS.md §3
+      cites it), so the fix qualifies rather than re-points. Variant
+      .claude/agents/pm.md mirrors converge at the next sync-agent-mirrors run /
+      upgrade visit (mirrors resolve through this L0 body, as the ticket's repro
+      showed). E3 spec exemption (single-line citation qualifier); dev-sync +
+      skill-graph regeneration gates green. Triaged by triage-b1 session
+      2026-11-13.
