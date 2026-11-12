@@ -125,7 +125,7 @@ PM (Orchestrator mode):
 | # | Task                          | Agent             | Tier   | Model  |
 |---|-------------------------------|-------------------|--------|--------|
 | 1 | Update docs/governance/pm-*.md | docs-writer       | Medium | sonnet |
-| 2 | Sync to templates/common/      | automation-engineer| Low   | haiku  |
+| 2 | Sync to templates/common/      | automation-engineer| Medium| sonnet |
 | 3 | Audit and QA                  | auditor           | Medium | sonnet |
 
 Sequential: 1 → 2 → 3

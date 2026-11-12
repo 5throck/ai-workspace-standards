@@ -45,7 +45,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
-| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Low | Scripting and tools expert; maintains TypeScript (.ts) automation scripts per ADR-0036; ensures idempotency and robustness |
+| Automation Engineer | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Scripting and tools expert; maintains TypeScript (.ts) automation scripts per ADR-0036; ensures idempotency and robustness |
 | Documentation Writer | [`agents/docs-writer.md`](agents/docs-writer.md) | Medium | Executes documentation changes per Architect decisions; writing, editing, terminology consistency; Architect owns document architecture design |
 | Scaffolding Expert | [`agents/scaffolding-expert.md`](agents/scaffolding-expert.md) | Low | New Project & Template Specialist; validates new-project logic; ensures template folder synchrony; prevents OS-level encoding corruption |
 
@@ -74,13 +74,13 @@ All specialist agents require PM dispatch - enforced at 4 levels.
 
 #### §3.1.1 PM Direct Execution Scope
 
-PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#pm-direct-execution-scope) in `agents/pm.md`.
+PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications MUST be dispatched to specialists (docs-writer, architect, automation-engineer, auditor). See [PM Direct Execution Constraints](agents/pm.md#pm-direct-execution-scope) in `agents/pm.md`. PM never runs `/sync` (the `/sync` row belongs to `automation-engineer`) and never merges a PR; merging happens only on the user's explicit request via an `automation-engineer` row.
 
 | Category | Tools | Scope |
 |----------|-------|-------|
 | Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
 | Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
-| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Conditional | Bash | Read-only: `git status/diff/log/show`, `gh pr view`, `gh pr checks`, `bun scripts/audit.ts`, `ls`, `cat` |
 | Forbidden | Write, Edit (all other paths) | Must delegate to specialist (docs-writer, architect, automation-engineer, auditor) |
 | Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
 

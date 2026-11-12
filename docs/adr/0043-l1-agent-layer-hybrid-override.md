@@ -83,9 +83,9 @@ An agent is eligible for L1 promotion when:
 | **2b** | `agent-promote.ts` — human-gated L1 promotion execution | After Wave 2a report review |
 | **2c** | `audit.ts` extension — `# @extends:` pointer validation, version drift, `remove` Hard Warning | After Wave 2b |
 
-### 6. Amendment (2026-11-12): common skill-owner agents
+### 6. Amendment (2026-11-12): common skill-owner agents (amended again 2026-11-12 for `automation-engineer`)
 
-`templates/common/agents/` may hold generic skill-owner agents in addition to promoted specialists, so every common skill's `owner:` resolves in every project that receives it. Such agents are listed in `docs/templates/common-contract.json` `common_agents`, carry no variant or L0-only text, and coexist with same-domain variant agents under distinct names (no `extends:` stub, no replacement). The L0 specialist roster remains non-propagated and no common `architect` is introduced. Rationale and sequence: `docs/designs/2026-11-12-common-agents-for-common-skills-design.md` (§5.11, decisions D1-D4).
+`templates/common/agents/` may hold generic skill-owner agents in addition to promoted specialists, so every common skill's `owner:` resolves in every project that receives it. Such agents are listed in `docs/templates/common-contract.json` `common_agents`, carry no variant or L0-only text, and coexist with same-domain variant agents under distinct names (no `extends:` stub, no replacement). The L0 specialist roster remains non-propagated, except `automation-engineer`, which is delivered as a common agent at Medium tier (amended 2026-11-12, design `docs/designs/2026-11-12-sync-ownership-and-common-automation-engineer-design.md` D2/D5/D6); no common `architect` is introduced. Rationale and sequence: `docs/designs/2026-11-12-common-agents-for-common-skills-design.md` (§5.11, decisions D1-D4).
 
 ---
 
