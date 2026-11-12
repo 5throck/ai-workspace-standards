@@ -3,16 +3,17 @@
 ## Metadata
 - **Skill**: sync
 - **Status**: active
-- **Version**: 1.9.0
-- **Owner**: pm
+- **Version**: 1.9.1
+- **Owner**: automation-engineer
 - **Created**: 2026-07-08
-- **Last Updated**: 2026-11-07
+- **Last Updated**: 2026-11-12
 
 ## Description
 Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
 
 ## Changelog
 
+- 2026-11-12: v1.9.1 — owner retargeted pm -> automation-engineer (common agent; D9 of design 2026-11-12-sync-ownership-and-common-automation-engineer, CA-3+AE-3). Metadata-only.
 - 2026-11-07: v1.9.0 — new "Worktree Landing Variant" section: 9-step isolated-worktree landing procedure under concurrency evidence (T-20261106-010; spec `2026-11-07-session-worktree-convention-design`), including the two live-validated mechanics (CWD guard anchors to `import.meta.dir` so in-worktree dev-sync passes by construction; per-worktree private git dir for the PR body file). Docs-only body change.
 - 2026-10-08: v1.8.0 — pipeline table gains step 4.85 Version-Bump Test Gate (dev-sync v1.24.0): a staged `SKILL.md` frontmatter `version:` or script `@version` header change forces `bun run test:unit` before the audit gate, FATAL on failure; skipped when `package.json` has no `test:unit` script (user directive 2026-10-08).
 - 2026-09-17: v1.7.0 — instruction-policy wiring: step 3.9 now cites the PM routing path (ADR-0078); step 0 sentence split into single-instruction sentences per ADR-0079 (design doc docs/designs/2026-09-17-instruction-policy-wiring-design.md)

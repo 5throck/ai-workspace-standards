@@ -5,8 +5,13 @@
  * Generates variant project structure from reconciled manifest.
  * Creates variant.json, directory structure, agent overrides, and skill directories.
  *
- * @version 1.20.0
+ * @version 1.20.1
  *
+ * v1.20.1 (2026-11-12, common-agents CA-3.AE-3, design
+ *          docs/designs/2026-11-12-sync-ownership-and-common-automation-engineer-design.md):
+ *          DEFAULT_WORKFLOW_PHASES(_KO) step 6 states the new /sync ownership: the PM
+ *          dispatches /sync to automation-engineer and verifies the landing.
+ *          Already-generated variant READMEs are not rewritten by this change.
  * v1.20.0 (2026-10-26, design
  *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md §7):
  *          normalizeAgentFrontmatter (fn v1.2.0) replaces the stale platform-
@@ -971,7 +976,7 @@ const DEFAULT_WORKFLOW_PHASES = [
   "3. **Analysis:** The PM synthesizes findings into requirements + acceptance criteria.",
   "4. **Design:** An architect produces an implementation plan + ADR.",
   "5. **Implementation:** Specialists implement; the PM loops up to 3× on failures.",
-  "6. **Finalization:** The PM logs decisions; runs `/sync`; opens a PR.",
+  "6. **Finalization:** The PM logs decisions and dispatches `/sync` to `automation-engineer`, which commits and opens the PR; the PM then verifies the landing.",
 ].join("\n");
 
 const DEFAULT_WORKFLOW_PHASES_KO = [
@@ -980,7 +985,7 @@ const DEFAULT_WORKFLOW_PHASES_KO = [
   "3. **분석:** PM이 조사 결과를 요구사항 + 완료 기준으로 종합합니다.",
   "4. **설계:** 아키텍트가 구현 계획 + ADR을 작성합니다.",
   "5. **구현:** 전문가가 구현하고, PM은 실패 시 최대 3회까지 반복합니다.",
-  "6. **마무리:** PM이 결정을 기록하고 `/sync`를 실행한 뒤 PR을 엽니다.",
+  "6. **마무리:** PM이 결정을 기록하고 `/sync`를 `automation-engineer`에게 맡기면 커밋과 PR 생성까지 수행하며, PM은 반영 결과를 확인합니다.",
 ].join("\n");
 
 /** Render the unified status line for both stable and beta variants. */

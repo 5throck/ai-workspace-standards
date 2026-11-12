@@ -1,12 +1,12 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.9.0
-last_reviewed: 2026-11-07
+version: 1.9.1
+last_reviewed: 2026-11-12
 status: active
 scope: common
 l2_propagate: true
-owner: pm
+owner: automation-engineer
 prerequisites: Bun runtime
 metadata:
   type: process

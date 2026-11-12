@@ -9,7 +9,11 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.9.0
+ * @version 1.9.1
+ *          v1.9.1 (2026-11-12, common-agents CA-3, design 2026-11-12-common-agents-for-common-skills
+ *          §5.7): agentNameExists() also resolves owners against templates/common/agents (the
+ *          common skill-owner roster), so L0 skills owned by a common agent (design-system-lead,
+ *          contract-gate-engineer, automation-engineer) no longer fail Check 12.
  *          v1.9.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md
  *          §3.A2, DEC-20261029-01 PR2): Check 11 gains the baseline-hash-equality
  *          tolerance — a flagged staleness warning is suppressed to an INFO line
@@ -35,7 +39,7 @@
  *          template-relative extends cannot be resolved at the audit location are
  *          exempted instead of failing with "Missing tier".
  * @l2-propagate false
- * @last_updated 2026-10-29
+ * @last_updated 2026-11-12
  * v1.5.0: Check 11 compares against the newest non-sync-only commit (DEC-20260930-01
  *         ruling 2, T-20260930-024) — `chore(upgrade): template sync`,
  *         `chore(templates): auto-release`, and `propagate sync` cascade commits no
@@ -556,6 +560,7 @@ function agentNameExists(name: string, registeredAgents: Set<string>): boolean {
   if (registeredAgents.has(name)) return true;
   if (existsSync(join(ROOT, "agents", `${name}.md`))) return true;
   if (existsSync(join(ROOT, ".claude", "agents", `${name}.md`))) return true;
+  if (existsSync(join(ROOT, "templates", "common", "agents", `${name}.md`))) return true;
   const templatesDir = join(ROOT, "templates");
   if (existsSync(templatesDir)) {
     for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
