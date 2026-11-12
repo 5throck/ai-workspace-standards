@@ -516,7 +516,9 @@ This is intentional — see ADR-0039 (L0→L1→L2 Hierarchy) and ADR-0040
   Override). This is a separate, intentional workflow distinct from L0→L1
   propagation.
 
-**Current L1 agents**: `pm.md` (uses `extends: ../../../agents/pm.md`) and `i18n-specialist.md`. `_COMMON.md` is directory documentation for `templates/common/agents/` — not a dispatched agent — and is excluded from generated projects.
+**Common agents (amended 2026-11-12, design `docs/designs/2026-11-12-common-agents-for-common-skills-design.md` §5.11)**: `templates/common/agents/` may also hold generic skill-owner agents, so that every common skill's `owner:` resolves in every project that receives the skill. These agents are listed in `docs/templates/common-contract.json` `common_agents`, are variant-agnostic, and coexist with same-domain variant agents under distinct names. This widens what the common roster may contain; it does not reverse the rule above — the L0 specialist roster stays non-propagated, and no common `architect` exists.
+
+**Current L1 agents**: `pm.md` (uses `extends: ../../../agents/pm.md`) and `i18n-specialist.md`, plus the common skill-owner agents listed in `common-contract.json` `common_agents` as they are added. `_COMMON.md` is directory documentation for `templates/common/agents/` — not a dispatched agent — and is excluded from generated projects.
 
 #### CONSTITUTION.md Non-Propagation
 
@@ -846,4 +848,4 @@ Agent, skill, and command frontmatter structures are validated against JSON Sche
 
 ---
 
-*Last Updated: 2026-11-02*
+*Last Updated: 2026-11-12*

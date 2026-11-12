@@ -19,6 +19,7 @@ const L0_RECORD = "# a\n\n## Metadata\n- **Skill**: a\n- **Created**: 2026-08-01
 
 const BASE: Record<string, string> = {
   "agents/pm.md": "# pm\n",
+  "templates/common/agents/pm.md": "# pm\n",
   "templates/common/agents/lifecycle-manager.md": "# lm\n",
   "templates/co-a/agents/worker.md": "# worker\n",
   "templates/co-a/agents/domains/deep/specialist.md": "# s\n",
@@ -89,9 +90,11 @@ describe("SLR rules", () => {
     expect(mapped.filter((x) => x.rule === "owner" || x.rule === "owner-agent")).toEqual([]);
   });
 
-  test("owner-agent: a common skill may be owned by any variant's agent", () => {
+  test("owner-agent: a common skill owned by a variant-only agent is reported (strict common roster)", () => {
     const files = published({ "templates/common/skills/k/SKILL.md": skill("k", "worker") });
-    expect(rules(files)).toEqual([]);
+    const f = evaluateSlr(mapTree(files), {}).findings.filter((x) => x.rule === "owner-agent");
+    expect(f.map((x) => x.variant)).toEqual(["common"]);
+    expect(f[0].message).toContain("common roster");
   });
 
   test("owner-agent: unknown agent is reported; nested variant agents and workspace roster resolve", () => {
