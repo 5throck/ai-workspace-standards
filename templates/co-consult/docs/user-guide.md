@@ -18,7 +18,8 @@ PM:   Analyzes the request, classifies the phase, and shows an execution plan:
       | # | Task                                   | Agent             | Tier   | Model  |
       |---|-----------------------------------------|--------------------|--------|--------|
       | 1 | Market/competitive analysis              | strategy-analyst   | Medium | sonnet |
-      | 2 | /sync "docs: add EV market analysis"     | pm                 | Medium | sonnet |
+      | 2 | /sync "docs: add EV market analysis"     | automation-engineer | Medium | sonnet |
+      | 3 | Verify landing (PR URL, CI state)        | pm                 | Medium | inherit (sonnet) |
 
       Execution Order: Sequential
 PM:   "Shall I dispatch strategy-analyst?"
@@ -29,7 +30,7 @@ PM:   ▶ dispatches strategy-analyst ...
 **Rules of engagement**:
 - Always start with the PM. Do not invoke `agents/*.md` specialists directly — the PM Gateway is enforced at tool, prompt, and QA-gate level (see `AGENTS.md` §3).
 - The PM shows an execution plan table **before** dispatching any specialist — review it, confirm, then work proceeds.
-- When your engagement produces a change worth recording (a new deliverable, a completed analysis, a report), the last row of the plan is always `/sync "type: message"` — this runs memlog → changelog → audit → commit → PR in one pipeline. You do not run `git commit` yourself.
+- When your engagement produces a change worth recording (a new deliverable, a completed analysis, a report), the last implementation row of the plan is always `/sync "type: message"`, owned by `automation-engineer` — this runs memlog → changelog → audit → commit → PR in one pipeline, and the PM then verifies the landing. You do not run `git commit` yourself.
 
 ## 2. What Kind of Consulting Task Do You Have?
 
@@ -114,7 +115,7 @@ Per `AGENTS.md` §3.5 and `docs/phase-definitions.md` (the phase-model SSOT), wo
 | 3 | Content Creation | communications-lead, solutions-architect, sme, data-analyst |
 | 4 | Coordination & Delivery | delivery-manager, workstream-lead, technology-specialist |
 | 5 | Lifecycle Finalization | PM (updates governance records, logs to memory/) |
-| 6 | Quality Assurance & Finalization | PM (runs `bun scripts/audit.ts`, then `/sync`) |
+| 6 | Quality Assurance & Finalization | PM (runs `bun scripts/audit.ts`, dispatches `/sync` to `automation-engineer`, verifies the landing) |
 
 Phase 1.5 runs after all Phase 1 deliverables are complete and before `insight-synthesis`: validators cross-check peer deliverables, report findings without modifying them, and each deliverable gets at most 1 revision cycle (unresolved findings are logged as accepted risk).
 

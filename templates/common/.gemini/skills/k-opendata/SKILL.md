@@ -9,10 +9,10 @@ description: >
   Customs Service (`관세청`) trade-statistics endpoints (HS-code-level
   import/export by country, national/regional totals) as the primary
   reference API set. Requires DATA_GO_KR_API_KEY environment variable.
-version: 1.2.2
+version: 1.2.3
 last_reviewed: 2026-09-03
 status: active
-owner: hs-classification-specialist
+owner: public-data-analyst
 prerequisites: DATA_GO_KR_API_KEY environment variable
 relates_to:
   - skill: k-ecos

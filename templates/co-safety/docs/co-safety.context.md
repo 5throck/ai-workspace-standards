@@ -166,7 +166,7 @@ Finalization`. Trigger precedence: (1) domain specificity wins; (2) functional
 specialization wins for cross-cutting tasks; (3) shared skills are the single
 entry point for cross-industry workflows (TBM → `tool-box-meeting`, PTW →
 `permit-to-work`); (4) PM arbitration — ask the user to clarify scope before
-dispatching. Every execution plan ends with `/sync`. Full specialist roster and
+dispatching. Every execution plan's last implementation row is `/sync` (owned by `automation-engineer`), followed by the PM landing verification. Full specialist roster and
 dispatch triggers: `AGENTS.md` Specialist Agent Roster.
 <!-- END VARIANT-SECTION -->
 
@@ -276,7 +276,7 @@ PM owns the composition of this project's agent team and rules on skill changes.
 <!-- COMMON-CONTEXT:END -->
 
 ---
-*co-safety.context.md version: 1.2 — PM model-ID table refreshed to current registry (claude-opus-5-5 / claude-sonnet-5-5) (2026-09-13); previous: 1.1 COMMON-CONTEXT zone added (T-20260913-002); 1.0 version footer added (2026-09-11)*
+*co-safety.context.md version: 1.3 — execution plan ends with the `automation-engineer` `/sync` row plus the PM landing verification; previous: 1.2 — PM model-ID table refreshed to current registry (claude-opus-5-5 / claude-sonnet-5-5) (2026-09-13); previous: 1.1 COMMON-CONTEXT zone added (T-20260913-002); 1.0 version footer added (2026-09-11)*
 <!-- COMMON-CONTEXT:START -->
 This project follows the coding standards in the key-rules list below.
 

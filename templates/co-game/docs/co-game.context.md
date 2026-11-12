@@ -119,7 +119,7 @@ PM → Game Designer (universal: core loop + difficulty + reward)
 | 2 | Analysis | PM synthesizes findings into requirements + acceptance criteria |
 | 3 | Design | Game Designer produces universal spec; Genre Designer produces genre spec; Visual Artist + Sound Designer produce asset specs |
 | 4 | Implementation | Game Developer → Test Runner → Game Debugger (loop up to 3× on failures) |
-| 5 | Finalization | PM logs decisions; runs `/sync`; opens PR |
+| 5 | Finalization | PM logs decisions; dispatches `/sync` to `automation-engineer`; verifies the PR landing |
 
 ---
 
@@ -223,7 +223,7 @@ PM owns the composition of this project's agent team and rules on skill changes.
 
 ---
 
-*co-game.context.md version: 2.0 — updated for game development project*
+*co-game.context.md version: 2.1 — Phase 5 finalization wording: `/sync` is dispatched to `automation-engineer`; previous: 2.0 — updated for game development project*
 
 ## Template Provenance
 

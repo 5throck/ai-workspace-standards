@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: e58a04a72c3426cfbc1086a81f4ee6e820a21723843ddc7f4abca59af4ea58b9
+translated_from_hash: 8e281fc6b732a68efbbac04740987f3124b39ff17605a072870a61273f9ad164
 lang: ko
 lang_reason: source-material
 ---
@@ -72,7 +72,7 @@ Software development workflow — full agent team with PM, Architect, Designer, 
 3. **UI/UX 설계:** UI/UX 요소가 범위에 있을 때 `designer`(선택)가 와이어프레임, 컴포넌트 스펙, 디자인 토큰을 산출합니다.
 4. **구현 및 QA 게이트:** `code-writer`가 구현하고 `test-runner`가 검증하며, 실패 시 PM이 최대 3회까지 반복합니다.
 5. **보안 검토 및 라이프사이클 마무리:** `security-monitor`가 PR 전 권고 점검을 실행하고, PM이 결정을 기록하며 거버넌스 기록을 갱신합니다.
-6. **품질 보증 및 최종 마무리:** PM이 audit과 `/sync`를 실행하고 PR을 엽니다.
+6. **품질 보증 및 최종 마무리:** PM이 audit을 실행하고 `automation-engineer`에 `/sync`를 배치한 뒤 PR 반영을 확인합니다.
 
 ### C. 사용 가능한 명령어
 

@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-translated_from_hash: c9ceacc812479138cd042d9396cbe578d13797b8da1f6d60595683a8c658e8ad
+translated_from_hash: ebf067db80d4bed320231042c2c785f5a3823cc076ed7b8abd3310e790b5a8b6
 lang: ko
 lang_reason: source-material
 ---
@@ -65,7 +65,7 @@ lang_reason: source-material
 3. **제작 전 준비:** 전담 전문가가 없는 단계는 통과합니다. 로캘 산출물 필요 사항은 `i18n-specialist`(필요 시 투입, 5단계)에 기록해 둡니다.
 4. **저작 및 QA 게이트:** `exam-bank-steward`가 답안 길이 편향 검사를 포함해 문항을 저작·검수합니다. 모든 재작성은 개선 대장을 통해 사람이 검수합니다.
 5. **시험 운영 및 라이프사이클 마무리:** `exam-bank-steward`가 기수·응시 창·활성화를 준비하고 통계를 모니터링합니다. PM이 PR 전 권고 점검을 실행하고 결정을 기록하며 거버넌스 기록을 갱신합니다.
-6. **품질 보증 및 최종 마무리:** PM이 audit과 `/sync`를 실행하고 PR을 엽니다.
+6. **품질 보증 및 최종 마무리:** PM이 audit을 실행하고 `automation-engineer`에 `/sync`를 배치한 뒤 PR 반영을 확인합니다.
 
 ### C. 사용 가능한 명령어
 

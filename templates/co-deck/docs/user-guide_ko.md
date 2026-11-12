@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 1e4166c20381e8c4bc5ca129dc92025ab565f455abf5136edb83f283e5ab11db
+translated_from_hash: d495479a1158249138409d815bafb79b623e89d31bf49da01204a818ffdad29e
 ---
 # co-deck 사용자 가이드
 
@@ -19,7 +19,8 @@ co-deck는 워크스페이스의 **PM Gateway** 패턴을 따릅니다 — 전�
    | # | Task | Agent | Tier | Model |
    |---|------|-------|------|-------|
    | 1 | [작업] | [전문가] | High/Medium/Low | [모델] |
-   | N | `/sync "type(scope): message"` | pm | Medium | [모델] |
+   | N | `/sync "type(scope): message"` | automation-engineer | Medium | sonnet |
+   | N+1 | 반영 확인 — PR 주소, 브랜치, CI 상태, 커밋된 파일 목록 | pm | Medium | inherit ([모델]) |
 
 3. **PM이 전문 에이전트를 디스패치**합니다 (`Agent` 도구 사용). 쓰기 작업은 한 번에 하나씩 순차 진행하고, 읽기 전용 리서치/분석은 병렬로 진행할 수 있습니다 (예: Stage 3.5의 `image-curator`와 `diagram-specialist`).
 4. **필수 게이트에서 승인**합니다 (게이트 2 — 콘텐츠 준비 완료; 게이트 5 — 샘플 PDF 준비 완료). 선택적 게이트(1.5, 3, 4)는 검토 후 자동으로 진행됩니다.

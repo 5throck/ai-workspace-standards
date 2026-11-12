@@ -82,8 +82,8 @@ const PRUNE_DIR_NAMES = new Set(["node_modules", ".git"]);
 /** Design occurrence map (verified 2026-11-10; DEC-20261110-02 ruling 1). */
 const EXPECTED_NEW_COUNTS = {
   rootAgents: 6,
-  templateAgents: 104, // 13 dirs incl. templates/common/agents
-  generatedMirrors: 17, // templates/co-architect/.claude/agents
+  templateAgents: 107, // 13 dirs incl. templates/common/agents (CA-2+AE-2: +4 common agents, -1 co-architect automation-engineer folded into the common agent)
+  generatedMirrors: 16, // templates/co-architect/.claude/agents (CA-2+AE-2: -1, its automation-engineer mirror removed with the folded agent)
   projectAgents: 161, // Projects/<16 repos>/agents — post-project-phase pin
   projectMirrors: 135, // Projects/<16 repos>/.claude/agents
 };

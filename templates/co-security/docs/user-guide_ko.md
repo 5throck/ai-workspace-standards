@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 64afaf6b6b05a2f8b50166c1144791b9eb8d9fa7bf2925d74af00db36f5b60bc
+translated_from_hash: f7b28af9b1c5f61ba1384bf5583d45edefe92524f7ee942b89f65329fa7da747
 ---
 # co-security 사용자 가이드
 
@@ -23,7 +23,8 @@ translated_from_hash: 64afaf6b6b05a2f8b50166c1144791b9eb8d9fa7bf2925d74af00db36f
    | # | 작업 | 에이전트 | 티어 | 모델 |
    |---|------|----------|------|------|
    | 1 | [작업 설명] | [전문가] | High/Medium/Low | [모델] |
-   | N | `/sync "type(scope): message"` | pm | Medium | [모델] |
+   | N | `/sync "type(scope): message"` | automation-engineer | Medium | sonnet |
+   | N+1 | 반영 확인 — PR 주소, 브랜치, CI 상태, 커밋된 파일 목록 | pm | Medium | inherit ([모델]) |
 
 4. **사용자가 계획을 승인**(또는 수정을 요청)한 후에만 에이전트가 작업을 시작합니다.
 5. **전문가들이 단계별 범위의 작업을 수행**합니다 (어떤 요청에 어떤 전문가가 배정되는지는 아래 §2 참고).

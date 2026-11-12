@@ -9,10 +9,10 @@ description: >
   lookup, time-series data retrieval, terminology glossary, and metadata
   lookup. Requires ECOS_API_KEY environment variable; a public demo key
   (`sample`) works for smoke tests capped at 10 rows per request.
-version: 1.0.0
+version: 1.0.1
 last_reviewed: 2026-09-11
 status: active
-owner: financial-analyst
+owner: public-data-analyst
 prerequisites: ECOS_API_KEY environment variable (public demo key `sample` usable for ≤10-row queries)
 l2_propagate: true
 relates_to:

@@ -18,8 +18,18 @@
       "layer": "common"
     },
     {
+      "id": "automation-engineer",
+      "type": "agent",
+      "layer": "common"
+    },
+    {
       "id": "ci-triage",
       "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "contract-gate-engineer",
+      "type": "agent",
       "layer": "common"
     },
     {
@@ -35,6 +45,11 @@
     {
       "id": "design-foundation",
       "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "design-system-lead",
+      "type": "agent",
       "layer": "common"
     },
     {
@@ -158,6 +173,11 @@
       "layer": "common"
     },
     {
+      "id": "public-data-analyst",
+      "type": "agent",
+      "layer": "common"
+    },
+    {
       "id": "research-analysis",
       "type": "skill",
       "layer": "common"
@@ -254,8 +274,38 @@
     },
     {
       "type": "references",
+      "from": "automation-engineer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "automation-engineer",
+      "to": "sync",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "ci-triage",
+      "to": "automation-engineer",
+      "source": "required_skills"
+    },
+    {
+      "type": "references",
       "from": "ci-triage",
       "to": "project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "contract-gate-engineer",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "contract-gate-engineer",
+      "to": "zod-contract-gate",
       "source": "prose"
     },
     {
@@ -287,6 +337,12 @@
       "from": "design-foundation",
       "to": "accessibility-audit",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "design-foundation",
+      "to": "design-system-lead",
+      "source": "required_skills"
     },
     {
       "type": "composes_with",
@@ -324,6 +380,36 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "design-system-lead",
+      "to": "accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design-system-lead",
+      "to": "design-foundation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design-system-lead",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design-system-lead",
+      "to": "token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "design-system-lead",
+      "to": "ui-ux-design-intelligence",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "documentation-writing",
       "to": "team-builder",
@@ -340,6 +426,12 @@
       "from": "evidence-ledger",
       "to": "decision-record",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "gateguard",
+      "to": "automation-engineer",
+      "source": "required_skills"
     },
     {
       "type": "references",
@@ -545,6 +637,12 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "k-dart",
+      "to": "public-data-analyst",
+      "source": "required_skills"
+    },
+    {
       "type": "composes_with",
       "from": "k-ecos",
       "to": "k-dart",
@@ -597,6 +695,12 @@
       "from": "k-ecos",
       "to": "k-opendata",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "k-ecos",
+      "to": "public-data-analyst",
+      "source": "required_skills"
     },
     {
       "type": "composes_with",
@@ -644,6 +748,12 @@
         "field": "relates_to",
         "index": 2
       }
+    },
+    {
+      "type": "used_by",
+      "from": "k-kosis",
+      "to": "public-data-analyst",
+      "source": "required_skills"
     },
     {
       "type": "composes_with",
@@ -718,6 +828,12 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "k-krx",
+      "to": "public-data-analyst",
+      "source": "required_skills"
+    },
+    {
       "type": "relates_to",
       "from": "k-law",
       "to": "k-dart",
@@ -738,6 +854,12 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "used_by",
+      "from": "k-law",
+      "to": "public-data-analyst",
+      "source": "required_skills"
     },
     {
       "type": "references",
@@ -779,6 +901,12 @@
       "from": "k-opendata",
       "to": "k-law",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "k-opendata",
+      "to": "public-data-analyst",
+      "source": "required_skills"
     },
     {
       "type": "references",
@@ -823,6 +951,48 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "public-data-analyst",
+      "to": "k-dart",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "public-data-analyst",
+      "to": "k-ecos",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "public-data-analyst",
+      "to": "k-kosis",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "public-data-analyst",
+      "to": "k-krx",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "public-data-analyst",
+      "to": "k-law",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "public-data-analyst",
+      "to": "k-opendata",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "public-data-analyst",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
       "type": "enables",
       "from": "research-analysis",
       "to": "documentation-writing",
@@ -832,6 +1002,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "used_by",
+      "from": "script-lifecycle-manager",
+      "to": "automation-engineer",
+      "source": "required_skills"
     },
     {
       "type": "references",
@@ -903,6 +1079,12 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "sync",
+      "to": "automation-engineer",
+      "source": "required_skills"
+    },
+    {
       "type": "references",
       "from": "team-builder",
       "to": "agent-lifecycle-manager",
@@ -947,6 +1129,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "used_by",
+      "from": "zod-contract-gate",
+      "to": "contract-gate-engineer",
+      "source": "required_skills"
     }
   ]
 }

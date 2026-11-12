@@ -16,7 +16,7 @@ This document defines the workflow phases used by the `co-learning` variant. It 
 | 3 | Content Production | Coordinator | `exam-bank-steward`; `i18n-specialist` on demand |
 | 4 | Implementation & QA Gate | Coordinator | PM-dispatched implementation specialist; PM verifies |
 | 5 | Security Review & Lifecycle Finalization | Owner | PM (runs `security-scan` in the QA gate, updates governance records, logs decisions) |
-| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, `/sync`, creates PR) |
+| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, dispatches `/sync` to `automation-engineer`, verifies the landing) |
 
 ---
 
@@ -67,7 +67,7 @@ This document defines the workflow phases used by the `co-learning` variant. It 
 **PM owns**: finalizes the session.
 - PM runs `project-review` skill (use `baseline-only` mode for docs/link validation)
 - Maximum 2 fix iterations before escalating to user
-- PM runs `/sync` pipeline
+- PM dispatches the `/sync` pipeline to `automation-engineer` and verifies the landing (PR URL, CI state, committed files)
 - PR opened with English title and description
 - Memory log updated
 - **Output**: passing audit report, merged PR or open PR link
@@ -80,7 +80,7 @@ Per each agent's frontmatter `phases:` field in `templates/co-learning/agents/*.
 
 | Agent | Phases | Tier | Notes |
 |-------|--------|------|-------|
-| `pm` | 0-6 | — | Orchestration, QA gate, security-scan runs, `/sync` |
+| `pm` | 0-6 | — | Orchestration, QA gate, security-scan runs, `/sync` dispatch and landing verification |
 | `exam-bank-steward` | 4, 5 | Medium | Question-bank authoring/review, bias remediation, exam operations; human-reviewed via the remediation ledger |
 | `i18n-specialist` | 5 | Medium | Locale documentation and translation zones (common extends-stub; engaged on demand for locale deliverables) |
 | design / implementation / docs specialists | per §3.5 row | High / Low-Medium / Medium | Generic PM-dispatched specialists — no agent file in this variant; the §3.5 Deliverable-Type Gate names the slot and tier |

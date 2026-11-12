@@ -13,7 +13,7 @@ This document defines the workflow phases used by the `co-safety` variant. co-sa
 | 2 | Design Review & Approval | Gate Keeper | PM + domain specialist |
 | 3 | Execution | Router | Domain specialist(s) |
 | 5 | Lifecycle Finalization | Owner | PM (updates governance records, logs decisions) |
-| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, `/sync`, creates PR) |
+| 6 | Quality Assurance & Finalization | Owner | PM (runs audit scripts, dispatches `/sync` to `automation-engineer`, verifies the landing) |
 
 ---
 

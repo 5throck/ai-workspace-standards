@@ -8,7 +8,7 @@
 
 ## 1. Quick Start
 
-co-develop is driven entirely through the **PM Gateway pattern**: you talk to PM, PM plans, PM dispatches specialists, and PM finalizes with `/sync`.
+co-develop is driven entirely through the **PM Gateway pattern**: you talk to PM, PM plans, PM dispatches specialists, PM dispatches `/sync` to `automation-engineer`, and PM verifies the landing.
 
 1. **Describe your task in plain language** — "add a login endpoint", "fix the flaky test in checkout", "review this PR". Do not try to invoke a specialist agent directly; specialists refuse direct user requests and redirect you to PM.
 2. **PM classifies the task** (Phase Determination) and, for any multi-step task (2+ files or 2+ sequential steps), outputs an **execution plan table** before doing anything else:
@@ -16,12 +16,13 @@ co-develop is driven entirely through the **PM Gateway pattern**: you talk to PM
    | # | Task | Agent | Tier | Model |
    |---|------|-------|------|-------|
    | 1 | [task description] | [specialist] | High/Medium/Low | [model] |
-   | N | `/sync "type(scope): message"` | pm | Medium | [model] |
+   | N | `/sync "type(scope): message"` | automation-engineer | Medium | sonnet |
+   | N+1 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit ([model]) |
 
 3. **You approve the plan** (or ask for changes). PM never proceeds to specialist dispatch without this step for multi-agent work.
 4. **PM dispatches specialists** via the native `Agent` tool, one per row, respecting sequential vs. parallel execution order.
 5. **PM runs the QA gate** (`bun scripts/audit.ts`) and verifies acceptance criteria.
-6. **PM finalizes with `/sync "type(scope): message"`** — this single command runs the full pipeline: memory log → CHANGELOG entry → audit → commit → push → PR. You never run `git commit`/`git push` directly; the pre-commit hook blocks it outside `/sync`.
+6. **PM dispatches `/sync "type(scope): message"` to `automation-engineer`, then verifies the landing** — this single command runs the full pipeline: memory log → CHANGELOG entry → audit → commit → push → PR. You never run `git commit`/`git push` directly; the pre-commit hook blocks it outside `/sync`.
 
 **Rule of thumb**: if you find yourself about to ask an agent file (`agents/code-writer.md` etc.) to do something directly, stop — route it through PM instead.
 
@@ -42,7 +43,7 @@ Use this table to anticipate which agent/skill PM will likely dispatch. You don'
 | Test writing / QA gate / acceptance criteria check | `test-runner` | `test-driven-development` | Runs the test suite and audit script; reports pass/fail per acceptance criterion |
 | Security review, secret scanning, dependency advisories | `security-monitor` | — | Runs at Phase 0 (baseline scan) and Phase 5 (pre-PR advisory check) |
 | Architecture decision / trade-off evaluation | `architect` | — | Produces an implementation plan and ADR before any code is written |
-| Commit, push, open a PR | PM | `sync` | Always via `/sync "type(scope): message"` — never direct `git commit`/`git push` |
+| Commit, push, open a PR | `automation-engineer` (dispatched by PM) | `sync` | Always via `/sync "type(scope): message"` — never direct `git commit`/`git push` |
 | Add a changelog entry mid-session | PM | `changelog` | `/changelog "..."` before the final `/sync` |
 | Log a session note without a full sync | PM | `memlog` | `/memlog "summary"` |
 | Full multi-agent project review | PM | `project-review` | Auto-detects roster, dispatches all specialists in parallel, produces a prioritized Critical/High/Medium/Low plan |
@@ -61,7 +62,7 @@ co-develop follows a fixed **pipeline order**: `architect → designer → stack
 4. **Code-writer (Phase 4)** — implements strictly from the approved plan. Does not design, does not decide scope — surgical changes only.
 5. **Test-runner (Phase 4)** — runs `bun scripts/audit.ts` (documentation/lifecycle gate) plus the project's test command, then checks off each acceptance criterion individually. Reports a `READY FOR PR` or `BLOCKED` verdict. Maximum 3 QA iterations before escalating back to PM.
 6. **Security-monitor (Phase 0, Phase 5)** — runs a baseline scan early and a pre-PR advisory check late, particularly for anything touching auth, secrets, or infrastructure.
-7. **PM finalizes** — logs decisions to `memory/YYYY-MM-DD.md`, checks the Phase 5 lifecycle triggers (did an agent/skill/script change? did a variant status change?), and runs `/sync "type(scope): message"`.
+7. **PM finalizes** — logs decisions to `memory/YYYY-MM-DD.md`, checks the Phase 5 lifecycle triggers (did an agent/skill/script change? did a variant status change?), and dispatches `/sync "type(scope): message"` to `automation-engineer`, then verifies the landing.
 
 ### Key commands
 
@@ -89,7 +90,7 @@ co-develop uses the canonical linear, gated 7-phase model (see `AGENTS.md` §3.5
 | 3 | UI/UX Design | `designer` (optional) produces UI/UX specs, wireframes, and design tokens when in scope | — |
 | 4 | Implementation & QA Gate | Code Writer implements; Test Runner verifies; loop up to 3x on failures | Code review passed, tests green, no critical lint errors |
 | 5 | Security Review & Lifecycle Finalization | `security-monitor` runs the pre-PR advisory check; PM logs decisions and updates governance records | Security advisory check clear for auth/secrets/infra changes, governance records updated |
-| 6 | Quality Assurance & Finalization | PM runs the audit, `/sync`, opens PR; deployment verified; documentation updated | Deployment verified, documentation updated, retrospective completed |
+| 6 | Quality Assurance & Finalization | PM runs the audit, dispatches `/sync` to `automation-engineer`, verifies the PR landing; deployment verified; documentation updated | Deployment verified, documentation updated, retrospective completed |
 
 **Tier ceiling rule**: an agent's tier can be downgraded for simple tasks but never upgraded above its defined baseline (architect: High, designer/security-monitor/test-runner: Medium, code-writer/stack-setup: Low).
 

@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: 5263f77b8b2a0c228fbee683f57ac5417871a5b2f6caa209cacfba5386049ae1
+translated_from_hash: 958af20f78a40f9abcbdd1593c774a8dd7088bc4e86332db86a71af29e3d28cd
 ---
 # co-game 사용자 가이드
 
@@ -27,7 +27,8 @@ co-game은 워크스페이스 전체의 **PM 게이트웨이** 패턴을 따릅�
    | 5 | 캔버스 엔진 + 게임플레이 구현 | `game-developer` | Medium | sonnet |
    | 6 | 버그 분석 / 수정 검증 | `game-debugger` | Medium | sonnet |
    | 7 | 테스트 작성 + QA 게이트 | `test-runner` | Medium | sonnet |
-   | 8 | `/sync "feat(...): ..."` — 라이프사이클 + 감사 + 커밋 + 푸시 + PR | pm | Medium | sonnet |
+   | 8 | `/sync "feat(...): ..."` — 라이프사이클 + 감사 + 커밋 + 푸시 + PR | automation-engineer | Medium | sonnet |
+   | 9 | 반영 확인 — PR 주소, 브랜치, CI 상태, 커밋된 파일 목록 | pm | Medium | inherit (sonnet) |
 
 3. **사용자가 계획을 승인**해야(또는 수정을 요청해야) 전문 에이전트가 디스패치됩니다.
 4. **전문 에이전트가 표시된 순서대로 실행**합니다 — 디자인 단계(1-2)는 항상 구현(Phase 4)보다 먼저 진행됩니다.
@@ -121,7 +122,7 @@ co-game은 워크스페이스의 6단계 모델을 재사용하며 ([AGENTS.md �
 | **2** | 분석 / 설계 검증 | PM이 결과를 종합해 요구사항 + 수락 기준으로 정리; **사용자 승인 게이트** |
 | **3** | 설계 핸드오프 | `game-designer`가 범용 명세를, 장르 디자이너가 장르별 명세를 작성; `visual-artist` + `sound-designer`가 에셋 명세 작성 |
 | **4** | 구현 | `game-developer` → `test-runner` → `game-debugger` 실행 루프 (실패 시 최대 3회 반복) |
-| **5** | 마무리 | PM이 `memory/YYYY-MM-DD.md`에 결정 사항을 기록; `/sync` 실행; PR 오픈 |
+| **5** | 마무리 | PM이 `memory/YYYY-MM-DD.md`에 결정 사항을 기록; `automation-engineer`에 `/sync` 배치; PR 반영 확인 |
 
 **베타 변형 상태**: co-game은 현재 **베타** 변형(v0.1.0)이며, 정식(stable) 승격 전에 3건의 고객 참여와 3개월의 베타 기간이 필요합니다. 정확한 승격 기준은 `scripts/helpers/variant-governance-rules.ts`를 참고하세요.
 

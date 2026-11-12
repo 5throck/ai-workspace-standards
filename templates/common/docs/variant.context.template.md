@@ -119,7 +119,7 @@ Edit code
 | 2 | Analysis | PM synthesizes findings into requirements + acceptance criteria |
 | 3 | Design | Architect produces implementation plan + ADR |
 | 4 | Implementation | Code Writer — Test Runner — loop up to 3× on failures |
-| 5 | Finalization | PM logs decisions; runs `/sync`; opens PR |
+| 5 | Finalization | PM logs decisions; dispatches `/sync` to `automation-engineer`; verifies the PR landing |
 <!-- END VARIANT-INJECT -->
 
 ---

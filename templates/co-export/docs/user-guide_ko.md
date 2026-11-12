@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: ef35c5cf332d0eb361c578a9d10dc32e64c4712afc57c901dd7086ff850b815d
+translated_from_hash: 180a41c6975587501a19829e92b35ec2392625f3c1977ce4844db522b17065d6
 ---
 # Co-Export 사용자 가이드
 
@@ -96,7 +96,7 @@ PM 워크플로우를 우회해 전문가에게 직접 요청하지 말고, 원�
 | 2 — 컴플라이언스 종합 게이트 | pm → **사용자** | 결과 종합; 실행 전 승인 필수 |
 | 3 — 실행 | market-entry-strategist, trade-documentation-specialist, customs-duty-drawback-specialist | 전략 문서, 무역 서류, 환급 평가 (환급은 Phase 1-2의 확정 HS 코드 필요) |
 | 4 — 물류 | logistics-coordinator | 인도 / 핸드오프 조율 |
-| 5-6 — 마무리 | pm | 감사 → `/sync` → PR |
+| 5-6 — 마무리 | pm | 감사 → `/sync`(`automation-engineer`에 배치) → 반영 확인 → PR |
 
 읽기(리서치, 규제 스캔)는 병렬 실행, **쓰기는 순차 처리** — 특정 파일에는 한 번에
 한 에이전트만 기록하며 PM이 조율합니다.

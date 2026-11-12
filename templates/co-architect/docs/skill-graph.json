@@ -23,11 +23,6 @@
       "layer": "variant:co-architect"
     },
     {
-      "id": "automation-engineer",
-      "type": "agent",
-      "layer": "variant:co-architect"
-    },
-    {
       "id": "bylaw-expert",
       "type": "agent",
       "layer": "variant:co-architect"
@@ -284,12 +279,6 @@
     {
       "type": "references",
       "from": "architect",
-      "to": "meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "automation-engineer",
       "to": "meeting-facilitation",
       "source": "prose"
     },

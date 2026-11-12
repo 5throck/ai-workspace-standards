@@ -56,7 +56,6 @@ This directory contains agent definition files for the co-architect multi-agent 
 | Agent | File | Role |
 |-------|------|------|
 | Architect | `architect.md` | Team lead; design docs and implementation plans for the MCP server / CAD-automation backend |
-| Automation Engineer | `automation-engineer.md` | Implements approved plans — MCP tools, Python data models, COM handlers, unit tests |
 
 ## Creating New Agents
 

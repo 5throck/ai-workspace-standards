@@ -14,7 +14,8 @@ co-deck follows the workspace's **PM Gateway** pattern: you never talk to a spec
    | # | Task | Agent | Tier | Model |
    |---|------|-------|------|-------|
    | 1 | [task] | [specialist] | High/Medium/Low | [model] |
-   | N | `/sync "type(scope): message"` | pm | Medium | [model] |
+   | N | `/sync "type(scope): message"` | automation-engineer | Medium | sonnet |
+   | N+1 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit ([model]) |
 
 3. **PM dispatches specialists** via the `Agent` tool, one stage at a time (writes are serial; read-only research/analysis can run in parallel — e.g. `image-curator` and `diagram-specialist` at Stage 3.5).
 4. **You approve at mandatory gates** (Gate 2 — content ready; Gate 5 — sample PDF ready). Optional gates (1.5, 3, 4) are reviewed and auto-advanced.

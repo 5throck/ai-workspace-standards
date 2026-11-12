@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: ee87788f0518148a13c85211e8912bf1ad1173d7b2881ed835b0cea46d9d42c6
+translated_from_hash: ffd0670b6167083078ce1823a678dfa5f453a12c34620adae31c43078251a6f5
 ---
 # Co-Design 사용자 가이드
 
@@ -20,7 +20,8 @@ translated_from_hash: ee87788f0518148a13c85211e8912bf1ad1173d7b2881ed835b0cea46d
    |---|------|-------|------|-------|
    | 1 | 온보딩 여정 매핑 | `service-designer` | Medium | sonnet |
    | 2 | 디자인 토큰 정의 | `design-lead` | High | opus |
-   | N | `/sync "feat: onboarding journey + tokens"` | pm | Medium | sonnet |
+   | N | `/sync "feat: onboarding journey + tokens"` | automation-engineer | Medium | sonnet |
+   | N+1 | 반영 확인 — PR 주소, 브랜치, CI 상태, 커밋된 파일 목록 | pm | Medium | inherit (sonnet) |
 
    계획을 검토한 후 작업이 시작되기 전에 승인하세요.
 3. **전문가들이 작업을 실행합니다.** 일상적인 단계에서는 (예: `design-lead` → `visual-designer`) PM을 매번 거치지 않고 서로 직접 핸드오프합니다.
@@ -112,7 +113,7 @@ Phase 6 — 품질 보증 및 최종화     (PM)
 | 3 | 디자인 시스템 및 실행 | 승인된 방향에 따른 고해상도 디자인, 사양, 타입 시스템 | `design-lead`, `visual-designer`, `service-designer`, `typography-expert` |
 | 4 | 프로토타이핑 및 핸드오프 | 인터랙티브 프로토타입, 인터랙션 사양, 개발자 핸드오프 문서 | `prototype-engineer` (선택 지원: `i18n-specialist`) |
 | 5 | 라이프사이클 최종화 | 거버넌스 레코드 갱신, 결정 기록 | PM |
-| 6 | 품질 보증 및 최종화 | 감사 게이트, `/sync`, PR | PM |
+| 6 | 품질 보증 및 최종화 | 감사 게이트, `/sync`(`automation-engineer`에 배치), 반영 확인, PR | PM |
 
 > 전체 단계 정의는 [docs/phase-definitions.md](phase-definitions.md)에 있습니다. 프로젝트별 디자인 스택 및 워크플로 커스터마이징은 [docs/co-design.context.md](co-design.context.md)에 있습니다.
 

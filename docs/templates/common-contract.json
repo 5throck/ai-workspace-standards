@@ -13,7 +13,7 @@
   "common_agents": {
     "pm": {
       "source": "agents/pm.md",
-      "version": "1.4.3",
+      "version": "1.4.4",
       "overridable": true,
       "override_type_allowed": [
         "additive",
@@ -43,6 +43,46 @@
         "replacement"
       ],
       "description": "I18N Specialist — locale configuration, locale-specific formatting, and text layout routing (constitution §4.4 i18n asset suite); jurisdictional workflows stay with domain experts"
+    },
+    "automation-engineer": {
+      "source": "agents/automation-engineer.md",
+      "version": "1.1.0",
+      "overridable": true,
+      "override_type_allowed": [
+        "additive",
+        "replacement"
+      ],
+      "description": "Automation Engineer — owns the /sync row, repository automation, and platform-layer implementation; Medium tier (design 2026-11-12-sync-ownership-and-common-automation-engineer)"
+    },
+    "public-data-analyst": {
+      "source": "agents/public-data-analyst.md",
+      "version": "1.0.0",
+      "overridable": true,
+      "override_type_allowed": [
+        "additive",
+        "replacement"
+      ],
+      "description": "Public Data Analyst — Korean public-data gateway skills (k-ecos, k-kosis, k-krx, k-dart, k-law, k-opendata); Korea-scoped"
+    },
+    "design-system-lead": {
+      "source": "agents/design-system-lead.md",
+      "version": "1.0.0",
+      "overridable": true,
+      "override_type_allowed": [
+        "additive",
+        "replacement"
+      ],
+      "description": "Design System Lead — owns design-foundation (style-neutral design principles and token architecture)"
+    },
+    "contract-gate-engineer": {
+      "source": "agents/contract-gate-engineer.md",
+      "version": "1.0.0",
+      "overridable": true,
+      "override_type_allowed": [
+        "additive",
+        "replacement"
+      ],
+      "description": "Contract Gate Engineer — owns zod-contract-gate (runtime schema contracts at interface boundaries)"
     }
   },
   "common_skills": {
@@ -114,19 +154,19 @@
     },
     "i18n-locale-config": {
       "source": "skills/i18n-locale-config/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "overridable": false,
       "description": "BCP 47 locale IDs, language-vs-country doctrine, per-language collation, timezone handling, region/language matrix (constitution §4.4)"
     },
     "i18n-formatting": {
       "source": "skills/i18n-formatting/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "overridable": false,
       "description": "Per-locale date/time, number, currency, unit formatting; Korean-scale numerals; print paper sizes (constitution §4.4)"
     },
     "i18n-layout": {
       "source": "skills/i18n-layout/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "overridable": false,
       "description": "Character encoding (UTF-8/CP949/BOM), RTL/bidi, script-specific fonts, hwp pointers (constitution §4.4)"
     },
@@ -210,7 +250,7 @@
     },
     "i18n-audit": {
       "source": "skills/i18n-audit/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "overridable": false,
       "description": "Locale parity and glossary audit: translation-key parity across locale files, glossary adherence, drift reporting"
     },
@@ -394,7 +434,7 @@
       "gemini_source": ".gemini/skills/i18n-audit/SKILL.md",
       "agents_source": ".agents/skills/i18n-audit/SKILL.md",
       "codex_source": ".codex/skills/i18n-audit/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Locale parity and glossary audit — master-locale translation-key parity, glossary adherence, drift reporting, parity certificate on success",
       "propagated_to_common": true
     },
@@ -403,7 +443,7 @@
       "gemini_source": ".gemini/skills/i18n-formatting/SKILL.md",
       "agents_source": ".agents/skills/i18n-formatting/SKILL.md",
       "codex_source": ".codex/skills/i18n-formatting/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Locale-specific formatting rules — date/time, number and currency, units, Korean-scale numerals, print paper sizes",
       "propagated_to_common": true
     },
@@ -412,7 +452,7 @@
       "gemini_source": ".gemini/skills/i18n-layout/SKILL.md",
       "agents_source": ".agents/skills/i18n-layout/SKILL.md",
       "codex_source": ".codex/skills/i18n-layout/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "Text layout and encoding guidance — UTF-8/legacy code pages, BOM hazards, line endings, RTL/bidi, script-specific font selection (Hangul focus)",
       "propagated_to_common": true
     },
@@ -421,7 +461,7 @@
       "gemini_source": ".gemini/skills/i18n-locale-config/SKILL.md",
       "agents_source": ".agents/skills/i18n-locale-config/SKILL.md",
       "codex_source": ".codex/skills/i18n-locale-config/SKILL.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Locale identification and configuration — BCP 47 structure, language-vs-country doctrine, collation order, timezone handling, region/language matrix",
       "propagated_to_common": true
     },

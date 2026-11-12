@@ -104,7 +104,7 @@ Canonical 7-phase model (see `docs/phase-definitions.md`):
 | 3 | UI/UX Design | `designer` (optional) produces wireframes, component specs, and design tokens when a UI/UX component is in scope |
 | 4 | Implementation & QA Gate | Code Writer → Test Runner — loop up to 3× on failures |
 | 5 | Security Review & Lifecycle Finalization | `security-monitor` runs the pre-PR advisory check; PM logs decisions and updates governance records |
-| 6 | Quality Assurance & Finalization | PM runs the audit and `/sync`; opens PR |
+| 6 | Quality Assurance & Finalization | PM runs the audit, dispatches `/sync` to `automation-engineer`, and verifies the PR landing |
 
 ---
 
@@ -218,4 +218,4 @@ Key rules:
 
 ---
 
-*co-develop.context.md version: 1.2 — Per-Role Deliverable Artifacts chain + [DEVELOP-R2] added (2026-08-25); previous: 1.1 normalized to canonical template structure*
+*co-develop.context.md version: 1.3 — Phase 6 finalization wording: `/sync` is dispatched to `automation-engineer`; previous: 1.2 — Per-Role Deliverable Artifacts chain + [DEVELOP-R2] added (2026-08-25); previous: 1.1 normalized to canonical template structure*

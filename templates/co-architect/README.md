@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: f89ae1100ff819cfa8b11f913413187771aff14e22ffb85810480c0b6a513839
+content_hash: 9e5ae9590223490c56f46640737ca7b4a8df793fa77496f41abf09334ab8e5a4
 ---
 
 # co-architect
@@ -40,7 +40,6 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 | **pm** | Project Manager (PM) — cross-team orchestrator; routes to Design / Research / Project / Engineering team leads at Phase 0 | medium | inherit |
 | **technical-writer** | Technical writer - creates API documentation, technical guides, and developer re | medium | inherit |
 | **design-lead** | Design system architect - defines visual language, design tokens, and component  | high | inherit |
-| **automation-engineer** | Implements approved technical plans for co-architect's software/platform layer — | medium | inherit |
 | **zwcad-drafter** | ZWCAD technical drawing specialist | medium | inherit |
 | **content-writer** | Content writer - transforms research into clear, accessible documentation and co | medium | inherit |
 | **architect** | Produces implementation plans and design docs for co-architect's software/platfo | high | inherit |

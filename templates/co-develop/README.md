@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: e58a04a72c3426cfbc1086a81f4ee6e820a21723843ddc7f4abca59af4ea58b9
+content_hash: 8e281fc6b732a68efbbac04740987f3124b39ff17605a072870a61273f9ad164
 ---
 
 # co-develop
@@ -70,7 +70,7 @@ The canonical 7-phase model (see `docs/phase-definitions.md`):
 3. **UI/UX Design:** `designer` (optional) produces wireframes, component specs, and design tokens when a UI/UX component is in scope.
 4. **Implementation & QA Gate:** `code-writer` implements; `test-runner` verifies; the PM loops up to 3× on failures.
 5. **Security Review & Lifecycle Finalization:** `security-monitor` runs the pre-PR advisory check; the PM logs decisions and updates governance records.
-6. **Quality Assurance & Finalization:** The PM runs the audit, `/sync`, and opens a PR.
+6. **Quality Assurance & Finalization:** The PM runs the audit, dispatches `/sync` to `automation-engineer`, and verifies the PR landing.
 
 ### C. Available Commands
 
@@ -89,4 +89,4 @@ This variant focuses on software development workflows, feature implementation, 
 
 ---
 
-*Last Updated: 2026-10-06*
+*Last Updated: 2026-11-12*

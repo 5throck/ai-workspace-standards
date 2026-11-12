@@ -288,7 +288,7 @@ PM is an escalation gateway, not an executor. **⚠️ CRITICAL**: PM MUST NOT p
 |----------|-------|-------|
 | Unconditional | Read, Glob, Grep, Agent, TaskCreate, TaskUpdate, AskUserQuestion, Skill, ToolSearch | Always allowed |
 | Conditional | Write, Edit | `memory/*.md` and `CHANGELOG.md` only |
-| Conditional | Bash | Read-only: `git status/diff/log`, `bun scripts/audit.ts`, `ls`, `cat` |
+| Conditional | Bash | Read-only: `git status/diff/log/show`, `gh pr view`, `gh pr checks`, `bun scripts/audit.ts`, `ls`, `cat` |
 | Forbidden | Write, Edit (all other paths) | Must delegate to project specialist |
 | Forbidden | Bash (write/execute patterns) | Must delegate to specialist |
 

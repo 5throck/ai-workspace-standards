@@ -15,7 +15,8 @@
    |---|------|-------|------|-------|
    | 1 | Map onboarding journey | `service-designer` | Medium | sonnet |
    | 2 | Define design tokens | `design-lead` | High | opus |
-   | N | `/sync "feat: onboarding journey + tokens"` | pm | Medium | sonnet |
+   | N | `/sync "feat: onboarding journey + tokens"` | automation-engineer | Medium | sonnet |
+   | N+1 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit (sonnet) |
 
    Review the plan, then approve it before work begins.
 3. **Specialists execute**, handing off to each other directly for routine steps (e.g. `design-lead` → `visual-designer`) without re-routing through the PM every time.
@@ -107,7 +108,7 @@ Phase 6 — Quality Assurance & Finalization     (PM)
 | 3 | Design System & Execution | High-fidelity designs, specifications, type system per approved direction | `design-lead`, `visual-designer`, `service-designer`, `typography-expert` |
 | 4 | Prototyping & Handoff | Interactive prototypes, interaction specs, developer handoff docs | `prototype-engineer` (optional support: `i18n-specialist`) |
 | 5 | Lifecycle Finalization | Governance records updated, decisions logged | PM |
-| 6 | Quality Assurance & Finalization | Audit gate, `/sync`, PR | PM |
+| 6 | Quality Assurance & Finalization | Audit gate, `/sync` (dispatched to `automation-engineer`), landing check, PR | PM |
 
 > Full phase definitions live in [docs/phase-definitions.md](phase-definitions.md); project-specific customization of the design stack and workflow lives in [docs/co-design.context.md](co-design.context.md).
 

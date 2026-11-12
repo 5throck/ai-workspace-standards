@@ -148,7 +148,7 @@ Engagement Leader
 | 3 | Content Creation | Communications Lead drafts client deliverables; Solutions Architect designs technical solutions (parallel) | Communications Lead, Solutions Architect |
 | 4 | Coordination & Delivery | Delivery Manager coordinates stakeholder reviews and delivery; Technology Specialist implements collaboration-platform workflows | Delivery Manager, Technology Specialist |
 | 5 | Lifecycle Finalization | PM updates governance records for changed artifacts and logs decisions to `memory/` | Engagement Leader (PM) |
-| 6 | Quality Assurance & Finalization | PM runs audit scripts, runs `/sync`, opens the PR, and delivers final output to client | Engagement Leader (PM) |
+| 6 | Quality Assurance & Finalization | PM runs audit scripts, dispatches `/sync` to `automation-engineer` (which opens the PR), verifies the landing, and delivers final output to client | Engagement Leader (PM) |
 
 ---
 
@@ -276,7 +276,7 @@ PM owns the composition of this project's agent team and rules on skill changes.
 
 ---
 
-*co-consult.context.md version: 2.6 — portfolio/backtest analytics recorded out-of-domain (Domain Rule 11)*
+*co-consult.context.md version: 2.7 — Phase 6 finalization wording: `/sync` is dispatched to `automation-engineer`, PM verifies the landing; previous: 2.6 — portfolio/backtest analytics recorded out-of-domain (Domain Rule 11)*
 
 ## Template Provenance
 
