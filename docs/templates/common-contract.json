@@ -214,7 +214,7 @@
     },
     "zod-contract-gate": {
       "source": "skills/zod-contract-gate/SKILL.md",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "overridable": false,
       "description": "Zod runtime schema validation patterns and contract safety rules"
     },

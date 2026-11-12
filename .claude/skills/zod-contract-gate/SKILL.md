@@ -4,12 +4,12 @@ description: >
   Defines Zod runtime schema validation patterns, interface boundaries,
   and contract safety rules for multi-agent architecture, IPC channels,
   and API endpoints.
-version: 1.0.2
-last_reviewed: 2026-11-08
+version: 1.0.3
+last_reviewed: 2026-11-12
 status: active
 scope: common
 l2_propagate: true
-owner: architect
+owner: contract-gate-engineer
 prerequisites: Bun runtime, Zod library (^3.25 || ^4.0)
 metadata:
   type: contract-safety
