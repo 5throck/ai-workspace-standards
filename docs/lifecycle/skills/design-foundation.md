@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: design-foundation
 - **Status**: active
-- **Version**: 1.1.0
+- **Version**: 1.1.1
 - **Created**: 2026-08-30
-- **Last Updated**: 2026-09-26
+- **Last Updated**: 2026-11-12
 
 ## Description
 Style-neutral procedure for deriving a project's own design system: domain evidence → design
@@ -17,6 +17,7 @@ Projects/co-price (Onyx 2.0) and Projects/co-newbiz (Onyx 3.0) without prescribi
 
 ## Changelog
 - 2026-08-30: 1.0.0 — created (spec: docs/designs/2026-08-30-design-foundation-design.md)
+- 2026-11-12: 1.1.1 — owner retargeted architect -> design-system-lead (common agent) so the owner resolves in every project (CA-3; design 2026-11-12-common-agents-for-common-skills D2). Metadata-only.
 - 2026-09-26: 1.1.0 — component inventory scaffold (`components.template.md`), inert icon
   tokens + icon vocabulary requirement, font fallback token contract, pattern field
   contract, §8 pointer genericization (spec: docs/designs/2026-09-26-design-foundation-v1.2-design.md)
@@ -31,6 +32,7 @@ Projects/co-price (Onyx 2.0) and Projects/co-newbiz (Onyx 3.0) without prescribi
 |------|------|-----|---------|----------|
 | 2026-08-30 | - | active | Initial release with Design Foundation framework | pm |
 | 2026-09-26 | 1.0.0 | 1.1.0 | v1.2 spec wave — coverage gaps closed | PM (user-approved execution plan) |
+| 2026-11-12 | 1.1.0 | 1.1.1 | Owner retarget to common agent design-system-lead (CA-3) | pm |
 
 ## Acceptance Criteria
 
@@ -43,5 +45,5 @@ Projects/co-price (Onyx 2.0) and Projects/co-newbiz (Onyx 3.0) without prescribi
 - [x] Triggers avoid co-design `ui-ux-design-intelligence` overlap ("design system" excluded)
 
 ## Notes
-- Owner: architect
+- Owner: design-system-lead
 - Follow-up backlog: automated design-lint implementation; co-design `tokens.json` flat → 3-layer migration

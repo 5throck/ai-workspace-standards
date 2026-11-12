@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-12T05:54:14.712Z
+**Generated**: 2026-11-12T06:21:27.690Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -46,7 +46,7 @@
 | decision-record | 1.1.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
 | decision-write-integrity | 1.0.0 | active | skills/decision-write-integrity/SKILL.md | workspace | decision write integrity, gate integrity, approval gate, hard block, maker checker, countersign, snapshot hash, decision audit | pm |
 | delegate-to-hub | 1.0.1 | active | skills/delegate-to-hub/SKILL.md | workspace | delegate to hub, delegation ticket, hub delegation, escalate to hub, file delegation | pm |
-| design-foundation | 1.1.0 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | architect |
+| design-foundation | 1.1.1 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | design-system-lead |
 | design-token-adoption | 1.0.0 | active | skills/design-token-adoption/SKILL.md | workspace | token retrofit, design token adoption, allowlist reduction, adopt design tokens in existing UI, brownfield design tokens | pm |
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
 | evidence-ledger | 1.1.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
@@ -85,7 +85,7 @@
 | skill-lifecycle-manager | 1.5.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.1.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
-| sync | 1.9.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | pm |
+| sync | 1.9.1 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | automation-engineer |
 | team-builder | 1.2.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |
@@ -108,7 +108,7 @@
 | adopt-project.ts | 1.6.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
 | agent-create.ts | 1.0.1 | scripts/agent-create.ts | fs, path |
 | agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | fs, path |
-| agent-lifecycle-audit.ts | 1.9.0 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
+| agent-lifecycle-audit.ts | 1.9.1 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
 | agent-list.ts | 1.1.0 | scripts/agent-list.ts | fs, path |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |

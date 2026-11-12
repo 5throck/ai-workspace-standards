@@ -27,11 +27,11 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `security-scan` | 1.3.0 | active | pm | 2026-11-04 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `skill-lifecycle-manager` | 1.5.0 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
-| `sync` | 1.9.0 | active | pm | 2026-11-07 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
+| `sync` | 1.9.1 | active | automation-engineer | 2026-11-12 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
 | `team-builder` | 1.2.0 | active | pm | 2026-11-08 | — | — |
 | `translate` | 1.0.3 | active | pm | 2026-11-08 | — | — |
 | `explain-me` | 1.0.0 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |
-| `design-foundation` | 1.1.0 | active | architect | 2026-09-26 | — | Style-neutral design system derivation framework: principles, decision record, 3-layer token architecture ([data-theme] theming). Spec: templates/common/docs/design-foundation.md |
+| `design-foundation` | 1.1.1 | active | design-system-lead | 2026-11-12 | — | Style-neutral design system derivation framework: principles, decision record, 3-layer token architecture ([data-theme] theming). Spec: templates/common/docs/design-foundation.md |
 | `zod-contract-gate` | 1.0.2 | active | architect | 2026-11-08 | — | Defines Zod runtime schema validation patterns and contract safety rules |
 | `standup-synthesizer` | 1.1.0 | active | pm | 2026-11-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
 | `api-documentation` | 1.0.2 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |

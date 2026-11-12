@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.10.0
+ * @version 1.10.1
+ * v1.10.1 (2026-11-12, CA-3+AE-3): pruneRegionNeutral also models the country-scoped common agent prune
+ *          (COUNTRY_SCOPED_AGENTS: public-data-analyst agent file and lifecycle record) so the derived
+ *          delivery matches a region-neutral scaffold after prune-country-scoped-assets.ts v0.5.0; the two
+ *          now-dead reviewed-gap entries for that agent and record are removed.
  * v1.10.0 (2026-11-12, CA-2+AE-2): reviewed delivery-gap entries for the four new common agents
  *          (automation-engineer, public-data-analyst, design-system-lead, contract-gate-engineer) and
  *          their lifecycle records — same class as agents/i18n-specialist.md (stub-generated for L3
@@ -111,6 +115,7 @@ import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import { includeScriptInL3, parseScriptLayers } from "./layer-filter.ts";
 import { PLATFORM_SKILL_BASES } from "../lib/platforms.ts";
+import { COUNTRY_SCOPED_AGENTS, agentPrunePaths } from "../lib/country-scoped-agents.ts";
 
 // ============================================================================
 // 1. Scaffold marker constants (T-20260915-002 / C3)
@@ -399,11 +404,6 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
       "common agent (CA-2+AE-2, designs 2026-11-12-common-agents-for-common-skills / 2026-11-12-sync-ownership-and-common-automation-engineer): agents/ is stub-generated for L3 drafts (dedicated step); the agent reaches real projects via the common copy at new-project instantiation",
   },
   {
-    path: "agents/public-data-analyst.md",
-    reason:
-      "common agent (CA-2+AE-2, designs 2026-11-12-common-agents-for-common-skills / 2026-11-12-sync-ownership-and-common-automation-engineer): agents/ is stub-generated for L3 drafts (dedicated step); the agent reaches real projects via the common copy at new-project instantiation",
-  },
-  {
     path: "agents/design-system-lead.md",
     reason:
       "common agent (CA-2+AE-2, designs 2026-11-12-common-agents-for-common-skills / 2026-11-12-sync-ownership-and-common-automation-engineer): agents/ is stub-generated for L3 drafts (dedicated step); the agent reaches real projects via the common copy at new-project instantiation",
@@ -415,11 +415,6 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
   },
   {
     path: "docs/lifecycle/agents/automation-engineer.md",
-    reason:
-      "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the common agent's record reaches real projects via the common copy at new-project instantiation (H13 reviewed gap)",
-  },
-  {
-    path: "docs/lifecycle/agents/public-data-analyst.md",
     reason:
       "L3 delivers only its own docs/lifecycle/agents/pm.md governance record; the common agent's record reaches real projects via the common copy at new-project instantiation (H13 reviewed gap)",
   },
@@ -604,6 +599,10 @@ function pruneRegionNeutral(rels: Set<string>, workspaceRoot: string): void {
     for (const dir of pruneDirs) {
       if (rel.startsWith(`${dir}/`)) rels.delete(rel);
     }
+  }
+  // Country-scoped common agents (region-neutral scaffolds drop them; lib/country-scoped-agents.ts).
+  for (const name of Object.keys(COUNTRY_SCOPED_AGENTS)) {
+    for (const rel of agentPrunePaths(name)) rels.delete(rel);
   }
 }
 

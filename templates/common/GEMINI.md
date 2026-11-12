@@ -106,7 +106,8 @@ When entering Planning Mode, Gemini **MUST** leverage the following three precis
     | Step | Task | Agent | Tier | Model |
     |:---:|---|:---:|:---:|---|
     | 1 | [Task Description] | [agent-name] | [High/Medium/Low] | [Model String] |
-    | N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | pm | Medium | [Model String] |
+    | N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | automation-engineer | Medium | [Model String] |
+    | N+1 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit ([session model]) |
 
     *Execution Order: [Parallel/Sequential]*
     ```
@@ -373,7 +374,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-11-01 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-11-12 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 <!-- trail:start -->
 ## Trail — repo context graph

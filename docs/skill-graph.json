@@ -8494,8 +8494,8 @@
       "name": "sync",
       "scope": "common",
       "capability": "sync",
-      "content_hash": "a0e1df01c91ed3ae",
-      "version": "1.9.0",
+      "content_hash": "e2acf3d04016e92d",
+      "version": "1.9.1",
       "mirrors": [
         "templates/common/skills/sync/SKILL.md"
       ],
@@ -8692,8 +8692,8 @@
       "name": "design-foundation",
       "scope": "root",
       "capability": "design-foundation",
-      "content_hash": "0f50cf02ea552572",
-      "version": "1.1.0",
+      "content_hash": "74fdd004a399497b",
+      "version": "1.1.1",
       "mirrors": [
         "skills/design-foundation/SKILL.md",
         "templates/common/skills/design-foundation/SKILL.md",
@@ -9176,8 +9176,8 @@
       "name": "sync",
       "scope": "root",
       "capability": "sync",
-      "content_hash": "e760363f744ceb2e",
-      "version": "1.9.0",
+      "content_hash": "006873a2e0886f71",
+      "version": "1.9.1",
       "mirrors": [
         "skills/sync/SKILL.md",
         ".claude/skills/sync/SKILL.md",

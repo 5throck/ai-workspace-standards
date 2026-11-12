@@ -1,5 +1,11 @@
 #!/usr/bin/env bun
-// @version 0.4.0
+// @version 0.5.0
+// v0.5.0 (2026-11-12, CA-3+AE-3, design 2026-11-12-common-agents-for-common-skills Q4):
+//         new category "agents" (registry constant COUNTRY_SCOPED_AGENTS in ../lib/country-scoped-agents.ts; the workspace-schema pair is not touched) — prunes a
+//         country-scoped common agent (public-data-analyst, KR) and its Claude mirror,
+//         lifecycle record and AGENTS.md roster row from non-matching scaffolds, because
+//         its owned k-* skills are pruned there and the agent would own zero skills.
+//         Planning logic is pure in ../lib/country-scoped-agents.ts.
 // v0.4.0 (2026-10-05, spec docs/designs/2026-10-05-country-prune-context-scrub-design.md):
 //         the context-doc reference scrub now matches every reference shape the
 //         variant context docs use — inline-code names (`k-dart`), bold table
@@ -57,6 +63,12 @@ import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { pruneCountryScopedEnvBlocks } from "../lib/env-sample.ts";
 import { PLATFORM_SKILL_BASES } from "../lib/platforms.ts";
+import {
+  COUNTRY_SCOPED_AGENTS,
+  agentPrunePaths,
+  agentsToPrune,
+  scrubAgentReferenceLines,
+} from "../lib/country-scoped-agents.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -265,6 +277,30 @@ for (const [scriptName, scopedCountry] of Object.entries(registry.scripts)) {
 // Prune variant asset directories
 for (const [dirRelPath, scopedCountry] of Object.entries(registry.dirs)) {
   pruneDir(dirRelPath, scopedCountry);
+}
+
+// Prune country-scoped common agents (design Q4) — files first, roster rows scrubbed below
+const prunedAgentNames: string[] = [];
+for (const { name, scopedCountry } of agentsToPrune(COUNTRY_SCOPED_AGENTS, countryArg)) {
+  let removed = false;
+  for (const rel of agentPrunePaths(name)) {
+    if (safeRemove(join(targetDir, rel))) removed = true;
+  }
+  if (removed) {
+    console.log(`Pruned ${scopedCountry}-scoped agent: ${name}`);
+    prunedAgentNames.push(name);
+    prunedCount++;
+  }
+}
+{
+  const agentsMd = join(targetDir, "AGENTS.md");
+  if (prunedAgentNames.length > 0 && existsSync(agentsMd)) {
+    const { output, removed } = scrubAgentReferenceLines(readFileSync(agentsMd, "utf-8"), prunedAgentNames);
+    if (removed > 0) {
+      writeFileSync(agentsMd, output, "utf-8");
+      prunedCount += removed;
+    }
+  }
 }
 
 // Prune env marker blocks
