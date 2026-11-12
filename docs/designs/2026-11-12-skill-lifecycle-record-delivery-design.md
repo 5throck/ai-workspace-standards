@@ -2,7 +2,7 @@
 
 - **Spec ID**: `2026-11-12-skill-lifecycle-record-delivery-design`
 - **Date**: 2026-11-12
-- **Status**: approved. The user made the three scope decisions on 2026-11-12 (recorded in the Decisions section below). Implementation tickets T1..T6 in §9 are proposals; the PM creates them. Open questions in §11 still need a user answer where marked as blocking.
+- **Status**: approved. The user made scope decisions D1-D3 and, in a second round, D4-D9 on 2026-11-12 (Decisions section). Implementation tickets T1..T6 in §9 are proposals; the PM creates them once the Open items in §11 are answered.
 - **Author**: architect (PM-dispatched, Design Gate Row 0, design only)
 - **Input**: upstream ticket U-20261112-005 (from co-develop, `tickets/governance/U-20261112-005.yaml`): "delivered skills arrive record-less at L3 and skill-lifecycle-audit warns for every delivered active skill (observed: 31 warnings in Projects/co-develop)".
 - **Related**: U-20261028-011 (Check LC moved out of the L0-only gate), [`2026-11-11-upgrade-overwrite-protection-design.md`](2026-11-11-upgrade-overwrite-protection-design.md) and DEC-20261111-01, ADR-0069 (L1 `docs/` is independently maintained; the `docs` propagation domain is disabled), `docs/self-managed-surfaces.json`.
@@ -18,6 +18,12 @@ The user answered three questions on 2026-11-12. They are binding for this desig
 | D1 | Form of a delivered record | **Refined projection.** Delivered records are a sanitized, version-free projection, not raw L0 copies. The sanitization rules in §4.2 stay as designed. | `--verbatim` is dropped from scope (§4.2). The 19 L0 records with internal references are not edited. |
 | D2 | Variant-own skills | **Deliver together with the common ones.** The 42 common records and the 153 derived variant-own records ship in the same rollout (same template release, same upgrade wave). Not "common first, variants later". | T3 carries both batches; T5 rolls both out in one wave (§5, §9). |
 | D3 | Leftover project-side records | **Allowed.** Stale or leftover records in projects are tolerated; no prune requirement. | Explicit non-goal (§3). Risk 3 is accepted, not mitigated. |
+| D4 | co-newbiz (49 active project-local skills, no variant template) | **Give them records.** Derived records are generated for all of co-newbiz's non-common skills. Scope grows beyond the 153 (§4.1). co-newbiz is a frozen project: delivery happens at its freeze-lift apply. | New total of 218 derived records; co-newbiz is delivered by a project-side batch because it has no template (§4.1, §11 O2). |
+| D5 | Default Owner when frontmatter has no owner | **Map by skill name** through an explicit, checked mapping table; no silent guessing. | Rule in §4.2. Maintenance cost and error risk accepted by the user. |
+| D6 | SLR (new `validate-templates` check) | **Blocking together with the records PR.** No report-only phase. | §4.6, §9 PR order; tension with CLAUDE.md §9 flagged in §11 O1. |
+| D7 | Template PR shape | **One template PR**, now larger. | 188 template files plus the root files in one PR; review and CI risk in §8. |
+| D8 | `explain-me` (experimental common skill) | **Deliver its record.** | Included in the 42 common records. Experimental co-newbiz skills (16) follow the same rule for uniformity. |
+| D9 | Frozen projects (co-deck, co-abap, co-hr, co-safety, co-newbiz) | **Receive the records in ONE batch at their freeze-lift apply.** | §5, T5/T6. |
 
 ## 1. Problem statement
 
@@ -104,9 +110,21 @@ All 42 common records go to every variant, because every variant receives all 42
 | co-work | 3 | 3 | 45 | 32 | 1 |
 | **Total** | 183 | **153** | | | |
 
-co-newbiz has no variant template (its 91 active skills: 34 common, 0 variant-own, 49 project-local residual after delivery), so it receives only the 42 common records and keeps 49 warnings that are the project's own to resolve. The table's "records after delivery" column adds variant-own names that are not also common names (co-design and co-safety override 5 and 7 common skills respectively; their common record still seeds).
+**co-newbiz (D4)**: no variant template exists, so it receives the 42 common records through the template and needs its own derived records for 65 non-common skills (66 skills outside the common set, minus `value-chain-linkage-analysis`, which already has a record): 49 `active` plus 16 `experimental`. Check LC only warns for the 49 active ones; the 16 experimental ones get a record for uniformity (D8). All 65 carry an `owner` in frontmatter and every owner exists as an agent in the project.
 
-The "residual" column was computed against the actual project trees: active skills that are in neither the common set nor the variant template. Five projects have exactly 1; co-newbiz has 49.
+**New totals under D1-D9** (measured on `origin/main` @ `732364334` and the `Projects/co-newbiz` checkout):
+
+| Group | Records | Where it is delivered |
+|---|---:|---|
+| Common, projected from L0 | 35 | `templates/common/docs/lifecycle/skills/` |
+| Variant-own, derived (14 variants, per-variant table above) | 153 | `templates/<variant>/docs/lifecycle/skills/` |
+| co-newbiz own, derived | 65 | project-side batch (no template; §11 O2) |
+| **Generated total** | **253** | 188 template files plus 65 project-side files |
+| Hand-authored (unchanged) | 7 common, 10 co-price | not touched |
+
+After delivery co-newbiz's residual drops from 49 to 0. The template PR carries 188 generated files (about 190 KB); co-newbiz's 65 files are not in it.
+
+The "residual" column was computed against the actual project trees: active skills that are in neither the common set nor the variant template. Five projects have exactly 1; co-newbiz had 49, which D4 now removes.
 
 ### 4.2 Decision (b): mechanism and record form
 
@@ -128,6 +146,16 @@ The "residual" column was computed against the actual project trees: active skil
 2. **Derivation** (variant-own skills). The record is built from the `SKILL.md` frontmatter: name, status, scope, owner, description, creation date from `last_reviewed` or the first git commit date. Same section layout as the 7 existing L1 records (`templates/common/docs/lifecycle/skills/handbook.md`).
 
 Every generated file begins with a one-line generated marker comment, `<!-- generated by scripts/generate-skill-lifecycle-records.ts — hand edits are overwritten at the next publish -->`, so reviewers and the validator can tell generated records from the 7 hand-authored ones. The generator never touches a file that lacks the marker (the 7 existing records and `co-price`'s 10 stay hand-authored).
+
+**Owner resolution (D5)**: deterministic, three steps, no guessing.
+
+1. The SKILL.md frontmatter `owner:` wins. Measured 2026-11-12: all 183 variant-own skills, all 42 common skills and all 66 co-newbiz non-common skills carry `owner:`, so step 2 is unused today (zero unmapped skills).
+2. Otherwise look up the skill name in an explicit mapping table, `scripts/data/skill-owner-map.json` (generator-owned, `{ "<variant>/<skill>": "<agent>" }`, with `"*/<skill>"` for a name valid everywhere). The table is hand-maintained and reviewed in the PR that adds the skill. Name-based inference is the human's judgement recorded in the table, never run-time pattern matching.
+3. Otherwise the generator exits non-zero naming the skill, and the SLR validator fails the same way. There is no default owner and no `pm` fallback: an unmapped skill blocks the PR, which is what prevents a silent wrong owner.
+
+The validator also checks that the resolved owner exists as an agent (a recursive search of the variant's `agents/` and the common and L0 rosters; `co-safety` keeps 50 domain agents under `agents/domains/`).
+
+Accepted cost and risk (user, 2026-11-12): the table is a second place to maintain; a mapped owner can be wrong without any check able to tell (the validator proves existence, not fit); and it can drift when agents are renamed. Mitigation: the table is empty today, so the risk applies only to future skills that omit `owner:`.
 
 **Why the version fields are dropped.** The seed claim never refreshes a record in a project. A record that carries `Version: 1.4.0` is wrong at the next bump, and for `ci-triage` it would turn into an ERROR through Check MV. The 7 existing L1 records already use the version-free form (`Version at record creation`, creation date only) and have run in the fleet since 2026-09-21 with no audit signal. A delivered record is therefore a birth certificate: what the skill is, who owns it, what "production" meant for it. Version history stays at L0 where it is authored.
 
@@ -163,7 +191,7 @@ Every generated file begins with a one-line generated marker comment, `<!-- gene
 
 **Check LC after delivery.** Behavior is unchanged. For a delivered project the warning count drops to the "residual" column in §4.1. One optional improvement: when the skill exists in the delivered template set but its record is absent, the fix text says "run `bun scripts/upgrade-project.ts`" instead of "create the record".
 
-**New validator, `validate-templates.ts` check `SLR` (skill lifecycle record coverage and parity)**, blocking:
+**New validator, `validate-templates.ts` check `SLR` (skill lifecycle record coverage and parity)**, blocking from its first merge with no report-only phase (D6). A fourth rule is added: **owner**, every record's owner resolves per §4.2 and an unmapped skill fails.
 
 1. **Coverage**: every active, non-self-managed skill under `templates/common/skills/` has `templates/common/docs/lifecycle/skills/<name>.md`; every skill under `templates/<variant>/skills/` has a record in `templates/<variant>/docs/lifecycle/skills/` or the common directory. This is what keeps U-20261112-005 from recurring when a skill is promoted.
 2. **Parity**: for each generated record (marker present), regenerate in memory and compare bytes (`generate-skill-lifecycle-records.ts --check`). A hand edit of a generated file, or an L0 record change that was not republished, fails with the file name.
@@ -184,7 +212,7 @@ The records ride the next upgrade wave. They are not delivered by a targeted run
 Ordering relative to the overwrite-protection rollout (DEC-20261111-01):
 
 1. **Template side first, no engine dependency.** T1, T2 and T3 (§9) land at L0/L1 on their own, and T3 delivers common and variant-own records together (D2), so one `release-template` cut carries the full record set. They do not touch `upgrade-project.ts` or `upgrade-policy.ts` and are independent of PR-A/PR-B/PR-C.
-2. **The five frozen projects wait.** co-deck, co-abap, co-hr, co-safety, and co-newbiz are under the Phase 0 apply freeze until PR-A and PR-B land (D3 of that design). Their records arrive with the freeze-lift apply, not before. The records add only `NEW` rows, so they do not change the sweep's permitted deltas (PR-A: EVOLVED rows; PR-B: DRIFT_RESTORED rows; PR-C: shadow rows).
+2. **The five frozen projects wait.** co-deck, co-abap, co-hr, co-safety, and co-newbiz are under the Phase 0 apply freeze until PR-A and PR-B land (D3 of that design). Their records arrive in one batch with the freeze-lift apply, not before (D9). For co-newbiz the batch includes the 65 project-side derived records (T6). The records add only `NEW` rows, so they do not change the sweep's permitted deltas (PR-A: EVOLVED rows; PR-B: DRIFT_RESTORED rows; PR-C: shadow rows).
 3. **The other eleven projects** take the full record set (common and variant-own, D2) in their next scheduled `project-resync` wave. The wave's dry run shows `NEW docs/lifecycle/skills/*.md (workspace seed)` rows only for records, as INFO.
 4. **Gate interaction.** In shadow or enforce the backport gate's gate set contains only `PROJECT_AHEAD`, `EVOLVED_PRESERVE`, `UNBASELINED`, `MARKER_LOSS`, and `CONFLICT` paths. A seeded record is none of those, so no ack is needed and the delivered diff lands with no `### Destructive dispositions` entry (L1 destructive-ack covers WARN/ERROR rows; `NEW` and `SEED_SKIP` are INFO).
 5. **Verification per project** after each wave: `bun run skill-lifecycle-audit` shows 0 LC warnings for template skills. Remaining LC warnings must equal the "residual" column. A larger count means a record was tombstoned or a skill is outside the template set.
@@ -223,63 +251,61 @@ Rollback is `git revert` of the template PR. Delivered records in projects are i
 8. **docs/lifecycle/ WORKSPACE policy.** Delivery relies on the existing add-if-missing seed. A project that later edits its record owns it; a project that deletes one gets it re-seeded only until the tombstone guard records the deletion. Any future change of `WORKSPACE_DOC_DIRS` or the tombstone rules (the overwrite-protection stream touches `upgrade-policy.ts`) would silently change this delivery. T5 therefore re-checks the seed rows in the wave dry run.
 9. **New blocking check.** `validate-templates.ts` check `SLR` blocks every future template PR that adds or promotes a skill without a record, and blocks on parity. It adds a recurring cost for variant owners and runs over about 280 template skill directories, so its runtime and a clear fix message matter (§9, T2).
 10. **Large single template PR (D2).** About 190 generated files in one PR; review is by sampling plus the `--check` parity gate.
-11. **co-newbiz** keeps 49 warnings that are project-local skills. The delivery cannot fix them. Its PM decides between records and a `self-managed-surfaces.json` entry for its own skills.
+11. **co-newbiz has no template (D4).** Its 65 derived records cannot ride the template PR. They are a project PR generated by the same generator (`--project <path>` mode) and are delivered only at the freeze-lift apply (D9). Until then co-newbiz keeps 49 Check LC warnings.
+12. **PR size and CI (D7).** One PR with about 188 generated template files, the generator, SLR, tests and registry rows. Review is by sampling plus the `--check` parity gate; Windows CI is the exposure, because `validate-templates.ts` and `generate --check` both walk the template tree. The PR must stay inside the existing per-job time budget; if the first run is slow, the fix is to speed the check, not to split the PR.
+13. **Owner mapping (D5).** Wrong or stale mapping entries are undetectable beyond existence; accepted (§4.2).
 
-## 9. Ticket breakdown (re-estimated for D1-D3; the PM creates the tickets)
+## 9. Ticket breakdown (re-estimated for D1-D9; not created)
 
 Sizes: S = 1-3 h, M = 3-6 h, L = 6-12 h of implementation and verification, excluding review wait.
 
 ### PR order (one open PR at a time, CLAUDE.md sequential-branch rule)
 
-1. **PR-1 (root, L0): T1 + T2**, merged before anything else. Hand-edited root files only: scripts, tests, docs, registry rows.
-2. **PR-2 (templates): T3**, opened only after PR-1 is merged. Generated files under `templates/` through the `/sync` publish step; never mixed with hand-edited root files (CLAUDE.md §9).
-3. **PR-3 (root, L0): T4**, after PR-2 merges (needs the delivered records in the template tree). `scaffold-markers.ts` is a root file; any matching `templates/common/scripts/` mirror lands through `/sync` publish.
-4. **T5** is operational (no PR from this stream except the upgrade PRs the wave itself opens, which belong to `project-resync`, one at a time per project repo).
-5. **T6** is a project PR in co-newbiz, independent of the template stream.
+1. **PR-1 (generator + SLR + records): T1 + T2 + T3.** Per D6 SLR is blocking from its first merge, and it cannot pass its own CI without the records, so the records must land in the same PR. Per D7 that is one PR. The 188 template files are produced by the `/sync` publish step (the sanctioned root-to-template path), not hand-edited, which is how this design reads CLAUDE.md §9. Whether that reading is acceptable is Open item O1.
+2. **PR-2 (root): T4** scaffold parity, after PR-1 merges.
+3. **T5** fleet wave (operational), and **T6** co-newbiz project PR, both delivered at the freeze-lift apply for the five frozen projects (D9), in one batch per project; the eleven non-frozen projects take the template records in their next `project-resync` wave.
 
-CV-02 (blocking check, `validate-templates.ts`): added files are out of scope and the generated records carry no version line, so T3's new files do not need a version bump. Any modified, already versioned `templates/**` file does: if T1/T4 edit a script that has a `templates/common/scripts/` mirror (`l0-ref-policy.ts`, `scaffold-markers.ts`, `skill-lifecycle-audit.ts`), the `@version` must be bumped in the same publish. Root-side `@version` bumps also apply to `validate-templates.ts`, `dev-sync.ts`, `skill-lifecycle-audit.ts` and the matching `docs/lifecycle/scripts/*.md` records and `scripts/SCRIPTS.md` rows. Per the unit-tests-before-sync rule, run `bun run test:unit` before each `/sync` that bumps a script version. The release itself is one `release-template` cut after PR-2 (`templates/VERSION` 0.30.0 to the next minor).
+CV-02: new files are out of scope and the records carry no version line. A modified versioned mirrored file needs a bump (`l0-ref-policy.ts`, `scaffold-markers.ts`, `skill-lifecycle-audit.ts` copies under `templates/common/scripts/`), plus root `@version` bumps and `docs/lifecycle/scripts/*.md` and `scripts/SCRIPTS.md` rows for `validate-templates.ts`, `dev-sync.ts`, `skill-lifecycle-audit.ts`. Run `bun run test:unit` before each `/sync` that bumps a script version. One `release-template` cut follows PR-1 (`templates/VERSION` 0.30.0 to the next minor).
 
 ### Tickets
 
 | Ticket | Scope | Files | Test plan | Size | Depends on |
 |---|---|---|---|---|---|
-| **T1** generator and shared pattern | `generate-skill-lifecycle-records.ts` with projection mode (35 L0 records), derivation mode (153 variant-own from `SKILL.md` frontmatter), generated marker, `--check`, and no `--verbatim` (D1). Shared `L0_INTERNAL_REF_PATTERN`. dev-sync step 4.5 write-mode hook. | `scripts/generate-skill-lifecycle-records.ts` (new), `scripts/helpers/l0-ref-policy.ts`, `scripts/dev-sync.ts`, `scripts/SCRIPTS.md`, `docs/lifecycle/scripts/` record for the new script, spec/registry rows | `tests/unit/generate-skill-lifecycle-records.test.ts` (projection of `gateguard`, `sync`, `delegate-to-hub`, `ci-triage`, `meeting-facilitation`; one derived record; marker; idempotence; hand-edited file without marker left alone); extend `l0-ref-policy.test.ts`. | **M-L, 6-9 h** (up from M: derivation for 14 variants and the 5 override-name cases add edge cases) | none |
-| **T2** SLR validator and LC fix text | `validate-templates.ts` check `SLR` (coverage, parity via generator `--check`, leak), blocking from day one. Check LC fix-text sentence. | `scripts/validate-templates.ts`, `scripts/skill-lifecycle-audit.ts`, matching lifecycle records, `SCRIPTS.md` | `tests/unit/validate-templates-skill-records.test.ts` with in-memory fixtures (missing record, edited generated file, leaking `ADR-0103`). Because T3 content does not exist yet, SLR must be wired so that PR-1 does not fail its own `validate-templates` run: either SLR ships report-only until PR-2 (see open question Q3) or T2 is held for PR-2. | **S-M, 3-5 h** | T1 |
-| **T3** publish, full set (D2) | 35 projected common records plus 153 derived variant-own records, one template PR; `release-template` entry; dry-run timing on co-safety (95 records). | `templates/common/docs/lifecycle/skills/` (+35), `templates/co-*/docs/lifecycle/skills/` (+153 across 14 variants), `templates/CHANGELOG.md` through release flow | `generate --check` and `validate-templates.ts` (SLR) on the result; sampled manual read of 10 records (include `co-safety`); fleet dry-run delta check on 2 projects. | **L, 6-10 h** (up from M: 153 plus 35 files, review by sampling, timing run) | T1, T2 merged |
-| **T4** scaffold parity | `new-project` docs copy includes `docs/lifecycle/skills/`; remove the 7 reviewed-gap entries; scaffold parity pin. | `scripts/helpers/scaffold-markers.ts`, `scripts/new-project.ts` if needed, `scripts/test-scaffold-delivery-parity.ts` | scaffold parity script (spawn-heavy, see below); `tests/unit/scaffold-delivery-parity.test.ts`. | **S, 2-3 h** | T3 merged |
-| **T5** fleet rollout runbook | One wave with the full record set. Eleven non-frozen projects at their next `project-resync` wave; five frozen projects (co-deck, co-abap, co-hr, co-safety, co-newbiz) with the freeze-lift apply. Per project: before/after dry run, LC warning count equals the residual column in §4.1, `NEW` rows only for records. | none (operational); wave notes in memory log | per-project `skill-lifecycle-audit` and dry-run diff | **M, 4-8 h spread over the wave** (16 projects, dry runs, 5 held) | T3; freeze lift for the 5 |
-| **T6** co-newbiz decision (optional) | Record or `self-managed-surfaces.json` entry for 49 project-local skills. | project PR | project audit | **S, 1-3 h** | none |
+| **T1** generator, owner table, shared pattern | `generate-skill-lifecycle-records.ts`: projection (35), derivation (153 template + 65 co-newbiz via `--project`), generated marker, `--check`, owner resolution per §4.2 (table file, fail on unmapped). Shared `L0_INTERNAL_REF_PATTERN`. dev-sync step 4.5 write-mode hook. | `scripts/generate-skill-lifecycle-records.ts` (new), `scripts/data/skill-owner-map.json` (new, empty), `scripts/helpers/l0-ref-policy.ts`, `scripts/dev-sync.ts`, `scripts/SCRIPTS.md`, new lifecycle record, registry rows | `tests/unit/generate-skill-lifecycle-records.test.ts`: five projections, one derived record, owner precedence (frontmatter, table, unmapped failure), marker, idempotence, no overwrite of unmarked files; extend `l0-ref-policy.test.ts` | **L, 8-12 h** | none |
+| **T2** SLR validator, blocking | `validate-templates.ts` check `SLR`: coverage, parity, leak, owner. Check LC fix-text sentence. | `scripts/validate-templates.ts`, `scripts/skill-lifecycle-audit.ts`, matching records, `SCRIPTS.md` | `tests/unit/validate-templates-skill-records.test.ts`, in-memory fixtures only | **M, 4-6 h** | T1 |
+| **T3** publish the template records | 35 common plus 153 variant-own records through the `/sync` publish; `release-template` entry; co-safety dry-run timing (95 records). | `templates/common/docs/lifecycle/skills/` (+35), `templates/co-*/docs/lifecycle/skills/` (+153) | `generate --check`, `validate-templates.ts`, sampled read of 10 records, 2-project dry-run delta | **L, 6-10 h** | T1, T2 (same PR) |
+| **T4** scaffold parity | `new-project` copies `docs/lifecycle/skills/`; remove the 7 reviewed-gap entries. | `scripts/helpers/scaffold-markers.ts`, `scripts/new-project.ts` if needed, `scripts/test-scaffold-delivery-parity.ts` | existing scaffold parity script; `tests/unit/scaffold-delivery-parity.test.ts` | **S, 2-3 h** | PR-1 merged |
+| **T5** fleet wave | Eleven non-frozen projects in their next wave; five frozen projects in one batch each at freeze-lift. Per project: dry run, LC count equals residual, `NEW` rows only for records. | none (operational) | per-project `skill-lifecycle-audit` and dry-run diff | **M, 5-9 h spread over the wave** | PR-1; freeze lift |
+| **T6** co-newbiz records | Run the generator in `--project` mode for 65 records, open a co-newbiz project PR, land at its freeze-lift apply together with its common records (D9). | co-newbiz `docs/lifecycle/skills/` (+65) | project `skill-lifecycle-audit` shows 0 LC warnings | **M, 3-5 h** | T1; freeze lift |
 
-Total implementation: about 22-38 h across PR-1, PR-2, PR-3, plus the T5 wave and T6.
+Total about 28-45 h across PR-1 (18-28 h), PR-2, the T5 wave and T6.
 
 ### Per-test budget notes (Windows CI is slow)
 
-- **Spawn-heavy, keep out of the unit tier or minimize**: the scaffold parity script (T4) scaffolds a project per variant by spawning `new-project`; reuse the existing script rather than adding a unit test that spawns it, and do not add a second scaffold. A test that spawns `upgrade-project` for the seed replay would also be spawn-heavy; use the in-process path that `tests/unit/upgrade-tree-sync.test.ts` already uses with a fixture project of 6 records.
-- **Keep in-process and pure**: generator tests call the projection and derivation functions directly on 5 real record strings and one frontmatter string, no `Bun.spawn`, no repo-wide scan. SLR tests pass in-memory file maps to the check function; they must not run `validate-templates.ts` over the real tree (about 48 MB and 280 skill directories). The CV-02 test in `validate-templates-cv02.test.ts` is the model.
-- **Full-tree checks belong in scripts, not unit tests**: the real-tree `generate --check` and SLR run via `bun scripts/validate-templates.ts` and the audit. If a single unit test must walk `templates/*/skills` (for the 153 count), read directory names only, no file contents, and set the per-test budget explicitly as in the PR #1957 raises.
-- **dev-sync hook**: test the step-4.5 wiring as a unit on the function that decides whether to call the generator; do not spawn `dev-sync.ts`.
-- Run `bun run test:unit` before each `/sync` (versions are bumped), and watch the three Windows-sensitive suites whose budgets were raised in PR #1957.
+- **Spawn-heavy**: the scaffold parity script (T4) scaffolds a project per variant by spawning `new-project`; reuse it, add no second scaffold. A seed-replay test that spawns `upgrade-project` is spawn-heavy too; use the in-process path of `upgrade-tree-sync.test.ts` with a 6-record fixture.
+- **Pure and in-process**: generator and SLR tests call functions on in-memory strings and file maps. They must not run `validate-templates.ts` or walk the real tree (about 48 MB, 280 skill directories); `validate-templates-cv02.test.ts` is the model.
+- **Real-tree checks live in scripts**: `generate --check` and SLR run via `validate-templates.ts` and the audit, where D7's one-PR size shows up as one more full-tree pass. If a unit test must list `templates/*/skills`, read directory names only and set its per-test budget explicitly, as PR #1957 did.
+- Do not spawn `dev-sync.ts` in tests; unit-test the function that decides when to call the generator. Watch the three Windows-sensitive suites whose budgets PR #1957 raised.
 
 ## 10. Acceptance criteria
 
 - [ ] `bun scripts/generate-skill-lifecycle-records.ts --check` passes on the published templates and fails on a hand-edited generated file.
-- [ ] `templates/common/docs/lifecycle/skills/` holds 42 records (35 generated, 7 hand-authored); each variant template holds a record for every own skill (153 derived across 14 variants, matching the §4.1 table), delivered in the same template release as the common records (D2).
+- [ ] `templates/common/docs/lifecycle/skills/` holds 42 records (35 generated, 7 hand-authored); each variant template holds a record for every own skill (153 derived across 14 variants, matching the §4.1 table), delivered in the same template PR as the common records (D2, D7).
 - [ ] No file in any `templates/**/docs/lifecycle/skills/` matches `L0_INTERNAL_REF_PATTERN` or `L0_REF_PATTERN`.
 - [ ] `validate-templates.ts` check `SLR` blocks a common skill without a record, a stale generated record, and a leaking record.
 - [ ] A fleet dry run shows only `NEW` rows for records; a present project record is `SEED_SKIP` and byte-identical after apply.
 - [ ] After the first wave, each project's LC warning count equals the residual column in §4.1.
+- [ ] co-newbiz holds 65 derived records after its freeze-lift apply and its LC warning count is 0 (D4, D9).
+- [ ] An unmapped skill (no `owner:`, no table entry) makes both the generator and SLR fail (D5).
 - [ ] Scaffolded projects (`new-project`) audit with no LC warning for template skills.
 
-## 11. Open questions for the user (OPEN / UNDECIDED)
+## 11. Open items (genuinely unresolved)
 
-D1-D3 are settled. These remain; the PM does not choose for the user.
+D4-D9 above settled the six earlier questions. Two items remain open and one list is empty; the PM does not decide them.
 
-1. **co-newbiz (49 project-local skills, no variant template)**: records, or a `self-managed-surfaces.json` entry? It is the project PM's decision, not a template one. Blocks only T6.
-2. **Record owner for derived variant-own records**: use the SKILL.md `owner` field when present; if absent, which default owner string (the variant's PM agent, or `workspace`)? Blocks T1 derivation tests.
-3. **SLR rollout severity**: SLR is specified as blocking. Because PR-1 (T1+T2) lands before the records exist, should SLR ship blocking only together with PR-2 (T2 held back, a longer PR-1 cycle), or ship report-only in PR-1 and be flipped to blocking in PR-2? Blocks the T2 PR boundary.
-4. **One template PR or two**: D2 requires one rollout and one release cut, not necessarily one PR. A single PR of about 190 generated files, or two sequential PRs (common 35, then 153 variant-own) released together? A split costs an extra sequential merge cycle.
-5. **`explain-me` (experimental common skill)**: deliver its record (recommended for set uniformity) or skip experimental skills? Check LC ignores non-active skills.
-6. **Frozen-project timing**: confirm the five frozen projects receive the full record set only at their freeze-lift apply (as §5 assumes), not through a separate record-only exception.
+- **O1 (blocks T3 PR boundary): root and template files in one PR.** D6 (SLR blocking together with the records) and D7 (one template PR) imply a PR that holds the generator, SLR and 188 template files. CLAUDE.md §9 forbids modifying workspace root files and template files in one task. This design reads the generated records as `/sync` publish output (sanctioned) and the hand-edited files as root, in one `/sync` run. Confirm that reading, or choose: root PR first with SLR blocking only after the records PR (which contradicts D6), or a split (which contradicts D7).
+- **O2 (blocks T6): co-newbiz delivery vehicle.** co-newbiz has no variant template, so its 65 records cannot ride the template PR. Proposed: a co-newbiz project PR generated by `--project` mode, landing at its freeze-lift apply (D9). Alternative: create `templates/co-newbiz` first, which is out of scope here.
+- **Unmappable skills (D5): none today.** Every one of the 183 variant-own, 42 common and 66 co-newbiz skills carries `owner:` in its frontmatter, so no skill needs a table entry and none needs a user decision now. The table file starts empty. Future skills without `owner:` are listed here by the generator failure message.
 
 ## 12. Accessibility exemption note
 

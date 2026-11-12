@@ -3282,7 +3282,7 @@
       "source": "architect",
       "created": "2026-11-12",
       "last_updated": "2026-11-12",
-      "review_notes": "U-20261112-005 (from co-develop): delivered skills arrive without docs/lifecycle/skills records. User decisions 2026-11-12: refined projection (sanitized, version-free); variant-own records delivered together with the 42 common ones (153 derived across 14 variants, recounted on origin/main 6541f4f91); leftover project-side records allowed (no prune, explicit non-goal). Generator plus existing WORKSPACE seed. Tickets T1-T6 proposed, not created; open questions in section 11."
+      "review_notes": "U-20261112-005 (from co-develop): delivered skills arrive without docs/lifecycle/skills records. User decisions 2026-11-12: D1 refined projection; D2 variant-own records delivered with the 42 common ones (153 derived); D3 leftovers allowed (non-goal); D4 co-newbiz gets records (65 derived, project-side batch); D5 owner mapped by name via checked table; D6 SLR blocking with the records; D7 one template PR; D8 explain-me delivered; D9 frozen projects in one batch at freeze-lift. Open: O1 root/template PR boundary, O2 co-newbiz delivery vehicle. Tickets T1-T6 proposed, not created."
     },
     {
       "id": "skillhygiene",
