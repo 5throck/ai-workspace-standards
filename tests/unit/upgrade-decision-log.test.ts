@@ -158,10 +158,14 @@ function runUpgrade(tmp: string, extraArgs: string[] = []): { status: number; ou
   // The file-level CI wall is handled by the test-runner per-file budget
   // override (scripts/test-runner.ts; the v2.0.0 fixture cache is what keeps
   // the spawn count at 17 — see the T-20261030-002 split design).
+  // 600s spawn budget: windows-latest runners intermittently exceed 300s on
+  // full upgrade-project.ts subprocess spawns (transient flake — PR #1991
+  // windows leg failed once, rerun of the identical commit passed, run
+  // 43245817385). T-20261113-001. ubuntu/macos finish well under 300s.
   const result = spawnSync(
     'bun',
     [upgradeScript, tmp, '--variant', VARIANT, '--yes', ...extraArgs],
-    { encoding: 'utf-8', timeout: 300000, stdio: ['ignore', 'pipe', 'pipe'] }
+    { encoding: 'utf-8', timeout: 600000, stdio: ['ignore', 'pipe', 'pipe'] }
   );
   return { status: result.status ?? -1, out: `${result.stdout ?? ''}\n${result.stderr ?? ''}` };
 }
@@ -1328,7 +1332,9 @@ describe('upgrade-project.ts VARIANT-SCOPE SKILL PRUNE decisions (T-20261101-001
     expect(manifest.decisions.some((d) => d.verdict === 'DELETE' && d.path.includes('sarif-exporter'))).toBe(false);
     // The loud console line is present (the operator sees the guard fire).
     expect(out).toContain('unregistered project-adopted skill');
-  }, 300000);
+  // 600s: windows runners intermittently exceed the 300s budget on full
+  // upgrade-project spawns (T-20261113-001, run 43245817385) — see runUpgrade.
+  }, 600000);
 
   test('manifest-seeded adoption keeps the skill with a SKIP (INFO) row', () => {
     const { tmp, status, manifest } = useShape('variant-scope-manifest-seeded');
@@ -1339,7 +1345,9 @@ describe('upgrade-project.ts VARIANT-SCOPE SKILL PRUNE decisions (T-20261101-001
     expect(row!.severity).toBe('INFO');
     expect(row!.detail).toContain('declared in the project variant.json skill_manifest.variant_specific');
     expect(manifest.decisions.some((d) => d.verdict === 'DELETE' && d.path.includes('sarif-exporter'))).toBe(false);
-  }, 300000);
+  // 600s: windows runners intermittently exceed the 300s budget on full
+  // upgrade-project spawns (T-20261113-001, run 43245817385) — see runUpgrade.
+  }, 600000);
 
   test('mirror-only foreign residue is still pruned — with a DELETE (WARN) row, never silently', () => {
     const tmp = useDir('variant-scope-mirror-prune');
@@ -1354,5 +1362,7 @@ describe('upgrade-project.ts VARIANT-SCOPE SKILL PRUNE decisions (T-20261101-001
     expect(row!.severity).toBe('WARN');
     expect(row!.detail).toContain('foreign variant-scoped skill pruned');
     expect(row!.pass).toBe('VARIANT-SCOPE SKILL PRUNE');
-  }, 300000);
+  // 600s: windows runners intermittently exceed the 300s budget on full
+  // upgrade-project spawns (T-20261113-001, run 43245817385) — see runUpgrade.
+  }, 600000);
 });
