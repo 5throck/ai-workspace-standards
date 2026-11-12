@@ -13359,12 +13359,6 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-architect/README.md",
-      "to": "skill:root/zod-contract-gate",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
       "from": "doc:co-consult/AGENTS.md",
       "to": "skill:common/handbook",
       "source": "workflow-doc"

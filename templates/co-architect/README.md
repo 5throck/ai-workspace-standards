@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 9e5ae9590223490c56f46640737ca7b4a8df793fa77496f41abf09334ab8e5a4
+content_hash: 125ee976aa4e6b7a1fb0593690083909c1bcbfdc78e2507d39647c1d3c8d7aef
 ---
 
 # co-architect
@@ -67,7 +67,6 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 - **script-lifecycle-manager**: 
 - **explain-me**: 
 - **team-builder**: 
-- **zod-contract-gate**: 
 - **service-design**: 
 - **source-command-commit-push-pr**: 
 - **skill-lifecycle-manager**: 
