@@ -2,7 +2,12 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.11.1
+ * @version 1.12.0
+ * v1.12.0 (2026-11-13, PR #1991 CI): Test 27 AC3 footer pin (2.15) replaced with a
+ *         template-derived expectation — the scaffolded docs/context.md footer version must
+ *         equal templates/common/docs/context.md's current footer version. The literal pin
+ *         broke in two consecutive footer bumps (2.14→2.15 U-20261112-002, 2.15→2.16
+ *         U-20261112-006); source-derivation ends that class. Behavior otherwise unchanged.
  * v1.11.1 (2026-11-12): Test 27 footer pin 2.14 → 2.15 — templates/common/docs/context.md gained an Agent
  *         Frontmatter section (U-20261112-002) and its footer moved to 2.15. Pin and messages only.
  * v1.11.0 (2026-11-06, T-20261106-004 class B): Test 25 normalizes the raw-template
@@ -1089,10 +1094,24 @@ try {
           if (ctx.includes("[One-sentence description"))
             ctxProblems.push("literal description placeholder still present");
           if (ctx.includes("web | cli | api | mcp")) ctxProblems.push("literal Type placeholder still present");
-          if (!/\*context\.md version: 2\.15\b/.test(ctx)) ctxProblems.push("version footer is not 2.15");
+          // v1.12.0: derive the expected footer version from the template source instead of a
+          // literal pin — the literal broke in two consecutive waves (2.14→2.15 via
+          // U-20261112-002, 2.15→2.16 via U-20261112-006 / PR #1991 CI). The actual AC is
+          // "delivered copy tracks the template's current footer version"; the
+          // validate-templates version gate guarantees the template footer moves whenever
+          // delivered content moves, so source-derived is the stable expectation.
+          const tplCtx = readFileSync(join(process.cwd(), "templates", "common", "docs", "context.md"), "utf-8");
+          const tplVersion = tplCtx.match(/\*context\.md version: (\d+\.\d+)\b/)?.[1];
+          if (!tplVersion) {
+            ctxProblems.push("could not parse version footer from templates/common/docs/context.md");
+          } else if (!new RegExp(`\\*context\\.md version: ${tplVersion}\\b`).test(ctx)) {
+            ctxProblems.push(`version footer is not the template's current ${tplVersion}`);
+          }
           if (ctxProblems.length > 0) fail("Test 27 (AC3 pointer)", ctxProblems.join("; "));
           else
-            pass("Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer 2.15");
+            pass(
+              `Test 27 PASSED (AC3): docs/context.md has the pointer section, no literal placeholders, footer ${tplVersion} (template-derived)`,
+            );
         } catch (e) {
           fail("Test 27 (AC3 pointer)", String(e));
         }

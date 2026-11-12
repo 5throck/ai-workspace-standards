@@ -66,3 +66,17 @@ review), governance-control touch (U-20261112-020 — user sign-off required per
   registered before `/sync`; sync-time spec-check passes on this registry entry.
 - JSON validity of edited settings.json re-checked post-edit.
 - Full audit battery runs in CI on the PR; no gates bypassed.
+
+## Addendum (2026-11-13, PR #1991 CI follow-up)
+
+ubuntu-latest E2E (`scripts/test-new-project.ts`) failed Test 27 AC3: the test pinned the
+scaffolded `docs/context.md` version footer at the pre-batch literal `2.15`, while this
+batch's footer bump (required by the validate-templates content-changed gate) moved the
+template to `2.16`. Diagnosis: the template/product change is correct; the E2E expectation
+was wrong-shaped — a literal pin that has now broken on two consecutive footer bumps
+(2.14→2.15 via U-20261112-002, 2.15→2.16 via this batch). Fix: Test 27 AC3 now derives the
+expected version from `templates/common/docs/context.md` at run time (scaffolded footer
+must equal the template's current footer version), which is the actual acceptance
+criterion and ends the bump-breakage class. `test-new-project.ts` 1.11.1 → 1.12.0;
+L0 SCRIPTS.md registry row updated (script is L0-only, not mirrored). Local E2E re-run:
+41/41 passed.
