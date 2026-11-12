@@ -28,8 +28,11 @@
  * The core is pure over an injected Tree so unit tests run on in-memory file maps. The CLI is
  * the only place that touches the real filesystem.
  *
- * @version 1.0.0
+ * @version 1.1.0
  *
+ * v1.1.0 (2026-11-12, common-agents CA-1): owner-agent rule is STRICT for common skills: the owner
+ *         must exist in templates/common/agents (no variant-union leniency). Severity still follows
+ *         scripts/skill-record-enforcement.json (enforce:false WARN, enforce:true error).
  * v1.0.0 (2026-11-12, U-20261112-005 PR-1): initial — projection, derivation, owner
  *         resolution, --check / --write / --project, SLR evaluation (coverage, parity, leak,
  *         owner) consumed by validate-templates.ts check SLR.
@@ -695,9 +698,11 @@ export function evaluateSlr(tree: Tree, ownerMap: OwnerMap): SlrResult {
   const variants = templateVariants(tree);
   const commonDir = `templates/common/${RECORD_DIR}`;
   const rosterBase = new Set<string>([...agentNames(tree, "agents"), ...agentNames(tree, "templates/common/agents")]);
-  // A common skill is delivered to every variant and may be owned by a variant-specific agent
-  // (e.g. k-* skills owned by co-export agents), so its roster is the union over all variants.
-  const allVariantAgents = new Set<string>(variants.flatMap((v) => agentNames(tree, `templates/${v}/agents`)));
+  // A common skill is delivered to every project, so its owner must exist in the common roster
+  // (templates/common/agents: pm and the common skill-owner agents). Variant-only and L0 root
+  // agents do not count (common-agents design 2026-11-12, CA-1, D4). Variant-own skills use the
+  // variant + common + workspace roster.
+  const commonRoster = new Set<string>(agentNames(tree, "templates/common/agents"));
   let checkedSkills = 0;
 
   const groups: Array<{ variant: string; skills: SkillDir[] }> = [
@@ -707,9 +712,8 @@ export function evaluateSlr(tree: Tree, ownerMap: OwnerMap): SlrResult {
 
   for (const g of groups) {
     const ownDir = `templates/${g.variant}/${RECORD_DIR}`;
-    const roster = new Set<string>(rosterBase);
-    if (g.variant === "common") for (const n of allVariantAgents) roster.add(n);
-    else for (const n of agentNames(tree, `templates/${g.variant}/agents`)) roster.add(n);
+    const roster = new Set<string>(g.variant === "common" ? commonRoster : rosterBase);
+    if (g.variant !== "common") for (const n of agentNames(tree, `templates/${g.variant}/agents`)) roster.add(n);
     for (const s of g.skills) {
       checkedSkills++;
       const fm = parseSkillFrontmatter(tree.read(s.skillMd));
@@ -733,7 +737,10 @@ export function evaluateSlr(tree: Tree, ownerMap: OwnerMap): SlrResult {
           variant: g.variant,
           path: s.skillMd,
           name: s.name,
-          message: `${g.variant}/${s.name}: owner "${owner.owner}" is not an agent in the variant, common, or workspace roster`,
+          message:
+            g.variant === "common"
+              ? `common/${s.name}: owner "${owner.owner}" is not in the common roster (templates/common/agents)`
+              : `${g.variant}/${s.name}: owner "${owner.owner}" is not an agent in the variant, common, or workspace roster`,
         });
       }
     }

@@ -9,7 +9,11 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.12.0
+ * @version 1.13.0
+ *
+ * v1.13.0 (2026-11-12, common-agents CA-1): agentExists() also resolves owners against
+ *         templates/common/agents (the common roster), so L0 skills owned by a common agent
+ *         are no longer reported as orphaned.
  *
  * v1.12.0 (2026-11-12, U-20261112-005 PR-1): Check LC fix text gains one sentence — template-delivered
  *         skills receive their record on upgrade; a project-local skill needs its record
@@ -312,12 +316,15 @@ function findSkillFiles(dir: string, baseDir: string = ROOT, depth = 0): string[
 }
 
 // Validate agent exists
-function agentExists(owner: string, registry: AgentRegistry): boolean {
+export function agentExists(owner: string, registry: AgentRegistry, ROOT: string = cwd()): boolean {
   if (registry.agents.includes(owner)) return true;
 
   const agentPath1 = join(ROOT, "agents", `${owner}.md`);
   const agentPath2 = join(ROOT, ".claude", "agents", `${owner}.md`);
   if (existsSync(agentPath1) || existsSync(agentPath2)) return true;
+
+  // Common (L1) skill-owner agents (design 2026-11-12-common-agents-for-common-skills section 5.7).
+  if (existsSync(join(ROOT, "templates", "common", "agents", `${owner}.md`))) return true;
 
   // A root-level (L0) skill's owner may be a variant-specific agent (the
   // skill's home domain) even though the skill itself lives in the shared
