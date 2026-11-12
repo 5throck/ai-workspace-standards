@@ -3,7 +3,7 @@ id: U-20261112-014
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-12T10:01:21.266+09:00'
 history:
@@ -13,7 +13,12 @@ history:
   - at: '2026-11-13T01:29:50.730+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-13T07:04:40.883+09:00'
+    from: review
+    to: done
+result: >-
+  verify-scripts 1.15.0 Check 10 — CI workflow bun scripts refs must exist (PR
+  landed; re-applied after 06:51 store rewrite reverted the resolution)
 error: null
 upstream:
   project: co-abap
@@ -44,3 +49,9 @@ upstream:
   duplicates:
     - project: co-abap
       at: '2026-11-12T10:01:21.266+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1993
+    summary: >-
+      verify-scripts 1.15.0 Check 10 — CI workflow bun scripts refs must exist
+      (PR landed; re-applied after 06:51 store rewrite reverted the resolution)

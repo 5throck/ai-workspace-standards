@@ -28,14 +28,20 @@ history:
   - at: '2026-11-11T08:55:42.804+09:00'
     from: waiting
     to: review
-  - at: '2026-11-12T05:11:07.109+09:00'
+  - at: '2026-11-12T23:50:37.627+09:00'
     from: review
     to: done
 result: >-
-  Verified 2026-11-12 in a fresh worktree off origin/main (templates/co-deck,
-  Playwright 1.63.0, chromium-1243 present): bun run test:visual run twice
-  consecutively, both '27 pairs compared, 2 pass / 0 fail' (failed: 0, exit 0;
-  59.26s and 57.52s); git status --porcelain
-  templates/co-deck/docs/html-themes/baselines empty after the second run (zero
-  diffs, zero new files). Design §6 acceptance box ticked.
+  Verified 2026-11-12: ask fulfilled — template VR baseline recapture landed via
+  workspace PR #1958 (merge b2a4e6a32, 2026-11-11 10:06): all 42 stale
+  diff-slide-*.png deleted from templates/co-deck/docs/html-themes/baselines,
+  slide PNGs recaptured (white-bubble baselines added, were missing).
+  origin/main store carries the acceptance evidence: fresh worktree off
+  origin/main, bun run test:visual run twice consecutively, both '27 pairs
+  compared, 2 pass / 0 fail', zero working-tree diffs after second run; design
+  2026-11-10-co-deck-vr-baselines-recapture-design section 6 acceptance ticked.
+  Independent cross-check this session: 52/64 template slide PNGs byte-identical
+  to the project's post-co-deck#217 recapture (12 white-bubble PNGs differ
+  template-vs-project — independent recapture vintage, not staleness;
+  template-vs-fixture test is green, which is the acceptance bar).
 error: null

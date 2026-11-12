@@ -1,0 +1,69 @@
+schemaVersion: 1
+id: U-20261113-001
+kind: manual
+title: Upstream request from co-consult
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-13T07:03:58.418+09:00'
+history:
+  - at: '2026-11-13T07:03:58.418+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-13T07:05:46.049+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T07:05:46.049+09:00'
+    from: review
+    to: done
+result: >-
+  Verified: L2 template phase-gate row is already Medium (line 160; zero Low
+  hits across templates/co-consult/; frontmatter tier: medium) — the upstream
+  correction recorded in CHANGELOG 2026-08-15 landed. Stale Low exists only in
+  the delivered Projects/co-consult/AGENTS.md managed block, which converges at
+  the next upgrade visit (no hand-edit per policy).
+error: null
+upstream:
+  project: co-consult
+  variant: co-consult
+  template_version: 0.30.0
+  source: project/co-consult
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    The co-consult variant's AGENTS.md VARIANT-PHASE-GATE block still classifies
+    data-analyst as Tier "Low" while every other tier reference says Medium.
+    Verified in the delivered project: AGENTS.md VARIANT-PHASE-GATE-START row
+    "Statistical analysis | Phase 1, 3 | data-analyst | Low" vs (a) the same
+    file's VARIANT-AGENTS roster row and VARIANT-AGENT-DETAILS/§4.1 tables
+    (Medium, aligned in project PR #124), (b) agents/data-analyst.md frontmatter
+    tier: medium (SSOT per engine validation), (c) docs/phase-definitions.md
+    ("data-analyst (Tier: Medium)"), (d) CHANGELOG 2026-08-15 entry recording an
+    upstream ai-workspace-standards update that already corrected this exact
+    drift ("correct data-analyst agent tier (Low→Medium, its role covers
+    advanced statistical modeling)"). The VARIANT-PHASE-GATE block is
+    variant-template-managed, so the stale Low appears to live in the L2
+    template source and re-appears on merge/upgrade. Expected: L2 template's
+    phase-gate table for data-analyst updated to Medium so the managed block
+    matches the roster/frontmatter SSOT.
+  affected_paths:
+    - AGENTS.md
+    - agents/data-analyst.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery AGENTS.md=false
+    - info:in_last_delivery agents/data-analyst.md=false
+  dedupe_key: 956b3a41f3baf745a9e9d2168c7c291b4f57aabc9546acb20bcd827c590d08b1
+  duplicates:
+    - project: co-consult
+      at: '2026-11-13T07:03:58.418+09:00'
+  resolution:
+    outcome: fixed
+    summary: >-
+      Verified: L2 template phase-gate row is already Medium (line 160; zero Low
+      hits across templates/co-consult/; frontmatter tier: medium) — the
+      upstream correction recorded in CHANGELOG 2026-08-15 landed. Stale Low
+      exists only in the delivered Projects/co-consult/AGENTS.md managed block,
+      which converges at the next upgrade visit (no hand-edit per policy).

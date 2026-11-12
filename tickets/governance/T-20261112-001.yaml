@@ -24,7 +24,7 @@ title: >-
   AU2/AU3 conditions.
 priority: urgent
 not_before: '2026-11-12'
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-12T09:53:15.064+09:00'
 history:
@@ -40,5 +40,13 @@ history:
   - at: '2026-11-12T23:02:26.431+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-13T07:05:38.005+09:00'
+    from: review
+    to: done
+result: >-
+  Re-closed after 06:51 store rewrite reverted the transition: governance PR
+  #1990 MERGED (merge 0a521aefd) — ADR-0105, §9.8 rewrite, protected-paths.json,
+  design doc 2026-11-12-unified-batch-runner-design registered, R30/AC-9
+  amendment. First-fire precondition was satisfied (runner verified at 03:01 and
+  deferred on tree state, not authority).
 error: null

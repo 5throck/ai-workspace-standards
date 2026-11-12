@@ -16,7 +16,7 @@ title: >-
   assertion vs template behavior change), then design. Refs: co-deck PR #217
   leftovers.
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-10T21:15:58.959+09:00'
 history:
@@ -29,5 +29,22 @@ history:
   - at: '2026-11-11T08:50:27.014+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-13T02:14:27.527+09:00'
+    from: review
+    to: done
+result: >-
+  Project-side delivery complete: Projects/co-deck
+  scripts/helpers/security-validator.test.ts v1.0.2→v1.1.0 (hermetic
+  workspace-root pin derived from the test file location; integration case pins
+  workspace_root explicitly; import adapted to './security-validator'). The
+  previously failing 'should validate complete extends chain with security'
+  passes — bun test 41 pass / 0 fail from project cwd and from workspace-root
+  cwd (hermetic, was 40/1). Landed via project dev-sync: PR
+  https://github.com/5throck/co-deck/pull/220 merged as 8d6b8ef, local main
+  fast-forwarded. CI never-started (billing wall,
+  T-20261007-025/DEC-20261110-03); local gates: security-validator suite 41/41
+  (two cwds), audit.ts PASS after VERSION_MANIFEST regen. Registry row
+  scripts/SCRIPTS.md bumped to 1.1.0. NOTE: the gating-policy gap itself (test
+  files delivered without @version parity basis) remains open as the design
+  follow-up named in the ticket.
 error: null
