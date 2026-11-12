@@ -101,6 +101,7 @@ Two governance gaps motivate this registration:
 ### 4.5 Secrets gate and safety invariants (non-negotiable)
 
 - R30. Run `gitleaks detect --no-git --config .github/gitleaks-full.toml` before any push and before any promotion into `templates/`. The default `.gitleaks.toml` allowlists `Projects/` entirely (~line 48) and is blind to the fleet.
+  > **Amendment (2026-11-12, ADR-0105 / T-20261112-001):** the full-config scan now runs at TWO boundaries — pre-push/pre-promotion as above, AND pre-merge of any PR (including exception merges under the unified runner's billing-wall terms) — scoped to the exported changed-path contents, never the raw worktree. The default config is never a fallback for the full config.
 - R31. Hard-fail the run on any gitleaks finding.
 - R32. Never pass `--no-verify`. Never bypass sync, audit, or spec gates. Never force-push.
 - R33. Never hand-edit `tickets/governance/*.yaml` outside `ticket.ts`.
@@ -133,7 +134,7 @@ Two governance gaps motivate this registration:
 - AC-6 (R19–R24, Phase II). The project set is glob-derived (no literal count anywhere in the runner prompt); only moved projects resync; Step 2d output rows carry the `domain-model:` prefix and require human triage; no artifact contains the banned acronym; the six paths above are the Step 2d diff scope.
 - AC-7 (R21, Design Gate). The root sync carries a registered spec or an E-exemption record; no bypass of dev-sync step 3.9 appears in any run log.
 - AC-8 (R25–R29, merge policy). The 03:00 batch merges nothing. The 01:30 runner merges project/root PRs only with all checks CLEAN. Upgrade merges run one canary, verify audit + verify-scripts clean, then proceed; a canary failure leaves the remainder open plus one urgent ticket.
-- AC-9 (R30–R31, secrets gate). The gitleaks-full command precedes every push and every promotion in the run transcript; any finding halts the run.
+- AC-9 (R30–R31, secrets gate). The gitleaks-full command precedes every push, every promotion, and every PR merge in the run transcript — the merge-boundary scan is scoped to the exported changed-path contents (never the raw worktree) and always uses the full config (the default config is never a fallback); any finding halts the run.
 - AC-10 (R32–R36, safety). No `--no-verify`, no force-push, no gate bypass, no hand-edited ticket YAML, no `/tmp` snapshots in any run log; snapshots persist under `.pipeline-state/resync-snapshots`.
 - AC-11 (R37, degraded mode). A baseline with ≥3 ERRORs or any Critical produces an audit-only Phase II: zero mutations of any kind.
 - AC-12 (R38–R39, stop conditions). Wall-clock expiry and >2 failing projects each produce exactly one summarizing ticket, not one per item.
