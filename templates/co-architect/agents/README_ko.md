@@ -54,7 +54,6 @@ lang: ko
 | 에이전트 | 파일 | 역할 설명 |
 |---------|------|----------|
 | 아키텍트 | `architect.md` | CAD 자동화 백엔드 및 MCP 서버 설계 총괄 |
-| 자동화 엔지니어 | `automation-engineer.md` | MCP 툴, COM 핸들러, Python 데이터 모델 구현 |
 
 ## 에이전트 생성
 

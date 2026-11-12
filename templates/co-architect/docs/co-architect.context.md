@@ -110,7 +110,6 @@
 | Agent | File | Role | Status |
 |-------|------|------|--------|
 | Architect | `agents/architect.md` | Team lead; implementation plans, design docs, ADRs for MCP server / CAD-automation backend (Phase 1-2) | active |
-| Automation Engineer | `agents/automation-engineer.md` | Common agent (delivered from the shared template): the `/sync` row, repository automation, and implementation of approved plans — MCP tools, Python data models, COM handlers, unit tests (Phase 3-4). CAD-specific bindings: see "Agent bindings — automation-engineer" below | active |
 
 **Platform Engineering Team Scope**: This team owns the *software* layer (`src/cad_intelligence/`, `src/agent/`, `src/file_curator/`, `src/lisp/`, `src/mcp_connector/`, `src/parser/`) — MCP tool implementation, data models, geometry/COM automation logic. It is distinct from Engineering Team, which owns *CAD drawing production* (SketchUp models, ZWCAD drawings) using the tools this team builds. A feature that needs both (e.g. a new elevation-generation capability) is planned by architect, implemented by automation-engineer, and only then produced as drawings by zwcad-drafter. Also distinct from Design Team (visual/design-system architecture).
 
