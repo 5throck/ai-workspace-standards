@@ -1,4 +1,9 @@
-// @version 1.43.0
+// @version 1.44.0
+// v1.44.0 (2026-11-12, U-20261112-003): `rewriteTemplateProvenanceVersion(content, version)` — pure helper that
+//          rewrites the `- **Template-Version**: X` line inside the `## Template Provenance` footer of
+//          docs/<variant>.context.md to the delivered template version. The footer was written once at scaffold
+//          time and never refreshed, so it drifted from template-version.txt (co-consult: 0.5.3 vs 0.30.0).
+//          Only that single line changes; the rest of the footer and file is untouched.
 // v1.43.0 (2026-11-12, U-20261112-011, user decision): `.mcp.json` REMOVED from TRAIL_RETIRED_SEEDS (explicit,
 //          documented shrink of the design 2026-10-31-graft-trail-migration R2.4/R2.6 list). Reason: trail 0.29
 //          stores its `trail mcp` server in the root `.mcp.json` (the migration no longer deletes it), and the
@@ -1804,6 +1809,30 @@ export function resolveDisposition(
  *  `LOCAL-PATCH(upstream-request: …)`, `LOCAL-PATCH (design: …)`,
  *  `LOCAL-PATCH(project-local)` and the bare `LOCAL-PATCH U-…` form. */
 export const LOCAL_PATCH_MARKER_RE = /LOCAL-PATCH\b/;
+
+/**
+ * U-20261112-003: refresh the `- **Template-Version**: X` line of the `## Template Provenance` footer.
+ * Pure. Returns `changed: false` when there is no footer, no version line inside it, or the version
+ * already matches. The version line is only matched inside the footer section (up to the next `## `
+ * heading), so a `Template-Version` mention elsewhere in the file is never touched.
+ */
+export function rewriteTemplateProvenanceVersion(
+  content: string,
+  version: string,
+): { content: string; changed: boolean; from?: string } {
+  if (!version || version === "unknown") return { content, changed: false };
+  const head = content.match(/^## Template Provenance[ \t]*\r?$/m);
+  if (!head || head.index === undefined) return { content, changed: false };
+  const start = head.index + head[0].length;
+  const rest = content.slice(start);
+  const next = rest.search(/^## /m);
+  const section = next === -1 ? rest : rest.slice(0, next);
+  const line = /^(- \*\*Template-Version\*\*:[ \t]*)(\S+)([ \t]*)$/m.exec(section);
+  if (!line || line[2] === version) return { content, changed: false };
+  const newSection =
+    section.slice(0, line.index) + line[1] + version + line[3] + section.slice(line.index + line[0].length);
+  return { content: content.slice(0, start) + newSection + rest.slice(section.length), changed: true, from: line[2] };
+}
 
 /** Count of LOCAL-PATCH markers (every form) in `text`. */
 export function countLocalPatchMarkers(text: string): number {

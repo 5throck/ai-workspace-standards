@@ -3,14 +3,25 @@ id: U-20261112-010
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-12T04:16:32.197+09:00
+created_at: '2026-11-12T04:16:32.197+09:00'
 history:
-  - at: 2026-11-12T04:16:32.197+09:00
+  - at: '2026-11-12T04:16:32.197+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-12T09:20:54.239+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-12T09:20:54.239+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved by U-20261112-002 (templates/common/docs/context.md 2.15 already
+  carries claude-haiku-5-5) plus validate-templates CV-02 (same-version content
+  change guard). Evidence: dry-run and apply of the current engine on a copy of
+  Projects/co-develop reports UPDATE docs/context.md v2.14 -> v2.15 and leaves
+  only claude-haiku-5-5. No engine change needed.
 error: null
 upstream:
   project: co-develop
@@ -19,11 +30,20 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: docs/context.md (pipeline-maintained, hand edits prohibited) carries a stale Claude Low-tier model mapping "claude-haiku-4-5" while every other governance surface (AGENTS.md, CLAUDE.md, docs/VERSION_MANIFEST.md, agents frontmatter) uses "claude-haiku-5-5". The pipeline that regenerates context.md's tier mapping appears to have missed the 5-4→5-5 model rename.
+  symptom: >-
+    docs/context.md (pipeline-maintained, hand edits prohibited) carries a stale
+    Claude Low-tier model mapping "claude-haiku-4-5" while every other
+    governance surface (AGENTS.md, CLAUDE.md, docs/VERSION_MANIFEST.md, agents
+    frontmatter) uses "claude-haiku-5-5". The pipeline that regenerates
+    context.md's tier mapping appears to have missed the 5-4→5-5 model rename.
   affected_paths:
     - docs/context.md
   identity_source: cwd
-  repro: 'In Projects/co-develop: grep -n "haiku-4-5" docs/context.md AGENTS.md CLAUDE.md docs/VERSION_MANIFEST.md → sole haiku-4-5 hit is docs/context.md:37; all others are haiku-5-5. docs/context.md:8 header states the file is pipeline-maintained.'
+  repro: >-
+    In Projects/co-develop: grep -n "haiku-4-5" docs/context.md AGENTS.md
+    CLAUDE.md docs/VERSION_MANIFEST.md → sole haiku-4-5 hit is
+    docs/context.md:37; all others are haiku-5-5. docs/context.md:8 header
+    states the file is pipeline-maintained.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +51,12 @@ upstream:
   dedupe_key: efef3ababd597e4051673eb08f7bbff8dc7f0d09d11b57e551f036fbf2110169
   duplicates:
     - project: co-develop
-      at: 2026-11-12T04:16:32.197+09:00
+      at: '2026-11-12T04:16:32.197+09:00'
+  resolution:
+    outcome: duplicate
+    summary: >-
+      Resolved by U-20261112-002 (templates/common/docs/context.md 2.15 already
+      carries claude-haiku-5-5) plus validate-templates CV-02 (same-version
+      content change guard). Evidence: dry-run and apply of the current engine
+      on a copy of Projects/co-develop reports UPDATE docs/context.md v2.14 ->
+      v2.15 and leaves only claude-haiku-5-5. No engine change needed.

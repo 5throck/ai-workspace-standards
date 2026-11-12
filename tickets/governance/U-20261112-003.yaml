@@ -3,14 +3,27 @@ id: U-20261112-003
 kind: manual
 title: Upstream request from co-consult
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-12T03:12:02.487+09:00
+created_at: '2026-11-12T03:12:02.487+09:00'
 history:
-  - at: 2026-11-12T03:12:02.487+09:00
+  - at: '2026-11-12T03:12:02.487+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-12T09:20:54.264+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-12T09:20:54.264+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-12T09:20:54.264+09:00'
+    from: review
+    to: done
+result: >-
+  upgrade-project.ts 1.103.0 + lib/upgrade-policy.ts 1.44.0 rewrite the Template
+  Provenance footer Template-Version line of docs/<variant>.context.md to the
+  delivered version after the template-version.txt write. Branch
+  pr/20261112-engine-provenance-footer (PR link in the PR body).
 error: null
 upstream:
   project: co-consult
@@ -19,7 +32,16 @@ upstream:
   source: project/co-consult
   trust: untrusted
   suspected_layer: L2
-  symptom: 'The upgrade pipeline updates template-version.txt (version=0.30.0, upgraded=2026-11-08) but does not rewrite the "## Template Provenance" footer block inside docs/<variant>.context.md. In co-consult L3 the provenance block still reads "Template-Version: 0.5.3" while template-version.txt says 0.30.0 — 10 minor versions stale. Repro: after upgrade-project delivery v0.30.0, read docs/co-consult.context.md footer vs template-version.txt — values diverge. Expected: upgrade pipeline rewrites the provenance block from template-version.txt (or the block is removed in favor of the single version file).'
+  symptom: >-
+    The upgrade pipeline updates template-version.txt (version=0.30.0,
+    upgraded=2026-11-08) but does not rewrite the "## Template Provenance"
+    footer block inside docs/<variant>.context.md. In co-consult L3 the
+    provenance block still reads "Template-Version: 0.5.3" while
+    template-version.txt says 0.30.0 — 10 minor versions stale. Repro: after
+    upgrade-project delivery v0.30.0, read docs/co-consult.context.md footer vs
+    template-version.txt — values diverge. Expected: upgrade pipeline rewrites
+    the provenance block from template-version.txt (or the block is removed in
+    favor of the single version file).
   affected_paths:
     - docs/co-consult.context.md
     - template-version.txt
@@ -33,4 +55,13 @@ upstream:
   dedupe_key: b6622394997975bdaddd7ac23172d9df69dad438e06352fbca7a46fbe569478a
   duplicates:
     - project: co-consult
-      at: 2026-11-12T03:12:02.487+09:00
+      at: '2026-11-12T03:12:02.487+09:00'
+  resolution:
+    outcome: fixed
+    template_version: unreleased
+    summary: >-
+      upgrade-project.ts 1.103.0 + lib/upgrade-policy.ts 1.44.0 rewrite the
+      Template Provenance footer Template-Version line of
+      docs/<variant>.context.md to the delivered version after the
+      template-version.txt write. Branch pr/20261112-engine-provenance-footer
+      (PR link in the PR body).
