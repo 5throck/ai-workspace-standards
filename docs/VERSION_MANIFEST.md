@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-12T02:04:22.963Z
+**Generated**: 2026-11-12T02:49:18.468Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 60
-- **Scripts**: 135 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 136 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -146,6 +146,7 @@
 | generate-scripts-mirror.ts | 1.1.0 | scripts/generate-scripts-mirror.ts | fs, path, url |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | fs, path, process |
 | generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
+| generate-skill-lifecycle-records.ts | 1.0.0 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
 | generate-version-manifest.ts | 1.12.1 | scripts/generate-version-manifest.ts | bun, child_process, fs, js-yaml, module, path |
 | graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | child_process, fs, path, url |
 | hub-bootstrap.ts | 1.6.0 | scripts/hub-bootstrap.ts | child_process, crypto, fs, path |
@@ -184,7 +185,7 @@
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
 | skill-graph-fleet-report.ts | 2.4.0 | scripts/skill-graph-fleet-report.ts | fs, path |
-| skill-lifecycle-audit.ts | 1.11.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
+| skill-lifecycle-audit.ts | 1.12.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
 | skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun, fs, path |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | fs, path |
@@ -224,7 +225,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
-| validate-templates.ts | 1.78.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
+| validate-templates.ts | 1.79.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |

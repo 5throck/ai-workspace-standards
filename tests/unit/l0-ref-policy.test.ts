@@ -15,12 +15,12 @@
  *    (guards the footer reword and the scrubbed COMMON-CONSTITUTION zone against
  *    propagation regressions).
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 import { describe, test, expect } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { blankL0Refs, findL0LeakLines, L0_REF_PATTERN } from '../../scripts/helpers/l0-ref-policy.ts';
+import { blankL0Refs, findL0LeakLines, L0_INTERNAL_REF_PATTERN, L0_REF_PATTERN } from '../../scripts/helpers/l0-ref-policy.ts';
 import { splitOffVersionFooter } from '../../scripts/helpers/context-sections.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
@@ -104,6 +104,35 @@ describe('findL0LeakLines', () => {
 
   test('clean content yields no leaks', () => {
     expect(findL0LeakLines('# Title\n\nSee docs/context.md and docs/governance/.\n').length).toBe(0);
+  });
+});
+
+// ── L0_INTERNAL_REF_PATTERN (U-20261112-005 PR-1) ────────────────────────────
+
+describe('L0_INTERNAL_REF_PATTERN', () => {
+  const hits = [
+    'see ADR-0103',
+    'DEC-20261109-01 ruled',
+    'ticket U-20261109-001',
+    'T-20261106-010 closed',
+    'docs/designs/2026-09-08-x.md',
+    'docs/decisions/foo.md',
+    'docs/adr/0103-x.md',
+    'docs/reports/r.md',
+    'tickets/governance/U-1.yaml',
+    'memory/2026-11-12.md',
+    'CONSTITUTION.md section 11.2',
+    'docs/constitution/06.md',
+  ];
+  for (const text of hits) {
+    test(`matches: ${text}`, () => {
+      expect(L0_INTERNAL_REF_PATTERN.test(text)).toBe(true);
+    });
+  }
+  test('plain project text does not match', () => {
+    for (const text of ['scripts/audit.ts', 'docs/context.md', 'the ADR process', 'skills/sync/SKILL.md', 'ticket tracker']) {
+      expect(L0_INTERNAL_REF_PATTERN.test(text)).toBe(false);
+    }
   });
 });
 

@@ -9,7 +9,11 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.11.0
+ * @version 1.12.0
+ *
+ * v1.12.0 (2026-11-12, U-20261112-005 PR-1): Check LC fix text gains one sentence — template-delivered
+ *         skills receive their record on upgrade; a project-local skill needs its record
+ *         created. Message text and severity are unchanged.
  *
  * v1.11.0 (2026-11-08, T-20261108-004 — E2E nightly red, co-work scaffold
  *          only, 14/15 variants green): vendored external-deps clones
@@ -935,7 +939,7 @@ function auditSkills(jsonMode = false): AuditResult {
           level: "warning",
           file: relPath,
           message: `No lifecycle record: docs/lifecycle/skills/${frontmatter.name}.md is missing for an active skill`,
-          fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata)`,
+          fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata). Template-delivered skills receive their record when the project is next upgraded from its template; if this skill is project-local, create the record.`,
         });
       } else if (frontmatter.status === "active" && selfManaged && !existsSync(lifecycleRecordPath)) {
         if (!jsonMode)

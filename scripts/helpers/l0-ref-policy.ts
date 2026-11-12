@@ -19,7 +19,12 @@
  * Side-effect-free module (no top-level execution) so unit tests can import it
  * directly — same convention as helpers/rollback-partial-project.ts.
  *
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-11-12, U-20261112-005 PR-1): L0_INTERNAL_REF_PATTERN — one shared definition of
+ *         L0-internal citations (ADR/DEC/ticket ids, docs/designs|decisions|adr|reports, tickets/,
+ *         memory/<date>, plus the CONSTITUTION forms) for the lifecycle-record generator, the
+ *         SLR validator check and tests.
  *
  * T-20260912-005: policy self-description comments are exempt from the leak
  * scan. An HTML comment that documents the Non-Propagation rule itself (e.g.
@@ -33,6 +38,14 @@
 
 /** L0 reference pattern: CONSTITUTION.md (literal) or a docs/constitution/ path segment. */
 export const L0_REF_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
+
+/**
+ * L0-internal reference pattern (design 2026-11-12-skill-lifecycle-record-delivery-design 4.2):
+ * citations that resolve only inside the workspace root — ADR ids, DEC ids, ticket ids,
+ * design/decision/adr/report paths, tickets/ and memory/<date> — plus the L0_REF_PATTERN forms.
+ */
+export const L0_INTERNAL_REF_PATTERN =
+  /\bADR-\d+|\bDEC-\d{8}|\b[TU]-\d{8}-\d+|docs[\/\\](?:designs|decisions|adr|reports)[\/\\]|\btickets[\/\\]|\bmemory[\/\\]\d|CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
 
 /** Global-flag twin of {@link L0_REF_PATTERN} for `.replace()` use (never `.test()` — lastIndex trap). */
 export const L0_REF_PATTERN_GLOBAL = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/gi;

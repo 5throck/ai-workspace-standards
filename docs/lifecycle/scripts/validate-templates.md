@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.78.0
+- **Version**: 1.79.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-11
+- **Last Updated**: 2026-11-12
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-12 | production | production | v1.78.0 → v1.79.0 (U-20261112-005 PR-1, design docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md §4.6): new check SLR (skill lifecycle record coverage, parity, leak, owner) evaluated by generate-skill-lifecycle-records.ts and gated by scripts/skill-record-enforcement.json — enforce:false (shipped state) reports WARN only, enforce:true fails. | automation-engineer |
 | 2026-11-11 | production | production | v1.77.0 → v1.78.0 (DEC-20261111-01 PR-D): blocking check CV-02 same-version-content-change — modified templates/** versioned files whose content changed without a version bump (base: CV02_BASE, else merge-base HEAD origin/main, else HEAD). | automation-engineer |
 | 2026-11-11 | production | production | v1.76.1 → v1.77.0 (T-20261110-012 Scope C2): blocking check CV-01 common-script-version — @version on every templates/common/scripts/**/*.ts. | automation-engineer |
 | 2026-11-11 | production | production | v1.76.0 → v1.76.1 (U-20261111-001): removed the import-time process.exit(1) for a missing templates/ dir; main() returns 0 with "not applicable" in L3 project roots. | automation-engineer |

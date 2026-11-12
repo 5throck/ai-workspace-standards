@@ -1,7 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.78.0
+ * @version 1.79.0
+ *
+ * v1.79.0 (2026-11-12, U-20261112-005 PR-1, design
+ *          docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md §4.6, D6/D10/D11):
+ *          new check SLR (skill lifecycle record coverage, parity, leak, owner) — evaluated by
+ *          generate-skill-lifecycle-records.ts evaluateSlr and gated by
+ *          scripts/skill-record-enforcement.json: enforce:false (the shipped state) reports WARN
+ *          lines only and never fails; enforce:true makes every finding an error. One line per
+ *          (rule, variant). Pure core unit-pinned by tests/unit/validate-templates-skill-records.test.ts.
  *
  * v1.78.0 (2026-11-11, DEC-20261111-01 PR-D, design
  *          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md §4.8 V1):
@@ -617,6 +625,13 @@ import {
   auditFixedTargets,
 } from "./lib/propagation-map-schema.ts";
 import { scrubConstitutionRefs } from "./lib/constitution-scrub.ts";
+import {
+  evaluateSlr,
+  fsTree as slrFsTree,
+  parseEnforcementFlag,
+  parseOwnerMap,
+  slrIssues,
+} from "./generate-skill-lifecycle-records.ts";
 import { PLATFORMS } from "./validate-model-registry.ts";
 import { PLATFORM_AGENT_ADAPTERS } from "./sync-agent-mirrors.ts";
 import { loadSkillGraph, findCapabilityDivergence } from "./lib/skill-graph-compat.ts";
@@ -3167,6 +3182,45 @@ function checkSameVersionContentChange(): void {
       `${b.path} content changed vs ${base.slice(0, 12)} but version is still ${b.version} — upgrade-project cannot tell old from new; bump the version`,
       "Bump the @version / frontmatter version / inline footer version (format sweeps bump the patch)",
     );
+  }
+}
+
+// Check SLR (v1.79.0; U-20261112-005, design 2026-11-12-skill-lifecycle-record-delivery-design §4.6):
+// every delivered skill has a lifecycle record, generated records reproduce byte for byte, records
+// carry no L0-internal reference, and every skill resolves an existing owner. The flag file
+// scripts/skill-record-enforcement.json decides WARN (enforce:false) versus FAIL (enforce:true).
+function checkSkillLifecycleRecords(): void {
+  if (!JSON_MODE) console.log("\n=== Check SLR: skill lifecycle record coverage, parity, leak, owner ===");
+  if (!existsSync(join(TEMPLATES_DIR, "common"))) {
+    pass("SLR: no templates/common — not applicable");
+    return;
+  }
+  const readOpt = (rel: string): string | null => {
+    const p = join(ROOT, rel);
+    return existsSync(p) ? readFileSync(p, "utf-8") : null;
+  };
+  let enforce = false;
+  let ownerMap: Record<string, string> = {};
+  try {
+    enforce = parseEnforcementFlag(readOpt("scripts/skill-record-enforcement.json")).enforce;
+    ownerMap = parseOwnerMap(readOpt("scripts/data/skill-owner-map.json"));
+  } catch (e) {
+    fail(
+      "common",
+      "skill-record-config",
+      `SLR: cannot read scripts/skill-record-enforcement.json or scripts/data/skill-owner-map.json: ${(e as Error).message}`,
+    );
+    return;
+  }
+  const { findings, checkedSkills } = evaluateSlr(slrFsTree(ROOT), ownerMap);
+  const issues = slrIssues(findings, enforce);
+  if (issues.length === 0) {
+    pass(`SLR: ${checkedSkills} skill(s) — coverage, parity, leak and owner all clean`);
+    return;
+  }
+  for (const i of issues) {
+    if (i.level === "error") fail(i.variant, i.check, i.message, i.fix);
+    else warn(i.variant, i.check, `${i.message} [report-only: enforce=false]`, i.fix);
   }
 }
 
@@ -8438,6 +8492,7 @@ function main(): number {
   checkL0L1ScriptParity();
   checkCommonScriptVersions(); // CV-01: @version on every common script (T-20261110-012 C2)
   checkSameVersionContentChange(); // CV-02: same-version content change (DEC-20261111-01 V1)
+  checkSkillLifecycleRecords(); // SLR: skill lifecycle record coverage/parity/leak/owner, flag-gated (U-20261112-005 PR-1)
   checkPlatformDocumentationParity();
   checkRootCommonCommandsParity();
   checkPropagationMapSchema();

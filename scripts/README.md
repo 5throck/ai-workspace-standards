@@ -127,6 +127,10 @@ section presence (VARIANT-INJECT: guidelines [REQUIRED] marker enforcement).
 **Usage**: `bun scripts/dependency-audit.ts [--waiver-file <path>]`
 **Runs automatically**: CI dependency-audit job (`templates/common/.github/workflows/ci.yml`)
 
+#### `generate-skill-lifecycle-records.ts`
+**Purpose**: Generates the governance records (`docs/lifecycle/skills/<name>.md`) that template delivery ships with each skill, and evaluates the SLR check (coverage, parity, leak, owner) used by `validate-templates.ts`.
+**Usage**: `bun scripts/generate-skill-lifecycle-records.ts` (dry run), `--check` (byte parity), `--write`, `--project <path>` (derive records for a project's local skills). Generated files start with a marker line; files without it are hand-owned and never touched.
+
 #### `generate-ide-rules.ts`
 **Purpose**: IDE context rules generator for `.cursorrules` and `.clauderules`. Generates IDE-specific context rules dynamically based on workspace context and agent rosters.
 **Usage**: `bun scripts/generate-ide-rules.ts [--check] [--force] [--dir <path>]`
