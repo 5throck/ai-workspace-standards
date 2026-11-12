@@ -3282,7 +3282,7 @@
       "source": "architect",
       "created": "2026-11-12",
       "last_updated": "2026-11-12",
-      "review_notes": "U-20261112-005 (from co-develop): delivered skills arrive without docs/lifecycle/skills records. User decisions 2026-11-12: D1 refined projection; D2 variant-own records delivered with the 42 common ones (153 derived); D3 leftovers allowed (non-goal); D4 co-newbiz gets records (65 derived, project-side batch); D5 owner mapped by name via checked table; D6 SLR blocking with the records; D7 one template PR; D8 explain-me delivered; D9 frozen projects in one batch at freeze-lift. Open: O1 root/template PR boundary, O2 co-newbiz delivery vehicle. Tickets T1-T6 proposed, not created."
+      "review_notes": "U-20261112-005 (from co-develop): delivered skills arrive without docs/lifecycle/skills records. User decisions 2026-11-12: D1 refined projection; D2 variant-own records delivered with common (153 derived); D3 leftovers allowed; D4 co-newbiz records (65, D12 project PR via --project); D5 owner mapped by checked table; D6 SLR blocking, amended by D10/D11 (flag-gated, report-only only between PR merges in one release window); D7 superseded by D10 (split root/templates: PR-1 root, PR-2 templates 188 records, PR-3 root flip); D8 explain-me delivered; D9 frozen projects one batch at freeze-lift. No open questions. Tickets T1-T6 proposed, not created (CLI cannot express them)."
     },
     {
       "id": "skillhygiene",
