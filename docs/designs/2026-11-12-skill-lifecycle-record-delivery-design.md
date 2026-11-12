@@ -2,7 +2,7 @@
 
 - **Spec ID**: `2026-11-12-skill-lifecycle-record-delivery-design`
 - **Date**: 2026-11-12
-- **Status**: approved (implementation complete in PR-3; set to implemented after that PR merges). The user made scope decisions D1-D3 and, in a second round, D4-D9, then D10-D12 on 2026-11-12 (Decisions section). No question is open. Implementation tickets T1..T6 in §9 are proposals for the PM to create.
+- **Status**: implemented (PR-1 #1976, PR-1b #1985, PR-2 #1986, PR-3 #1987 merged 2026-11-12). The user made scope decisions D1-D3 and, in a second round, D4-D9, then D10-D12 on 2026-11-12 (Decisions section). No question is open. Implementation tickets T1..T6 in §9 are proposals for the PM to create.
 - **Author**: architect (PM-dispatched, Design Gate Row 0, design only)
 - **Input**: upstream ticket U-20261112-005 (from co-develop, `tickets/governance/U-20261112-005.yaml`): "delivered skills arrive record-less at L3 and skill-lifecycle-audit warns for every delivered active skill (observed: 31 warnings in Projects/co-develop)".
 - **Related**: U-20261028-011 (Check LC moved out of the L0-only gate), [`2026-11-11-upgrade-overwrite-protection-design.md`](2026-11-11-upgrade-overwrite-protection-design.md) and DEC-20261111-01, ADR-0069 (L1 `docs/` is independently maintained; the `docs` propagation domain is disabled), `docs/self-managed-surfaces.json`.

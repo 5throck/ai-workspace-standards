@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20261112-003
+kind: manual
+title: >-
+  Variant READMEs (7 + _ko) carry stale 'PM runs /sync; opens a PR' text from a
+  one-time seed with no regenerate path
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-12T18:32:25.353+09:00'
+history:
+  - at: '2026-11-12T18:32:25.353+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

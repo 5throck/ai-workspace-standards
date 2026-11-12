@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261112-002
+kind: manual
+title: >-
+  dev-sync first-run unit flake: meeting-command-retirement and
+  meeting-participation-boilerplate 'Projects leg' fail at step 4.85, pass on
+  rerun (suspected transient Projects/ directory)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-12T18:32:25.328+09:00'
+history:
+  - at: '2026-11-12T18:32:25.328+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

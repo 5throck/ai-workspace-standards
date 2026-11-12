@@ -3,14 +3,28 @@ id: U-20261112-005
 kind: manual
 title: Upstream request from co-develop
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-12T04:16:32.149+09:00
+created_at: '2026-11-12T04:16:32.149+09:00'
 history:
-  - at: 2026-11-12T04:16:32.149+09:00
+  - at: '2026-11-12T04:16:32.149+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-12T18:32:17.286+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-12T18:32:17.286+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-12T18:32:17.286+09:00'
+    from: review
+    to: done
+result: >-
+  Skill lifecycle records are now delivered through templates (35 common
+  projected records plus 153 variant-own derived records), skill-lifecycle-audit
+  (SLR) is enforced, and dev-sync regenerates the records. Projects receive them
+  on the next upgrade (5 frozen projects at freeze-lift; co-newbiz via a project
+  PR).
 error: null
 upstream:
   project: co-develop
@@ -19,12 +33,26 @@ upstream:
   source: project/co-develop
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Template delivery/upgrade waves propagate skills/<name>/SKILL.md bodies to variant projects but do not propagate their docs/lifecycle/skills/<name>.md records. L0 holds 58 lifecycle records while the L1 canonical (templates/common/docs/lifecycle/skills/) carries only 7; delivered skills therefore arrive record-less at L3 and skill-lifecycle-audit warns for every delivered active skill (observed: 31 warnings in Projects/co-develop). The project-side escape hatch (docs/self-managed-surfaces.json) is not intended for delivered content.'
+  symptom: >-
+    Template delivery/upgrade waves propagate skills/<name>/SKILL.md bodies to
+    variant projects but do not propagate their docs/lifecycle/skills/<name>.md
+    records. L0 holds 58 lifecycle records while the L1 canonical
+    (templates/common/docs/lifecycle/skills/) carries only 7; delivered skills
+    therefore arrive record-less at L3 and skill-lifecycle-audit warns for every
+    delivered active skill (observed: 31 warnings in Projects/co-develop). The
+    project-side escape hatch (docs/self-managed-surfaces.json) is not intended
+    for delivered content.
   affected_paths:
     - templates/common/docs/lifecycle/skills/
     - docs/lifecycle/skills/
   identity_source: cwd
-  repro: '1. At L0, list ai_workspace/docs/lifecycle/skills/ (58 records) vs ai_workspace/templates/common/docs/lifecycle/skills/ (7 records). 2. Run a delivery/upgrade wave into a variant. 3. In the variant, run bun run skill-lifecycle-audit — every delivered active skill without a pre-existing local record warns "No lifecycle record". Observed in Projects/co-develop: 31 active skills warn.'
+  repro: >-
+    1. At L0, list ai_workspace/docs/lifecycle/skills/ (58 records) vs
+    ai_workspace/templates/common/docs/lifecycle/skills/ (7 records). 2. Run a
+    delivery/upgrade wave into a variant. 3. In the variant, run bun run
+    skill-lifecycle-audit — every delivered active skill without a pre-existing
+    local record warns "No lifecycle record". Observed in Projects/co-develop:
+    31 active skills warn.
   triage: inbox
   flagged: true
   triage_reasons:
@@ -36,4 +64,14 @@ upstream:
   dedupe_key: 0e52ca3dffa94d24843fc47d405f7b6cedd42592b4cb97a947fa53cb608d34e5
   duplicates:
     - project: co-develop
-      at: 2026-11-12T04:16:32.149+09:00
+      at: '2026-11-12T04:16:32.149+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1986
+    template_version: unreleased
+    summary: >-
+      Skill lifecycle records are now delivered through templates (35 common
+      projected records plus 153 variant-own derived records),
+      skill-lifecycle-audit (SLR) is enforced, and dev-sync regenerates the
+      records. Projects receive them on the next upgrade (5 frozen projects at
+      freeze-lift; co-newbiz via a project PR).

@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20261112-009
+kind: manual
+title: >-
+  Check LC warning count for delivered skills in a scaffold is unverified:
+  new-project.ts only scaffolds inside the workspace root
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-12T18:32:25.500+09:00'
+history:
+  - at: '2026-11-12T18:32:25.500+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
