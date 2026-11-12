@@ -1,0 +1,43 @@
+schemaVersion: 1
+id: U-20261113-002
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-13T07:11:02.534+09:00
+history:
+  - at: 2026-11-13T07:11:02.534+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'Re-file of U-20261112-010 (left the live store overnight after filing — individual lookup returns not found; believed merged into a same-day co-develop request per the L0 governance ticket store). The graft→trail fleet standard (870cd776f, 2026-11-08) updated templates/common/{AGENTS,CLAUDE,GEMINI,HERMES,CODEX}.md and templates/co-abap/AGENTS.md, but the 0.30.0 delivery to Projects/co-abap (ebcacde, 2026-11-08 13:09, AFTER the template commit) delivered neither the trail blocks nor removal of the graft blocks: project AGENTS.md:563-603 still taught `graft map/ask/grep` though the graft binary is uninstalled, HERMES.md:95 was graft-era, CODEX.md:76-81 had graft prose + a `bunx @nanonets/graft` snippet, and CLAUDE.md/GEMINI.md carried no context-graph block at all. Root cause: tool-owned blocks (graft:start/end) sit outside COMMON-*/WORKSPACE-MANAGED merge zones, upgrade-project merge preserves project free text, and `trail init` wired .trail/hook.cjs + settings hooks but did not rewrite the doc blocks in this checkout (the project has since hand-adopted the trail blocks with LOCAL-PATCH markers — the upstream ask is the durable delivery-side cure). TB-01 (scripts/lib/trail-block-parity.ts) enforces root==common==variant only inside validate-templates.ts (L0; delivered-project CI never runs it). Expected: detached projects receive the trail block swap (or trail init completes doc blocks it wired hooks for), and a delivered-side detector flags a tool-owned block instructing a CLI absent from PATH.'
+  affected_paths:
+    - AGENTS.md
+    - HERMES.md
+    - CODEX.md
+    - CLAUDE.md
+    - GEMINI.md
+    - scripts/lib/trail-block-parity.ts
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery AGENTS.md=false
+    - info:in_last_delivery HERMES.md=false
+    - info:in_last_delivery CODEX.md=false
+    - info:in_last_delivery CLAUDE.md=false
+    - info:in_last_delivery GEMINI.md=false
+    - info:in_last_delivery scripts/lib/trail-block-parity.ts=false
+  dedupe_key: f6984a3dbbeebc328daf27dbb08245fceaff1685499dec0e0badd99d6b6e9803
+  duplicates:
+    - project: co-abap
+      at: 2026-11-13T07:11:02.534+09:00

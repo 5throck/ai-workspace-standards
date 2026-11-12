@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261113-003
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-13T07:11:02.552+09:00
+history:
+  - at: 2026-11-13T07:11:02.552+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'Re-file of U-20261112-011 (left the live store overnight after filing — individual lookup returns not found; believed merged into a same-day co-develop request per the L0 governance ticket store). Since skill-lifecycle-audit 1.9.0 (U-20261028-011) removed the workspace-root gate, delivered projects honestly report lifecycle-record gaps: Projects/co-abap showed 50 skills / 42 WARN ("No lifecycle record"). Two delivery gaps: (a) templates ship docs/lifecycle/agents/ but NO docs/lifecycle/skills/ (verified templates/co-abap/docs/lifecycle/ has only agents/) — projects are born with zero skill records while the delivered audit demands them; (b) the 7 records delivered earlier (v0.6.0 resync) are L0-perspective artifacts: all 7 cite templates/common/... paths absent in detached checkouts, and 6 of 7 have exactly one ## Metadata block (i18n-audit.md zero) so lifecycleRecordVersions() returns null and Check MV silently never validates them — LC passes on existence alone. Expected: upgrade/new-project deliver skill lifecycle records adapted to the delivery (in-checkout paths, dual Metadata version lines matching SKILL.md frontmatter), or the audit documents the dimension as L0-only. The project has since authored all 49 records locally with LOCAL-PATCH markers (upstream adoption remains the durable cure).'
+  affected_paths:
+    - docs/lifecycle/skills
+    - scripts/skill-lifecycle-audit.ts
+  identity_source: cwd
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: docs/lifecycle/skills'
+    - info:in_last_delivery docs/lifecycle/skills=false
+    - info:in_last_delivery scripts/skill-lifecycle-audit.ts=true
+  dedupe_key: 16ed65d1f38c4e232cfbe15f4babdd343c27344c49b03d224e54afdf7155c8f5
+  duplicates:
+    - project: co-abap
+      at: 2026-11-13T07:11:02.552+09:00

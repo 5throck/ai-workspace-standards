@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: U-20261113-005
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-13T07:23:38.342+09:00
+history:
+  - at: 2026-11-13T07:23:38.342+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The template-delivered .claude/settings.json carries a "footerLinksRegexes" key set to an empty array that no consumer reads in its delivered form — a dead configuration key propagated to variant projects on upgrade. Originally filed 2026-11-12 (co-security) as U-20261112-008; that id slot now holds a different project''s submission after the fleet triage wave, so re-filing. Expected: remove the key from the L1 template or wire it to a real consumer.'
+  affected_paths:
+    - templates/common/.claude/settings.json
+  identity_source: cwd
+  repro: '1. Open templates/common/.claude/settings.json (~line 165). 2. Observe "footerLinksRegexes": [] — an empty-array config key. 3. Grep the template tree and scripts for consumers of footerLinksRegexes: no live consumer reads it in delivered form. 4. Variant projects inherit the dead key on upgrade.'
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: templates/common/.claude/settings.json'
+    - info:in_last_delivery templates/common/.claude/settings.json=false
+  dedupe_key: bcb6baeac7d39b82c15028106fc52c7537e4c20880171321a32673ac83a4cb99
+  duplicates:
+    - project: co-security
+      at: 2026-11-13T07:23:38.342+09:00
