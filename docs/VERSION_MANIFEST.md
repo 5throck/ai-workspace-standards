@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-10T22:42:19.843Z
+**Generated**: 2026-11-12T13:36:23.132Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -113,7 +113,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | fs, path |
-| audit.ts | 2.65.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
+| audit.ts | 2.66.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
 | backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
@@ -154,7 +154,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | fs, path |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | fs, path |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | child_process, fs, os, path, url |
-| l3-to-variant-pipeline.ts | 1.23.0 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
+| l3-to-variant-pipeline.ts | 1.23.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.21.0 | scripts/lifecycle-sync-audit.ts | crypto, fs, js-yaml, path, process |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | fs, path |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun, path |
@@ -171,7 +171,7 @@
 | propagate-to-templates.ts | 2.23.0 | scripts/propagate-to-templates.ts | child_process, crypto, fs, js-yaml, path |
 | qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun, crypto |
 | readme-lifecycle-audit.ts | 1.1.0 | scripts/readme-lifecycle-audit.ts | fs, path, process |
-| regenerate-agents-md.ts | 1.4.0 | scripts/regenerate-agents-md.ts | fs, path |
+| regenerate-agents-md.ts | 1.5.0 | scripts/regenerate-agents-md.ts | fs, path |
 | release-template.ts | 1.0.0 | scripts/release-template.ts | child_process, fs, path |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | child_process, fs, path, readline |
 | render-commands.ts | 1.1.0 | scripts/render-commands.ts | fs, path |
@@ -211,10 +211,10 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.98.1 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.100.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
-| validate-doc-folder.ts | 1.3.0 | scripts/validate-doc-folder.ts | fs, path |
+| validate-doc-folder.ts | 1.4.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.1 | scripts/validate-md-language.ts | child_process, fs, path |
 | validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | fs, path, url |
@@ -224,7 +224,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
-| validate-templates.ts | 1.76.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
+| validate-templates.ts | 1.77.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |
