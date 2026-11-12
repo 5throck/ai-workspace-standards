@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-12T04:47:00.263Z
+**Generated**: 2026-11-12T04:58:00.359Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -21,7 +21,7 @@
 |------|------|------|-------|---------------|
 | architect | agents/architect.md | high | claude-opus-5-5 | 2026-11-10 |
 | auditor | agents/auditor.md | medium | claude-sonnet-5-5 | 2026-11-10 |
-| automation-engineer | agents/automation-engineer.md | low | claude-haiku-5-5 | 2026-11-10 |
+| automation-engineer | agents/automation-engineer.md | medium | claude-sonnet-5-5 | 2026-11-10 |
 | docs-writer | agents/docs-writer.md | medium | claude-sonnet-5-5 | 2026-11-10 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | claude-sonnet-5-5 | 2026-10-30 |
 | pm | agents/pm.md | medium | claude-sonnet-5-5 | 2026-10-30 |
@@ -225,7 +225,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
-| validate-templates.ts | 1.79.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
+| validate-templates.ts | 1.79.1 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |

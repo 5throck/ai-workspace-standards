@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * YAML Frontmatter Merger for Template Files
- * @version 1.8.6
+ * @version 1.8.7
  *
  * Handles two patterns:
  * 1. `extends` pattern: Variant file with `extends: path/to/skeleton.md`
@@ -1200,7 +1200,7 @@ ${substituteAgentNames(subpoints.version, map)}
 
   ${generatePhaseDeterminationTable(variantOverrides, mergedFrontmatter.variant || "unknown")}
 
-  **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. \`${map["automation-engineer"]}\` is always Low — assigning it High is a governance violation.
+  **Tier ceiling rule**: An agent's tier may NOT be elevated beyond its defined tier. \`${map["automation-engineer"]}\` is Medium — assigning it High is a governance violation.
 
 **Platform Note**: The execution plan table format has been simplified to remove the \`Platform\` column. PM will still internally manage the L0-only task classification.
 

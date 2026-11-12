@@ -57,7 +57,7 @@ The `description` field is how the AI tool selects the right agent - always writ
 | Analysis | Read-only investigation, codebase exploration, data gathering | Medium | `*-analyst.md`, `auditor.md` |
 | Design | Architecture decisions, implementation planning, technical spec | High | `architect.md` |
 | Design | UI/UX specifications, wireframes, component and interaction design | Medium | `designer.md` |
-| Execution | Code implementation and automated test verification | Low | `automation-engineer.md`, `scaffolding-expert.md` (`docs-writer.md` remains Medium) |
+| Execution | Code implementation and automated test verification | Low | `scaffolding-expert.md` (`automation-engineer.md` and `docs-writer.md` are Medium) |
 | Quality | Independent QA gate, security validation | Medium | `auditor.md`, `security-expert.md` |
 
 #### 5.3 PM Orchestrator Rules
@@ -110,7 +110,7 @@ Phase 6 - Quality Assurance & Finalization (specialist-autonomous)
   auditor executes qa-gate.ts autonomously
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
-  Gate passed → PM closes out (not a phase): runs /sync "type: description" → PR opened → hand-off to user
+  Gate passed → PM closes out (not a phase): dispatches /sync "type: description" to automation-engineer → PR opened → PM verifies the landing → hand-off to user
 ```
 
 > **Gate-moment decision records**: every gate ruling above — Design Gate Row 0 rulings, escalations, and go/no-go decisions — must emit a decision record (`docs/decisions/DEC-YYYYMMDD-NN.md`) before dispatch continues, per ADR-0061.

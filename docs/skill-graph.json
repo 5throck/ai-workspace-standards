@@ -2529,8 +2529,8 @@
       "name": "automation-engineer",
       "scope": "root",
       "capability": "automation-engineer",
-      "content_hash": "6071c47d7e632d82",
-      "version": "1.0.0",
+      "content_hash": "68f5e297aad8d38b",
+      "version": "1.1.0",
       "mirrors": [
         "agents/automation-engineer.md"
       ]
@@ -2568,8 +2568,8 @@
       "name": "pm",
       "scope": "root",
       "capability": "pm",
-      "content_hash": "99e82f537ff41073",
-      "version": "1.2.2",
+      "content_hash": "7a049182e6bcd420",
+      "version": "1.3.0",
       "mirrors": [
         "agents/pm.md"
       ]
@@ -12025,6 +12025,12 @@
       "type": "references",
       "from": "agent:root/automation-engineer",
       "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/automation-engineer",
+      "to": "skill:root/sync",
       "source": "prose"
     },
     {

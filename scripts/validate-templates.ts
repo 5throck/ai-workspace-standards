@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.79.0
+ * @version 1.79.1
+ *
+ * v1.79.1 (2026-11-12, design docs/designs/2026-11-12-sync-ownership-and-common-automation-engineer-design.md
+ *          D2/D5, AE-1): VA-02 WORKSPACE_ROOT_AGENTS drops automation-engineer, which becomes a
+ *          common agent (Medium) and may appear in variant AGENTS.md rows.
  *
  * v1.79.0 (2026-11-12, U-20261112-005 PR-1, design
  *          docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md §4.6, D6/D10/D11):
@@ -5731,7 +5735,6 @@ function checkWorkspaceRootAgentIntrusion(variant: string): void {
 
   const WORKSPACE_ROOT_AGENTS = [
     "scaffolding-expert",
-    "automation-engineer",
     "docs-writer",
     "security-expert",
     "architect",

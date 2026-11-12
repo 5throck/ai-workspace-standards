@@ -12,13 +12,14 @@
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/automation-engineer.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/automation-engineer.md SSOT (Can Support In corrected to [1]); agents/automation-engineer.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8 (project review 2026-10-26 findings #4/#9, T-20261026-004) | lifecycle-manager |
 | 2026-10-28 | production | production | Engine-day roster content changes (2026-10-28 commits); frontmatter last_updated backfilled per Check 11/F (agent-lifecycle-audit) | pm |
+| 2026-11-12 | production | production | Tier Low -> Medium (v1.1.0) and Sync Execution section: automation-engineer owns the /sync row (design 2026-11-12-sync-ownership-and-common-automation-engineer-design, D3/D6) | pm |
 
 ## Acceptance Criteria
 
 ### Production Phase
 
 - [x] Agent role clearly defined: Cross-platform scripting specialist
-- [x] Tier assignment: Low-tier for simple tasks
+- [x] Tier assignment: Medium-tier (since v1.1.0; sync pipeline ownership)
 - [x] Script responsibilities specified: .ps1, .sh, tool maintenance
 - [x] Cross-platform compatibility expertise documented
 - [x] Successfully validated in implementation workflows
@@ -45,7 +46,7 @@
 
 **Can Lead Phases**: [4]
 **Can Support In**: [1]
-**Tier**: low
+**Tier**: medium
 **Communication Style**: async (can work independently on implementation tasks)
 
 ## Script Types
@@ -59,5 +60,5 @@
 
 - **Current Phase**: production
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-11-12
 - **Last Reviewer**: pm

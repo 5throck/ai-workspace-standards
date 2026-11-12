@@ -17,7 +17,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | New file design, schema definition, ADR | Phase 1-2 | architect | High | Must precede implementation |
 | New directory structure, template layout | Phase 1-2 | architect | High | Must precede implementation |
 | Cross-platform convention, naming standard | Phase 1-2 | architect | High | Must precede implementation |
-| Script implementation (approved plan exists) | Phase 4 | automation-engineer | Low | Plan from architect required |
+| Script implementation (approved plan exists) | Phase 4 | automation-engineer | Medium | Plan from architect required |
 | Documentation update | Phase 4 | docs-writer | Medium | |
 | Documentation writing | Phase 4 | docs-writer | Medium | |
 | Security configuration | Phase 6 | security-expert | Medium | |
@@ -25,7 +25,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 
 **Design Gate (Row 0)**: All non-exempt deliverable types above require a design document (Row 0 in the execution plan) to be created/updated by architect before implementation begins. See §5.1.1 for exemption categories.
 
-**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is always Low — assigning it High is a governance violation.
+**Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier. `automation-engineer` is Medium — assigning it High is a governance violation.
 
 > **Execution Plan Boilerplate Policy**: For boilerplate mandatory/discretionary cases, see [CLAUDE.md — Execution Plan Boilerplate](../../../CLAUDE.md#execution-plan-boilerplate) or [GEMINI.md — Execution Plan Boilerplate](../../../GEMINI.md#execution-plan-boilerplate).
 

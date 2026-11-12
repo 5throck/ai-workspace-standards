@@ -62,7 +62,7 @@ The PM agent delegates execution to the Low-tier and delegates review to the Med
 | Consistency Auditor | `agents/auditor.md` | Medium | Independent QA | No |
 | Lifecycle Manager | `agents/lifecycle-manager.md` | Medium | On-demand governance sync | Governance docs only (Workspace root only — L0-only agent) |
 | Template Architect | `agents/architect.md` | High | Design phase | No |
-| Automation Engineer | `agents/automation-engineer.md` | Low | Serial | TypeScript (.ts) automation scripts per ADR-0036 |
+| Automation Engineer | `agents/automation-engineer.md` | Medium | Serial | TypeScript (.ts) automation scripts per ADR-0036 |
 | Documentation Writer | `agents/docs-writer.md` | Medium | After design | .md files only |
 | Scaffolding Expert | `agents/scaffolding-expert.md` | Low | Research phase | setup scripts only (after approval) |
 | Security & Git Expert | `agents/security-expert.md` | Medium | Review phase | Hook configs only |
@@ -132,7 +132,7 @@ Phase 6 - Quality Assurance & Finalization (autonomous per `docs/workspace-schem
   PM (variants) executes qa scripts
   Validates: workspace audit, project tests, documentation consistency
   Maximum 2 iterations before PM escalation → GATE
-  Gate passed → PM closes out (not a phase): runs /sync "type: description" → PR opened → hand-off to user
+  Gate passed → PM closes out (not a phase): dispatches /sync "type: description" to automation-engineer → PR opened → PM verifies the landing → hand-off to user
 ```
 
 ---

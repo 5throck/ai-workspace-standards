@@ -17,6 +17,7 @@
 | 2026-10-04 | production | production | Instruction Duty reworded to the LLM Interaction Standard (ADR-0098); spec 2026-10-04-llm-interaction-standard-design | pm |
 | 2026-10-26 | production | production | agents/pm.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8, which predated the record (project review 2026-10-26 finding #9, T-20261026-004) | lifecycle-manager |
 | 2026-10-28 | production | production | Engine-day roster content changes (2026-10-28 commits); frontmatter last_updated backfilled per Check 11/F (agent-lifecycle-audit) | pm |
+| 2026-11-12 | production | production | agents/pm.md v1.3.0: PM dispatches the /sync row to automation-engineer and verifies the landing; read-only Bash adds git show, gh pr view, gh pr checks (design 2026-11-12-sync-ownership-and-common-automation-engineer-design D3/D4) | pm |
 
 ## Acceptance Criteria
 
@@ -70,6 +71,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-11-12
 - **Last Reviewer**: pm
 
