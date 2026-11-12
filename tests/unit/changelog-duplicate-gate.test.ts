@@ -4,13 +4,17 @@
  * docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md §3.A4).
  *
  * Detection lives in scripts/helpers/changelog-duplicates.ts (pure, exported):
- * duplicate `### <Category>` headings within one release section and duplicate
- * `[Unreleased]` sections are blocking findings; clean files pass.
+ * duplicate `### <Category>` headings within one release section, duplicate
+ * `[Unreleased]` sections, and (v1.1.0, U-20261112-019) cross-layer duplicate
+ * entries are blocking findings; clean files pass.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, test, expect } from 'bun:test';
-import { changelogGateFindings } from '../../scripts/helpers/changelog-duplicates.ts';
+import {
+  changelogGateFindings,
+  normalizeChangelogEntry,
+} from '../../scripts/helpers/changelog-duplicates.ts';
 
 const CLEAN = [
   '# Changelog',
@@ -186,5 +190,73 @@ describe('changelogGateFindings — robustness', () => {
   test('empty body and header-only file pass', () => {
     expect(changelogGateFindings('')).toEqual([]);
     expect(changelogGateFindings('# Changelog\n')).toEqual([]);
+  });
+});
+
+describe('changelogGateFindings — cross-layer duplicate entries (v1.1.0, U-20261112-019)', () => {
+  test('same entry under ### Changed (with PR ref) and bare wave-log bullets → finding (live co-abap case)', () => {
+    const text = [
+      '## [Unreleased]',
+      '',
+      '### Changed',
+      '- **[2026-10-28]**: retire the L0-only governance doc mirror + template delivery wave (DEC-20261028-05 phase 2). (#225)',
+      '',
+      '### Wave Log',
+      '- **[2026-10-28]**: Retire the L0-only governance doc mirror + template delivery wave (DEC-20261028-05 phase 2).',
+      '',
+    ].join('\n');
+    const findings = changelogGateFindings(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].kind).toBe('cross-layer-duplicate-entry');
+    expect(findings[0].section).toBe('## [Unreleased]');
+    expect(findings[0].message).toContain('`Changed`');
+    expect(findings[0].message).toContain('`Wave Log`');
+    expect(findings[0].message).toContain('U-20261112-019');
+    expect(findings[0].message).toContain('PR ref');
+  });
+
+  test('entry before any ### heading counts as a distinct layer position', () => {
+    const text = [
+      '## [Unreleased]',
+      '',
+      '- wave entry (DEC-1)',
+      '',
+      '### Changed',
+      '- wave entry (DEC-1) (#9)',
+      '',
+    ].join('\n');
+    const findings = changelogGateFindings(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].kind).toBe('cross-layer-duplicate-entry');
+    expect(findings[0].message).toContain('before any `###` heading');
+  });
+
+  test('same-layer exact repeats are NOT findings (legacy released rollups repeat within one category)', () => {
+    const text = [
+      '## [2026-09-04]',
+      '',
+      '### Changed',
+      '- docs: improve readme step 4 (tetris game)',
+      '',
+      '- docs: improve readme step 4 (tetris game)',
+      '',
+      '### Added',
+      '- unrelated',
+      '',
+    ].join('\n');
+    // Both copies sit under the SAME `### Changed` layer — no cross-layer span,
+    // so the cross-layer gate stays quiet.
+    expect(changelogGateFindings(text)).toEqual([]);
+  });
+
+  test('distinct entries never collide (clean file passes)', () => {
+    expect(changelogGateFindings(CLEAN)).toEqual([]);
+  });
+
+  test('normalization strips PR refs, whitespace and case before comparing', () => {
+    expect(normalizeChangelogEntry('Retire the  governance  mirror (#225)')).toBe(
+      normalizeChangelogEntry('retire the governance mirror'),
+    );
+    expect(normalizeChangelogEntry('one thing')).not.toBe(normalizeChangelogEntry('two things'));
   });
 });

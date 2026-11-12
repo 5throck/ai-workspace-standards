@@ -1,0 +1,55 @@
+schemaVersion: 1
+id: U-20261112-017
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T10:01:47.805+09:00'
+history:
+  - at: '2026-11-12T10:01:47.805+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-13T02:02:17.973+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Delivered content cites L0-only design paths that never exist in detached
+    checkouts: scripts/lib/self-managed-tools.ts:12 cites
+    docs/designs/2026-10-31-graft-trail-migration-design.md,
+    scripts/lib/trail-block-parity.ts:25 and .gitignore:146,155 cite
+    docs/designs/2026-11-08-trail-fleet-standard-design.md (all exist only at
+    the workspace root), and AGENTS.md §3.7.5 cites
+    docs/designs/2026-08-16-governance-backlog-design.md inside backticks —
+    markdown-link transforms never touch backtick paths, so the upstream L1
+    qualification fix (U-20261028-008 B-A14) does not reach it; the reference
+    remains unresolvable in delivered projects. Expected: a citation convention
+    for L0 design references in delivered content (e.g. a "workspace-root:"
+    prefix or spec-id-only citations), and for backtick path citations either
+    qualify them at the source or deliver the targets.
+  affected_paths:
+    - scripts/lib/self-managed-tools.ts
+    - scripts/lib/trail-block-parity.ts
+    - .gitignore
+    - AGENTS.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/lib/self-managed-tools.ts=true
+    - info:in_last_delivery scripts/lib/trail-block-parity.ts=false
+    - info:in_last_delivery .gitignore=false
+    - info:in_last_delivery AGENTS.md=false
+  dedupe_key: 76d192663f587f0984211c8095124907815a2a21adf0bb2712caff5cd3a57bdb
+  duplicates:
+    - project: co-abap
+      at: '2026-11-12T10:01:47.805+09:00'

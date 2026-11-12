@@ -1,7 +1,22 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.80.0
+ * @version 1.81.0
+ *
+ * v1.81.0 (2026-11-13, merge of parallel v1.80.0 waves U-20261112-013 + U-20261112-010): version consolidation — content unchanged from the two v1.80.0 notes below.
+ * v1.80.0 (2026-11-13, U-20261112-013): new check `hook-command-targets` — every
+ *          script-file target extracted from hook `command` strings in template
+ *          platform settings (common + every variant: .claude/settings.json,
+ *          .gemini/settings.json, .codex/hooks.json) must exist in the effective
+ *          template tree (the variant dir, else the templates/common fallback —
+ *          hooks are delivered by both layers). Resolves ${VAR}/ and $(...)/
+ *          prefixes; targets on upgrade-policy's TRAIL_RETIRED_SEEDS are skipped
+ *          (the graft-era seeds are deliberately deleted and their hook references
+ *          re-pointed by hook-dedupe — a retained reference is not a template
+ *          defect). Fail-on-missing: a dangling hook target ships a broken
+ *          session to every scaffold (the deleting-.trail/hook.cjs class passed
+ *          audit, parity and CI before this arm). Pure primitives
+ *          collectHookCommands / extractHookScriptTargets exported for tests.
  *
  * v1.80.0 (2026-11-13, U-20261112-010, design
  *          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-010): TB-01 arm widened —
@@ -668,7 +683,7 @@ import {
 } from "./lib/managed-block-parity.ts";
 import { extractTrailBlock, compareTrailBlock, countGraftBlocks } from "./lib/trail-block-parity.ts";
 import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from "./lib/platform-skeleton-merge.ts";
-import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES } from "./lib/upgrade-policy.ts";
+import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES, TRAIL_RETIRED_SEEDS } from "./lib/upgrade-policy.ts";
 import { SCAFFOLD_MARKER_SOURCES, isCanonicalPmStubBody } from "./helpers/scaffold-markers.ts";
 
 interface VariantManifest {
@@ -776,6 +791,114 @@ function checkGraftMcpSurfaces(): void {
   if (scanned === 0) pass("graft-mcp-surfaces: no template MCP surfaces found — vacuous pass");
   else if (!JSON_MODE)
     pass(`graft-mcp-surfaces: ${scanned} template MCP surface(s) carry zero graft-era registrations`);
+}
+
+// ── U-20261112-013: hook-command-target existence (v1.80.0) ──────────────────
+
+/**
+ * Recursively collect every string value under a `command` key (pure, exported
+ * for tests). Structure-agnostic on purpose: Claude settings wrap hooks in
+ * matcher groups, Gemini mixes flat and wrapped shapes, Codex hooks.json nests
+ * differently — walking for "command" strings covers all three without
+ * structural assumptions.
+ */
+export function collectHookCommands(node: unknown, out: string[] = []): string[] {
+  if (typeof node === "string") return out;
+  if (Array.isArray(node)) {
+    for (const child of node) collectHookCommands(child, out);
+    return out;
+  }
+  if (node && typeof node === "object") {
+    for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+      if (key === "command" && typeof value === "string") out.push(value);
+      else collectHookCommands(value, out);
+    }
+  }
+  return out;
+}
+
+/**
+ * Extract template-relative script-file targets from one hook command string
+ * (pure, exported for tests). Only script-file targets (.ts/.cjs/.mjs/.js) are
+ * extracted — bare commands like `git config core.hooksPath .githooks` carry no
+ * checkable file target. Recognized prefixes:
+ *  - `node "${CLAUDE_PROJECT_DIR:-.}/.trail/hook.cjs"`  → `.trail/hook.cjs`
+ *  - `bun "$(git rev-parse --show-toplevel)/scripts/hooks/x.ts"` → `scripts/hooks/x.ts`
+ *  - `bun scripts/sync-md.ts` → `scripts/sync-md.ts`
+ */
+export function extractHookScriptTargets(command: string): string[] {
+  const targets: string[] = [];
+  const re = /(?:\$\{[^}]*\}|\$\([^)]*\))?\/?((?:[A-Za-z0-9_@.\-]+\/)*[A-Za-z0-9_@.\-]+\.(?:ts|cjs|mjs|js))/g;
+  let m: RegExpExecArray | null = re.exec(command);
+  while (m !== null) {
+    // Normalize the captured path (leading "./", double slashes) to a
+    // template-relative form.
+    const path = m[1].replace(/^\.\//, "").replace(/\/\//g, "/");
+    if (path && !targets.includes(path)) targets.push(path);
+    m = re.exec(command);
+  }
+  return targets;
+}
+
+/**
+ * v1.80.0 (U-20261112-013): every hook `command` script target in the template
+ * platform settings surfaces must exist in the effective template tree — the
+ * variant dir first, then the templates/common fallback (hooks are delivered
+ * from both layers). Fail-on-missing: a dangling target (the deleting-
+ * `.trail/hook.cjs` class) passed audit, platform parity and CI before this
+ * arm. TRAIL_RETIRED_SEEDS targets are skipped: the graft-era seeds are
+ * deliberately deleted by upgrade-policy and their hook references re-pointed
+ * by the hook-dedupe normalize, so a retained reference is not a template
+ * defect (every variant template still carries them pending that normalize).
+ */
+function checkHookCommandTargets(): void {
+  const SURFACES = [".claude/settings.json", ".gemini/settings.json", ".codex/hooks.json"];
+  const dirs = [{ label: "common", dir: join(TEMPLATES_DIR, "common") }];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith("co-"))
+        dirs.push({ label: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+    }
+  }
+  const retiredSeeds = new Set<string>(TRAIL_RETIRED_SEEDS);
+  let checked = 0;
+  let missing = 0;
+  for (const { label, dir } of dirs) {
+    for (const surf of SURFACES) {
+      const abs = join(dir, surf);
+      if (!existsSync(abs)) continue;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(readFileSync(abs, "utf-8"));
+      } catch {
+        fail(label, "hook-command-targets", `${abs} is not valid JSON — hook command targets cannot be verified`);
+        continue;
+      }
+      for (const command of collectHookCommands(parsed)) {
+        for (const target of extractHookScriptTargets(command)) {
+          if (retiredSeeds.has(target) || retiredSeeds.has(`/${target}`)) continue;
+          const variantCopy = join(dir, target);
+          const commonCopy = join(TEMPLATES_DIR, "common", target);
+          if (existsSync(variantCopy) || existsSync(commonCopy)) {
+            checked++;
+            continue;
+          }
+          fail(
+            label,
+            "hook-command-targets",
+            `${surf} hook command references \`${target}\` but the file exists neither in templates/${label}/ nor templates/common/ — the hook would fail at runtime in every scaffold`,
+            `Restore \`${target}\` to the template tree or re-point the hook in ${surf}`,
+          );
+          missing++;
+        }
+      }
+    }
+  }
+  if (checked === 0 && missing === 0) {
+    pass("hook-command-targets: no hook command targets found in template settings — vacuous pass");
+  } else if (checked > 0 && !JSON_MODE) {
+    pass(`hook-command-targets: ${checked} hook command target(s) resolve in the effective template tree`);
+  }
 }
 
 function pass(msg: string) {
@@ -8584,6 +8707,7 @@ function main(): number {
   }
 
   checkGraftMcpSurfaces(); // R2: template mcp surfaces are trail-only (graft-mcp-corrective-pass-design)
+  checkHookCommandTargets(); // U-20261112-013: hook command targets exist in the effective template tree (fail-on-missing)
   checkVariantIndexCoverage(manifests); // WS-12
   checkMirrorHygiene(); // R6: mirrors carry only skill dirs (spec 2026-09-25-verifier-platform-expansion-design)
 

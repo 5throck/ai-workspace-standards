@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-13](2026-11-13.md) | chore: workspace sync (0 files) |
 | [2026-11-13](2026-11-13.md) | fix(governance): E2E scaffold validation alignment for upstream triage batch (PR #1991 CI) |
 | [2026-11-12](2026-11-12.md) | test(ci): budget the upgrade-overwrite-protection re-stale loop test - windows 15.03s vs 15s ceiling |
 | [2026-11-11](2026-11-11.md) | fix(hardening): biome compliance for fleet-script-parity v1.2.0 |

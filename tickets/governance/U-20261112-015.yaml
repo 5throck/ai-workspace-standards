@@ -1,0 +1,51 @@
+schemaVersion: 1
+id: U-20261112-015
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T10:01:47.778+09:00'
+history:
+  - at: '2026-11-12T10:01:47.778+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-13T01:29:50.749+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The mcp-proxy-routing check's MCP_CONFIGS table
+    (scripts/validate-abap-platform-parity.ts:41-47) covers .mcp.json,
+    .codex/config.toml, .gemini/settings.json, .agents/mcp.json, and the hermes
+    example yaml — but not opencode.json (its mcp map) and not the mcpServers
+    block inside .claude/settings.json (checkDenyRules reads only its
+    permissions key). In Projects/co-abap both surfaces are currently clean
+    (trail-only), but a future direct `vsp` entry in either surface would pass
+    every gate including platform parity and CI. Expected: add opencode.json
+    (parse the mcp map) and .claude/settings.json mcpServers to the checker's
+    config table so the abap-routes-through-proxy invariant holds on all
+    registered surfaces.
+  affected_paths:
+    - scripts/validate-abap-platform-parity.ts
+    - opencode.json
+    - .claude/settings.json
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/validate-abap-platform-parity.ts=true
+    - info:in_last_delivery opencode.json=false
+    - info:in_last_delivery .claude/settings.json=true
+  dedupe_key: 593cd686cdff05821271689662fb14f1de2f25bb8a6803bdd31417956efc8c74
+  duplicates:
+    - project: co-abap
+      at: '2026-11-12T10:01:47.778+09:00'
