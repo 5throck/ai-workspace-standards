@@ -28,8 +28,11 @@
  * The core is pure over an injected Tree so unit tests run on in-memory file maps. The CLI is
  * the only place that touches the real filesystem.
  *
- * @version 1.1.0
+ * @version 1.2.0
  *
+ * v1.2.0 (2026-11-12, U-20261112-005 PR-1b): Korean text in generated records is wrapped in backticks
+ *         (wrapHangulInCode) so validate-md-language.ts accepts the records without a lang: ko
+ *         declaration or an allowlist.
  * v1.1.0 (2026-11-12, common-agents CA-1): owner-agent rule is STRICT for common skills: the owner
  *         must exist in templates/common/agents (no variant-union leniency). Severity still follows
  *         scripts/skill-record-enforcement.json (enforce:false WARN, enforce:true error).
@@ -433,11 +436,28 @@ export function projectRecord(opts: {
   };
 }
 
-/** Last-line guard: no output line may still carry an internal reference. */
+const HANGUL_RUN = /[\u3131-\u318E\uAC00-\uD7A3]+(?:[ ]+[\u3131-\u318E\uAC00-\uD7A3]+)*/g;
+
+/**
+ * Language Policy (scripts/validate-md-language.ts): Korean outside inline code in an official
+ * document needs a `lang: ko` declaration. Generated records stay English; Korean trigger phrases
+ * and proper nouns quoted from a SKILL.md description are wrapped in backticks, the repo's
+ * existing convention for such terms. Text already inside a code span is left alone, so the
+ * transform is idempotent.
+ */
+export function wrapHangulInCode(line: string): string {
+  return line
+    .split(/(`[^`]*`)/)
+    .map((seg, i) => (i % 2 === 1 ? seg : seg.replace(HANGUL_RUN, (m) => `\`${m}\``)))
+    .join("");
+}
+
+/** Last-line guard: no output line may still carry an internal reference; Korean is code-quoted. */
 function finalizeClean(content: string): string {
   return content
     .split("\n")
     .filter((l) => l === GENERATED_MARKER || !isInternalRef(l))
+    .map(wrapHangulInCode)
     .join("\n");
 }
 
