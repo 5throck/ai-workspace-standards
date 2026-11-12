@@ -31,9 +31,6 @@ history:
   - at: '2026-11-12T05:14:33.098+09:00'
     from: null
     to: backlog
-  - at: '2026-11-12T09:53:15.064+09:00'
-    from: null
-    to: backlog
   - at: '2026-11-12T22:19:11.687+09:00'
     from: backlog
     to: waiting
