@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-12T06:50:30.373Z
+**Generated**: 2026-11-12T07:05:53.961Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -146,7 +146,7 @@
 | generate-scripts-mirror.ts | 1.1.0 | scripts/generate-scripts-mirror.ts | fs, path, url |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | fs, path, process |
 | generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
-| generate-skill-lifecycle-records.ts | 1.1.0 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
+| generate-skill-lifecycle-records.ts | 1.2.0 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
 | generate-version-manifest.ts | 1.12.1 | scripts/generate-version-manifest.ts | bun, child_process, fs, js-yaml, module, path |
 | graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | child_process, fs, path, url |
 | hub-bootstrap.ts | 1.6.0 | scripts/hub-bootstrap.ts | child_process, crypto, fs, path |
