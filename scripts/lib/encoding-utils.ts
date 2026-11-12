@@ -4,8 +4,13 @@
  * UTF-8 encoding helpers for cross-platform file operations.
  * Addresses Risk #3: UTF-8 Encoding.
  *
- * @version 1.2.0
+ * @version 1.3.0
  * @Risk #3: UTF-8 Encoding (P0 - Critical)
+ *
+ * 1.3.0 (2026-11-12, U-20261112-012): detectEncoding classifies zero-line-ending
+ * content (no CR and no LF bytes) as "lf" instead of "mixed" — a single-line or
+ * minified file cannot carry CRLF or mixed endings, and the old else-branch made
+ * the audit print a false "CRLF/Mixed line endings" WARN for those fixtures.
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -87,6 +92,10 @@ export function detectEncoding(filePath: string): EncodingDetectionResult {
   if (crlfCount > 0 && lfCount === 0) {
     lineEndings = "crlf";
   } else if (lfCount > 0 && crlfCount === 0) {
+    lineEndings = "lf";
+  } else if (crlfCount === 0 && lfCount === 0) {
+    // Zero line endings (single-line files, minified JSON): nothing is CRLF,
+    // so the content is LF-compliant — never report "mixed" (U-20261112-012).
     lineEndings = "lf";
   } else {
     lineEndings = "mixed";

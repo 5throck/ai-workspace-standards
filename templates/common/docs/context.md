@@ -369,7 +369,7 @@ Key rules:
 All agents must follow this file routing policy. **Creating `.md` files at the project root is prohibited** unless they are standard root files.
 
 ### Standard Root Files (allowed at root)
-`README.md`, `CHANGELOG.md`, `AGENTS.md`, `SECURITY.md`, `workspace standards`, `CLAUDE.md`, `GEMINI.md`, `CODEX.md`, `HERMES.md`
+`README.md`, `CHANGELOG.md`, `AGENTS.md`, `SECURITY.md`, `workspace standards`, `CLAUDE.md`, `GEMINI.md`, `CODEX.md`, `HERMES.md`, `README_ko.md`
 
 ### File Type Routing
 | File Type | Default Location |
@@ -600,4 +600,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.15 — Agent Frontmatter section added (U-20261112-002); 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*
+*context.md version: 2.16 — Standard Root Files adds README_ko.md (delivered-file parity: templates/README_ko.md ships to variants; U-20261112-006); 2.15 — Agent Frontmatter section added (U-20261112-002); 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*
