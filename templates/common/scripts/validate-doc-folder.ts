@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.4.0
+ * @version 1.5.0
+ * v1.5.0 (2026-11-12, T-20261112-002): allowlist gains
+ *           `expected-gate-failures.json` — the unified runner's checked-in
+ *           sanctioned-repairs list (ADR-0105 Decision 8; docs/README.md §2 row
+ *           is the contract).
  * v1.4.0 (2026-11-12, ADR-0105 / T-20261112-001): allowlist gains
  *           `protected-paths.json` — the unified 03:00 batch runner's
  *           protected-path SSOT (merge-predicate floor, hold-for-human-merge;
@@ -88,6 +92,7 @@ const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   "variant-benchmark-backlog.md",
   "fleet-membership.json",
   "protected-paths.json",
+  "expected-gate-failures.json",
 ]);
 
 interface WorkspaceFinding {

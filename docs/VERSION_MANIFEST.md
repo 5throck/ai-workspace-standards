@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-12T13:46:35.825Z
+**Generated**: 2026-11-12T13:57:03.219Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +10,7 @@
 
 - **Agents**: 9
 - **Skills**: 60
-- **Scripts**: 136 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 137 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -215,7 +215,7 @@
 | upgrade-project.ts | 1.103.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
-| validate-doc-folder.ts | 1.4.0 | scripts/validate-doc-folder.ts | fs, path |
+| validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.1 | scripts/validate-md-language.ts | child_process, fs, path |
 | validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | fs, path, url |
@@ -241,6 +241,7 @@
 | verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | fs, path, url |
 | verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | fs, path |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
+| watchdog-automation-stop.ts | 1.0.0 | scripts/watchdog-automation-stop.ts | fs, path, url |
 
 ---
 

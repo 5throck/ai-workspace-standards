@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "_comment": "Checked-in expected-failure list for the unified 03:00 batch runner (T-20261112-002; ADR-0105 Decision 8; design docs/designs/2026-11-12-unified-batch-runner-design.md R12/AC-6). A gate failure matching an entry id is a SANCTIONED repair: the runner logs it to the run manifest (sanctionedRepairs[]) and continues; the repaired files still pass the secrets gate; it is never escalated as an unexpected gate failure. A gate failure matching NO entry is unexpected: the second one trips the watchdog stop-file (.pipeline-state/automation-stop). The list is versioned in git and grows only through the PR path; entries carry the source that sanctioned them.",
+  "note": "Decision of record: docs/adr/0105-unified-batch-runner.md (Decision 8, mechanics bound by artifacts). Consumers: the unified runner's gate-failure classification and the run-manifest sanctioned-repair log.",
+  "entries": [
+    {
+      "id": "memory-union-verify-repair",
+      "class": "dev-sync step 3.88 theirs-side dropped block",
+      "sanctionedRecovery": "restore block + forward commit per gate instruction",
+      "source": "T-20261104-001"
+    },
+    {
+      "id": "repo-config-drift",
+      "class": "repo-integrity config delta (core.bare etc.)",
+      "sanctionedRecovery": "restore snapshot + log",
+      "source": "2026-11-07 GIT_DIR incident"
+    }
+  ]
+}
