@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261112-005
+kind: manual
+title: >-
+  Q4 country-scoped agent registry is a constant in
+  scripts/lib/country-scoped-agents.ts, not workspace-schema.json
+  country_scoped_assets.agents (hand-maintained root/L1 schema pair)
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-12T18:32:25.402+09:00'
+history:
+  - at: '2026-11-12T18:32:25.402+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

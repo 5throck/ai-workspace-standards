@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261112-006
+kind: manual
+title: >-
+  co-architect keeps promotion-leftover mirrors of common skills
+  (design-foundation, i18n-*, accessibility-audit) that variant-mirror-parity
+  may flag on next version bumps
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-12T18:32:25.426+09:00'
+history:
+  - at: '2026-11-12T18:32:25.426+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
