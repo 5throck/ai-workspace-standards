@@ -79,6 +79,11 @@ every term below:
      `.githooks/**`, `scripts/hooks/**`, `CODEOWNERS`, project external-deps
      manifests) is NEVER merged by the runner. CLEAN discipline is kept on top of
      this — protected paths are a human-merge floor, not a substitute for gates.
+     For the out-of-repo automation-prompt surface (preserved dissent S2),
+     `prompts.manifest.json` is the integrity SSOT — the expected SHA256 of each
+     authority-bearing automation prompt, checked daily at 06:00 KST by the
+     prompt-integrity verifier (T-20261112-003, §Prompt-Integrity); any prompt
+     change updates the manifest in the same governance change set.
 3. **Billing-wall exception — nine authentication conditions.** While the
    account-level GitHub Actions billing wall makes real CI impossible, merges may
    proceed only when ALL nine hold:

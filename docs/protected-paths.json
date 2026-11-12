@@ -16,13 +16,14 @@
     ".githooks/**",
     "scripts/hooks/**",
     "CODEOWNERS",
-    "Projects/*/external-deps.json"
+    "Projects/*/external-deps.json",
+    "prompts.manifest.json"
   ],
   "outOfRepoProtected": [
     {
       "name": "automation prompts",
       "location": "ZCode automation store (not git-tracked)",
-      "reason": "The runner's own prompt surface. Out-of-repo vector documented as preserved dissent S2 (meeting 2026-11-12): prompt self-edits are invisible to every in-repo gate; protection stays procedural until the launcher hash-manifest gate lands (T-20261112-003)."
+      "reason": "The runner's own prompt surface. Out-of-repo vector documented as preserved dissent S2 (meeting 2026-11-12): prompt self-edits are invisible to every in-repo gate. Detection layer landed via T-20261112-003: prompts.manifest.json carries the expected SHA256 of each authority-bearing prompt and the 06:00 KST prompt-integrity verifier compares the live automation prompts against it daily; the launcher-side pre-fire hash gate remains a platform ask."
     }
   ]
 }

@@ -115,3 +115,7 @@ startup_failure-class failure event attributed to the head SHA; account-wide wal
 ## 8. Accessibility Impact
 
 Accessibility-exempt per ADR-0065: governance/automation registration with no user-interface surface; all runner, watchdog, and manifest output is plain text.
+
+## 9. Addendum: Prompt-Integrity Manifest (T-20261112-003, 2026-11-12)
+
+Auditor preserved-dissent S2 (out-of-repo prompt self-edit vector, closed "detection-based" this wave): automation prompts are not git-tracked, so the diff gates cannot see a cross-run authority escalation on them. The detection layer is `prompts.manifest.json` (repo root, protected path) — it carries the expected SHA256 of each authority-bearing automation prompt, and a companion prompt-integrity verifier automation (daily 06:00 KST) hashes the live automation prompts byte-exact (temp file + `shasum -a 256`, never eyeballed) and compares against the manifest: any mismatch or missing automation/entry files one urgent ticket and stops; an all-match run appends one `prompt integrity verify: N/N match` line to the day's memory log. The pre-fire launcher-side hash gate remains a platform ask (automation-host support, tracked on T-20261112-003's upstream thread). **Invariant**: any change to an automation prompt MUST update `prompts.manifest.json` in the same governance change set; the verifier automation's own id joins the manifest at its creation time, and the verifier treats its own prompt's drift as the highest-priority alert.
