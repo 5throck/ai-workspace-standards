@@ -1,7 +1,14 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.14.0
+ * @version 1.15.0
+ *         v1.15.0 (2026-11-13, U-20261112-014): new Check 10 `workflow-script-ref` —
+ *         every `bun scripts/<name>.ts` reference in .github/workflows/*.yml|*.yaml
+ *         must resolve to an existing file under scripts/ (the 2026-11-08 co-abap
+ *         prune-recurrence class: upgrade deleted scripts/validate-abap-platform-parity.ts
+ *         while ci.yml still invoked it, and no gate scanned workflow files). Error-level,
+ *         mirroring the ghost-entry convention. Pure scanner
+ *         findDanglingWorkflowScriptRefs exported for unit tests.
  *         v1.14.0 (2026-11-06, DEC-20261106-03): Ghost-entry check skips L0+L2 rows whose
  *         script exists under templates/co-X/scripts/ (variant-scoped, co-abap registry rows).
  *         v1.13.0 (2026-10-27, U-20261026-010): --check-drift equal-version divergence
@@ -462,6 +469,33 @@ export function shortContentHash(content: string): string {
   return createHash("sha256").update(content).digest("hex").slice(0, 12);
 }
 
+// ── CI workflow reference scanner (U-20261112-014; pure, unit-tested) ────────
+
+/**
+ * Every `bun scripts/<name>.ts` reference inside the given workflow files.
+ * v1.15.0 (U-20261112-014): the prune-recurrence class — an upgrade deletes a
+ * script while .github/workflows/ci.yml still invokes it — silently broke CI
+ * because no gate scanned workflow files (T-20261108-008). Pure: callers feed
+ * the workflow contents and do the existence check themselves.
+ */
+export function findDanglingWorkflowScriptRefs(
+  workflows: Array<{ name: string; content: string }>,
+): Array<{ workflow: string; script: string }> {
+  const refs: Array<{ workflow: string; script: string }> = [];
+  for (const wf of workflows) {
+    const re = /\bbun\s+(scripts\/[A-Za-z0-9/_.-]+\.ts)\b/g;
+    let m: RegExpExecArray | null = re.exec(wf.content);
+    while (m !== null) {
+      const script = m[1];
+      if (!refs.some((r) => r.workflow === wf.name && r.script === script)) {
+        refs.push({ workflow: wf.name, script });
+      }
+      m = re.exec(wf.content);
+    }
+  }
+  return refs;
+}
+
 interface DriftPair {
   script: string;
   classification: DriftClassification;
@@ -835,6 +869,36 @@ function verify(): boolean {
         }
       } catch {
         errors.push(`Typecheck baseline unparseable: \`scripts/helpers/typecheck-baseline.json\` is not valid JSON`);
+      }
+    }
+  }
+
+  // Check 10: CI workflow script references (U-20261112-014). Every
+  // `bun scripts/<name>.ts` invocation in .github/workflows/*.yml|*.yaml must
+  // resolve to an existing file under scripts/ — the prune-recurrence class
+  // (T-20261108-008: a deleted script left ci.yml invoking it) silently broke
+  // CI. Error-level, mirroring the ghost-entry convention. Runs wherever a
+  // .github/workflows directory exists relative to the context root (L0 and
+  // projects carry one; L1/L2 template trees do not).
+  const workflowsDir = join(workspaceRoot, ".github", "workflows");
+  if (existsSync(workflowsDir)) {
+    const workflows: Array<{ name: string; content: string }> = [];
+    for (const entry of fs.readdirSync(workflowsDir)) {
+      if (!entry.endsWith(".yml") && !entry.endsWith(".yaml")) continue;
+      const abs = join(workflowsDir, entry);
+      if (!fs.statSync(abs).isFile()) continue;
+      try {
+        workflows.push({ name: entry, content: readFileSync(abs, "utf-8") });
+      } catch {
+        continue; // unreadable workflow — CI itself will fail on it, not this gate
+      }
+    }
+    const scriptsExist = (script: string): boolean => existsSync(join(workspaceRoot, script));
+    for (const ref of findDanglingWorkflowScriptRefs(workflows)) {
+      if (!scriptsExist(ref.script)) {
+        errors.push(
+          `Dangling CI workflow reference: \`.github/workflows/${ref.workflow}\` invokes \`${ref.script}\` but the file does not exist at the context root — restore the script or update the workflow (U-20261112-014)`,
+        );
       }
     }
   }

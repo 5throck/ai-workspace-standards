@@ -1,7 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Platform Parity Validator
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-11-13, U-20261112-015): MCP_CONFIGS gains two conditional
+ *           surfaces — opencode.json (its `mcp` map, argv-array command shape)
+ *           and .claude/settings.json (its mcpServers block, previously read
+ *           only by checkDenyRules' permissions key). Both are
+ *           `conditional: true` (skipped when the file is absent — the base
+ *           template does not ship opencode.json and common's settings.json
+ *           carries no mcpServers) and `requireAbap: false` (these surfaces
+ *           may legitimately carry trail-only server sets; the invariant
+ *           enforced is that the `abap` entry, when present, routes through
+ *           sap-mcp-proxy and NO server launches vsp directly).
  *
  * v1.1.0 (2026-10-11, T-20261011-008/T-20261011-013, spec
  *           docs/designs/2026-10-11-backlog-batch-2-design.md): promoted from the
@@ -37,14 +48,35 @@ import { pathToFileURL } from 'node:url';
 
 export interface CheckResult { id: string; ok: boolean; problems: string[] }
 
-/** MCP configs that must route `abap` through the proxy. */
-export const MCP_CONFIGS: Array<{ file: string; kind: 'json' | 'toml' | 'yaml' }> = [
+/** MCP configs that must route `abap` through the proxy.
+ * U-20261112-015: `conditional` surfaces are skipped when the file is absent
+ * (per-profile delivery), and `requireAbap: false` surfaces only enforce the
+ * no-direct-vsp / abap-routes-through-proxy invariant, not abap presence. */
+export interface McpConfig {
+  file: string;
+  kind: 'json' | 'toml' | 'yaml';
+  /** JSON key holding the server map (default 'mcpServers'; opencode.json uses 'mcp'). */
+  key?: string;
+  /** Skip (instead of fail) when the file does not exist. */
+  conditional?: boolean;
+  /** Do not require an `abap` entry — only the proxy-routing invariant. */
+  requireAbap?: boolean;
+}
+export const MCP_CONFIGS: McpConfig[] = [
   { file: '.mcp.json', kind: 'json' },
   { file: '.codex/config.toml', kind: 'toml' },
   { file: '.gemini/settings.json', kind: 'json' },
   { file: '.agents/mcp.json', kind: 'json' },
   { file: 'config/platforms/hermes-mcp.example.yaml', kind: 'yaml' },
+  { file: 'opencode.json', kind: 'json', key: 'mcp', conditional: true, requireAbap: false },
+  { file: '.claude/settings.json', kind: 'json', key: 'mcpServers', conditional: true, requireAbap: false },
 ];
+
+/** Argv of one server entry: opencode `command` arrays vs mcpServers command+args strings. */
+export function serverArgv(v: any): string[] {
+  if (Array.isArray(v?.command)) return v.command.map(String);
+  return [String(v?.command ?? ''), ...((v?.args ?? []) as any[]).map(String)];
+}
 
 /**
  * Required sections for every instruction file; extend this table, not the code.
@@ -78,21 +110,24 @@ function checkServerArgv(name: string, argv: string[], problems: string[], file:
 
 export function checkMcp(root: string): CheckResult {
   const problems: string[] = [];
-  for (const { file, kind } of MCP_CONFIGS) {
+  for (const { file, kind, key, conditional, requireAbap } of MCP_CONFIGS) {
     const abs = join(root, file);
     // Profile-aware: `.codex/**` is stripped on non-codex profiles
     // (PROFILE_OWNED_PATHS). Universal MCP surfaces stay fail-on-missing.
+    // U-20261112-015: conditional surfaces (opencode.json, .claude/settings.json
+    // mcpServers) are skipped when the profile legitimately omits the file.
     if (!existsSync(abs)) {
-      if (file.startsWith('.codex/')) continue;
+      if (conditional || file.startsWith('.codex/')) continue;
       problems.push(`${file}: missing`);
       continue;
     }
     const text = readFileSync(abs, 'utf-8');
     try {
       if (kind === 'json') {
-        const servers = JSON.parse(text).mcpServers ?? {};
-        if (!servers.abap) problems.push(`${file}: no abap server entry`);
-        for (const [n, v] of Object.entries<any>(servers)) checkServerArgv(n, [String(v.command ?? ''), ...(v.args ?? []).map(String)], problems, file);
+        const parsed = JSON.parse(text);
+        const servers = (key ? parsed[key] : parsed.mcpServers) ?? {};
+        if ((requireAbap ?? true) && !servers.abap) problems.push(`${file}: no abap server entry`);
+        for (const [n, v] of Object.entries<any>(servers)) checkServerArgv(n, serverArgv(v), problems, file);
       } else if (kind === 'toml') {
         const blocks = text.split(/^\[(?:\[)?/m).slice(1).map(b => ({ header: b.split('\n')[0], body: b }));
         const abap = blocks.find(b => /^mcp_servers\.abap\]/.test(b.header));
