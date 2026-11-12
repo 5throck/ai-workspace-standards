@@ -1,0 +1,10 @@
+{
+  "id": "2026-11-12-skill-lifecycle-record-delivery-design",
+  "title": "skill lifecycle record delivery design",
+  "file": "docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md",
+  "status": "approved",
+  "source": "architect",
+  "created": "2026-11-12",
+  "last_updated": "2026-11-12",
+  "review_notes": "U-20261112-005 (from co-develop): delivered skills arrive without docs/lifecycle/skills records. User decisions 2026-11-12: refined projection (sanitized, version-free); variant-own records delivered together with the 42 common ones (153 derived across 14 variants, recounted on origin/main 6541f4f91); leftover project-side records allowed (no prune, explicit non-goal). Generator plus existing WORKSPACE seed. Tickets T1-T6 proposed, not created; open questions in section 11."
+}

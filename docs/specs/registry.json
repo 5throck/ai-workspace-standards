@@ -3275,6 +3275,16 @@
       "review_notes": "User decisions recorded in DEC-20261111-01 (2026-11-11): EVOLVED_PRESERVE reverses the DEC-20261110-04 non-goal; blocking backport gate off->shadow->enforce incl. off-cycle runs; apply freeze for co-deck, co-abap, co-hr, co-safety, co-newbiz until PR-A+PR-B land; all LOCAL-PATCH forms protective with a marker-loss guard on every delivery path. Implementation tickets (PR-D, PR-A, PR-B, PR-C, PR-F, PR-E, PR-G, PR-H) not created; they land after PR1/PR3/PR4."
     },
     {
+      "id": "2026-11-12-skill-lifecycle-record-delivery-design",
+      "title": "skill lifecycle record delivery design",
+      "file": "docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-11-12",
+      "last_updated": "2026-11-12",
+      "review_notes": "U-20261112-005 (from co-develop): delivered skills arrive without docs/lifecycle/skills records. User decisions 2026-11-12: refined projection (sanitized, version-free); variant-own records delivered together with the 42 common ones (153 derived across 14 variants, recounted on origin/main 6541f4f91); leftover project-side records allowed (no prune, explicit non-goal). Generator plus existing WORKSPACE seed. Tickets T1-T6 proposed, not created; open questions in section 11."
+    },
+    {
       "id": "skillhygiene",
       "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
       "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
