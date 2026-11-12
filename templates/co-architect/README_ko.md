@@ -2,7 +2,7 @@
 sync_version: 1
 lang: ko
 lang_reason: source-material
-translated_from_hash: 9e5ae9590223490c56f46640737ca7b4a8df793fa77496f41abf09334ab8e5a4
+translated_from_hash: 125ee976aa4e6b7a1fb0593690083909c1bcbfdc78e2507d39647c1d3c8d7aef
 ---
 
 # co-architect
@@ -69,7 +69,6 @@ Architecture firm collaboration variant integrating design (UI/UX, service desig
 - **script-lifecycle-manager**: 
 - **explain-me**: 
 - **team-builder**: 
-- **zod-contract-gate**: 
 - **service-design**: 
 - **source-command-commit-push-pr**: 
 - **skill-lifecycle-manager**: 
