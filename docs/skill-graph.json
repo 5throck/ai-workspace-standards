@@ -8156,8 +8156,8 @@
       "name": "translate",
       "scope": "co-safety",
       "capability": "translate",
-      "content_hash": "1e85c0edd67d459d",
-      "version": "1.0.1",
+      "content_hash": "51f1f071acf76015",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-safety/skills/translate/SKILL.md"
       ]

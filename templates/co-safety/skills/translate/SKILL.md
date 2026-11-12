@@ -3,7 +3,7 @@ lang: ko
 lang_reason: legal
 name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
-version: 1.0.1
+version: 1.0.2
 owner: pm
 tier:
   claude: medium
@@ -26,7 +26,9 @@ metadata:
     - translate
     - translation
     - Korean translation
----## Purpose
+---
+
+## Purpose
 
 Provides translation helpers for README and documentation files with diff preview, synchronization checking, and translation guidance.
 

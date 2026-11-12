@@ -9,13 +9,11 @@
 
 ## Phase History
 
-- **2026-09-07**: Initial release — created in Projects/co-develop per the
-  question-bank bias meeting (memory/meeting-2026-09-07-question-bank-bias.md)
-  together with the exam-bank-steward agent. Encodes the meeting's Phase A
+- **2026-09-07**: Initial release — created in a sibling project per the
+  question-bank bias meeting together with the exam-bank-steward agent. Encodes the meeting's Phase A
   detection usage, Phase B remediation loop, and exam operations checklist.
-- **2026-09-12**: Hard-deleted in Projects/co-develop by the template fleet-sync
-  upgrade commit `43dc0c4` (see DEC-20261006-01.md, superseded by
-  DEC-20261006-02.md).
+- **2026-09-12**: Hard-deleted in a sibling project by the template fleet-sync
+  upgrade commit `43dc0c4`.
 - **2026-10-06**: Restored by owner decision and promoted into the co-learning
   variant (`skills/exam-bank-operations/`, platform mirrors included) together
   with its owner agent.
