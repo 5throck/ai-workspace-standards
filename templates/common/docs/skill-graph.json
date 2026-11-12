@@ -807,6 +807,12 @@
     {
       "type": "references",
       "from": "pm",
+      "to": "meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "pm",
       "to": "skill-lifecycle-manager",
       "source": "prose"
     },

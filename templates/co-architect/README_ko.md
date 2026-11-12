@@ -2,7 +2,7 @@
 sync_version: 1
 lang: ko
 lang_reason: source-material
-translated_from_hash: 3fff3bfdcf5fc24037f6e7fe74f8f553eada8ac8aa3f09213665420aefe52cfe
+translated_from_hash: f89ae1100ff819cfa8b11f913413187771aff14e22ffb85810480c0b6a513839
 ---
 
 # co-architect
@@ -131,7 +131,7 @@ Architecture firm collaboration variant integrating design (UI/UX, service desig
 - `/sync "feat: ..."` — 전체 파이프라인: memlog → changelog → audit → commit → PR.
 - `/changelog "..."` — `CHANGELOG.md`에 항목 추가.
 - `/memlog "summary"` — 오늘 세션 로그에 요약 추가.
-- `/meeting` — 구조화된 인라인 다중 에이전트 토론 진행.
+- `meeting-facilitation` — 구조화된 인라인 다중 에이전트 토론 진행 (스킬; 기존 `/meeting` 슬래시 명령어는 폐기됨).
 
 ## 변형 유형
 

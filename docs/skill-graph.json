@@ -876,8 +876,8 @@
       "name": "pm",
       "scope": "co-architect",
       "capability": "pm",
-      "content_hash": "4077f48ae3b43210",
-      "version": "1.2.1",
+      "content_hash": "a59035e45ffa6f6c",
+      "version": "1.2.2",
       "mirrors": [
         "templates/co-architect/agents/pm.md"
       ]
@@ -2490,8 +2490,8 @@
       "name": "pm",
       "scope": "common",
       "capability": "pm",
-      "content_hash": "e12dc3609e1c472b",
-      "version": "1.4.2",
+      "content_hash": "5017208f344917df",
+      "version": "1.4.3",
       "mirrors": [
         "templates/common/agents/pm.md"
       ]
@@ -11989,6 +11989,12 @@
       "type": "references",
       "from": "agent:common/pm",
       "to": "skill:root/agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:common/pm",
+      "to": "skill:root/meeting-facilitation",
       "source": "prose"
     },
     {

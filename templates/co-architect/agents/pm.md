@@ -1,10 +1,10 @@
 ---
-extends: ../../../agents/pm.md
+extends: ../../common/agents/pm.md
 name: pm
 variant: co-architect
 status: active
-version: "1.2.1"
-last_updated: 2026-11-06
+version: "1.2.2"
+last_updated: 2026-11-12
 capabilities:
   - communication
   - task-management
