@@ -3,7 +3,7 @@
 This file is the **index** of all development logs. Updated automatically by `scripts/sync-md.sh` (or `/sync`).
 
 - **Sessions** — Daily session logs (`YYYY-MM-DD.md`). Auto-updated on every commit via `commit-msg` hook.
-- **Meetings** — Agent meeting transcripts (`meeting-YYYY-MM-DD-slug.md`). Auto-registered via `/meeting`.
+- **Meetings** — Agent meeting transcripts (`meeting-YYYY-MM-DD-slug.md`). Auto-registered by the `meeting-facilitation` skill.
 - **ADRs** — Architecture Decision Records (`adr-NNNN-slug.md`). Register manually via `bash scripts/sync-md.sh "$DATE" "Title" --adr ADR-NNNN`.
 
 ---
@@ -22,7 +22,7 @@ This file is the **index** of all development logs. Updated automatically by `sc
 
 | Date | Topic | File |
 |------|-------|------|
-<!-- Auto-registered by /meeting skill. Example:                                                                -->
+<!-- Auto-registered by meeting-facilitation skill. Example:                                                                -->
 <!-- | 2026-01-15 | Sprint planning | [meeting-2026-01-15-sprint-planning.md](meeting-2026-01-15-sprint-planning.md) | -->
 
 ## ADRs
