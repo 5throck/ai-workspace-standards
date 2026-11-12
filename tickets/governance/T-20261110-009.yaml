@@ -30,18 +30,18 @@ history:
   - at: '2026-11-11T08:50:27.051+09:00'
     from: waiting
     to: review
-  - at: '2026-11-12T04:32:31.262+09:00'
+  - at: '2026-11-12T23:50:37.593+09:00'
     from: review
     to: done
 result: >-
-  Closed: Scope A of docs/designs/2026-11-10-delivery-gating-hardening-design
-  implemented and merged in workspace PR #1961 (upgrade-project 1.100.0,
-  upgrade-policy 1.40.0): A1 resolveUnbaselinedDisposition (NO_BASELINE +
-  divergent content: LOCAL-PATCH marker -> CONFLICT/ERROR skip, unmarked ->
-  UNBASELINED_OVERWRITE WARN) and A2 parity baselining (baselines recorded, not
-  in manifest files[]); covered by upgrade-policy-decisions.test.ts and
-  upgrade-decision-log.test.ts. Verified on origin/main
-  (resolveUnbaselinedDisposition present in scripts/lib/upgrade-policy.ts).
-  Fleet dry-run showed zero A1 rows; the co-deck canary apply is a rollout gate
-  tracked with the fleet dry-run, not part of this ticket's acceptance.
+  Verified 2026-11-12: ask fulfilled — Scope A landed via workspace PR #1961
+  (merge e7d550b0b, 2026-11-11 22:52, commit 741d48fd9 'unbaselined-disposition
+  resolution and decision log (T-20261110-009 A1/A2)'):
+  resolveUnbaselinedDisposition + UNBASELINED_OVERWRITE verdict present in
+  origin/main scripts/lib/upgrade-policy.ts (now v1.44.0, further evolved),
+  upgrade-project.ts decision log landed; covered by
+  upgrade-policy-decisions.test.ts and upgrade-decision-log.test.ts. origin/main
+  store already carries the closure result (upgrade-policy 1.40.0 /
+  upgrade-project 1.100.0 at closure); local store (81 commits behind) aligned
+  to done.
 error: null

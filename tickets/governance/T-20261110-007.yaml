@@ -8,7 +8,7 @@ title: >-
   (design-spec amendment or gen-slides-pdf change) and align the other side via
   the design flow
 priority: low
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-10T14:44:07.975+09:00'
 history:
@@ -21,9 +21,9 @@ history:
   - at: '2026-11-11T09:53:17.417+09:00'
     from: waiting
     to: review
-  - at: '2026-11-12T08:54:36.885+09:00'
+  - at: '2026-11-13T02:10:26.939+09:00'
     from: review
-    to: review
+    to: done
 description: >-
   PM ruling 2026-11-11 (recommended option, taken under the user's attempt-all
   directive; FLAGGED for user confirmation): the HTML rendering is authoritative
@@ -45,5 +45,17 @@ description: >-
 blocked_reason: >-
   awaiting user confirmation of the recommended ruling (HTML authoritative) and
   a co-deck design-flow PR for the gen-slides-pdf punchline alignment
-result: null
+result: >-
+  Project-side landing complete: Projects/co-deck gen-slides-pdf.ts
+  v1.14.4→v1.14.5 (LOCAL-PATCH U-20261105-005) — punchline statement routes
+  through richLines/richRunW with forceBold, **keyword** runs draw C_ACCENT
+  (HTML .punch-text strong parity per PM ruling, HTML authoritative; user
+  process-all directive = confirmation). Test pin gen-slides-pdf-render.test.ts
+  v1.1.0 (asserts extracted text has no literal **); U-002(c) passes. Landed via
+  project dev-sync: PR https://github.com/5throck/co-deck/pull/219 merged as
+  bfcef0d. CI never-started (billing wall, T-20261007-025/DEC-20261110-03);
+  local gates: bun scripts/audit.ts PASS (VERSION_MANIFEST regenerated), render
+  test 4 pass/1 fail with the sole fail (U-005(1+2) /W calt) verified
+  pre-existing on clean main. Template-side port already landed via workspace PR
+  #1958.
 error: null

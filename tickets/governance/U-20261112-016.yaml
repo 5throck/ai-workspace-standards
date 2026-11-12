@@ -3,7 +3,7 @@ id: U-20261112-016
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-12T10:01:47.792+09:00'
 history:
@@ -16,7 +16,13 @@ history:
   - at: '2026-11-13T02:02:17.956+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-13T07:04:40.967+09:00'
+    from: review
+    to: done
+result: >-
+  co-abap.context.md DA-1..DA-8 restored verbatim from project history + vsp
+  facts corrected to pinned 2.60.0 (PR landed; re-applied after 06:51 store
+  rewrite reverted the resolution)
 error: null
 upstream:
   project: co-abap
@@ -62,3 +68,10 @@ upstream:
   duplicates:
     - project: co-abap
       at: '2026-11-12T10:01:47.792+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1994
+    summary: >-
+      co-abap.context.md DA-1..DA-8 restored verbatim from project history + vsp
+      facts corrected to pinned 2.60.0 (PR landed; re-applied after 06:51 store
+      rewrite reverted the resolution)

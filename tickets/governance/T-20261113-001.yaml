@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: T-20261113-001
+kind: manual
+title: >-
+  Windows CI flake: tests/unit/upgrade-decision-log.test.ts intermittently times
+  out on windows-latest (Test timed out after 300000ms; the file sets per-test
+  300s timeouts at lines 1331/1342/1357 and spawns full upgrade-project.ts
+  subprocesses — slow windows runners intermittently exceed the budget;
+  ubuntu/macos pass the same content). Evidence: PR #1991 windows leg failed
+  once with this timeout, rerun of the identical commit passed (run
+  43245817385). Fix options: (a) raise per-test timeout for these 3 subprocess
+  tests to 600s, (b) windows-only retry-once via bun test retry config, (c) mark
+  them integration-tier and move out of the per-PR unit gate. Discovered
+  2026-11-13 during PR #1991 merge triage.
+priority: low
+status: done
+attempts: 0
+created_at: '2026-11-13T02:25:03.717+09:00'
+history:
+  - at: '2026-11-13T02:25:03.717+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-13T06:55:33.081+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-13T06:55:33.101+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T07:03:29.017+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via PR #1996 (merge bc2e8c797): upgrade-decision-log.test.ts
+  subprocess-test timeouts 300s→600s (spawn + 3 tests), windows-lateest flake
+  class closed; local 36/36 green, CI 4/4 green. Note during processing: a
+  concurrent bulk ticket-store rewrite at 06:51:23 had dropped this ticket from
+  the live store — restored verbatim from session-start read; sweep's
+  review-state protection worth a follow-up check.
+error: null

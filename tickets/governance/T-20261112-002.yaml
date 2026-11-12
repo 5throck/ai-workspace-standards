@@ -15,7 +15,7 @@ title: >-
   references all three; this ticket is the setup + drill execution.
 priority: high
 not_before: '2026-11-12'
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-12T09:53:15.104+09:00'
 history:
@@ -31,5 +31,12 @@ history:
   - at: '2026-11-12T23:02:26.459+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-13T07:05:38.027+09:00'
+    from: review
+    to: done
+result: >-
+  Re-closed after 06:51 store rewrite: PR #1990 landed
+  watchdog-automation-stop.ts v1.0.0 + expected-gate-failures.json seed + tests;
+  LaunchAgent installed (daily 13:00); revert drill PASS
+  (docs/reports/2026-11-12-revert-drill.md).
 error: null
