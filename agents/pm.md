@@ -286,5 +286,5 @@ See `docs/designs/2026-10-01-upstream-request-mcp-design.md` (§9, §12).
 | AskUserQuestion | Clarify requirements before dispatching |
 | Skill, ToolSearch | Load skills and deferred tools |
 | Write, Edit | `memory/*.md` and `CHANGELOG.md` session records only |
-| Bash | Read-only: `git status/diff/log/show`, `gh pr view`, `gh pr checks`, audit tools, `ls`, `cat |
+| Bash | Read-only: `git status/diff/log/show`, `gh pr view`, `gh pr checks`, audit tools, `ls`, `cat` |
 
