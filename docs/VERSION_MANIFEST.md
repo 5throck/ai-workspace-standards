@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-11-12T15:44:36.508Z
+**Generated**: 2026-11-12T16:28:42.746Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -204,7 +205,7 @@
 | test-adopt-project.ts | 1.0.0 | scripts/test-adopt-project.ts | child_process, fs, path |
 | test-extends-validator.ts | 1.0.1 | scripts/test-extends-validator.ts | fs, path |
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
-| test-new-project.ts | 1.11.1 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
+| test-new-project.ts | 1.12.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
 | test-runner.ts | 1.15.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |
@@ -225,7 +226,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
-| validate-templates.ts | 1.79.1 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
+| validate-templates.ts | 1.80.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |
@@ -237,7 +238,7 @@
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | fs |
 | verify-platform-lifecycle.ts | 1.6.1 | scripts/verify-platform-lifecycle.ts | fs, path |
 | verify-readme-sync.ts | 1.5.0 | scripts/verify-readme-sync.ts | bun, crypto, fs, path |
-| verify-scripts.ts | 1.14.0 | scripts/verify-scripts.ts | crypto, fs, path |
+| verify-scripts.ts | 1.15.0 | scripts/verify-scripts.ts | crypto, fs, path |
 | verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | fs, path, url |
 | verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | fs, path |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
