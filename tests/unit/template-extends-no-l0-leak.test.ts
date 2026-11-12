@@ -10,7 +10,7 @@
  */
 import { describe, test, expect } from 'bun:test';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 const ROOT = resolve(import.meta.dir, '../..');
 const TEMPLATES = join(ROOT, 'templates');
@@ -25,7 +25,7 @@ function stubs(): { file: string; target: string }[] {
     for (const f of readdirSync(dir)) {
       if (!f.endsWith('.md')) continue;
       const file = join(dir, f);
-      const fm = /^---\n([\s\S]*?)\n---/.exec(readFileSync(file, 'utf8'));
+      const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(file, 'utf8'));
       const m = fm && /^extends:\s*(\S+)\s*$/m.exec(fm[1]);
       if (m) out.push({ file, target: resolve(dirname(file), m[1]) });
     }
@@ -35,8 +35,11 @@ function stubs(): { file: string; target: string }[] {
 
 describe('template extends stubs', () => {
   test('every stub resolves under templates/common/agents, not root agents/', () => {
-    const bad = stubs().filter((s) => !s.target.startsWith(COMMON_AGENTS + '/'));
-    expect(bad.map((s) => s.file.replace(ROOT + '/', ''))).toEqual([]);
+    const bad = stubs().filter((s) => {
+      const rel = relative(COMMON_AGENTS, s.target);
+      return rel.startsWith('..') || isAbsolute(rel);
+    });
+    expect(bad.map((s) => relative(ROOT, s.file).split(sep).join('/'))).toEqual([]);
   });
 
   test('the L1 PM body has no L0-only Upstream Request Tickets section or retired pm-gateway-workflow link', () => {
