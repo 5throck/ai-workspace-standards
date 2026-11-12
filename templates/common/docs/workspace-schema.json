@@ -185,7 +185,7 @@
       "NOTICES",
       ".mcp.json",
       ".sync_context.tmp",
-      "propagation-map.json",
+      "propagation-map.json", "prompts.manifest.json",
       "services.yaml",
       "fix.mjs",
       ".DS_Store", ".zcodeignore",
