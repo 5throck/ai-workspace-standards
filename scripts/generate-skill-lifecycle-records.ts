@@ -28,8 +28,10 @@
  * The core is pure over an injected Tree so unit tests run on in-memory file maps. The CLI is
  * the only place that touches the real filesystem.
  *
- * @version 1.2.0
+ * @version 1.3.0
  *
+ * v1.3.0 (2026-11-12, U-20261112-005 PR-3): `recordHookVerdict` pure decision for the dev-sync step 4.51
+ *         records hook (bun scripts/generate-skill-lifecycle-records.ts --write after the L0->L1 publish).
  * v1.2.0 (2026-11-12, U-20261112-005 PR-1b): Korean text in generated records is wrapped in backticks
  *         (wrapHangulInCode) so validate-md-language.ts accepts the records without a lang: ko
  *         declaration or an allowlist.
@@ -905,6 +907,24 @@ function summarize(plan: Plan): string {
     `  total: ${plan.records.length} record(s) (${projected} projected, ${plan.records.length - projected} derived); ${plan.handAuthored.length} hand-authored left alone; ${plan.problems.length} problem(s)`,
   );
   return lines.join("\n");
+}
+
+export type RecordHookVerdict = "skip" | "ok" | "fatal" | "warn";
+
+/**
+ * dev-sync step 4.51 hook decision: the generator only runs at the workspace root; a failure (an unmapped
+ * owner, a leaking record) is fatal in L0 context so a template change that adds a skill without a
+ * record never reaches a commit, and a warning elsewhere.
+ */
+export function recordHookVerdict(opts: {
+  isWorkspaceRoot: boolean;
+  generatorPresent: boolean;
+  exitCode: number | null;
+  isL0Context: boolean;
+}): RecordHookVerdict {
+  if (!opts.isWorkspaceRoot || !opts.generatorPresent) return "skip";
+  if (opts.exitCode === 0) return "ok";
+  return opts.isL0Context ? "fatal" : "warn";
 }
 
 export function main(argv: string[], root: string = ROOT): number {

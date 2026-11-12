@@ -2,7 +2,7 @@
 
 - **Spec ID**: `2026-11-12-skill-lifecycle-record-delivery-design`
 - **Date**: 2026-11-12
-- **Status**: approved. The user made scope decisions D1-D3 and, in a second round, D4-D9, then D10-D12 on 2026-11-12 (Decisions section). No question is open. Implementation tickets T1..T6 in §9 are proposals for the PM to create.
+- **Status**: approved (implementation complete in PR-3; set to implemented after that PR merges). The user made scope decisions D1-D3 and, in a second round, D4-D9, then D10-D12 on 2026-11-12 (Decisions section). No question is open. Implementation tickets T1..T6 in §9 are proposals for the PM to create.
 - **Author**: architect (PM-dispatched, Design Gate Row 0, design only)
 - **Input**: upstream ticket U-20261112-005 (from co-develop, `tickets/governance/U-20261112-005.yaml`): "delivered skills arrive record-less at L3 and skill-lifecycle-audit warns for every delivered active skill (observed: 31 warnings in Projects/co-develop)".
 - **Related**: U-20261028-011 (Check LC moved out of the L0-only gate), [`2026-11-11-upgrade-overwrite-protection-design.md`](2026-11-11-upgrade-overwrite-protection-design.md) and DEC-20261111-01, ADR-0069 (L1 `docs/` is independently maintained; the `docs` propagation domain is disabled), `docs/self-managed-surfaces.json`.
@@ -27,6 +27,10 @@ The user answered three questions on 2026-11-12. They are binding for this desig
 | D10 | Root and template boundary (CLAUDE.md §9) | **Split root and templates into separate PRs.** Supersedes D7 and amends D6. Three sequential PRs: root, templates, root (§9). SLR runs report-only between merges only, inside one template release window. | §9 PR sequence. |
 | D11 | Enforcement mechanism | An explicit enforcement flag in a config file (`scripts/skill-record-enforcement.json`, `{ "enforce": false }`), read by SLR; PR-3 flips it to `true`. | §4.6, §9. |
 | D12 | co-newbiz delivery | **Project PR** on the co-newbiz repository through a generator `--project <path>` mode. No `templates/co-newbiz`. Lands at its freeze-lift apply on that project's own PM merge path; not part of any root or templates PR. | §4.1, §9 T6. |
+
+## Implementation outcome (2026-11-12, PR-3)
+
+Actual PR sequence: PR-1 #1976 (generator, report-only SLR), PR-1b #1985 (generator Korean handling; found that `new-project` already delivers the common records through its docs copy, so the scaffold copy planned in T4 is not needed and the reviewed-gap entries became one prefix rule), PR-2 #1986 (the 188 generated records; SLR clean at 225 skills), PR-3 (this PR). T4 therefore shrank to the `enforce: true` flip plus the dev-sync hook. The hook is step 4.505 (right after the 4.5 publish) and runs `generate-skill-lifecycle-records.ts --write`; the decision is the pure `recordHookVerdict` (fatal in L0 context on failure). The flag file is root-only (not propagated to templates). Negative checks (deleted record, unknown owner, missing owner) fail SLR with a named file and fix text.
 
 ## 1. Problem statement
 

@@ -1,4 +1,9 @@
-// @version 1.46.2
+// @version 1.47.0
+// v1.47.0 (2026-11-12, U-20261112-005 PR-3, design docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md
+//          section 9 T4): new step 4.505 runs `generate-skill-lifecycle-records.ts --write` right after the 4.5 publish
+//          (L0 only), so a skill added or changed under templates/ gets its generated lifecycle record in the same
+//          sync; a generator failure (unmapped owner, leaking record) is fatal in L0 context. Decision is the pure
+//          `recordHookVerdict` exported by the generator. Cost: one in-tree pass, no network.
 // v1.46.2 (2026-11-12, U-20261112-007): the missing-spec hint cited "AGENTS.md §5.1.1" for the E1-E5
 //          exemption categories; they now live in docs/governance/agents/execution-plan-templates.md §5.1.1.
 //          Message string only, no behavior change.
@@ -1450,6 +1455,36 @@ if (isWorkspaceRoot) {
     } else {
       console.log(`${YELLOW}⚠️  L0→L1 publish failed — continuing sync${RESET}`);
     }
+  }
+}
+
+// ── Step 4.505: skill lifecycle record generation (U-20261112-005 PR-3) ──
+//     After the publish, regenerate the generated records so a template change that adds a skill
+//     (or edits an L0 record behind a projection) never reaches a commit record-less or stale.
+{
+  const gen = "scripts/generate-skill-lifecycle-records.ts";
+  const generatorPresent = fs.existsSync(gen);
+  let exitCode: number | null = null;
+  if (isWorkspaceRoot && generatorPresent) {
+    console.log("\n📋 Step 4.505: skill lifecycle records (generate --write)...");
+    const genRes = await $`bun ${gen} --write`.nothrow().quiet();
+    exitCode = genRes.exitCode;
+    const out = (genRes.stdout.toString() + genRes.stderr.toString()).trim().split("\n");
+    console.log(`${DIM}   ${out.slice(-2).join("\n   ")}${RESET}`);
+  }
+  const { recordHookVerdict } = generatorPresent
+    ? await import("./generate-skill-lifecycle-records.ts")
+    : { recordHookVerdict: () => "skip" as const };
+  const verdict = recordHookVerdict({ isWorkspaceRoot, generatorPresent, exitCode, isL0Context });
+  if (verdict === "fatal") {
+    console.log(
+      `${RED}❌ Step 4.505: lifecycle record generation failed — fatal in L0 context. Fix the finding above (unmapped owner? leaking record?) and re-run /sync.${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  } else if (verdict === "warn") {
+    console.log(`${YELLOW}⚠️  Step 4.505: lifecycle record generation failed — continuing sync${RESET}`);
   }
 }
 

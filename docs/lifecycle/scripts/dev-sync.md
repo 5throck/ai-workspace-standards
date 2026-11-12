@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.46.2
+- **Version**: 1.47.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-10
+- **Last Updated**: 2026-11-12
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-12 | production | production | v1.47.0 (U-20261112-005 PR-3): step 4.505 runs generate-skill-lifecycle-records.ts --write after the 4.5 publish (L0 only, fatal on failure) so a template skill change never lands without its generated record. | automation-engineer |
 | 2026-11-12 | production | production | v1.46.2 (U-20261112-007): missing-spec hint cites docs/governance/agents/execution-plan-templates.md §5.1.1 instead of the stale AGENTS.md §5.1.1; message string only. | automation-engineer |
 | 2026-11-10 | production | production | v1.46.1 (design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md §4.3, U-20261108-001 / DEC-20261109-01): strict-profile compliance sweep — formatting reflow (double quotes, 2-space, lineWidth 120) and the enumerated while-((match=re.exec())) loop rewrites (noAssignInExpressions/noImplicitAnyLet). Behavior unchanged — version-only bump for the format-class sweep; no step numbers added or reordered. | automation-engineer |
 | 2026-11-09 | production | production | v1.46.0 (spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3.3-§3.4, T-20261109-002): step 4.88 becomes the spawned-child integrity gate — Arm 1 (config snapshot/compare, semantics unchanged) also diffs the per-worktree scope (`wt: ` rows); Arm 2 (new, corruption MODE 1) scans one `git log <base>..HEAD` spawn for fixture-identity commits (author AND committer, case-insensitive): base resolves upstream → origin/main → fail-closed refusal, any hit is FATAL with SHA + identity + subject + manual-repair guidance, no env skip path. Primitives: lib/repo-integrity.ts v1.1.0; placement + no-skip-path pinned by tests/unit/repo-integrity.test.ts v1.2.0. | automation-engineer |
