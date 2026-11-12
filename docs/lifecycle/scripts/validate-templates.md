@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.79.1
+- **Version**: 1.80.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-12
+- **Last Updated**: 2026-11-13
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-13 | production | production | v1.79.1 → v1.80.0 (U-20261112-013, upstream co-abap): new check `hook-command-targets` — every script-file target in template platform settings hook commands (.claude/settings.json, .gemini/settings.json, .codex/hooks.json; common + every variant) must exist in the effective template tree (variant dir → templates/common fallback); `${VAR}/`/`$(...)/` prefixes resolved; TRAIL_RETIRED_SEEDS skipped; fail-on-missing. Primitives collectHookCommands/extractHookScriptTargets unit-pinned (tests/unit/validate-templates-hook-targets.test.ts). | automation-engineer |
 | 2026-11-12 | production | production | v1.79.0 → v1.79.1 (AE-1, design 2026-11-12-sync-ownership-and-common-automation-engineer-design D2/D5): VA-02 WORKSPACE_ROOT_AGENTS drops automation-engineer (common agent, Medium). | automation-engineer |
 | 2026-11-12 | production | production | v1.78.0 → v1.79.0 (U-20261112-005 PR-1, design docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md §4.6): new check SLR (skill lifecycle record coverage, parity, leak, owner) evaluated by generate-skill-lifecycle-records.ts and gated by scripts/skill-record-enforcement.json — enforce:false (shipped state) reports WARN only, enforce:true fails. | automation-engineer |
 | 2026-11-11 | production | production | v1.77.0 → v1.78.0 (DEC-20261111-01 PR-D): blocking check CV-02 same-version-content-change — modified templates/** versioned files whose content changed without a version bump (base: CV02_BASE, else merge-base HEAD origin/main, else HEAD). | automation-engineer |
