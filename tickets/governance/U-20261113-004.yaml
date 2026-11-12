@@ -1,0 +1,34 @@
+schemaVersion: 1
+id: U-20261113-004
+kind: manual
+title: Upstream request from co-develop
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-13T07:15:03.944+09:00
+history:
+  - at: 2026-11-13T07:15:03.944+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-develop
+  variant: co-develop
+  template_version: 0.30.0
+  source: project/co-develop
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The workspace-root SSOT agents/pm.md still links the retired docs/governance/agents/pm-gateway-workflow.md ("Triage procedure: pm-gateway-workflow.md §3.12" in the Upstream Reporting / tickets section). That file was retired by 533f934 / DEC-20261028-05 (same retirement as U-20261112-006, which fixed the template-side copies and common pm.md). Because extends-chain variant mirrors resolve through this L0 body, every regenerated .claude/agents/pm.md mirror re-imports the retired pointer — the residual was reproduced in Projects/co-develop after running sync-agent-mirrors.ts today. Suggested fix: scrub/re-point the §3.12 triage-procedure citation in the L0 agents/pm.md body to the surviving governance doc, then regenerate mirrors.'
+  affected_paths:
+    - agents/pm.md
+  identity_source: cwd
+  repro: 'In a variant whose agents/pm.md is an extends stub pointing at the workspace root (e.g. Projects/co-develop): regenerate mirrors via scripts/sync-agent-mirrors.ts and observe .claude/agents/pm.md line ~255 still cites the retired docs/governance/agents/pm-gateway-workflow.md §3.12 — the reference originates in the L0 SSOT body, not the stub.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery agents/pm.md=false
+  dedupe_key: fc84032abaa7bcba11d5203f57ae2ec0ab5dea29324f2bb317b162c602c5b4b8
+  duplicates:
+    - project: co-develop
+      at: 2026-11-13T07:15:03.944+09:00

@@ -3,7 +3,7 @@ id: U-20261112-020
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-12T19:54:39.642+09:00'
 history:
@@ -16,7 +16,12 @@ history:
   - at: '2026-11-13T00:45:37.898+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-13T07:06:38.835+09:00'
+    from: review
+    to: done
+result: >-
+  pm.md:289 unbalanced backtick fixed (PR #1992, merge 56af78e65); lifecycle
+  audit 0 errors — re-applied after 06:51 store rewrite
 error: null
 upstream:
   project: co-newbiz
@@ -51,3 +56,9 @@ upstream:
   duplicates:
     - project: co-newbiz
       at: '2026-11-12T19:54:39.642+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1992
+    summary: >-
+      pm.md:289 unbalanced backtick fixed (PR #1992, merge 56af78e65); lifecycle
+      audit 0 errors — re-applied after 06:51 store rewrite

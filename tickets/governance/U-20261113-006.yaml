@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261113-006
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-13T07:23:38.362+09:00
+history:
+  - at: 2026-11-13T07:23:38.362+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The template-delivered .gemini/skills/explain-me/SKILL.md parameter table describes --no-verify as "Skip verification (discouraged)" while every other template-delivered surface (CLAUDE.md, GEMINI.md, .gemini/commands/commit-push-pr.md) declares --no-verify forbidden — the wording drift weakens the git-hook bypass prohibition at the discovery surface. Originally filed 2026-11-12 (co-security) as U-20261112-009; that id slot now holds a different project''s submission after the fleet triage wave, so re-filing. Expected: change the table wording to "Skip verification (forbidden)".'
+  affected_paths:
+    - templates/common/.gemini/skills/explain-me/SKILL.md
+  identity_source: cwd
+  repro: '1. Open the template''s .gemini/skills/explain-me/SKILL.md parameter table (~line 68). 2. Observe --no-verify described as "Skip verification (discouraged)". 3. Compare with CLAUDE.md/GEMINI.md/commit-push-pr command copies in the same tree: all declare --no-verify forbidden. 4. The table contradicts the rule text delivered by the same template.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - 'path_not_template_managed: templates/common/.gemini/skills/explain-me/SKILL.md'
+    - info:in_last_delivery templates/common/.gemini/skills/explain-me/SKILL.md=false
+  dedupe_key: a5b84d4f3a5ee9cdab6e4d22297d642ea2183a15de13a128b25f280fac64c06e
+  duplicates:
+    - project: co-security
+      at: 2026-11-13T07:23:38.362+09:00
