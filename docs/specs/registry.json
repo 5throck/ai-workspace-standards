@@ -3294,6 +3294,15 @@
       "review_notes": "U-20261112-005 (from co-develop): delivered skills arrive without docs/lifecycle/skills records. User decisions 2026-11-12: D1 refined projection; D2 variant-own records delivered with common (153 derived); D3 leftovers allowed; D4 co-newbiz records (65, D12 project PR via --project); D5 owner mapped by checked table; D6 SLR blocking, amended by D10/D11 (flag-gated, report-only only between PR merges in one release window); D7 superseded by D10 (split root/templates: PR-1 root, PR-2 templates 188 records, PR-3 root flip); D8 explain-me delivered; D9 frozen projects one batch at freeze-lift. No open questions. Tickets T1-T6 proposed, not created (CLI cannot express them)."
     },
     {
+      "id": "2026-11-12-sync-ownership-and-common-automation-engineer-design",
+      "title": "sync ownership and common automation engineer design",
+      "file": "docs/designs/2026-11-12-sync-ownership-and-common-automation-engineer-design.md",
+      "status": "approved",
+      "source": "architect",
+      "created": "2026-11-12",
+      "last_updated": "2026-11-12"
+    },
+    {
       "id": "skillhygiene",
       "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
       "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
