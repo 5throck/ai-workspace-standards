@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.102.0
+// @version 1.103.0
+// v1.103.0 (2026-11-12, U-20261112-003): after the template-version.txt write, the `## Template Provenance`
+//          footer of docs/<variant>.context.md has its `Template-Version` line rewritten to the delivered
+//          version (policy helper rewriteTemplateProvenanceVersion). The footer was scaffold-only and drifted
+//          (co-consult read 0.5.3 vs template-version.txt 0.30.0). Single-line edit; dry-run reports only.
 // v1.102.0 (2026-11-12, DEC-20261111-01 — design 2026-11-11-upgrade-overwrite-protection PR-B):
 //          (E3) lib/template-vintage.ts — a project file whose bytes equal ANY historical
 //          template revision (git blob history, CRLF-normalized, horizon 2026-06-01) is
@@ -1288,6 +1292,7 @@ import {
   LOCAL_PATCH_MARKER_RE,
   markerLoss,
   markerLossDetail,
+  rewriteTemplateProvenanceVersion,
   tombstoneGuard,
   type DecisionBaseline,
   type DecisionVerdict,
@@ -8051,6 +8056,19 @@ if (!dryRun) {
   console.log(
     `[DRY RUN] Would write: template-version.txt (version=${currentVersion}, country=${detectedCountry}${legacyMarkerPresent ? ", migrated from .claude/" : ""})`,
   );
+}
+// U-20261112-003: keep the docs/<variant>.context.md provenance footer in step with template-version.txt.
+{
+  const provenancePath = join(projectDir, "docs", `${variant}.context.md`);
+  if (existsSync(provenancePath)) {
+    const rewritten = rewriteTemplateProvenanceVersion(readFileSync(provenancePath, "utf8"), currentVersion);
+    if (rewritten.changed) {
+      if (!dryRun) writeFileSync(provenancePath, rewritten.content, "utf8");
+      console.log(
+        `${dryRun ? "[DRY RUN] Would update" : "Updated"}: docs/${variant}.context.md Template Provenance (Template-Version ${rewritten.from} -> ${currentVersion})`,
+      );
+    }
+  }
 }
 console.log("");
 
