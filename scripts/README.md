@@ -269,7 +269,9 @@ Audits user-guide.md / user-guide_ko.md translated_from_hash synchronization (FA
 #### `verify-memory.ts`
 **Purpose**: Validates `memory/*.md` session logs for mandatory 4-section format compliance
 (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) and detects
-orphaned files not registered in `MEMORY.md` index.
+orphaned files not registered in `MEMORY.md` index. Link integrity is enforced in
+both directions: dead Sessions rows are ERRORS (Check 3b), and every flat `.md` link
+anywhere in the index must resolve — missing targets WARN with a count (Check 3c).
 **Usage**: `bun scripts/verify-memory.ts [--verify | --report]`
 **Runs automatically**: pre-commit hook when `memory/*.md` files are staged.
 
