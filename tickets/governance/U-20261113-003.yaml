@@ -3,14 +3,38 @@ id: U-20261113-003
 kind: manual
 title: Upstream request from co-abap
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-13T07:11:02.552+09:00
+created_at: '2026-11-13T07:11:02.552+09:00'
 history:
-  - at: 2026-11-13T07:11:02.552+09:00
+  - at: '2026-11-13T07:11:02.552+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-13T07:39:49.187+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-13T07:40:06.369+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T07:40:06.369+09:00'
+    from: review
+    to: done
+result: >-
+  adjudicated at source, two parts. (a) 'templates ship docs/lifecycle/agents/
+  but NO docs/lifecycle/skills/' — already fixed by PR #1986 (fb77af367,
+  2026-11-12 16:19, U-005 PR-2) which delivered 13 generated in-checkout-path
+  records to templates/co-abap/docs/lifecycle/skills/ (verified on disk) — the
+  ticket's part-(a) verification predated this landing; records replace the 7
+  stale v0.6.0 L0-perspective records at the next upgrade visit. (b)
+  dual-Metadata version lines so lifecycleRecordVersions()
+  (skill-lifecycle-audit.ts:397-405) validates delivered records — ruled out by
+  design: U-005 design D1 defines delivered records as a sanitized VERSION-FREE
+  projection, so Check MV silence on delivery-form records is the designed
+  consequence, recorded in
+  docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-011 (PR #1994)
+  rather than re-opening the U-005 decision. Verification: bun
+  scripts/generate-skill-lifecycle-records.ts --check 0 problems fleet-wide (per
+  §U-011 gates). Triaged by triage-b1 session 2026-11-13.
 error: null
 upstream:
   project: co-abap
@@ -19,12 +43,31 @@ upstream:
   source: project/co-abap
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Re-file of U-20261112-011 (left the live store overnight after filing — individual lookup returns not found; believed merged into a same-day co-develop request per the L0 governance ticket store). Since skill-lifecycle-audit 1.9.0 (U-20261028-011) removed the workspace-root gate, delivered projects honestly report lifecycle-record gaps: Projects/co-abap showed 50 skills / 42 WARN ("No lifecycle record"). Two delivery gaps: (a) templates ship docs/lifecycle/agents/ but NO docs/lifecycle/skills/ (verified templates/co-abap/docs/lifecycle/ has only agents/) — projects are born with zero skill records while the delivered audit demands them; (b) the 7 records delivered earlier (v0.6.0 resync) are L0-perspective artifacts: all 7 cite templates/common/... paths absent in detached checkouts, and 6 of 7 have exactly one ## Metadata block (i18n-audit.md zero) so lifecycleRecordVersions() returns null and Check MV silently never validates them — LC passes on existence alone. Expected: upgrade/new-project deliver skill lifecycle records adapted to the delivery (in-checkout paths, dual Metadata version lines matching SKILL.md frontmatter), or the audit documents the dimension as L0-only. The project has since authored all 49 records locally with LOCAL-PATCH markers (upstream adoption remains the durable cure).'
+  symptom: >-
+    Re-file of U-20261112-011 (left the live store overnight after filing —
+    individual lookup returns not found; believed merged into a same-day
+    co-develop request per the L0 governance ticket store). Since
+    skill-lifecycle-audit 1.9.0 (U-20261028-011) removed the workspace-root
+    gate, delivered projects honestly report lifecycle-record gaps:
+    Projects/co-abap showed 50 skills / 42 WARN ("No lifecycle record"). Two
+    delivery gaps: (a) templates ship docs/lifecycle/agents/ but NO
+    docs/lifecycle/skills/ (verified templates/co-abap/docs/lifecycle/ has only
+    agents/) — projects are born with zero skill records while the delivered
+    audit demands them; (b) the 7 records delivered earlier (v0.6.0 resync) are
+    L0-perspective artifacts: all 7 cite templates/common/... paths absent in
+    detached checkouts, and 6 of 7 have exactly one ## Metadata block
+    (i18n-audit.md zero) so lifecycleRecordVersions() returns null and Check MV
+    silently never validates them — LC passes on existence alone. Expected:
+    upgrade/new-project deliver skill lifecycle records adapted to the delivery
+    (in-checkout paths, dual Metadata version lines matching SKILL.md
+    frontmatter), or the audit documents the dimension as L0-only. The project
+    has since authored all 49 records locally with LOCAL-PATCH markers (upstream
+    adoption remains the durable cure).
   affected_paths:
     - docs/lifecycle/skills
     - scripts/skill-lifecycle-audit.ts
   identity_source: cwd
-  triage: inbox
+  triage: ready
   flagged: false
   triage_reasons:
     - 'path_not_template_managed: docs/lifecycle/skills'
@@ -33,4 +76,24 @@ upstream:
   dedupe_key: 16ed65d1f38c4e232cfbe15f4babdd343c27344c49b03d224e54afdf7155c8f5
   duplicates:
     - project: co-abap
-      at: 2026-11-13T07:11:02.552+09:00
+      at: '2026-11-13T07:11:02.552+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/1986
+    summary: >-
+      adjudicated at source, two parts. (a) 'templates ship
+      docs/lifecycle/agents/ but NO docs/lifecycle/skills/' — already fixed by
+      PR #1986 (fb77af367, 2026-11-12 16:19, U-005 PR-2) which delivered 13
+      generated in-checkout-path records to
+      templates/co-abap/docs/lifecycle/skills/ (verified on disk) — the ticket's
+      part-(a) verification predated this landing; records replace the 7 stale
+      v0.6.0 L0-perspective records at the next upgrade visit. (b) dual-Metadata
+      version lines so lifecycleRecordVersions()
+      (skill-lifecycle-audit.ts:397-405) validates delivered records — ruled out
+      by design: U-005 design D1 defines delivered records as a sanitized
+      VERSION-FREE projection, so Check MV silence on delivery-form records is
+      the designed consequence, recorded in
+      docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-011 (PR
+      #1994) rather than re-opening the U-005 decision. Verification: bun
+      scripts/generate-skill-lifecycle-records.ts --check 0 problems fleet-wide
+      (per §U-011 gates). Triaged by triage-b1 session 2026-11-13.
