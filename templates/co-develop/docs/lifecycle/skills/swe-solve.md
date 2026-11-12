@@ -11,13 +11,13 @@
 Autonomous 5-stage issue-to-PR resolution pipeline for software engineering tasks, featuring test-driven validation, pull-request synthesis, and resolution-trajectory logging.
 
 ## Changelog
-- 2026-08-29: L0 dev-home copy (`skills/swe-solve/`) removed per DEC-20260829-02 — the skill is variant-exclusive to co-develop; the variant copy (1.1.1, 5-stage) is authoritative; the L0 realignment done earlier the same day is superseded by full removal. Registered in `variant_scoped_skills` (docs/workspace-schema.json 1.5.0).
+- 2026-08-29: L0 dev-home copy (`skills/swe-solve/`) removed — the skill is variant-exclusive to co-develop; the variant copy (1.1.1, 5-stage) is authoritative; the L0 realignment done earlier the same day is superseded by full removal.
 - 2026-08-16: Lifecycle document created from SKILL.md frontmatter (backfill)
-- 2026-08-29: Re-scoped `common` → `co-develop`. The skill had evolved to 1.1.1 (5-stage pipeline with trajectory record) inside `templates/co-develop/skills/` while the common copy remained at 1.0.0 (4-stage), shipping the stale version to every non-co-develop project. Registered in `variant_scoped_skills` (docs/workspace-schema.json 1.5.0); L1 common copy and platform mirrors removed; L0 dev copy aligned to co-develop 1.1.1 with scope: co-develop.
+- 2026-08-29: Re-scoped `common` → `co-develop`. The skill had evolved to 1.1.1 (5-stage pipeline with trajectory record) inside `templates/co-develop/skills/` while the common copy remained at 1.0.0 (4-stage), shipping the stale version to every non-co-develop project. L1 common copy and platform mirrors removed.
 
 ## Dependencies
 - Bun runtime
-- test-runner.ts — the workspace-root `scripts/test-runner.ts` (L0 dev home). It is a workspace-level tool, not part of the shipped variant, so it is unsatisfiable inside an adopted co-develop project; in adopted projects use the project's own test command (e.g. `bun test`) instead.
+- test-runner.ts — the workspace-root `scripts/test-runner.ts`. It is a workspace-level tool, not part of the shipped variant, so it is unsatisfiable inside an adopted co-develop project; in adopted projects use the project's own test command (e.g. `bun test`) instead.
 
 ## Phase History
 
@@ -31,8 +31,8 @@ Autonomous 5-stage issue-to-PR resolution pipeline for software engineering task
 
 - [x] Skill SKILL.md exists at `skills/swe-solve/SKILL.md`
 - [x] Frontmatter valid: name, description, status, scope, version, owner populated
-- [x] Registration scope: variant-scoped — recorded in `docs/workspace-schema.json` → `variant_scoped_skills` (co-develop); the workspace `VERSION_MANIFEST.md` covers workspace-root and common-layer skills only, so no row there is expected for this skill
-- [x] Scope: co-develop (variant-exclusive; registered in `variant_scoped_skills`)
+- [x] Registration scope: variant-scoped; no common-layer registry row is expected for this skill
+- [x] Scope: co-develop (variant-exclusive)
 
 ## Notes
 - Variant-exclusive skill (owner: co-develop) — reaches only co-develop projects via the variant overlay; other variants no longer receive the stale common copy

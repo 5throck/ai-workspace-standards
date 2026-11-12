@@ -182,7 +182,7 @@
 | `co-safety/temperature-excursion-analyzer` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/thermal-burn-prevention-planner` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/tool-box-meeting` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/translate` | variant:co-safety | 1.0.1 | — | — | root/documentation-writing (composes_with) | — | — |
+| `co-safety/translate` | variant:co-safety | 1.0.2 | — | — | root/documentation-writing (composes_with) | — | — |
 | `co-security/finding-reconciliation` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5, co-security/phase 6 | co-security/sarif-exporter (composes_with), co-security/spdx-sbom (follows) | — | — |
 | `co-security/samm-maturity` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | — | — | — |
 | `co-security/sarif-exporter` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5 | co-security/samm-maturity (follows), co-security/stride-threat-matrix (composes_with) | — | — |
@@ -929,7 +929,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.9.1 #e2acf3d0; root@1.9.1 #006873a2 |
 | `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.2.0 #c375e7fd |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
-| `translate` | skill | divergence | co-safety@1.0.1 #1e85c0ed; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
+| `translate` | skill | divergence | co-safety@1.0.2 #51f1f071; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
 | `ui-ux-design-intelligence` | skill | divergence | co-design@1.0.2 #576de29c; root@1.0.1 #584f569c |
 
 ## Isolated Nodes (G5)
