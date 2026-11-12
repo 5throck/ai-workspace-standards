@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.103.0
+// @version 1.104.0
+// v1.104.0 (2026-11-13, U-20261112-010, design
+//          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-010):
+//          delivered-side graft→trail tool-block swap — after the MERGE and
+//          DOCS_MERGE passes touch an instruction file (the five
+//          AGENTS/CLAUDE/GEMINI/CODEX/HERMES docs), swapGraftForTrail
+//          (lib/trail-block-parity.ts v1.1.0) replaces any graft-era
+//          `<!-- graft:start -->…<!-- graft:end -->` block in the delivered
+//          copy with the template's trail block (ADOPT decision row
+//          TOOL_ERA_SWAP). The tool-owned block sits outside every
+//          COMMON-*/WORKSPACE-MANAGED zone, so the MERGE pass preserved the
+//          project's graft-era prose forever and delivered docs taught a CLI
+//          absent from PATH (`graft` → `trail`, vendor rename 0.28; `trail
+//          init` wires the hooks but never rewrites doc blocks). Refused when
+//          the template side itself still carries a graft block; idempotent;
+//          dry-run reports only.
 // v1.103.0 (2026-11-12, U-20261112-003): after the template-version.txt write, the `## Template Provenance`
 //          footer of docs/<variant>.context.md has its `Template-Version` line rewritten to the delivered
 //          version (policy helper rewriteTemplateProvenanceVersion). The footer was scaffold-only and drifted
@@ -1332,6 +1347,7 @@ import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from ".
 import { buildMergedTemplateBlocks, mergeManagedBlocks } from "./lib/managed-block-merge.ts";
 import { mergeSkeletonSections } from "./lib/platform-skeleton-merge.ts";
 import { applyCiWorkflowMerge } from "./lib/ci-workflow-merge.ts";
+import { extractTrailBlock, swapGraftForTrail } from "./lib/trail-block-parity.ts";
 import {
   capturePreDelivery,
   changedDeliveredSubjects,
@@ -3977,6 +3993,39 @@ console.log("");
 // ── MERGE files ────────────────────────────────────────────────────────────────
 console.log("--- MERGE files (WORKSPACE-MANAGED sections) ---");
 const MERGE_FILES: string[] = [];
+// U-20261112-010 (v1.104.0): delivered-side graft→trail tool-block swap. The
+// graft/trail marker block is TOOL-OWNED and sits outside every
+// COMMON-*/WORKSPACE-MANAGED zone, so mergeWorkspaceManaged can neither see
+// nor repair it — a delivered copy keeps teaching the graft CLI after the
+// vendor renamed the tool to trail (0.28). When the template side has already
+// moved to the trail era (it carries a trail block and no graft block), swap
+// the delivered graft block for the template's trail block; ADOPT decision row,
+// idempotent, dry-run-safe.
+const ERA_SWAP_RELS = new Set(["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md"]);
+function swapDeliveredEraBlocks(rel: string, templatePath: string, destPath: string, pass: string): void {
+  if (!ERA_SWAP_RELS.has(rel) || !existsSync(destPath)) return;
+  const templateContent = readFileSync(templatePath, "utf8");
+  const templateTrail = extractTrailBlock(templateContent);
+  if (templateTrail === null) return; // not-yet-migrated template — refuse to push a swap
+  const destContent = readFileSync(destPath, "utf8");
+  const swapped = swapGraftForTrail(destContent, templateContent, templateTrail);
+  if (swapped === null) return;
+  console.log(
+    `  ${dryTag}ERA SWAP: ${rel} — graft-era tool-owned doc block replaced with the template trail block (graft CLI absent from PATH; U-20261112-010)`,
+  );
+  if (!dryRun) {
+    writeFileSync(destPath, swapped, "utf8");
+    noteDelivered(rel);
+  }
+  recordDecision(
+    rel,
+    "TOOL_ERA_SWAP",
+    pass,
+    "ADOPT",
+    "graft-era tool-owned doc block swapped for the template trail block (block sits outside every managed zone — the MERGE pass cannot see it; trail init wires hooks but never rewrites doc blocks)",
+  );
+}
+
 // Union of the selected profiles' instruction files (literal sites: upgrade-policy drift guard).
 if (selectedProfiles.includes("claude")) MERGE_FILES.push("CLAUDE.md");
 if (selectedProfiles.includes("antigravity")) MERGE_FILES.push("GEMINI.md");
@@ -4055,6 +4104,7 @@ for (const rel of MERGE_FILES) {
       );
     }
   }
+  swapDeliveredEraBlocks(rel, src, dest, "MERGE");
   mergeChanged++;
 }
 if (ciMergeFailed) {
@@ -4120,6 +4170,7 @@ for (const rel of DOCS_MERGE_FILES) {
       mergeResult.snapshotCount > 0 || (mergeResult.dropped ?? 0) > 0 ? "WARN" : undefined,
     );
   }
+  swapDeliveredEraBlocks(rel, src, dest, "DOCS_MERGE");
   mergeChanged++;
 }
 for (const rel of DOCS_OVERWRITE_FILES) {
