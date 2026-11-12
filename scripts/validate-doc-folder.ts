@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.3.0
+ * @version 1.4.0
+ * v1.4.0 (2026-11-12, ADR-0105 / T-20261112-001): allowlist gains
+ *           `protected-paths.json` — the unified 03:00 batch runner's
+ *           protected-path SSOT (merge-predicate floor, hold-for-human-merge;
+ *           never propagated; docs/README.md §2 row is the contract).
  * v1.3.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md,
  *           DEC-20261107-01): allowlist gains `fleet-membership.json` — the
  *           L0-only fleet membership SSOT registry (never propagated,
@@ -67,7 +71,8 @@ const ALLOWED_DIRS: ReadonlySet<string> = new Set([
 
 /** Allowed loose FILES at docs/ root: the two indexes, the version manifest, the
  * machine projections (generator-declared names), the fleet membership SSOT
- * (L0-only registry, DEC-20261107-01), and the established top-level
+ * (L0-only registry, DEC-20261107-01), the unified-runner protected-path SSOT
+ * (L0-only registry, ADR-0105), and the established top-level
  * guides indexed in docs/index.md. */
 const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   "README.md",
@@ -82,6 +87,7 @@ const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   "variant-roadmap-2026-q3-q4.md",
   "variant-benchmark-backlog.md",
   "fleet-membership.json",
+  "protected-paths.json",
 ]);
 
 interface WorkspaceFinding {

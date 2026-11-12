@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "_comment": "Protected-paths SSOT for the unified 03:00 batch runner's merge predicate (ADR-0105, meeting 2026-11-12). A PR touching any pattern in protectedPaths is hold-for-human-merge: the runner must never merge it, regardless of gate status. Patterns are gitignore-style globs evaluated from the repository root. L0-only - never propagated to templates/ or scaffolded projects. Consumers: the runner prompt's merge predicate (cited by reference) and human PR review. Machine-readable counterpart of ADR-0105 Decision 2.",
+  "note": "Decision of record: docs/adr/0105-unified-batch-runner.md (Decision 2, protected paths hold-for-human-merge). Changes to this file are themselves protected and merge only via human review. See also docs/designs/2026-11-12-unified-batch-runner-design.md (AC-3).",
+  "protectedPaths": [
+    "docs/adr/**",
+    "AGENTS.md",
+    "CONSTITUTION.md",
+    "docs/governance/**",
+    "memory/**",
+    "docs/fleet-membership.json",
+    "scripts/dev-sync.ts",
+    "scripts/audit.ts",
+    ".github/workflows/**",
+    ".github/gitleaks*.toml",
+    ".githooks/**",
+    "scripts/hooks/**",
+    "CODEOWNERS",
+    "Projects/*/external-deps.json"
+  ],
+  "outOfRepoProtected": [
+    {
+      "name": "automation prompts",
+      "location": "ZCode automation store (not git-tracked)",
+      "reason": "The runner's own prompt surface. Out-of-repo vector documented as preserved dissent S2 (meeting 2026-11-12): prompt self-edits are invisible to every in-repo gate; protection stays procedural until the launcher hash-manifest gate lands (T-20261112-003)."
+    }
+  ]
+}
