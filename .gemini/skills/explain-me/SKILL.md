@@ -7,7 +7,7 @@ description: >
   Use when: user says "/explain-me", "/reportme", "make a report", "create report",
   "explain this topic".
   Inspired by beret21/reportme.
-version: 1.0.0
+version: 1.0.1
 last_reviewed: 2026-08-03
 status: experimental
 scope: common
@@ -65,7 +65,7 @@ Inspired by [beret21/reportme](https://github.com/beret21/reportme) v0.4.1 (MIT 
 | `--source` | Source mode: `research` (default) or `data` (auto-detected) | `--source data` |
 | `--tabs` | Custom tab list (comma-separated) | `--tabs "Overview,Analysis,References"` |
 | `--out` | Output file path | `--out ./reports/market-2026.html` |
-| `--no-verify` | Skip verification (discouraged) | `--no-verify` |
+| `--no-verify` | Skip verification (FORBIDDEN in this workspace) | `--no-verify` |
 | `--no-svg` | Skip inline SVG diagrams | `--no-svg` |
 | `--repo` | Publish: repository slug | `--repo ev-report-2026` |
 | `--owner` | Publish: GitHub account | `--owner beret21` |

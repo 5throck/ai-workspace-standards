@@ -1,0 +1,46 @@
+schemaVersion: 1
+id: U-20261112-014
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T10:01:21.266+09:00'
+history:
+  - at: '2026-11-12T10:01:21.266+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-13T01:29:50.730+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Upgrade prune deleted scripts/validate-abap-platform-parity.ts while
+    .github/workflows/ci.yml still invoked it (T-20261108-008 class; commit
+    ebcacde deleted it, manual restore c2ffd85 followed within minutes — "prune
+    recurrence" per the commit message). No gate scans workflow files for `bun
+    scripts/<name>.ts` references and verifies the targets exist, so the prune
+    class silently breaks CI. Expected: verify-scripts or audit adds a
+    CI-reference existence check (regex bun scripts/[A-Za-z0-9/_.-]+\.ts over
+    .github/workflows/ → existsSync).
+  affected_paths:
+    - scripts/verify-scripts.ts
+    - .github/workflows/ci.yml
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/verify-scripts.ts=false
+    - info:in_last_delivery .github/workflows/ci.yml=false
+  dedupe_key: 15b06972a91ce8e44a159e62e75aa6f22573c152aa12c75213cb38bde7ba1b05
+  duplicates:
+    - project: co-abap
+      at: '2026-11-12T10:01:21.266+09:00'

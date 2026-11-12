@@ -1,0 +1,53 @@
+schemaVersion: 1
+id: U-20261112-020
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T19:54:39.642+09:00'
+history:
+  - at: '2026-11-12T19:54:39.642+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-12T23:51:05.436+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-13T00:45:37.898+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The L0/L1 canonical agents/pm.md file contains a malformed Markdown table
+    row in its "Required Tools" section. The Bash row ends with an unbalanced
+    backtick: the cell reads `cat |` with the closing backtick missing, so the
+    cell content ("git status, git diff, git log, bun scripts/audit.ts, ls,
+    cat") renders incompletely and breaks table/inline-code rendering
+    downstream. The defect propagates into every platform mirror generated from
+    the canonical file (verified: .claude/agents/pm.md projection carries the
+    same malformed row; sync-agent-mirrors.ts parity passes because the
+    projection faithfully copies the broken source). Reproduction: open
+    agents/pm.md, locate the "Required Tools" table, Bash row, last cell — the
+    trailing backtick is missing after `cat`.
+  affected_paths:
+    - agents/pm.md
+    - templates/common/agents/pm.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: templates/common/agents/pm.md'
+    - info:in_last_delivery agents/pm.md=false
+    - info:in_last_delivery templates/common/agents/pm.md=false
+  dedupe_key: 99f6772683982d2fc8c29de250aa2d5365344e0a0cf4c169a3616ec2dee82774
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-12T19:54:39.642+09:00'

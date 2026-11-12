@@ -1,0 +1,44 @@
+schemaVersion: 1
+id: U-20261112-019
+kind: manual
+title: Upstream request from co-abap
+priority: normal
+status: review
+attempts: 0
+created_at: '2026-11-12T10:01:47.828+09:00'
+history:
+  - at: '2026-11-12T10:01:47.828+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-13T01:29:50.766+09:00'
+    from: waiting
+    to: review
+result: null
+error: null
+upstream:
+  project: co-abap
+  variant: co-abap
+  template_version: 0.30.0
+  source: project/co-abap
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The new duplicate-category changelog lint checks ### headings only, so
+    identical entry TEXT duplicated across layers within one release section
+    passes: in Projects/co-abap [Unreleased], the 2026-10-28 wave entry ("retire
+    the L0-only governance doc mirror + template delivery wave (DEC-20261028-05
+    phase 2)…") appears twice — once in the wave-log bullet layer without a PR
+    ref and once under ### Changed with "(#225)". Expected: extend the lint to
+    flag identical/near-identical entry bodies within one release section, so
+    per-wave append duplication cannot hide across layers.
+  affected_paths:
+    - CHANGELOG.md
+  identity_source: cwd
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery CHANGELOG.md=false
+  dedupe_key: b6a6973621e02f63e1d6168f7d184d0db8b8f61faee4e5c2d07994052717d653
+  duplicates:
+    - project: co-abap
+      at: '2026-11-12T10:01:47.828+09:00'
