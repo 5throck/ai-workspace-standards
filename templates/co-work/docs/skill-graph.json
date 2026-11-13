@@ -38,6 +38,21 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "i18n-formatting",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-layout",
+      "type": "skill",
+      "layer": "variant:co-work"
+    },
+    {
+      "id": "i18n-locale-config",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
       "id": "i18n-specialist",
       "type": "agent",
       "layer": "variant:co-work"
@@ -156,6 +171,11 @@
       "id": "technical-writer",
       "type": "agent",
       "layer": "variant:co-work"
+    },
+    {
+      "id": "translate",
+      "type": "skill",
+      "layer": "L0"
     }
   ],
   "edges": [
@@ -230,6 +250,24 @@
       "from": "evidence-ledger",
       "to": "output_type.evidence_pack",
       "source": "procedure_schema"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "i18n-layout",
+      "to": "translate",
+      "source": "prose"
     },
     {
       "type": "references",

@@ -224,3 +224,4 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `generate-room-elevation` | 1.2.0 | active | pm | 2026-09-26 | — | co-architect only |
 | `zwcad-ai-drawing` | 1.3.0 | active | zwcad-drafter | 2026-09-09 | — | co-architect only |
 | `security-audit` | 1.1.0 | active | security-expert | 2026-11-07 | — | co-security only |
+| `i18n-layout` | 1.1.2 | active | i18n-specialist | 2026-11-13 | — | co-work only |
