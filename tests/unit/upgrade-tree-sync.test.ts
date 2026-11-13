@@ -815,7 +815,7 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
     }
   }, 60000);
 
-  test('unmigrated shape (no .trail/, helper present): .mcp.json is seeded and template graft hooks merge (unchanged behavior)', () => {
+  test('unmigrated shape (no .trail/, helper present): .mcp.json is seeded and template no longer re-adds graft hooks', () => {
     const tmp = makeTempProject();
     try {
       // Pre-migration graft-era state: the helper shelf is present (no .trail/).
@@ -841,10 +841,11 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
       const decisions = readDecisionLog(tmp);
       expect(decisions.find((d) => d.path === '.mcp.json' && d.verdict === 'SEED_SKIP' && d.detail.includes('retired-surface'))).toBeUndefined();
 
-      // The template's graft-era hook entries still merge (every referenced path
-      // exists), and the project-only permission grant survives the union.
+      // The co-develop template carries no graft hook entries (U-20261113-011), so
+      // none are merged even though the helper exists; the project-only permission
+      // grant survives the union.
       const settings = JSON.parse(readFileSync(join(tmp, '.claude', 'settings.json'), 'utf8'));
-      expect(JSON.stringify(settings.hooks)).toContain('graft-hooks.cjs');
+      expect(JSON.stringify(settings.hooks)).not.toContain('graft-hooks.cjs');
       expect(settings.permissions.allow).toContain('Bash(my-project-tool *)');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
