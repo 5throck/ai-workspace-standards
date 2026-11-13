@@ -33,7 +33,7 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 <!-- VARIANT-AGENTS-START -->
 | **technical-writer** | [`agents/technical-writer.md`](agents/technical-writer.md) | Medium | Technical writer - creates API documentation, technical guides, and developer resources. Use when: documenting APIs, wri |
 | **design-lead** | [`agents/design-lead.md`](agents/design-lead.md) | High | Design system architect - defines visual language, design tokens, and component architecture. Use when: establishing des |
-| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Implements approved technical plans for co-architect's software/platform layer — MCP tool handlers (src/cad_intelligence |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
 | **zwcad-drafter** | [`agents/zwcad-drafter.md`](agents/zwcad-drafter.md) | Medium | ZWCAD technical drawing specialist. Converts SketchUp 3D models from the sketchup-modeler into 2D technical drawings usi |
 | **content-writer** | [`agents/content-writer.md`](agents/content-writer.md) | Medium | Content writer - transforms research into clear, accessible documentation and communications. Use when: creating documen |
 | **architect** | [`agents/architect.md`](agents/architect.md) | High | Produces implementation plans and design docs for co-architect's software/platform layer (MCP servers, ZWCAD COM automat |
@@ -87,7 +87,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
 | **Tier** | medium |
 | **Phases** | 3, 4 |
-| **Role** | Implements approved technical plans for co-architect's software/platform layer — MCP tool handlers (src/cad_intelligence/), Python data models, geometry/COM logic, and associated unit tests. Receives an approved implementation plan from architect and executes it precisely. Use when: an approved design doc/plan exists and code needs to be written, e.g. new MCP tools, new Python modules, or non-trivial refactors of src/cad_intelligence/ or src/agent/. |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests. Use when: running /sync, creating or changing scripts and automation, or implementing an approved plan for tool handlers, data models, or integration bridges. |
 
 ### zwcad-drafter
 
@@ -348,7 +348,7 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 <!-- VARIANT-PHASE-GATE-START -->
 | Technical writer - creates API documentation, technical guides, and developer re | Phase 3 | `technical-writer` | medium | |
 | Design system architect - defines visual language, design tokens, and component  | Phase 0 | `design-lead` | high | |
-| Implements approved technical plans for co-architect's software/platform layer — | Phase 3 | `automation-engineer` | medium | |
+| Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests | Phase 3 | `automation-engineer` | medium | |
 | ZWCAD technical drawing specialist | Phase 4 | `zwcad-drafter` | medium | |
 | Content writer - transforms research into clear, accessible documentation and co | Phase 3 | `content-writer` | medium | |
 | Produces implementation plans and design docs for co-architect's software/platfo | Phase 1 | `architect` | high | |
@@ -488,7 +488,7 @@ Hubs (co-develop, co-design, co-security, co-work) own their domain doctrine and
 <!-- VARIANT-ROLE-BOUNDARY-START -->
 | Technical writer - creates API documentation, technical guides, and developer re | `technical-writer` | `pm` |
 | Design system architect - defines visual language, design tokens, and component  | `design-lead` | `pm` |
-| Implements approved technical plans for co-architect's software/platform layer — | `automation-engineer` | `pm` |
+| Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests | `automation-engineer` | `pm` |
 | ZWCAD technical drawing specialist | `zwcad-drafter` | `pm` |
 | Content writer - transforms research into clear, accessible documentation and co | `content-writer` | `pm` |
 | Produces implementation plans and design docs for co-architect's software/platfo | `architect` | `pm` |
