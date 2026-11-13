@@ -576,7 +576,6 @@
         "templates/co-game/agents/i18n-specialist.md",
         "templates/co-price/agents/i18n-specialist.md",
         "templates/co-safety/agents/i18n-specialist.md",
-        "templates/co-security/agents/i18n-specialist.md",
         "templates/co-work/agents/i18n-specialist.md"
       ]
     },
@@ -2304,6 +2303,19 @@
       "version": "1.1.2",
       "mirrors": [
         "templates/co-safety/agents/safety-workflow-manager.md"
+      ]
+    },
+    {
+      "id": "agent:co-security/i18n-specialist",
+      "type": "agent",
+      "layer": "variant:co-security",
+      "name": "i18n-specialist",
+      "scope": "co-security",
+      "capability": "i18n-specialist",
+      "content_hash": "7e665adae6bb3912",
+      "version": "1.1.2",
+      "mirrors": [
+        "templates/co-security/agents/i18n-specialist.md"
       ]
     },
     {
