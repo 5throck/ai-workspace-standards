@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: T-20261113-003
+kind: manual
+title: >-
+  Remove dead self-managed checks in skill-lifecycle-audit (unreachable
+  isSelfManagedPath arms after the v1.11.0 loop-top skip) and correct the stale
+  SCRIPTS.md v1.5.2 claim that the self-managed lifecycle INFO line prints.
+  Follow-up (D4) of T-20261113-002; spec
+  docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md section 5.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-13T12:25:09.481+09:00'
+history:
+  - at: '2026-11-13T12:25:09.481+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
