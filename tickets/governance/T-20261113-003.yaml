@@ -8,12 +8,24 @@ title: >-
   Follow-up (D4) of T-20261113-002; spec
   docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md section 5.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-13T12:25:09.481+09:00'
 history:
   - at: '2026-11-13T12:25:09.481+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-13T16:37:07.630+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-13T16:37:07.653+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T16:37:10.338+09:00'
+    from: review
+    to: done
+result: >-
+  Landed in PR #2005 (merge e0e9b1e54): removed unreachable isSelfManagedPath
+  arms in skill-lifecycle-audit and corrected the stale SCRIPTS.md v1.5.2
+  self-managed INFO-line claim.
 error: null
