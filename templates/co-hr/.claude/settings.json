@@ -37,15 +37,6 @@
         ]
       },
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" session-start",
-            "timeout": 8000
-          }
-        ]
-      },
-      {
         "matcher": "",
         "hooks": [
           {
@@ -77,26 +68,6 @@
             "async": true,
             "asyncRewake": true,
             "statusMessage": "Running post-edit lifecycle check..."
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" post-edit",
-            "timeout": 10000
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|mcp__graft__|Read|Grep|Glob",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" tool-savings",
-            "timeout": 8000
           }
         ]
       }
@@ -176,41 +147,13 @@
         ]
       }
     ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" prompt",
-            "timeout": 15000
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-hooks.cjs\" stop",
-            "timeout": 8000
-          }
-        ]
-      }
-    ]
+    "UserPromptSubmit": [],
+    "Stop": []
   },
   "worktree": {
     "bgIsolation": "none"
   },
-  "statusLine": {
-    "type": "command",
-    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\""
-  },
-  "subagentStatusLine": {
-    "type": "command",
-    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/graft-statusline.cjs\""
-  },
   "footerLinksRegexes": [
-    "graft/[\\w./-]+\\.md"
+    ".trail/[\\w./-]+\\.md"
   ]
 }

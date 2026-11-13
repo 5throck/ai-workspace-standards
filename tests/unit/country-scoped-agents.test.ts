@@ -7,7 +7,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import {
-  COUNTRY_SCOPED_AGENTS,
+  loadCountryScopedAgents,
   agentPrunePaths,
   agentsToPrune,
   isPrunedForCountry,
@@ -16,9 +16,27 @@ import {
 
 const REGISTRY = { "public-data-analyst": "KR" };
 
-describe("COUNTRY_SCOPED_AGENTS", () => {
-  test("registers public-data-analyst as KR-scoped", () => {
-    expect(COUNTRY_SCOPED_AGENTS).toEqual(REGISTRY);
+describe("loadCountryScopedAgents (v1.1.0 — schema-backed registry, T-20261112-005)", () => {
+  test("default (repo-root schema) registers public-data-analyst as KR-scoped", () => {
+    expect(loadCountryScopedAgents()).toEqual(REGISTRY);
+  });
+  test("schema without an agents key yields an empty registry (vacuously clean)", () => {
+    const { writeFileSync, mkdtempSync } = require("node:fs");
+    const { tmpdir } = require("node:os");
+    const { join } = require("node:path");
+    const dir = mkdtempSync(join(tmpdir(), "csa-"));
+    const p = join(dir, "schema.json");
+    writeFileSync(p, JSON.stringify({ country_scoped_assets: { skills: { "k-law": "KR" } } }));
+    expect(loadCountryScopedAgents(p)).toEqual({});
+  });
+  test("malformed schema JSON throws (fail-closed)", () => {
+    const { writeFileSync, mkdtempSync } = require("node:fs");
+    const { tmpdir } = require("node:os");
+    const { join } = require("node:path");
+    const dir = mkdtempSync(join(tmpdir(), "csa-"));
+    const p = join(dir, "schema.json");
+    writeFileSync(p, "{ not json");
+    expect(() => loadCountryScopedAgents(p)).toThrow();
   });
 });
 

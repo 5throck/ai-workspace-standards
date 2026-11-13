@@ -6,12 +6,30 @@
  * docs/workspace-schema.json `country_scoped_assets.agents` ({ "<agent>": "<COUNTRY>" });
  * the filesystem work stays in scripts/helpers/prune-country-scoped-assets.ts.
  *
- * @version 1.0.0
+ * @version 1.1.0
  * v1.0.0 (2026-11-12, CA-3+AE-3): initial — agentsToPrune / agentPrunePaths / scrubAgentReferenceLines.
  */
 
-/** Country-scoped common agents: the agent owns only skills registered under that country. */
-export const COUNTRY_SCOPED_AGENTS: Readonly<Record<string, string>> = { "public-data-analyst": "KR" };
+/** v1.1.0 (T-20261112-005, spec docs/designs/2026-11-14-country-scoped-agents-registry-and-prune-design.md
+ *          R1): the registry moved INTO the schema pair (docs/workspace-schema.json +
+ *          templates/common/docs/workspace-schema.json — hand-maintained) under
+ *          `country_scoped_assets.agents`; the constant is gone. `loadCountryScopedAgents`
+ *          reads it (default: the repo-root schema; explicit path for tests); a missing
+ *          `agents` key yields {} (vacuously clean); malformed JSON throws (fail-closed,
+ *          same posture as the other schema readers). The pure helpers below are
+ *          unchanged and take the registry as an argument.
+ */
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const DEFAULT_SCHEMA_PATH = resolve(import.meta.dir, "../../docs/workspace-schema.json");
+
+export function loadCountryScopedAgents(schemaPath: string = DEFAULT_SCHEMA_PATH): Record<string, string> {
+  const schema = JSON.parse(readFileSync(schemaPath, "utf8")) as {
+    country_scoped_assets?: { agents?: Record<string, string> };
+  };
+  return schema.country_scoped_assets?.agents ?? {};
+}
 
 /** True when an asset scoped to `scopedCountry` must be removed for `targetCountry` ("none" / "" = region-neutral). */
 export function isPrunedForCountry(targetCountry: string, scopedCountry: string): boolean {

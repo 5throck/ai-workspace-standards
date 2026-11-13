@@ -28,8 +28,11 @@
  * The core is pure over an injected Tree so unit tests run on in-memory file maps. The CLI is
  * the only place that touches the real filesystem.
  *
- * @version 1.3.0
+ * @version 1.3.1
  *
+ * v1.3.1 (2026-11-14, T-20261112-007): the missing-record fix text no longer claims the records are
+ *          "published by the templates PR" — the SLR gate now BLOCKS a sync whose records are missing/stale,
+ *          so the fix instruction points at the generator --write + include-in-PR flow.
  * v1.3.0 (2026-11-12, U-20261112-005 PR-3): `recordHookVerdict` pure decision for the dev-sync step 4.51
  *         records hook (bun scripts/generate-skill-lifecycle-records.ts --write after the L0->L1 publish).
  * v1.2.0 (2026-11-12, U-20261112-005 PR-1b): Korean text in generated records is wrapped in backticks
@@ -853,7 +856,7 @@ export function groupSlrFindings(findings: SlrFinding[], listMax = 6): SlrGroupe
 
 export const SLR_FIX: Record<SlrRule, string> = {
   coverage:
-    "Run bun scripts/generate-skill-lifecycle-records.ts --write (the records are published by the templates PR, never hand-written)",
+    "Run bun scripts/generate-skill-lifecycle-records.ts --write and include the regenerated records in the /sync PR (the SLR gate blocks a sync whose records are missing or stale — never hand-write them)",
   parity:
     "Run bun scripts/generate-skill-lifecycle-records.ts --write to regenerate; drop the generated marker to make a record hand-owned",
   leak: "Remove the L0-internal reference (ADR/DEC/ticket ids, docs/designs|decisions|adr|reports, tickets/) from the record",

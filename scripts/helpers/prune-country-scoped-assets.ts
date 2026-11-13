@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // @version 0.5.0
 // v0.5.0 (2026-11-12, CA-3+AE-3, design 2026-11-12-common-agents-for-common-skills Q4):
-//         new category "agents" (registry constant COUNTRY_SCOPED_AGENTS in ../lib/country-scoped-agents.ts; the workspace-schema pair is not touched) — prunes a
+//         new category "agents" (registry loaded from the workspace-schema.json pair via ../lib/country-scoped-agents.ts v1.1.0 — T-20261112-005) — prunes a
 //         country-scoped common agent (public-data-analyst, KR) and its Claude mirror,
 //         lifecycle record and AGENTS.md roster row from non-matching scaffolds, because
 //         its owned k-* skills are pruned there and the agent would own zero skills.
@@ -64,7 +64,7 @@ import { fileURLToPath } from "node:url";
 import { pruneCountryScopedEnvBlocks } from "../lib/env-sample.ts";
 import { PLATFORM_SKILL_BASES } from "../lib/platforms.ts";
 import {
-  COUNTRY_SCOPED_AGENTS,
+  loadCountryScopedAgents,
   agentPrunePaths,
   agentsToPrune,
   scrubAgentReferenceLines,
@@ -281,7 +281,7 @@ for (const [dirRelPath, scopedCountry] of Object.entries(registry.dirs)) {
 
 // Prune country-scoped common agents (design Q4) — files first, roster rows scrubbed below
 const prunedAgentNames: string[] = [];
-for (const { name, scopedCountry } of agentsToPrune(COUNTRY_SCOPED_AGENTS, countryArg)) {
+for (const { name, scopedCountry } of agentsToPrune(loadCountryScopedAgents(), countryArg)) {
   let removed = false;
   for (const rel of agentPrunePaths(name)) {
     if (safeRemove(join(targetDir, rel))) removed = true;

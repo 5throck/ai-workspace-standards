@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: U-20261114-003
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-14T00:24:45.182+09:00
+history:
+  - at: 2026-11-14T00:24:45.182+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'co-deck styles declare font stacks starting with ''Pretendard'' / ''Noto Serif KR'' but ship no @font-face rule and no bundled font files in the render chain. On any machine without Pretendard installed, Korean text falls back to a serif Myungjo face (AppleMyungjo on macOS was observed via CDP in a Playwright render), silently breaking the sans-serif typography of every deck. The shared pool presentations/assets/fonts/ does contain Pretendard TTFs, but nothing in the build copies them into the project or injects @font-face. The engagement deck required a per-deck fix: copy Pretendard Regular/Bold into assets/fonts/, add deck-level @font-face (font-display: swap) and extend the fallback chain (''Apple SD Gothic Neo'',''Malgun Gothic'',''Noto Sans KR'').'
+  affected_paths:
+    - docs/html-themes/styles/base.css
+    - docs/html-themes/styles/white-bubble/style.css
+    - agents/html-build.md
+  identity_source: cwd
+  repro: Open a freshly built deck (lecture_*.html) via file:// on a machine without Pretendard installed. CDP/console inspection of computed glyph fonts shows Korean text rendering with AppleMyungjo (serif) instead of Pretendard; grep of the HTML shows zero @font-face rules.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/html-themes/styles/base.css=true
+    - info:in_last_delivery docs/html-themes/styles/white-bubble/style.css=true
+    - info:in_last_delivery agents/html-build.md=true
+  dedupe_key: 739efb052701e350579d6734ce244b9767bfc94bf1e131b938161eebd2c04181
+  duplicates:
+    - project: co-deck
+      at: 2026-11-14T00:24:45.182+09:00

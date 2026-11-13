@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261114-002
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-14T00:24:45.167+09:00
+history:
+  - at: 2026-11-14T00:24:45.167+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'Four render-time defects in the zen x white-bubble combination surface on every new deck and required per-deck CSS overrides in the 2026-11-open-innovation-keynote engagement: (1) in-card SVG diagrams render at ~25% card width with 4-7px labels — .zen-visual-wrap has no width rule and styles/white-bubble/style.css caps .zen-visual at max-height:24vh; (2) VideoSlide play affordance is white-on-white with no backdrop — a translucent white triangle plus faint ''Play video'' label sit directly on bright YouTube thumbnails, and the bottom caption has no scrim (ppt-engine/template.html VideoSlide renderer); (3) footnote strip renders directly on background photos with sub-3:1 contrast and crosses the slide card''s rounded corner — white-bubble declares no --footnote-color/--footnote-bg overrides; (4) slide layouts overflow the card when bullets+caption+SVG combine (no density guard coupling the in-card visual height to the card bounds). Each defect was independently confirmed by full-deck Playwright render + visual judge (29/58 slides failed pre-fix).'
+  affected_paths:
+    - docs/html-themes/styles/white-bubble/style.css
+    - docs/html-themes/themes/zen/theme.css
+    - docs/html-themes/themes/_shared/ppt-engine.css
+    - docs/html-themes/themes/_shared/ppt-engine.js
+  identity_source: cwd
+  repro: 'Build any zen deck with diagram/chart slides (visualImage bound in-card) and type: video slides under style white-bubble; render at 1280x720 via Playwright. Observe: SVGs occupy ~1/4 of the card width with sub-labels at 4-7px; video slides show a near-invisible white play triangle on bright thumbnails; footnotes sit unstyled on photos below the card; dense slides push title/caption against card edges.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/html-themes/styles/white-bubble/style.css=true
+    - info:in_last_delivery docs/html-themes/themes/zen/theme.css=false
+    - info:in_last_delivery docs/html-themes/themes/_shared/ppt-engine.css=false
+    - info:in_last_delivery docs/html-themes/themes/_shared/ppt-engine.js=false
+  dedupe_key: 30a2ee62c3043fa7ee833bfe0cdeff30faa2ef1adfc59657d4905dcbe65a953b
+  duplicates:
+    - project: co-deck
+      at: 2026-11-14T00:24:45.167+09:00

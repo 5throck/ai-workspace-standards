@@ -167,6 +167,7 @@ function runUpgrade(tmp: string, extraArgs: string[] = []): { status: number; ou
     [upgradeScript, tmp, '--variant', VARIANT, '--yes', ...extraArgs],
     { encoding: 'utf-8', timeout: 600000, stdio: ['ignore', 'pipe', 'pipe'] }
   );
+  if (result.status !== 0) console.error('[UPGRADE-FAIL-DELIVERY]', (() => { const o = `${result.stdout ?? ''}\n${result.stderr ?? ''}`; const i = o.indexOf('DELIVERY CONFLICTS'); return i >= 0 ? o.slice(Math.max(0, i - 1500), i + 400) : '(no conflicts block) ' + o.slice(-900); })());
   return { status: result.status ?? -1, out: `${result.stdout ?? ''}\n${result.stderr ?? ''}` };
 }
 
