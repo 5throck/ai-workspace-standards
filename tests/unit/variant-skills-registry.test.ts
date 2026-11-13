@@ -40,7 +40,7 @@ const EXPECTED_COUNTS: Record<string, number> = {
   'co-news': 6,
   'co-price': 22,
   'co-safety': 60,
-  'co-work': 3,
+  'co-work': 4,
 };
 
 // Design §1 audited fork set — the only co-safety rows classified as
