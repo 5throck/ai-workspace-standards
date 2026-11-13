@@ -9,7 +9,14 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.13.0
+ * @version 1.14.0
+ *
+ * v1.14.0 (2026-11-13, T-20261113-002; spec
+ *         docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md): a skills/SKILLS.md
+ *         row for a self-managed skill (e.g. skills/graft/) is tolerated — the inverse registry
+ *         check no longer reports "no matching runtime skill" for it (one INFO line outside
+ *         --json mode); the removal-date check still applies. "Skills found" and the summary
+ *         now state the self-managed count and audit only the remaining skills.
  *
  * v1.13.0 (2026-11-12, common-agents CA-1): agentExists() also resolves owners against
  *         templates/common/agents (the common roster), so L0 skills owned by a common agent
@@ -603,6 +610,10 @@ function auditSkills(jsonMode = false): AuditResult {
   const warnings: SkillIssue[] = [];
   const registryRows = parseSkillRegistryRows();
   const runtimeSkillNames = new Set<string>();
+  // v1.14.0 (T-20261113-002): names of self-managed skills (frontmatter name,
+  // else directory name) — their registry rows are tolerated, not validated.
+  const selfManagedSkillNames = new Set<string>();
+  const selfManagedCount = skillFiles.filter((f) => isSelfManagedPath(relative(ROOT, f).replace(/\\/g, "/"))).length;
   // v1.5.0 reference-integrity inputs (L0 only — mirrors/projects inherit L0 state)
   const knownSkills = collectKnownSkillNames();
   const refAllowlist = loadReferenceAllowlist();
@@ -614,7 +625,9 @@ function auditSkills(jsonMode = false): AuditResult {
     console.log(`${colors.cyan}=========================${colors.reset}`);
     console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
     console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? "workspace root" : "current project"}${colors.reset}`);
-    console.log(`${colors.dim}Skills found: ${skillFiles.length}${colors.reset}`);
+    console.log(
+      `${colors.dim}Skills found: ${skillFiles.length}${selfManagedCount > 0 ? ` (${selfManagedCount} self-managed, not audited)` : ""}${colors.reset}`,
+    );
     console.log("");
   }
 
@@ -626,7 +639,10 @@ function auditSkills(jsonMode = false): AuditResult {
     // model literals): the project's external-deps.json install_dirs join the
     // self-managed path set (self-managed-tools v1.3.0), so isSelfManagedPath
     // is the single sanctioned skip point.
-    if (isSelfManagedPath(relPath)) continue;
+    if (isSelfManagedPath(relPath)) {
+      selfManagedSkillNames.add(parseFrontmatter(skillFile)?.name || basename(dirname(skillFile)));
+      continue;
+    }
     const frontmatter = parseFrontmatter(skillFile);
 
     if (!frontmatter) {
@@ -976,7 +992,14 @@ function auditSkills(jsonMode = false): AuditResult {
 
   if (registryRows.size > 0) {
     for (const name of registryRows.keys()) {
-      if (!runtimeSkillNames.has(name)) {
+      if (!runtimeSkillNames.has(name) && selfManagedSkillNames.has(name)) {
+        // v1.14.0: a row for a self-managed skill is tolerated (tool-owned, not validated).
+        if (!jsonMode) {
+          console.log(
+            `  ℹ️  skills/SKILLS.md row \`${name}\` belongs to a self-managed skill — not validated (rows for self-managed skills are optional)`,
+          );
+        }
+      } else if (!runtimeSkillNames.has(name)) {
         errors.push({
           level: "error",
           file: "skills/SKILLS.md",
@@ -1036,7 +1059,7 @@ function auditSkills(jsonMode = false): AuditResult {
     }
   }
 
-  const summary = generateSummary(skillFiles.length, errors.length, warnings.length);
+  const summary = generateSummary(skillFiles.length - selfManagedCount, errors.length, warnings.length);
 
   return {
     skillsScanned: skillFiles.length,

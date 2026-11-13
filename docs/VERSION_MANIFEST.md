@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-13T00:57:23.271Z
+**Generated**: 2026-11-13T03:27:24.186Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -185,7 +185,7 @@
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
 | skill-graph-fleet-report.ts | 2.4.0 | scripts/skill-graph-fleet-report.ts | fs, path |
-| skill-lifecycle-audit.ts | 1.13.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
+| skill-lifecycle-audit.ts | 1.14.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
 | skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun, fs, path |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | fs, path |
@@ -212,7 +212,7 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.104.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.105.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |

@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.104.0
+// @version 1.105.0
+// v1.105.0 (2026-11-13, T-20261113-002, design
+//          docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md):
+//          SKILLS_REGISTRY_RECONCILE skips self-managed skill dirs (e.g. skills/graft/,
+//          external-deps install_dirs; checked against projectDir) — no registry row is
+//          synthesized for them, so a project's audit no longer re-fails after every upgrade.
 // v1.104.0 (2026-11-13, U-20261112-010, design
 //          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-010):
 //          delivered-side graft→trail tool-block swap — after the MERGE and
@@ -1261,6 +1266,7 @@ import {
   type TenantLoopTenant,
 } from "./lib/fleet.ts";
 import { gitCleanEnv } from "./lib/git-env.ts";
+import { isSelfManagedPath } from "./lib/self-managed-tools.ts";
 import { appendRegistryRows, registryAppendIndex } from "./helpers/registry-append.ts";
 import {
   extractFrontmatterVersionAndReviewed,
@@ -7624,6 +7630,12 @@ if (existsSync(registryPath) && existsSync(projSkillsPath)) {
   for (const skillName of readdirSync(projSkillsPath)) {
     const skillMdPath = join(projSkillsPath, skillName, "SKILL.md");
     if (!existsSync(skillMdPath)) continue;
+    // T-20261113-002: self-managed skills are tool-owned; rows for them are optional,
+    // so never synthesize or rewrite one. rootDir MUST be projectDir (cwd is the L0 root).
+    if (isSelfManagedPath(`skills/${skillName}/SKILL.md`, projectDir)) {
+      console.log(`  INFO: skills/${skillName} is self-managed — no registry row synthesized`);
+      continue;
+    }
 
     const fm = extractFrontmatterVersionAndReviewed(skillMdPath);
     if (!fm.version) continue;
