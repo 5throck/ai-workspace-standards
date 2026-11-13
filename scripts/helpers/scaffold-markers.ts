@@ -1,12 +1,15 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.10.2
+ * @version 1.10.3
+ * v1.10.3 (2026-11-14, T-20261112-005, country-scoped-agents-registry-and-prune design R1): the
+ *          country-scoped agent withholding list is read via loadCountryScopedAgents() (schema pair)
+ *          instead of the removed constant.
  * v1.10.2 (2026-11-12, U-20261112-005 PR-1b): the seven exact docs/lifecycle/skills/<name>.md reviewed-gap entries
  *          become one docs/lifecycle/skills/ prefix rule, so the generated common skill records landing in
  *          templates/common do not each need an entry (they are delivered by new-project like the seven).
  * v1.10.1 (2026-11-12, CA-3+AE-3): pruneRegionNeutral also models the country-scoped common agent prune
- *          (COUNTRY_SCOPED_AGENTS: public-data-analyst agent file and lifecycle record) so the derived
+ *          (country-scoped agents registry, read from the schema pair via lib v1.1.0) so the derived
  *          delivery matches a region-neutral scaffold after prune-country-scoped-assets.ts v0.5.0; the two
  *          now-dead reviewed-gap entries for that agent and record are removed.
  * v1.10.0 (2026-11-12, CA-2+AE-2): reviewed delivery-gap entries for the four new common agents
@@ -118,7 +121,7 @@ import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import { includeScriptInL3, parseScriptLayers } from "./layer-filter.ts";
 import { PLATFORM_SKILL_BASES } from "../lib/platforms.ts";
-import { COUNTRY_SCOPED_AGENTS, agentPrunePaths } from "../lib/country-scoped-agents.ts";
+import { loadCountryScopedAgents, agentPrunePaths } from "../lib/country-scoped-agents.ts";
 
 // ============================================================================
 // 1. Scaffold marker constants (T-20260915-002 / C3)
@@ -573,8 +576,9 @@ function pruneRegionNeutral(rels: Set<string>, workspaceRoot: string): void {
       if (rel.startsWith(`${dir}/`)) rels.delete(rel);
     }
   }
-  // Country-scoped common agents (region-neutral scaffolds drop them; lib/country-scoped-agents.ts).
-  for (const name of Object.keys(COUNTRY_SCOPED_AGENTS)) {
+  // Country-scoped common agents (region-neutral scaffolds drop them; lib/country-scoped-agents.ts —
+  // v1.1.0 reads the registry from the schema pair, T-20261112-005).
+  for (const name of Object.keys(loadCountryScopedAgents())) {
     for (const rel of agentPrunePaths(name)) rels.delete(rel);
   }
 }

@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261114-004
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-14T00:24:45.197+09:00
+history:
+  - at: 2026-11-14T00:24:45.197+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'The two content-density disciplines for zen disagree, so decks authored to the creation-time rules fail the render-time gate. zen theme.json content_rules (read by the storyline agent at Stage 2) permits ~5 bullets per slide, while the merged pdf_layout_spec.json content_constraints for zen standard slides enforce max_bullets=4 / max_title_chars=28 / max_body_chars=100 (checked by scripts/co-deck/estimate-layout.ts --lint). A 58-slide deck authored with <=5-bullet discipline (per storyline guidance) produced 76 layout-gate FAILs (bullets 5>4; body up to 458 chars > 100); the 2026-11-consumer-goods-market-shift precedent deck also fails (2 violations) despite being delivered. Result: a deck can pass Stage 2 authoring and still be blocked at the render-time gate, forcing content cuts after the fact. One bound should win: either theme.json content_rules must match the pdf_layout_spec constraints, or the gate must consume theme.json''s values.'
+  affected_paths:
+    - docs/html-themes/themes/zen/theme.json
+    - docs/html-themes/themes/zen/pdf_layout_spec.json
+    - agents/storyline.md
+    - .agents/skills/slide-layout-gate/SKILL.md
+  identity_source: cwd
+  repro: '1. Author a deck for zen with slides carrying 5 bullets and >100-char bodies (allowed by storyline-side guidance). 2. Run: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --lint. 3. Observe bulk FAIL rows for standard slides: bullet count 5 > 4, body chars > 100. Cross-check: docs/html-themes/themes/zen/theme.json content_rules vs docs/html-themes/themes/zen/pdf_layout_spec.json content_constraints.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/html-themes/themes/zen/theme.json=false
+    - info:in_last_delivery docs/html-themes/themes/zen/pdf_layout_spec.json=false
+    - info:in_last_delivery agents/storyline.md=false
+    - info:in_last_delivery .agents/skills/slide-layout-gate/SKILL.md=false
+  dedupe_key: cc3ba1a70e9eb29399c7bc358e5cf5c1358f1e610ccd851112441d4b1311b3a6
+  duplicates:
+    - project: co-deck
+      at: 2026-11-14T00:24:45.197+09:00

@@ -4,7 +4,7 @@
 
 - **Script**: generate-skill-lifecycle-records
 - **Status**: active
-- **Version**: 1.3.0
+- **Version**: 1.3.1
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-12
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.

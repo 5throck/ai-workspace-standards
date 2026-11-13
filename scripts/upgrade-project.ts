@@ -1,10 +1,22 @@
 #!/usr/bin/env bun
-// @version 1.105.0
+// @version 1.106.0
 // v1.105.0 (2026-11-13, T-20261113-002, design
 //          docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md):
 //          SKILLS_REGISTRY_RECONCILE skips self-managed skill dirs (e.g. skills/graft/,
 //          external-deps install_dirs; checked against projectDir) — no registry row is
 //          synthesized for them, so a project's audit no longer re-fails after every upgrade.
+// v1.106.0 (2026-11-14, spec docs/designs/2026-11-14-country-scoped-agents-registry-and-prune-design.md
+//          R2, T-20261112-004): SYNC_IF_NEWER: agents/ gains the pre-delivery country guard — the
+//          scaffold-time prune (prune-country-scoped-assets.ts) removes country-scoped common agents
+//          (public-data-analyst, KR-scoped) for non-matching countries, but this pass re-delivered them
+//          on the next upgrade visit (template has the file, pruned project lacks it → NEW copy). A
+//          deliver-then-prune post-pass was tried first and REJECTED by the fixtures: the delivered
+//          bytes left a stale baseline behind, re-firing TOMBSTONED (ERROR) on the next visit
+//          (upgrade-decision-log caught it). Final shape: the agents pass WITHHOLDS the country-scoped
+//          agent for a non-matching detectedCountry (CORRECTIVE/INFO decision row, no copy, no
+//          baseline) and the workspace-seed pass withholds the agent's lifecycle record the same way;
+//          no baselines are created, so nothing re-fires. Companion: country-scoped-agents.ts v1.1.0
+//          reads the registry from the schema pair (T-20261112-005, R1).
 // v1.104.0 (2026-11-13, U-20261112-010, design
 //          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-010):
 //          delivered-side graft→trail tool-block swap — after the MERGE and
@@ -1253,6 +1265,12 @@ import {
   scaffoldChangelogEntry,
 } from "./helpers/upgrade-versions.ts";
 import { scanLocalPatches } from "./helpers/local-patch-scan.ts";
+import {
+  agentsToPrune,
+  agentPrunePaths,
+  loadCountryScopedAgents,
+  scrubAgentReferenceLines,
+} from "./lib/country-scoped-agents.ts";
 import { reconcileExternalDepsManifest, splitValidEntries } from "./helpers/external-deps-reconcile.ts";
 import { applySubstitutions } from "./helpers/substitute-placeholders.ts";
 import { selectIgnoredToolingArtifacts } from "./helpers/ignored-tooling.ts";
@@ -5239,6 +5257,27 @@ for (const agentsDir of tplAgentsDirs) {
     const tplFile = join(agentsDir, fname);
     if (!statSync(tplFile).isFile()) continue;
     const rel = `agents/${fname}`;
+    // v1.105.0 (R2, T-20261112-004): pre-delivery country guard — a country-scoped
+    // common agent (registry from the schema pair, lib/country-scoped-agents.ts v1.1.0)
+    // is SKIPPED for a non-matching detectedCountry instead of being delivered and then
+    // post-pruned (the deliver-then-prune shape left a stale delivered baseline behind,
+    // which re-fired TOMBSTONED (ERROR) on the next visit — caught by
+    // upgrade-decision-log fixture). Absent project copy stays absent; decision row
+    // CORRECTIVE/INFO; idempotent. The workspace-seed pass applies the same guard for
+    // the agent's lifecycle record.
+    if (agentsToPrune(loadCountryScopedAgents(), detectedCountry).some((a) => a.name === fname.replace(/\.md$/, ""))) {
+      recordDecision(
+        rel,
+        "CORRECTIVE",
+        "SYNC_IF_NEWER: agents/",
+        "SKIP",
+        `country-scoped agent withheld (non-matching detectedCountry: ${detectedCountry}) — scaffold-prune coverage mirrored at upgrade time (T-20261112-004)`,
+        undefined,
+        "INFO",
+      );
+      console.log(`  ${dryTag}SKIP   ${rel}  (country-scoped; project country: ${detectedCountry})`);
+      continue;
+    }
     const projFile = join(projectDir, rel);
     // T-20260924-003 R2.4 (spec 2026-09-25-inventory-decisions-batch-design):
     // template extends-stubs (variant pm.md, the 13 variant i18n-specialist.md)
@@ -5595,6 +5634,8 @@ if (existsSync(projAgentsDir)) {
   }
 }
 console.log("");
+
+// ── SYNC_IF_NEWER: skills/ ────────────────────────────────────────────────────
 
 // ── SYNC_IF_NEWER: skills/ ────────────────────────────────────────────────────
 // v1.37.0: NEW/UPDATE copy the skill's WHOLE directory (template files overwrite
@@ -6777,6 +6818,27 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           "SEED_SKIP",
           "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
         );
+        continue;
+      }
+      // v1.105.0 (R2, T-20261112-004): the country guard mirrors the agents/ pass —
+      // a lifecycle record seeded for a country-scoped agent is withheld for a
+      // non-matching detectedCountry (the agent file itself is withheld upstream).
+      if (
+        rel.startsWith("docs/lifecycle/agents/") &&
+        agentsToPrune(loadCountryScopedAgents(), detectedCountry).some(
+          (a) => rel === `docs/lifecycle/agents/${a.name}.md`,
+        )
+      ) {
+        recordDecision(
+          rel,
+          "CORRECTIVE",
+          TEMPLATE_TREE_SYNC_PASS,
+          "SKIP",
+          `country-scoped agent lifecycle record withheld (non-matching detectedCountry: ${detectedCountry}) — T-20261112-004`,
+          undefined,
+          "INFO",
+        );
+        console.log(`  ${dryTag}SKIP   ${rel}  (country-scoped; project country: ${detectedCountry})`);
         continue;
       }
       // D2 (U-20261028-001): tombstone guard before the seed — a deleted,

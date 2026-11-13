@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261114-001
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-14T00:24:45.129+09:00
+history:
+  - at: 2026-11-14T00:24:45.129+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'Decks built through the 11-stage pipeline with type: video slides ship without local video files. The canonical offline video pipeline exists (scripts/co-deck/download-videos.ts downloads yt-<id>.mp4 into presentations/assets/videos/ via QuickDL, then inject-video-players.ts injects the triple play-mode fallback local mp4 -> YouTube iframe -> new-tab watch URL; build-theme-deck.ts documents the order as build -> (--download-videos) -> inject-video-players), but the html-build agent definition (agents/html-build.md) never references this step, so in the 2026-11-open-innovation-keynote engagement the agent hand-injected a player block without downloading any mp4 and without running the injector — keynote playback silently depended on network. Expected: video slides must be locally downloaded and wired before delivery, or the YouTube fallback must be an explicit user-visible decision. Local workaround applied: ran download-videos.ts --project (1 mp4 downloaded, 1 found in shared pool) and re-ran inject-video-players.ts on the built HTML (idempotent marker strip worked; local-first resolution confirmed; node --check passed).'
+  affected_paths:
+    - agents/html-build.md
+    - scripts/co-deck/build-theme-deck.ts
+    - scripts/co-deck/download-videos.ts
+    - scripts/co-deck/inject-video-players.ts
+  identity_source: cwd
+  repro: '1. Run the slide pipeline (research -> storyline -> build) for a deck whose slide_deck.md contains type: video slides with youtube watch URLs. 2. Inspect the built HTML: video slides embed videoId-only players; no yt-<id>.mp4 exists for them in presentations/assets/videos/; inject-video-players.ts was never run. 3. Open the deck offline: video slides cannot play. Compare with the canonical flow documented in build-theme-deck.ts header comment (--download-videos step) and inject-video-players.ts usage contract.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery agents/html-build.md=true
+    - info:in_last_delivery scripts/co-deck/build-theme-deck.ts=true
+    - info:in_last_delivery scripts/co-deck/download-videos.ts=false
+    - info:in_last_delivery scripts/co-deck/inject-video-players.ts=true
+  dedupe_key: 473a6c8188cf8d49756972bf7fdac2aac1611da9d51089218b3188fdcd0fc4ba
+  duplicates:
+    - project: co-deck
+      at: 2026-11-14T00:24:45.129+09:00
