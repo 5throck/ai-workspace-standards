@@ -5,60 +5,71 @@ title: >-
   skill-lifecycle-audit: registry check flags rows for self-managed skills
   (graft) as 'no matching runtime skill', and upgrade-project re-adds those rows
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-13T11:58:14.821+09:00'
 history:
   - at: '2026-11-13T11:58:14.821+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-13T13:43:46.680+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-13T13:43:46.700+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T13:43:46.717+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in ai-workspace-standards#2003 (merge 01bc148c3): skill-lifecycle-audit
+  1.14.0 tolerates registry rows for self-managed skills; upgrade-project
+  1.105.0 no longer re-adds them; propagated to templates/common; projects get
+  the fix on their next upgrade. Follow-up D4: T-20261113-003.
 error: null
 description: >-
   SYMPTOM (found 2026-11-13 during the co-work upgrade, ai-workspace-standards
   #2002 / co-work#49): a project that tracks a self-managed skill directory
   (skills/graft/SKILL.md, in the built-in DEFAULT_SELF_MANAGED_PATHS of
   scripts/lib/self-managed-tools.ts:70-85) AND a skills/SKILLS.md row for it
-  fails scripts/skill-lifecycle-audit.ts (v1.13.0) with "ERROR: Registry row
-  has no matching runtime skill: graft" (exit 1). The fix hint is
+  fails scripts/skill-lifecycle-audit.ts (v1.13.0) with "ERROR: Registry row has
+  no matching runtime skill: graft" (exit 1). The fix hint is
   self-contradictory: it says "restore skills/graft/SKILL.md", but the file
   exists. Reproduced 2026-11-13 on an isolated export of co-work origin/main
   (c12377f) with the original row re-inserted: exit 1. Without the row: exit 0,
-  "All 42 skills healthy".
-  ROOT CAUSE: v1.11.0 (commit 7b4e1a21c, T-20261108-004, 2026-11-08) added a
-  loop-top `if (isSelfManagedPath(relPath)) continue;` at
-  scripts/skill-lifecycle-audit.ts:629. That line runs BEFORE
+  "All 42 skills healthy". ROOT CAUSE: v1.11.0 (commit 7b4e1a21c,
+  T-20261108-004, 2026-11-08) added a loop-top `if (isSelfManagedPath(relPath))
+  continue;` at scripts/skill-lifecycle-audit.ts:629. That line runs BEFORE
   `runtimeSkillNames.add(frontmatter.name)` at line 643. The inverse registry
   check at lines 977-986 iterates EVERY skills/SKILLS.md row and flags any name
   missing from runtimeSkillNames. Side effects of the same skip: the later
   isSelfManagedPath arms at lines 670, 720, 865, 942 and 951 are dead code (the
   self-managed lifecycle INFO line never prints). "Skills found: N" (line 617)
   still counts the skipped files, so the summary over-claims "All N skills
-  healthy".
-  SIBLING ARM (makes the workaround non-durable): scripts/upgrade-project.ts
-  SKILLS_REGISTRY_RECONCILE (lines 7609-7671) collects every
-  skills/<name>/SKILL.md that has a version and calls reconcileSkillRegistry
-  (scripts/helpers/skills-registry.ts:163). That helper ADDS a row for every
-  skill without one, with no self-managed filter. A probe against co-work's
-  current registry returns added=["graft"]. Every upgrade therefore re-adds the
-  row, and the project's next audit fails again.
-  AFFECTED SCOPE: 5 fleet projects track skills/graft/SKILL.md with a version
-  (co-develop 1.1.0; co-export, co-game, co-price and co-work 1.0.0). On
-  2026-11-08, the upgrade commits of co-export (fa07242), co-game (97378f4),
-  co-price (005c55f) and co-work (5ff7f5a, co-work PR #40) silently removed
-  the graft row (no commit message mentions it). co-work#49 (2026-11-13) hit
-  the failure again after the upgrade re-added the row, and removed it before
-  commit (net-zero diff; the PR body documents the removal). co-develop has
-  had no upgrade since its graft dir returned on 2026-10-31, so its next
-  upgrade will hit this. skills/trail/ is NOT self-managed (tracked SSOT) and
-  is unaffected. No external-deps vendored skill has a registry row today.
-  WORKAROUND IN PLACE: graft row deleted from skills/SKILLS.md (co-work PR
-  #40 and #49; also in co-export, co-game and co-price).
-  ACCEPTANCE: (1) a fixture project with skills/graft/SKILL.md and a `graft`
-  registry row passes skill-lifecycle-audit (exit 0); (2) the same fixture
-  without the row also passes; (3) upgrade-project's registry reconcile no
-  longer adds rows for self-managed skill dirs; (4) external-deps vendored
-  skills keep every v1.11.0 exemption; (5) the L1 mirror
-  templates/common/scripts/skill-lifecycle-audit.ts stays byte-identical
-  through the /sync publish; (6) bun run test:unit and bun scripts/audit.ts
-  pass. Design: docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md.
+  healthy". SIBLING ARM (makes the workaround non-durable):
+  scripts/upgrade-project.ts SKILLS_REGISTRY_RECONCILE (lines 7609-7671)
+  collects every skills/<name>/SKILL.md that has a version and calls
+  reconcileSkillRegistry (scripts/helpers/skills-registry.ts:163). That helper
+  ADDS a row for every skill without one, with no self-managed filter. A probe
+  against co-work's current registry returns added=["graft"]. Every upgrade
+  therefore re-adds the row, and the project's next audit fails again. AFFECTED
+  SCOPE: 5 fleet projects track skills/graft/SKILL.md with a version (co-develop
+  1.1.0; co-export, co-game, co-price and co-work 1.0.0). On 2026-11-08, the
+  upgrade commits of co-export (fa07242), co-game (97378f4), co-price (005c55f)
+  and co-work (5ff7f5a, co-work PR #40) silently removed the graft row (no
+  commit message mentions it). co-work#49 (2026-11-13) hit the failure again
+  after the upgrade re-added the row, and removed it before commit (net-zero
+  diff; the PR body documents the removal). co-develop has had no upgrade since
+  its graft dir returned on 2026-10-31, so its next upgrade will hit this.
+  skills/trail/ is NOT self-managed (tracked SSOT) and is unaffected. No
+  external-deps vendored skill has a registry row today. WORKAROUND IN PLACE:
+  graft row deleted from skills/SKILLS.md (co-work PR #40 and #49; also in
+  co-export, co-game and co-price). ACCEPTANCE: (1) a fixture project with
+  skills/graft/SKILL.md and a `graft` registry row passes skill-lifecycle-audit
+  (exit 0); (2) the same fixture without the row also passes; (3)
+  upgrade-project's registry reconcile no longer adds rows for self-managed
+  skill dirs; (4) external-deps vendored skills keep every v1.11.0 exemption;
+  (5) the L1 mirror templates/common/scripts/skill-lifecycle-audit.ts stays
+  byte-identical through the /sync publish; (6) bun run test:unit and bun
+  scripts/audit.ts pass. Design:
+  docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md.
