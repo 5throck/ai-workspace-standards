@@ -3,14 +3,28 @@ id: U-20261114-005
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-14T00:41:37.774+09:00
+created_at: '2026-11-14T00:41:37.774+09:00'
 history:
-  - at: 2026-11-14T00:41:37.774+09:00
+  - at: '2026-11-14T00:41:37.774+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-14T08:13:22.617+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T08:13:22.617+09:00'
+    from: review
+    to: done
+result: >-
+  Already-implemented + verified live:
+  scripts/co-deck/validate-image-manifest.ts carries the pool-path style check
+  (checkPoolPathStyle), per-entry file-existence check, and the
+  diagram-manifest.json location check (§2c, U-20261114-005-tagged — landed by
+  the 11-13/14 sessions). Ran against the 2026-11-open-innovation-keynote
+  deliverable: PASSED 0 errors (58 slides / 34 images). Residual scope
+  (style+location validation of html-build-consumed path fields beyond the
+  manifest) tracked in T-20261114-001.
 error: null
 upstream:
   project: co-deck
@@ -19,14 +33,47 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'The workspace asset-location contract exists only in prose and is not machine-enforced, allowing a second per-project convention to coexist with the canonical shared pool. agents/image-curator.md and agents/html-build.md both define the shared pool (presentations/assets/{images,diagrams,fonts,videos} bound via ../assets/...) as the single convention, yet (a) image-manifest.json / diagram-manifest.json path fields are consumed as-is by html-build without style or location validation — validate-image-manifest.ts checks content-hash uniqueness but not where files live; (b) legacy decks retain per-project layouts (soosan_group_2026 carries its own images/ and assets/), so follow-recent-decks heuristics can resolve to the wrong convention; (c) in the 2026-11-open-innovation-keynote engagement a PM-authored dispatch brief that said download into <project>/assets/ silently created deck-local images/, diagrams/, fonts/ and the drift was only caught by hand in html-build deviation report. Result: two asset conventions ship side by side, 20MB + 3.6MB of duplicated deck-local assets, and pool reuse dedup does not engage for those decks.'
+  symptom: >-
+    The workspace asset-location contract exists only in prose and is not
+    machine-enforced, allowing a second per-project convention to coexist with
+    the canonical shared pool. agents/image-curator.md and agents/html-build.md
+    both define the shared pool
+    (presentations/assets/{images,diagrams,fonts,videos} bound via
+    ../assets/...) as the single convention, yet (a) image-manifest.json /
+    diagram-manifest.json path fields are consumed as-is by html-build without
+    style or location validation — validate-image-manifest.ts checks
+    content-hash uniqueness but not where files live; (b) legacy decks retain
+    per-project layouts (soosan_group_2026 carries its own images/ and assets/),
+    so follow-recent-decks heuristics can resolve to the wrong convention; (c)
+    in the 2026-11-open-innovation-keynote engagement a PM-authored dispatch
+    brief that said download into <project>/assets/ silently created deck-local
+    images/, diagrams/, fonts/ and the drift was only caught by hand in
+    html-build deviation report. Result: two asset conventions ship side by
+    side, 20MB + 3.6MB of duplicated deck-local assets, and pool reuse dedup
+    does not engage for those decks.
   affected_paths:
     - agents/image-curator.md
     - agents/html-build.md
     - agents/diagram-specialist.md
     - scripts/co-deck/validate-image-manifest.ts
   identity_source: cwd
-  repro: '1. Read agents/image-curator.md (line 29: download into the shared image pool at presentations/assets/images/) and agents/html-build.md (line 64: images are in the shared pool at presentations/assets/images/) — both agree. 2. Dispatch image-curator with a brief mentioning project-local paths; the subagent writes project-local assets/images/ and a manifest with project-local path fields. No tool fails; validate-image-manifest.ts passes (it checks hash uniqueness, not path location/style). 3. html-build binds whatever path style the manifest carries, producing a deck with project-local assets while sibling decks use the shared pool. 4. Compare: presentations/2026-11-consumer-goods-market-shift (pool convention) vs presentations/2026-11-open-innovation-keynote and presentations/soosan_group_2026 (project-local convention). Suggested fix: enforce manifest path-style (must match presentations/assets/... / ../assets/...) and on-disk location in validate-image-manifest.ts; add the same location check for diagram-manifest; document the pool convention in the dispatch checklist so PM briefs cannot drift.'
+  repro: >-
+    1. Read agents/image-curator.md (line 29: download into the shared image
+    pool at presentations/assets/images/) and agents/html-build.md (line 64:
+    images are in the shared pool at presentations/assets/images/) — both agree.
+    2. Dispatch image-curator with a brief mentioning project-local paths; the
+    subagent writes project-local assets/images/ and a manifest with
+    project-local path fields. No tool fails; validate-image-manifest.ts passes
+    (it checks hash uniqueness, not path location/style). 3. html-build binds
+    whatever path style the manifest carries, producing a deck with
+    project-local assets while sibling decks use the shared pool. 4. Compare:
+    presentations/2026-11-consumer-goods-market-shift (pool convention) vs
+    presentations/2026-11-open-innovation-keynote and
+    presentations/soosan_group_2026 (project-local convention). Suggested fix:
+    enforce manifest path-style (must match presentations/assets/... /
+    ../assets/...) and on-disk location in validate-image-manifest.ts; add the
+    same location check for diagram-manifest; document the pool convention in
+    the dispatch checklist so PM briefs cannot drift.
   triage: ready
   flagged: false
   triage_reasons:
@@ -37,4 +84,16 @@ upstream:
   dedupe_key: 35b5700cb504f92e41c7cc4a2fb2e58427bd5a80f22389c9c78b305ac96fbe05
   duplicates:
     - project: co-deck
-      at: 2026-11-14T00:41:37.774+09:00
+      at: '2026-11-14T00:41:37.774+09:00'
+  resolution:
+    outcome: fixed
+    template_version: 0.30.0
+    summary: >-
+      Already-implemented + verified live:
+      scripts/co-deck/validate-image-manifest.ts carries the pool-path style
+      check (checkPoolPathStyle), per-entry file-existence check, and the
+      diagram-manifest.json location check (§2c, U-20261114-005-tagged — landed
+      by the 11-13/14 sessions). Ran against the 2026-11-open-innovation-keynote
+      deliverable: PASSED 0 errors (58 slides / 34 images). Residual scope
+      (style+location validation of html-build-consumed path fields beyond the
+      manifest) tracked in T-20261114-001.
