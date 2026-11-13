@@ -23,12 +23,25 @@ title: >-
   lands as its own co-deck per-repo commit/PR then flows template-side at the
   next wave.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-14T02:29:35.879+09:00'
 history:
   - at: '2026-11-14T02:29:35.879+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-14T08:24:45.131+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-14T08:24:45.153+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T08:24:45.173+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: all 5 consolidated requests dispositioned with verified evidence
+  (co-deck PR #224 carried the project-side port). Residual architect item:
+  template-side promotion ruling for 002's CSS port (engagement design_spec
+  overrides vs universal white-bubble improvements).
 error: null
