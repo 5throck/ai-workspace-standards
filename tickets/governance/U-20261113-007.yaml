@@ -1,0 +1,83 @@
+schemaVersion: 1
+id: U-20261113-007
+kind: manual
+title: Upstream request from co-architect
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-13T17:33:08.768+09:00'
+history:
+  - at: '2026-11-13T17:33:08.768+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-13T18:10:09.257+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-13T18:10:09.257+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-13T18:10:09.257+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by #2007 (template graft cleanup in
+  templates/co-architect/.claude/settings.json, merge dc3bef762). Not addressed
+  here: the upgrade engine GUARD does not drop
+  statusLine/subagentStatusLine/footerLinksRegexes graft entries; possible
+  separate engine hardening candidate.
+error: null
+upstream:
+  project: co-architect
+  variant: co-architect
+  template_version: 0.30.0
+  source: project/co-architect
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    upgrade-project (template 0.30.0, engine from origin/main bffc6ad1f) merges
+    templates/co-architect/.claude/settings.json into a project that already
+    removed graft, and re-adds graft entries: statusLine.command and
+    subagentStatusLine.command pointing at .claude/helpers/graft-statusline.cjs
+    (file does not exist in the project) and the footerLinksRegexes pattern
+    graft/[\w./-]+\.md. Expected: no graft references in the merged result. The
+    co-architect template file still has 9 graft references (graft-hooks.cjs at
+    lines 62, 96, 106, 219, 230; graft-statusline.cjs at 242, 246; a
+    mcp__graft__ matcher; a graft/*.md pattern);
+    templates/common/.claude/settings.json has none. The engine GUARD drops the
+    graft hook entries but not the
+    statusLine/subagentStatusLine/footerLinksRegexes entries.
+  affected_paths:
+    - .claude/settings.json
+  identity_source: self_declared
+  local_workaround_diff: >-
+    Remove the three resurrected graft entries from .claude/settings.json after
+    the upgrade (statusLine, subagentStatusLine, and the graft/[\w./-]+\.md
+    entry in footerLinksRegexes).
+  repro: >-
+    In a project whose .claude/settings.json has no graft entries and no
+    .claude/helpers/graft-*.cjs, run bun scripts/upgrade-project.ts <project>
+    --yes --disposition 'adopt-template=agents/automation-engineer.md' from a
+    clean worktree of origin/main. Then grep -n graft .claude/settings.json: 3
+    lines reappear (footerLinksRegexes, statusLine.command,
+    subagentStatusLine.command).
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - first_request_from_project
+    - info:in_last_delivery .claude/settings.json=true
+  dedupe_key: 27a02a5d6f55ad1539c25a0e530028246fd81f834885823cb2a7dd56000279d6
+  duplicates:
+    - project: co-architect
+      at: '2026-11-13T17:33:08.768+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2007
+    template_version: unreleased
+    summary: >-
+      Fixed by #2007 (template graft cleanup in
+      templates/co-architect/.claude/settings.json, merge dc3bef762). Not
+      addressed here: the upgrade engine GUARD does not drop
+      statusLine/subagentStatusLine/footerLinksRegexes graft entries; possible
+      separate engine hardening candidate.
