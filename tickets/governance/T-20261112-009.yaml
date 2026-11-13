@@ -5,7 +5,7 @@ title: >-
   Check LC warning count for delivered skills in a scaffold is unverified:
   new-project.ts only scaffolds inside the workspace root
 priority: low
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-12T18:32:25.500+09:00'
 history:
@@ -15,5 +15,15 @@ history:
   - at: '2026-11-14T02:14:52.545+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-14T02:29:17.714+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T02:29:17.736+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: harness landed (tests/unit/lc-scaffold-warning-count.test.ts, 3/3
+  green, full suite green) — the delivered-skills LC warning count is now pinned
+  by CI on every run. No new-project.ts change needed; the fixture approach
+  avoids the workspace-root scaffolding constraint entirely.
 error: null
