@@ -6,12 +6,30 @@ title: >-
   (design-foundation, i18n-*, accessibility-audit) that variant-mirror-parity
   may flag on next version bumps
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-12T18:32:25.426+09:00'
 history:
   - at: '2026-11-12T18:32:25.426+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-14T02:14:36.969+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-14T02:14:36.986+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T02:14:37.003+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: landed via PR #2019 (root CI green after a macos runner-capacity
+  retry; merge 5aa49e336). Implemented in PR #2019: the FULL promotion-leftover
+  mirror set removed from templates/co-architect — 105 tracked mirror files
+  across 21 orphan skills × 5 platforms (the ticket named 3 examples; the full
+  sweep found 21 SSOT-absent skills incl. agent-lifecycle-manager,
+  decision-record, evidence-ledger, explain-me, i18n-*, sync, translate,
+  security-scan, platform-*-lifecycle-manager...). validate-variant-claims
+  co-architect: PASS after removal. CV-02 flagged the downstream risk the ticket
+  predicted (same-version content) — now structurally gone.
 error: null

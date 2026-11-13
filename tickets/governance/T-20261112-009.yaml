@@ -5,12 +5,15 @@ title: >-
   Check LC warning count for delivered skills in a scaffold is unverified:
   new-project.ts only scaffolds inside the workspace root
 priority: low
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-12T18:32:25.500+09:00'
 history:
   - at: '2026-11-12T18:32:25.500+09:00'
     from: null
     to: backlog
+  - at: '2026-11-14T02:14:52.545+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

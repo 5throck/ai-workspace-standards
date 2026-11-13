@@ -3,13 +3,16 @@ id: U-20261113-008
 kind: manual
 title: Upstream request from co-consult
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
-created_at: 2026-11-13T21:10:37.924+09:00
+created_at: '2026-11-13T21:10:37.924+09:00'
 history:
-  - at: 2026-11-13T21:10:37.924+09:00
+  - at: '2026-11-13T21:10:37.924+09:00'
     from: null
     to: backlog
+  - at: '2026-11-14T02:15:10.558+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,30 +22,88 @@ upstream:
   source: project/co-consult
   trust: untrusted
   suspected_layer: L2
-  symptom: In co-consult variant projects, deliverable-type outputs (client-facing research findings, analyses, reports) are placed under docs/reports/ instead of the variant's own deliverables/ layout, because the projected AGENTS.md §7 File Organization bullet tells agents to put "analysis and reports" in docs/. The L2 variant template itself ships the deliverables/ scaffold (deliverables/drafts|presentations|references|reports|research) and defines an Output Destination Mapping in docs/co-consult.context.md (deliverables/research/ = research findings; deliverables/reports/ = final client-ready reports; naming {topic}-{report-type}-{YYYY-MM-DD}_ko.md), but templates/co-consult/AGENTS.md (~line 320, inherited verbatim from templates/common/AGENTS.md ~line 270) contradicts that mapping with "Place analysis and reports in docs/". Agents bootstrap AGENTS.md first, so the docs/ instruction wins in practice and every deliverable lands in the wrong folder, requiring manual relocation and breaking the deliverables/ convention the variant was designed around.
+  symptom: >-
+    In co-consult variant projects, deliverable-type outputs (client-facing
+    research findings, analyses, reports) are placed under docs/reports/ instead
+    of the variant's own deliverables/ layout, because the projected AGENTS.md
+    §7 File Organization bullet tells agents to put "analysis and reports" in
+    docs/. The L2 variant template itself ships the deliverables/ scaffold
+    (deliverables/drafts|presentations|references|reports|research) and defines
+    an Output Destination Mapping in docs/co-consult.context.md
+    (deliverables/research/ = research findings; deliverables/reports/ = final
+    client-ready reports; naming {topic}-{report-type}-{YYYY-MM-DD}_ko.md), but
+    templates/co-consult/AGENTS.md (~line 320, inherited verbatim from
+    templates/common/AGENTS.md ~line 270) contradicts that mapping with "Place
+    analysis and reports in docs/". Agents bootstrap AGENTS.md first, so the
+    docs/ instruction wins in practice and every deliverable lands in the wrong
+    folder, requiring manual relocation and breaking the deliverables/
+    convention the variant was designed around.
   affected_paths:
     - AGENTS.md
     - docs/co-consult.context.md
     - deliverables/research
   identity_source: cwd
-  local_workaround_diff: |-
-    Reference only (not yet applied — marker to receive the returned ticket ID when applied). Proposed local patch to the projected project AGENTS.md §7 File Organization bullet:
+  local_workaround_diff: >-
+    Reference only (not yet applied — marker to receive the returned ticket ID
+    when applied). Proposed local patch to the projected project AGENTS.md §7
+    File Organization bullet:
+
 
     --- a/AGENTS.md
-    +++ b/AGENTS.md
-    @@ -1 line in §7 Universal Baseline Behaviors
-    -- **File Organization**: Never create `.md` files at the project root unless explicitly creating a standard root file (README.md, CHANGELOG.md, AGENTS.md, SECURITY.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, README_ko.md). Place analysis and reports in `docs/`, session logs and meeting transcripts in `memory/`. Create all temporary code and scratch scripts in `tests/`.
-    +<!-- LOCAL-PATCH(upstream-request: <TICKET_ID>) -->
-    +- **File Organization**: Never create `.md` files at the project root unless explicitly creating a standard root file (README.md, CHANGELOG.md, AGENTS.md, SECURITY.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, README_ko.md). Place client-facing deliverables (research findings, analyses, reports, presentations, references) per the variant layout — `deliverables/research|reports|presentations|references` per the Output Destination Mapping in the project context doc (docs/co-consult.context.md), naming pattern `{topic}-{report-type}-{YYYY-MM-DD}_ko.md`. Place internal project analysis docs in `docs/`, session logs and meeting transcripts in `memory/`. Create all temporary code and scratch scripts in `tests/`.
 
-    Additionally, existing client deliverables already misplaced in docs/reports/ were manually relocated to deliverables/research/ with convention-compliant names (no content changes).
-  repro: |-
-    1. In any project scaffolded from templates/co-consult, ask an agent to produce a research/deliverable-type output (e.g., lecture-support research report, market analysis).
-    2. The agent reads the projected AGENTS.md §7 Universal Baseline Behaviors — File Organization, which instructs "Place analysis and reports in docs/" (sentence inherited from templates/common/AGENTS.md line ~270 and copied verbatim into templates/co-consult/AGENTS.md line ~320).
+    +++ b/AGENTS.md
+
+    @@ -1 line in §7 Universal Baseline Behaviors
+
+    -- **File Organization**: Never create `.md` files at the project root
+    unless explicitly creating a standard root file (README.md, CHANGELOG.md,
+    AGENTS.md, SECURITY.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md,
+    README_ko.md). Place analysis and reports in `docs/`, session logs and
+    meeting transcripts in `memory/`. Create all temporary code and scratch
+    scripts in `tests/`.
+
+    +<!-- LOCAL-PATCH(upstream-request: <TICKET_ID>) -->
+
+    +- **File Organization**: Never create `.md` files at the project root
+    unless explicitly creating a standard root file (README.md, CHANGELOG.md,
+    AGENTS.md, SECURITY.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md,
+    README_ko.md). Place client-facing deliverables (research findings,
+    analyses, reports, presentations, references) per the variant layout —
+    `deliverables/research|reports|presentations|references` per the Output
+    Destination Mapping in the project context doc (docs/co-consult.context.md),
+    naming pattern `{topic}-{report-type}-{YYYY-MM-DD}_ko.md`. Place internal
+    project analysis docs in `docs/`, session logs and meeting transcripts in
+    `memory/`. Create all temporary code and scratch scripts in `tests/`.
+
+
+    Additionally, existing client deliverables already misplaced in
+    docs/reports/ were manually relocated to deliverables/research/ with
+    convention-compliant names (no content changes).
+  repro: >-
+    1. In any project scaffolded from templates/co-consult, ask an agent to
+    produce a research/deliverable-type output (e.g., lecture-support research
+    report, market analysis).
+
+    2. The agent reads the projected AGENTS.md §7 Universal Baseline Behaviors —
+    File Organization, which instructs "Place analysis and reports in docs/"
+    (sentence inherited from templates/common/AGENTS.md line ~270 and copied
+    verbatim into templates/co-consult/AGENTS.md line ~320).
+
     3. Agent writes the deliverable to docs/reports/.
-    4. Owner expects deliverables/research/ per docs/co-consult.context.md "Output Destination Mapping" ({topic}-{report-type}-{YYYY-MM-DD}_ko.md); the file must be manually relocated afterwards.
-    Observed 2026-11-13 in this project: four lecture-support research reports (tech-trends-2026, sector briefs, open-innovation, ai-era-business-survival) were placed in docs/reports/ and had to be moved manually to deliverables/research/ with convention-compliant names. docs/reports/ also accumulated market-analysis deliverables (global-construction-market-analysis-2026.md, korea-power-energy-market-analysis-2026.md, 2026-10-ai-industry-research/ research pack) under the same rule.
-  triage: inbox
+
+    4. Owner expects deliverables/research/ per docs/co-consult.context.md
+    "Output Destination Mapping" ({topic}-{report-type}-{YYYY-MM-DD}_ko.md); the
+    file must be manually relocated afterwards.
+
+    Observed 2026-11-13 in this project: four lecture-support research reports
+    (tech-trends-2026, sector briefs, open-innovation, ai-era-business-survival)
+    were placed in docs/reports/ and had to be moved manually to
+    deliverables/research/ with convention-compliant names. docs/reports/ also
+    accumulated market-analysis deliverables
+    (global-construction-market-analysis-2026.md,
+    korea-power-energy-market-analysis-2026.md, 2026-10-ai-industry-research/
+    research pack) under the same rule.
+  triage: ready
   flagged: false
   triage_reasons:
     - 'path_not_template_managed: deliverables/research'
@@ -52,4 +113,4 @@ upstream:
   dedupe_key: bacd84855257f5559d5c34d835bf5212120ea2d6df897ff6e544fa234b83dfeb
   duplicates:
     - project: co-consult
-      at: 2026-11-13T21:10:37.924+09:00
+      at: '2026-11-13T21:10:37.924+09:00'
