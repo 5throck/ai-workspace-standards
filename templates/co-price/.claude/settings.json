@@ -21,12 +21,9 @@
       "Bash(bun scripts/audit.ts *)",
       "Bash(bun scripts/lifecycle-sync-audit.ts *)",
       "Bash(bun run agent:verify *)",
-      "Bash(curl -sI *)",
       "Bash(bun scripts/validate-templates.ts *)",
       "WebSearch(*)",
-      "WebFetch(*)",
-      "Bash(trail:*)",
-      "Bash(node dist/cli.js:*)"
+      "Bash(trail:*)"
     ],
     "deny": [
       "Bash(git push --force*)",
@@ -165,9 +162,7 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [],
-    "Stop": []
+    ]
   },
   "footerLinksRegexes": [
     ".trail/[\\w./-]+\\.md"
