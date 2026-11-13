@@ -1,0 +1,47 @@
+schemaVersion: 1
+id: T-20261114-003
+kind: manual
+title: >-
+  co-learning upgrade blocker 2/2 (decision needed from project owner;
+  project-repo changes need user confirmation): Projects/co-learning has NO
+  variant.json (confirmed in project and scratch clone), unlike 13 of the other
+  co-* projects (co-security, co-architect, co-deck, co-safety, ...); the
+  template templates/co-learning/variant.json exists (v0.1.0, agents
+  pm/exam-bank-steward/i18n-specialist, skill_manifest, agent_manifest,
+  country_config, deg_conformance). Impact in scripts/upgrade-project.ts:
+  loadProjectAssetGate returns null so new common agents/skills are delivered
+  UNGATED (no registration check, risk of audit-variant allowlist/parity
+  failures after delivery); country detection falls back to region-neutral;
+  cross-variant prune cannot be opted into (project-adopted skills are only
+  SKIPped with a WARN 'seed variant.json to opt into pruning'). The project
+  carries 13 agents vs 3 in the template (education-planner, content-steward,
+  program-operations, reporting-analyst, architect, code-writer, test-runner,
+  security-monitor), none registered anywhere, so blindly copying the template
+  variant.json would under-describe the project and a roster/parity audit could
+  flag the extras. Not an upgrade-stopper by itself (dry-run 2026-11-14 exit 1
+  is caused by one CONFLICT on agents/exam-bank-steward.md, equal-version
+  project-evolved drift), hence normal priority. Other visible blockers (list
+  only): exam-bank-steward.md CONFLICT (project-evolved, port-or-adopt
+  decision); docs/context.md UNBASELINED and
+  skills/exam-bank-operations/SKILL.md PROJECT_AHEAD (1.2.0 vs template 1.1.0)
+  pending backport; CLAUDE.md/README_ko.md LOCAL-PATCH markers protected
+  (U-20261006-006/007); many CENSUS WARN evolved regions in CLAUDE.md; REVIEW
+  manual commonization for agents/skills. Options: (a) project adds a
+  variant.json derived from the template plus its 8 extra agents and skills
+  (needs owner confirmation), (b) adopt via upgrade/adopt-project flow, (c)
+  template-side fix so the gate/registration handles variant-less forks without
+  ungated delivery. Acceptance: decision recorded; co-learning has a valid
+  variant.json (or documented exemption) with the roster matching agents/;
+  audit-variant passes; upgrade-project dry-run on co-learning shows the gate
+  active and no ungated additions; coordinate with ticket 1/2 and
+  T-20261112-008.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-14T08:06:38.566+09:00'
+history:
+  - at: '2026-11-14T08:06:38.566+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
