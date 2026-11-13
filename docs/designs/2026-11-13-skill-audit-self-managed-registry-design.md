@@ -169,6 +169,10 @@ The canonical state after the fix is "no row". That matches the doctrine and the
 
 A follow-up ticket can cover the dead arms and the stale v1.5.2 history claim (decision D4).
 
+### D4 implementation note (T-20261113-003)
+
+Removed in `skill-lifecycle-audit.ts` v1.15.0, all unreachable because the loop-top `if (isSelfManagedPath(relPath)) { ...; continue; }` skips self-managed skills before them and `relPath` is an immutable per-iteration const: the `!isSelfManagedPath` term in the owner check, the same term in the registry-row check, the `selfManaged` flag and its `!selfManaged` term in Check SD, and the `selfManaged` flag, its `!selfManaged` term and the `else if (... selfManaged ...)` lifecycle INFO arm in Check LC. The 1.14.0 registry-row tolerance, its INFO line and the honest count are unchanged. Evidence: audit output and exit code are byte-identical before and after on four fixtures (healthy, graft plus row, self-managed without owner, non-self-managed without owner) and on the real repo, in text and `--json` modes; `tests/unit/skill-lifecycle-audit-self-managed-skip.test.ts` pins the behaviour. The stale SCRIPTS.md v1.5.2 claim is corrected.
+
 ## 6. Exact file list
 
 ### 6.1 Hand-edited (L0, root PR)

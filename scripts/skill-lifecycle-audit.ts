@@ -9,7 +9,15 @@
  *   bun scripts/skill-lifecycle-audit.ts
  *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.14.0
+ * @version 1.15.0
+ *
+ * v1.15.0 (2026-11-13, T-20261113-003, D4 of T-20261113-002; spec
+ *         docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md section 5):
+ *         removed the isSelfManagedPath arms that the v1.11.0 loop-top skip made
+ *         unreachable (owner check, registry-row check, Check SD flag, Check LC
+ *         exemption and its self-managed lifecycle INFO line). Behaviour is
+ *         unchanged for every input; the 1.14.0 registry-row tolerance and the
+ *         honest self-managed count are kept.
  *
  * v1.14.0 (2026-11-13, T-20261113-002; spec
  *         docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md): a skills/SKILLS.md
@@ -677,13 +685,9 @@ function auditSkills(jsonMode = false): AuditResult {
       });
     }
 
-    // T-20261108-004 (F-1): scaffold-time external-deps clones (external/<id>/
-    // per DEC-20261106-04 "consumed as-is") are vendored upstream content —
-    // no owner frontmatter by design (upstream repos; falsified provenance if
-    // stubbed). The project's external-deps.json install_dirs join the
-    // self-managed path set (self-managed-tools v1.3.0), so isSelfManagedPath
-    // exempts them here exactly like the tool-owned graft/trail skills.
-    if (!isPlatformSkill && !frontmatter.owner && !isSelfManagedPath(relPath)) {
+    // Self-managed skills (tool-owned graft/trail, vendored external-deps clones)
+    // never reach here: the loop-top isSelfManagedPath skip handles them.
+    if (!isPlatformSkill && !frontmatter.owner) {
       errors.push({
         level: "error",
         file: relPath,
@@ -730,10 +734,7 @@ function auditSkills(jsonMode = false): AuditResult {
         fix: "Archive to skills/_archive/ or remove from repository",
       });
     }
-    // T-20261108-004: vendored external-deps clones are tool-custody content —
-    // no project SKILLS.md registry row exists for upstream skills (same
-    // self-managed exemption as the owner check above).
-    if (!isPlatformSkill && !isSelfManagedPath(relPath) && frontmatter.name && registryRows.size > 0) {
+    if (!isPlatformSkill && frontmatter.name && registryRows.size > 0) {
       const row = registryRows.get(frontmatter.name);
       if (!row) {
         errors.push({
@@ -876,17 +877,14 @@ function auditSkills(jsonMode = false): AuditResult {
       }
       // U-20261028-011: the LC/MV checks moved below — out of the
       // IS_WORKSPACE_ROOT gate — so delivered projects run them too.
-      // Check SD still needs the self-managed exemption, so keep the flag
-      // computed here.
-      const selfManaged = isSelfManagedPath(relPath);
 
       // Check SD (v1.6.0, T-20261004-023): stale last_reviewed — the SKILL.md's
       // git content history moved past its declared last_reviewed without a
       // stamp refresh (the graft doctrine-block window case). Same semantics as
       // agent-lifecycle-audit Check 11 (T-20260909-004): the shared
       // lastContentCommitDate helper skips sync-only pipeline commits and
-      // metadata-only (stamp-only) commits; archived and self-managed skills are
-      // exempt (tool-owned SKILL.md content moves without review stamps).
+      // metadata-only (stamp-only) commits; archived skills are exempt, and
+      // self-managed skills never reach this check (loop-top skip).
       // v1.10.0 A2 tolerance (spec 2026-10-29-delivery-bookkeeping-engine-design):
       // the engine never stamps last_reviewed (an engine write is not a review),
       // so a wave-delivered SKILL.md whose current bytes hash-match the recorded
@@ -894,7 +892,7 @@ function auditSkills(jsonMode = false): AuditResult {
       // absent at L0, where the tolerance is inert) is suppressed to an INFO
       // line instead; any genuine project edit breaks the hash and re-arms the
       // warning with full history.
-      if (frontmatter.status === "active" && !selfManaged) {
+      if (frontmatter.status === "active") {
         const reviewed = frontmatter.last_reviewed;
         const commitDate = lastContentCommitDate(skillFile);
         if (reviewed && /^\d{4}-\d{2}-\d{2}$/.test(reviewed) && commitDate && reviewed < commitDate) {
@@ -951,24 +949,16 @@ function auditSkills(jsonMode = false): AuditResult {
     // while the dimension went unmeasured (49 active skills, 7 records, zero
     // project-level signals). Check RI stays workspace-gated: the reference
     // integrity allowlist surface is L0-only.
-    // T-20261002-001 follow-up: a self-managed skill (e.g. graft — its SKILL.md is
-    // owned by the tool, not the workspace) is exempt; the tool refreshes it on every
-    // version bump and a hand-maintained record would just drift.
+    // Self-managed skills (e.g. graft) never reach here: the loop-top skip exempts them.
     if (!isPlatformSkill && frontmatter.name) {
-      const selfManaged = isSelfManagedPath(relPath);
       const lifecycleRecordPath = join(ROOT, "docs", "lifecycle", "skills", `${frontmatter.name}.md`);
-      if (frontmatter.status === "active" && !selfManaged && !existsSync(lifecycleRecordPath)) {
+      if (frontmatter.status === "active" && !existsSync(lifecycleRecordPath)) {
         warnings.push({
           level: "warning",
           file: relPath,
           message: `No lifecycle record: docs/lifecycle/skills/${frontmatter.name}.md is missing for an active skill`,
           fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata). Template-delivered skills receive their record when the project is next upgraded from its template; if this skill is project-local, create the record.`,
         });
-      } else if (frontmatter.status === "active" && selfManaged && !existsSync(lifecycleRecordPath)) {
-        if (!jsonMode)
-          console.log(
-            `  ℹ️  lifecycle: ${relPath} is self-managed (docs/self-managed-surfaces.json) — lifecycle record not required`,
-          );
       } else if (frontmatter.status === "active" && existsSync(lifecycleRecordPath)) {
         // Check MV (v1.6.0, T-20261004-020): the record's footer Metadata Version
         // must match the header Metadata Version and the SKILL.md frontmatter —
