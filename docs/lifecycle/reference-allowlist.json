@@ -15,6 +15,13 @@
         "dart-disclosure-parser"
       ],
       "reason": "v2.0.0 changelog note: dart-disclosure-parser parsing rules were merged into this unified skill; the mention is merge history."
+    },
+    {
+      "file_substring": "templates/co-work/skills/i18n-layout",
+      "refs": [
+        "hwp-document-processing"
+      ],
+      "reason": "co-work hub-local skill; HWP promotion to templates deferred by DEC-20261107-01; the hub override intentionally names it."
     }
   ]
 }

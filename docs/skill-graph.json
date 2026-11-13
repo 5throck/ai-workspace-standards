@@ -8259,6 +8259,19 @@
       ]
     },
     {
+      "id": "skill:co-work/i18n-layout",
+      "type": "skill",
+      "layer": "variant:co-work",
+      "name": "i18n-layout",
+      "scope": "co-work",
+      "capability": "i18n-layout",
+      "content_hash": "55cc9f304f096508",
+      "version": "1.1.2",
+      "mirrors": [
+        "templates/co-work/skills/i18n-layout/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-work/pptx-export",
       "type": "skill",
       "layer": "variant:co-work",
@@ -30748,6 +30761,36 @@
       "type": "references",
       "from": "skill:co-security/verify-authorization",
       "to": "skill:root/security-scan",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-work/i18n-layout",
+      "to": "skill:co-deck/design",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-work/i18n-layout",
+      "to": "skill:co-deck/theme-authoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-work/i18n-layout",
+      "to": "skill:common/i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-work/i18n-layout",
+      "to": "skill:common/i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-work/i18n-layout",
+      "to": "skill:common/translate",
       "source": "prose"
     },
     {

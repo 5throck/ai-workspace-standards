@@ -61,6 +61,10 @@
     {
       "name": "pptx-export",
       "file": "skills/pptx-export/SKILL.md"
+    },
+    {
+      "name": "i18n-layout",
+      "file": "skills/i18n-layout/SKILL.md"
     }
   ],
   "agent_manifest": {
