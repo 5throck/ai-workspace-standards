@@ -5,12 +5,28 @@ title: >-
   SLR missing-record fix text says 'published by the templates PR, never
   hand-written', stale now that SLR blocks
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-12T18:32:25.451+09:00'
 history:
   - at: '2026-11-12T18:32:25.451+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-14T02:14:37.021+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-14T02:14:37.038+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T02:14:37.055+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: landed via PR #2019 (root CI green after a macos runner-capacity
+  retry; merge 5aa49e336). Implemented in PR #2019:
+  scripts/generate-skill-lifecycle-records.ts v1.3.1 — the missing-record fix
+  text now says the SLR gate BLOCKS a sync whose records are missing/stale and
+  points at generator --write + include-in-PR (the old 'published by the
+  templates PR, never hand-written' claim was stale after the gate went
+  blocking); L1 mirror synced; registry + lifecycle rows updated.
 error: null

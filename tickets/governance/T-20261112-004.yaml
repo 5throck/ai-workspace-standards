@@ -5,12 +5,33 @@ title: >-
   upgrade-project has no agent prune for non-KR scaffolds (public-data-analyst
   re-delivered)
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-12T18:32:25.378+09:00'
 history:
   - at: '2026-11-12T18:32:25.378+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-14T02:14:36.838+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-14T02:14:36.866+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T02:14:36.889+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: landed via PR #2019 (root CI green after a macos runner-capacity
+  retry; merge 5aa49e336). Implemented in upgrade-project v1.106.0 (PR #2019,
+  spec 2026-11-14-country-scoped-agents-registry-and-prune-design R2):
+  SYNC_IF_NEWER: agents/ gains the PRE-DELIVERY country guard — country-scoped
+  agents (registry from the schema pair, lib v1.1.0) are WITHHELD for a
+  non-matching detectedCountry: no copy, no baseline, CORRECTIVE/INFO decision
+  row; the workspace-seed pass withholds the agent lifecycle record the same
+  way. A deliver-then-prune post-pass was tried first and rejected by the
+  fixtures (stale delivered baseline re-fired TOMBSTONED ERROR next visit —
+  upgrade-decision-log caught it). Verified live: co-work (region-neutral)
+  dry-run shows the SKIP row and no re-delivery; KR projects keep everything.
+  Companion T-20261112-005 rides the same PR.
 error: null

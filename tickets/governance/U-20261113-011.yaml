@@ -3,14 +3,30 @@ id: U-20261113-011
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-13T22:08:05.759+09:00
+created_at: '2026-11-13T22:08:05.759+09:00'
 history:
-  - at: 2026-11-13T22:08:05.759+09:00
+  - at: '2026-11-13T22:08:05.759+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-14T02:14:52.628+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-14T02:14:52.628+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T02:14:52.628+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed at the template source (PR #2019): all graft-era
+  hooks/statusline/footerLinks/permission entries removed from the 7 variant
+  .claude/settings.json files; trail-era equivalents in place. The engine-side
+  guard (drop graft statusLine/subagentStatusLine/footerLinksRegexes during
+  JSON_MERGE — U-20261113-007's noted hardening candidate) remains open as a
+  separate hardening item. Re-delivery to co-security happens at its next
+  upgrade visit.
 error: null
 upstream:
   project: co-security
@@ -19,12 +35,37 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L2
-  symptom: 'upgrade-project (template 0.30.0, engine from origin/main f8b2482a7) applied to co-security adds graft leftovers and widened permissions from templates/co-security/.claude/settings.json into a project that had none: statusLine.command and subagentStatusLine.command pointing at .claude/helpers/graft-statusline.cjs (missing in the project, breaks the status line), a graft footerLinksRegexes entry, and permission allows Bash(node dist/cli.js:*) (graft CLI), Bash(curl -sI *) and WebFetch(*). The project''s own settings restricted WebFetch to a domain allowlist (bun.sh, github.com, raw.githubusercontent.com, api.github.com, objects.githubusercontent.com, registry.npmjs.org, nodejs.org) and had no curl allow, so for a security engagement the result is a regression of web-access posture. The co-security template file carries 9 graft-matching lines; templates/common/.claude/settings.json has none. The same class of leftover was already fixed for templates/co-architect in PR #2007 (U-20261113-007); other variant templates may carry the same graft references and should be checked.'
+  symptom: >-
+    upgrade-project (template 0.30.0, engine from origin/main f8b2482a7) applied
+    to co-security adds graft leftovers and widened permissions from
+    templates/co-security/.claude/settings.json into a project that had none:
+    statusLine.command and subagentStatusLine.command pointing at
+    .claude/helpers/graft-statusline.cjs (missing in the project, breaks the
+    status line), a graft footerLinksRegexes entry, and permission allows
+    Bash(node dist/cli.js:*) (graft CLI), Bash(curl -sI *) and WebFetch(*). The
+    project's own settings restricted WebFetch to a domain allowlist (bun.sh,
+    github.com, raw.githubusercontent.com, api.github.com,
+    objects.githubusercontent.com, registry.npmjs.org, nodejs.org) and had no
+    curl allow, so for a security engagement the result is a regression of
+    web-access posture. The co-security template file carries 9 graft-matching
+    lines; templates/common/.claude/settings.json has none. The same class of
+    leftover was already fixed for templates/co-architect in PR #2007
+    (U-20261113-007); other variant templates may carry the same graft
+    references and should be checked.
   affected_paths:
     - .claude/settings.json
   identity_source: self_declared
-  local_workaround_diff: After the upgrade, remove statusLine, subagentStatusLine, the graft footerLinksRegexes entry, Bash(node dist/cli.js:*), Bash(curl -sI *) and WebFetch(*) from .claude/settings.json so the pre-upgrade allowlist posture is kept.
-  repro: 'From a clean worktree of origin/main run bun scripts/upgrade-project.ts <co-security checkout> --yes --disposition adopt-template, then grep -n graft .claude/settings.json (3 hits) and compare permissions.allow with the project''s pre-upgrade file: WebFetch(*), Bash(curl -sI *), Bash(node dist/cli.js:*) are added (allow count 13 to 16).'
+  local_workaround_diff: >-
+    After the upgrade, remove statusLine, subagentStatusLine, the graft
+    footerLinksRegexes entry, Bash(node dist/cli.js:*), Bash(curl -sI *) and
+    WebFetch(*) from .claude/settings.json so the pre-upgrade allowlist posture
+    is kept.
+  repro: >-
+    From a clean worktree of origin/main run bun scripts/upgrade-project.ts
+    <co-security checkout> --yes --disposition adopt-template, then grep -n
+    graft .claude/settings.json (3 hits) and compare permissions.allow with the
+    project's pre-upgrade file: WebFetch(*), Bash(curl -sI *), Bash(node
+    dist/cli.js:*) are added (allow count 13 to 16).
   triage: inbox
   flagged: true
   triage_reasons:
@@ -34,4 +75,17 @@ upstream:
   dedupe_key: b8dcba76e3a5d97eeefb7fef73d8108b401309e47c6f28e19ad591e923cf7b3d
   duplicates:
     - project: co-security
-      at: 2026-11-13T22:08:05.759+09:00
+      at: '2026-11-13T22:08:05.759+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2019
+    template_version: unreleased
+    summary: >-
+      Fixed at the template source (PR #2019): all graft-era
+      hooks/statusline/footerLinks/permission entries removed from the 7 variant
+      .claude/settings.json files; trail-era equivalents in place. The
+      engine-side guard (drop graft
+      statusLine/subagentStatusLine/footerLinksRegexes during JSON_MERGE —
+      U-20261113-007's noted hardening candidate) remains open as a separate
+      hardening item. Re-delivery to co-security happens at its next upgrade
+      visit.

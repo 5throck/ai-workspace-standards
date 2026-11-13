@@ -8,12 +8,15 @@ title: >-
   co-newbiz, co-price, co-safety, co-security) and co-architect context.md
   bindings section
 priority: low
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-12T18:32:25.475+09:00'
 history:
   - at: '2026-11-12T18:32:25.475+09:00'
     from: null
     to: backlog
+  - at: '2026-11-14T02:14:52.567+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

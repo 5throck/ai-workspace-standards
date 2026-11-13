@@ -3,13 +3,16 @@ id: U-20261113-010
 kind: manual
 title: Upstream request from co-consult
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
-created_at: 2026-11-13T22:03:30.920+09:00
+created_at: '2026-11-13T22:03:30.920+09:00'
 history:
-  - at: 2026-11-13T22:03:30.920+09:00
+  - at: '2026-11-13T22:03:30.920+09:00'
     from: null
     to: backlog
+  - at: '2026-11-14T02:15:10.610+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,7 +22,18 @@ upstream:
   source: project/co-consult
   trust: untrusted
   suspected_layer: L1
-  symptom: 'Project-side artifacts delivered from templates/common reference the workspace-root CONSTITUTION.md (an L0-only document absent from project checkouts), violating CONSTITUTION §7.5 Non-Propagation: 79 files in a scaffolded co-consult project reference it, including 19 delivered scripts whose user-facing failure messages point project users at "See: CONSTITUTION.md ..." (a dead pointer in project context), and 7 skills'' references/terms-ko.json _note fields citing "CONSTITUTION §6.7" (mirrored 3x per platform). The existing propagation stripper (merge-frontmatter.ts) only strips CONSTITUTION.md lines from frontmatter/managed output and does not scrub script strings or skill reference notes, so the L1-origin references re-propagate on every upgrade.'
+  symptom: >-
+    Project-side artifacts delivered from templates/common reference the
+    workspace-root CONSTITUTION.md (an L0-only document absent from project
+    checkouts), violating CONSTITUTION §7.5 Non-Propagation: 79 files in a
+    scaffolded co-consult project reference it, including 19 delivered scripts
+    whose user-facing failure messages point project users at "See:
+    CONSTITUTION.md ..." (a dead pointer in project context), and 7 skills'
+    references/terms-ko.json _note fields citing "CONSTITUTION §6.7" (mirrored
+    3x per platform). The existing propagation stripper (merge-frontmatter.ts)
+    only strips CONSTITUTION.md lines from frontmatter/managed output and does
+    not scrub script strings or skill reference notes, so the L1-origin
+    references re-propagate on every upgrade.
   affected_paths:
     - scripts/validate-md-language.ts
     - scripts/dev-sync.ts
@@ -27,18 +41,61 @@ upstream:
     - skills/k-opendata/references/terms-ko.json
     - skills/company-intelligence/references/terms-ko.json
   identity_source: cwd
-  local_workaround_diff: |-
-    Reference only — none applied (user ruling: ticket-only resolution; L1-delivered core scripts are L2-patch-forbidden per the core script standardization rule). Proposed direction for the workspace PM at L1:
-    1. In templates/common scripts (validate-md-language.ts and the 18 other scripts referencing CONSTITUTION.md): replace the L0 path pointer in user-facing output with project-safe wording, e.g. "See the workspace language policy (CONSTITUTION.md, workspace root)" only in L0 contexts, or drop the pointer entirely: "[FAIL] Language validation: Korean-only markdown files detected — policy: official documents are English; Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' frontmatter."
-    2. In templates/common skills' references/terms-ko.json _note fields: replace "(CONSTITUTION §6.7)" / "(CONSTITUTION.md — Non-English Reference Material in Skills)" with "(workspace English-only doc policy, non-Markdown reference asset exemption)" — no L0 doc pointer.
-    3. Optionally extend the propagation stripper (merge-frontmatter.ts) to scrub CONSTITUTION.md path references from delivered non-frontmatter content, with a drift check so future L1 content cannot re-introduce them.
-  repro: |-
-    Survey performed 2026-11-13 in a project scaffolded from templates/co-consult:
-    1. `grep -rln "CONSTITUTION" --include="*.md" --include="*.ts" --include="*.json"` → 79 files total. Categories: 19 delivered scripts (validate-md-language.ts, validate-skills.ts, validate-templates.ts, validate-surface-registry.ts, validate-model-registry.ts, verify-scripts.ts, audit.ts, dev-sync.ts, qa-gate.ts, agent-*.ts, gen-pr-body.ts, generate-skill-graph.ts, lifecycle audits), 7 skill SSOT reference JSONs (skills/k-opendata, k-kosis, k-krx, k-ecos, k-dart, k-law, company-intelligence → references/terms-ko.json `_note` fields citing "CONSTITUTION §6.7"), 21 platform mirror copies of those JSONs (.claude/.gemini/.agents/skills/...), plus CODEX.md/HERMES.md body references.
-    2. Origin confirmed in L1: `templates/common/scripts/validate-md-language.ts` and `templates/common/skills/k-opendata/references/terms-ko.json` contain the identical CONSTITUTION.md references.
-    3. Concrete user-facing failure: running `bun scripts/dev-sync.ts` in the project, a language-gate failure prints "See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content" — CONSTITUTION.md is an L0 workspace-root document and does not exist in the project checkout, so the pointer is dead for every project user.
-    4. Rule conflict: CONSTITUTION.md §7.5 (Non-Propagation) states L1/L2 must not reference CONSTITUTION.md, and merge-frontmatter.ts strips CONSTITUTION.md lines from L2 output — but the stripping evidently covers only frontmatter/managed blocks, not script strings or skill reference notes, so 79 references survive delivery.
-  triage: inbox
+  local_workaround_diff: >-
+    Reference only — none applied (user ruling: ticket-only resolution;
+    L1-delivered core scripts are L2-patch-forbidden per the core script
+    standardization rule). Proposed direction for the workspace PM at L1:
+
+    1. In templates/common scripts (validate-md-language.ts and the 18 other
+    scripts referencing CONSTITUTION.md): replace the L0 path pointer in
+    user-facing output with project-safe wording, e.g. "See the workspace
+    language policy (CONSTITUTION.md, workspace root)" only in L0 contexts, or
+    drop the pointer entirely: "[FAIL] Language validation: Korean-only markdown
+    files detected — policy: official documents are English; Korean exception
+    requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun'
+    frontmatter."
+
+    2. In templates/common skills' references/terms-ko.json _note fields:
+    replace "(CONSTITUTION §6.7)" / "(CONSTITUTION.md — Non-English Reference
+    Material in Skills)" with "(workspace English-only doc policy, non-Markdown
+    reference asset exemption)" — no L0 doc pointer.
+
+    3. Optionally extend the propagation stripper (merge-frontmatter.ts) to
+    scrub CONSTITUTION.md path references from delivered non-frontmatter
+    content, with a drift check so future L1 content cannot re-introduce them.
+  repro: >-
+    Survey performed 2026-11-13 in a project scaffolded from
+    templates/co-consult:
+
+    1. `grep -rln "CONSTITUTION" --include="*.md" --include="*.ts"
+    --include="*.json"` → 79 files total. Categories: 19 delivered scripts
+    (validate-md-language.ts, validate-skills.ts, validate-templates.ts,
+    validate-surface-registry.ts, validate-model-registry.ts, verify-scripts.ts,
+    audit.ts, dev-sync.ts, qa-gate.ts, agent-*.ts, gen-pr-body.ts,
+    generate-skill-graph.ts, lifecycle audits), 7 skill SSOT reference JSONs
+    (skills/k-opendata, k-kosis, k-krx, k-ecos, k-dart, k-law,
+    company-intelligence → references/terms-ko.json `_note` fields citing
+    "CONSTITUTION §6.7"), 21 platform mirror copies of those JSONs
+    (.claude/.gemini/.agents/skills/...), plus CODEX.md/HERMES.md body
+    references.
+
+    2. Origin confirmed in L1:
+    `templates/common/scripts/validate-md-language.ts` and
+    `templates/common/skills/k-opendata/references/terms-ko.json` contain the
+    identical CONSTITUTION.md references.
+
+    3. Concrete user-facing failure: running `bun scripts/dev-sync.ts` in the
+    project, a language-gate failure prints "See: CONSTITUTION.md — Language
+    Policy Exception — Korean Legal/Regulatory Content" — CONSTITUTION.md is an
+    L0 workspace-root document and does not exist in the project checkout, so
+    the pointer is dead for every project user.
+
+    4. Rule conflict: CONSTITUTION.md §7.5 (Non-Propagation) states L1/L2 must
+    not reference CONSTITUTION.md, and merge-frontmatter.ts strips
+    CONSTITUTION.md lines from L2 output — but the stripping evidently covers
+    only frontmatter/managed blocks, not script strings or skill reference
+    notes, so 79 references survive delivery.
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
@@ -46,8 +103,10 @@ upstream:
     - info:in_last_delivery scripts/dev-sync.ts=true
     - info:in_last_delivery scripts/audit.ts=true
     - info:in_last_delivery skills/k-opendata/references/terms-ko.json=false
-    - info:in_last_delivery skills/company-intelligence/references/terms-ko.json=false
+    - >-
+      info:in_last_delivery
+      skills/company-intelligence/references/terms-ko.json=false
   dedupe_key: fb58676dc1fed21b61757d06f0337c878072df6d892f74f0dfddbc7437a07181
   duplicates:
     - project: co-consult
-      at: 2026-11-13T22:03:30.920+09:00
+      at: '2026-11-13T22:03:30.920+09:00'
