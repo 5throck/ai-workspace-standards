@@ -908,7 +908,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `design-lead` | agent | version-drift | co-architect@1.1.1 #b5fbb388; co-design@1.1.1 #354436e5 |
 | `designer` | agent | version-drift | co-develop@1.1.1 #d0d0220c; co-game@1.1.1 #cf752c0d |
 | `devops-admin` | agent | divergence | co-abap@1.1.2 #59a99f2f; co-price@2.2.1 #20aad471 |
-| `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; common@1.3.2 #e0bd9ada |
+| `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; co-security@1.1.2 #7e665ada; common@1.3.2 #e0bd9ada |
 | `ms365-expert` | agent | version-drift | co-architect@1.1.1 #d66a2884; co-work@1.1.1 #a594ed3b |
 | `pm` | agent | divergence | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.3 #9264b767; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.4 #6e05a2a4; root@1.3.0 #2340c4b8 |
 | `project-coordinator` | agent | version-drift | co-architect@1.1.1 #ea0ba5e1; co-work@1.1.1 #ef8c8cfa |
@@ -940,7 +940,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | Type | Count | Nodes |
 |------|-------|-------|
 | adr | 57 | (expected until docs `references` edges are mined) |
-| agent | 11 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, root/skill-graph-analyst |
+| agent | 12 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, co-security/i18n-specialist, root/skill-graph-analyst |
 | decision | 31 | (expected until docs `references` edges are mined) |
 | skill | 1 | root/trail |
 

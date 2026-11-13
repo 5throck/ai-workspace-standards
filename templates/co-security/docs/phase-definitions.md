@@ -53,7 +53,7 @@ This document defines the workflow phases used by the `co-security` variant. It 
 ### Phase 4 — Remediation
 **PM coordinates**: remediation is delivered against confirmed findings.
 - `patch-engineer` (Tier: Medium, optional) develops remediation scripts and Ansible playbooks, and deploys cross-platform patches
-- Optional: skipped for report-only engagements where remediation is out of scope (per `variant.json → agent_manifest.optional`)
+- Optional: skipped for report-only engagements where remediation is out of scope (roster membership in `variant.json → agents`; the skip itself is an engagement-scope ruling made at the Phase 0 authorization gate, phase assignment per `AGENTS.md §3.5`)
 - **Output**: applied remediations logged to `PATCH_LOG.md`
 
 ### Phase 5 — Reporting & Lifecycle Finalization
@@ -70,7 +70,7 @@ This document defines the workflow phases used by the `co-security` variant. It 
 - `report-writer` performs final QA pass on report accuracy and CVSS scoring
 - PM runs `project-review` skill (use `baseline-only` mode for docs/link validation)
 - Maximum 2 fix iterations before escalating to user
-- PM dispatches the `/sync` pipeline to `automation-engineer` and verifies the landing (PR URL, CI state, committed files)
+- PM runs `/sync` pipeline
 - PR opened with English title and description
 - Memory log updated
 - **Output**: passing audit report, closed findings confirmed, merged PR or open PR link
@@ -88,8 +88,9 @@ Per each agent's phase assignment in `templates/co-security/AGENTS.md §1` and `
 | `pentester` | 3, 6 | Medium | No |
 | `patch-engineer` | 4, 6 | Medium | Yes |
 | `report-writer` | 5, 6 | Medium | No |
+| `i18n-specialist` | 5 | Medium | Yes (engagement-optional; DEC-20261112-01) |
 
-`patch-engineer` is declared optional in `variant.json → agent_manifest.optional` ("skip for report-only engagements where remediation is out of scope").
+`patch-engineer` is listed in the variant roster (`variant.json → agents`; there is no per-agent `optional` flag in `variant.json`). Its optionality is an engagement-scope decision ("skip for report-only engagements where remediation is out of scope") applied at the Phase 0 authorization gate and recorded in the Agent-to-Phase table above.
 
 ---
 
