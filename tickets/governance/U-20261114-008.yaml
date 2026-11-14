@@ -1,0 +1,44 @@
+schemaVersion: 1
+id: U-20261114-008
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-14T11:08:26.867+09:00
+history:
+  - at: 2026-11-14T11:08:26.867+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'Promotion request (precedent: U-20261114-006 script promotion). Session 2026-11-14 produced three template-worthy fixes that currently live only in this project: (1) zen x white-bubble in-card visual flex-shrink rules + retirement of the whack-a-mole "fix f" per-slide ID caps in white-bubble style.css — the systemic fix for the 39/90-slide title/source clipping defect (root pattern already reported as U-20261114-007; the deck-local !important neutralizer must move into the shared patch injector or style.css, otherwise any deck rebuild loses the neutralizer while fix-f caps survive); (2) video-slide poster thumbnail minimum-resolution acceptance rule (>=1280px wide, maxresdefault/hq720 class) — the video injector and download pipeline should enforce or warn, plus video-manifest.json schema promotion from v0 provisional; (3) gen-slides-pdf.ts profile-type background parity fix (slideData.backgroundImage must render full-bleed on every slide type; fix applied locally today, test verification pending at filing time); (4) the forced-load render-clip verification method (img eager+decode, then scrollHeight-clientHeight scan over all slides) as a documented lint/skill step for html-build, since transient lazy-load states mask the defect in naive scans.'
+  affected_paths:
+    - tests/patch-zen-white-bubble.ts
+    - docs/html-themes/styles/white-bubble/style.css
+    - scripts/co-deck/gen-slides-pdf.ts
+    - .agents/skills/html-build/SKILL.md
+    - deliverables/assets/videos/video-manifest.json
+  identity_source: cwd
+  repro: '1. Build a new zen x white-bubble deck in any project: the flex-shrink clip fix and the fix-f neutralizer exist only in this project''s tests/patch-zen-white-bubble.ts and deck-local HTML patches — every OTHER project built from templates/co-deck reproduces the 39-slide clipping defect (see U-20261114-007 for the shared-CSS root pattern). 2. Any deck swapping YouTube videos: no enforced minimum resolution for video-slide poster thumbnails — a 480x360 hqdefault stretched full-bleed was shipped to production in deliverables/2026-11-ai-era-business-survival before manual review caught it. 3. PDF export of a deck whose profile-type slideData entry carries backgroundImage: renderer draws the warm-paper fallback instead of the photo (observed on deliverables/2026-11-ai-era-business-survival PDF page 2; all other 11 background slide types render correctly).'
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: tests/patch-zen-white-bubble.ts'
+    - 'path_not_template_managed: deliverables/assets/videos/video-manifest.json'
+    - info:in_last_delivery tests/patch-zen-white-bubble.ts=false
+    - info:in_last_delivery docs/html-themes/styles/white-bubble/style.css=true
+    - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=false
+    - info:in_last_delivery .agents/skills/html-build/SKILL.md=false
+    - info:in_last_delivery deliverables/assets/videos/video-manifest.json=false
+  dedupe_key: 8247f0938c374d894f837df39d96840ac164f567cc4e60d631d7cc81e53257f9
+  duplicates:
+    - project: co-deck
+      at: 2026-11-14T11:08:26.867+09:00
