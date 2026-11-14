@@ -1,0 +1,55 @@
+schemaVersion: 1
+id: T-20261114-005
+kind: manual
+title: >-
+  upgrade-project --disposition has three limits that make a partial adopt
+  impossible on a multi-conflict project: (a) only the LAST --disposition flag
+  is honoured (applyDispositionArg, scripts/upgrade-project.ts:1583, assigns the
+  single module-level disposition binding, so repeated flags silently overwrite
+  each other even though --tombstone already accepts repeats); (b) globToRegExp
+  (scripts/lib/upgrade-policy.ts:2007) escapes braces and pipes, so {a,b}
+  alternation and comma lists never match; (c) every apply run starts with git
+  stash push -u (upgrade-project.ts:2318-2321) after preUpgradeDirty was
+  captured, so running single-file adopt-template=<file> grants in sequence
+  stashes the previous run's uncommitted adoption and re-classifies that file as
+  CONFLICT/MARKER_LOSS again. Reproduced on a throwaway local clone of
+  Projects/co-security at 7cefe7b (engine from origin/main 70dd5d582): run 1
+  plain --yes exit 1 (AGENTS.md MARKER_LOSS plus agents/i18n-specialist.md
+  CONFLICT); run 2 adopt-template=AGENTS.md exit 1 (AGENTS.md adopted, i18n
+  skipped, 1 stash); run 3 adopt-template=agents/i18n-specialist.md exit 1 (i18n
+  adopted but AGENTS.md markers reset to committed, 2 stashes). The set never
+  converges, a stash entry is left per run, and the only exit-0 path is a
+  blanket adopt-template that also adopts unwanted files
+  (docs/workspace-schema.json); field: co-security PR #112 session, 4
+  single-file runs all exit 1. Impact: the sanctioned selective-adopt recovery
+  path is unusable when 2+ files conflict, pushing operators to blanket adopt
+  (data-loss risk for project-evolved files) or hand merging; co-learning
+  (T-20261114-002/-003) will hit the same wall. Note: --dry-run does not write
+  to the project tree (verified, tree and stash unchanged), so this reproduction
+  needs real apply runs on a scratch clone. Proposed fix: (1) make --disposition
+  repeatable (dispositionGrants[], OR semantics, bare adopt-template remains
+  all); (2) support {a,b} alternation and comma lists inside one value, keeping
+  * ** ? semantics; (3) convergence: when the tree is dirty with a previous
+  run's delivery (.claude/last-upgrade-delivery.json modified/untracked) either
+  refuse with a clear message (commit or stash the previous run, or pass all
+  grants in one run) or skip the pre-upgrade stash for paths in the previous
+  manifest, and print the stash name at the end of a conflicted run; (4) update
+  usage text plus a two-file conflict fixture. Acceptance: --disposition
+  adopt-template=A --disposition adopt-template=B adopts exactly A and B with
+  both grants in the decision rows; adopt-template={A,B} and the comma list are
+  equivalent with docs/workspace-schema.json untouched; the sequential per-file
+  flow either reaches exit 0 or refuses explicitly (no silent un-adopt);
+  existing single-glob tests unchanged. Relations: T-20261027-004 (archived
+  original feature), U-20261113-007, U-20261113-011, T-20261114-002,
+  T-20261114-003, design docs/designs/2026-10-27-sync-overwrite-policy-design.md
+  section 6.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:28.960+09:00'
+history:
+  - at: '2026-11-14T18:12:28.960+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

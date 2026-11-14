@@ -1,0 +1,48 @@
+schemaVersion: 1
+id: T-20261114-006
+kind: manual
+title: >-
+  dev-sync flattens the commit message to one line, so commit bodies and
+  trailers can never be recorded through the mandated /sync path:
+  scripts/dev-sync.ts:578-585 joins every non-flag arg with a space then
+  collapses newlines/tabs and whitespace (msgArgs.join(" ") then
+  .replace(/[\r\n\t]+/g," ")), and commits with a single git commit -m ${msg}
+  (dev-sync.ts:2483); the same flattened string feeds the PR title. Observed: a
+  Co-Authored-By trailer passed on the command line lands on the SUBJECT line
+  (co-security PR #112 commit 97230ff: subject ends with 'Co-Authored-By: Claude
+  Sonnet 5.5 <noreply@anthropic.com>'), and when only the subject is passed the
+  trailer is never present. OWNER DECISION NEEDED (not a violated rule): the
+  repo has NO rule requiring a Co-Authored-By trailer (absent from CLAUDE.md,
+  AGENTS.md, CONSTITUTION.md, docs/constitution, .githooks,
+  skills/sync/SKILL.md, scripts/helpers/commit-message.ts; 0 of the last 300
+  commits on origin/main carry one, re-verified on fcbee7f78); the request comes
+  from tool/harness attribution guidance in agent sessions, an external
+  convention. The owner decides whether the repo should adopt a trailer
+  convention; if yes, dev-sync must support it, if no, agents should stop
+  appending it. Independent of that decision, any multi-line body is currently
+  lost; .githooks/commit-msg already reads subject (head -1) and body (tail -n
+  +2) separately, so multi-paragraph messages are supported downstream. Proposed
+  fix if a body/trailer convention is adopted: keep subject = first line
+  collapsed (safe for gh --title), preserve text after the first blank line as
+  the body and commit with git commit -m subject -m body (or -F tempfile); add a
+  repeatable --trailer 'Key: value' arg (optionally env SYNC_COMMIT_TRAILERS)
+  appended as the final paragraph and never entering the PR title; extract the
+  pure builder into scripts/helpers/commit-message.ts with unit tests (subject
+  only, subject+body, subject+trailer, CRLF). Acceptance: bun
+  scripts/dev-sync.ts --trailer 'Co-Authored-By: X <x@y>' 'feat: msg' yields %s
+  = 'feat: msg', trailer present in %(trailers), PR title 'feat: msg'; a
+  multi-line argument keeps its body; language gate and weak-message derivation
+  still apply to the subject. Priority low: cosmetic for history until the owner
+  adopts a convention. Relations: T-20261024-001, T-20261028-012; observed
+  across the 2026-11 fleet upgrade session (root PRs #2012-#2031, co-security
+  #112).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:28.993+09:00'
+history:
+  - at: '2026-11-14T18:12:28.993+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,61 @@
+schemaVersion: 1
+id: T-20261114-007
+kind: manual
+title: >-
+  dev-sync scoped staging can open a PR that contains none of the intended edits
+  (and the unexplained co-security #112 CLAUDE.md omission is a related
+  symptom). Context: scoped staging is the DEFAULT since dev-sync v1.23.0
+  (archived T-20261001-015, PR #1298); SYNC_SCOPED_STAGING=1 and
+  --scoped-staging are accepted no-ops, SYNC_SCOPED_STAGING=0 / --warn-staging
+  restores the old sweep-in behaviour, so the exclusion is intended and this
+  ticket is about the opposite failure mode. Step 6.5 (scripts/dev-sync.ts,
+  classification near :2257-2283, warn-only branch near :2285-2301, the
+  'Scoped-staging check' WARN) computes committable = taskStaged U
+  pipelineOutputs and leaves residual (neither pre-staged nor
+  pipeline-generated) OUT of the commit with only a yellow WARN; there is no
+  exit path keyed on taskStaged being empty. When the operator forgot git add,
+  the pipeline still commits, pushes and opens a PR holding only generated
+  outputs (memory log, CHANGELOG, VERSION_MANIFEST, skill-graph) with a
+  plausible 'chore: workspace sync (N files)' subject from composeCommitMessage
+  (derived from the final staged set), passing the language and pre-push gates.
+  Field: root PRs #2009, #2010 and #2025 shipped that way (operator-reported)
+  and cost three PRs under the one-open-root-PR rule. Folded-in related symptom
+  (PR-specific proof unavailable, no transcript retained): co-security PR #112
+  commit 97230ff (15 files, none CLAUDE.md) although the engine logged 'MERGE:
+  CLAUDE.md' / 'MERGED COMMON-CLAUDE block'. Minimal repro on a scratch clone of
+  Projects/co-security at 7cefe7b with the engine from origin/main: bun
+  scripts/upgrade-project.ts <clone> --yes (exit 1) leaves 'M CLAUDE.md' whose
+  diff is exactly one line, the managed block footer '*Last Updated: 2026-11-13
+  ...*' moved BACKWARDS to 2026-11-12 (project commit 1f94682 carries
+  2026-11-13, templates/common/CLAUDE.md carries 2026-11-12); a file dirty at S0
+  and unchanged by the pipeline is residual and, unless explicitly git added, is
+  left out with only the WARN. So two mechanisms interact: COMMON-CLAUDE merge
+  has no never-move-Last-Updated-backwards rule (engine nit), and scoped staging
+  hides engine-written tracked files. Proposed fix: (1) guard: if taskStaged is
+  empty AND residual contains at least one tracked modified/deleted/renamed path
+  (porcelain M/D/R, not untracked scratch) exit 1 with the list and the ways
+  forward (git add <paths>, or --stage <paths>, or --allow-generated-only);
+  relax for known delivery/closeout callers that intentionally present an empty
+  index (see comments near dev-sync.ts:2246-2250 and :2400-2406); (2) new
+  repeatable --stage <path|glob> flag staging paths before the snapshot so the
+  declared set is part of taskStaged; (3) keep untracked scratch residual as
+  WARN only; (4) document in skills/sync/SKILL.md which invocation classes may
+  run with an empty index; (5) optional tiny engine nit: keep the newer Last
+  Updated date in the COMMON-CLAUDE merge so a no-op delivery produces no
+  CLAUDE.md change. Acceptance: fixture with a tracked unstaged edit and empty
+  index makes dev-sync exit 1 before commit or push; same with --stage <file>
+  commits the file; delivery/closeout callers unchanged; the existing
+  scoped-staging cases (9, T-20261001-015) stay green; with the guard, an
+  engine-modified tracked file that is not staged can no longer be omitted
+  silently. Relations: T-20261001-015 (archived), U-20261107-003 (v1.43.0
+  overlap classification), U-20261006-006.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:29.029+09:00'
+history:
+  - at: '2026-11-14T18:12:29.029+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
