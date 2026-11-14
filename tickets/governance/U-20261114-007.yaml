@@ -1,0 +1,46 @@
+schemaVersion: 1
+id: U-20261114-007
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-14T10:13:47.862+09:00
+history:
+  - at: 2026-11-14T10:13:47.862+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'The zen x white-bubble pairing renders 39/90 standard slides with clipped content after in-card visuals load: .slide-content (flex column, justify-content:center, overflow:hidden, max-height calc(100% - 1rem)) overflows by 5-56px because img.zen-visual sits at a fixed max-height cap (42vh) that does not shrink when the title+bullets stack is tall; title top and source line bottom are cut symmetrically. Root pattern is in the shared, template-managed white-bubble style.css: (1) the U-20261114-002 ported override block hard-codes a deck-wide 42vh cap sized for one deck; (2) "fix f" per-slide caps (#slide-2/#slide-11/#slide-13/#slide-17/#slide-20/#slide-27/#slide-28/#slide-30/#slide-31/#slide-32/#slide-35/#slide-37/#slide-43/#slide-49/#slide-52 at 24-36vh) are authored against that deck''s DOM slide numbering and silently bind to different slides in every other zen x white-bubble deck, where they are both ineffective (wrong slides) and harmful (wrongly shrink slides that would fit, and do nothing for the deck''s real dense slides).'
+  affected_paths:
+    - docs/html-themes/styles/white-bubble/style.css
+    - tests/patch-zen-white-bubble.ts
+    - docs/html-themes/themes/zen/theme.css
+  identity_source: cwd
+  local_workaround_diff: |-
+    Deck-local inline patch (lecture HTML) + patch injector change, pattern only:
+    - [data-theme="zen"] .slide-card .zen-visual-wrap gains: flex: 0 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
+    - [data-theme="zen"] .slide .zen-visual: max-height changed 42vh -> min(42vh, 100%); margin: 0 auto;
+    - title/.bullets-container/.zen-visual-caption/.zen-visual-source get flex-shrink: 0 so only the visual absorbs a deficit
+    - deck-local neutralizer for the inherited ID caps (deck HTML only): [data-theme="zen"] .slide .zen-visual { max-height: min(42vh, 100%) !important; } with a LOCAL-PATCH comment
+    Post-fix measured: 39/90 clipped slides -> 0/90 (forced image load, scrollHeight-clientHeight scan, 1280x720); sparse slides unchanged (agenda visual stays 174px).
+  repro: '1. Build any zen x white-bubble deck whose dense standard slides (title + 4-5 bullets + in-card diagram) differ in slide count/numbering from 2026-11-open-innovation-keynote. 2. Serve over HTTP, open at 1280x720, force-load all img.zen-visual (loading=eager + decode). 3. Measure document.querySelectorAll(''.slide-content'') scrollHeight - clientHeight: slides with tall text stacks clip (observed 39/90 slides, 5-56px, title ascenders and .zen-visual-source cut symmetrically because .slide-content uses justify-content:center with overflow:hidden). 4. Additionally, style.css fix-f ID caps bind to the wrong slides of the new deck (e.g. #slide-13 cap 36vh applies to an unrelated dense slide).'
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: tests/patch-zen-white-bubble.ts'
+    - info:in_last_delivery docs/html-themes/styles/white-bubble/style.css=true
+    - info:in_last_delivery tests/patch-zen-white-bubble.ts=false
+    - info:in_last_delivery docs/html-themes/themes/zen/theme.css=false
+  dedupe_key: 8fadd532d98023459ef54d4858439776482b3add0acc812891707d1bc3ba9ec3
+  duplicates:
+    - project: co-deck
+      at: 2026-11-14T10:13:47.862+09:00

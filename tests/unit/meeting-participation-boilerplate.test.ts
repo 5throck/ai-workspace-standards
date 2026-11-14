@@ -84,8 +84,8 @@ const EXPECTED_NEW_COUNTS = {
   rootAgents: 6,
   templateAgents: 107, // 13 dirs incl. templates/common/agents (CA-2+AE-2: +4 common agents, -1 co-architect automation-engineer folded into the common agent)
   generatedMirrors: 16, // templates/co-architect/.claude/agents (CA-2+AE-2: -1, its automation-engineer mirror removed with the folded agent)
-  projectAgents: 169, // Projects/<16 repos>/agents — post-project-phase pin (recounted 2026-11-14: +8 from the 11-13 sessions' legitimate agent additions — sync-ownership + common-agents waves; stale count verified 0 at the same recount)
-  projectMirrors: 139, // Projects/<16 repos>/.claude/agents (recounted 2026-11-14: +4 same waves)
+  projectAgents: 209, // Projects/<16 repos>/agents — post-project-phase pin (recounted 2026-11-14: live-session agent additions across co-newbiz/co-deck/co-consult; stale verified 0)
+  projectMirrors: 179, // Projects/<16 repos>/.claude/agents (recounted 2026-11-14: same waves)
 };
 
 /**

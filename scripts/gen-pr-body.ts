@@ -3,7 +3,7 @@
  * gen-pr-body.ts - Generate a structured PR body from commit message + diff
  * Usage: bun run scripts/gen-pr-body.ts "<commit message>"
  * Output: PR body markdown (stdout)
- * @version 1.2.0
+ * @version 1.2.1
  *
  * Behaviour:
  *   Builds a structured template PR body from the commit message + file list.
@@ -31,7 +31,7 @@ if (!commitMsg) {
 // (workspace root) or docs/context.md §3 (variant projects, which omit CONSTITUTION.md).
 // Detection (Korean/Japanese/Chinese) lives in scripts/lib/language-guard.ts, shared
 // with dev-sync.ts and pre-commit.ts so the three enforcement points can't drift.
-const LANGUAGE_POLICY_REF = existsSync("CONSTITUTION.md") ? "CONSTITUTION.md §3" : "docs/context.md §3";
+const LANGUAGE_POLICY_REF = existsSync("CONSTITUTION.md") ? "CONSTITUTION.md §3" : "docs/context.md §3"; // l0-functional: root detection
 
 function validateLanguage(text: string, label = "PR body"): void {
   if (hasNonEnglish(text)) {

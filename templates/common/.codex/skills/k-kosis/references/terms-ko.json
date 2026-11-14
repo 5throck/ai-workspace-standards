@@ -1,5 +1,5 @@
 {
-  "_note": "Korean-original KOSIS terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. Seed file: service/parameter vocabulary from the official KOSIS Open API docs as recorded in SKILL.md; table-code entries await live verification with a real KOSIS_API_KEY and are marked accordingly.",
+  "_note": "Korean-original KOSIS terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (workspace English-only doc policy, non-Markdown reference asset exemption). SKILL.md stays English-only and links here. Seed file: service/parameter vocabulary from the official KOSIS Open API docs as recorded in SKILL.md; table-code entries await live verification with a real KOSIS_API_KEY and are marked accordingly.",
   "version": "0.1.0",
   "verified": "2026-08-22",
   "service_names": {

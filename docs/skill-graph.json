@@ -8798,7 +8798,7 @@
       "scope": "root",
       "capability": "finishing-a-development-branch",
       "content_hash": "7aa95cd39dce01f1",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "mirrors": [
         "skills/finishing-a-development-branch/SKILL.md",
         "templates/common/skills/finishing-a-development-branch/SKILL.md",
@@ -8927,7 +8927,7 @@
       "scope": "root",
       "capability": "platform-skill-lifecycle-manager",
       "content_hash": "08e425f43401cabc",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "mirrors": [
         "skills/platform-skill-lifecycle-manager/SKILL.md",
         "templates/common/skills/platform-skill-lifecycle-manager/SKILL.md",

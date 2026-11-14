@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-13T23:25:57.786Z
+**Generated**: 2026-11-14T02:05:21.007Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -51,7 +51,7 @@
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
 | evidence-ledger | 1.1.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
 | explain-me | 1.0.1 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
-| finishing-a-development-branch | 1.0.1 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
+| finishing-a-development-branch | 1.0.2 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.2 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | handbook | 0.6.0 | active | templates/common/skills/handbook/SKILL.md | common | make handbook, create handbook, build course site, companion handbook, update handbook, handbook sync, handbook maintenance | pm |
 | handbook-sync-audit | 1.0.5 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | audit handbook, handbook parity check, handbook sync audit, textbook drift check | pm |
@@ -70,7 +70,7 @@
 | model-migration | 1.0.0 | active | skills/model-migration/SKILL.md | workspace | model-migration, change model, model bump, `모델 변경` | lifecycle-manager |
 | new-project | 1.0.0 | active | skills/new-project/SKILL.md | workspace | new project, create project, scaffold project, project from template, start a new engagement | scaffolding-expert |
 | platform-command-lifecycle-manager | 1.0.3 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
-| platform-skill-lifecycle-manager | 1.0.2 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
+| platform-skill-lifecycle-manager | 1.0.3 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
 | project-resync | 1.8.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
 | project-review | 1.3.2 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
@@ -106,14 +106,14 @@
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
 | adopt-project.ts | 1.6.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
-| agent-create.ts | 1.0.1 | scripts/agent-create.ts | fs, path |
-| agent-delete.ts | 1.0.1 | scripts/agent-delete.ts | fs, path |
+| agent-create.ts | 1.0.2 | scripts/agent-create.ts | fs, path |
+| agent-delete.ts | 1.0.2 | scripts/agent-delete.ts | fs, path |
 | agent-lifecycle-audit.ts | 1.9.1 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
 | agent-list.ts | 1.1.0 | scripts/agent-list.ts | fs, path |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.1.0 | scripts/archive-memory.ts | fs, path |
-| audit.ts | 2.66.1 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
+| audit.ts | 2.67.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
 | backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
@@ -129,7 +129,7 @@
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
-| dev-sync.ts | 1.47.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| dev-sync.ts | 1.48.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |
@@ -139,7 +139,7 @@
 | fix-script-versions.ts | 1.1.1 | scripts/fix-script-versions.ts | fs, path |
 | fleet-list.ts | 1.0.0 | scripts/fleet-list.ts | path |
 | fleet-script-parity.ts | 1.2.0 | scripts/fleet-script-parity.ts | crypto, fs, path |
-| gen-pr-body.ts | 1.2.0 | scripts/gen-pr-body.ts | bun, fs |
+| gen-pr-body.ts | 1.2.1 | scripts/gen-pr-body.ts | bun, fs |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | fs, path |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-raci.ts | 1.2.0 | scripts/generate-raci.ts | fs, js-yaml, path |
@@ -217,7 +217,7 @@
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
-| validate-md-language.ts | 1.16.1 | scripts/validate-md-language.ts | child_process, fs, path |
+| validate-md-language.ts | 1.16.2 | scripts/validate-md-language.ts | child_process, fs, path |
 | validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | fs, path, url |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | child_process, fs, path |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | fs, js-yaml, path |
@@ -225,7 +225,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
-| validate-templates.ts | 1.81.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
+| validate-templates.ts | 1.82.0 | scripts/validate-templates.ts | child_process, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |

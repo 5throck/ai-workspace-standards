@@ -1,4 +1,10 @@
-// @version 2.66.1
+// @version 2.67.0
+// v2.67.0 (2026-11-14, spec docs/designs/2026-11-14-consult-output-destination-and-constitution-refs-ruling.md
+//          §5-item4, U-20261113-010): L0 Leakage scan-scope extension — .ts and .json under templates/
+//          join the sweep at WARN severity (soak-before-FAIL). .ts lines carrying the l0-functional:
+//          marker are exempt (functional root-detection guards); .json files in the functional-registry
+//          exemption set (workspace-schema.json, propagation-map.json) are skipped. The .md arm keeps
+//          ERROR severity unchanged.
 // v2.66.1 (2026-11-12, U-20261112-007): the --spec-exempt comment and the invalid-code error message
 //          cited "AGENTS.md §5.1.1"; the Design Gate exemption categories now live in
 //          docs/governance/agents/execution-plan-templates.md §5.1.1. Strings only, no behavior change.
@@ -3359,6 +3365,49 @@ if (!LIFECYCLE_ONLY && fs.existsSync("templates")) {
   checkLeakage("templates");
   if (leakageErrors === 0) {
     Pass("L0 Leakage check: no unauthorized CONSTITUTION references in templates");
+  }
+
+  // v1.107.0 (2026-11-14, spec docs/designs/2026-11-14-consult-output-destination-and-constitution-refs-ruling.md
+  //          §5-item4, U-20261113-010): scan-scope extension — .ts and .json under templates/ join the
+  //          L0 Leakage sweep (WARN severity first per the ruling's soak-before-FAIL posture). .ts lines
+  //          carrying the l0-functional: marker are exempt (functional root-detection guards);
+  //          .json files in the functional-registry exemption set are skipped (their context.md
+  //          values are read by code). The .md arm above keeps its ERROR severity.
+  const codeLeakWarn = (msg: string) => {
+    Warn(`L0 Leakage (code/json scan): ${msg}`);
+  };
+  const CODE_SKIP_DIRS = new Set(["node_modules", ".git", ".bun"]);
+  const JSON_FILE_EXEMPT = new Set(["workspace-schema.json", "propagation-map.json"]);
+  const functionalMarker = /\/\/ l0-functional:/;
+  let codeLeakWarns = 0;
+  const walkCodeLeak = (dir: string): void => {
+    for (const item of fs.readdirSync(dir)) {
+      const itemPath = path.join(dir, item);
+      const stat = fs.statSync(itemPath);
+      if (stat.isDirectory()) {
+        if (CODE_SKIP_DIRS.has(item)) continue;
+        const dirName = path.basename(itemPath);
+        if (dirName.startsWith("co-") && !isCoVariantTracked(dirName)) continue;
+        walkCodeLeak(itemPath);
+      } else if (stat.isFile() && (itemPath.endsWith(".ts") || itemPath.endsWith(".json"))) {
+        const content = readUTF8File(itemPath);
+        const isJson = itemPath.endsWith(".json");
+        for (const { lineNo, line } of findL0LeakLines(content)) {
+          if (isJson && JSON_FILE_EXEMPT.has(path.basename(itemPath))) continue;
+          if (functionalMarker.test(line)) continue;
+          codeLeakWarn(
+            `${itemPath}:${lineNo} carries an unannotated CONSTITUTION reference (WARN soak — annotate with // l0-functional: if functional, or remove the reference)`,
+          );
+          codeLeakWarns++;
+        }
+      }
+    }
+  };
+  for (const root of ["templates"]) {
+    if (fs.existsSync(root)) walkCodeLeak(root);
+  }
+  if (codeLeakWarns === 0) {
+    Pass("L0 Leakage code/json extension: no unannotated CONSTITUTION references under templates");
   }
 }
 

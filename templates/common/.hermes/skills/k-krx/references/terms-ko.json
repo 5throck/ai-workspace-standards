@@ -1,5 +1,5 @@
 {
-  "_note": "Korean-original KRX Data Marketplace OPEN API terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. All API IDs and coverage dates scraped from the live portal service catalog/detail pages on 2026-09-11.",
+  "_note": "Korean-original KRX Data Marketplace OPEN API terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (workspace English-only doc policy, non-Markdown reference asset exemption). SKILL.md stays English-only and links here. All API IDs and coverage dates scraped from the live portal service catalog/detail pages on 2026-09-11.",
   "version": "1.0.0",
   "verified": "2026-09-11",
   "category_names": {

@@ -1,7 +1,7 @@
 ---
 name: platform-skill-lifecycle-manager
 status: active
-version: 1.0.2
+version: 1.0.3
 description: >
   Manages the creation, versioning, and propagation of platform skills
   in .claude/skills/ and .gemini/skills/ directories. Use when: creating new platform skills,
