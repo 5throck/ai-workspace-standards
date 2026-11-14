@@ -13,9 +13,6 @@
       "Bash(bun run agent:verify *)",
       "Bash(bun scripts/validate-templates.ts *)",
       "WebSearch(*)",
-      "Bash(curl -sI *)",
-      "WebFetch(*)",
-      "Bash(node dist/cli.js:*)",
       "Bash(trail:*)"
     ]
   },
