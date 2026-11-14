@@ -11,12 +11,9 @@
       "Bash(bun scripts/audit.ts *)",
       "Bash(bun scripts/lifecycle-sync-audit.ts *)",
       "Bash(bun run agent:verify *)",
-      "Bash(curl -sI *)",
       "Bash(bun scripts/validate-templates.ts *)",
       "WebSearch(*)",
-      "WebFetch(*)",
-      "Bash(trail:*)",
-      "Bash(node dist/cli.js:*)"
+      "Bash(trail:*)"
     ]
   },
   "env": {
@@ -146,9 +143,7 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [],
-    "Stop": []
+    ]
   },
   "worktree": {
     "bgIsolation": "none"
