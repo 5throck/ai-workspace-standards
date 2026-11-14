@@ -1,0 +1,64 @@
+schemaVersion: 1
+id: T-20261114-012
+kind: manual
+title: >-
+  Variants that shadow common files wholesale have no drift guard: a later edit
+  to templates/common/<path> never reaches a variant copy that replaced it, and
+  no validator reports divergence. Enumeration on origin/main fcbee7f78 (compare
+  relative paths under templates/common, 1013 files, against each
+  templates/co-*, byte comparison): files present in both and byte-different per
+  variant: co-abap 19, co-architect 17, co-consult 29, co-deck 29, co-design 58,
+  co-develop 27, co-export 12, co-game 27, co-hr 27, co-learning 13, co-news 12,
+  co-price 31, co-safety 63, co-security 27, co-work 36 (identical copies 2-11
+  each). Most are expected per-variant content (present in all 15: README.md,
+  README_ko.md, HERMES.md, AGENTS.md, agents/pm.md, docs/lifecycle/agents/pm.md,
+  skills/SKILLS.md, docs/skill-graph.json, .gemini/settings.json,
+  .claude/settings.json; agents/i18n-specialist.md in 14). The governance-doc
+  shadows are docs/phase-definitions.md (14 of 15 variants; co-architect has
+  none; design 2026-10-28-l0-only-governance-doc-cleanup-design.md (line 220)
+  records that 14/16 projects carrying variant-customized phase-definitions is
+  the accepted norm, i.e. intended hand-maintained divergence) and
+  docs/governance/agents/workflows.md (co-learning only, new in PR #2032; its
+  entire delta versus common is the 29-line Stream Boundaries insertion at line
+  124 inside the VARIANT-ROLE-BOUNDARY zone, so the other 150+ lines are a
+  frozen snapshot of common, and common's file changed three times in recent
+  history: cf8bc12e9, 92d90b49f, 57dcdc191). Other shadowed sets worth guarding:
+  the three platform skill copies (platform-skill-lifecycle-manager,
+  platform-command-lifecycle-manager, finishing-a-development-branch under
+  .claude/.codex/.gemini/.agents/.hermes skills) differ in 8 variants
+  (co-consult, co-deck, co-design, co-develop, co-game, co-hr, co-security,
+  co-work), plus package.json (4), SECURITY.md and .gitignore (2 each). Existing
+  guards cover only narrow cases: scripts/validate-variant-claims.ts check j
+  (AGENTS.md boilerplate drift vs common) and README-pair hash parity; nothing
+  reports a whole-file shadow whose common source moved. Impact: improvements to
+  common governance text (for example the workflows.md Gate-passed sentence that
+  differs at line 104 per T-20261114-002) silently never reach shadowing
+  variants, and the divergence is discovered only by humans during an upgrade
+  conflict. Proposed fix (design first): either (a) hash-of-common recorded in
+  the variant file (a front-matter or trailing comment such as common-sha256
+  plus common-template-version stamped at shadow time) with a validate-templates
+  check that warns when the current common hash differs and the variant has not
+  re-acknowledged it, or (b) a validate-templates check that computes the shadow
+  set (path in both trees, bytes differ) and compares it to a declared list in
+  variant.json (shadowedCommonFiles with reason), failing on undeclared shadows
+  and reporting declared ones whose common source changed since the recorded
+  hash; for zone-only deltas (co-learning workflows.md) prefer converting the
+  shadow into a zone override of common so the rest keeps flowing. Acceptance:
+  the check lists exactly the current shadow set above on main, a seeded fixture
+  (edit common, leave variant) is flagged, intentional shadows (README,
+  variant.json, phase-definitions) can be declared without noise, and
+  co-learning workflows.md either carries the recorded hash or is converted to a
+  zone override. Priority low (a normal bump is reasonable once a second
+  zone-only shadow appears). Relations: PR #2032, T-20261114-002,
+  T-20261114-003, T-20261110-012 (README-pair hash gating precedent),
+  T-20261110-010 (variant script parity for @version files).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:29.203+09:00'
+history:
+  - at: '2026-11-14T18:12:29.203+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

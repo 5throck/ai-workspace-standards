@@ -1,0 +1,66 @@
+schemaVersion: 1
+id: T-20261114-004
+kind: manual
+title: >-
+  upgrade-project settings JSON_MERGE has two unguarded gaps (priority normal;
+  treat as HIGH for security-sensitive variants such as co-security, co-hr,
+  co-safety). (1) GUARD covers only hooks: dropMissingPathHookEntries
+  (scripts/lib/hook-dedupe.ts:207, v1.1.0, called at
+  scripts/upgrade-project.ts:6621) filters only template hooks entries whose
+  command references a path absent from the project; template
+  statusLine.command, subagentStatusLine.command and footerLinksRegexes patterns
+  pointing at missing helper files are merged anyway (resurrecting
+  graft-statusline.cjs references and breaking the status line), and the GUARD
+  log row (upgrade-project.ts:6648) prints hook drops only. Unit repro against
+  current main: template {statusLine.command graft-statusline.cjs, hooks
+  SessionStart graft-hooks.cjs, permissions.allow [WebFetch(*), Bash(curl -sI
+  *)]} merged over project {permissions.allow [WebFetch(domain:github.com)]}
+  with exists()=false drops the hook but keeps statusLine. Field reports:
+  U-20261113-007 (co-architect PR #398) and U-20261113-011 (co-security PR
+  #112), whose resolutions leave the engine-side guard open as a separate
+  hardening item (no ticket until now). (2) Permission union has no never-widen
+  or report rule: mergeSettingsData (scripts/lib/upgrade-policy.ts:893-931)
+  unions arrays (template entries first, project-only appended, only
+  project-only items are logged as preserved), so a template WebFetch(*) or
+  Bash(curl -sI *) lands next to a project's WebFetch(domain:...) allowlist with
+  no WARN/ERROR (co-security PR #112: allow count 13 to 16, 7-domain WebFetch
+  allowlist widened). Only CI workflows have a prior-art gate
+  (--accept-ci-perm-diff); nothing equivalent for .claude/settings.json.
+  Template state re-verified on origin/main fcbee7f78: six variant templates
+  still carry WebFetch(*), Bash(curl -sI *) and Bash(node dist/cli.js:*) in
+  permissions.allow: co-abap, co-architect, co-deck, co-hr, co-safety, co-work
+  (statusLine/footerLinksRegexes are already swept from all templates by
+  #2007/#2019, so the engine exposure is latent). Impact: every upgrade of a
+  project stricter than its variant template silently re-widens its permission
+  posture and any future template regression re-injects dead helper references,
+  visible only as a MERGE line. Proposed fix: (a) extend the pre-merge filter
+  from hooks to statusLine.command, subagentStatusLine.command and any
+  command-bearing top-level key, dropping template values whose repo-relative
+  path is absent from the project, emit a GUARD row per drop and a WARN
+  decision; keep footerLinksRegexes handling small and explicit (retired-surface
+  list already exists at upgrade-project.ts:6578-6595); (b) classify permission
+  widenings (template allow entry that is a bare wildcard while the project has
+  scoped entries for the same tool, or grants a tool the project neither allows
+  nor lists) as a gated decision: not merged by default, WARN naming the
+  entries, accepted only via --disposition adopt-template=.claude/settings.json
+  or a new explicit flag; never remove project entries; (c) remove WebFetch(*),
+  curl -sI and node dist/cli.js from the six templates or document why a variant
+  needs them. Acceptance: fixture with template statusLine pointing at a missing
+  helper merges neither key and prints GUARD; fixture project restricted to
+  WebFetch(domain:...) plus template WebFetch(*) keeps the project allow list
+  and records a WARN naming WebFetch(*); narrow template additions (Bash(bun
+  scripts/foo.ts:*)) still merge; hook-only behaviour and idempotent re-run
+  unchanged; the six templates clean or justified. Relations: U-20261113-005,
+  U-20261113-007, U-20261113-011, T-20261112-006/-007, design
+  docs/designs/2026-10-31-graft-trail-migration-design.md R2.4; related to the
+  variant settings drift ticket filed alongside (Bash(trail:*) extra allow).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:28.927+09:00'
+history:
+  - at: '2026-11-14T18:12:28.927+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

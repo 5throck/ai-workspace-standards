@@ -1,0 +1,59 @@
+schemaVersion: 1
+id: T-20261114-008
+kind: manual
+title: >-
+  Windows CI flake, sibling class of the done tickets T-20261110-001
+  (co-workspace-admin-console), T-20261113-001 (upgrade-decision-log) and
+  T-20261106-008 (hub-bootstrap): four more co-workspace unit files hit the
+  15000ms default per-test ceiling on windows-latest because they have no
+  FILE_TIME_BUDGETS row in scripts/test-runner.ts (v1.15.0; rows exist for
+  co-workspace-admin-console at :209 and the
+  review-remediation/shared-team-access/shared-team-loop/composer-wire-regression
+  files, but not for the four below; 47 co-workspace-*.test.ts files share the
+  fixture style). Evidence (job 'test (windows-latest, 18.x)', repo
+  5throck/ai-workspace-standards): run 43423354132 attempt 1 (PR #2010):
+  tests/unit/co-workspace-migrations.test.ts 'v4 is transactional: a mid-step
+  failure leaves the database at v3' 21354.68ms and 'one-way guard message:
+  downgrading below v4 loses data' 21486.43ms, plus
+  co-workspace-shared-team-quarantine.test.ts 'S2: group-delete quarantine ...
+  the recreated id inherits nothing' 21525.65ms, all 'timed out after 15000ms'
+  (2 of 310 files failed), attempt 2 passed; run 43446832817 attempt 1 (PR
+  #2018): co-workspace-admin-console-r2.test.ts 'export triggers > enrollment
+  PUT/DELETE, member add/remove, and tenant deletes rewrite the registry'
+  15182.90ms, attempt 2 passed; main run 43476903271 (2026-11-13T17:51Z):
+  co-workspace-migrations 'v3 slice -> v4: policies created+assigned' timed out;
+  main run 43322937546 (2026-11-12T22:46Z): co-workspace-admin-console-r2
+  'reserved-principal guard suffixes a slug' 16.6s and co-workspace-admin-page
+  'GET /admin page route > admin without a password set is redirected to /'
+  17.9s. Five distinct failing runs in about 19 hours; same commits pass on
+  rerun and on ubuntu/macos. Failure scan of the last 80 Test Suite runs: the
+  only other failures were the already-fixed upgrade-decision-log 300000ms
+  timeout (run 43436245621) and unrelated ubuntu variant-claims findings.
+  Fixture shape: bun:sqlite Database plus mkdtempSync tmpdir per test
+  (tests/unit/co-workspace-migrations.test.ts:16-24, 54, 75), argon2 hashing in
+  the admin tests, under win32 FS pressure. Impact: about 1 in 6 windows legs
+  retried in the window; each retry costs 6-9 minutes and queue time and
+  encourages a rerun-until-green habit that can mask real regressions. Proposed
+  fix: add FILE_TIME_BUDGETS rows { suite: 300000, test: 45000 } for
+  co-workspace-migrations, co-workspace-shared-team-quarantine,
+  co-workspace-admin-console-r2 and co-workspace-admin-page with an evidence
+  comment (the run IDs above), per the v1.6.0 first-time-entry convention (not a
+  raise on an existing offender); bump the test-runner version and registry;
+  consider a co-workspace-* prefix family default if more siblings fail; if a
+  file still flakes after the budget, fix the fixture (one DB per describe,
+  avoid per-test argon2 cost) instead of raising further. Acceptance:
+  test-runner unit gate accepts the rows (registry/version parity green), bun
+  run test:unit green locally, and over the next about 20 windows-latest runs no
+  timeout in the four files (monitor via gh run list) or a follow-up fixture
+  ticket is filed. Relations: T-20261110-001, T-20261113-001, T-20261106-008,
+  T-20261105-001 (all done).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:29.064+09:00'
+history:
+  - at: '2026-11-14T18:12:29.064+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

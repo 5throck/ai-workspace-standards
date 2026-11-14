@@ -1,0 +1,63 @@
+schemaVersion: 1
+id: T-20261114-009
+kind: manual
+title: >-
+  Variant template settings drift from templates/common/.claude/settings.json
+  and no validator detects it (re-verified on origin/main fcbee7f78; data from a
+  bun matcher-diff over every templates/*/.claude/settings.json). (1)
+  agent-model-gate.ts (PreToolUse matcher Agent; the CLAUDE.md section 6
+  automated enforcement of tier-to-model aliases) is ABSENT from 14 of 15
+  variant templates, only co-security wires it; the script is delivered
+  (templates/common/scripts/hooks/agent-model-gate.ts) but no settings entry
+  invokes it, so in 14 variant fleets a High-tier agent can silently fall back
+  to the inherited parent model. (2) pm-dispatch-gate.ts (common matcher Agent)
+  is wired with an EMPTY matcher in 14/15 variants (only co-architect keeps
+  Agent) and delete-guard.ts (common matcher Bash) with an EMPTY matcher in
+  15/15, so both fire on every tool call; enforcement still works because the
+  scripts self-filter (scripts/hooks/agent-model-gate.ts:201,
+  pm-dispatch-gate.ts:129, delete-guard.ts:526-533) but every Read/Grep/Edit
+  pays a bun spawn and the wiring differs from the documented design
+  (docs/designs/2026-10-17-pm-dispatch-gate-design.md; T-20261106-003/-005). (3)
+  Bash(trail:*) is an extra permissions.allow entry in all 15 variants and
+  absent from common (probable origin T-20261108-001, unverified). (4) Six
+  variant templates still carry WebFetch(*), Bash(curl -sI *) and Bash(node
+  dist/cli.js:*) in permissions.allow, re-verified on current main by grep:
+  co-abap, co-architect, co-deck, co-hr, co-safety, co-work (each 3 matches;
+  co-safety has one more extra) - the permission-widening arm is tracked in the
+  settings JSON_MERGE ticket filed alongside. Variant-specific extras that look
+  intentional: PostToolUse/TeammateIdle/TaskCompleted audit hooks in
+  co-architect (bun scripts/audit.ts), co-safety
+  (scripts/co-safety/safety-audit.ts), co-security, co-abap (sync-md.ts). No
+  variant lacks a common allow entry. Validator gap: scripts/lib/hook-dedupe.ts
+  analyzeHookDrift (lifecycle-sync-audit Check I) reports only duplicates and
+  local>template over-counts, never a MISSING common governance hook or a
+  matcher mismatch; docs/ declares no variant exemption for agent-model-gate
+  (only design/ADR/lifecycle prose about the script itself). Related field
+  evidence: U-20261112-018 (co-abap) noted agent-model-gate is registered and
+  version-checked but never invoked anywhere. Impact: CLAUDE.md section 6 claims
+  the gate runs; for all projects except co-security it does not. Proposed fix:
+  regenerate each variant hook block from common keeping documented extras (add
+  agent-model-gate Agent to the 14, normalize pm-dispatch-gate to Agent and
+  delete-guard to Bash, verify co-architect separately); add a validator (extend
+  analyzeHookDrift or a new verify-variant-claims/lifecycle-sync-audit check)
+  failing when a variant lacks a common governance hook or uses a different
+  event+matcher unless the variant declares an exemption in a documented list;
+  decide whether Bash(trail:*) joins common or is documented as variant-only;
+  note that the upgrade JSON_MERGE unions hooks so projects receive new entries
+  at their next upgrade (the GUARD only drops entries with missing paths, and
+  the script is delivered). Acceptance: matcher-diff shows MISSING = 0 for the
+  common governance hooks across all variants (or listed exemptions); the
+  validator fails on a seeded drift fixture; a variant scaffold smoke test shows
+  an Agent call without a model alias triggers the agent-model-gate ask.
+  Relations: T-20261106-003, T-20261106-005, T-20261108-001, U-20261112-018,
+  design docs/designs/2026-10-17-pm-dispatch-gate-design.md.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:29.100+09:00'
+history:
+  - at: '2026-11-14T18:12:29.100+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

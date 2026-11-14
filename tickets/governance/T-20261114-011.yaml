@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: T-20261114-011
+kind: manual
+title: >-
+  templates/co-learning/docs/governance/agents/workflows.md (new in PR #2032,
+  git log 53c19d79a) quotes a design doc that does not resolve in the template
+  tree or a fresh scaffold: line 139 reads 'Boundary rules (from
+  docs/designs/2026-10-06-co-learning-education-operations-design.md section 3)'
+  inside the Stream Boundaries (education operations, DEC-20261007-01) section
+  (lines 124-152, VARIANT-ROLE-BOUNDARY zone). Verified on origin/main
+  fcbee7f78: no file of that name exists under docs/designs/ at the workspace
+  root (only 2026-10-06-co-learning-variant-ization-design.md, a different
+  document), templates/co-learning has no docs/designs/ directory, and the only
+  occurrence of the string in templates/ is that line; per the PM brief the doc
+  exists only in the Projects/co-learning repo (not verifiable from a clean
+  worktree, Projects/ is out of scope). A scaffolded co-learning project
+  therefore carries a dangling pointer in its PM governance workflow. Options:
+  (a) port the design doc, or a trimmed section-3 excerpt, into the template
+  tree so the path resolves in a scaffold (docs/designs/ is project-owned
+  territory, so check delivery policy first); (b) reword the pointer to cite the
+  rule source without a path (for example 'DEC-20261007-01, co-learning
+  education-operations design' or inline the three boundary rules as the
+  normative text, which they already are). Acceptance: no unresolved
+  docs/designs/ path in
+  templates/co-learning/docs/governance/agents/workflows.md (pointer-integrity
+  check or grep clean), a fresh co-learning scaffold has no dangling reference,
+  and the three boundary rules plus the additional gates text stay intact.
+  Priority low: documentation pointer only. Relations: PR #2032, T-20261114-002
+  and T-20261114-003 (co-learning upgrade blockers, project-side port of the
+  Stream Boundaries section), DEC-20261007-01.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:29.168+09:00'
+history:
+  - at: '2026-11-14T18:12:29.168+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

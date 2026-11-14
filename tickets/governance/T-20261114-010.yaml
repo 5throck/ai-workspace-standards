@@ -1,0 +1,59 @@
+schemaVersion: 1
+id: T-20261114-010
+kind: manual
+title: >-
+  upgrade-project seeds docs/lifecycle/agents/<name>.md records for agents the
+  variant.json agent-registry gate withheld, leaving dangling records with no
+  agent file and no audit signal. The TEMPLATE_TREE_SYNC WORKSPACE seed branch
+  (scripts/upgrade-project.ts:6811-6855) seeds every absent record from the
+  template and guards only country-scoped agents (v1.105.0/v1.106.0,
+  T-20261112-004); it never consults assetGate.agents (loaded around :5188),
+  which the agents/ pass uses at :5422-5431 to log 'SKIP ... not in the
+  variant.json agent registry — new-asset injection withheld' (message at
+  :5429). Evidence on a throwaway local clone of Projects/co-security at 97230ff
+  (template 0.30.0): agents/ holds i18n-specialist, patch-engineer, pentester,
+  pm, red-team-lead, report-writer, threat-modeler (+README) while
+  docs/lifecycle/agents/ holds the same 7 PLUS automation-engineer,
+  contract-gate-engineer, design-system-lead, public-data-analyst (4 orphans,
+  exactly the common agents co-security's variant.json agents[] does not
+  register); git log --diff-filter=A shows commit 1f94682 (2026-11-13 'upgrade
+  template delivery to current workspace') added them and
+  .claude/last-upgrade-delivery.json carries delivered baselines for them. bun
+  scripts/audit.ts in the clone exits 0 'All checks passed': the only dangling
+  check in agent-lifecycle-audit.ts (:879) covers agent-to-agent references, not
+  records without an agent file. Engine dry-run re-run on the clone (--dry-run
+  does not write to the project tree) showed SKIP for the withheld agents/
+  files, the country-scoped record skipped by its guard ('SKIP
+  docs/lifecycle/agents/public-data-analyst.md (country-scoped; project country:
+  none)'), and a deleted automation-engineer record hitting 'TOMBSTONE (SKIP):
+  project deleted a previously delivered file; delivery refused (severity
+  ERROR)', i.e. cleaning an already-seeded orphan needs an explicit --tombstone
+  docs/lifecycle/agents/<name>.md grant. Impact: fleet-wide for every
+  gate-active project (co-deck, co-newbiz, co-price, co-safety, co-security per
+  T-20261112-008) records accumulate for agents the project does not own,
+  skewing fleet inventory and agent-count assumptions, and going stale. Proposed
+  fix: in the WORKSPACE seed branch, when rel matches
+  docs/lifecycle/agents/<name>.md and the asset gate is active and <name>.md is
+  not in assetGate.agents (and the project has no agents/<name>.md), record an
+  INFO SKIP 'agent withheld by variant.json registry - lifecycle record
+  withheld' like the country guard; report already-seeded orphans as a WARN row
+  (no auto delete, the owner owns deletions) or handle them in the
+  T-20261112-008 wave; optional agent-lifecycle-audit WARN when
+  docs/lifecycle/agents/<x>.md exists without agents/<x>.md. Acceptance: fixture
+  with an assetGate lacking automation-engineer.md does not seed that record and
+  logs a decision row while a registered agent still gets its record; the orphan
+  audit check (if added) is a WARN, silent when agents/ and records align, and
+  shows exactly the 4 known orphans on the co-security clone before cleanup.
+  Relations: T-20261112-008 (waiting; fixes registration, not the seeding
+  behaviour - ride it or stay separate), T-20261112-004, U-20261113-003, design
+  docs/designs/2026-11-12-common-agents-for-common-skills-design.md.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-14T18:12:29.135+09:00'
+history:
+  - at: '2026-11-14T18:12:29.135+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
