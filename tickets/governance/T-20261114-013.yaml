@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: T-20261114-013
+kind: manual
+title: >-
+  co-learning exam-bank-operations backport decision (owner decision needed: is
+  the content education-generic enough for the template; template PR, so root
+  change): Projects/co-learning skills/exam-bank-operations/SKILL.md is version
+  1.2.0 vs template templates/co-learning/skills/exam-bank-operations 1.1.0 and
+  upgrade-project reports it as PROJECT_AHEAD (WARN, kept in the PENDING
+  BACKPORT list, first seen 2026-11-14). The project content was added in commit
+  926c0c3 (2026-10-07 'register education-operations team (P1)'): frontmatter
+  triggers 'invigilation' and 'misconduct handling', '### 5. Invigilation policy
+  (during sittings)' and '### 6. Misconduct handling'. The new text references
+  project-specific ADR-0003 (approval-code reset flow) and the cms-operations /
+  lms-operations skills (4 skills exist in the project variant.json but those
+  two are not necessarily in the template), which must be scrubbed or ported
+  before the content can enter the template. Options: (a) scrub ADR-0003 and the
+  cms/lms references and port to
+  templates/co-learning/skills/exam-bank-operations with a version bump to 1.2.0
+  (CV-02) plus regenerated skill-graph; (b) port together with
+  cms-operations/lms-operations if the owner wants them template-wide; (c)
+  record a keep-in-project decision so the PENDING BACKPORT entry is closed.
+  Acceptance: owner decision recorded; if (a)/(b), template PR merged with
+  version 1.2.0 and generated skill-graph, and upgrade-project dry-run on
+  co-learning no longer lists PROJECT_AHEAD for this path; if (c), decision
+  recorded in the project and the engine pending-backport entry resolved.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-14T19:45:31.001+09:00'
+history:
+  - at: '2026-11-14T19:45:31.001+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

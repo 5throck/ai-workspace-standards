@@ -36,12 +36,28 @@ title: >-
   active and no ungated additions; coordinate with ticket 1/2 and
   T-20261112-008.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-14T08:06:38.566+09:00'
 history:
   - at: '2026-11-14T08:06:38.566+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-14T19:45:23.055+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-14T19:45:23.071+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T19:45:30.955+09:00'
+    from: review
+    to: done
+result: >-
+  variant.json added to co-learning via co-learning#42 (11 agents, 4 skills:
+  exam-bank-operations, cms-operations, education-planning, lms-operations);
+  registry gate now active, upgrade-project dry-run exit 0 ERROR 0 (verified on
+  remote main after #44). CORRECTION: the ticket body said the project had 13
+  agents ('extras 8'), but agents/ held 13 directory entries only because
+  README.md and README_ko.md were counted; the real roster is 11 (3 template
+  agents + 8 project agents), matching the registered variant.json.
 error: null

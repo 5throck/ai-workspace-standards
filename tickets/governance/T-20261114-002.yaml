@@ -29,12 +29,30 @@ title: >-
   upgrade-project dry-run on co-learning has no workflows.md conflict/loss, no
   uncommitted-WIP loss, owner sign-off recorded.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-14T08:06:38.531+09:00'
 history:
   - at: '2026-11-14T08:06:38.531+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-14T19:45:23.022+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-14T19:45:23.038+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T19:45:30.938+09:00'
+    from: review
+    to: done
+result: >-
+  Stream Boundaries (education operations, DEC-20261007-01) ported to
+  templates/co-learning via root PR #2032 (workflows.md variant override,
+  30-line block). Project adopted the template variant file in co-learning#44
+  (merge 13b7573f; template 0.30.0 upgrade, adopt-template for
+  agents/exam-bank-steward.md, 324 files, 0 deleted); owner WIP backed up to
+  .wip-backups/co-learning-20261114/ (sha256 c56af8d3) and reverted; project
+  workflows.md sha256 equals the template file (50bbf08f). upgrade-project
+  dry-run on co-learning remote main: exit 0, ERROR 0. Related: co-learning#41
+  (graft removal), #43 (widened permissions removed).
 error: null
