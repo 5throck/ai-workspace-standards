@@ -3,14 +3,27 @@ id: U-20261113-009
 kind: manual
 title: Upstream request from co-consult
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-13T21:17:20.362+09:00
+created_at: '2026-11-13T21:17:20.362+09:00'
 history:
-  - at: 2026-11-13T21:17:20.362+09:00
+  - at: '2026-11-13T21:17:20.362+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-14T12:31:46.509+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T12:31:46.509+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented (Wave B, PR #2019/#2026/#2027): the two-tier §7 routing sentence
+  landed in all 16 template AGENTS.md bodies (common + 15 variants) +
+  validate-templates v1.82.0 agents-md-output-destination-pin WARN arm (37
+  surfaces green) pinning it against rot. co-deck presentations/
+  declared-deviation section added to its context doc. Proposal-2 (deliverables/
+  scaffold into common) REJECTED per ruling; schema-backed output_destinations
+  registry deferred to Phase 2.
 error: null
 upstream:
   project: co-consult
@@ -19,31 +32,92 @@ upstream:
   source: project/co-consult
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The common template''s File Organization standard ("Place analysis and reports in docs/", templates/common/AGENTS.md ~line 270) routes ALL deliverable-type outputs to docs/ in every variant, while actual output-destination scaffolds are fragmented across variants: co-consult and co-work ship deliverables/{drafts,presentations,references,reports,research}, co-deck ships a top-level presentations/ instead, and co-develop/co-design/co-security/co-architect ship no output scaffold at all. Agents bootstrap AGENTS.md first, so the L1 docs/ sentence always wins; each variant''s own output convention is bypassed in practice, and variants without a scaffold have no destination standard for deliverables whatsoever. A single L1-level standardization (common deliverables/ convention with variant deference, replacing the docs/ routing for client-facing outputs) is needed; this complements the L2-scoped ticket U-20261113-008 (co-consult-specific) and may be merged with it during triage.'
+  symptom: >-
+    The common template's File Organization standard ("Place analysis and
+    reports in docs/", templates/common/AGENTS.md ~line 270) routes ALL
+    deliverable-type outputs to docs/ in every variant, while actual
+    output-destination scaffolds are fragmented across variants: co-consult and
+    co-work ship
+    deliverables/{drafts,presentations,references,reports,research}, co-deck
+    ships a top-level presentations/ instead, and
+    co-develop/co-design/co-security/co-architect ship no output scaffold at
+    all. Agents bootstrap AGENTS.md first, so the L1 docs/ sentence always wins;
+    each variant's own output convention is bypassed in practice, and variants
+    without a scaffold have no destination standard for deliverables whatsoever.
+    A single L1-level standardization (common deliverables/ convention with
+    variant deference, replacing the docs/ routing for client-facing outputs) is
+    needed; this complements the L2-scoped ticket U-20261113-008
+    (co-consult-specific) and may be merged with it during triage.
   affected_paths:
     - AGENTS.md
   identity_source: cwd
-  local_workaround_diff: |-
-    Reference only — none applied locally (per user ruling, resolution is ticket-only). Proposed direction for the workspace PM to adjudicate at L0/L1:
+  local_workaround_diff: >-
+    Reference only — none applied locally (per user ruling, resolution is
+    ticket-only). Proposed direction for the workspace PM to adjudicate at
+    L0/L1:
 
-    1. templates/common/AGENTS.md §7 File Organization bullet — replace "Place analysis and reports in `docs/`" with a two-tier standard, e.g.:
+
+    1. templates/common/AGENTS.md §7 File Organization bullet — replace "Place
+    analysis and reports in `docs/`" with a two-tier standard, e.g.:
+
     --- a/templates/common/AGENTS.md
+
     +++ b/templates/common/AGENTS.md
+
     @@ §7 Universal Baseline Behaviors
-    -- **File Organization**: ... Place analysis and reports in `docs/`, session logs and meeting transcripts in `memory/`. ...
-    +- **File Organization**: ... Place client-facing deliverables (research findings, analyses, reports, presentations, references) in the project's deliverables layout — common default `deliverables/{drafts,presentations,references,reports,research}` when the variant ships it, per the variant's Output Destination Mapping. Place internal project docs and designs in `docs/`, session logs and meeting transcripts in `memory/`. ...
 
-    2. Promote the deliverables/ 5-subfolder scaffold (already shipped identically by co-consult and co-work) into templates/common/ so bare variants (co-develop, co-design, co-security, co-architect) get an output destination by default.
+    -- **File Organization**: ... Place analysis and reports in `docs/`, session
+    logs and meeting transcripts in `memory/`. ...
 
-    3. Reconcile co-deck's divergent top-level presentations/ with the common deliverables/ standard (either adopt deliverables/presentations/ or register presentations/ as the co-deck-declared deviation in its variant context).
+    +- **File Organization**: ... Place client-facing deliverables (research
+    findings, analyses, reports, presentations, references) in the project's
+    deliverables layout — common default
+    `deliverables/{drafts,presentations,references,reports,research}` when the
+    variant ships it, per the variant's Output Destination Mapping. Place
+    internal project docs and designs in `docs/`, session logs and meeting
+    transcripts in `memory/`. ...
 
-    4. Optionally extend the common Output Destination Mapping pattern ({topic}-{report-type}-{YYYY-MM-DD}_ko.md) so naming is consistent across variants.
-  repro: |-
-    Survey performed 2026-11-13 across /workspace/templates (all paths relative to templates/):
-    1. `grep -c "Place analysis and reports in \`docs/\`" */AGENTS.md` → 1 occurrence in EVERY template: common, co-consult, co-deck, co-develop, co-work, co-design, co-security, co-architect (8/8 inherit the L1 sentence verbatim).
-    2. Output-scaffold divergence: common ships NO deliverables or presentations scaffold; co-consult and co-work both ship deliverables/{drafts,presentations,references,reports,research} (identical layout); co-deck ships a top-level presentations/ instead (divergent standard); co-develop/co-design/co-security/co-architect ship neither.
-    3. Concrete failure observed in a co-consult project on 2026-11-13: four lecture-support research reports and three market analyses were written to docs/reports/ by agents following the common-inherited §7 rule, and had to be relocated to deliverables/research/ manually (relocation ticket: U-20261113-008, scoped L2). With bare variants (no scaffold at all) there is no destination convention for deliverable-type outputs whatsoever.
-    Suggested root fix is at L1: change the common File Organization standard so deliverable-type outputs route to a deliverables/ convention (deferred by variant mappings), and reconcile the divergent co-deck presentations/ layout.
+
+    2. Promote the deliverables/ 5-subfolder scaffold (already shipped
+    identically by co-consult and co-work) into templates/common/ so bare
+    variants (co-develop, co-design, co-security, co-architect) get an output
+    destination by default.
+
+
+    3. Reconcile co-deck's divergent top-level presentations/ with the common
+    deliverables/ standard (either adopt deliverables/presentations/ or register
+    presentations/ as the co-deck-declared deviation in its variant context).
+
+
+    4. Optionally extend the common Output Destination Mapping pattern
+    ({topic}-{report-type}-{YYYY-MM-DD}_ko.md) so naming is consistent across
+    variants.
+  repro: >-
+    Survey performed 2026-11-13 across /workspace/templates (all paths relative
+    to templates/):
+
+    1. `grep -c "Place analysis and reports in \`docs/\`" */AGENTS.md` → 1
+    occurrence in EVERY template: common, co-consult, co-deck, co-develop,
+    co-work, co-design, co-security, co-architect (8/8 inherit the L1 sentence
+    verbatim).
+
+    2. Output-scaffold divergence: common ships NO deliverables or presentations
+    scaffold; co-consult and co-work both ship
+    deliverables/{drafts,presentations,references,reports,research} (identical
+    layout); co-deck ships a top-level presentations/ instead (divergent
+    standard); co-develop/co-design/co-security/co-architect ship neither.
+
+    3. Concrete failure observed in a co-consult project on 2026-11-13: four
+    lecture-support research reports and three market analyses were written to
+    docs/reports/ by agents following the common-inherited §7 rule, and had to
+    be relocated to deliverables/research/ manually (relocation ticket:
+    U-20261113-008, scoped L2). With bare variants (no scaffold at all) there is
+    no destination convention for deliverable-type outputs whatsoever.
+
+    Suggested root fix is at L1: change the common File Organization standard so
+    deliverable-type outputs route to a deliverables/ convention (deferred by
+    variant mappings), and reconcile the divergent co-deck presentations/
+    layout.
   triage: ready
   flagged: false
   triage_reasons:
@@ -51,4 +125,16 @@ upstream:
   dedupe_key: ba075cf0d3b075c8b1b3bbe504c8c99c3baba026544207512361546bfb7bfdc0
   duplicates:
     - project: co-consult
-      at: 2026-11-13T21:17:20.362+09:00
+      at: '2026-11-13T21:17:20.362+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2019
+    template_version: unreleased
+    summary: >-
+      Implemented (Wave B, PR #2019/#2026/#2027): the two-tier §7 routing
+      sentence landed in all 16 template AGENTS.md bodies (common + 15 variants)
+      + validate-templates v1.82.0 agents-md-output-destination-pin WARN arm (37
+      surfaces green) pinning it against rot. co-deck presentations/
+      declared-deviation section added to its context doc. Proposal-2
+      (deliverables/ scaffold into common) REJECTED per ruling; schema-backed
+      output_destinations registry deferred to Phase 2.
