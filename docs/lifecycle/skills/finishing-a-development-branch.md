@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: finishing-a-development-branch
 - **Status**: active
-- **Version**: 1.0.1
+- **Version**: 1.0.2
 - **Created**: 2026-09-04
 - **Last Updated**: 2026-09-04
 

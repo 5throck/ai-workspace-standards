@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-11-11
+# Last Updated: 2026-11-14
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -677,7 +677,7 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 
 ---
 
-*co-deck.context.md version: 4.3 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
+*co-deck.context.md version: 4.4 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
 *co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
 *co-deck.context.md version: 4.5 — updated 2026-10-05: theme/style registry sync (outlook + white-bubble rows, 6×6 compatibility matrix, gen-slides-pdf v1.9.0); skills table synced to variant.json (added slide-layout-gate/presenter-mode; removed dead handbook/graft/agent-lifecycle-manager paths); gate model aligned to user-guide §4 (Gates 2 and 5 mandatory; 1.5, 3, 4 optional).*
 *co-deck.context.md version: 4.6 — updated 2026-10-30: backport: generalized structural slide rules from Projects/co-deck 2026-10-30 (DEC-20261030-01 lineage) — video quality policy (`already-max`), injector order contract, background semantic `matches` rationale, diagram label convention, generalized caption policy (sidecar VTT contract, `manual|auto|translated|translated-llm` vocabulary, merge-on-refetch, CC selector, OFF default, video-box-relative cue sizing).*
@@ -717,3 +717,15 @@ Key rules:
 - All text files saved as **UTF-8 (without BOM)**
 - Commit messages and PR artifacts in **English only**
 <!-- COMMON-CONTEXT:END -->
+
+
+## Output Destination Mapping
+
+Deck deliverables render into `presentations/<project>/` — the deck pipeline's
+working root (lecture-profile.md, slidedata.json, image-manifest.json, shared
+asset pool at `presentations/assets/`). This is a **declared deviation** from
+the cross-variant `deliverables/{drafts,presentations,references,reports,research}`
+convention: the layout is pipeline-load-bearing (lecture-profile, image-manifest,
+theme assets are consumed by the 11-stage build chain), so migrating it for
+cosmetic conformity would break the deck pipeline (ruling
+2026-11-14-consult-output-destination-and-constitution-refs-ruling.md, U-20261113-009).

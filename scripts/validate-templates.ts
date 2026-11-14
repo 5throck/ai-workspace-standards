@@ -1,6 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
+ * @version 1.82.0
+ *
+ * v1.82.0 (2026-11-14, spec docs/designs/2026-11-14-consult-output-destination-and-constitution-refs-ruling.md
+ *          Wave B pin, U-20261113-009): new WARN arm `agents-md-output-destination-pin` — every template
+ *          AGENTS.md §7 must carry the Output Destination Mapping marker phrase ("Output Destination
+ *          Mapping in the project context doc"), the two-tier deliverable-routing sentence from the
+ *          consult-output-destination ruling. §7 is variant-body content with no propagation mechanism;
+ *          without the pin the 16-file wave can silently rot (agents-md-destructive-file-ops-pin precedent).
  * @version 1.81.0
  *
  * v1.81.0 (2026-11-13, merge of parallel v1.80.0 waves U-20261112-013 + U-20261112-010): version consolidation — content unchanged from the two v1.80.0 notes below.
@@ -8706,6 +8714,51 @@ function main(): number {
     }
   }
 
+  /** v1.82.0 (Wave B pin, consult-output-destination-and-constitution-refs-ruling §R2/Wave-B,
+   *  U-20261113-009): every template AGENTS.md §7 carries the two-tier Output Destination
+   *  Mapping routing sentence. §7 is variant-body content with no propagation mechanism —
+   *  without this pin the 16-file wave silently rots (agents-md-destructive-file-ops-pin
+   *  precedent; severity WARN per that precedent). */
+  function checkAgentsMdOutputDestinationPin(): void {
+    if (!JSON_MODE)
+      console.log(
+        "\n=== Check agents-md-output-destination-pin: §7 carries the Output Destination Mapping routing sentence (consult-output-destination ruling Wave B) ===",
+      );
+    const targets: Array<{ variant: string; path: string }> = [
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "AGENTS.md") });
+        }
+      }
+    }
+    const MARKER_PHRASE = "Output Destination Mapping in the project context doc";
+    let checked = 0;
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      checked++;
+      const content = readFileSync(t.path, "utf-8");
+      const sectionMatch = content.match(/^## §7: Universal Baseline Behaviors\n([\s\S]*?)(?=^## )/m);
+      if (!sectionMatch) continue; // §7-absent files are the destructive-file-ops-pin arm's finding
+      if (!sectionMatch[1].includes(MARKER_PHRASE)) {
+        warn(
+          t.variant,
+          "agents-md-output-destination-pin",
+          `${t.path} §7 is missing the Output Destination Mapping routing sentence — the two-tier deliverable routing (ruling 2026-11-14-consult-output-destination-and-constitution-refs-ruling.md, U-20261113-009 Wave B) can silently rot`,
+          `Add the routing sentence to §7 (copy the File Organization bullet verbatim from templates/common/AGENTS.md §7)`,
+        );
+      } else {
+        pass(`agents-md-output-destination-pin: ${t.path} §7 carries the routing sentence`);
+      }
+    }
+    if (checked === 0) {
+      pass("agents-md-output-destination-pin: no template AGENTS.md found — vacuous pass");
+    }
+  }
+
+  checkAgentsMdOutputDestinationPin(); // Wave B pin: Output Destination Mapping routing sentence (U-20261113-009)
   checkGraftMcpSurfaces(); // R2: template mcp surfaces are trail-only (graft-mcp-corrective-pass-design)
   checkHookCommandTargets(); // U-20261112-013: hook command targets exist in the effective template tree (fail-on-missing)
   checkVariantIndexCoverage(manifests); // WS-12

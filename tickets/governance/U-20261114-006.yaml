@@ -1,0 +1,47 @@
+schemaVersion: 1
+id: U-20261114-006
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-14T10:13:14.263+09:00
+history:
+  - at: 2026-11-14T10:13:14.263+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'Two script fixes that landed in the co-deck project are at risk of being clobbered by the next template delivery because the affected scripts are variant-delivered L2 scripts whose templates/co-deck copies still carry the older versions. (1) scripts/co-deck/html-to-pdf.ts: the project''s v1.2.0 adds a pool-asset intercept-fallback — after the presentations→deliverables consolidation, decks bind shared-pool assets via ../assets/… but the tool''s Bun server (docroot = deck dir, traversal-guarded) 404''d those silently, making PDF-based render verification unreliable (its "Image failed" warning fired only on network failures, not 404s; the soosan v7 PDF-stream verification from 2026-11-14 was an unreliable proxy for this reason). v1.2.0 re-resolves /assets/* deck-local misses against dirname(serveDir) under the existing startsWith containment discipline, WARNs server-side on every content 404 with a final missing-asset summary (exit unchanged), and quiets the headless-Chrome favicon.ico 404. E2E: keynote deck → 58 pool hits, 0 missing-asset warnings, valid 15.6 MB PDF. (2) scripts/co-deck/validate-image-manifest.ts: the project''s v1.3.0 promotes the pool-wide sha256 duplicate scan from WARN to ERROR/blocking — the precondition (pool duplicates cleaned, co-deck PR #225) is satisfied, closing consolidation-spec Follow-up 3. Upstream context: U-20261114-005 was closed as fixed against validator v1.2.0; v1.3.0 postdates that triage, so the template copy does not carry the promotion.'
+  affected_paths:
+    - templates/co-deck/scripts/co-deck/html-to-pdf.ts
+    - templates/co-deck/scripts/co-deck/validate-image-manifest.ts
+    - templates/co-deck/scripts/co-deck/tests/html-to-pdf-serve.test.ts
+    - templates/co-deck/scripts/co-deck/tests/fixtures/pool-serve/proj/deck.html
+    - templates/co-deck/scripts/co-deck/tests/validate-image-manifest.test.ts
+  identity_source: cwd
+  repro: '1. In the co-deck project, the two scripts are variant-delivered L2 scripts (scripts/SCRIPTS.md classifies both L2-only; validate-image-manifest.test.ts row says "Variant-delivered script (auto-registered at upgrade, T-20261012-001)"), so upgrade-project re-delivers the templates/co-deck copies and overwrites project-local edits. 2. The co-deck project now carries newer local versions: scripts/co-deck/html-to-pdf.ts v1.2.0 (pool-asset intercept-fallback: /assets/* deck-local misses re-resolved against dirname(serveDir) under the existing startsWith containment discipline; loud server-side 404 WARNs + final missing-asset summary; favicon.ico 404s quietly; new integration test html-to-pdf-serve.test.ts v1.0.0 with fixture tests/fixtures/pool-serve/{assets/images/probe.png, proj/deck.html}) and scripts/co-deck/validate-image-manifest.ts v1.3.0 (pool-wide sha256 duplicate scan promoted WARN to ERROR/blocking; test pin v1.2.0) — landed via co-deck PR #226 (commit 35f0e96, merge a6cd2cb, 2026-11-14). 3. Run upgrade-project on the co-deck project after the next template release: both project scripts revert to the template versions (html-to-pdf v1.1.0 without pool serving; validate-image-manifest v1.2.0 with WARN-only dedup), losing the fixes. Note: the earlier design note claiming html-to-pdf.ts is "not template-managed" was a misread of the L2-only column — L2-only scripts are variant-delivered. Port both files (+ the two test files and the pool-serve fixture) from the co-deck repo PR #226 into templates/co-deck/scripts/co-deck/, bump the template-side SCRIPTS.md rows, and release in the next template wave.'
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: templates/co-deck/scripts/co-deck/html-to-pdf.ts'
+    - 'path_not_template_managed: templates/co-deck/scripts/co-deck/validate-image-manifest.ts'
+    - 'path_not_template_managed: templates/co-deck/scripts/co-deck/tests/html-to-pdf-serve.test.ts'
+    - 'path_not_template_managed: templates/co-deck/scripts/co-deck/tests/fixtures/pool-serve/proj/deck.html'
+    - 'path_not_template_managed: templates/co-deck/scripts/co-deck/tests/validate-image-manifest.test.ts'
+    - info:in_last_delivery templates/co-deck/scripts/co-deck/html-to-pdf.ts=false
+    - info:in_last_delivery templates/co-deck/scripts/co-deck/validate-image-manifest.ts=false
+    - info:in_last_delivery templates/co-deck/scripts/co-deck/tests/html-to-pdf-serve.test.ts=false
+    - info:in_last_delivery templates/co-deck/scripts/co-deck/tests/fixtures/pool-serve/proj/deck.html=false
+    - info:in_last_delivery templates/co-deck/scripts/co-deck/tests/validate-image-manifest.test.ts=false
+  dedupe_key: 5d8ed80fd4d75cbcec453cd2f519820af38648a988095063fdc8f0b89784ab44
+  duplicates:
+    - project: co-deck
+      at: 2026-11-14T10:13:14.263+09:00

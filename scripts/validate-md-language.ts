@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.16.1
+// @version 1.16.2
 // v1.16.1 (2026-10-28, T-20261028-003): whitespace-only — the two-statement line at isOfficialDocument reflowed (dev-sync script-registry gate requires a version bump for any modified script; no behavior change).
 // v1.16.0 (2026-10-27, U-20261027-007): perimeter hardening — (a) the
 //           `/^Hermes\.md$/` official-pattern was case-SENSITIVE and never
@@ -617,7 +617,10 @@ async function validateMarkdownLanguage(): Promise<void> {
     console.log(
       "Exception NOT available for: CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, CONSTITUTION.md, AGENTS.md, *.context.md",
     );
-    console.log("See: CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content\n");
+    const policyRef = existsSync("CONSTITUTION.md")
+      ? "CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content"
+      : "docs/context.md — Language Policy (workspace English-only standard)";
+    console.log(`See: ${policyRef}\n`);
     process.exit(1);
   }
 }

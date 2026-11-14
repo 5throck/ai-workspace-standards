@@ -1,4 +1,4 @@
-// @version 1.47.0
+// @version 1.48.0
 // v1.47.0 (2026-11-12, U-20261112-005 PR-3, design docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md
 //          section 9 T4): new step 4.505 runs `generate-skill-lifecycle-records.ts --write` right after the 4.5 publish
 //          (L0 only), so a skill added or changed under templates/ gets its generated lifecycle record in the same
@@ -644,7 +644,9 @@ if (import.meta.main) {
 // silently swallowed by the PR-creation fallback below). Shared detector also catches
 // Japanese/Chinese, not just Korean — see scripts/lib/language-guard.ts.
 if (hasNonEnglish(msg)) {
-  console.log(`${RED}❌ Commit message / PR title must be written in English (CONSTITUTION.md §3).${RESET}`);
+  console.log(
+    `${RED}❌ Commit message / PR title must be written in English (${fs.existsSync("CONSTITUTION.md") ? "CONSTITUTION.md §3" : "docs/context.md §3"}).${RESET}`,
+  );
   console.log(`${YELLOW}   Translate the message and re-run: /sync "<english message>"${RESET}`);
   if (import.meta.main) {
     process.exit(1);
@@ -2658,7 +2660,9 @@ if (existingPrUrl) {
       } else {
         // Same English gate as the commit message above.
         if (hasNonEnglish(agentBody)) {
-          console.log(`${RED}❌ Agent-written PR body must be written in English (CONSTITUTION.md §3).${RESET}`);
+          console.log(
+            `${RED}❌ Agent-written PR body must be written in English (${fs.existsSync("CONSTITUTION.md") ? "CONSTITUTION.md §3" : "docs/context.md §3"}).${RESET}`,
+          );
           console.log(`${YELLOW}   Regenerate the body in English and re-run /sync.${RESET}`);
           if (import.meta.main) {
             process.exit(1);

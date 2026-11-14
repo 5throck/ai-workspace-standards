@@ -1,5 +1,5 @@
 {
-  "_note": "Korean-original data.go.kr Korea Customs Service terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. Endpoint names and field vocabulary live-tested 2026-09-03 with a real key (see SKILL.md); error-code Korean messages are portal documentation.",
+  "_note": "Korean-original data.go.kr Korea Customs Service terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (workspace English-only doc policy, non-Markdown reference asset exemption). SKILL.md stays English-only and links here. Endpoint names and field vocabulary live-tested 2026-09-03 with a real key (see SKILL.md); error-code Korean messages are portal documentation.",
   "version": "0.1.0",
   "verified": "2026-09-03",
   "endpoints": {

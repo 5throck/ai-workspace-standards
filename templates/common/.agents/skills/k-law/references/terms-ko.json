@@ -1,5 +1,5 @@
 {
-  "_note": "Korean-original Korea Law Open API terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (CONSTITUTION §6.7). SKILL.md stays English-only and links here. Category codes and response field names are from the official 법제처 Open API guide pages as recorded in SKILL.md (2026-08-09).",
+  "_note": "Korean-original Korea Law Open API terminology mapping. Non-Markdown reference asset — exempt from the workspace English-only doc policy (workspace English-only doc policy, non-Markdown reference asset exemption). SKILL.md stays English-only and links here. Category codes and response field names are from the official 법제처 Open API guide pages as recorded in SKILL.md (2026-08-09).",
   "version": "0.1.0",
   "verified": "2026-08-09",
   "target_codes": {

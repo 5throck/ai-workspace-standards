@@ -19,7 +19,7 @@
  * Side-effect-free module (no top-level execution) so unit tests can import it
  * directly — same convention as helpers/rollback-partial-project.ts.
  *
- * @version 1.2.0
+ * @version 1.3.0
  *
  * v1.2.0 (2026-11-12, U-20261112-005 PR-1): L0_INTERNAL_REF_PATTERN — one shared definition of
  *         L0-internal citations (ADR/DEC/ticket ids, docs/designs|decisions|adr|reports, tickets/,
@@ -37,7 +37,19 @@
  */
 
 /** L0 reference pattern: CONSTITUTION.md (literal) or a docs/constitution/ path segment. */
+/**
+ * v1.3.0 (2026-11-14, spec docs/designs/2026-11-14-consult-output-destination-and-constitution-refs-ruling.md
+ *          §5-item4, U-20261113-010): L0_FUNCTIONAL_MARKER + findL0LeakLines skip — a line carrying
+ *          "l0-functional:" is a functional L0 reference (root detection, existsSync guards) exempt
+ *          from the leak scan; same occurrence-scoped mechanics as intentional-duplicate.
+ */
 export const L0_REF_PATTERN = /CONSTITUTION\.md|docs[\/\\]constitution[\/\\]/i;
+
+/** v1.? (2026-11-14, consult-output-destination-and-constitution-refs-ruling §6.1 item 4):
+ *  line-scoped exemption marker — a line carrying this marker is a FUNCTIONAL
+ *  L0 reference (root detection, existsSync guards) and is exempt from the
+ *  leak scan. Same occurrence-scoped mechanics as intentional-duplicate. */
+export const L0_FUNCTIONAL_MARKER = "l0-functional:";
 
 /**
  * L0-internal reference pattern (design 2026-11-12-skill-lifecycle-record-delivery-design 4.2):
@@ -91,7 +103,10 @@ export function findL0LeakLines(content: string): L0LeakLine[] {
     .map((line, idx) => ({ lineNo: idx + 1, line }))
     .filter(
       ({ line }) =>
-        L0_REF_PATTERN.test(line) && !line.includes(INTENTIONAL_DUPLICATE_MARKER) && !isPolicySelfDescription(line),
+        L0_REF_PATTERN.test(line) &&
+        !line.includes(INTENTIONAL_DUPLICATE_MARKER) &&
+        !isPolicySelfDescription(line) &&
+        !line.includes(L0_FUNCTIONAL_MARKER),
     );
 }
 

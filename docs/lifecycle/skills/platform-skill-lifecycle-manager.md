@@ -3,7 +3,7 @@
 ## Metadata
 - **Skill**: platform-skill-lifecycle-manager
 - **Status**: active
-- **Version**: 1.0.2
+- **Version**: 1.0.3
 - **Created**: 2026-09-04
 - **Last Updated**: 2026-09-04
 
