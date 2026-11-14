@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: T-20261114-002
+kind: manual
+title: >-
+  co-learning upgrade blocker 1/2 (decision needed from project owner;
+  project-repo changes need user confirmation):
+  docs/governance/agents/workflows.md needs a manual merge. Projects/co-learning
+  carries 30 UNCOMMITTED lines in docs/governance/agents/workflows.md (branch
+  pr/20261110-111454-docs-agents-sweep-stale-meeting-boilerpl, 0 ahead/0 behind,
+  WIP also in .agents/mcp.json, .claude/settings.json, .codex/config.toml,
+  .gemini/settings.json, opencode.json): a LOCAL-PATCH(project-local) 'Stream
+  Boundaries (education operations, DEC-20261007-01)' section (scenario table +
+  3 boundary rules + gates) inserted inside the VARIANT-ROLE-BOUNDARY zone,
+  restored after template delivery 31d3c99 erased it. The clean remote main
+  lacks it. Template side (templates/common/docs/governance/agents/workflows.md,
+  no co-learning override) differs at line 104 (Gate-passed sentence: template
+  dispatches /sync to automation-engineer and PM verifies the landing; project
+  copy says PM runs /sync). Scratch-clone dry-run 2026-11-14 (upgrade-project
+  --dry-run --yes, 0.30.0 to 0.30.0): workflows.md is a plain 'UPDATE (content
+  changed)' copy, so applying the upgrade over the WIP would silently erase the
+  Stream Boundaries section; the run exits 1 (see ticket 2/2 and the separate
+  exam-bank-steward CONFLICT). Plan: owner decides keep/port; preferred route is
+  port the Stream Boundaries hunk template-side into templates/co-learning
+  (variant override of the role-boundary zone, adjudicated-port procedure,
+  sync-overwrite-policy design section 6) or commit it in the project on its own
+  branch so the upgrade classifies it PROJECT_EVOLVED/MERGE; then adopt the
+  line-104 template change; precedents co-security #112 and co-architect #398.
+  Acceptance: Stream Boundaries content survives the upgrade (diff proof),
+  upgrade-project dry-run on co-learning has no workflows.md conflict/loss, no
+  uncommitted-WIP loss, owner sign-off recorded.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-14T08:06:38.531+09:00'
+history:
+  - at: '2026-11-14T08:06:38.531+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
