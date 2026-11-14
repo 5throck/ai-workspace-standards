@@ -3,7 +3,7 @@ id: U-20261113-010
 kind: manual
 title: Upstream request from co-consult
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-13T22:03:30.920+09:00'
 history:
@@ -13,7 +13,24 @@ history:
   - at: '2026-11-14T02:15:10.610+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-14T12:31:46.488+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-14T12:31:46.488+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented (Wave A, PR #2019/#2021/#2026/#2027/#2028 landed root-side): (1)
+  audit.ts v2.67.0 L0 Leakage scan-scope extension — .ts/.json under templates/
+  join the sweep at WARN (soak-before-FAIL), .ts lines with the l0-functional:
+  marker exempt (functional root-detection), JSON functional registries
+  (workspace-schema.json, propagation-map.json) exempt by filename; (2)
+  user-facing pointers fixed at source with the gen-pr-body context-detection
+  shape — validate-md-language (See: message), dev-sync ×3 language-gate
+  messages, agent-create/agent-delete checklists (root+L1 pairs byte-synced);
+  (3) terms-ko.json _note reworded at the 6 L1 SSOTs + 30 platform mirrors
+  regenerated. The scrub's comment-vs-literal/JSON non-target design untouched
+  per ruling §5-item1.
 error: null
 upstream:
   project: co-consult
@@ -110,3 +127,19 @@ upstream:
   duplicates:
     - project: co-consult
       at: '2026-11-13T22:03:30.920+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2019
+    template_version: unreleased
+    summary: >-
+      Implemented (Wave A, PR #2019/#2021/#2026/#2027/#2028 landed root-side):
+      (1) audit.ts v2.67.0 L0 Leakage scan-scope extension — .ts/.json under
+      templates/ join the sweep at WARN (soak-before-FAIL), .ts lines with the
+      l0-functional: marker exempt (functional root-detection), JSON functional
+      registries (workspace-schema.json, propagation-map.json) exempt by
+      filename; (2) user-facing pointers fixed at source with the gen-pr-body
+      context-detection shape — validate-md-language (See: message), dev-sync ×3
+      language-gate messages, agent-create/agent-delete checklists (root+L1
+      pairs byte-synced); (3) terms-ko.json _note reworded at the 6 L1 SSOTs +
+      30 platform mirrors regenerated. The scrub's comment-vs-literal/JSON
+      non-target design untouched per ruling §5-item1.
