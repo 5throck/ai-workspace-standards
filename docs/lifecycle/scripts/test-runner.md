@@ -4,9 +4,9 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.15.0
+- **Version**: 1.16.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-12 (v1.15.0 longest-first parallel dispatch, CI speed; v1.14.0 `upgrade-vintage-pending.test.ts` budget row, overwrite-protection PR-B; v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
+- **Last Updated**: 2026-11-15 (v1.16.0 junit batched-tail execution, windows CI test speedup spec; v1.15.0 longest-first parallel dispatch, CI speed; v1.14.0 `upgrade-vintage-pending.test.ts` budget row, overwrite-protection PR-B; v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
 
 ## Description
 
@@ -19,6 +19,7 @@ default suite `integration`).
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-15 | production | production | v1.16.0 (spec 2026-11-15-windows-ci-test-speedup-design): non-budgeted tail batched ~12 files per `bun test --reporter=junit` process (311 spawns → ~36) with per-file attribution from junit XML + mandatory individual re-run fallback (verified: live 12-file batch exit 0, 12/12 attributed; 2 real fallbacks re-attributed cleanly); `TEST_RUNNER_CONCURRENCY`/`TEST_RUNNER_BATCH_SIZE` env knobs (win32=6 default evidence-gated OFF — stays min(availableParallelism(), 4)). | automation-engineer |
 | 2026-11-12 | production | production | v1.15.0 (CI speed): parallel dispatch is longest-first via exported pure `orderLongestFirst()` (FILE_TIME_BUDGETS rows first, larger budget first, report order unchanged) — windows test:unit ~345s vs ~60s ubuntu, tail = upgrade-decision-log 163s / upgrade-overwrite-protection 119s / co-workspace-admin-console 103s / upgrade-tree-sync 97s / mcp-upstream-server 51s. |
 | 2026-11-12 | production | production | v1.14.0 (overwrite-protection PR-B): `upgrade-vintage-pending.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — three full upgrade-project.ts engine spawns per file run; same windows-slow family budget. | automation-engineer |
 | 2026-11-12 | production | production | v1.13.1: `upgrade-core-locked-fork.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s). | automation-engineer |

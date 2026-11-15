@@ -5,7 +5,24 @@
  * /auth/me effective budget, and the /admin page gate for a must-change admin.
  * Fixtures live under mkdtemp-style absolute tmpdir roots only.
  *
- * @version 1.1.0
+ * @version 1.2.0
+ *
+ * v1.2.0 (2026-11-15, createState reuse — spec
+ * docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1):
+ * createState is this file's dominant cost on windows CI (argon2id admin
+ * bootstrap + sqlite store creation per call), so three describes whose tests
+ * are data-disjoint now share ONE state each ("suspension", "bulk operations
+ * and guards", "CSV export and import" — 15 states → 3). Per-test isolation
+ * via UNIQUE fixture principals (a soft-deleted principal permanently burns
+ * its login_id — idx_users_login is a full UNIQUE index — so per-test reuse of
+ * "root-admin"/"alice" inside one store is impossible by design); the bulk
+ * describe additionally soft-deletes every account afterEach, which is what
+ * keeps the last-admin guard's countActiveAdmins() arithmetic and the exact
+ * suspended-list assertion at their fresh-store values. Soft delete revokes
+ * sessions and excludes rows from user listings, and successful admin reauths
+ * reset the shared login limiter bucket (access.ts requireAdminReauth), so no
+ * assertion weakened. The EBUSY/timeout containment (v1.1.0) is untouched and
+ * every store still closes via CLOSEABLE in afterAll.
  *
  * v1.1.0 (2026-11-10, T-20261110-001 — spec
  * docs/designs/2026-11-10-workspace-console-ci-flake-design.md): review M5
@@ -23,7 +40,7 @@
  * v1.0.0 (2026-11-09): initial suite (gw-admin-console design §11 review).
  */
 
-import { afterAll, describe, expect, test } from "bun:test";
+import { afterAll, afterEach, describe, expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -496,48 +513,51 @@ describe("a key whose label is a suspended or deleted principal carries no ident
 // ── Suspension ────────────────────────────────────────────────────────────────
 
 describe("suspension (admin-suspend)", () => {
+  // v1.2.0 state reuse (spec 2026-11-15-windows-ci-test-speedup-design item 1):
+  // one state for the describe; per-test isolation via unique fixture
+  // principals (a soft-deleted principal permanently burns its login_id, so
+  // the old per-test "root-admin"/"alice" names cannot recur inside one store).
+  const state = makeState("suspend-shared");
+
   test("suspend revokes the user's sessions, login gives 403 account_disabled, a wrong password gives 401", async () => {
-    const state = makeState("suspend");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const admin = state.users.findByPrincipal("root-admin")!;
+    makeUser(state, "root-susp", { role: "admin", password: ADMIN_PW });
+    const admin = state.users.findByPrincipal("root-susp")!;
     const adminTok = sessionFor(state, admin);
-    const alice = makeUser(state, "alice");
+    const alice = makeUser(state, "alice-susp");
     const aliceTok = sessionFor(state, alice);
-    expect(state.users.resolveSession(aliceTok)?.principal).toBe("alice");
+    expect(state.users.resolveSession(aliceTok)?.principal).toBe("alice-susp");
 
     const res = await send(state, "/admin/users/bulk", { token: adminTok, adminPassword: ADMIN_PW, body: { ids: [alice.id], action: "suspend" } });
     expect(res.status).toBe(200);
     expect((await json(res)).ok).toBe(1);
 
     expect(state.users.resolveSession(aliceTok)).toBeNull();
-    expect(state.users.findByPrincipal("alice")?.disabledAt).toBeTruthy();
+    expect(state.users.findByPrincipal("alice-susp")?.disabledAt).toBeTruthy();
 
-    const correct = await send(state, "/auth/login", { body: { loginId: "alice", password: USER_PW } });
+    const correct = await send(state, "/auth/login", { body: { loginId: "alice-susp", password: USER_PW } });
     expect(correct.status).toBe(403);
     expect((await json(correct)).error).toBe("account_disabled");
 
-    const wrong = await send(state, "/auth/login", { body: { loginId: "alice", password: "not-the-password" } });
+    const wrong = await send(state, "/auth/login", { body: { loginId: "alice-susp", password: "not-the-password" } });
     expect(wrong.status).toBe(401);
   });
 
   test("activate re-allows login (review M4: with reauth)", async () => {
-    const state = makeState("activate");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
-    const alice = makeUser(state, "alice");
+    makeUser(state, "root-susp-act", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-susp-act")!);
+    const alice = makeUser(state, "alice-susp-act");
     state.users.setDisabled([alice.id], true);
 
     const res = await send(state, "/admin/users/bulk", { token: adminTok, adminPassword: ADMIN_PW, body: { ids: [alice.id], action: "activate" } });
     expect(res.status).toBe(200);
-    const login = await send(state, "/auth/login", { body: { loginId: "alice", password: USER_PW } });
+    const login = await send(state, "/auth/login", { body: { loginId: "alice-susp-act", password: USER_PW } });
     expect(login.status).toBe(200);
   });
 
   test("a suspended admin gets 403 on /admin/* API routes", async () => {
-    const state = makeState("suspended-admin");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    makeUser(state, "second-admin", { role: "admin", password: ADMIN_PW });
-    const second = state.users.findByPrincipal("second-admin")!;
+    makeUser(state, "root-susp-guard", { role: "admin", password: ADMIN_PW });
+    makeUser(state, "second-susp", { role: "admin", password: ADMIN_PW });
+    const second = state.users.findByPrincipal("second-susp")!;
     const secondTok = sessionFor(state, second);
     state.users.setDisabled([second.id], true);
     const res = await send(state, "/admin/users", { token: secondTok });
@@ -548,30 +568,44 @@ describe("suspension (admin-suspend)", () => {
 // ── Bulk operations and guards ────────────────────────────────────────────────
 
 describe("bulk operations and guards (admin-users-api)", () => {
+  // v1.2.0 state reuse (spec 2026-11-15-windows-ci-test-speedup-design item 1):
+  // one state for the describe. The afterEach soft-delete sweep is what keeps
+  // the shared store's arithmetic identical to a fresh store per test: it
+  // empties countActiveAdmins() (so the last-admin guard still refuses with
+  // exactly one active admin) and drops soft-deleted rows from user listings
+  // (so the status=suspended list stays exactly ["alice-lf"]). Revoked
+  // sessions and unique per-test principals keep the rest byte-equivalent.
+  const state = makeState("bulk-shared");
+
+  afterEach(() => {
+    for (const u of state.users.listUsers()) {
+      state.users.softDeleteUser(u.id);
+      state.users.removePrincipalFromAllGroups(u.principal);
+    }
+    state.users.deleteGroup("loop-a");
+  });
+
   test("bulk suspend without reauth gives 403 and changes nothing", async () => {
-    const state = makeState("bulk-noreauth");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
-    const alice = makeUser(state, "alice");
+    makeUser(state, "root-bulk-nr", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-bulk-nr")!);
+    const alice = makeUser(state, "alice-bulk-nr");
     const res = await send(state, "/admin/users/bulk", { token: adminTok, body: { ids: [alice.id], action: "suspend" } });
     expect(res.status).toBe(403);
-    expect(state.users.findByPrincipal("alice")?.disabledAt).toBeNull();
+    expect(state.users.findByPrincipal("alice-bulk-nr")?.disabledAt).toBeNull();
   });
 
   test("more than 500 ids gives 413 payload_too_large", async () => {
-    const state = makeState("bulk-413");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
+    makeUser(state, "root-bulk-413", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-bulk-413")!);
     const ids = Array.from({ length: 501 }, (_, i) => `ghost-${i}`);
     const res = await send(state, "/admin/users/bulk", { token: adminTok, adminPassword: ADMIN_PW, body: { ids, action: "suspend" } });
     expect(res.status).toBe(413);
   });
 
   test("bulk with reauth returns per-item results; an unknown id fails alone", async () => {
-    const state = makeState("bulk-items");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
-    const alice = makeUser(state, "alice");
+    makeUser(state, "root-bulk-items", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-bulk-items")!);
+    const alice = makeUser(state, "alice-bulk-items");
     const res = await send(state, "/admin/users/bulk", {
       token: adminTok,
       adminPassword: ADMIN_PW,
@@ -584,9 +618,8 @@ describe("bulk operations and guards (admin-users-api)", () => {
   });
 
   test("self-suspend is refused per item with self_lockout", async () => {
-    const state = makeState("self-lockout");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const admin = state.users.findByPrincipal("root-admin")!;
+    makeUser(state, "root-bulk-sl", { role: "admin", password: ADMIN_PW });
+    const admin = state.users.findByPrincipal("root-bulk-sl")!;
     const res = await send(state, "/admin/users/bulk", {
       token: sessionFor(state, admin),
       adminPassword: ADMIN_PW,
@@ -595,38 +628,35 @@ describe("bulk operations and guards (admin-users-api)", () => {
     const body = await json(res);
     expect(body.ok).toBe(0);
     expect(body.failed).toEqual([{ id: admin.id, error: "self_lockout" }]);
-    expect(state.users.findByPrincipal("root-admin")?.disabledAt).toBeNull();
+    expect(state.users.findByPrincipal("root-bulk-sl")?.disabledAt).toBeNull();
   });
 
   test("last admin: a batch that would drop the active-admin count to zero is refused with last_admin", () => {
-    const state = makeState("last-admin");
-    const root = makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const caller = makeUser(state, "alice"); // a non-admin caller leaves the root as the only admin
+    const root = makeUser(state, "root-bulk-la", { role: "admin", password: ADMIN_PW });
+    const caller = makeUser(state, "alice-bulk-la"); // a non-admin caller leaves the root as the only admin
     const result = guardAdminTargets(state, caller, [{ ref: root.id, user: root }], "suspend");
     expect(result.allowed).toEqual([]);
     expect(result.failed).toEqual([{ id: root.id, error: "last_admin" }]);
   });
 
   test("set-role changes the role and writes an audit record", async () => {
-    const state = makeState("set-role");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
-    const second = makeUser(state, "second-admin", { role: "admin", password: ADMIN_PW });
+    makeUser(state, "root-bulk-sr", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-bulk-sr")!);
+    const second = makeUser(state, "second-bulk-sr", { role: "admin", password: ADMIN_PW });
     const res = await send(state, "/admin/users/bulk", {
       token: adminTok,
       adminPassword: ADMIN_PW,
       body: { ids: [second.id], action: "set-role", role: "user" },
     });
     expect((await json(res)).ok).toBe(1);
-    expect(state.users.findByPrincipal("second-admin")?.role).toBe("user");
-    expect(state.audit.query({ action: "user.set-role" }).entries.some((e) => e.target === "second-admin")).toBe(true);
+    expect(state.users.findByPrincipal("second-bulk-sr")?.role).toBe("user");
+    expect(state.audit.query({ action: "user.set-role" }).entries.some((e) => e.target === "second-bulk-sr")).toBe(true);
   });
 
   test("adding members to a loop group through the general API gives 409 loop_group_readonly", async () => {
-    const state = makeState("loop-readonly");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
-    const alice = makeUser(state, "alice");
+    makeUser(state, "root-bulk-loop", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-bulk-loop")!);
+    const alice = makeUser(state, "alice-bulk-loop");
     state.users.upsertGroup({ groupId: "loop-a", name: "Loop A", designatedUsers: [] });
 
     const add = await send(state, "/admin/groups/loop-a/members", { token: adminTok, body: { principals: [alice.principal] } });
@@ -645,21 +675,26 @@ describe("bulk operations and guards (admin-users-api)", () => {
   });
 
   test("the list filter by status returns suspended users", async () => {
-    const state = makeState("list-filter");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
-    const alice = makeUser(state, "alice");
-    makeUser(state, "bob");
+    makeUser(state, "root-bulk-lf", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-bulk-lf")!);
+    const alice = makeUser(state, "alice-bulk-lf");
+    makeUser(state, "bob-bulk-lf");
     state.users.setDisabled([alice.id], true);
     const res = await send(state, "/admin/users?status=suspended", { token: adminTok });
     const body = await json(res);
-    expect(body.users.map((u: { principal: string }) => u.principal)).toEqual(["alice"]);
+    expect(body.users.map((u: { principal: string }) => u.principal)).toEqual(["alice-bulk-lf"]);
   });
 });
 
 // ── CSV import and export ─────────────────────────────────────────────────────
 
 describe("CSV export and import (admin-csv)", () => {
+  // v1.2.0 state reuse (spec 2026-11-15-windows-ci-test-speedup-design item 1):
+  // one state for the describe — its tests use disjoint principals
+  // (evil / alice / newbie-two / per-test root-csv-* admins) and make no
+  // exact-list assertions over other users, so residue cannot flip a verdict.
+  const csvSharedState = makeState("csv-shared");
+
   test("csvCell prefixes formula leads and quotes separators, quotes, and newlines", () => {
     // A CR-leading cell is also quoted (it contains a line break), so the prefix is checked
     // as "'" immediately before the lead character rather than at position zero.
@@ -673,9 +708,13 @@ describe("CSV export and import (admin-csv)", () => {
   });
 
   test("export escapes formula-leading names and writes an attachment with an audit row", async () => {
-    const state = makeState("csv-export");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
+    // v1.2.0 state reuse (spec 2026-11-15-windows-ci-test-speedup-design item 1):
+    // one state for the describe; per-test unique principals, no exact-list
+    // assertions on other users, and successful reauths reset the shared login
+    // limiter — every assertion unchanged.
+    const state = csvSharedState;
+    makeUser(state, "root-csv-export", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-csv-export")!);
     state.users.createUser({ email: "evil@example.test", name: "=HYPERLINK(\"http://evil\")", password: null });
     const res = await send(state, "/admin/users/export.csv", { token: adminTok });
     expect(res.status).toBe(200);
@@ -687,9 +726,9 @@ describe("CSV export and import (admin-csv)", () => {
   });
 
   test("import dry run validates, reports duplicates, and writes nothing", async () => {
-    const state = makeState("csv-dry");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
+    const state = csvSharedState;
+    makeUser(state, "root-csv-dry", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-csv-dry")!);
     makeUser(state, "alice");
     const csv = "loginId,name,role,groups\nnewbie-one,Newbie One,user,\nalice,Alice Again,user,\n";
     const res = await send(state, "/admin/users/import?dryRun=1", { token: adminTok, raw: csv });
@@ -703,9 +742,9 @@ describe("CSV export and import (admin-csv)", () => {
   });
 
   test("a real import needs reauth and creates a must-change account with a temp password", async () => {
-    const state = makeState("csv-real");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
+    const state = csvSharedState;
+    makeUser(state, "root-csv-real", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-csv-real")!);
     const csv = "loginId,name,role,groups\nnewbie-two,Newbie Two,user,\n";
 
     const denied = await send(state, "/admin/users/import", { token: adminTok, raw: csv });
@@ -719,9 +758,9 @@ describe("CSV export and import (admin-csv)", () => {
   });
 
   test("more than 2000 data rows gives 413", async () => {
-    const state = makeState("csv-413");
-    makeUser(state, "root-admin", { role: "admin", password: ADMIN_PW });
-    const adminTok = sessionFor(state, state.users.findByPrincipal("root-admin")!);
+    const state = csvSharedState;
+    makeUser(state, "root-csv-413", { role: "admin", password: ADMIN_PW });
+    const adminTok = sessionFor(state, state.users.findByPrincipal("root-csv-413")!);
     const rows = Array.from({ length: 2001 }, (_, i) => `row-${i},Row ${i},user,`).join("\n");
     const res = await send(state, "/admin/users/import?dryRun=1", { token: adminTok, raw: `loginId,name,role,groups\n${rows}\n` });
     expect(res.status).toBe(413);

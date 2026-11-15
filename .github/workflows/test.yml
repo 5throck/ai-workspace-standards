@@ -42,12 +42,30 @@ jobs:
           # which fails with "ambiguous argument ...^..." on pull_request events.
           fetch-depth: 0
 
+      - name: Windows Defender exclusions (CI speed)
+        # windows-only: real-time scanning multiplies every bun/git process
+        # start and every fixture-tree copy (unit step 361s vs 41s on ubuntu,
+        # run 43705458736). Slot: immediately after checkout, before Setup Bun
+        # / Install dependencies, so bun install, template validation and all
+        # later steps benefit. Optimization only — must never fail the job
+        # (design 2026-11-15-windows-ci-test-speedup-design, item 2).
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Add-MpPreference -ExclusionPath $env:GITHUB_WORKSPACE
+          Add-MpPreference -ExclusionPath (Join-Path $env:USERPROFILE '.bun')   # bun install cache
+          Add-MpPreference -ExclusionPath $env:TEMP                              # runner temp / sqlite sidecars
+          Add-MpPreference -ExclusionProcess 'bun.exe'
+          Write-Host "Exclusions:"; (Get-MpPreference).ExclusionPath | Out-String | Write-Host
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           # Pinned to the version verified locally; `latest` risks silent breakage
-          # on upstream Bun releases.
-          bun-version: 1.4.0
+          # on upstream Bun releases. 1.4.4 matches local dev (design
+          # 2026-11-15-windows-ci-test-speedup-design, item 5).
+          bun-version: 1.4.4
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -306,8 +324,9 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          # Keep in sync with the test job above.
-          bun-version: 1.4.0
+          # Keep in sync with the test job above (1.4.4: design
+          # 2026-11-15-windows-ci-test-speedup-design, item 5).
+          bun-version: 1.4.4
 
       - name: Install gitleaks (pinned)
         env:

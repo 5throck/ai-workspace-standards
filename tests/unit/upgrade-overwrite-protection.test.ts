@@ -21,7 +21,22 @@
  * real workspace templates (the upgrade-decision-log pattern). One run per
  * seeded shape; scenarios ride the shared run as read-only assertions.
  *
- * @version 1.0.3 (file joins the test-runner FILE_TIME_BUDGETS; every in-body engine spawn carries a 60s per-test budget)
+ * @version 1.1.0 (engine-run consolidation — spec docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1)
+ * v1.1.0 (2026-11-15): two dedicated engine spawns consolidated onto shared
+ *          runs with every expect() preserved verbatim — (a) the
+ *          regression-guard scene (docs/phase-definitions.md, stale baseline +
+ *          evolved bytes) is seeded into the shared E2 apply run and its test
+ *          moved into that describe; (b) the instruction-file MERGE scene
+ *          (marked CLAUDE.md zone) is seeded into the shared A1 run (hoisted
+ *          to module scope) and its test asserts against it. 15 runUpgrade
+ *          sites → 13. The E1/E2 describe-level dry+apply base pairs were NOT
+ *          merged: their exit-code assertions are mutually exclusive (E1 pins
+ *          WARN-only exit 0, E2 pins MARKER_LOSS exit 1) and repeated
+ *          --disposition flags overwrite rather than accumulate
+ *          (scripts/upgrade-project.ts disposition is a single variable), so
+ *          the design's composite-grant and pair-dedupe projections would
+ *          delete assertions.
+ * v1.0.3 (file joins the test-runner FILE_TIME_BUDGETS; every in-body engine spawn carries a 60s per-test budget)
  * v1.0.1 (re-stale loop test gets a 60s per-test budget — windows-latest 15.03s vs 15s ceiling)
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
@@ -120,6 +135,11 @@ function seedBaseline(tmp: string, rel: string, baselineContent: string): void {
 
 const SKIP_LINE = (verdictLabel: string, rel: string): string => `${verdictLabel} (SKIP): ${rel}`;
 
+// DOCS_OVERWRITE-covered doc path shared by the E1/E2 scenes (module scope so
+// the E2 seed's regression-guard scene and the moved regression test can
+// reference it).
+const PHASE_DEFS = 'docs/phase-definitions.md';
+
 // ═════════════════════════════════════════════════════════════════════════════
 // E1 — EVOLVED_PRESERVE
 // ═════════════════════════════════════════════════════════════════════════════
@@ -127,7 +147,7 @@ const SKIP_LINE = (verdictLabel: string, rel: string): string => `${verdictLabel
 describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
   // co-deck audit cases #1/#2 (yaml / docs shape), the co-newbiz delete-merged-branches.yml
   // re-stale loop: baseline == today's template bytes, the project added content.
-  const PHASE_DEFS = 'docs/phase-definitions.md'; // DOCS_OVERWRITE
+  // (PHASE_DEFS lives at module scope — shared with the E2 regression-guard scene.)
   const WORKFLOWS = 'docs/governance/agents/workflows.md'; // TEMPLATE TREE SYNC
   const RESTALE = '.github/workflows/delete-merged-branches.yml'; // TEMPLATE TREE SYNC (co-newbiz loop)
   const rels = [PHASE_DEFS, WORKFLOWS, RESTALE];
@@ -218,19 +238,6 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
     }
   }, 60000);
 
-  test('regression guard: template changed + project evolved is still CONFLICT (ERROR), exit 1', () => {
-    const tmp = makeTempProject();
-    // baseline differs from today's template => templateChanged
-    write(tmp, PHASE_DEFS, `${templateBytes(PHASE_DEFS).trimEnd()}\n# project-only\n`);
-    seedBaseline(tmp, PHASE_DEFS, '# an older delivered revision\n');
-    commitAll(tmp, 'seed');
-    const r = runUpgrade(tmp);
-    expect(r.status).toBe(1);
-    const rows = rowsFor(readManifest(tmp), PHASE_DEFS);
-    expect(rows.map((x) => x.verdict)).toEqual(['CONFLICT']);
-    expect(rows[0].severity).toBe('ERROR');
-  }, 60000);
-
   test('UNTOUCHED + template changed still delivers (preserve fires only for project evolution)', () => {
     const tmp = makeTempProject();
     const old = '# old delivered revision\n';
@@ -246,19 +253,38 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
 // ═════════════════════════════════════════════════════════════════════════════
 // A1 — every LOCAL-PATCH form is a marker (design replay fixture 3)
 // ═════════════════════════════════════════════════════════════════════════════
+// Module-scope shared run (spec 2026-11-15-windows-ci-test-speedup-design
+// item 1): the A1 seeded project additionally carries the instruction-file
+// MERGE scene (a LOCAL-PATCH marker inside the CLAUDE.md managed zone) so the
+// "E2 MARKER_LOSS — prune and instruction-file MERGE" describe asserts against
+// this one run instead of paying its own engine spawn. Same unbaselined
+// marked-divergence shape the standalone fixture used; per-path assertions
+// are unchanged.
+const A1_CASES: Array<{ rel: string; marker: string }> = [
+  { rel: 'docs/governance/agents/workflows.md', marker: '<!-- LOCAL-PATCH(upstream-request: U-20991231-001): upstream form -->' },
+  { rel: 'docs/governance/agents/execution-plan-templates.md', marker: '<!-- LOCAL-PATCH (design: DG-DECK-06 fallback): field form -->' },
+  { rel: 'docs/phase-definitions.md', marker: '<!-- LOCAL-PATCH(project-local): project form -->' },
+  { rel: '.github/workflows/delete-merged-branches.yml', marker: '# LOCAL-PATCH U-20261108-002 bare form' },
+];
+const a1ClaudeZone = templateBytes('CLAUDE.md').match(/<!-- COMMON-CLAUDE:START -->[\s\S]*?<!-- COMMON-CLAUDE:END -->/);
+const a1MarkedClaude = a1ClaudeZone
+  ? templateBytes('CLAUDE.md').replace(
+      a1ClaudeZone[0],
+      a1ClaudeZone[0].replace('<!-- COMMON-CLAUDE:END -->', '<!-- LOCAL-PATCH(project-local): zone patch -->\n<!-- COMMON-CLAUDE:END -->'),
+    )
+  : null;
+const a1Tmp = makeTempProject();
+for (const c of A1_CASES) write(a1Tmp, c.rel, `${templateBytes(c.rel).trimEnd()}\n${c.marker}\n`);
+if (a1MarkedClaude !== null) write(a1Tmp, 'CLAUDE.md', a1MarkedClaude);
+commitAll(a1Tmp, 'seed marked, never-baselined project');
+const a1Run = runUpgrade(a1Tmp);
+const a1Manifest = readManifest(a1Tmp);
 
 describe('A1 marker forms — NO_BASELINE divergence is CONFLICT for every LOCAL-PATCH form', () => {
-  const CASES: Array<{ rel: string; marker: string }> = [
-    { rel: 'docs/governance/agents/workflows.md', marker: '<!-- LOCAL-PATCH(upstream-request: U-20991231-001): upstream form -->' },
-    { rel: 'docs/governance/agents/execution-plan-templates.md', marker: '<!-- LOCAL-PATCH (design: DG-DECK-06 fallback): field form -->' },
-    { rel: 'docs/phase-definitions.md', marker: '<!-- LOCAL-PATCH(project-local): project form -->' },
-    { rel: '.github/workflows/delete-merged-branches.yml', marker: '# LOCAL-PATCH U-20261108-002 bare form' },
-  ];
-  const tmp = makeTempProject();
-  for (const c of CASES) write(tmp, c.rel, `${templateBytes(c.rel).trimEnd()}\n${c.marker}\n`);
-  commitAll(tmp, 'seed marked, never-baselined project');
-  const r = runUpgrade(tmp);
-  const m = readManifest(tmp);
+  const CASES = A1_CASES;
+  const tmp = a1Tmp;
+  const r = a1Run;
+  const m = a1Manifest;
 
   test('exit 1 — each marked, unbaselined divergence is CONFLICT (ERROR) and preserved', () => {
     expect(r.status).toBe(1);
@@ -340,6 +366,14 @@ describe('E2 MARKER_LOSS — every delivery path (DEC-20261111-01 D4)', () => {
 
   const dryProject = seed();
   const applyProject = seed();
+  // Regression-guard scene (spec 2026-11-15-windows-ci-test-speedup-design
+  // item 1: consolidated run, assertions unchanged — rowsFor is per-path so
+  // this stale-baseline evolved doc rides the shared apply run as a read-only
+  // scene instead of paying its own engine spawn). APPLY project only: the
+  // dry-run parity test pins zero writes against a manifest-less project.
+  write(applyProject, PHASE_DEFS, `${templateBytes(PHASE_DEFS).trimEnd()}\n# project-only\n`);
+  seedBaseline(applyProject, PHASE_DEFS, '# an older delivered revision\n');
+  commitAll(applyProject, 'seed regression-guard scene');
   if (haveSkill) {
     for (const p of [dryProject, applyProject]) {
       write(p, SKILL, readFileSync(skillTplPath, 'utf8').replace(/^version:.*$/m, 'version: "0.0.1"'));
@@ -431,6 +465,17 @@ describe('E2 MARKER_LOSS — every delivery path (DEC-20261111-01 D4)', () => {
     expect(r.status).toBe(1);
     expect(rowsFor(mm, CORE_MARKED).some((d) => d.verdict === 'MARKER_LOSS')).toBe(true);
   }, 60000);
+
+  test('regression guard: template changed + project evolved is still CONFLICT (ERROR), exit 1', () => {
+    // Consolidated ride (spec 2026-11-15-windows-ci-test-speedup-design item 1):
+    // the stale-baseline evolved docs/phase-definitions.md scene is seeded into
+    // the shared E2 apply run above — rowsFor is per-path, so every assertion
+    // is unchanged; only the dedicated engine spawn is gone.
+    expect(apply.status).toBe(1);
+    const rows = rowsFor(m, PHASE_DEFS);
+    expect(rows.map((x) => x.verdict)).toEqual(['CONFLICT']);
+    expect(rows[0].severity).toBe('ERROR');
+  });
 });
 
 describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
@@ -471,21 +516,14 @@ describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
   }, 60000);
 
   test('instruction-file MERGE: a marker inside a replaced managed zone is MARKER_LOSS and the merge write is skipped', () => {
-    const tmp = makeTempProject();
-    const tpl = templateBytes('CLAUDE.md');
-    const zone = tpl.match(/<!-- COMMON-CLAUDE:START -->[\s\S]*?<!-- COMMON-CLAUDE:END -->/);
-    if (!zone) return; // template carries no zone — nothing to assert
-    const marked = tpl.replace(
-      zone[0],
-      zone[0].replace('<!-- COMMON-CLAUDE:END -->', '<!-- LOCAL-PATCH(project-local): zone patch -->\n<!-- COMMON-CLAUDE:END -->'),
-    );
-    write(tmp, 'CLAUDE.md', marked);
-    commitAll(tmp, 'seed');
-    const r = runUpgrade(tmp);
-    const mm = readManifest(tmp);
+    // Consolidated ride (spec 2026-11-15-windows-ci-test-speedup-design item 1):
+    // the marked-zone CLAUDE.md scene is seeded into the shared A1 run (same
+    // unbaselined marked-divergence shape this fixture used standalone) —
+    // every assertion is unchanged; only the dedicated engine spawn is gone.
+    if (a1MarkedClaude === null) return; // template carries no zone — nothing to assert
     // The zone content differs from the template, so the merge would replace it and drop the marker.
-    expect(verdictsFor(mm, 'CLAUDE.md')).toContain('MARKER_LOSS');
-    expect(read(tmp, 'CLAUDE.md')).toBe(marked);
-    expect(r.status).toBe(1);
-  }, 60000);
+    expect(verdictsFor(a1Manifest, 'CLAUDE.md')).toContain('MARKER_LOSS');
+    expect(read(a1Tmp, 'CLAUDE.md')).toBe(a1MarkedClaude);
+    expect(a1Run.status).toBe(1);
+  });
 });
