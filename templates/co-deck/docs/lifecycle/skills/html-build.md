@@ -7,7 +7,7 @@
 - **Skill**: html-build
 - **Status**: active
 - **Owner**: html-build
-- **Created**: 2026-11-15
+- **Created**: 2026-11-16
 
 ## Description
 
@@ -17,7 +17,7 @@ Generates HTML slides from slide_deck.md and design_spec.md. Applies theme (data
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-11-15 | - | production | Initial record derived from SKILL.md frontmatter | html-build |
+| 2026-11-16 | - | production | Initial record derived from SKILL.md frontmatter | html-build |
 
 ## Acceptance Criteria
 

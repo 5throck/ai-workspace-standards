@@ -1,5 +1,24 @@
 #!/usr/bin/env bun
-// @version 1.106.0
+// @version 1.108.0
+// v1.108.0 (2026-11-16, T-20261114-010 — spec
+//          docs/designs/2026-11-16-governance-batch-design.md): the WORKSPACE seed
+//          branch consults assetGate.agents for docs/lifecycle/agents/<name>.md —
+//          a record for an agent the variant.json registry withholds is skipped
+//          (INFO decision row) instead of seeded dangling. Already-seeded orphans
+//          are not auto-deleted; cleanup rides the T-20261112-008 wave.
+// v1.107.0 (2026-11-16, T-20261114-004 — spec
+//          docs/designs/2026-11-16-governance-batch-design.md): settings JSON_MERGE
+//          guard extension. Arm (a): the pre-merge filter extends from hooks to
+//          command-bearing top-level keys (statusLine, subagentStatusLine, ...) via
+//          dropMissingPathCommandEntries (lib/hook-dedupe.ts v1.2.0) — template
+//          commands referencing paths absent from the project are dropped with a
+//          GUARD row instead of resurrecting dead helper references. Arm (b):
+//          classifyPermissionWidenings (lib/upgrade-policy.ts v1.45.0) names
+//          template allow entries that widen a stricter project posture (bare
+//          wildcard over a scoped tool, wildcard for an unlisted tool); they are
+//          stripped from the merged payload by default with a GUARD row and a
+//          WARN-severity MERGE decision; narrow additions still merge; project
+//          entries are never removed.
 // v1.105.0 (2026-11-13, T-20261113-002, design
 //          docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md):
 //          SKILLS_REGISTRY_RECONCILE skips self-managed skill dirs (e.g. skills/graft/,
@@ -1275,7 +1294,16 @@ import { reconcileExternalDepsManifest, splitValidEntries } from "./helpers/exte
 import { applySubstitutions } from "./helpers/substitute-placeholders.ts";
 import { selectIgnoredToolingArtifacts } from "./helpers/ignored-tooling.ts";
 import { mergeGitleaksToml } from "./helpers/gitleaks-merge.ts";
-import { dedupeClaudeSettingsHooks, dropMissingPathHookEntries } from "./lib/hook-dedupe.ts";
+import {
+  dedupeClaudeSettingsHooks,
+  dropMissingPathCommandEntries,
+  dropMissingPathHookEntries,
+} from "./lib/hook-dedupe.ts";
+
+/** Plain-object narrow for the settings-guard call sites (T-20261114-004). */
+function isPlainObj(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
 import {
   isFleetProjectPath,
   isTenantWithinWindows,
@@ -1319,6 +1347,7 @@ import {
   lifecyclelessText,
   censusInstructionRegions,
   spanCarriesProjectAuthoredLines,
+  classifyPermissionWidenings,
   mergeSettingsData,
   mergeWorkspaceSchemaJson,
   normalizeAgentTierFrontmatter,
@@ -6618,11 +6647,40 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           // deliberately deleted, hooks re-pointed at `.trail/hook.cjs`) never gets
           // graft-era hook entries re-merged. Inert for healthy projects: every path
           // a current template hook references is delivered everywhere.
-          const guardedTemplate = dropMissingPathHookEntries(JSON.parse(readFileSync(abs, "utf8")), (p) =>
+          // T-20261114-004 arm (a) (spec docs/designs/2026-11-16-governance-batch-design.md):
+          // the pre-merge filter extends from hooks to any command-bearing top-level
+          // key (statusLine, subagentStatusLine, ...) — a template command referencing
+          // a path absent from the project is dropped instead of resurrecting dead
+          // helper references. Arm (b): template allow entries classified as widening
+          // a stricter project posture (bare wildcard over a scoped tool, wildcard
+          // for an unlisted tool) are stripped from the merged payload by default and
+          // recorded as a WARN decision naming them; narrow additions still merge.
+          const templateData = JSON.parse(readFileSync(abs, "utf8"));
+          const cmdGuarded = dropMissingPathCommandEntries(templateData, (p) => existsSync(join(projectDir, p)));
+          const guardedTemplate = dropMissingPathHookEntries(cmdGuarded.settings, (p) =>
             existsSync(join(projectDir, p)),
           );
           const projectData = JSON.parse(readFileSync(dest, "utf8"));
-          const { merged: mergedData, preserved } = mergeSettingsData(guardedTemplate.settings, projectData);
+          const mergedPre = mergeSettingsData(guardedTemplate.settings, projectData);
+          const widenings = classifyPermissionWidenings(guardedTemplate.settings, projectData);
+          let mergedData = mergedPre.merged;
+          if (
+            widenings.length > 0 &&
+            isPlainObj(mergedData) &&
+            isPlainObj(mergedData.permissions) &&
+            Array.isArray(mergedData.permissions.allow)
+          ) {
+            mergedData = {
+              ...mergedData,
+              permissions: {
+                ...mergedData.permissions,
+                allow: (mergedData.permissions.allow as string[]).filter(
+                  (entry) => !widenings.some((w) => w.entry === entry),
+                ),
+              },
+            };
+          }
+          const preserved = mergedPre.preserved;
           // U-20261031-008 (spec docs/designs/2026-10-31-template-security-hardening-design.md
           // R2.6 arm 1): the array-union merge appends template hook entries without
           // deduping — variant graft installs accumulated exact-duplicate (event, matcher,
@@ -6648,12 +6706,33 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
               `  GUARD  ${rel}  (dropped ${guardedTemplate.dropped.length} template hook entr(ies) referencing paths absent from the project: ${[...new Set(guardedTemplate.dropped.map((d) => d.missingPath))].join(", ")})`,
             );
           }
+          if (cmdGuarded.dropped.length > 0) {
+            console.log(
+              `  GUARD  ${rel}  (dropped ${cmdGuarded.dropped.length} template command key(s) referencing paths absent from the project: ${[...new Set(cmdGuarded.dropped.map((d) => d.key))].join(", ")})`,
+            );
+          }
+          if (widenings.length > 0) {
+            console.log(
+              `  GUARD  ${rel}  (stripped ${widenings.length} template permission widening(s): ${widenings.map((w) => w.entry).join(", ")})`,
+            );
+          }
           if (deduped.removed.length > 0) {
             console.log(
               `  DEDUPE ${rel}  (collapsed ${deduped.removed.length} duplicate hook command(s): ${[...new Set(deduped.removed.map((r) => r.command))].join(", ")})`,
             );
           }
           if (!dryRun) writeFileSync(dest, merged, "utf8");
+          if (widenings.length > 0 && !dryRun) {
+            recordDecision(
+              rel,
+              claim.policy,
+              TEMPLATE_TREE_SYNC_PASS,
+              "MERGE",
+              `permission widening stripped by default (T-20261114-004 arm b): ${widenings.map((w) => w.entry).join(", ")}`,
+              undefined,
+              "WARN",
+            );
+          }
           recordDecision(
             rel,
             claim.policy,
@@ -6839,6 +6918,28 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           "INFO",
         );
         console.log(`  ${dryTag}SKIP   ${rel}  (country-scoped; project country: ${detectedCountry})`);
+        continue;
+      }
+      // T-20261114-010: the asset-gate guard mirrors the agents/ pass — a lifecycle
+      // record for an agent the variant.json registry withholds is not seeded (the
+      // record would dangle with no agent file and no audit signal). Already-seeded
+      // orphans are NOT auto-deleted (the owner owns deletions); they surface in the
+      // T-20261112-008 cleanup wave.
+      if (
+        rel.startsWith("docs/lifecycle/agents/") &&
+        assetGate &&
+        !assetGate.agents.has(rel.replace(/^docs\/lifecycle\/agents\//, ""))
+      ) {
+        recordDecision(
+          rel,
+          "CORRECTIVE",
+          TEMPLATE_TREE_SYNC_PASS,
+          "SKIP",
+          "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+          undefined,
+          "INFO",
+        );
+        console.log(`  ${dryTag}SKIP   ${rel}  (agent withheld by variant.json registry — lifecycle record withheld)`);
         continue;
       }
       // D2 (U-20261028-001): tombstone guard before the seed — a deleted,

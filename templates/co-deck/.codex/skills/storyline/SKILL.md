@@ -1,7 +1,7 @@
 ---
 name: storyline
 scope: co-deck
-version: 1.3.0
+version: 1.3.1
 lang: ko
 lang_reason: proper-noun (Step 3.5 quotes verbatim Korean defect strings and replacement wording from the affected deck)
 description: >
@@ -12,7 +12,7 @@ description: >
   of the lecture workflow.
 status: active
 owner: storyline
-last_reviewed: 2026-11-07
+last_reviewed: "2026-11-16"
 prerequisites: research
 relates_to:
   - skill: design
@@ -43,6 +43,23 @@ Designs the lecture narrative flow (`storyline.md`) and per-slide content (`slid
   - Total slide count (e.g., 40, 60)
   - Chapter (part) count and rough proportions
   - Whether to include cover / speaker intro / contact slides (default: include all)
+
+---
+
+### Step 1.5: Content Doctrine (authoring rules)
+
+The slide-content doctrine the built deck must follow (mirrored in zen theme.json
+content_rules.bullet_doctrine; enforced editorially at Step 3.5’s hygiene check):
+
+- **Bullets carry context, not listings** — every bullet states an interpretation or
+  takeaway; the bare "number — source" listing style is banned. The figure and its
+  meaning live in the same line.
+- **Source attributions are narration material** — per-slide source citations belong
+  in the speaker script and the references appendix, never in slide bullets.
+- **No next-slide announcements in bullets** — "다음 장에서는…" sentences belong in
+  the speaker script only.
+- **Biography credentials break per line** — each credential is its own line so
+  profile cards keep a readable width instead of stretching full-width.
 
 ---
 

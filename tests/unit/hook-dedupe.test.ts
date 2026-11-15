@@ -147,7 +147,9 @@ describe('analyzeClaudeHookDrift (U-20261031-008 arm 2 — lifecycle-sync-audit 
     });
 
     test('malformed local settings yield an empty report, no throw', () => {
-        expect(analyzeClaudeHookDrift(null, templateSettings())).toEqual({ duplicates: [], overCount: [] });
-        expect(analyzeClaudeHookDrift({ hooks: 'nope' }, templateSettings())).toEqual({ duplicates: [], overCount: [] });
+        // v1.3.0: the report gains the arm-(c) arrays (always present, empty on malformed input)
+        const empty = { duplicates: [], overCount: [], missing: [], matcherMismatch: [] };
+        expect(analyzeClaudeHookDrift(null, templateSettings())).toEqual(empty);
+        expect(analyzeClaudeHookDrift({ hooks: 'nope' }, templateSettings())).toEqual(empty);
     });
 });

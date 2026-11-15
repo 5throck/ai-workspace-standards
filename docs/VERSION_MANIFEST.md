@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-15T14:58:14.424Z
+**Generated**: 2026-11-15T22:44:04.010Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -156,7 +156,7 @@
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | fs, path |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | child_process, fs, os, path, url |
 | l3-to-variant-pipeline.ts | 1.23.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
-| lifecycle-sync-audit.ts | 1.21.0 | scripts/lifecycle-sync-audit.ts | crypto, fs, js-yaml, path, process |
+| lifecycle-sync-audit.ts | 1.22.0 | scripts/lifecycle-sync-audit.ts | crypto, fs, js-yaml, path, process |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | fs, path |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun, path |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | child_process, fs, path, readline, url |
@@ -206,13 +206,13 @@
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
 | test-new-project.ts | 1.12.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.15.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.16.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | child_process, fs, os, path |
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.106.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.108.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |

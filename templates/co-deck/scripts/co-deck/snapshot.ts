@@ -1,4 +1,11 @@
-// @version 1.0.1
+// @version 1.1.0
+// v1.1.0 (2026-11-16, U-20261114-010 — spec docs/designs/2026-11-16-governance-batch-design.md):
+//   (a) input resolution order is absolute → CWD-relative → workspace-relative, so
+//       repo-level files (scripts/co-deck/*.ts) snapshot correctly regardless of where
+//       the invocation runs; (b) a snapshot where EVERY input is missing rolls back the
+//       _versions/<id>/ directory and writes no VERSIONS.md entry (no bogus state to
+//       clean by hand); (c) --desc values longer than 20 chars keep full text in
+//       VERSIONS.md and warn once about the shortened directory id.
 // v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // File version snapshot manager — saves copies to _versions/<id>/ and tracks history in VERSIONS.md.
 // Usage: bun scripts/co-deck/snapshot.ts <file1> [file2 ...] --workspace deliverables/<project> --desc "..." --agent "..."
@@ -7,9 +14,9 @@
 
 import {
   existsSync, mkdirSync, copyFileSync, cpSync, statSync,
-  readdirSync, readFileSync, writeFileSync,
+  readdirSync, readFileSync, writeFileSync, rmSync,
 } from 'fs';
-import { join, resolve, relative, dirname, basename } from 'path';
+import { join, resolve, relative, dirname, basename, isAbsolute } from 'path';
 
 const VERSIONS_DIR = '_versions';
 const VERSIONS_MD  = 'VERSIONS.md';
@@ -24,7 +31,14 @@ function makeVersionId(desc: string, agent: string): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   const ts = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
   const safeAgent = agent.replace(/ /g, '_').toLowerCase().slice(0, 12);
-  const safeDesc  = (desc || 'update').replace(/ /g, '_').replace(/[^a-zA-Z0-9\-_가-힣ㄱ-ㅎㅏ-ㅣ]/g, '').slice(0, 20);
+  const cleanDesc = (desc || 'update').replace(/ /g, '_').replace(/[^a-zA-Z0-9\-_가-힣ㄱ-ㅎㅏ-ㅣ]/g, '');
+  // v1.1.0 (c): the directory id still caps at 20 chars, but the truncation is
+  // loud — VERSIONS.md keeps the full desc, and the operator knows the id lost
+  // its tail (U-20261114-010: the silent truncate ate "video-swap-pdf-profi").
+  if (cleanDesc.length > 20) {
+    console.error(`  ⚠️  --desc가 길어 버전 id에서 잘렸습니다 (VERSIONS.md에는 전문 기록): "${cleanDesc}" → "${cleanDesc.slice(0, 20)}"`);
+  }
+  const safeDesc = cleanDesc.slice(0, 20);
   return `${ts}_${safeAgent}_${safeDesc}`;
 }
 
@@ -102,26 +116,46 @@ ${newEntry}`;
 
 function snapshot(files: string[], desc: string, agent: string, workspace: string): string {
   const versionId  = makeVersionId(desc, agent);
-  const versionDir = join(workspace, VERSIONS_DIR, versionId);
-  mkdirSync(versionDir, { recursive: true });
+  // v1.1.0 (b): the directory is created lazily on the first successful copy — a
+  // fully-failed snapshot leaves no _versions/<id>/ state to clean by hand.
+  let versionDir: string | null = null;
+  const ensureVersionDir = (): string => {
+    if (versionDir === null) {
+      versionDir = join(workspace, VERSIONS_DIR, versionId);
+      mkdirSync(versionDir, { recursive: true });
+    }
+    return versionDir;
+  };
 
   const saved: [string, string][] = [];
   const skipped: string[] = [];
 
   for (const filePath of files) {
-    const src = resolve(workspace, filePath);
+    // v1.1.0 (a): resolution order absolute → CWD-relative → workspace-relative,
+    // so repo-level files resolve regardless of the invocation's CWD.
+    let src: string;
+    if (isAbsolute(filePath)) src = filePath;
+    else {
+      const cwdCand = resolve(process.cwd(), filePath);
+      const wsCand = resolve(workspace, filePath);
+      src = existsSync(cwdCand) ? cwdCand : wsCand;
+    }
     if (!existsSync(src)) { skipped.push(filePath); continue; }
 
     const stat = statSync(src);
     if (stat.isDirectory()) {
-      const dst = join(versionDir, basename(src));
+      const dst = join(ensureVersionDir(), basename(src));
       cpSync(src, dst, { recursive: true });
       saved.push([filePath, 'directory']);
       console.log(`  📁 ${filePath}/ → _versions/${versionId}/`);
     } else {
       let rel: string;
-      try { rel = relative(workspace, src); } catch { rel = basename(src); }
-      const dst = join(versionDir, rel);
+      try {
+        rel = relative(workspace, src);
+        // files outside the workspace (repo-level) store flat under their basename
+        if (rel.startsWith('..')) rel = basename(src);
+      } catch { rel = basename(src); }
+      const dst = join(ensureVersionDir(), rel);
       mkdirSync(dirname(dst), { recursive: true });
       copyFileSync(src, dst);
       const size = sizeofFmt(stat.size);
@@ -133,6 +167,18 @@ function snapshot(files: string[], desc: string, agent: string, workspace: strin
   if (skipped.length > 0) {
     console.error(`  ❌ Input file(s) not found (${skipped.length}):`);
     for (const s of skipped) console.error(`     ${s}`);
+  }
+
+  // v1.1.0 (b): every input missed — roll the directory back, write no VERSIONS.md
+  // entry, and fail loudly instead of leaving a bogus empty snapshot.
+  if (saved.length === 0) {
+    if (versionDir !== null) rmSync(versionDir, { recursive: true, force: true });
+    console.error(`\n❌ 스냅샷 실패: 저장된 파일이 없습니다 (입력 ${files.length}건 모두 미발견). VERSIONS.md 미기록.`);
+    process.exitCode = 1;
+    return versionId;
+  }
+
+  if (skipped.length > 0) {
     // Snapshot still completes for the files that exist, but the run fails so
     // callers (and the agent) notice the missing input instead of silently
     // proceeding with a partial snapshot.
