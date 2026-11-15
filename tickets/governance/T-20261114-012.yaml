@@ -53,12 +53,15 @@ title: >-
   T-20261114-003, T-20261110-012 (README-pair hash gating precedent),
   T-20261110-010 (variant script parity for @version files).
 priority: low
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-14T18:12:29.203+09:00'
 history:
   - at: '2026-11-14T18:12:29.203+09:00'
     from: null
     to: backlog
+  - at: '2026-11-16T07:45:42.703+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

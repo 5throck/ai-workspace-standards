@@ -44,12 +44,15 @@ title: >-
   T-20261114-003, design docs/designs/2026-10-27-sync-overwrite-policy-design.md
   section 6.
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-14T18:12:28.960+09:00'
 history:
   - at: '2026-11-14T18:12:28.960+09:00'
     from: null
     to: backlog
+  - at: '2026-11-16T07:45:42.649+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
