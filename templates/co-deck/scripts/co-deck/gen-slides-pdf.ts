@@ -1,3 +1,67 @@
+// @version 1.14.9 — LOCAL-PATCH(pm-2026-11-15 footnote-scrim): photo-aware footnote
+//   scrim + placement fit ladder. Audit of the 24 gloss slides / 37 glosses found
+//   NO absent text, NO off-page text and NO card overlap — the reported
+//   "약어 글상자가 사라진다" was CONTRAST: the bare C_MUTED grey gloss line
+//   (~lum 115) sits directly on the photo backgrounds that v1.14.7 made render,
+//   and every one of the 24 backdrops measured p90 luminance 52–130, so the
+//   gloss read as gone. HTML parity is the deck injector's photo-aware footnote
+//   scrim. ①when a background was drawn (ctx.bgDrawn), the band now gets a white
+//   C_CARD scrim (rounded, 0.96, hug-width) and body-navy C_BODY ink — worst-case
+//   ≈4.9:1 on pure black; decks without a drawn background keep the legacy grey.
+//   ②placement is a first-fit ladder: (1a) below the card at the legacy anchor
+//   (1-line bands land exactly where they always did), (1b) shrunk to the 11px
+//   floor and re-wrapped, (1c) on the card's empty bottom padding (kept below the
+//   card title area; scrim-over-card seam is white-on-white), (2) the top margin
+//   above the card, (3) drop as the last resort ONLY — with a loud per-gloss
+//   ⚠ log and an end-of-run summary (audited deck cannot reach it). Per-slide
+//   placement lines are logged for verification (band rect + rung + scrim flag).
+// @version 1.14.8 — LOCAL-PATCH(pm-2026-11-15 footnote-wrap; html-build finding, no
+//   upstream ticket id yet): footnote band wrapping. The joined gloss list was
+//   already wrapped by multiCell, but the band was anchored at a FIXED bottom
+//   offset (CY+CH−18px) and grew DOWNWARD, so every line after the first landed
+//   below the page edge and was clipped at export — S11 lost
+//   "FY = Fiscal Year — 회사 회계연도", S48 lost "AP2 = Agent Payments Protocol
+//   — …프로토콜" (2 of the deck's 37 glosses; the HTML deck shows both in full,
+//   so the PDF was the outlier). The wrap count is now measured up front with
+//   the same greedy discipline bullets use, the band is placed so it ENDS at the
+//   legacy footer baseline and grows UPWARD, and it is card-aware: the white
+//   card's own bottom (CARD_LOG rect) is the floor, so a 2-line band slides
+//   under the card instead of painting through its bottom edge; the last line is
+//   always clamped on-page and a cramped band is logged. No text is truncated.
+// @version 1.14.7 — LOCAL-PATCH(U-20261114-011, PDF-side half of "chapter background
+//   groups"): background resolution + divider paint order (PM-approved option A).
+//   ①scope `all`/`divider-cover` per-slide precedence — a slide's OWN
+//   slideData.backgroundImage / manifest binding now wins over the deck-wide
+//   global backdrop; only slides with no binding fall back to the global pool
+//   image. This is the model documented in lecture-profile.md + image-manifest
+//   ("individual bindings win over the global") and what the per-chapter
+//   CHAPTER_BG order depends on; previously scope `all` ignored slideBgEntries
+//   entirely, so bgDrawn was false on every slide and the tooling silently
+//   dropped the deck backdrop too (next item). ②global pool path dual-base
+//   resolution — resolveImageCandidate() tries absolute → imgDir → workspaceRoot
+//   for the global path as the individual branch always did; the global was
+//   resolved against imgDir alone, so "deliverables/assets/images/bg-deck.jpg"
+//   (workspace-relative) never resolved and no background was drawn deck-wide.
+//   Both failures are now warned instead of silent. ③divider legacy paint order
+//   — the divider's own full-bleed visual is drawn BEFORE the part/title/desc
+//   text (was after), so a photo-less divider can no longer paint its own image
+//   over its title card when the theme's `visual` region covers the page (zen:
+//   0,0,100%,100%); this is the same "drawn background ⇒ title stays legible"
+//   guarantee the title/punchline/contact/profile bgDrawn branches provide.
+// @version 1.14.6 — LOCAL-PATCH(U-20261114-008/-009 pending promotion): profile-slide
+//   background parity. renderProfileSlide now honours ctx.bgDrawn — when the
+//   generic per-slide step already drew this slide's own background photo +
+//   wash, the flat C_BG full-page repaint is SKIPPED (it erased the photo:
+//   the same overpaint class as v1.12.0 divider / v1.12.1 contact / F4
+//   punchline / R1 title), the white-bubble card is drawn behind the profile
+//   block (drawBubbleBehind, C_CARD @0.97, 14px radius, before any text), and
+//   the name renders in ink (C_DARK) with the bio in body ink (C_BODY) —
+//   mirroring the HTML .slide-card/.slide-content profile branch and the
+//   v1.14.0 contact treatment. Eyebrow and affiliation keep C_ACCENT (legible
+//   on the white card). Decks WITHOUT a drawn per-slide background keep the
+//   legacy flat-surface white-name/muted-bio path, unchanged.
+//   Re-applied per design 2026-11-14-co-deck-tooling-hardening D5 (the
+//   session-verified edit was absent from the tree at landing time).
 // @version 1.14.5 — LOCAL-PATCH(U-20261105-005): punchline statement renders **keyword** bold-accent (HTML parity; T-20261110-007) via richRuns/richLines
 // @version 1.14.4 — LOCAL-PATCH(U-20261105-005): ToUnicode CMap fix (one preferred code point per glyph; ':' '-' '+' '→' '–' no longer extract as CJK-compat chars)
 // @version 1.14.3 — LOCAL-PATCH(U-20261105-005): rich bullets (**bold** = bold + accent, inline wrap), diagram caption/source in the card, generic contact* lines
@@ -313,6 +377,28 @@ function parseBackgroundImage(frontmatter: string): BgImageConfig | null {
   };
 }
 
+// Try one background-image reference against every base we support.
+// Entries come from two sources with different base dirs: image-manifest.json
+// paths are repo-root-relative pool paths ("deliverables/assets/..."), while the
+// slideData.json backgroundImage fallback is HTML/imgDir-relative
+// ("../assets/images/..."). Try both bases (plus already-absolute) rather than
+// assuming one — guessing wrong silently drops the image (ENOENT inside
+// embedImg's own try/catch), leaving a flat color behind the play button with
+// no visible error.
+// LOCAL-PATCH(upstream-request: U-20261114-011) v1.14.7 — this was individual-only
+// behaviour; the global pool path was resolved against imgDir alone, so a
+// registered deck backdrop ("deliverables/assets/images/bg-deck.jpg") silently
+// never drew on any slide (bgDrawn stayed false deck-wide).
+function resolveImageCandidate(raw: string, imgDir: string, workspaceRoot: string): string | null {
+  if (!raw) return null;
+  if (existsSync(raw)) return raw;
+  const viaImgDir = resolve(imgDir, raw);
+  if (existsSync(viaImgDir)) return viaImgDir;
+  const viaWorkspace = resolve(workspaceRoot, raw);
+  if (existsSync(viaWorkspace)) return viaWorkspace;
+  return null;
+}
+
 // Resolve the background image file path for a given slide.
 // Returns null if the slide should not have a background image or the file doesn't exist.
 function resolveBgImagePath(
@@ -326,28 +412,6 @@ function resolveBgImagePath(
 ): string | null {
   if (!bgConfig.enabled) return null;
 
-  // Individual mode: only slides with explicit background entries.
-  // Entries come from two sources with different base dirs: image-manifest.json
-  // paths are repo-root-relative pool paths ("deliverables/assets/..."),
-  // while the slideData.json backgroundImage fallback is HTML/imgDir-relative
-  // ("../assets/images/..."). Try both bases (plus already-absolute) rather
-  // than assuming one — guessing wrong silently drops the image (ENOENT
-  // inside embedImg's own try/catch), leaving a flat color behind the play
-  // button with no visible error.
-  if (bgConfig.scope === 'individual') {
-    const raw = slideBgEntries.get(slideIdx);
-    if (!raw) return null;
-    if (existsSync(raw)) return raw;
-    const viaImgDir = resolve(imgDir, raw);
-    if (existsSync(viaImgDir)) return viaImgDir;
-    const viaWorkspace = resolve(workspaceRoot, raw);
-    if (existsSync(viaWorkspace)) return viaWorkspace;
-    return null;
-  }
-
-  // 'all' or 'divider-cover' mode: use global background image
-  if (!globalBgPath) return null;
-
   if (bgConfig.scope === 'divider-cover') {
     // LOCAL-PATCH(upstream-request: U-20261105-002) F4 — accept both
     // isPunchline and isPunchlineSlide spellings.
@@ -355,9 +419,34 @@ function resolveBgImagePath(
     if (!data.isTitleSlide && !data.isDividerSlide && !(data.isPunchline || data.isPunchlineSlide)) return null;
   }
 
-  // scope === 'all' or divider-cover with matching slide type
-  const fullPath = resolve(imgDir, globalBgPath);
-  return existsSync(fullPath) ? fullPath : null;
+  // LOCAL-PATCH(upstream-request: U-20261114-011) v1.14.7 — per-slide precedence.
+  // A slide's OWN binding (slideData.backgroundImage / its manifest entry) wins
+  // over the deck-wide global backdrop for EVERY scope, not just `individual`:
+  // the deck model documented in lecture-profile.md and image-manifest.json is
+  // "individual bindings win over the global", and the per-chapter background
+  // order (CHAPTER_BG in the deck generator) depends on it. Before this, scope
+  // `all` ignored slideBgEntries entirely, so a global backdrop repainted every
+  // slide and the per-slide chapter photos were unreachable. Slides with no
+  // binding fall through to the global pool image below.
+  const own = slideBgEntries.get(slideIdx);
+  if (own) {
+    const resolvedOwn = resolveImageCandidate(own, imgDir, workspaceRoot);
+    if (resolvedOwn) return resolvedOwn;
+    // Individual scope used to drop unresolvable entries silently; keep the
+    // fall-through for `all`/`divider-cover` (global backdrop) but say so.
+    if (bgConfig.scope !== 'individual') {
+      console.warn(`  bg own binding unresolvable (slide ${slideIdx + 1}): ${own} — falling back to the global backdrop`);
+    }
+  }
+
+  if (bgConfig.scope === 'individual') return null;   // only explicit per-slide entries
+  if (!globalBgPath) return null;
+
+  const resolvedGlobal = resolveImageCandidate(globalBgPath, imgDir, workspaceRoot);
+  if (!resolvedGlobal) {
+    console.warn(`  bg global backdrop unresolvable: ${globalBgPath} — no background drawn (check the pool path base)`);
+  }
+  return resolvedGlobal;
 }
 
 // ── Slide renderer ────────────────────────────────────────────────────────────
@@ -1288,6 +1377,23 @@ async function renderDividerSlide(ctx: RenderCtx) {
   // dark-overlaid backdrop.
 
   const ip = imgPath(data.visualImage, imgDir ?? '');
+
+  // LOCAL-PATCH(upstream-request: U-20261114-011) v1.14.7 — paint order fix.
+  // The legacy path used to draw the part/title/desc text FIRST and then a
+  // full-bleed cover-crop of the divider's own visual over the whole `visual`
+  // region. Under zen that region IS the page (0,0,100%,100%), so every
+  // photo-less divider lost its title card to its own image (blank photo page;
+  // observed on S4 of the sample after the deck moved to background scope
+  // `all`). Drawing the image first makes the title card unconditionally
+  // legible on top of the photo — the same "drawn background" guarantee the
+  // title / punchline / contact / profile bgDrawn branches provide. The
+  // bgDrawn branch above already returns early with the white-bubble card;
+  // this path is what a future deck without a resolvable background gets.
+  if (ip && visR) {
+    r.fillRect(visR.x, visR.y, visR.w, visR.h, C_DARK3);
+    await r.placeImageCover(doc, ip, visR.x, visR.y, visR.w, visR.h);
+  }
+
   const align: 'L' | 'C' = ip ? 'L' : 'C';
 
   // Estimate actual block height accounting for title/desc text wrapping.
@@ -1312,11 +1418,6 @@ async function renderDividerSlide(ctx: RenderCtx) {
   const py2 = afterTitle + GAP_DIV_TITLE_DESC;
   r.setFont(false, T_DIV_DESC); r.setColor(C_MUTED);
   r.multiCell(titleR.w, LH_DIV_DESC, strip(data.desc), titleR.x, py2, align);
-
-  if (ip) {
-    r.fillRect(visR.x, visR.y, visR.w, visR.h, C_DARK3);
-    await r.placeImageCover(doc, ip, visR.x, visR.y, visR.w, visR.h);
-  }
 }
 
 function renderPunchlineSlide(ctx: RenderCtx) {
@@ -1438,7 +1539,18 @@ function renderProfileSlide(ctx: RenderCtx) {
   //   flex column, centered, text-align:center, padding: 4rem
   //   profile-eyebrow (section) → profile-name → profile-affiliation (accent) → profile-bio
   //   No slide-title element.
-  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+  // LOCAL-PATCH(upstream-request: U-20261114-008/-009 pending) v1.14.6 — when the
+  // per-slide loop already drew this slide's own background photo + wash
+  // (ctx.bgDrawn), SKIP the flat C_BG fill: the opaque full-page repaint painted
+  // straight over the photo (same overpaint class as v1.12.0 divider / v1.12.1
+  // contact / F4 punchline / R1 title). The profile block then renders inside the
+  // white-bubble card, mirroring HTML (zen × white-bubble: .slide-card >
+  // .slide-content) and the v1.14.0 contact treatment. Decks without a drawn
+  // per-slide background keep the legacy flat surface unchanged.
+  const bgDrawn = ctx.bgDrawn === true;
+  if (!bgDrawn) {
+    r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+  }
 
   const bandW = coords.CW * 0.80;
   const bandX = coords.CX + (coords.CW - bandW) / 2;
@@ -1453,11 +1565,25 @@ function renderProfileSlide(ctx: RenderCtx) {
                + LH_PROF_AFFIL + GAP_PROF_AFFIL_BIO + LH_PROF_BIO * Math.max(1, bioLines.length);
   let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
 
+  // v1.14.6 — white bubble card behind the profile block (eyebrow + name +
+  // affiliation + bio), drawn BEFORE any text; width = widest wrapped line.
+  if (bgDrawn) {
+    const textW = Math.max(
+      widestWrappedLine(r, eyebrowTxt ? eyebrowTxt.toUpperCase() : '', bandW, T_PROF_EYEBROW, true),
+      widestWrappedLine(r, nameTxt,  bandW, T_PROF_NAME,  true),
+      widestWrappedLine(r, affilTxt, bandW, T_PROF_AFFIL, false),
+      ...bioLines.map(l => widestWrappedLine(r, l, bandW, T_PROF_BIO, false)),
+    );
+    if (textW > 0) drawBubbleBehind(ctx, bandX + bandW / 2, y, blockH, textW);
+  }
+
   r.setFont(true,  T_PROF_EYEBROW); r.setColor(C_ACCENT);
   r.cell(bandW, LH_PROF_EYEBROW, eyebrowTxt.toUpperCase(), bandX, y, 'C');
   y += LH_PROF_EYEBROW + GAP_PROF_EYEBROW_NAME;
 
-  r.setFont(true,  T_PROF_NAME); r.setColor(C_WHITE);
+  // v1.14.6 — name in ink on the drawn white card (C_WHITE was invisible);
+  // legacy decks keep white. Bio is body ink (C_BODY); affiliation keeps accent.
+  r.setFont(true,  T_PROF_NAME); r.setColor(bgDrawn ? colors.C_DARK : C_WHITE);
   r.cell(bandW, LH_PROF_NAME, nameTxt, bandX, y, 'C');
   y += LH_PROF_NAME + GAP_PROF_NAME_AFFIL;
 
@@ -1465,7 +1591,7 @@ function renderProfileSlide(ctx: RenderCtx) {
   r.cell(bandW, LH_PROF_AFFIL, affilTxt, bandX, y, 'C');
   y += LH_PROF_AFFIL + GAP_PROF_AFFIL_BIO;
 
-  r.setFont(false, T_PROF_BIO); r.setColor(C_MUTED);
+  r.setFont(false, T_PROF_BIO); r.setColor(bgDrawn ? colors.C_BODY : C_MUTED);
   for (const line of bioLines) {
     r.cell(bandW, LH_PROF_BIO, line, bandX, y, 'C');
     y += LH_PROF_BIO;
@@ -2682,6 +2808,7 @@ async function main() {
 
   const renderer = new Renderer(regularFont, boldFont, PW, PH, colors.C_WHITE, cjkRegularFont, cjkBoldFont, missingCps);
 
+  let footnoteDrops = 0;                     // v1.14.9 ladder rung (3) counter — must stay 0
   for (let idx = 0; idx < slideData.length; idx++) {
     const data = slideData[idx];
     const page = pdfDoc.addPage([mm(PW), mm(PH)]);
@@ -2775,13 +2902,102 @@ async function main() {
     // Generic loop placement (not renderStandardSlide) so every slide type can
     // carry citations; draw-last guarantees the line sits on top of the
     // background/card layers already painted.
+    // LOCAL-PATCH(pm-2026-11-15 footnote-wrap) v1.14.8 — wrap + upward growth + a
+    // card-aware clamp (details in the header). Superseded by v1.14.9 below.
+    // LOCAL-PATCH(pm-2026-11-15 footnote-scrim) v1.14.9 — the audited 24-slide /
+    // 37-gloss deck showed NO absence, NO off-page text and NO card overlap, but
+    // the bare C_MUTED grey line was unreadable on EVERY footnote slide: with
+    // v1.14.7 actually drawing photos, the grey (~lum 115) sits on backdrops
+    // measuring p90 luminance 52–130 — the user-visible "약어 글상자가 사라진다".
+    // HTML parity is the deck injector's photo-aware footnote scrim, so:
+    // ① when a background was drawn, the band gets a white C_CARD scrim
+    //   (rounded, 0.96, hug-width) and its ink switches to body-navy C_BODY —
+    //   readable on any photo (worst-case ≈4.9:1 on pure black);
+    // ② placement becomes a fit ladder, first fit wins:
+    //    (1a) below the card at the legacy anchor (1-line bands land exactly
+    //         where they always did);
+    //    (1b) shrunk to the 11px floor and re-wrapped;
+    //    (1c) on the card's empty bottom padding (scrim over card = seamless
+    //         white; kept below the card's title area);
+    //    (2) the top margin above the card;
+    //    (3) drop — last resort only, with a loud per-gloss ⚠ log and a run
+    //         summary (none of the 24 audited slides can reach it).
     const fns = (data.footnotes ?? []).map(s => strip(s)).filter(Boolean);
     if (fns.length > 0) {
       const footR = region('content');
-      renderer.setFont(false, 9);              // 12px × 0.75 = 9pt
-      renderer.setColor(colors.C_MUTED);       // dim ink (#4A4A6A text_muted)
-      renderer.multiCell(footR.w, 4.2, fns.join('  ·  '), footR.x,
-        coords.CY + coords.CH - coords.px2mm(18), 'L');
+      const footText = fns.join('  ·  ');
+      const cardEntry = CARD_LOG
+        .filter((c) => c.n === idx + 1)
+        .sort((a, b) => (b.y + b.h) - (a.y + a.h))[0];
+      const cardBottomMm = cardEntry ? (cardEntry.y + cardEntry.h) * coords.PH : 0;
+      const cardTopMm    = cardEntry ? cardEntry.y * coords.PH : 0;
+      const scrimFloorMm = coords.CY + coords.CH - coords.px2mm(2);
+      const pageTopMm    = coords.CY + coords.px2mm(4);
+      const legacyAnchorBottomMm = coords.CY + coords.CH - coords.px2mm(18) + 4.2;   // v1.14.5-era single-line bottom
+      const onCardTopFloorMm = cardTopMm + coords.px2mm(20);                          // stay below the card's title area
+
+      let plan: { top: number; lh: number; sizePt: number; lines: string[]; where: string } | null = null;
+      const cardPadMm = coords.px2mm(32);              // card bottom padding (empty white strip)
+      const tryPlace = (sizePx: number, mode: 'below-card' | 'on-card' | 'top-margin'): boolean => {
+        const sizePt = sizePx * 0.75;
+        const lh = 4.2 * (sizePx / 12);
+        renderer.setFont(false, sizePt);
+        const lines = renderer.wrapText(footText, footR.w);
+        const bandH = Math.max(1, lines.length) * lh;
+        let top: number;
+        if (mode === 'below-card') {
+          // Legacy anchor; the band may sit on the card's empty bottom padding
+          // (scrim makes the seam invisible) but must stop short of card TEXT,
+          // which ends at cardBottom − cardPad.
+          top = legacyAnchorBottomMm - bandH;
+          const floorMm = cardBottomMm > 0 ? cardBottomMm - cardPadMm + coords.px2mm(3) : coords.CY;
+          if (top < floorMm || top + bandH > scrimFloorMm + coords.px2mm(2)) return false;
+        } else if (mode === 'on-card') {
+          top = cardBottomMm - coords.px2mm(4) - bandH;
+          if (cardBottomMm === 0 || top < onCardTopFloorMm) return false;
+        } else {
+          top = pageTopMm;
+          if (cardTopMm > 0 && top + bandH > cardTopMm - coords.px2mm(2)) return false;
+        }
+        plan = { top: Math.max(coords.CY, top), lh, sizePt, lines, where: mode };
+        return true;
+      };
+      // (1) below the card: design-spec 12px first, then the 11px floor.
+      //     (1c)/(2) follow once the below-card rung is exhausted at both sizes.
+      if (!tryPlace(12, 'below-card') && !tryPlace(11, 'below-card')) {
+        if (!tryPlace(11, 'on-card') && !tryPlace(12, 'on-card')) {
+          if (!tryPlace(11, 'top-margin') && !tryPlace(12, 'top-margin')) {
+            plan = null;                               // (3) drop — see below
+          }
+        }
+      }
+
+      if (!plan) {
+        // (3) last resort: drop, loudly. footnoteDrops is summarised after the loop.
+        footnoteDrops++;
+        console.log(`  ⚠ footnotes DROPPED (slide ${idx + 1}): ${fns.join(' | ')}`);
+      } else {
+        renderer.setFont(false, plan.sizePt);
+        const maxLineW = Math.max(0, ...plan.lines.map((l) => renderer.stringWidth(l)));
+        if (bgDrawn) {
+          // Photo-aware scrim (deck injector parity): white pill behind the band.
+          const padX = coords.px2mm(14), padY = coords.px2mm(8);
+          const sx = Math.max(coords.CX, footR.x - padX);
+          const sw = Math.min(maxLineW + padX * 2, coords.CX + coords.CW - sx);
+          const sy = Math.max(coords.CY + coords.px2mm(2), plan.top - padY);
+          const sh = Math.min(plan.lines.length * plan.lh + padY * 2, scrimFloorMm - sy);
+          renderer.drawRoundedRect(sx, sy, sw, sh, coords.px2mm(8), colors.C_CARD, 0.96);
+          renderer.setColor(colors.C_BODY);              // navy ink on the white scrim
+        } else {
+          renderer.setColor(colors.C_MUTED);             // legacy flat-surface ink
+        }
+        let yy = plan.top;
+        for (const line of plan.lines) {
+          renderer.cell(footR.w, plan.lh, line, footR.x, yy, 'L');
+          yy += plan.lh;
+        }
+        console.log(`  footnotes (slide ${idx + 1}): ${plan.lines.length} line(s) @${plan.sizePt.toFixed(2)}pt ${plan.where}, band [${plan.top.toFixed(1)}..${(plan.top + plan.lines.length * plan.lh).toFixed(1)}]mm${bgDrawn ? ' + scrim' : ''}`);
+      }
     }
 
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {
@@ -2789,6 +3005,9 @@ async function main() {
     }
   }
 
+  if (footnoteDrops > 0) {
+    console.warn(`⚠ ${footnoteDrops} slide(s) lost their footnote glosses entirely (see the ⚠ footnotes DROPPED lines above) — PM must be notified`);
+  }
   const pdfBytes = await pdfDoc.save();
   writeFileSync(outPath, pdfBytes);
   if (process.env.CARD_RECTS_OUT) writeFileSync(process.env.CARD_RECTS_OUT, JSON.stringify(CARD_LOG));
