@@ -1,4 +1,5 @@
-// @version 0.2.1
+// @version 0.2.2
+// v0.2.2 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // theme-builder.ts — deterministic HTML theme deck builder.
 //
 // Reads a theme package (template.html + theme.json), replaces INJECT markers
@@ -15,7 +16,7 @@ import { readJson, normalizeStyleEntry } from './theme-utils.js';
 
 export interface BuildOptions {
   root: string;           // workspace root
-  projectPath: string;    // path to presentations/<project>
+  projectPath: string;    // path to deliverables/<project>
   theme: string;          // theme name (e.g. "pitch-enhanced")
   style: string;          // style name (e.g. "premium-dark")
   tocStyle?: 'glass-drawer' | 'solid-drawer'; // optional TOC style (defaults to "glass-drawer")

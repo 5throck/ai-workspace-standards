@@ -397,13 +397,13 @@
   },
   "lecture_profile": {
     "template_path": "docs/lecture-profile.md",
-    "project_path": "presentations/<project>/lecture-profile.md",
+    "project_path": "deliverables/<project>/lecture-profile.md",
     "required_fields": [
       "title",
       "audience",
       "level"
     ],
-    "notes": "Master template copied to presentations/<project>/lecture-profile.md on new-project creation. Agents load the local project profile at stage start."
+    "notes": "Master template copied to deliverables/<project>/lecture-profile.md on new-project creation. Agents load the local project profile at stage start."
   },
   "trust_score_thresholds": {
     "pass": 0.9,

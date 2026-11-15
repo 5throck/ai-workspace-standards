@@ -1,7 +1,7 @@
 ---
 name: html-build
-version: "1.4.0"
-last_updated: 2026-11-10
+version: "1.4.1"
+last_updated: 2026-11-15
 role: HTML slide builder and image integration specialist
 status: active
 tier: low
@@ -41,9 +41,9 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Responsibilities
 
-- **Load `presentations/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language`, `narration`, `auto_advance`, `background_image` fields
+- **Load `deliverables/<project>/lecture-profile.md`** at start: read `presentation.theme`, `presentation.style`, `instructor`, `language`, `narration`, `auto_advance`, `background_image` fields
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
-- Read `presentations/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
+- Read `deliverables/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
 - Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` strict-JSON array (all keys double-quoted, no trailing commas, no JS comments — required for `extract_slidedata.mjs` to parse via `JSON.parse`); the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
 - Apply theme + style from `lecture-profile.md`: inject `base.css` + style override CSS, set `data-theme` and `data-style` on `<html>`
@@ -60,19 +60,19 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Output Format
 
-- `presentations/<project>/lecture_vN.html` — single HTML file with embedded slideData
-- Images are in the **shared pool** at `presentations/assets/images/<slug>.<ext>` (managed by image-curator; html-build references them via `../assets/images/<slug>.<ext>`)
-- Diagrams are in the **shared diagram pool** at `presentations/assets/diagrams/<stem>.png` (managed by diagram-specialist + gen-visual-images.ts; visualImage paths use `../assets/diagrams/<stem>.png`)
+- `deliverables/<project>/lecture_vN.html` — single HTML file with embedded slideData
+- Images are in the **shared pool** at `deliverables/assets/images/<slug>.<ext>` (managed by image-curator; html-build references them via `../assets/images/<slug>.<ext>`)
+- Diagrams are in the **shared diagram pool** at `deliverables/assets/diagrams/<stem>.png` (managed by diagram-specialist + gen-visual-images.ts; visualImage paths use `../assets/diagrams/<stem>.png`)
 
 slideData object fields and image filename convention: see `skills/html-build/SKILL.md`.
 
-> **STRICT PROHIBITION**: Do NOT create any `.ts`, `.js`, `.sh`, or `.py` script files inside `presentations/<project>/`. The only permitted TypeScript file under a project folder is `diagram-defs.ts` (owned by the diagram-specialist agent). If you feel you need a helper script to build HTML, use the existing `scripts/co-deck/` infrastructure instead.
+> **STRICT PROHIBITION**: Do NOT create any `.ts`, `.js`, `.sh`, or `.py` script files inside `deliverables/<project>/`. The only permitted TypeScript file under a project folder is `diagram-defs.ts` (owned by the diagram-specialist agent). If you feel you need a helper script to build HTML, use the existing `scripts/co-deck/` infrastructure instead.
 
 ## Theme + Style Integration
 
 > **Builder (primary method — Task 4, post-implementation):** After the deterministic `build-theme-deck.ts` CLI is implemented, the html-build agent should invoke it instead of manually assembling HTML:
 > ```bash
-> bun scripts/co-deck/build-theme-deck.ts --project presentations/<name>
+> bun scripts/co-deck/build-theme-deck.ts --project deliverables/<name>
 > ```
 > The builder handles: theme/style resolution, package validation, INJECT marker replacement, CSS link generation, ppt-engine.js inlining, and strict-JSON slideData injection. See the **Builder Boundary** section below for what the builder does NOT handle.
 >
@@ -144,9 +144,9 @@ e.g. `inject_video_players.py`). A project-documented rebuild order overrides
 this canonical default:
 
 ```
-1. build    bun scripts/co-deck/build-theme-deck.ts --project presentations/<name>
+1. build    bun scripts/co-deck/build-theme-deck.ts --project deliverables/<name>
 2. patch    tests/patch-zen-white-bubble.ts (only for zen + white-bubble decks, or as configured)
-3. inject   bun scripts/co-deck/inject-video-players.ts presentations/<name>/lecture_vN.html
+3. inject   bun scripts/co-deck/inject-video-players.ts deliverables/<name>/lecture_vN.html
 ```
 
 Notes:
@@ -156,13 +156,13 @@ Notes:
   are untouched). The manual command remains the fallback and is always safe to re-run —
   the injector strips its previous marker block before re-injecting.
 - `--download-videos` on the build command pre-fetches the deck's YouTube videos into
-  `presentations/assets/videos/yt-<id>.mp4` (via QuickDL) BEFORE the injection step, so
+  `deliverables/assets/videos/yt-<id>.mp4` (via QuickDL) BEFORE the injection step, so
   the offline play-mode fallback binds local files. Skip-if-exists — re-running never
   re-downloads a good file.
 - A rebuild regenerates the HTML from templates: re-apply the style patch (step 2) and
   let step 3 re-inject — never assume a previous build's patches survive.
 - **Project-local rebuild order takes precedence.** If the deck's project ships its own
-  injector (e.g. `presentations/<name>/inject_video_players.py`) or documents a different
+  injector (e.g. `deliverables/<name>/inject_video_players.py`) or documents a different
   rebuild order, follow THAT order — the project injector may apply project-specific
   video-slide styling (e.g. hidden text card, slim title bar) that the generic injector
   does not reproduce. Following this section literally on such a deck silently loses
@@ -171,7 +171,7 @@ Notes:
 ## Constraints
 
 - Do not start before `design_spec.md` is locked (Gate 3 approved)
-- Load `presentations/<project>/lecture-profile.md` before generating HTML — theme, style, and instructor data are required
+- Load `deliverables/<project>/lecture-profile.md` before generating HTML — theme, style, and instructor data are required
 - No hardcoded color or font values — use CSS variables from design_spec only
 - Default theme: `pitch-enhanced`; default style: `premium-dark`
 - Bullet density: follow `theme.json content_rules`; ≤3 consecutive slides without visuals; slide counts balanced ±20%

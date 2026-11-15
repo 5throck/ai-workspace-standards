@@ -1,14 +1,14 @@
 ---
 name: design
 scope: co-deck
-version: 1.2.1
+version: "1.2.2"
 description: >
   Locks visual design style. Decides layout, color palette, font family and
   saves design_spec.md. Can analyze reference URLs/images. Responds to "lock
   design", "pick colors/fonts", "make design spec" . Stage 4 of the workflow.
 status: active
 owner: design
-last_reviewed: 2026-08-24
+last_reviewed: "2026-11-15"
 prerequisites: storyline
 relates_to:
   - skill: html-build
@@ -120,7 +120,7 @@ Bundling CSS variables makes the HTML stage directly consumable:
 
 ## Output Format
 
-`presentations/<project>/design_spec.md` containing: layout decisions, 8-color palette table (with HEX/RGB), font family and size table, CSS variables block.
+`deliverables/<project>/design_spec.md` containing: layout decisions, 8-color palette table (with HEX/RGB), font family and size table, CSS variables block.
 
 ## Related Skills
 

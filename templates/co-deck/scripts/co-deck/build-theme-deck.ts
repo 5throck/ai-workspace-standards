@@ -1,4 +1,5 @@
-// @version 0.2.1
+// @version 0.2.2
+// v0.2.2 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // build-theme-deck.ts — CLI wrapper for deterministic theme deck builder.
 //
 // Reads a project's lecture-profile.md for theme/style/title,
@@ -11,10 +12,10 @@
 // idempotent (marker-based), so running it on every build is always safe.
 //
 // Usage:
-//   bun scripts/co-deck/build-theme-deck.ts --project presentations/<project>
-//   bun scripts/co-deck/build-theme-deck.ts --project presentations/<project> --slide-data path/to/data.json
-//   bun scripts/co-deck/build-theme-deck.ts --project presentations/<project> --output output.html --version v2
-//   bun scripts/co-deck/build-theme-deck.ts --project presentations/<project> --download-videos
+//   bun scripts/co-deck/build-theme-deck.ts --project deliverables/<project>
+//   bun scripts/co-deck/build-theme-deck.ts --project deliverables/<project> --slide-data path/to/data.json
+//   bun scripts/co-deck/build-theme-deck.ts --project deliverables/<project> --output output.html --version v2
+//   bun scripts/co-deck/build-theme-deck.ts --project deliverables/<project> --download-videos
 
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname, join } from 'path';
@@ -93,7 +94,7 @@ function main(): void {
 
   if (!projectArg) {
     console.error('Error: --project <path> is required');
-    console.error('Usage: bun build-theme-deck.ts --project presentations/<project>');
+    console.error('Usage: bun build-theme-deck.ts --project deliverables/<project>');
     process.exit(1);
   }
 

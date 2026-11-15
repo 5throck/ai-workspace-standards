@@ -7,7 +7,7 @@
 - **Skill**: design
 - **Status**: active
 - **Owner**: design
-- **Created**: 2026-08-24
+- **Created**: 2026-11-15
 
 ## Description
 
@@ -17,7 +17,7 @@ Locks visual design style. Decides layout, color palette, font family and saves 
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-08-24 | - | production | Initial record derived from SKILL.md frontmatter | design |
+| 2026-11-15 | - | production | Initial record derived from SKILL.md frontmatter | design |
 
 ## Acceptance Criteria
 

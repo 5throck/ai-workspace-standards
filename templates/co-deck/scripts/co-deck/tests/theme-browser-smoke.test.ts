@@ -1,4 +1,5 @@
-// @version 0.1.0
+// @version 0.1.1
+// v0.1.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // theme-browser-smoke.test.ts — compatibility matrix tests (builder-side).
 //
 // This file covers:
@@ -31,7 +32,7 @@ import { join, resolve, dirname } from 'path';
 // tests/ is 3 levels deep from workspace root (scripts/co-deck/tests/).
 const root = resolve(dirname(import.meta.path), '../../..');
 const slideDataPath = join(dirname(import.meta.path), 'fixtures', 'theme-deck', 'slide-data.json');
-const smokeProjectDir = join(root, 'presentations', '_smoke_test');
+const smokeProjectDir = join(root, 'deliverables', '_smoke_test');
 
 // Read fixture slide data
 const SLIDE_DATA = JSON.parse(readFileSync(slideDataPath, 'utf-8')) as any[];

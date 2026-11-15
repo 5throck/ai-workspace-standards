@@ -1,7 +1,7 @@
 ---
 name: version
-version: "1.1.1"
-last_updated: "2026-10-28"
+version: "1.1.2"
+last_updated: 2026-11-15
 role: Version snapshot manager for all lecture production files
 status: active
 tier: low
@@ -42,15 +42,15 @@ This ensures all file modifications are safely snapshotted throughout the 11-sta
 ## Responsibilities
 
 - Create a timestamped snapshot in `_versions/` before any file edit by any agent
-- Accept `--workspace presentations/<project>` to scope all snapshots to the project folder
+- Accept `--workspace deliverables/<project>` to scope all snapshots to the project folder
 - Append a manifest entry to `VERSIONS.md` for every snapshot
 - Restore any prior version on user request without losing the current state
 - Report current version list when asked
 
 ## Output Format
 
-- `presentations/<project>/_versions/<timestamp>_<agent>_<desc>/` — snapshot directory
-- `presentations/<project>/VERSIONS.md` — manifest with restore commands
+- `deliverables/<project>/_versions/<timestamp>_<agent>_<desc>/` — snapshot directory
+- `deliverables/<project>/VERSIONS.md` — manifest with restore commands
 
 Snapshot commands, restore examples, storage layout, and collaboration pattern: see `skills/version/SKILL.md`.
 
@@ -59,7 +59,7 @@ Snapshot commands, restore examples, storage layout, and collaboration pattern: 
 - `--workspace` is required on every invocation — never snapshot without scoping to the project
 - Restore always auto-backs up the current state before restoring
 - HTML files are large — snapshot only when layout changes, not for content-only edits
-- `presentations/assets/fonts/` does not require snapshots (re-downloadable)
+- `deliverables/assets/fonts/` does not require snapshots (re-downloadable)
 - `layout_spec.json` and `pdf_layout_spec.md` must be snapshotted together with the HTML they were measured from
 
 ## Meeting Participation

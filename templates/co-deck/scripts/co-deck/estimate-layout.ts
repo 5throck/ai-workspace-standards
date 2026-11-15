@@ -1,4 +1,5 @@
-// @version 1.5.0 — boolean-flag slide schema + shared override parser:
+// @version 1.5.1 — boolean-flag slide schema + shared override parser:
+// v1.5.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 //   • lintSlideContent resolves the slide type via lib/slide-type.ts
 //     slideTypeOf() — recognizes the boolean-flag schema current decks emit
 //     (isCover/isDivider/isPunchline/isContact/isProfile) in addition to the
@@ -17,7 +18,7 @@
 // Playwright-free PDF layout preparation — replaces measure-layout.ts.
 // Reads lecture-profile.md, resolves the 4-layer spec merge, validates fonts,
 // and outputs a summary for review. Optionally triggers a sample PDF.
-// Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--lint] [--font-dir presentations/assets/fonts/]
+// Usage: bun scripts/co-deck/estimate-layout.ts --project deliverables/<project> [--sample] [--lint] [--font-dir deliverables/assets/fonts/]
 // No Playwright dependency required.
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -407,13 +408,13 @@ async function main() {
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('Usage: bun scripts/co-deck/estimate-layout.ts --project presentations/<project> [--sample] [--lint] [--font-dir presentations/assets/fonts/]');
+    console.error('Usage: bun scripts/co-deck/estimate-layout.ts --project deliverables/<project> [--sample] [--lint] [--font-dir deliverables/assets/fonts/]');
     console.error('');
     console.error('Options:');
     console.error('  --project    Project folder (relative to workspace root)');
     console.error('  --sample     Generate a 5-slide sample PDF after estimation');
     console.error('  --lint       Layout gate: lint slidedata.json against merged content_constraints (exit 1 on violation)');
-    console.error('  --font-dir   Custom font directory (default: presentations/assets/fonts/)');
+    console.error('  --font-dir   Custom font directory (default: deliverables/assets/fonts/)');
     process.exit(1);
   }
 
@@ -502,7 +503,7 @@ async function main() {
   }
 
   // ── Check fonts ───────────────────────────────────────────────────────────
-  const fontDir = resolve(workspaceRoot, fontDirArg ?? 'presentations/assets/fonts');
+  const fontDir = resolve(workspaceRoot, fontDirArg ?? 'deliverables/assets/fonts');
   const fontStatus = checkFonts(fontDir);
   const preferred = fontStatus.find(f => f.regular && f.bold);
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-15T14:16:06.069Z
+**Generated**: 2026-11-15T14:58:14.424Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -125,7 +125,7 @@
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | fs, path |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | fs |
 | compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | fs, path |
-| create-l3-scaffold.ts | 1.20.0 | scripts/create-l3-scaffold.ts | child_process, fs, path, url |
+| create-l3-scaffold.ts | 1.21.0 | scripts/create-l3-scaffold.ts | child_process, fs, path, url |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |

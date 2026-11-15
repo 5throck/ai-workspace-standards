@@ -1,7 +1,7 @@
 ---
 lang: ko
 lang_reason: source-material
-translated_from_hash: d495479a1158249138409d815bafb79b623e89d31bf49da01204a818ffdad29e
+translated_from_hash: 4091df45e26c677665827a04b4d5c4752e7a679c09c2d52db57c41c4c3e55a0b
 ---
 # co-deck 사용자 가이드
 
@@ -96,10 +96,10 @@ co-deck는 `AGENTS.md` §3.5 및 §4.1.5에 따라 모든 결과물을 단계에
 
 ## 5. 출력 / 결과물 위치
 
-모든 강연 프로젝트는 Stage 0에서 생성된 `presentations/<project-name>/` 아래에 위치합니다:
+모든 강연 프로젝트는 Stage 0에서 생성된 `deliverables/<project-name>/` 아래에 위치합니다:
 
 ```
-presentations/<project-name>/
+deliverables/<project-name>/
   lecture-profile.md          # docs/lecture-profile.md의 프로젝트별 사본
   project_state.json          # 단계별 상태/승인 추적
   research_notes.md           # Stage 1 출력

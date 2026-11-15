@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.20.0
+// @version 1.21.0
+// v1.21.0 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md):
+//          lecture-type scaffold seeds deliverables/ instead of presentations/ —
+//          the co-deck fleet consolidated deck projects under deliverables/<project>/
+//          with the shared pool at deliverables/assets/{images,diagrams,videos,fonts};
+//          the template shipped the same rename (templates/co-deck/deliverables/).
+//          validate-image-manifest keeps its dual-convention path-style rule, so
+//          pre-migration projects with presentations/ still lint clean.
 // v1.20.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
 //          §6.4, DEC-20261107-01): fleet membership SSOT B4 name-collision
 //          guard — a scaffold variant name matching an exclusion record in
@@ -1070,16 +1077,16 @@ function printSummary(variant: string): void {
 }
 
 function createLectureScaffold(projectDir: string): void {
-  log("🎨 Creating lecture-specific scaffold (docs/html-themes/, presentations/)…");
+  log("🎨 Creating lecture-specific scaffold (docs/html-themes/, deliverables/)…");
   // html-themes directory structure
-  for (const dir of ["docs/html-themes", "docs/html-themes/base", "docs/html-themes/overrides", "presentations"]) {
+  for (const dir of ["docs/html-themes", "docs/html-themes/base", "docs/html-themes/overrides", "deliverables"]) {
     ensureDir(path.join(projectDir, dir));
   }
-  // presentations/.gitkeep so the folder is tracked
-  writeFile(path.join(projectDir, "presentations", ".gitkeep"), "");
+  // deliverables/.gitkeep so the folder is tracked
+  writeFile(path.join(projectDir, "deliverables", ".gitkeep"), "");
   log("    ├─ docs/html-themes/base/");
   log("    ├─ docs/html-themes/overrides/");
-  log("    └─ presentations/");
+  log("    └─ deliverables/");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1194,7 +1201,7 @@ function main(): void {
   // Step 6: domain docs + agents/
   createDomainDocs(projectDir, args.domain, args.variant);
 
-  // Step 6.5: lecture-type specific setup (html-themes + presentations/)
+  // Step 6.5: lecture-type specific setup (html-themes + deliverables/)
   if (args.domain === "lecture") {
     createLectureScaffold(projectDir);
   }

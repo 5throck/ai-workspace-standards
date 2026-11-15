@@ -1,9 +1,10 @@
-// @version 1.3.0 — U-20261105-006: stripDiagramFooterText() + svgTextDuplicatesSlide()
+// @version 1.3.1 — U-20261105-006: stripDiagramFooterText() + svgTextDuplicatesSlide()
+// v1.3.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // (SVGs must not embed caption/takeaway/source lines — slidedata visualCaption /
 // visualSource own them; deterministic dedup audit for bullet echoes).
 // Prior 1.2.0: default canvas matches pitch-enhanced right-panel aspect ratio.
 // Shared SVG utilities for diagram generation.
-// Imported by each project's presentations/<project>/diagram-defs.ts and by
+// Imported by each project's deliverables/<project>/diagram-defs.ts and by
 // gen-visual-images.ts (which runs the strip + audit after every generator).
 // Do NOT add project-specific content here — keep this infrastructure-only.
 

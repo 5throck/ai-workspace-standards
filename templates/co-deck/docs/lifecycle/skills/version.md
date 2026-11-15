@@ -7,7 +7,7 @@
 - **Skill**: version
 - **Status**: active
 - **Owner**: version
-- **Created**: 2026-06-20
+- **Created**: 2026-11-15
 
 ## Description
 
@@ -17,7 +17,7 @@ Manages version snapshots of lecture files. Auto-backs up files before edits and
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-06-20 | - | production | Initial record derived from SKILL.md frontmatter | version |
+| 2026-11-15 | - | production | Initial record derived from SKILL.md frontmatter | version |
 
 ## Acceptance Criteria
 

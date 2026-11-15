@@ -1,7 +1,8 @@
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // estimate-layout-lint.test.ts — pin tests for the --lint minimum content
 // checks (U-20261029-006). Runs the real CLI against a synthetic project
-// (lecture-profile.md + slidedata.json) under templates/co-deck/presentations/
+// (lecture-profile.md + slidedata.json) under the repo-root deliverables/ tree
 // because estimate-layout.ts resolves its workspace root relative to the
 // script location.
 //
@@ -29,7 +30,7 @@ const tmpDirs: string[] = [];
 
 function fixture(slides: any[], frontmatterExtra = ''): string {
   const name = `_lint_test_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const dir = join(ROOT, 'presentations', name);
+  const dir = join(ROOT, 'deliverables', name);
   mkdirSync(dir, { recursive: true });
   tmpDirs.push(dir);
   writeFileSync(
@@ -44,7 +45,7 @@ ${frontmatterExtra}
 `,
   );
   writeFileSync(join(dir, 'slidedata.json'), JSON.stringify(slides));
-  return join('presentations', name);
+  return join('deliverables', name);
 }
 
 function runLint(projectRel: string) {

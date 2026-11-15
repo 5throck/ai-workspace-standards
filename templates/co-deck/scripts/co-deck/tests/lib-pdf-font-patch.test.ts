@@ -1,4 +1,5 @@
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // lib-pdf-font-patch.test.ts — pin the CustomFontEmbedder patch
 // (U-20261105-005 items 1+2): /W entries must be integers (PDF 32000-1
 // §9.7.4.3), shaped-glyph closure must cover glyphs reachable only through
@@ -12,9 +13,11 @@
 
 import { describe, expect, test } from 'bun:test';
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { platform, homedir } from 'node:os';
 import { collectShapedGlyphs, integerizeWidths, patchCustomFontEmbedder } from '../lib/pdf-font-patch';
+
+const ROOT = resolve(dirname(import.meta.path), '../../..');
 
 describe('integerizeWidths', () => {
   test('rounds scalars and nested sections, preserves structure', () => {
@@ -65,7 +68,7 @@ describe('patchCustomFontEmbedder', () => {
 
 // ── Real-font /W coverage (skipped when no local font pool) ─────────────────
 const fontDirs = [
-  '/Users/techcross/git/ai_workspace/Projects/co-deck/presentations/assets/fonts',
+  join(ROOT, 'deliverables/assets/fonts'),
   join(homedir(), 'Library/Fonts'),
 ];
 const fontPath = fontDirs

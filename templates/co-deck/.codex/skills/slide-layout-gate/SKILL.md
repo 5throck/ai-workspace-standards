@@ -1,7 +1,7 @@
 ---
 name: slide-layout-gate
 scope: co-deck
-version: 1.0.0
+version: "1.0.1"
 description: >
   Slide content conformance gate. Runs estimate-layout.ts --lint to check every
   slide in slidedata.json against the merged 4-layer spec's content_constraints
@@ -10,7 +10,7 @@ description: >
   "check slide bounds", "slide content conformance".
 status: active
 owner: pdf-export
-last_reviewed: 2026-08-26
+last_reviewed: "2026-11-15"
 prerequisites: html-build
 relates_to:
   - skill: pdf-export
@@ -43,7 +43,7 @@ layout spec actually declares, using the exact 4-layer merge
 
 1. Run the gate:
    ```bash
-   bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --lint
+   bun scripts/co-deck/estimate-layout.ts --project deliverables/<project> --lint
    ```
    (composes with `--sample`: lint runs first; a FAIL blocks the sample too)
 2. Read the verdict table — one row per slide: `# | Type | Check | Actual | Limit | Verdict`
@@ -56,7 +56,7 @@ layout spec actually declares, using the exact 4-layer merge
 |--------|-------------|--------|
 | Verdict table | console (stdout) | per-slide check rows: `# \| Type \| Check \| Actual \| Limit \| Verdict` |
 | Violation summary + remediation ladder | console (stderr on FAIL) | `N check(s) passed, M failed, K slide(s) unconstrained (WARN)` |
-| Layout summary | `presentations/<project>/layout_summary.md` | unchanged prep-pdf artifact (written on every run) |
+| Layout summary | `deliverables/<project>/layout_summary.md` | unchanged prep-pdf artifact (written on every run) |
 
 ## Verdict Semantics
 

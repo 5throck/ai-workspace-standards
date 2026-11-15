@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-11-14
+# Last Updated: 2026-11-15
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -267,7 +267,7 @@ To create a new theme or style, use the **T-Stage** or **Style Workflow** via th
 Layer 0 — shared : docs/html-themes/themes/_shared/layout_base.json       → region skeleton (all null) + 16:9 page + print defaults
 Layer 1 — theme  : docs/html-themes/themes/<theme>/pdf_layout_spec.json   → regions.*, slide_types[type].regions, slide_type_overrides, fonts, line_heights, content_constraints, toc, print
 Layer 2 — style  : docs/html-themes/styles/<style>/pdf_color_spec.json    → color palette
-Layer 3 — project: presentations/<project>/lecture-profile.md             → layout_overrides block
+Layer 3 — project: deliverables/<project>/lecture-profile.md             → layout_overrides block
 ```
 
 Region values that are `null` in the theme spec stay `null` (Layer 0 never fills a region the theme intends to leave absent). Required regions referenced by `slide_types[type].regions` that resolve to `null` throw — there is no silent fallback. Per-project overrides (e.g., 4:3 ratio, CI accent color, higher bullet count, **PDF font sizes / line heights** via `layout_overrides.fonts`/`line_heights`) are set in `lecture-profile.md` → `layout_overrides` and take precedence over all theme/style defaults.
@@ -297,7 +297,7 @@ bun scripts/co-deck/scaffold-theme-style.ts --style <name>
 ## Lecture Profile
 
 <!-- VARIANT-INJECT: lecture-profile -->
-`presentations/<project>/lecture-profile.md` is the single source of truth for per-lecture settings. (The master template is located at `docs/lecture-profile.md` and copied to the presentation folder on start).
+`deliverables/<project>/lecture-profile.md` is the single source of truth for per-lecture settings. (The master template is located at `docs/lecture-profile.md` and copied to the presentation folder on start).
 
 **Scaffolded automatically** on new project start — edit the copy under your presentation folder before starting Stage 1.
 
@@ -355,13 +355,13 @@ Handled by the `image-curator` agent (Stage 3.5). All sources are **commercial-u
 | Unsplash API | Optional | 50/hr | Unsplash License |
 | Wikimedia | Not required | Unlimited | CC0 / CC-BY |
 
-**Shared image pool**: `presentations/assets/images/<slug>.<ext>`
+**Shared image pool**: `deliverables/assets/images/<slug>.<ext>`
 
 **Naming**: slug-only (`ai-future-professional.jpg`) — no slide-number prefix. The slug is the content identifier, enabling cross-project reuse. image-curator checks the pool before downloading: if `<slug>.<ext>` exists it sets `"reused": true` and skips download.
 
-**Per-project manifest**: `presentations/<project>/image-manifest.json` — maps slide index → slug, records source URL, license, `"reused": true/false`. Missing images are logged but do not block the pipeline. Also contains an optional `background_image` object with a `path` field pointing to a global background image (`slide_index: -1`, `scope: "global"`).
+**Per-project manifest**: `deliverables/<project>/image-manifest.json` — maps slide index → slug, records source URL, license, `"reused": true/false`. Missing images are logged but do not block the pipeline. Also contains an optional `background_image` object with a `path` field pointing to a global background image (`slide_index: -1`, `scope: "global"`).
 
-**HTML image path** (from `presentations/<project>/lecture.html`): `../assets/images/<slug>.<ext>`
+**HTML image path** (from `deliverables/<project>/lecture.html`): `../assets/images/<slug>.<ext>`
 <!-- END VARIANT-INJECT -->
 
 ---
@@ -379,7 +379,7 @@ Handled by the `source-verifier` agent (Stage 1.5, Gate 1.5). Validates URLs in 
 
 **Level 2** — Content cross-check via Web Search (title + author verification, max 10 sources).
 
-**Output**: `presentations/<project>/source-verification.md` with Trust Score.
+**Output**: `deliverables/<project>/source-verification.md` with Trust Score.
 
 **Skip flag**: `--skip-verify` skips all checks (for drafts or offline environments).
 <!-- END VARIANT-INJECT -->
@@ -397,7 +397,7 @@ bun install                      # installs pdf-lib, fflate, @pdf-lib/fontkit
 bun add playwright
 bunx playwright install chromium
 
-# Font download — saves to shared pool presentations/assets/fonts/
+# Font download — saves to shared pool deliverables/assets/fonts/
 # Check-before-download: skips if font files already exist
 bun scripts/co-deck/download-font.ts maruburi
 ```
@@ -453,7 +453,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 4. Speaker intro (slide 2) and contact (last slide) are mandatory
 5. Every slide in slide_deck.md must have `image_role`, `image_query`, `image_license` fields
 6. **Uniform Layout Principle**: All content slides within a single deck MUST use `standard` type. Special types (`punchline`, `divider`, `profile`) are reserved for their designated structural purpose only. `punchline` is allowed ONLY as the last content slide with a single-statement message (≤1 line, no bullets). Mixing slide types for content slides is prohibited — each type has a distinct CSS layout (2-column vs center-aligned), and mixing breaks visual consistency.
-7. **Font Parity (PDF ↔ HTML)**: a deck's typography SSOT is the font family the PDF engine loads from `presentations/assets/fonts/` (currently Pretendard); every HTML build embeds the same family via `@font-face` and verifies `document.fonts.check()` before hand-off — rule body: html-build SKILL "Font Parity"; gate record DG-DECK-06.
+7. **Font Parity (PDF ↔ HTML)**: a deck's typography SSOT is the font family the PDF engine loads from `deliverables/assets/fonts/` (currently Pretendard); every HTML build embeds the same family via `@font-face` and verifies `document.fonts.check()` before hand-off — rule body: html-build SKILL "Font Parity"; gate record DG-DECK-06.
 
 ### Design Rules
 1. 8-role color palette: defined in design_spec.md CSS variable block
@@ -466,7 +466,7 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 1. Always call Version Agent before editing any file
 2. HTML must embed `slideData` array for PDF extraction
 3. Set `<html data-theme="<theme>" data-style="<style>">` and inject CSS in Load Order: `styles/base.css` → `themes/<theme>/theme.css` → `styles/<style>/style.css` (paths resolved from `theme.json` `css_base` + `css_theme`)
-4. Images: from shared pool `presentations/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `presentations/assets/diagrams/<stem>.svg`; reference as `../assets/diagrams/<stem>.svg` (SVG path auto-written by gen-visual-images.ts v3.2.0 — HTML renders SVG natively; PDF pipeline auto-derives the `.png` sibling)
+4. Images: from shared pool `deliverables/assets/images/<slug>.<ext>`; reference as `../assets/images/<slug>.<ext>` (path from `image-manifest.json` → `path` field). Diagrams: from shared pool `deliverables/assets/diagrams/<stem>.svg`; reference as `../assets/diagrams/<stem>.svg` (SVG path auto-written by gen-visual-images.ts v3.2.0 — HTML renders SVG natively; PDF pipeline auto-derives the `.png` sibling)
 5. For slides with no image in manifest: use text-panel fallback — never use placeholder images
 
 ### Visual Diagram Pipeline
@@ -474,12 +474,12 @@ PM reads lecture-profile.md → confirms presentation.theme + presentation.style
 For slides that use concept diagrams (not stock photos), the pipeline is:
 
 ```
-presentations/<project>/diagram-defs.ts  ← project-specific generators (authored per project)
+deliverables/<project>/diagram-defs.ts  ← project-specific generators (authored per project)
         ↓ dynamic import
 gen-visual-images.ts (infrastructure dispatcher)
         ↓
-presentations/assets/diagrams/<stem>.svg  (primary delivery format — HTML renders SVG natively via <img>)
-presentations/assets/diagrams/<stem>.png  (PDF sibling — auto-derived by gen-slides-pdf.ts from the SVG path)
+deliverables/assets/diagrams/<stem>.svg  (primary delivery format — HTML renders SVG natively via <img>)
+deliverables/assets/diagrams/<stem>.png  (PDF sibling — auto-derived by gen-slides-pdf.ts from the SVG path)
         ↓
 slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen-visual-images.ts v3.2.0)
         ↓ HTML: template buildSlideChildren() injects <img src="...svg"> into .right-panel
@@ -489,9 +489,9 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 **Architecture (v3.2.0)**:
 - `gen-visual-images.ts` is **infrastructure-only** — no project-specific SVG code lives here
 - `diagram-helpers.ts` provides shared utilities (`svgWrap`, `svgToPng`, `wrapText`) and colour palettes (`DARK_AMBER`, `B2B_NAVY`)
-- Each project creates `presentations/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
+- Each project creates `deliverables/<project>/diagram-defs.ts` exporting a `GENERATORS: Record<string, () => string>` map keyed by image stem
 - If no `diagram-defs.ts` exists, `gen-visual-images.ts` exits cleanly (nothing to generate)
-- **Unified output path**: SVG and PNG are both saved to `presentations/assets/diagrams/` (shared pool). `slidedata.json` `visualImage` always references the SVG path. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/<stem>.svg`.
+- **Unified output path**: SVG and PNG are both saved to `deliverables/assets/diagrams/` (shared pool). `slidedata.json` `visualImage` always references the SVG path. Legacy per-project `images/` paths are auto-rewritten to `../assets/diagrams/<stem>.svg`.
 
 **Design principle**: SVG is the source of truth and the **primary delivery format for HTML** — browsers render SVG natively via `<img>` tags with no quality loss. PNG is generated alongside as a PDF sibling; the PDF pipeline (`gen-slides-pdf.ts`) auto-derives the `.png` path from the `.svg` path in `imgPath()` — no manual path switching required.
 
@@ -526,16 +526,16 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 <!-- VARIANT-INJECT: file-organization -->
 | Folder | Purpose |
 |--------|---------|
-| `presentations/<project>/` | All outputs for a single lecture project |
+| `deliverables/<project>/` | All outputs for a single lecture project |
 | `docs/lecture-profile.md` | Master template for lecture profile (copied on project start) |
-| `presentations/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
-| `presentations/<project>/image-manifest.json` | Per-project map: slide index → shared asset slug + reused flag |
-| `presentations/<project>/_versions/` | Version snapshots (Version Agent) |
-| `presentations/<project>/images/` | **Project-local images** — deprecated; diagram assets moved to shared pool `presentations/assets/diagrams/` |
-| `presentations/assets/fonts/` | **Shared font pool** — downloaded once, reused across all projects |
-| `presentations/assets/icons/` | **Shared icon pool** |
-| `presentations/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
-| `presentations/assets/diagrams/` | **Shared diagram pool** — SVG source + PNG render (diagram-specialist + gen-visual-images.ts), cross-project reuse |
+| `deliverables/<project>/lecture-profile.md` | Lecture settings SSOT (audience, theme, image prefs, instructor) |
+| `deliverables/<project>/image-manifest.json` | Per-project map: slide index → shared asset slug + reused flag |
+| `deliverables/<project>/_versions/` | Version snapshots (Version Agent) |
+| `deliverables/<project>/images/` | **Project-local images** — deprecated; diagram assets moved to shared pool `deliverables/assets/diagrams/` |
+| `deliverables/assets/fonts/` | **Shared font pool** — downloaded once, reused across all projects |
+| `deliverables/assets/icons/` | **Shared icon pool** |
+| `deliverables/assets/images/` | **Shared image pool** — stock photos (Pixabay/Pexels/Unsplash), slug-named, cross-project reuse |
+| `deliverables/assets/diagrams/` | **Shared diagram pool** — SVG source + PNG render (diagram-specialist + gen-visual-images.ts), cross-project reuse |
 | `agents/` | Agent role definitions (14 agents: 1 PM + 10 slide-pipeline + 2 handbook + 1 i18n-specialist) |
 | `skills/` | Skill trigger descriptors (10 variant-specific; `handbook`/`handbook-sync-audit` provided by common via `inherits_common`) |
 | `scripts/co-deck/` | Variant-specific TypeScript scripts |
@@ -555,15 +555,15 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 
 <!-- VARIANT-INJECT: domain-rules -->
 1. **Version Agent is always called first** — before any file modification by any agent
-2. **presentations/<project>/lecture-profile.md is the single source of truth** for theme, audience, instructor, and image settings
+2. **deliverables/<project>/lecture-profile.md is the single source of truth** for theme, audience, instructor, and image settings
 3. **project_state.json tracks pipeline progress** — PM reads this to resume interrupted sessions
-4. **`--workspace presentations/<project>`** must always be passed to snapshot.ts to scope backups
+4. **`--workspace deliverables/<project>`** must always be passed to snapshot.ts to scope backups
 5. **PDF requires layout preparation** — run Prep PDF (estimate-layout.ts) before Export Agent; optional auto-calibrate loop for iterative refinement
 6. **Playwright is optional** — only install for `measure-layout.ts`; `bun install` skips it by default
 7. **source-verifier is optional but recommended** — Trust Score < 70% (derived from `variant.json` `trust_score_thresholds.escalate`) should block storyline
 8. **image-curator is optional** — skip if all slides use `image_role: none` or images are pre-supplied
 9. **Theme vs Style boundary**: Themes own DOM structure (`template.html`) and per-theme CSS extension (`theme.css`); styles own CSS variables only (`style.css`). Styles live in the shared `styles/` pool — never nest a style under a theme folder. Never modify DOM in a style file.
-10. **Shared asset pool**: Fonts and images live in `presentations/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
+10. **Shared asset pool**: Fonts and images live in `deliverables/assets/` — not in per-project folders. Check existence before downloading; set `"reused": true` in manifest when reusing.
 11. **theme.json is read at Stage 2**: Storyline must receive the path `docs/html-themes/themes/<theme>/theme.json` to apply `content_rules` (max bullets, title length, slide count range) during slide_deck.md generation.
 12. **Theme × Style compatibility gated at Stage 0**: PM checks THEMES.md compatibility matrix before confirming `presentation.theme` + `presentation.style`. Incompatible combinations are rejected with explanation. `visual-heavy` is partial for pitch-enhanced; incompatible with pitch and zen; `white-bubble` is zen-only.
 13. **TypeScript-first**: Use TypeScript scripts (`bun scripts/co-deck/`) for all automated operations. Python is only permitted when the task cannot be accomplished in TypeScript. When a TS script already exists for a task, use it — never default to Python.
@@ -577,11 +577,11 @@ slideData[i].visualImage = "../assets/diagrams/<stem>.svg"   ← always SVG (gen
 Deck-level structure policies generalized from project-side deck practice (Projects/co-deck, 2026-10-30). The engagement-facing arms already delivered template-side by the render/validation batch (video-slide chrome-free rendering, background uniqueness / `individual`-scope manifest rules, content density floors) live in the batch tooling and are not restated here.
 
 1. **Video quality policy** — deck videos download at BEST AVAILABLE resolution: probe per video (`yt-dlp -F`), no artificial height cap; if a higher resolution than the local file exists, re-download; sources capped at 720p are recorded as `already-max` in `video-manifest.json` with `resolution_height` per entry. Thumbnails always maxresdefault.
-2. **Injector order contract** — after any rebuild the post-build injectors run in fixed order: `build-theme-deck.ts` → `inject-diagram-panels.ts` (if the deck uses diagrams) → `inject-video-players.ts`. When the project maintains a project-level UI injector (`presentations/<project>/scripts/inject-project-ui.ts`), it runs third, before `inject-video-players.ts` (which must stay last — its strip regex anchors on `</body>`).
+2. **Injector order contract** — after any rebuild the post-build injectors run in fixed order: `build-theme-deck.ts` → `inject-diagram-panels.ts` (if the deck uses diagrams) → `inject-video-players.ts`. When the project maintains a project-level UI injector (`deliverables/<project>/scripts/inject-project-ui.ts`), it runs third, before `inject-video-players.ts` (which must stay last — its strip regex anchors on `</body>`).
 3. **Background semantic matching** — every background-scoped slide's image must match the chapter thesis, not merely be distinct: the rationale is recorded as a `matches` string on the corresponding `background_image` entry in `image-manifest.json` (`families` for cover/divider entries; per-slide `individual` entries at `individual` scope). Semantic re-maps re-curate via the image-curator path (license-verified, ≥1200px, ≤2MB, sha256-deduped) and keep the background-uniqueness rules; the deck rebuilds through the injector chain and re-passes its deck verification checks.
 4. **Diagram label convention** — when a diagram's labels do not fit inside their shapes (pyramid apex layers are the recurring case), move the labels to right-side callout bubbles joined by leader lines and keep only short layer markers (number or keyword) inside each shape; the silhouette must stay true to the intended shape — a pyramid is a triangle, never a truncated frustum carved out to make text fit. Record the geometry decisions (shape, callout placement, leader-line targets) in `diagram-manifest.json`.
 5. **Caption policy (video slides)** —
-   - **Sidecar VTT contract**: where the video platform offers captions (manual or auto-generated), the sidecar WebVTT is part of the deck asset set — downloaded, converted to clean WebVTT, stored at `presentations/assets/videos/subs/<ID>.<lang>.vtt`, and recorded per video in `video-manifest.json` `subtitles` (`manual` preferred over `auto`; spoken language first; genuinely captionless videos record `[]` with a note — never a fake entry; a fragment manual track loses to a full auto track of the same language). Because `file://` pages block external VTT fetches, tracks are injected at runtime as blob URLs (project UI injector); exactly one track may show at a time (Chromium registers TextTracks asynchronously — enforce on `addtrack`/track `load`/`playing`, not a one-shot mode loop).
+   - **Sidecar VTT contract**: where the video platform offers captions (manual or auto-generated), the sidecar WebVTT is part of the deck asset set — downloaded, converted to clean WebVTT, stored at `deliverables/assets/videos/subs/<ID>.<lang>.vtt`, and recorded per video in `video-manifest.json` `subtitles` (`manual` preferred over `auto`; spoken language first; genuinely captionless videos record `[]` with a note — never a fake entry; a fragment manual track loses to a full auto track of the same language). Because `file://` pages block external VTT fetches, tracks are injected at runtime as blob URLs (project UI injector); exactly one track may show at a time (Chromium registers TextTracks asynchronously — enforce on `addtrack`/track `load`/`playing`, not a one-shot mode loop).
    - **Source vocabulary + merge-on-refetch**: `subtitles[].source` uses the vocabulary `manual | auto | translated | translated-llm` (`translated` = platform machine translation of captions; `translated-llm` = LLM cue-for-cue translation of the verified sidecar — timestamps byte-identical, cue counts preserved). Priority per (video, language): native manual > native auto > translated; existing `manual`/`auto` tags stay intact on re-fetch, and the manifest patch MERGES rather than replaces, so languages whose re-fetch failed keep their prior records verbatim.
    - **CC selector affordance**: when a video carries more than one caption track, the injector renders a `CC: <language> ▾` pill (title-pill styling, staged over the video) that cycles the tracks actually available on that video — pure client-side track switching (offline-safe), preserving exactly-one-showing semantics across languages.
    - **Caption default OFF**: `captions.default` options are `spoken | <language codes> | off`; the default posture is OFF because videos may carry burned-in captions — at load ZERO caption tracks show, and the selector cycle gains an OFF terminal state (languages → OFF), zero-showing correct in OFF and exactly-one-showing whenever a language is selected. The initial state is carried PER VIDEO by a `captionsDefault` field (`"spoken" | "off"`) on each video slide in `slidedata.json` (the injector reads it first and falls back to the profile `captions.default`); videos with baked-in captions are flagged `burned_in_captions: true` in `video-manifest.json` — METADATA ONLY, it must not change the default.
@@ -609,9 +609,9 @@ H-7: PM — Secret scan + deploy + verify
 |-----------------|-------------|
 | Research Package | `research_notes.md` from prior slide project |
 | Images | `image-manifest.json` entries from shared pool |
-| Diagrams | `presentations/assets/diagrams/*.svg` |
+| Diagrams | `deliverables/assets/diagrams/*.svg` |
 | References | `source-verification.md` validated URLs |
-| Versions | `presentations/<project>/_versions/` snapshots |
+| Versions | `deliverables/<project>/_versions/` snapshots |
 
 ### Handbook Domain Rules
 
@@ -661,9 +661,9 @@ Three tiers of abstraction exist, each with strict scope:
 |-------|-------|----------|-----------------|
 | **System** | `agents/*.md`, `skills/*/SKILL.md`, `scripts/` | Process logic, schemas, tool usage | Project values |
 | **Context** | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `co-deck.context.md` | Workspace paths, workflow summary, agent index | Project values |
-| **Project** | `presentations/<project>/` | Design values, content, measurements | Process logic |
+| **Project** | `deliverables/<project>/` | Design values, content, measurements | Process logic |
 
-**Critical invariant**: No color, font, or size value appears outside `presentations/<project>/`. The system layer defines schemas and contracts; the context layer defines the workflow; the project layer holds project-specific values.
+**Critical invariant**: No color, font, or size value appears outside `deliverables/<project>/`. The system layer defines schemas and contracts; the context layer defines the workflow; the project layer holds project-specific values.
 
 ### AI Neutrality
 
@@ -677,8 +677,9 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 
 ---
 
-*co-deck.context.md version: 4.4 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
+*co-deck.context.md version: 4.5 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
 *co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
+*co-deck.context.md version: 4.5 — updated 2026-11-15: scaffold deliverables/ migration (presentations/ → deliverables/); path references updated throughout.*
 *co-deck.context.md version: 4.5 — updated 2026-10-05: theme/style registry sync (outlook + white-bubble rows, 6×6 compatibility matrix, gen-slides-pdf v1.9.0); skills table synced to variant.json (added slide-layout-gate/presenter-mode; removed dead handbook/graft/agent-lifecycle-manager paths); gate model aligned to user-guide §4 (Gates 2 and 5 mandatory; 1.5, 3, 4 optional).*
 *co-deck.context.md version: 4.6 — updated 2026-10-30: backport: generalized structural slide rules from Projects/co-deck 2026-10-30 (DEC-20261030-01 lineage) — video quality policy (`already-max`), injector order contract, background semantic `matches` rationale, diagram label convention, generalized caption policy (sidecar VTT contract, `manual|auto|translated|translated-llm` vocabulary, merge-on-refetch, CC selector, OFF default, video-box-relative cue sizing).*
 *co-deck.context.md version: 4.7 — updated 2026-11-11: Content Rule 7 — Font Parity (PDF ↔ HTML) typography SSOT pointer, backported from Projects/co-deck rule 9 (DEC-20261110-02, co-deck PR #216; upstream request U-20261111-004) so template deliveries stop dropping it; rule body lives in the html-build SKILL "Font Parity" section (v1.7.0).*
@@ -721,9 +722,9 @@ Key rules:
 
 ## Output Destination Mapping
 
-Deck deliverables render into `presentations/<project>/` — the deck pipeline's
+Deck deliverables render into `deliverables/<project>/` — the deck pipeline's
 working root (lecture-profile.md, slidedata.json, image-manifest.json, shared
-asset pool at `presentations/assets/`). This is a **declared deviation** from
+asset pool at `deliverables/assets/`). This is a **declared deviation** from
 the cross-variant `deliverables/{drafts,presentations,references,reports,research}`
 convention: the layout is pipeline-load-bearing (lecture-profile, image-manifest,
 theme assets are consumed by the 11-stage build chain), so migrating it for

@@ -22,6 +22,13 @@
         "hwp-document-processing"
       ],
       "reason": "co-work hub-local skill; HWP promotion to templates deferred by DEC-20261107-01; the hub override intentionally names it."
+    },
+    {
+      "file_substring": "skills/presenter-mode",
+      "refs": [
+        "render-pdf-deck"
+      ],
+      "reason": "Capability list references the pdf-export skill's render command name (render-pdf-deck) — a cross-skill command reference, not a skill name (deliverables-migration wholesale copy, 2026-11-15)."
     }
   ]
 }
