@@ -1,4 +1,5 @@
-// @version 1.4.1
+// @version 1.4.2
+// v1.4.2 (2026-11-16, U-20261114-010): --project accepted as a --workspace alias (DX unification with the sibling co-deck tools; usage docs updated).
 // v1.4.0 (LOCAL-PATCH — deck-wide photo background doctrine, 2026-11-14
 // rebuild of 2026-11-ai-era-business-survival): Rule A amended — scope
 // "all"/"divider-cover" with a REGISTERED global background is now the
@@ -81,7 +82,8 @@
 //
 // Usage:
 //   bun scripts/co-deck/validate-image-manifest.ts --workspace deliverables/<project> [--root <path>]
-//   --workspace  project directory under deliverables/ (required)
+//   bun scripts/co-deck/validate-image-manifest.ts --project deliverables/<project> [--root <path>]  (alias)
+//   --workspace  project directory under deliverables/ (required; --project accepted as an alias)
 //   --root       instance root, default process.cwd() (where deliverables/ and the
 //                shared asset pool deliverables/assets/ live)
 // Exit codes: 0 = pass, 1 = validation errors found (warnings never fail).
@@ -96,7 +98,9 @@ const get = (flag: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 
-const workspaceArg = get('--workspace');
+// U-20261114-010 DX unification: --project is an alias of --workspace (the
+// sibling co-deck tools standardize on --project; both spellings are accepted).
+const workspaceArg = get('--workspace') ?? get('--project');
 const rootArg = get('--root');
 const instanceRoot = rootArg ? resolve(rootArg) : process.cwd();
 

@@ -50,12 +50,15 @@ title: >-
   silently. Relations: T-20261001-015 (archived), U-20261107-003 (v1.43.0
   overlap classification), U-20261006-006.
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
 created_at: '2026-11-14T18:12:29.029+09:00'
 history:
   - at: '2026-11-14T18:12:29.029+09:00'
     from: null
     to: backlog
+  - at: '2026-11-16T07:45:42.686+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null

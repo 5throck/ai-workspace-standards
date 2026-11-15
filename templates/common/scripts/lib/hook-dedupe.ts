@@ -23,7 +23,27 @@
  * Key semantics: matcher is normalized to '' when absent; an entry is identified by
  * its (matcher, command-sequence) — only byte-equal repeats are exact duplicates.
  *
- * @version 1.1.0
+ * v1.2.0 (2026-11-16, T-20261114-004 arm (a) — spec
+ *          docs/designs/2026-11-16-governance-batch-design.md): command-key guard —
+ *          dropMissingPathCommandEntries() extends the pre-merge filter from
+ *          hooks to any command-bearing top-level key (statusLine,
+ *          subagentStatusLine, and future {command} shapes): the whole key is
+ *          dropped when its command references a repo-relative path absent
+ *          from the project, with a GUARD row per drop. Same existsSync-style
+ *          contract and fixture-testable purity as the hooks guard.
+ *
+ * v1.3.0 (2026-11-16, T-20261114-009 item 4 — spec
+ *          docs/designs/2026-11-16-governance-batch-design.md): governance-hook
+ *          presence arm — analyzeClaudeHookDrift gains missing + matcherMismatch
+ *          arrays derived from the TEMPLATE side: every template hook command
+ *          referencing scripts/hooks/<name>.ts is a governance hook the local
+ *          settings must invoke under the same event+matcher (auto-derived set,
+ *          no hardcoding). lifecycle-sync-audit Check I reports them at error
+ *          level; variant-side drift is additionally caught by
+ *          sync-variant-settings --check (MANAGED_SUBSTRINGS now includes
+ *          agent-model-gate).
+ *
+ * @version 1.3.0
  *
  * v1.1.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
  *           R2.4 arm (a), U-20261031-009): dropMissingPathHookEntries() — the
@@ -79,6 +99,10 @@ export interface HookDriftReport {
   duplicates: HookDuplicateGroup[];
   /** Arm (b): events whose entry count exceeds the template count (template known only). */
   overCount: HookOverCount[];
+  /** Arm (c): governance hooks the template invokes that the local settings never invoke. */
+  missing: Array<{ name: string; event: string; matcher: string }>;
+  /** Arm (c): governance hooks invoked locally under a different event+matcher than the template. */
+  matcherMismatch: Array<{ name: string; expected: string; found: string }>;
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -259,7 +283,7 @@ export function dropMissingPathHookEntries(
  * skipped entirely and only arm (a) runs.
  */
 export function analyzeClaudeHookDrift(local: unknown, template: unknown | null): HookDriftReport {
-  const report: HookDriftReport = { duplicates: [], overCount: [] };
+  const report: HookDriftReport = { duplicates: [], overCount: [], missing: [], matcherMismatch: [] };
   if (!isPlainObject(local) || !isPlainObject(local.hooks)) return report;
 
   // Arm (a): within-event exact-duplicate (matcher, command) pairs.
@@ -300,5 +324,89 @@ export function analyzeClaudeHookDrift(local: unknown, template: unknown | null)
     }
   }
 
+  // Arm (c) (T-20261114-009): governance-hook presence — every template hook
+  // command referencing scripts/hooks/<name>.ts must be invoked locally under the
+  // same event+matcher. The governance set is auto-derived from the template side
+  // (no hardcoded hook list).
+  if (template !== null && isPlainObject(template) && isPlainObject(template.hooks)) {
+    const localIndex = new Map<string, Set<string>>();
+    for (const [event, eventValue] of Object.entries(local.hooks)) {
+      for (const e of normalizeEntries(eventValue)) {
+        for (const command of e.commands) {
+          const m = /scripts\/hooks\/([A-Za-z0-9_-]+\.ts)/.exec(command);
+          if (!m) continue;
+          const set = localIndex.get(m[1]) ?? new Set<string>();
+          set.add(`${event}/${e.matcher}`);
+          localIndex.set(m[1], set);
+        }
+      }
+    }
+    for (const [event, eventValue] of Object.entries(template.hooks)) {
+      for (const e of normalizeEntries(eventValue)) {
+        for (const command of e.commands) {
+          const m = /scripts\/hooks\/([A-Za-z0-9_-]+\.ts)/.exec(command);
+          if (!m) continue;
+          const name = m[1];
+          const expected = `${event}/${e.matcher}`;
+          const found = localIndex.get(name);
+          if (found === undefined) report.missing.push({ name, event, matcher: e.matcher });
+          else if (!found.has(expected)) {
+            // multi-entry hooks (post-write-lifecycle-check fires at two events)
+            // pass when the expected wiring is one of the local wirings
+            report.matcherMismatch.push({ name, expected, found: [...found].join(" + ") });
+          }
+        }
+      }
+    }
+  }
+
   return report;
+}
+
+export interface DroppedPathCommandRef {
+  /** Top-level settings key carrying the command, e.g. `statusLine`. */
+  key: string;
+  /** The referenced repo-relative path that does not exist in the project. */
+  missingPath: string;
+  /** The command string carrying the reference. */
+  command: string;
+}
+
+export interface CommandGuardResult {
+  /** Template settings with dropped command keys removed. */
+  settings: Record<string, unknown>;
+  /** One row per dropped key (first missing path wins). */
+  dropped: DroppedPathCommandRef[];
+}
+
+/**
+ * Command-key guard for the upgrade JSON_MERGE pass (pure; fixture-testable;
+ * T-20261114-004 arm (a)). Walks the TEMPLATE's top-level entries whose value is
+ * a plain object carrying a string `command` (`statusLine`,
+ * `subagentStatusLine`, and any future {command} shape); the whole key is
+ * dropped when the command references a repo-relative path the `exists`
+ * predicate reports missing from the project — the same existsSync-style
+ * contract as dropMissingPathHookEntries, applied outside `hooks`. Keys
+ * without a command shape pass through untouched. Never mutates the input.
+ */
+export function dropMissingPathCommandEntries(
+  template: unknown,
+  exists: (repoRelPath: string) => boolean,
+): CommandGuardResult {
+  const dropped: DroppedPathCommandRef[] = [];
+  if (!isPlainObject(template)) {
+    return { settings: {}, dropped };
+  }
+  const out: Record<string, unknown> = { ...template };
+  for (const [key, value] of Object.entries(template)) {
+    if (!isPlainObject(value) || typeof value.command !== "string") continue;
+    for (const rel of commandPathRefs(value.command)) {
+      if (!exists(rel)) {
+        dropped.push({ key, missingPath: rel, command: value.command });
+        delete out[key];
+        break;
+      }
+    }
+  }
+  return { settings: out, dropped };
 }

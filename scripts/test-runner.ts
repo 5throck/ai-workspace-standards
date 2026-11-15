@@ -1,6 +1,14 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.15.0
+ * v1.16.0 (2026-11-16, T-20261114-008): four more co-workspace files join
+ *          FILE_TIME_BUDGETS (suite 300s / test 45s, the co-workspace family
+ *          budget) — migrations, shared-team-quarantine, admin-console-r2,
+ *          admin-page each hit the 15000ms default per-test ceiling on
+ *          windows-latest (runs 43423354132, 43446832817, 43476903271,
+ *          43322937546; same commits pass on rerun and on ubuntu/macos).
+ *          First-time entries per the v1.6.0 convention, not raises.
+ *
+ * @version 1.16.0
  *
  * v1.15.0 (2026-11-12, CI speed): parallel dispatch is longest-first. windows-latest `test:unit` takes ~345s vs ~60s on ubuntu; the tail is a handful of files (upgrade-decision-log 163s, upgrade-overwrite-protection 119s, co-workspace-admin-console 103s, upgrade-tree-sync 97s, mcp-upstream-server 51s) that start late under alphabetical order and extend the wall clock. New pure exported `orderLongestFirst()` sorts files carrying a FILE_TIME_BUDGETS row first (larger suite budget, then larger test budget), the rest after in original order (stable); results/reporting stay in the original alphabetical order. No budget changed.
  *
@@ -207,6 +215,16 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // follows the hub-bootstrap precedent (no per-test timeout was
   // implicated in either CI failure mode).
   "co-workspace-admin-console.test.ts": { suite: 300000, test: 45000 },
+  // T-20261114-008 (windows-latest runs 43423354132 attempt 1, 43476903271):
+  // migrations/shared-team-quarantine per-test timeouts at 21.3-21.5s; same
+  // commits green on rerun and on ubuntu/macos. Family budget, first-time entry.
+  "co-workspace-migrations.test.ts": { suite: 300000, test: 45000 },
+  "co-workspace-shared-team-quarantine.test.ts": { suite: 300000, test: 45000 },
+  // T-20261114-008 (windows-latest runs 43446832817 attempt 1, 43322937546):
+  // admin-console-r2 15.2s / admin-page 17.9s per-test timeouts; same rerun-
+  // green shape as the rows above.
+  "co-workspace-admin-console-r2.test.ts": { suite: 300000, test: 45000 },
+  "co-workspace-admin-page.test.ts": { suite: 300000, test: 45000 },
   "mcp-upstream-server.test.ts": { suite: 300000, test: 30000 },
   "upgrade-tree-sync.test.ts": { suite: 300000, test: 60000 },
   // v1.9.0 (T-20261030-002 stage 2): 600s → 300s on the design's evidence

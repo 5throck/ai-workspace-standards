@@ -3,7 +3,7 @@ id: U-20261114-010
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-14T21:20:36.528+09:00'
 history:
@@ -16,7 +16,19 @@ history:
   - at: '2026-11-15T19:08:33.652+09:00'
     from: waiting
     to: waiting
-result: null
+  - at: '2026-11-16T07:45:23.009+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T07:45:23.009+09:00'
+    from: review
+    to: done
+result: >-
+  snapshot.ts v1.1.0: input resolution absolute → CWD → workspace (repo-level
+  files snapshot correctly), full-failure rollback (no _versions dir, no
+  VERSIONS.md entry), loud --desc truncation warning (VERSIONS.md keeps full
+  text); validate-image-manifest v1.4.2 accepts --project as a --workspace alias
+  (DX unification). Verified live (rollback + repo-relative + truncation
+  warning).
 error: null
 upstream:
   project: co-deck
@@ -82,3 +94,13 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-14T21:20:36.528+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2042
+    summary: >-
+      snapshot.ts v1.1.0: input resolution absolute → CWD → workspace
+      (repo-level files snapshot correctly), full-failure rollback (no _versions
+      dir, no VERSIONS.md entry), loud --desc truncation warning (VERSIONS.md
+      keeps full text); validate-image-manifest v1.4.2 accepts --project as a
+      --workspace alias (DX unification). Verified live (rollback +
+      repo-relative + truncation warning).

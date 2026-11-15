@@ -24,7 +24,12 @@
  *   bun scripts/lifecycle-sync-audit.ts --json
  *   bun scripts/lifecycle-sync-audit.ts --fix
  *
- * @version 1.21.0
+ * v1.22.0 (2026-11-16, T-20261114-009 item 4 — spec
+ *          docs/designs/2026-11-16-governance-batch-design.md): Check I consumes the
+ *          governance-hook presence arm (lib/hook-dedupe.ts v1.3.0) — missing and
+ *          matcher-mismatch findings report at ERROR level.
+ *
+ * @version 1.22.0
  * v1.21.0 (2026-11-06, DEC-20261106-03): Check B skips L0+L2 (variant-scoped) registry rows.
  * v1.20.1 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
  *          R2.5/R2.6 annotation, U-20261031-009): Check I docstring annotation only —
@@ -1159,6 +1164,26 @@ export function runCheckI(): SyncIssue[] {
       file: ".claude/settings.json",
       message: `Check I: hooks.${oc.event} has ${oc.localCount} entr(ies) vs ${oc.templateCount} in templates/common/.claude/settings.json${oc.excessCommands.length > 0 ? ` — excess command(s): ${oc.excessCommands.map((c) => `"${c}"`).join(", ")}` : ""}`,
       fix: "Rerun upgrade-project (the JSON_MERGE pass collapses exact duplicates) or remove the excess hook entries manually",
+    });
+  }
+  // T-20261114-009 item 4: governance-hook presence (arm (c) in lib/hook-dedupe.ts
+  // v1.3.0) — a governance hook the common template wires that the local settings
+  // never invoke, or invoke under a different event+matcher, is error-level: the
+  // CLAUDE.md §6 enforcement is inert without the wiring.
+  for (const mi of report.missing) {
+    issues.push({
+      level: "error",
+      file: ".claude/settings.json",
+      message: `Check I: governance hook ${mi.name} is never invoked (common template wires it at hooks.${mi.event}/${mi.matcher})`,
+      fix: "Add the common PreToolUse entry (mirror templates/common/.claude/settings.json) — CLAUDE.md §6 enforcement is inert without the wiring",
+    });
+  }
+  for (const mm of report.matcherMismatch) {
+    issues.push({
+      level: "error",
+      file: ".claude/settings.json",
+      message: `Check I: governance hook ${mm.name} fires at ${mm.found} but the common template wires ${mm.expected}`,
+      fix: "Align the matcher with templates/common/.claude/settings.json (or declare an exemption in docs/lifecycle/hook-exemptions.json)",
     });
   }
 

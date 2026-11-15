@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: "1.7.1"
+version: "1.7.3"
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -11,7 +11,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: "2026-11-15"
+last_reviewed: "2026-11-16"
 prerequisites: design
 relates_to:
   - skill: pdf-export
@@ -214,6 +214,36 @@ If any issue, split or merge slides.
 Insert if either is missing. Populate with `instructor` fields from `lecture-profile.md`.
 
 > To open HTML locally: `bunx serve .` → `http://localhost:3000`
+
+---
+
+## Patch-Layer Convergence Doctrine (U-20261114-012)
+
+Deck CSS/JS patch layers (style patches, player injectors, fit correctors) must be
+CONVERGENT — re-running a patch must approach a fixed point, never oscillate.
+
+- **Fixed-point rule**: the available height a corrective write uses must be computed
+  from inputs the write cannot change (containers, stable siblings, padding, gaps,
+  margins) — never from the mutated element's own post-write metrics. A clear branch
+  conditioned on state its own pin branch created is a permanent two-state oscillation
+  (observed defect class: 25/57 visual slides shaking in one deck, rev5 zen-visual fit).
+- **Never condition the clear branch on the pinned DOM state** — measure before the
+  pin, or read a container that the pin cannot resize.
+- **Idempotency is pinned**: the injector's rebuild+re-run contract is regression-
+  tested (tests/inject-video-players.test.ts 're-injection is byte-identical'); any
+  new patch-layer tool ships the same pin.
+- **Per-deck patch files do not travel** — a fix proven on one deck must be promoted
+  to the shared patch layer (or the template tool) before the next deck uses it;
+  per-deck copies of a shared injector diverge silently.
+- **Promotion path (the shared zen patch layer)**: the parameterized patcher
+  `scripts/co-deck/patch-zen-white-bubble.ts` (`--project/--version/--accent/
+  --accent-light`) is the layer — new zen decks run IT, they never copy it into
+  the project. A deck-local fix promotes in three steps: (1) fix the deck-local
+  copy and verify convergence (0 oscillating slides); (2) parameterize the fix
+  into the shared patcher with a version bump (deck-specific constants become
+  flags); (3) the shared patcher rides the next project→template backport gate.
+  If a fix cannot be parameterized, it stays deck-local and is re-assessed at
+  the next rebuild.
 
 ---
 

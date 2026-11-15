@@ -1,4 +1,15 @@
-// @version 1.44.0
+// @version 1.45.0
+// v1.45.0 (2026-11-16, T-20261114-004 arm (b) — spec
+//          docs/designs/2026-11-16-governance-batch-design.md): permission-widening
+//          classification — classifyPermissionWidenings() names template allow
+//          entries that widen a stricter project posture: a bare wildcard
+//          (Tool(*)) over a tool the project scopes with non-wildcard entries.
+//          Non-wildcard template additions always merge (acceptance:
+//          Bash(bun scripts/foo.ts:*) still merges), and template default
+//          allows merge into projects that do not list the tool yet (the
+//          engine contract pinned by upgrade-tree-sync's apply test). The
+//          upgrade caller strips classified entries from the merged allow
+//          array by default and records a WARN decision naming them.
 // v1.44.0 (2026-11-12, U-20261112-003): `rewriteTemplateProvenanceVersion(content, version)` — pure helper that
 //          rewrites the `- **Template-Version**: X` line inside the `## Template Provenance` footer of
 //          docs/<variant>.context.md to the delivered template version. The footer was written once at scaffold
@@ -2494,4 +2505,63 @@ export interface InstructionCensusGate {
   /** True when --disposition adopt-template[=glob] covers the path (the
    *  replace proceeds and re-baselines, ADOPT row recorded by the engine). */
   dispositionGranted: boolean;
+}
+
+export interface PermissionWidening {
+  /** The tool the entry grants, e.g. `WebFetch`. */
+  tool: string;
+  /** The raw template allow entry, e.g. `WebFetch(*)`. */
+  entry: string;
+  /** bare-wildcard: template Tool(*) over a tool the project scopes with non-wildcard entries. */
+  kind: "bare-wildcard";
+}
+
+function toolOfAllowEntry(entry: string): string | null {
+  const m = /^([A-Za-z][A-Za-z0-9_]*)\(/.exec(entry);
+  return m ? m[1] : (/^([A-Za-z][A-Za-z0-9_]*)$/.exec(entry.trim())?.[1] ?? null);
+}
+
+function isWildcardAllowEntry(entry: string): boolean {
+  return /^[A-Za-z][A-Za-z0-9_]*\(\*\)$/.test(entry.trim()) || /^[A-Za-z][A-Za-z0-9_]*$/.test(entry.trim());
+}
+
+/**
+ * Permission-widening classification for the upgrade JSON_MERGE pass (pure;
+ * fixture-testable; T-20261114-004 arm (b)). Compares the TEMPLATE
+ * permissions.allow entries against the PROJECT's and returns the template
+ * entries that widen a stricter project posture. Non-wildcard template
+ * entries are never classified — they merge as before. Never mutates input.
+ */
+export function classifyPermissionWidenings(template: unknown, project: unknown): PermissionWidening[] {
+  const tRoot = isPlainObject(template) ? template : {};
+  const pRoot = isPlainObject(project) ? project : {};
+  const tPerms = isPlainObject(tRoot.permissions) ? tRoot.permissions : {};
+  const pPerms = isPlainObject(pRoot.permissions) ? pRoot.permissions : {};
+  const tAllow = Array.isArray(tPerms.allow) ? tPerms.allow.filter((x): x is string => typeof x === "string") : [];
+  const pAllow = Array.isArray(pPerms.allow) ? pPerms.allow.filter((x): x is string => typeof x === "string") : [];
+  if (tAllow.length === 0) return [];
+  const pByTool = new Map<string, { scoped: boolean; wildcard: boolean }>();
+  for (const entry of pAllow) {
+    const tool = toolOfAllowEntry(entry);
+    if (!tool) continue;
+    const cur = pByTool.get(tool) ?? { scoped: false, wildcard: false };
+    if (isWildcardAllowEntry(entry)) cur.wildcard = true;
+    else cur.scoped = true;
+    pByTool.set(tool, cur);
+  }
+  const out = new Map<string, PermissionWidening>();
+  for (const entry of tAllow) {
+    const tool = toolOfAllowEntry(entry);
+    if (!tool || !isWildcardAllowEntry(entry)) continue;
+    // bare-wildcard only (T-20261114-004 review fix): a template wildcard over a
+    // tool the project scopes with non-wildcard entries. The unlisted-tool arm was
+    // dropped — the engine contract (upgrade-tree-sync apply test) requires template
+    // default allows to merge into projects that do not list the tool yet, and the
+    // dangerous template wildcards were swept from the templates (arm (c)).
+    const cur = pByTool.get(tool);
+    if (cur && cur.scoped && !cur.wildcard) {
+      out.set(entry, { tool, entry, kind: "bare-wildcard" });
+    }
+  }
+  return [...out.values()];
 }

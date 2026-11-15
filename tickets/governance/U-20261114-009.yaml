@@ -3,7 +3,7 @@ id: U-20261114-009
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-14T19:40:29.064+09:00'
 history:
@@ -19,7 +19,22 @@ history:
   - at: '2026-11-15T23:05:03.480+09:00'
     from: waiting
     to: waiting
-result: null
+  - at: '2026-11-16T07:45:31.923+09:00'
+    from: waiting
+    to: waiting
+  - at: '2026-11-16T08:01:53.208+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T08:02:02.752+09:00'
+    from: review
+    to: done
+result: >-
+  All four items: (1) subtitle promotion landed via inject-video-players v1.3.1
+  (PR #2040); (2) content doctrine — storyline Step 3.5 + Step 1.5 + zen
+  theme.json content_rules.bullet_doctrine; (3) Humanize pre-build lint —
+  storyline v1.3.2 Step 1.6 (POST /api/analyze, graceful skip); (4) generator
+  hygiene — Step 1.7 (lecture-profile.md single source + round-trip parity
+  gate).
 error: null
 upstream:
   project: co-deck
@@ -87,3 +102,13 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-14T19:40:29.064+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2042
+    summary: >-
+      All four items: (1) subtitle promotion landed via inject-video-players
+      v1.3.1 (PR #2040); (2) content doctrine — storyline Step 3.5 + Step 1.5 +
+      zen theme.json content_rules.bullet_doctrine; (3) Humanize pre-build lint
+      — storyline v1.3.2 Step 1.6 (POST /api/analyze, graceful skip); (4)
+      generator hygiene — Step 1.7 (lecture-profile.md single source +
+      round-trip parity gate).

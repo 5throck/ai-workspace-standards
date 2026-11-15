@@ -4,9 +4,9 @@
 
 - **Script**: hook-dedupe (scripts/lib/hook-dedupe.ts)
 - **Status**: active
-- **Version**: 1.1.0
+- **Version**: 1.3.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-31
+- **Last Updated**: 2026-11-16
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-31 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -18,6 +18,8 @@
 Hook-entry dedupe + drift analysis for .claude/settings.json (U-20261031-008): dedupeClaudeSettingsHooks collapses exact-duplicate (event, matcher, command) hook entries with first-occurrence-wins (consumed by upgrade-project's JSON_MERGE pass); analyzeClaudeHookDrift reports within-event duplicate pairs and per-event entry counts exceeding the common template (consumed by lifecycle-sync-audit Check I). Dedup is within-event only — cross-event repeats (SessionStart vs WorktreeCreate `git config core.hooksPath`; PostToolUse vs TeammateIdle post-write-lifecycle-check) are intentional and never merged or flagged. L0+L1 delivered. SSOT: `scripts/SCRIPTS.md` registry row (`lib/hook-dedupe.ts`).
 
 ## Phase History
+
+- **1.3.0** (v1.3.0 (2026-11-16, T-20261114-004/-009): v1.2.0 added dropMissingPathCommandEntries (command-bearing top-level key guard for the upgrade JSON_MERGE pass); v1.3.0 added the governance-hook presence arm (missing + matcherMismatch derived from the template side) consumed by lifecycle-sync-audit Check I at error level.)
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
