@@ -136,7 +136,7 @@ cross without going through PM.
 | KPI board, ops-review pack, cohort analyses | `reporting-analyst` | any ops agent deciding outcomes |
 | Platform code, schema, migrations, deployment | `architect`/`code-writer`/`test-runner` | any operations-stream agent |
 
-**Boundary rules** (from `docs/designs/2026-10-06-co-learning-education-operations-design.md` §3):
+**Boundary rules** (from DEC-20261007-01, the co-learning education-operations design — a project-local design doc, not shipped with the template; the rules below are the normative text):
 
 1. Operations-stream agents never touch code — platform needs go through PM
    to the product stream.

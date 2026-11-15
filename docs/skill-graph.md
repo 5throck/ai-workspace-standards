@@ -53,7 +53,7 @@
 | `co-deck/presenter-mode` | variant:co-deck | 1.0.1 | co-deck/html-build | co-deck/phase 4 | — | — | — |
 | `co-deck/research` | variant:co-deck | 1.2.1 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
 | `co-deck/slide-layout-gate` | variant:co-deck | 1.0.0 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
-| `co-deck/storyline` | variant:co-deck | 1.2.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
+| `co-deck/storyline` | variant:co-deck | 1.3.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
 | `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | — | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.0 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
 | `co-design/design-foundation` | variant:co-design | 1.3.0 | — | — | co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (enables), root/accessibility-audit (composes_with) | — | — |
@@ -90,7 +90,7 @@
 | `co-hr/performance-system-design` | variant:co-hr | 1.0.0 | co-hr/performance-management-consultant | co-hr/phase 2 | co-hr/career-path-succession-planning (follows), co-hr/stakeholder-alignment (composes_with), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/stakeholder-alignment` | variant:co-hr | 1.0.1 | co-hr/change-management-partner | co-hr/phase 1, co-hr/phase 2 | co-hr/org-readiness-assessment (follows), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/talent-acquisition-strategy` | variant:co-hr | 1.0.0 | co-hr/talent-acquisition-specialist | co-hr/phase 2 | co-hr/compensation-benchmarking (follows) | — | — |
-| `co-learning/exam-bank-operations` | variant:co-learning | 1.1.0 | co-learning/exam-bank-steward | co-learning/phase 4, co-learning/phase 5 | root/documentation-writing (composes_with) | — | — |
+| `co-learning/exam-bank-operations` | variant:co-learning | 1.2.0 | co-learning/exam-bank-steward | co-learning/phase 4, co-learning/phase 5 | root/documentation-writing (composes_with) | — | — |
 | `co-news/ai-tell-reduction` | variant:co-news | 1.0.0 | co-news/style-editor | co-news/phase 4 | co-news/financial-journalism-style (composes_with) | — | — |
 | `co-news/financial-infographic-svg` | variant:co-news | 1.0.1 | co-news/visual-editor | co-news/phase 5 | — | — | — |
 | `co-news/financial-journalism-style` | variant:co-news | 1.0.0 | co-news/reporter, co-news/style-editor | co-news/phase 3, co-news/phase 4 | co-news/ai-tell-reduction (composes_with), co-news/financial-narrative-brief (composes_with), co-news/source-verification-ledger (composes_with) | — | — |

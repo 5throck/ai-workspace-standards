@@ -6454,8 +6454,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "1be0ddc250ee8ca8",
-      "version": "1.2.0",
+      "content_hash": "c9c4a7058c508162",
+      "version": "1.3.0",
       "mirrors": [
         "templates/co-deck/skills/storyline/SKILL.md"
       ],
@@ -6944,8 +6944,8 @@
       "name": "exam-bank-operations",
       "scope": "co-learning",
       "capability": "exam-bank-operations",
-      "content_hash": "67b59ef23cb786d6",
-      "version": "1.1.0",
+      "content_hash": "0ffd8bccfd5d3d16",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-learning/skills/exam-bank-operations/SKILL.md"
       ]

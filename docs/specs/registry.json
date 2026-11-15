@@ -3384,6 +3384,15 @@
       "last_updated": "2026-11-13"
     },
     {
+      "id": "2026-11-15-co-deck-co-learning-backport-batch-design",
+      "title": "co deck co learning backport batch design",
+      "file": "docs/designs/2026-11-15-co-deck-co-learning-backport-batch-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-11-15",
+      "last_updated": "2026-11-15"
+    },
+    {
       "id": "skillhygiene",
       "title": "skill hygiene and layer conventions: cross-variant leak, per-skill README standard, scripts/<variant> layout",
       "file": "docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md",
