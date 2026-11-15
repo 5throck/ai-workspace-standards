@@ -1,7 +1,7 @@
 ---
 name: prep-pdf
 scope: co-deck
-version: 2.0.0
+version: "2.0.1"
 description: >
   Playwright-free PDF preparation. Reads lecture-profile.md, resolves the 4-layer
   spec merge, validates fonts, outputs a layout summary, and optionally generates
@@ -10,7 +10,7 @@ description: >
   Stages 9-10 of the lecture workflow (simplified).
 status: active
 owner: pdf-export
-last_reviewed: 2026-06-23
+last_reviewed: "2026-11-15"
 prerequisites: html-build
 relates_to:
   - skill: version
@@ -38,7 +38,7 @@ pieces are in place and produces a summary of what the PDF will look like.
 ### Step 1: Estimate Layout
 
 ```bash
-bun scripts/co-deck/estimate-layout.ts --project presentations/<project>
+bun scripts/co-deck/estimate-layout.ts --project deliverables/<project>
 ```
 
 This automatically:
@@ -63,7 +63,7 @@ bun scripts/co-deck/download-font.ts pretendard
 For new themes or when tuning layout, generate estimated overrides from CSS:
 
 ```bash
-bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
+bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project deliverables/<project>
 ```
 
 This reads CSS custom properties and computes estimated `layout_overrides` values.
@@ -74,7 +74,7 @@ Copy the printed YAML block into `lecture-profile.md`.
 For precise layout tuning, run the numerical calibration loop:
 
 ```bash
-bun scripts/co-deck/auto-calibrate.ts --project presentations/<project> --max-iter 3 --sample 5
+bun scripts/co-deck/auto-calibrate.ts --project deliverables/<project> --max-iter 3 --sample 5
 ```
 
 This generates a 5-page sample PDF, converts it to images (requires `pdf-to-png-converter` v4),
@@ -87,21 +87,21 @@ the sample PDF and validates the spec merge, but skips image-based numerical val
 ### Step 5: Generate Sample PDF
 
 ```bash
-bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --sample
+bun scripts/co-deck/estimate-layout.ts --project deliverables/<project> --sample
 ```
 
 Or directly:
 ```bash
-bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> --sample 5
+bun scripts/co-deck/gen-slides-pdf.ts --project deliverables/<project> --sample 5
 ```
 
 ---
 
 ## Output Format
 
-- `presentations/<project>/layout_summary.md` — spec merge summary (regions, fonts, sizes)
-- `presentations/<project>/sample_5slides.pdf` — sample for Gate 5 review (with --sample)
-- `presentations/<project>/calibration_report.md` — iterative calibration results (with auto-calibrate.ts)
+- `deliverables/<project>/layout_summary.md` — spec merge summary (regions, fonts, sizes)
+- `deliverables/<project>/sample_5slides.pdf` — sample for Gate 5 review (with --sample)
+- `deliverables/<project>/calibration_report.md` — iterative calibration results (with auto-calibrate.ts)
 
 ## Key Differences from Deprecated `measure` Skill
 

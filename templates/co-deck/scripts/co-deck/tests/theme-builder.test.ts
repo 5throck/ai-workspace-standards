@@ -1,4 +1,5 @@
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // theme-builder.test.ts — tests for the deterministic theme deck builder.
 //
 // Uses real theme packages from the workspace and a minimal slideData array.
@@ -19,7 +20,7 @@ const MINIMAL_SLIDES = [{ headline: 'Test Deck', type: 'cover', bullets: [] }];
 function makeOpts(overrides: Partial<import('../lib/theme-builder.js').BuildOptions> = {}) {
   return {
     root: ROOT,
-    projectPath: join(ROOT, 'presentations', '_test'),
+    projectPath: join(ROOT, 'deliverables', '_test'),
     theme: 'outline',
     style: 'classic',
     title: 'Test Deck',

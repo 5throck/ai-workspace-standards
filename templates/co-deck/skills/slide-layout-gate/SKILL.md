@@ -1,7 +1,7 @@
 ---
 name: slide-layout-gate
 scope: co-deck
-version: 1.0.0
+version: "1.0.1"
 description: >
   Slide content conformance gate. Runs estimate-layout.ts --lint to check every
   slide in slidedata.json against the merged 4-layer spec's content_constraints
@@ -10,7 +10,7 @@ description: >
   "check slide bounds", "slide content conformance".
 status: active
 owner: pdf-export
-last_reviewed: 2026-08-26
+last_reviewed: "2026-11-15"
 prerequisites: html-build
 relates_to:
   - skill: pdf-export
@@ -43,7 +43,7 @@ layout spec actually declares, using the exact 4-layer merge
 
 1. Run the gate:
    ```bash
-   bun scripts/co-deck/estimate-layout.ts --project presentations/<project> --lint
+   bun scripts/co-deck/estimate-layout.ts --project deliverables/<project> --lint
    ```
    (composes with `--sample`: lint runs first; a FAIL blocks the sample too)
 2. Read the verdict table — one row per slide: `# | Type | Check | Actual | Limit | Verdict`
@@ -56,7 +56,7 @@ layout spec actually declares, using the exact 4-layer merge
 |--------|-------------|--------|
 | Verdict table | console (stdout) | per-slide check rows: `# \| Type \| Check \| Actual \| Limit \| Verdict` |
 | Violation summary + remediation ladder | console (stderr on FAIL) | `N check(s) passed, M failed, K slide(s) unconstrained (WARN)` |
-| Layout summary | `presentations/<project>/layout_summary.md` | unchanged prep-pdf artifact (written on every run) |
+| Layout summary | `deliverables/<project>/layout_summary.md` | unchanged prep-pdf artifact (written on every run) |
 
 ## Verdict Semantics
 
@@ -95,15 +95,6 @@ discipline applied while composing `slide_deck.md`. This gate is the render-time
 bound from the merged spec's `content_constraints`, checked against the built
 deck. A compliant storyline that is edited afterwards can still fail the gate;
 a deck failing both was non-compliant at creation.
-
-**Minimum content (U-20261029-006)**: the gate also enforces floors —
-`min_bullets` / `min_body_chars` per type from `content_constraints`
-(mirrored in `content_rules` as `min_bullets_per_slide` / `min_body_chars`).
-Standard slides default to 3 bullets / 40 body chars when the theme declares
-no minimum (explicit `0` disables); title/divider/profile/contact/punchline
-slides are exempt unless they declare minimums; slides carrying `videoId` are
-exempt (media slides). The remediation ladder's under-bound arm is the reverse
-of over-bound: densify or merge thin slides, or reclassify.
 
 ## Related Skills
 

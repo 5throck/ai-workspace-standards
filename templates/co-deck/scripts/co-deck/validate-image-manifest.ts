@@ -1,4 +1,4 @@
-// @version 1.4.0
+// @version 1.4.1
 // v1.4.0 (LOCAL-PATCH — deck-wide photo background doctrine, 2026-11-14
 // rebuild of 2026-11-ai-era-business-survival): Rule A amended — scope
 // "all"/"divider-cover" with a REGISTERED global background is now the
@@ -16,6 +16,7 @@
 // entries, deck-scoped and pool-wide duplicate content.
 // LOCAL-PATCH(upstream-request: U-20261114-005; promotion pending in
 // U-20261114-006/-008 — script believed project-owned)
+// v1.4.1: pool-wide duplicate diagnostics normalize win32 backslash separators to manifest-convention forward slashes (win32-only test pin validate-image-manifest.test.ts:430; POSIX output unchanged) — single emission site, line 464.
 // v1.3.0 (design 2026-11-14-deliverables-rename-asset-pool-consolidation,
 // Follow-up 3): pool-wide duplicate content scan promoted WARN → ERROR
 // (blocking at Gate 3.5) — pool duplicates are consolidation debt that must not
@@ -461,7 +462,7 @@ if (existsSync(poolDir)) {
         try {
           const h = createHash('sha256').update(readFileSync(full)).digest('hex');
           const files = poolHashToFiles.get(h) ?? [];
-          files.push(full.slice(instanceRoot.length + 1));
+          files.push(full.slice(instanceRoot.length + 1).replaceAll('\\', '/'));
           poolHashToFiles.set(h, files);
         } catch {
           // unreadable pool file — the deck-side gate is not the place for it

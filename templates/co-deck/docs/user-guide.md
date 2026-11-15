@@ -91,10 +91,10 @@ There is also a lightweight **T-Stage pipeline** for authoring new themes/styles
 
 ## 5. Output / Deliverable Locations
 
-Every lecture project lives under `presentations/<project-name>/`, created from Stage 0:
+Every lecture project lives under `deliverables/<project-name>/`, created from Stage 0:
 
 ```
-presentations/<project-name>/
+deliverables/<project-name>/
   lecture-profile.md          # project-local copy of docs/lecture-profile.md
   project_state.json          # per-step status/approval tracking
   research_notes.md           # Stage 1 output

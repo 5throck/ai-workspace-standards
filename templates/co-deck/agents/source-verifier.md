@@ -1,9 +1,9 @@
 ---
 name: source-verifier
-version: "1.1.2"
+version: "1.1.3"
 role: Research source credibility and URL existence verification specialist
 status: active
-last_updated: 2026-11-06
+last_updated: 2026-11-15
 tier: medium
 color: yellow
 description: >-
@@ -80,7 +80,7 @@ Result classification:
 
 ## Output Format
 
-**File:** `presentations/<project>/source-verification.md`
+**File:** `deliverables/<project>/source-verification.md`
 
 ```markdown
 # Source Verification Report
@@ -197,7 +197,7 @@ When Gate 1.5 Recommendation is ❌ **Hold — Re-research Required**, execute t
 
 ### Retry Steps
 1. **Compile a targeted re-search list**: extract all ❌ Failed and ❌ Content Unverifiable sources with their original search context
-2. **Hand off to research agent** with the re-search list and the original topic/audience context from `presentations/<project>/lecture-profile.md`
+2. **Hand off to research agent** with the re-search list and the original topic/audience context from `deliverables/<project>/lecture-profile.md`
 3. **Research agent** runs targeted searches to find replacement or supplementary sources
 4. **Re-run source-verifier** on the updated `research_notes.md`
 5. **Max retries: 2**. If Trust Score remains < trust_score_thresholds.escalate (70%) after 2 retry cycles, escalate to PM with the final `source-verification.md` — PM decides whether to proceed with exclusions, narrow scope, or halt

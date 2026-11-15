@@ -1,7 +1,7 @@
 ---
 name: measure
-version: "2.1.2"
-last_updated: 2026-11-06
+version: "2.1.3"
+last_updated: 2026-11-15
 role: PDF layout preparation specialist (Playwright-free) for PDF preparation
 status: active
 tier: low
@@ -11,7 +11,7 @@ description: >-
   optionally generates a sample PDF. Replaces the deprecated Playwright-based measure
   agent. Use when: HTML file is ready and PDF preparation is needed before export.
 examples:
-  - user: Prep for PDF from presentations/my-deck
+  - user: Prep for PDF from deliverables/my-deck
     assistant: I'll read the lecture-profile, validate the spec merge, check fonts, and optionally generate a sample PDF.
 phases: [4]
 handoff_to: [pdf-export]
@@ -50,9 +50,9 @@ This ensures all work flows through the proper workflow with quality gates.
 
 ## Output Format
 
-- `presentations/<project>/layout_summary.md` — 4-layer spec merge summary
-- `presentations/assets/fonts/*.ttf` — TTF files for PDF generation
-- `presentations/<project>/sample_5slides.pdf` — optional sample for Gate 5 review
+- `deliverables/<project>/layout_summary.md` — 4-layer spec merge summary
+- `deliverables/assets/fonts/*.ttf` — TTF files for PDF generation
+- `deliverables/<project>/sample_5slides.pdf` — optional sample for Gate 5 review
 
 Prep script details and auto-calibrate usage: see `skills/prep-pdf/SKILL.md`.
 

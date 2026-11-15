@@ -1,4 +1,5 @@
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // verify-new-theme.ts — composite registration gate for new co-deck themes.
 //
 // Runs 5 checks to verify a theme is ready for registration:
@@ -299,7 +300,7 @@ function check4_fixtureBuild(): CheckResult {
 
   try {
     // Step 1: Build HTML deck using buildThemeDeck
-    const projectPath = join(workspaceRoot, 'presentations', '_test');
+    const projectPath = join(workspaceRoot, 'deliverables', '_test');
     mkdirSync(projectPath, { recursive: true });
 
     const buildResult = buildThemeDeck({

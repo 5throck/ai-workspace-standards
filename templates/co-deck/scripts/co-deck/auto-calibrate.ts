@@ -1,8 +1,9 @@
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // Auto-calibration loop for PDF layout tuning.
 // Generates a 5-slide sample PDF, converts to images, validates numerically,
 // adjusts layout_overrides, and repeats up to N iterations.
-// Usage: bun scripts/co-deck/auto-calibrate.ts --project presentations/<project> [--max-iterations 3] [--font-dir presentations/assets/fonts/]
+// Usage: bun scripts/co-deck/auto-calibrate.ts --project deliverables/<project> [--max-iterations 3] [--font-dir deliverables/assets/fonts/]
 // Requires: pdf-to-png-converter (optional: bun add pdf-to-png-converter)
 //
 // When pdf-to-png-converter is NOT installed, the loop still runs numerical checks
@@ -297,7 +298,7 @@ async function main() {
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('Usage: bun scripts/co-deck/auto-calibrate.ts --project presentations/<project> [--max-iterations 3] [--font-dir presentations/assets/fonts/]');
+    console.error('Usage: bun scripts/co-deck/auto-calibrate.ts --project deliverables/<project> [--max-iterations 3] [--font-dir deliverables/assets/fonts/]');
     process.exit(1);
   }
 

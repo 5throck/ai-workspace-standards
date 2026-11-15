@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // download-videos.ts — offline video fetch for lecture decks (U-20261105-007).
 //
 // TypeScript port of the 2026-10-ai-industry-research engagement's
@@ -24,11 +25,11 @@
 //      2 = at least one download failed (caller may WARN and continue — the
 //      injector keeps the YouTube fallback for missed files).
 //   3. Portable output — videos land in the shared pool
-//      `presentations/assets/videos/yt-<id>.mp4` (the injector's default
+//      `deliverables/assets/videos/yt-<id>.mp4` (the injector's default
 //      assets root), never inside the project folder.
 //
 // Usage:
-//   bun scripts/co-deck/download-videos.ts --project presentations/<project>
+//   bun scripts/co-deck/download-videos.ts --project deliverables/<project>
 //       [--slidedata <path>] [--assets-dir <dir>] [--quickdl-dir <dir>]
 //       [--check-only] [--force]
 //     --slidedata   slidedata SSOT (default: <project>/slidedata.json)
@@ -53,7 +54,7 @@ function hasFlag(flag: string): boolean {
 
 const projectArg = argValue('--project');
 if (!projectArg) {
-  console.error('Usage: bun scripts/co-deck/download-videos.ts --project presentations/<project> [--slidedata <path>] [--assets-dir <dir>] [--quickdl-dir <dir>] [--check-only] [--force]');
+  console.error('Usage: bun scripts/co-deck/download-videos.ts --project deliverables/<project> [--slidedata <path>] [--assets-dir <dir>] [--quickdl-dir <dir>] [--check-only] [--force]');
   process.exit(1);
 }
 

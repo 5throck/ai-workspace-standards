@@ -1,14 +1,15 @@
-// @version 3.3.0 — U-20261105-006: stripDiagramFooterText() runs on every generated SVG
+// @version 3.3.1 — U-20261105-006: stripDiagramFooterText() runs on every generated SVG
+// v3.3.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // (caption/source lines are slidedata-owned; generators must not draw them) and
 // svgTextDuplicatesSlide() audits each diagram for echoes of the slide's caption/source/
 // bullets (WARN, non-fatal). Previous 3.2.0: visualImage references SVG path (HTML
 // primary delivery format); PNG still generated alongside for PDF use.
 // Generate right-panel visual images via SVG rendering (no browser required).
-// Project-specific diagram generators live in presentations/<project>/diagram-defs.ts.
+// Project-specific diagram generators live in deliverables/<project>/diagram-defs.ts.
 // Shared utilities (svgWrap, svgToPng, palettes, strip/audit) live in diagram-helpers.ts.
 //
 // Usage:
-//   bun scripts/co-deck/gen-visual-images.ts --project presentations/<project>
+//   bun scripts/co-deck/gen-visual-images.ts --project deliverables/<project>
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
@@ -19,7 +20,7 @@ const getArg  = (flag: string) => { const i = args.indexOf(flag); return i >= 0 
 
 const projectArg = getArg('--project');
 if (!projectArg) {
-  console.error('Usage: bun scripts/co-deck/gen-visual-images.ts --project presentations/<project>');
+  console.error('Usage: bun scripts/co-deck/gen-visual-images.ts --project deliverables/<project>');
   process.exit(1);
 }
 
@@ -48,7 +49,7 @@ if (!existsSync(slidedataPath)) {
 }
 const slidedata: Array<Record<string, any>> = JSON.parse(readFileSync(slidedataPath, 'utf-8'));
 
-const imagesDir = join(workspaceRoot, 'presentations', 'assets', 'diagrams');
+const imagesDir = join(workspaceRoot, 'deliverables', 'assets', 'diagrams');
 if (!existsSync(imagesDir)) mkdirSync(imagesDir, { recursive: true });
 
 console.log(`\n🎨 Visual image generation (SVG → PNG, no browser)`);

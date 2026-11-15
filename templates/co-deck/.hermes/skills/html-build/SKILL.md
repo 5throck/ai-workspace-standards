@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: 1.7.0
+version: "1.7.1"
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -11,7 +11,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: 2026-11-10
+last_reviewed: "2026-11-15"
 prerequisites: design
 relates_to:
   - skill: pdf-export
@@ -45,7 +45,7 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 
 ### Stage 5: HTML Slide Generation
 
-**File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + `assets/images/` folder (photos) + `assets/diagrams/` folder (SVG/PNG diagrams).
+**File Structure:** Single HTML file (`lecture_[topic]_v1.html`) + shared-pool images at `deliverables/assets/images/` (photos, bound deck-relative as `../assets/images/…`) + shared-pool diagrams at `deliverables/assets/diagrams/` (SVG/PNG, bound deck-relative as `../assets/diagrams/…`).
 
 **slideData Structure:** Slide data lives as a **strict-JSON** array embedded as `const slideData = [...]` inside the HTML file. All keys and string values must use double-quotes; no trailing commas, no JS comments. This enables `extract_slidedata.mjs` to parse via `JSON.parse` directly without a transform step.
 
@@ -148,14 +148,14 @@ initPPT({ transition: 'fade', showTimer: true, showThumbnails: false,
 - If `narration` section is absent, set `narration.enabled: false`. If `auto_advance` section is absent, use defaults (`enabled: true`, `startAsAuto: false`, `interval: 8`)
 - **Backward compatibility**: if the old single `narration.autoAdvance` or `narration.autoAdvanceInterval` fields are present, silently ignore them
 
-**Image paths:** Photos live in the shared pool at `presentations/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `presentations/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix. Diagrams (SVG/PNG) live in the shared pool at `presentations/assets/diagrams/`. Use `../assets/diagrams/<stem>.png` for diagram slides. Paths are auto-rewritten by `gen-visual-images.ts` when run.
+**Image paths:** Photos live in the shared pool at `deliverables/assets/images/`. Use `../assets/images/<slug>.<ext>` (relative from `deliverables/<project>/`). Slug is the `path` field basename from `image-manifest.json`. No slide-number prefix. Diagrams (SVG/PNG) live in the shared pool at `deliverables/assets/diagrams/`. Use `../assets/diagrams/<stem>.png` for diagram slides. Paths are auto-rewritten by `gen-visual-images.ts` when run.
 
-**Canonical rebuild order (U-20261105-007):** every rebuild follows build → style patch → video inject — a rebuild silently drops video players and style patches otherwise. `build-theme-deck.ts` runs the video injection itself after a successful build (idempotent, video-less decks untouched); pass `--download-videos` to pre-fetch the deck's YouTube videos into `presentations/assets/videos/yt-<id>.mp4` before injection so offline playback binds local files. Re-apply the style patch after every rebuild.
+**Canonical rebuild order (U-20261105-007):** every rebuild follows build → style patch → video inject — a rebuild silently drops video players and style patches otherwise. `build-theme-deck.ts` runs the video injection itself after a successful build (idempotent, video-less decks untouched); pass `--download-videos` to pre-fetch the deck's YouTube videos into `deliverables/assets/videos/yt-<id>.mp4` before injection so offline playback binds local files. Re-apply the style patch after every rebuild.
 
 #### Font Parity (PDF ↔ HTML) — mandatory
 
 A deck's typography has ONE source of truth: the font family the PDF engine
-loads from `presentations/assets/fonts/` (currently `Pretendard-Regular/Bold.ttf`,
+loads from `deliverables/assets/fonts/` (currently `Pretendard-Regular/Bold.ttf`,
 per `gen-slides-pdf.ts` `--font-dir` default). Every HTML build MUST:
 
 1. Embed that same family via `@font-face` from those same TTF files (CSS url
@@ -219,7 +219,7 @@ Insert if either is missing. Populate with `instructor` fields from `lecture-pro
 
 ## Output Format
 
-`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData` (strict JSON), theme `data-theme` attribute, base + override CSS links, and `assets/images/` (photos) + `assets/diagrams/` (SVG/PNG) alongside.
+`lecture_[topic]_v1.html` — single self-contained HTML file with embedded `const slideData` (strict JSON), theme `data-theme` attribute, base + override CSS links; photos and diagrams live in the shared pools `deliverables/assets/images/` + `deliverables/assets/diagrams/` (bound deck-relative as `../assets/…`).
 
 > PDF pipeline note: `scripts/co-deck/extract_slidedata.mjs` parses the inline `const slideData = [...]` array via a bracket-depth state machine (not regex, not DOM). The slideData array **MUST be strict JSON** — all keys double-quoted, string values double-quoted, no trailing commas, no JS comments, no single quotes. Non-JSON syntax will break the PDF pipeline.
 >

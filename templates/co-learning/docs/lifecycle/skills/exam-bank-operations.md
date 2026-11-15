@@ -18,6 +18,10 @@
   variant (`skills/exam-bank-operations/`, platform mirrors included) together
   with its owner agent.
 
+
+- **2026-10-07**: 1.2.0 — invigilation policy (§5) and misconduct handling (§6)
+  added per the education-operations design decision (P1, project-local design
+  doc); triggers extended accordingly.
 ## Acceptance Criteria
 
 - [x] SKILL.md with frontmatter (status/scope/owner/triggers)

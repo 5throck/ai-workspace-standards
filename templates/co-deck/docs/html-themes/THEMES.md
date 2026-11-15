@@ -376,7 +376,7 @@ bun scripts/co-deck/scaffold-theme-style.ts --style <name>
 Layer 0 (shared) : docs/html-themes/themes/_shared/layout_base.json      → region skeleton (all null) + 16:9 page + print defaults
 Layer 1 (theme)  : docs/html-themes/themes/<theme>/pdf_layout_spec.json  → regions.*, slide_types[type].regions, slide_type_overrides, fonts, line_heights, content_constraints, toc, print
 Layer 2 (style)  : docs/html-themes/styles/<style>/pdf_color_spec.json   → color palette (colors.<role>)
-Layer 3 (project): presentations/<project>/lecture-profile.md            → layout_overrides block
+Layer 3 (project): deliverables/<project>/lecture-profile.md            → layout_overrides block
 ```
 
 Region values that are `null` in the theme spec **stay null** — Layer 0 never fills a region the theme intends to leave absent. Missing keys fall back to the previous layer or built-in defaults. Required regions referenced by `slide_types[type].regions` that resolve to `null` (and are not overridden) throw — there is **no silent fallback** to a default geometry.

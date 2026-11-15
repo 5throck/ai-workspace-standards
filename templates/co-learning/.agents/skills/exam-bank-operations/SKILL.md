@@ -8,8 +8,8 @@ description: >
   statistics monitoring. Use when: adding/reviewing bank items, running the bias
   remediation workflow, preparing an exam for a cohort, or analyzing exam statistics.
 owner: exam-bank-steward
-version: "1.1.0"
-last_reviewed: "2026-10-06"
+version: "1.2.0"
+last_reviewed: "2026-10-07"
 prerequisites: Assessment deliverable in deliverables/ with its bias tooling (bias.js) and the admin question-edit surface; remediation drafts + ledger fixtures under tests/
 relates_to:
   - skill: documentation-writing
@@ -21,6 +21,8 @@ metadata:
     - exam operations
     - bias review
     - item authoring
+    - invigilation
+    - misconduct handling
 ---
 
 # Exam Bank Operations
@@ -102,6 +104,34 @@ node deliverables/harness-assessment/scripts/validate.js   # warn-only bias shar
 
 Report: hard/soft shares, longest-correct rank distribution, per-dimension counts,
 thin strata (need more items), ledger progress (reviewed/applied counts).
+
+### 5. Invigilation policy (during sittings)
+
+1. Activation window is the single source of truth: no exam opens outside the
+   confirmed window (timezone explicit), and review mode is locked per the
+   attempt policy at creation time.
+2. Approval-code flow is the identity boundary — codes are issued through the
+   platform flow only, never by ad-hoc message; a reissue requires the reset
+   flow (ADR-0003) and is logged.
+3. During a sitting, the steward watches the admin statistics surface for
+   anomalies (impossible completion times, identical answer patterns). Findings
+   are recorded, not acted on unilaterally — suspected misconduct follows §6.
+4. Environment readiness per sitting: activation state, cohort roster match,
+   content version pin (cms-operations), and the ops cohort calendar
+   (lms-operations) agree.
+
+### 6. Misconduct handling
+
+1. **Record, don't judge**: capture the evidence (audit-trail entry, attempt
+   records, statistics anomaly) before anything else.
+2. Escalate to PM with the evidence summary; PM brings it to the owner — the
+   steward never invalidates a participant's result unilaterally.
+3. Owner decision determines the outcome (result annulment, re-sitting,
+   program-level action); the decision and rationale land in the session
+   memory log, and the affected records are corrected only through the admin
+   flow.
+4. If the misconduct reveals an item leak or bank defect, the affected items
+   enter the §2 remediation workflow and a comparability review before reuse.
 
 ## Output Format
 

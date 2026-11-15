@@ -1,4 +1,5 @@
-// @version 0.1.0
+// @version 0.1.1
+// v0.1.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // watch-deck.ts — live-reload authoring loop for theme deck builds.
 //
 // Runs an initial build, then watches the project directory for changes
@@ -7,10 +8,10 @@
 // Survives build errors — continues watching so authoring loop isn't broken.
 //
 // Usage:
-//   bun scripts/co-deck/watch-deck.ts --project presentations/<project>
-//   bun scripts/co-deck/watch-deck.ts --project presentations/<project> --slide-data path/to/data.json
-//   bun scripts/co-deck/watch-deck.ts --project presentations/<project> --output output.html --interval 500
-//   bun scripts/co-deck/watch-deck.ts --project presentations/<project> --once
+//   bun scripts/co-deck/watch-deck.ts --project deliverables/<project>
+//   bun scripts/co-deck/watch-deck.ts --project deliverables/<project> --slide-data path/to/data.json
+//   bun scripts/co-deck/watch-deck.ts --project deliverables/<project> --output output.html --interval 500
+//   bun scripts/co-deck/watch-deck.ts --project deliverables/<project> --once
 //
 // Flags:
 //   --project    (required) path to project directory
@@ -48,7 +49,7 @@ function parseArgs(): WatchOptions {
 
   if (!projectArg) {
     console.error('Error: --project <path> is required');
-    console.error('Usage: bun scripts/co-deck/watch-deck.ts --project presentations/<project>');
+    console.error('Usage: bun scripts/co-deck/watch-deck.ts --project deliverables/<project>');
     process.exit(1);
   }
 

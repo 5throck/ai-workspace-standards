@@ -1,8 +1,9 @@
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // File version snapshot manager — saves copies to _versions/<id>/ and tracks history in VERSIONS.md.
-// Usage: bun scripts/co-deck/snapshot.ts <file1> [file2 ...] --workspace presentations/<project> --desc "..." --agent "..."
-//        bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --list
-//        bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --restore <versionId>
+// Usage: bun scripts/co-deck/snapshot.ts <file1> [file2 ...] --workspace deliverables/<project> --desc "..." --agent "..."
+//        bun scripts/co-deck/snapshot.ts --workspace deliverables/<project> --list
+//        bun scripts/co-deck/snapshot.ts --workspace deliverables/<project> --restore <versionId>
 
 import {
   existsSync, mkdirSync, copyFileSync, cpSync, statSync,
@@ -271,9 +272,9 @@ if (isList) {
 } else {
   console.log(`
 사용법:
-  bun scripts/co-deck/snapshot.ts <file1> [file2 ...] --workspace presentations/<project> --desc "설명" --agent "에이전트명"
-  bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --list
-  bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --restore <버전ID>
+  bun scripts/co-deck/snapshot.ts <file1> [file2 ...] --workspace deliverables/<project> --desc "설명" --agent "에이전트명"
+  bun scripts/co-deck/snapshot.ts --workspace deliverables/<project> --list
+  bun scripts/co-deck/snapshot.ts --workspace deliverables/<project> --restore <버전ID>
 
 예시:
   bun scripts/co-deck/snapshot.ts slide_deck.md --desc '챕터 수 조정' --agent content

@@ -1166,8 +1166,8 @@
       "name": "design",
       "scope": "co-deck",
       "capability": "design",
-      "content_hash": "b89bbe3fe376f72a",
-      "version": "1.1.2",
+      "content_hash": "40e091fa1cba1873",
+      "version": "1.1.3",
       "mirrors": [
         "templates/co-deck/agents/design.md"
       ]
@@ -1179,8 +1179,8 @@
       "name": "diagram-specialist",
       "scope": "co-deck",
       "capability": "diagram-specialist",
-      "content_hash": "54b92c5c41c28c4b",
-      "version": "1.3.1",
+      "content_hash": "d3fce69fdeb8d4be",
+      "version": "1.3.2",
       "mirrors": [
         "templates/co-deck/agents/diagram-specialist.md"
       ]
@@ -1218,8 +1218,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "0bc78fb6ffcfac8b",
-      "version": "1.4.0",
+      "content_hash": "2e725f3f1ee0ad7e",
+      "version": "1.4.1",
       "mirrors": [
         "templates/co-deck/agents/html-build.md"
       ]
@@ -1231,8 +1231,8 @@
       "name": "image-curator",
       "scope": "co-deck",
       "capability": "image-curator",
-      "content_hash": "34d707a82a9fcd1d",
-      "version": "1.4.2",
+      "content_hash": "460f557db51bbc6f",
+      "version": "1.4.3",
       "mirrors": [
         "templates/co-deck/agents/image-curator.md"
       ]
@@ -1244,8 +1244,8 @@
       "name": "measure",
       "scope": "co-deck",
       "capability": "measure",
-      "content_hash": "2e8c8bef70068522",
-      "version": "2.1.2",
+      "content_hash": "99b79c2ddd7efae0",
+      "version": "2.1.3",
       "mirrors": [
         "templates/co-deck/agents/measure.md"
       ]
@@ -1257,8 +1257,8 @@
       "name": "pdf-export",
       "scope": "co-deck",
       "capability": "pdf-export",
-      "content_hash": "da4b197fe9e863fd",
-      "version": "2.2.2",
+      "content_hash": "af052ebf35439aa6",
+      "version": "2.2.3",
       "mirrors": [
         "templates/co-deck/agents/pdf-export.md"
       ]
@@ -1270,8 +1270,8 @@
       "name": "research",
       "scope": "co-deck",
       "capability": "research",
-      "content_hash": "050a816ffcaf2256",
-      "version": "1.1.2",
+      "content_hash": "9a655ce5e2f2924b",
+      "version": "1.1.3",
       "mirrors": [
         "templates/co-deck/agents/research.md"
       ]
@@ -1283,8 +1283,8 @@
       "name": "source-verifier",
       "scope": "co-deck",
       "capability": "source-verifier",
-      "content_hash": "c1e7a32f3eb925b2",
-      "version": "1.1.2",
+      "content_hash": "c065d001f8cfbc66",
+      "version": "1.1.3",
       "mirrors": [
         "templates/co-deck/agents/source-verifier.md"
       ]
@@ -1296,8 +1296,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "a7680994aa0d4972",
-      "version": "1.1.2",
+      "content_hash": "c34b2aa2cbe02bb4",
+      "version": "1.1.3",
       "mirrors": [
         "templates/co-deck/agents/storyline.md"
       ]
@@ -1309,8 +1309,8 @@
       "name": "version",
       "scope": "co-deck",
       "capability": "version",
-      "content_hash": "501e5cd10f657320",
-      "version": "1.1.1",
+      "content_hash": "523676c84c147247",
+      "version": "1.1.2",
       "mirrors": [
         "templates/co-deck/agents/version.md"
       ]
@@ -6334,8 +6334,8 @@
       "name": "design",
       "scope": "co-deck",
       "capability": "design",
-      "content_hash": "d7190a09a052c47a",
-      "version": "1.2.1",
+      "content_hash": "9ed885b8d29b131c",
+      "version": "1.2.2",
       "mirrors": [
         "templates/co-deck/skills/design/SKILL.md"
       ],
@@ -6354,8 +6354,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "68f8fd7de4b562a4",
-      "version": "1.7.0",
+      "content_hash": "acd63940aafe51ee",
+      "version": "1.7.1",
       "mirrors": [
         "templates/co-deck/skills/html-build/SKILL.md"
       ],
@@ -6374,8 +6374,8 @@
       "name": "pdf-export",
       "scope": "co-deck",
       "capability": "pdf-export",
-      "content_hash": "63cf9c38c93aa19c",
-      "version": "2.1.2",
+      "content_hash": "cdab3e30ac89ae8e",
+      "version": "2.1.3",
       "mirrors": [
         "templates/co-deck/skills/pdf-export/SKILL.md"
       ],
@@ -6393,8 +6393,8 @@
       "name": "prep-pdf",
       "scope": "co-deck",
       "capability": "prep-pdf",
-      "content_hash": "e4c4e2fb5faad5a3",
-      "version": "2.0.0",
+      "content_hash": "411913fa4ca52162",
+      "version": "2.0.1",
       "mirrors": [
         "templates/co-deck/skills/prep-pdf/SKILL.md"
       ]
@@ -6406,8 +6406,8 @@
       "name": "presenter-mode",
       "scope": "co-deck",
       "capability": "presenter-mode",
-      "content_hash": "d118492692123f54",
-      "version": "1.0.1",
+      "content_hash": "681adae7720b46ef",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-deck/skills/presenter-mode/SKILL.md"
       ]
@@ -6419,8 +6419,8 @@
       "name": "research",
       "scope": "co-deck",
       "capability": "research",
-      "content_hash": "7f6ea650fce00613",
-      "version": "1.2.1",
+      "content_hash": "8cb93e9ffe84855e",
+      "version": "1.2.2",
       "mirrors": [
         "templates/co-deck/skills/research/SKILL.md"
       ],
@@ -6435,8 +6435,8 @@
       "name": "slide-layout-gate",
       "scope": "co-deck",
       "capability": "slide-layout-gate",
-      "content_hash": "9630565e044a430e",
-      "version": "1.0.0",
+      "content_hash": "2d84d31631c0ef42",
+      "version": "1.0.1",
       "mirrors": [
         "templates/co-deck/skills/slide-layout-gate/SKILL.md"
       ],
@@ -6454,8 +6454,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "1be0ddc250ee8ca8",
-      "version": "1.2.0",
+      "content_hash": "c9c4a7058c508162",
+      "version": "1.3.0",
       "mirrors": [
         "templates/co-deck/skills/storyline/SKILL.md"
       ],
@@ -6487,8 +6487,8 @@
       "name": "version",
       "scope": "co-deck",
       "capability": "version",
-      "content_hash": "cd5f47037bbab861",
-      "version": "1.3.0",
+      "content_hash": "b9e098ad866a9c54",
+      "version": "1.3.1",
       "mirrors": [
         "templates/co-deck/skills/version/SKILL.md"
       ]
@@ -6944,8 +6944,8 @@
       "name": "exam-bank-operations",
       "scope": "co-learning",
       "capability": "exam-bank-operations",
-      "content_hash": "67b59ef23cb786d6",
-      "version": "1.1.0",
+      "content_hash": "0ffd8bccfd5d3d16",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-learning/skills/exam-bank-operations/SKILL.md"
       ]

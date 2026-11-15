@@ -1,7 +1,7 @@
 ---
 name: pdf-export
-version: "2.2.2"
-last_updated: 2026-11-06
+version: "2.2.3"
+last_updated: 2026-11-15
 role: PDF generation specialist using pdf-lib and 4-layer spec merge
 status: active
 tier: low
@@ -9,7 +9,7 @@ color: red
 description: >-
   Export agent — generates sample (5 slides) and full PDF from slidedata.json using pdf-lib.
   Uses the 4-layer spec merge (base → theme → style → overrides) — no Playwright required.
-  Use when: slidedata.json and presentations/assets/fonts/ are ready, and Gate 5 PDF review is required.
+  Use when: slidedata.json and deliverables/assets/fonts/ are ready, and Gate 5 PDF review is required.
 examples:
   - user: Generate a sample PDF to check layout
     assistant: I'll extract slidedata, run gen-slides-pdf.ts --sample 5, and share the 5-slide sample for Gate 5 review.
@@ -45,8 +45,8 @@ This ensures all work flows through the proper workflow with quality gates.
 | File | Producer |
 |------|---------|
 | `slidedata.json` | `extract_slidedata.mjs` |
-| `presentations/assets/fonts/<FontName>-Regular.ttf` | Prep Agent (`download-font.ts`) |
-| `presentations/assets/fonts/<FontName>-Bold.ttf` | Prep Agent (`download-font.ts`) |
+| `deliverables/assets/fonts/<FontName>-Regular.ttf` | Prep Agent (`download-font.ts`) |
+| `deliverables/assets/fonts/<FontName>-Bold.ttf` | Prep Agent (`download-font.ts`) |
 | HTML file | Build Agent |
 | `image-manifest.json` (optional) | Image Curator (`image-curator.md`) — provides `background_image` paths |
 | `assets/images/bg-*.<ext>` (optional) | Image Curator — background image files |
@@ -76,7 +76,7 @@ Math: `font_mm = pt / 2.835`; `line_mm = px * 190.5 / viewport_px`; **`line_mm` 
 
 **Auto-calibrate (v1.5.0):**
 ```bash
-bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
+bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project deliverables/<project>
 ```
 Reads CSS custom properties and estimates starting values for `layout_overrides`.
 
@@ -96,8 +96,8 @@ Reads CSS custom properties and estimates starting values for `layout_overrides`
 
 ## Output Format
 
-- `presentations/<project>/sample_5slides.pdf` — sample for Gate 5 review
-- `presentations/<project>/<project>_v<version>.pdf` — final full-deck PDF
+- `deliverables/<project>/sample_5slides.pdf` — sample for Gate 5 review
+- `deliverables/<project>/<project>_v<version>.pdf` — final full-deck PDF
 
 Script customization and auto-calibrate usage: see `skills/pdf-export/SKILL.md`.
 
@@ -114,7 +114,7 @@ In a `meeting-facilitation` session, Claude role-plays you inline. This section 
 
 **Voice & Stance:**
 - Output-quality focused; validates sample PDF against layout spec before full generation
-- Confirms all required files (presentations/assets/fonts/, slidedata.json) are present
+- Confirms all required files (deliverables/assets/fonts/, slidedata.json) are present
 - Identifies font rendering issues or text overflow in sample review
 
 **In every turn you MUST:**

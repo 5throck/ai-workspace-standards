@@ -2,7 +2,7 @@
 catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: pdf-export
 scope: co-deck
-version: 2.1.2
+version: "2.1.3"
 description: >
   Generates PDF from slide data using pdf-lib. Extracts slidedata.json, runs sample
   (5-slide) then full PDF generation scripts, reviews results. Reads the 4-layer
@@ -11,7 +11,7 @@ description: >
   the lecture workflow.
 status: active
 owner: pdf-export
-last_reviewed: 2026-11-10
+last_reviewed: "2026-11-15"
 prerequisites: prep-pdf
 relates_to:
   - skill: research
@@ -49,11 +49,11 @@ All inputs must exist before starting:
 | File | Produced by |
 |------|------------|
 | `slidedata.json` | `extract_slidedata.mjs` (or prep-pdf --sample) |
-| `presentations/assets/fonts/<FontName>-Regular.ttf` | `download-font.ts` (or prep-pdf) |
-| `presentations/assets/fonts/<FontName>-Bold.ttf` | `download-font.ts` (or prep-pdf) |
+| `deliverables/assets/fonts/<FontName>-Regular.ttf` | `download-font.ts` (or prep-pdf) |
+| `deliverables/assets/fonts/<FontName>-Bold.ttf` | `download-font.ts` (or prep-pdf) |
 | HTML file | Build Agent |
 | `image-manifest.json` (optional) | Image Curator — `background_image` paths |
-| `assets/images/bg-*.<ext>` (optional) | Image Curator — background image files |
+| `deliverables/assets/images/bg-*.<ext>` (optional) | Image Curator — background image files |
 
 **Dependencies** (pre-installed via `bun install`):
 - `pdf-lib` — PDF generation
@@ -61,7 +61,7 @@ All inputs must exist before starting:
 - `@pdf-lib/fontkit` — Korean font embedding
 
 **Font source of truth**: the sample/full PDF embeds fonts from
-`presentations/assets/fonts/` (default Pretendard Regular/Bold). That family is
+`deliverables/assets/fonts/` (default Pretendard Regular/Bold). That family is
 the deck's typographic reference — the HTML deck must embed the same family
 (html-build SKILL, "Font Parity"). Any font change lands in BOTH engines in one
 change. Gate 5 sample review includes a font-parity spot-check (DG-DECK-06).
@@ -85,7 +85,7 @@ bun scripts/co-deck/extract_slidedata.mjs "path/to/lecture.html"
 Before the full run, generate a 5-slide sample for layout sanity check.
 
 ```bash
-bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> --sample 5
+bun scripts/co-deck/gen-slides-pdf.ts --project deliverables/<project> --sample 5
 ```
 
 Share the sample with the user for review. If approved, proceed to Step 4 (★ Gate 5: approval required before full PDF).
@@ -95,10 +95,10 @@ Share the sample with the user for review. If approved, proceed to Step 4 (★ G
 ### Step 4: Generate Full PDF
 
 ```bash
-bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project>
+bun scripts/co-deck/gen-slides-pdf.ts --project deliverables/<project>
 
 # Custom output filename:
-bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> --out <filename>.pdf
+bun scripts/co-deck/gen-slides-pdf.ts --project deliverables/<project> --out <filename>.pdf
 ```
 
 **Layout customization** — edit `lecture-profile.md` → `layout_overrides`:
@@ -116,7 +116,7 @@ layout_overrides:
 The `--auto-calibrate` flag can suggest starting values:
 
 ```bash
-bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
+bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project deliverables/<project>
 ```
 
 **Background image rendering (v1.7.0):**
@@ -135,9 +135,9 @@ When `lecture-profile.md` has `background_image.enabled: true`, the PDF renderer
 
 ## Output Format
 
-- `presentations/<project>/[project]_v[version].pdf` — full presentation PDF
-- `presentations/<project>/sample_5slides.pdf` — sample for Gate 5 review
-- `presentations/<project>/speaker-notes_<lang>.txt` — speaker-notes handoff file, produced alongside the full PDF per the convention in [`docs/speaker-notes-export.md`](../../docs/speaker-notes-export.md)
+- `deliverables/<project>/[project]_v[version].pdf` — full presentation PDF
+- `deliverables/<project>/sample_5slides.pdf` — sample for Gate 5 review
+- `deliverables/<project>/speaker-notes_<lang>.txt` — speaker-notes handoff file, produced alongside the full PDF per the convention in [`docs/speaker-notes-export.md`](../../docs/speaker-notes-export.md)
 
 ## Related Skills
 

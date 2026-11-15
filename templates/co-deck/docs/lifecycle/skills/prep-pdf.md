@@ -7,7 +7,7 @@
 - **Skill**: prep-pdf
 - **Status**: active
 - **Owner**: pdf-export
-- **Created**: 2026-06-23
+- **Created**: 2026-11-15
 
 ## Description
 
@@ -17,7 +17,7 @@ Playwright-free PDF preparation. Reads lecture-profile.md, resolves the 4-layer 
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-06-23 | - | production | Initial record derived from SKILL.md frontmatter | pdf-export |
+| 2026-11-15 | - | production | Initial record derived from SKILL.md frontmatter | pdf-export |
 
 ## Acceptance Criteria
 
