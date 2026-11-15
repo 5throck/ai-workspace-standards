@@ -3,13 +3,19 @@ id: U-20261114-011
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
-created_at: 2026-11-14T23:05:02.197+09:00
+created_at: '2026-11-14T23:05:02.197+09:00'
 history:
-  - at: 2026-11-14T23:05:02.197+09:00
+  - at: '2026-11-14T23:05:02.197+09:00'
     from: null
     to: backlog
+  - at: '2026-11-15T19:08:24.865+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-15T19:08:24.890+09:00'
+    from: waiting
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,14 +25,39 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'The deck background model has no first-class notion of chapter/section background groups. `background_image.scope` supports only individual | divider-cover | all, so a deck that wants each chapter''s content slides to carry that chapter''s own photo cannot express it: the only path is per-slide backgroundImage injection outside the manifest, and registering those bindings in image-manifest.json is rejected by validate-image-manifest rule 3 (many-to-one reuse of one pool file across N slides is treated as a duplicate-content ERROR — legitimate for accidental duplication, wrong for an intentional chapter backdrop). Consequence observed 2026-11-14: with scope "all" every standard slide rendered the same global photo ("일반 장표의 배경 이미지가 모두 같게" per the client), and the fix had to bypass the manifest entirely (generator CHAPTER_BG table + deck patch script), leaving the mapping with no validator coverage. Requested capability: a chapter/section-scoped background group (e.g. background_image.chapters[] mapping section → slug, expanded by the build; validator accepts a registered chapter group as non-duplicate), plus html-build SKILL guidance on when content-slide backgrounds are appropriate vs the global backdrop.'
+  symptom: >-
+    The deck background model has no first-class notion of chapter/section
+    background groups. `background_image.scope` supports only individual |
+    divider-cover | all, so a deck that wants each chapter's content slides to
+    carry that chapter's own photo cannot express it: the only path is per-slide
+    backgroundImage injection outside the manifest, and registering those
+    bindings in image-manifest.json is rejected by validate-image-manifest rule
+    3 (many-to-one reuse of one pool file across N slides is treated as a
+    duplicate-content ERROR — legitimate for accidental duplication, wrong for
+    an intentional chapter backdrop). Consequence observed 2026-11-14: with
+    scope "all" every standard slide rendered the same global photo ("일반 장표의 배경
+    이미지가 모두 같게" per the client), and the fix had to bypass the manifest entirely
+    (generator CHAPTER_BG table + deck patch script), leaving the mapping with
+    no validator coverage. Requested capability: a chapter/section-scoped
+    background group (e.g. background_image.chapters[] mapping section → slug,
+    expanded by the build; validator accepts a registered chapter group as
+    non-duplicate), plus html-build SKILL guidance on when content-slide
+    backgrounds are appropriate vs the global backdrop.
   affected_paths:
     - scripts/co-deck/validate-image-manifest.ts
     - docs/html-themes/themes/zen/theme.json
     - .agents/skills/html-build/SKILL.md
   identity_source: cwd
-  repro: '1. In a deck project, assign one pool photo to all content slides of chapter 1, another to chapter 2, etc. (65-slide assignment observed in deliverables/2026-11-ai-era-business-survival today). 2. Attempt to register those bindings in image-manifest.json slides[]: validate-image-manifest.ts rule 3 fails with "duplicate image across slides … identical content hash" for every repeated photo, exit 1. 3. Workaround used locally: keep the mapping only in the slidedata generator + a patch script, leaving manifest notes to describe it — so no machine gate protects the mapping from drift.'
-  triage: inbox
+  repro: >-
+    1. In a deck project, assign one pool photo to all content slides of chapter
+    1, another to chapter 2, etc. (65-slide assignment observed in
+    deliverables/2026-11-ai-era-business-survival today). 2. Attempt to register
+    those bindings in image-manifest.json slides[]: validate-image-manifest.ts
+    rule 3 fails with "duplicate image across slides … identical content hash"
+    for every repeated photo, exit 1. 3. Workaround used locally: keep the
+    mapping only in the slidedata generator + a patch script, leaving manifest
+    notes to describe it — so no machine gate protects the mapping from drift.
+  triage: ready
   flagged: false
   triage_reasons:
     - project_soft_cap
@@ -36,4 +67,4 @@ upstream:
   dedupe_key: 9e0b4e120b85da76f38d9f77364b4cb005c324cde0851e85774b81a59929a963
   duplicates:
     - project: co-deck
-      at: 2026-11-14T23:05:02.197+09:00
+      at: '2026-11-14T23:05:02.197+09:00'
