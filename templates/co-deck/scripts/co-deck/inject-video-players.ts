@@ -1,5 +1,32 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.1
+// v1.3.1 (U-20261115-001): deck-relative local video bindings
+//          ("videoLocal": "../assets/videos/yt-<id>.mp4", the asset-pool
+//          convention) no longer double-navigate — they resolve against the
+//          DECK dir instead of being joined onto --assets-dir (the old code
+//          produced <deck>/../assets/videos/../assets/videos/… and missed the
+//          pool). Resolution order: absolute as-is; "../"-forms → deck dir
+//          first, --assets-dir second; bare/other-relative forms → --assets-dir
+//          first, deck dir second; the first EXISTING candidate wins (the
+//          primary is kept when nothing exists, so the warning names it).
+//          The default (no videoLocal) and the subs discovery are unchanged.
+// v1.3.0 (subtitle-selection regression restore): if sidecar subtitles exist at
+// <assets-dir>/subs/yt-<videoId>.<lang>.vtt (lang = ko|en) for a slide's video,
+// they are inlined into the payload (lang/label/vtt map — the pattern proven in
+// the 2026-10-ai-era-business-majors deck's project-local inject-project-ui.ts)
+// and a CC selector pill (.cc-lang-selector, z-index 8 — rides above the
+// ppt-engine .video-frame z-7 and both stage buttons z-5) is wired per slide:
+// click cycles 한국어 → English → OFF (default OFF), tracks attach as blob URLs
+// (file:// blocks external VTT fetches) and exactly ONE track is "showing" (or
+// zero when OFF), re-asserted at every stable point (addtrack / track load /
+// playing / seeked / loadeddata) because Chromium registers TextTracks
+// asynchronously. Switching languages or toggling OFF never touches video.src,
+// so playback position is preserved by construction. Subtitles apply to the
+// local-mp4 mode only — native ppt-engine VideoSlide <video.video-frame>
+// elements AND injector-created <video.cdk-video-frame> elements are both
+// wired (a childList observer); the YouTube iframe and new-tab fallbacks are
+// untouched. No subs files → payload omits the map and the deck behaves
+// exactly as v1.2.0.
 // v1.2.0 (T-20261110-005, design docs/designs/2026-11-10-co-deck-root-tooling-design.md):
 // --slidedata now defaults to <deck dir>/slidedata.json (anchored beside the deck
 // HTML instead of the CWD — manual re-runs from the repo root no longer ENOENT);
@@ -32,7 +59,8 @@
 //   bun scripts/co-deck/inject-video-players.ts <deck.html> [--slidedata <path>] [--assets-dir <dir>]
 //     --slidedata   slidedata SSOT (default: <deck dir>/slidedata.json — beside the deck
 //                   HTML, independent of the CWD; an explicit value keeps CWD semantics)
-//     --assets-dir  local video root; videos resolved as <assets-dir>/yt-<videoId>.mp4
+//     --assets-dir  local video root; videos resolved as <assets-dir>/yt-<videoId>.mp4,
+//                   subtitles as <assets-dir>/subs/yt-<videoId>.<lang>.vtt
 //                   (default: <deck dir>/../assets/videos)
 // Exit codes: 0 = injected (or nothing to do); 1 = fatal (missing input, no video slides).
 // A project-local injector in the deck directory (inject_*.py|js|mjs|ts) triggers a
@@ -43,6 +71,7 @@ import { dirname, isAbsolute, join, normalize, relative, resolve } from 'node:pa
 
 interface SlideEntry { videoId?: string; videoLocal?: string }
 interface Vid { i: number; id: string; local?: string }
+interface SubTrack { lang: string; label: string; vtt: string }
 
 function argValue(flag: string): string | undefined {
   const i = process.argv.indexOf(flag);
@@ -89,7 +118,22 @@ for (let i = 0; i < slides.length; i++) {
   const d = slides[i];
   if (!d?.videoId) continue;
   const local = d.videoLocal ?? join('yt-' + d.videoId + '.mp4');
-  const localAbs = isAbsolute(local) ? local : join(assetsDir, local);
+  // U-20261115-001: deck-relative bindings ("../assets/videos/…", the
+  // asset-pool convention) resolve against the DECK dir — the old code joined
+  // them onto --assets-dir, double-navigating and missing the pool.
+  // Resolution order: absolute as-is; "../"-forms → deck dir first,
+  // --assets-dir second; bare/other-relative forms → --assets-dir first, deck
+  // dir second; the first EXISTING candidate wins (the primary is kept when
+  // nothing exists, so the warning names it).
+  const candidates: string[] = [];
+  if (isAbsolute(local)) {
+    candidates.push(local);
+  } else {
+    if (local.startsWith('..')) candidates.push(resolve(deckDir, local));
+    candidates.push(resolve(assetsDir, local));
+    if (!local.startsWith('..')) candidates.push(resolve(deckDir, local));
+  }
+  const localAbs = candidates.find((c) => existsSync(c)) ?? candidates[0];
   // Deck-relative posix path — the built deck must stay portable across machines.
   const relLocal = existsSync(localAbs) ? relative(deckDir, localAbs).split('\\').join('/') : undefined;
   vids.push({ i, id: d.videoId, local: relLocal });
@@ -97,6 +141,27 @@ for (let i = 0; i < slides.length; i++) {
 if (vids.length === 0) {
   console.error('inject-video-players: no slides carry videoId — nothing to inject');
   process.exit(1);
+}
+
+// v1.3.0: sidecar subtitle discovery — <assets-dir>/subs/yt-<videoId>.<lang>.vtt,
+// lang fixed to ko|en (labels 한국어/English; ko listed first when both exist —
+// the deck's spoken language is ko and the selector cycle starts at OFF, so
+// order only shapes the cycle, never the initial state). Raw VTT text is
+// inlined verbatim: the runtime creates blob URLs because file:// pages cannot
+// fetch external VTT resources.
+const SUB_LANGS: Array<[string, string]> = [['ko', '한국어'], ['en', 'English']];
+const subs: Record<number, SubTrack[]> = {};
+let subCount = 0;
+for (const v of vids) {
+  const tracks: SubTrack[] = [];
+  for (const [lang, label] of SUB_LANGS) {
+    const p = join(assetsDir, 'subs', `yt-${v.id}.${lang}.vtt`);
+    if (existsSync(p)) tracks.push({ lang, label, vtt: readFileSync(p, 'utf8') });
+  }
+  if (tracks.length > 0) {
+    subs[v.i] = tracks;
+    subCount += tracks.length;
+  }
 }
 
 // Idempotent strip: remove any previous injection block (style marker .. </body>).
@@ -110,16 +175,166 @@ if (!clean.includes('</body>')) {
   process.exit(1);
 }
 
+// v1.3.0 — the pill CSS is emitted only when at least one sidecar exists, so a
+// subtitle-less deck keeps the exact v1.2.0 output shape (dead CSS would be
+// harmless, but byte-identical behavior is the cheaper contract to pin).
+const SUBS_CSS = subCount > 0
+  ? `/* v1.3.0 — CC language selector pill, staged bottom-right over the video.
+   z-index 8 rides above the ppt-engine .video-frame (z-7) and both full-slide
+   stage buttons (z-5), so it is clickable before playback and stays clickable
+   while playing (it lives on the slide element, not on any frame). Scoped to
+   .slide (NOT .cdk-video-slide): native ppt-engine VideoSlide slides carry
+   class video-slide, not cdk-video-slide, and they are the ones that play
+   local mp4s. */
+.slide .cc-lang-selector {
+  position: absolute; bottom: 1.1rem; right: 1.4rem; z-index: 8;
+  display: inline-block;
+  background: rgba(11, 15, 25, 0.55);
+  color: #fff; font-size: 0.95rem; font-weight: 600; line-height: 1.2;
+  padding: 0.4rem 0.95rem; border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(2px);
+  cursor: pointer; user-select: none; white-space: nowrap;
+  font-family: inherit;
+}
+.slide .cc-lang-selector:hover { background: rgba(11, 15, 25, 0.75); }
+`
+  : '';
+
+// v1.3.0 — subtitle runtime segments, emitted only when at least one sidecar
+// exists (a subtitle-less deck then keeps the exact v1.2.0 output shape —
+// no pill CSS, no subs payload, no wiring code at all).
+const SUBS_JS_VARS = subCount > 0
+  ? `  // v1.3.0 — slide index -> [{lang,label,vtt}]; absent keys have no sidecar
+  // subs and get no pill (deck renders exactly as before).
+  var subs = ${JSON.stringify(subs)};
+  var OFF_LABEL = "CC: 끔";
+  // Per-slide active caption state: a track index, or -1 = OFF. Default OFF
+  // (client-confirmed captions-off default on the majors deck; captions come
+  // on via the CC pill on demand).
+  var activeIdx = {};
+  var blobCache = {};
+  function activeIdxOf(slideIdx) {
+    var v = activeIdx[slideIdx];
+    return typeof v === "number" ? v : -1;
+  }
+  // Exactly ONE track shows (the selected one) or ZERO when OFF. Chromium
+  // registers TextTracks asynchronously after <track> insertion, so the
+  // policy is re-asserted at every stable point: addtrack, track load,
+  // playing, seeked, loadeddata.
+  function enforceCaptionModes(video) {
+    var want = activeIdxOf(parseInt(video.dataset.cdkSlide, 10));
+    var tt = video.textTracks;
+    for (var i = 0; i < tt.length; i++) {
+      try { tt[i].mode = (want !== -1 && i === want) ? "showing" : "disabled"; } catch (e) {}
+    }
+  }
+  // Set the active state for a slide: persists the index (-1 = OFF), updates
+  // the pill label, and flips modes on any existing video element. Never
+  // touches video.src — playback position is preserved on switch/toggle.
+  function setActive(slideIdx, idx) {
+    activeIdx[slideIdx] = idx;
+    var el = document.getElementById("slide-" + slideIdx);
+    var tracks = subs[slideIdx] || [];
+    if (el) {
+      var btn = el.querySelector(".cc-lang-selector");
+      if (btn) {
+        btn.textContent = (idx === -1 || !tracks[idx]) ? OFF_LABEL
+          : "CC: " + tracks[idx].label + " \\u25BE";
+      }
+      el.querySelectorAll("video").forEach(function (v) {
+        v.dataset.cdkActive = String(idx);
+        enforceCaptionModes(v);
+      });
+    }
+  }
+  // Attach caption tracks (blob URLs) to a video element the first time it is
+  // seen. Covers BOTH native ppt-engine VideoSlide <video.video-frame>
+  // elements and injector-created <video.cdk-video-frame> elements.
+  function ensureTracks(video, slideIdx) {
+    if (!video || video.dataset.cdkCaptions) return;
+    var tracks = subs[slideIdx];
+    if (!tracks || !tracks.length) return;
+    video.dataset.cdkCaptions = "1";
+    video.dataset.cdkSlide = String(slideIdx);
+    video.dataset.cdkActive = String(activeIdxOf(slideIdx));
+    tracks.forEach(function (t, k) {
+      var key = slideIdx + ":" + k;
+      if (!blobCache[key]) {
+        blobCache[key] = URL.createObjectURL(new Blob([t.vtt], { type: "text/vtt" }));
+      }
+      var tr = document.createElement("track");
+      tr.kind = "captions";
+      tr.label = t.label;
+      tr.srclang = t.lang;
+      tr.src = blobCache[key];
+      tr.addEventListener("load", function () { enforceCaptionModes(video); });
+      video.appendChild(tr);
+    });
+    enforceCaptionModes(video);
+    if (video.textTracks.addEventListener) {
+      video.textTracks.addEventListener("addtrack", function () {
+        enforceCaptionModes(video);
+      });
+    }
+    ["playing", "seeked", "loadeddata"].forEach(function (ev) {
+      video.addEventListener(ev, function () { enforceCaptionModes(video); });
+    });
+  }
+`
+  : '';
+
+const SUBS_JS_INIT = subCount > 0
+  ? `    // v1.3.0 — CC pill per subtitle-carrying slide (native and injected slides
+    // alike). Click cycles tracks then OFF: ko → en → 끔 → ko (payload order);
+    // starting from -1, (+1) mod (n+1) lands on track 0, and OFF is always the
+    // terminal state right after the last language. stopPropagation keeps the
+    // full-slide play affordance from firing.
+    Object.keys(subs).forEach(function (k) {
+      var i = parseInt(k, 10);
+      var el = document.getElementById("slide-" + i);
+      if (!el || el.dataset.cdkSubsBound) return;
+      el.dataset.cdkSubsBound = "1";
+      activeIdx[i] = -1;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cc-lang-selector";
+      btn.setAttribute("aria-label", "subtitle language");
+      btn.textContent = OFF_LABEL;
+      btn.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        var n = subs[i].length + 1;
+        var next = (activeIdxOf(i) + 1) % n;
+        setActive(i, next === subs[i].length ? -1 : next);
+      });
+      el.appendChild(btn);
+    });
+    var subsTarget = document.getElementById("presentation") || document.body;
+    // v1.3.0 — wire caption tracks onto any <video> that appears inside a
+    // subtitle-carrying slide (VideoSlide.play / injector stage click create
+    // it on demand; autoplay race is fine — cues load from the in-memory blob
+    // within a frame or two).
+    new MutationObserver(function () {
+      Object.keys(subs).forEach(function (k) {
+        var i = parseInt(k, 10);
+        var el = document.getElementById("slide-" + i);
+        if (!el) return;
+        el.querySelectorAll("video").forEach(function (v) { ensureTracks(v, i); });
+      });
+    }).observe(subsTarget, { childList: true, subtree: true });
+`
+  : '';
+
 const injection = `<style id="cdk-video-players">
 .cdk-video-stage { position: absolute; inset: 0; z-index: 5; background: transparent; border: 0; cursor: pointer; }
 .cdk-video-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: none; background: #000; }
 .cdk-video-slide.playing .cdk-video-frame { display: block; }
 .cdk-video-slide.playing .cdk-video-stage { display: none; }
-</style>
+${SUBS_CSS}</style>
 <script id="cdk-video-players-js">
 (function () {
   var vids = ${JSON.stringify(vids.map((v) => ({ i: v.i, id: v.id, local: v.local ?? undefined })))};
-  function init() {
+${SUBS_JS_VARS}  function init() {
     vids.forEach(function (v) {
       var el = document.getElementById("slide-" + v.i);
       if (!el || el.dataset.videoBound) return;
@@ -162,7 +377,7 @@ const injection = `<style id="cdk-video-players">
       });
       el.appendChild(btn);
     });
-    var target = document.getElementById("presentation") || document.body;
+${SUBS_JS_INIT}    var target = document.getElementById("presentation") || document.body;
     new MutationObserver(function () {
       document.querySelectorAll(".cdk-video-slide.playing").forEach(function (el) {
         if (!el.classList.contains("active")) {
@@ -183,4 +398,5 @@ const injection = `<style id="cdk-video-players">
 const outDir = dirname(htmlPath);
 if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 writeFileSync(htmlPath, clean.replace('</body>', injection));
-console.log(`inject-video-players: injected ${vids.length} video slide(s) (${vids.filter((v) => v.local).length} local, rest YouTube fallback) — re-run after every deck rebuild`);
+const subNote = subCount > 0 ? `, ${subCount} subtitle track(s) on ${Object.keys(subs).length} slide(s)` : ', no subtitle sidecars found';
+console.log(`inject-video-players: injected ${vids.length} video slide(s) (${vids.filter((v) => v.local).length} local, rest YouTube fallback)${subNote} — re-run after every deck rebuild`);

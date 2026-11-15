@@ -1,0 +1,86 @@
+schemaVersion: 1
+id: U-20261114-009
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-14T19:40:29.064+09:00'
+history:
+  - at: '2026-11-14T19:40:29.064+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-15T19:08:07.120+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-15T19:08:15.882+09:00'
+    from: waiting
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Promotion/doctrine request compiling session 2026-11-14 second-half findings
+    not yet covered by U-20261114-006/-007/-008: (1) inject-video-players.ts
+    v1.3.0 (implemented locally, 10/10 tests) adds generic subtitle selection —
+    sidecar-driven (assets/videos/subs/yt-<id>.{ko,en}.vtt) inline VTT map + CC
+    language pill, local-mp4 mode only, conditional emission keeps v1.2.0
+    behavior when no sidecars; template currently ships v1.2.0 without it;
+    download-videos.ts also lacks a subs-download mode (VTTs were fetched by
+    ad-hoc tooling; YouTube translated-track endpoints 429-throttled — doctrine
+    needs a documented fallback, e.g. machine-translated sidecars marked in
+    manifest qa_note). (2) storyline content doctrine gaps observed by the
+    client: bullets must carry context/interpretation, not source listings;
+    per-slide source attributions belong in speaker narration + the references
+    appendix, not slide bullets; next-slide announcement sentences must not live
+    in bullets; biography data needs structured line breaks (each credential its
+    own line) so profile cards do not stretch full-width. These belong in zen
+    theme.json content_rules / storyline skill as authoring rules. (3) Humanize
+    (/Users/techcross/git/project/Humanize — offline Korean AI-tic rule engine,
+    Bun, zero deps) proven useful as a pre-build content lint: deck-wide scan
+    found 19 severe AI-flavor findings, cleared to 0 with numbers/density
+    preserved; integrate as an optional storyline-stage check. (4) slidedata
+    generator hygiene: hardcoded presentation constants must derive from
+    lecture-profile.md (single source), and a generator-vs-slidedata round-trip
+    parity check should gate rebuilds.
+  affected_paths:
+    - scripts/co-deck/inject-video-players.ts
+    - scripts/co-deck/download-videos.ts
+    - .agents/skills/storyline/SKILL.md
+    - docs/html-themes/themes/zen/theme.json
+    - tests/gen-slidedata-ai-era-business-survival.py
+  identity_source: cwd
+  repro: >-
+    1. Build any new deck from templates/co-deck: video slides get players
+    without subtitle selection (generic inject-video-players.ts v1.2.0 has no
+    subtitle support; the capability existed only as project-local code in
+    deliverables/2026-10-ai-era-business-majors/scripts/inject-project-ui.ts —
+    inline per-language VTT map + CC pill). 2. Author content with theme
+    content_rules as-is: bullets drift into "수치 — 출처" listing style, sources
+    clutter slide bullets, and next-slide announcement sentences appear inside
+    bullets; biography renders as one long unwrapped line forcing
+    near-full-width cards. 3. Project slidedata generators
+    (tests/gen-slidedata-*.py) carry hardcoded constants (e.g. COVER_META) that
+    drift from lecture-profile.md edits — a rebuild silently reintroduces stale
+    text (observed today: 운영위원 credential re-entry risk).
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: tests/gen-slidedata-ai-era-business-survival.py'
+    - info:in_last_delivery scripts/co-deck/inject-video-players.ts=true
+    - info:in_last_delivery scripts/co-deck/download-videos.ts=false
+    - info:in_last_delivery .agents/skills/storyline/SKILL.md=false
+    - info:in_last_delivery docs/html-themes/themes/zen/theme.json=false
+    - >-
+      info:in_last_delivery
+      tests/gen-slidedata-ai-era-business-survival.py=false
+  dedupe_key: d5c2c364f00a9ee6807361c2de1896e94181d6d44591f5e2099bca0f29d66641
+  duplicates:
+    - project: co-deck
+      at: '2026-11-14T19:40:29.064+09:00'

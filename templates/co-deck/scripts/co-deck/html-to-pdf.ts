@@ -1,8 +1,14 @@
-// @version 1.1.0 — Generate PDF from self-contained HTML slide deck using Puppeteer.
+// @version 1.2.0 — Generate PDF from self-contained HTML slide deck using Puppeteer.
+// v1.2.0 (design 2026-11-14-html-to-pdf-pool-asset-serving): pool-asset
+//   intercept-fallback — `/assets/…` requests that miss deck-locally re-resolve
+//   against the shared pool dir beside the deck (containment-guarded; `🔀 pool:`
+//   info log on pool hits), and every content 404 logs `⚠️ 404 (missing)` plus
+//   a final missing-asset summary (favicon.ico excluded — browser artifact) —
+//   loud but non-fatal, exit code unchanged.
 // Uses system Chrome/Edge (WebSocket transport, more reliable than Playwright pipe in VMs).
 // Captures each <section> as a full-page PDF with correct centering and large layout.
 // Usage:
-//   bun scripts/co-deck/html-to-pdf.ts --html presentations/<project>/lecture_vN.html [--out output.pdf] [--width 1920] [--height 1080] [--scale 1.5] [--pages N]
+//   bun scripts/co-deck/html-to-pdf.ts --html deliverables/<project>/lecture_vN.html [--out output.pdf] [--width 1920] [--height 1080] [--scale 1.5] [--pages N]
 //   --pages N: only render first N sections (useful for sample/preview PDF)
 
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
@@ -107,6 +113,9 @@ async function main() {
   let browser: Browser | null = null;
   let server: ReturnType<typeof Bun.serve> | null = null;
   let hadError = false;
+  // Server-observed 404 count (v1.2.0). An HTTP 404 is a *successful* network
+  // request, so the `requestfailed` listener below never sees it — count here.
+  let missingRequests = 0;
 
   try {
     const execPath = findChrome();
@@ -118,6 +127,11 @@ async function main() {
 
     // 1. Start local HTTP server (serves HTML dir — fixes file:// image loading in Chrome)
     const serveDir = htmlDir;
+    // Shared asset pool beside the deck dir (v1.2.0): decks bind pool assets as
+    // `../assets/…`; the browser resolves that before sending, so the wire path
+    // is `/assets/…` — a deck-local miss once deck-local asset dirs are gone.
+    const poolRoot = resolve(dirname(serveDir), 'assets');
+    const isFile = (p: string): boolean => existsSync(p) && statSync(p).isFile();
     server = Bun.serve({
       port: 0, // random available port
       fetch(req) {
@@ -133,12 +147,38 @@ async function main() {
         if (!resolvedFull.startsWith(serveDir + sep)) {
           return new Response('Forbidden', { status: 403 });
         }
-        if (!existsSync(fullPath) || !statSync(fullPath).isFile()) {
-          return new Response('Not Found', { status: 404 });
+
+        let servePath = fullPath;
+        if (!isFile(fullPath)) {
+          // Pool fallback: only for a first path segment of `assets/`, and only
+          // when the re-resolved file stays inside the pool root — the same
+          // startsWith(dir + sep) discipline as the guard above, so `..` never
+          // survives resolve + check and nothing outside the pool is served.
+          const poolFile = resolve(dirname(serveDir), relativePath);
+          if (
+            relativePath.startsWith('assets/') &&
+            poolFile.startsWith(poolRoot + sep) &&
+            isFile(poolFile)
+          ) {
+            console.log(`🔀 pool: ${relativePath}`);
+            servePath = poolFile;
+          } else {
+            // favicon.ico: a browser artifact (requested by headless Chrome,
+            // never referenced by the deck) — 404 it quietly or it would
+            // pollute the missing-asset signal on every clean render.
+            if (relativePath !== 'favicon.ico') {
+              const reason = relativePath.startsWith('assets/')
+                ? 'not in the deck dir or the shared pool'
+                : 'not in the deck dir';
+              console.warn(`⚠️ 404 (missing): ${relativePath} — ${reason}`);
+              missingRequests++;
+            }
+            return new Response('Not Found', { status: 404 });
+          }
         }
 
-        const mime = getMime(fullPath);
-        const body = readFileSync(fullPath);
+        const mime = getMime(servePath);
+        const body = readFileSync(servePath);
         return new Response(body, {
           headers: { 'Content-Type': mime, 'Cache-Control': 'no-cache' },
         });
@@ -419,6 +459,12 @@ async function main() {
       scale: printScale,
       preferCSSPageSize: false,
     });
+
+    // Loud but non-fatal failure summary (v1.2.0): the render itself succeeds,
+    // so exit code stays 0 — the operator decides what to do with the blanks.
+    if (missingRequests > 0) {
+      console.warn(`⚠️ ${missingRequests} asset request(s) missing — images/fonts may be blank in the PDF`);
+    }
 
     console.log(`\n✅ PDF generated: ${outPath}`);
     console.log(`   Size: ${(pdfBuffer.length / 1024 / 1024).toFixed(2)} MB`);

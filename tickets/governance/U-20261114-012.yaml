@@ -1,0 +1,98 @@
+schemaVersion: 1
+id: U-20261114-012
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-14T23:30:44.782+09:00'
+history:
+  - at: '2026-11-14T23:30:44.782+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-15T19:08:24.913+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-15T19:08:24.933+09:00'
+    from: waiting
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Recurring defect class in deck CSS/JS patch layers: a fit/size-correction
+    function whose CLEAR branch is conditioned on state its own PIN branch
+    created produces a permanent two-state oscillation (visible shaking).
+    Observed 2026-11-14 on the zen x white-bubble deck: the rev5 zen-visual fit
+    pinned img height to the wrap's clientHeight when a deficit existed, and
+    cleared it when the (post-pin) scrollHeight no longer exceeded clientHeight
+    — a non-idempotent feedback loop, 25/57 visual slides shaking in one deck
+    and 19/57 in its sibling. The same trap already bit this pipeline once at a
+    smaller scale (a first cut that pinned height 0 during the lazy-image 0x0
+    layout and deadlocked the visual). Escapes: (a) templates and skills carry
+    no guidance that DOM-measurement patches must be convergent — available
+    height must be computed from inputs the corrective write cannot change
+    (containers, stable siblings), never from the mutated element's own
+    post-write metrics; (b) injector idempotency has no regression test in the
+    template, and this deck's injector silently duplicated its own
+    comment/marker blocks on every re-run until fixed today; (c) deck CSS/JS
+    patch layers are per-deck files, so a fix proven on one deck does not travel
+    — the same oscillating variant was present in multiple deck builds.
+    Requested: html-build SKILL guidance on convergent measurement patches (with
+    the fixed-point rule and a "never condition the clear branch on the pinned
+    DOM state" prohibition), a template-level idempotency test for the video/CC
+    injector, and a promotion path for the shared zen patch layer so per-deck
+    injectors stop diverging.
+  affected_paths:
+    - tests/patch-zen-white-bubble-ai-era-survival.ts
+    - .agents/skills/html-build/SKILL.md
+    - scripts/co-deck/inject-video-players.ts
+  identity_source: cwd
+  local_workaround_diff: >-
+    Convergent replacement (rev8), verified 0/57 oscillating on both decks:
+
+    - slot = card border box minus padding minus column gaps minus sum of
+    sibling boxes minus wrap margins (all inputs the pin cannot change)
+
+    - natural = img box width * (naturalHeight / naturalWidth), guarded on
+    naturalWidth > 0
+
+    - if natural > slot + 1 -> img.style.height = round(slot)px else clear
+
+    - ResizeObserver observes the CARD, not the wrap the function mutates
+
+    - collapse breaker: never pin below 25% of natural height
+
+    Two intermediate cuts documented and rejected: integer-rounded parent height
+    (rev6) and floored slot (rev7) each lost ~1px per observer pass and walked
+    visuals down (241->86px).
+  repro: >-
+    1. Add any DOM-measuring fit function to a flex-column card whose observed
+    element is the one you resize. 2. Pin img height from wrap.clientHeight when
+    wrap.scrollHeight > wrap.clientHeight. 3. The pin shrinks scrollHeight, so
+    the naive companion branch (scrollHeight <= clientHeight -> clear height)
+    fires on the next observer callback, restoring natural size, which
+    re-creates the deficit. 4. Measure: rAF sampling of img height over 1.5s
+    shows two alternating values (observed 213px <-> 297px, 91 frames, inline
+    style alternating '213px' / ''). User-visible symptom: the SVG visibly
+    shakes on that slide, forever.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - project_soft_cap
+    - 'path_not_template_managed: tests/patch-zen-white-bubble-ai-era-survival.ts'
+    - >-
+      info:in_last_delivery
+      tests/patch-zen-white-bubble-ai-era-survival.ts=false
+    - info:in_last_delivery .agents/skills/html-build/SKILL.md=false
+    - info:in_last_delivery scripts/co-deck/inject-video-players.ts=true
+  dedupe_key: 9ebfa7f3d24c3ab7cda1d1d0c8d6a419f37622bcd711418ca3201a71dfeb3dd4
+  duplicates:
+    - project: co-deck
+      at: '2026-11-14T23:30:44.782+09:00'

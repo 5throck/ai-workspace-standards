@@ -1,0 +1,84 @@
+schemaVersion: 1
+id: U-20261114-010
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-14T21:20:36.528+09:00'
+history:
+  - at: '2026-11-14T21:20:36.528+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-15T19:08:33.630+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-15T19:08:33.652+09:00'
+    from: waiting
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    snapshot.ts v1.0.0 (pre-edit backup tool used by every agent before every
+    deck edit) failed three distinct ways in one session (2026-11-14,
+    ai-era-business-survival project), each requiring manual cleanup: (a)
+    repo-level files cannot be snapshotted — paths resolve relative to
+    --workspace, so scripts/ files either exit-1 or would copy a file onto
+    itself; agents resorted to manual cp with hand-written VERSIONS.md
+    deviations (2 occurrences); (b) a mis-pathed invocation leaves an empty
+    snapshot directory plus a bogus manifest entry with no clean rollback; (c)
+    --desc silently truncated to 20 characters (version id
+    2026-11-14_10-31_pm_video-swap-pdf-profi lost its tail). Related DX
+    inconsistency in the same script family: validate-image-manifest.ts takes
+    --workspace while gen-slides-pdf.ts/estimate-layout.ts take --project for
+    the same kind of argument, so the same invocation pattern fails across
+    sibling tools. Request: (i) snapshot.ts should accept workspace-relative AND
+    repo-relative paths (documented resolution order), skip creating empty
+    dirs/entries on failure, warn (not silently truncate) on long desc; (ii)
+    unify or accept both flag spellings across co-deck scripts. Also note:
+    U-20261114-008 items (validate-image-manifest v1.4.0 Rule A
+    registered-global, gen-slides-pdf v1.14.6 profile-bg parity) are now
+    implemented AND test-verified in this project (384-387 pass / 2 pre-existing
+    fails across today's runs) — the -008 ticket's pending-verification caveat
+    can be considered satisfied when triaging.
+  affected_paths:
+    - scripts/co-deck/snapshot.ts
+    - scripts/co-deck/validate-image-manifest.ts
+    - scripts/co-deck/gen-slides-pdf.ts
+    - scripts/co-deck/estimate-layout.ts
+    - scripts/co-deck/inject-video-players.ts
+  identity_source: cwd
+  repro: >-
+    1. Run bun scripts/co-deck/snapshot.ts with a repo-level file arg (e.g.
+    scripts/co-deck/gen-slides-pdf.ts) while --workspace points at a
+    deliverables project: the script resolves the arg relative to the workspace,
+    misses the file (exit 1) or copies it into the project tree — both observed
+    2026-11-14. 2. A mis-pathed invocation still writes an EMPTY _versions/<id>/
+    directory and appends a VERSIONS.md entry listing files as skipped (no
+    rollback of the bogus entry; manual prune required — observed twice today).
+    3. --desc is truncated to 20 chars for the directory name with no warning.
+    4. CLI flag inconsistency across sibling co-deck scripts:
+    validate-image-manifest.ts accepts --workspace (rejects --project), while
+    gen-slides-pdf.ts/estimate-layout.ts accept --project — agents and humans
+    interchange them and get usage-exit 1 (observed today by the image-curator
+    agent).
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/co-deck/snapshot.ts=true
+    - info:in_last_delivery scripts/co-deck/validate-image-manifest.ts=false
+    - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=false
+    - info:in_last_delivery scripts/co-deck/estimate-layout.ts=true
+    - info:in_last_delivery scripts/co-deck/inject-video-players.ts=true
+  dedupe_key: 0451be4c19772fbe9c03ba26341f6007f36f69e00af2578977e9c50dd82f9d7c
+  duplicates:
+    - project: co-deck
+      at: '2026-11-14T21:20:36.528+09:00'
