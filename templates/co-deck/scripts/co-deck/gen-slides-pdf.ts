@@ -1,31 +1,88 @@
-// @version 1.10.1 — punchline statement renders **keyword** bold-accent runs (HTML `.punch-text strong` parity; ported from Projects/co-deck v1.14.5 LOCAL-PATCH U-20261105-005) via richRuns/richLines; no literal asterisks.
-//   v1.10.0 — render-path parity batch (U-20261105-002/-003/-005):
-//   • U-20261105-002(a): full-bleed visual path — when the theme's visual
-//     region overlaps the content region from the left (zen: visual = full
-//     page), the visual is drawn as a BACKGROUND before title/bullets instead
-//     of an in-card right panel drawn AFTER them (which painted C_VIS_BG over
-//     the text and squeezed bulTxtW negative). Works with and without
-//     background_image.enabled.
-//   • U-20261105-002(b): per-slide `footnotes` (abbreviation citations,
-//     FootnoteBuilder parity) now render as a small bottom-left line.
-//   • U-20261105-002(c): punchline dispatch accepts `isPunchlineSlide`
-//     alongside the legacy `isPunchline` (html-build contract key).
-//   • U-20261105-003: lecture-profile parsing moved to lib/layout-overrides.ts
-//     (shared with estimate-layout.ts) — dotted layout_overrides keys
-//     (`colors.card_dark: [...]`, `content_constraints.standard.max_body_chars`)
-//     are no longer silently dropped.
-//   • U-20261105-005(1,2): CustomFontEmbedder patch (lib/pdf-font-patch.ts) —
-//     /W table + ToUnicode now cover OpenType shaped (calt-alternate) glyphs,
-//     fixing viewer over-advance of ':'/'-' and garbled text extraction; /W
-//     entries rounded to integers per PDF 32000-1 §9.7.4.3.
-//   • U-20261105-005(6b): bold `**segments**` render with bold weight + accent
-//     color in titles/bullets (HTML appendInline parity).
-//   • U-20261105-005(7): renderContactSlide renders `contactPhone`.
-//   • U-20261105-005(8): when a background image was drawn on a slide, the
-//     full-bleed C_BG surface fill in divider/punchline/profile/contact
-//     renderers is skipped (it painted over the photo).
+// @version 1.14.5 — LOCAL-PATCH(U-20261105-005): punchline statement renders **keyword** bold-accent (HTML parity; T-20261110-007) via richRuns/richLines
+// @version 1.14.4 — LOCAL-PATCH(U-20261105-005): ToUnicode CMap fix (one preferred code point per glyph; ':' '-' '+' '→' '–' no longer extract as CJK-compat chars)
+// @version 1.14.3 — LOCAL-PATCH(U-20261105-005): rich bullets (**bold** = bold + accent, inline wrap), diagram caption/source in the card, generic contact* lines
+// @version 1.14.2 — LOCAL-PATCH(U-20261105-005): zen/white-bubble standard + divider cards hug content like HTML (fit-content, max 88%, centered; bullets col 600px, visual 760px/216px)
+// @version 1.14.1 — LOCAL-PATCH(U-20261105-005): subset font embed (fixes ':'/'-' gaps), 5% card page margin, centered card+title
+// @version 1.14.0 — white bubble card behind COVER / PUNCHLINE / CONTACT text
+//   (LOCAL-PATCH anchored U-20261105-005, user complaint: cover + last-slide
+//   text sat directly on the photo). When ctx.bgDrawn, renderTitleSlide (no-image
+//   column branch), renderPunchlineSlide and renderContactSlide now draw the
+//   white-bubble card (colors.C_CARD @0.97, 14px radius — same as the divider
+//   v1.12.0 card and HTML .slide-content) sized to the measured text block
+//   BEFORE the ink text; legacy path unchanged without a drawn background.
+//   Mirrors the HTML white-bubble style.css change (cover/punchline/contact
+//   all render the card). New helpers: drawBubbleBehind(), widestWrappedLine().
+//   v1.13.2 — C_BODY spec-key fallback in buildColors: accept
+//   `text_body` (classic pdf_color_spec.json) alongside `body`, so the R1/F4/R2
+//   ink-muted text actually resolves from the spec on wash backgrounds
+//   (previously always the light [203,213,225] default). One-line fix.
+//   v1.13.1 — R1/R2 contrast fixes (post-re-measure, same class as the
+//   F4 ink branch): title slide NO-IMAGE branch and contact "감사합니다" hero
+//   now render in ink (C_DARK; subtitle/meta → C_BODY) when ctx.bgDrawn —
+//   white type sat at ≈1.08:1 on the warm-paper wash enabled by F2; legacy
+//   colors unchanged without a drawn background. LOCAL-PATCH anchored
+//   (U-20261105-002). S2 profile white-on-white is pre-existing, accepted.
+//   v1.13.0 — zen visual fix (design 2026-11-05-codeck-pdf-engine-zen-visual-fix,
+//   upstream tickets U-20261105-001/-002, LOCAL-PATCH anchored): ①F1 full-page-cover
+//   guard — a visual region that CONTAINS the content region (zen: 0,0,100%,100%)
+//   routes to the in-card path even when bgDrawn=false (extends the v1.11.0
+//   bgDrawn-only condition), fixing negative bullet width and the C_VIS_BG
+//   full-bleed overpaint on 22 slides; adds an in-card text-visual render for
+//   visualTitle/visualDisplay-only slides (onCardText ink, parallel to the
+//   diagram embed). ②F3 footnotes — per-slide source citations now render as a
+//   bottom dim line (9pt, C_MUTED) for every slide type, drawn last.
+//   ③F4 isPunchlineSlide acceptance (interface, divider-cover scope, type
+//   dispatch) + punchline bgDrawn branch — skip the flat C_BG repaint and draw
+//   the statement in ink when a background was drawn (mirror of the v1.12.1
+//   contact pattern); legacy colors unchanged otherwise.
+//   v1.12.1 — contact slide: when the per-slide loop already drew the
+//   slide's own background photo + wash (ctx.bgDrawn), renderContactSlide no
+//   longer repaints the flat C_BG surface that erased the photo (same overpaint
+//   class as the v1.12.0 divider fix); decks without a background keep the fill.
+//   v1.12.0 — divider-with-background HTML parity: dividers whose
+//   background image was drawn (ctx.bgDrawn) now render inside the white-bubble
+//   style's white rounded bubble card (C_CARD, rgba(255,255,255,0.97) + 14px
+//   radius like HTML .slide-content) with a dark navy title (--divider-text
+//   #1f2a44) — previously white title text sat directly on the photo. Dividers
+//   WITHOUT a resolvable background keep the legacy white-text-on-photo path.
+//   v1.11.0 — per-slide background-image layering fix for individual-scope
+//   decks (2026-10-ai-era-business-majors Gate 5 round): ①Standard slides whose
+//   visualImage duplicates their own background photo no longer repaint a
+//   full-bleed C_VIS_BG panel + photo over the white C_CARD bubble/text (the
+//   zen theme's "visual" region is the full page, so the repaint erased
+//   everything drawn beneath it) — when the slide's own background was drawn,
+//   a visual that IS the background is skipped entirely. ②Diagram slides
+//   (visualImage ≠ backgroundImage) now embed the diagram INSIDE the white
+//   card under the bullets (HTML zen layout); SVG-only diagrams are
+//   rasterized on demand via @resvg/resvg-js (pdf-lib cannot embed SVG) and
+//   a missing/unresolvable visual no longer paints a blank full-page panel.
+//   ③Video slides (videoId) draw the slideData.videoThumbnail full-bleed
+//   (HTML .cdk-video-thumb parity) before the play button, add a top-center
+//   dark title pill (HTML video-slide chip) and extend the URI link
+//   annotation to the whole slide (HTML .video-stage is inset:0).
+//   v1.10.1 — doc comments codifying the HTML-local/PDF-YouTube video split
+//   as a standing rule (docs/co-deck.context.md "Video Rules"); no behavior change.
+//   v1.10.0: video play-button links, content card, divider/background-image fixes.
+//   Video slides (slideData.videoId) now draw a clickable play-button (circle + triangle)
+//   with a real PDF URI link annotation to the YouTube watch URL instead of a plain
+//   "link: youtube.com/..." text bullet, and skip the title/bullets overlay entirely.
+//   renderStandardSlide now draws the HTML deck's white-bubble content-card background
+//   (new C_CARD color role, sourced from pdf_color_spec.json's card_dark) behind
+//   title/bullets, with automatic light/dark text contrast (readableTextOn/readableMutedOn).
+//   renderDividerSlide no longer re-fills the card over the already-drawn background photo
+//   (which left near-invisible pale text on light styles) — uses the cover slide's fixed
+//   white/muted text colors instead. resolveBgImagePath's individual-mode branch now
+//   resolves paths against both the project dir and workspace root (previously assumed one
+//   base and silently dropped the image on mismatch), and slideData.backgroundImage now
+//   wins over image-manifest.json's slide_index map, which goes stale on deck reordering.
 //   v1.9.0: CJK fallback font + contact slide LinkedIn fix.
-//   v1.8.0: Increased PDF body/bullet font sizes for readability.
+//   When primary font (Pretendard/MaruBuri) lacks glyphs for CJK characters (e.g. 한자),
+//   automatically falls back to NotoSansKR (system or project font). Fixes tofu/box
+//   rendering on profile slides with 한자 bio text. Also fixed: renderContactSlide now
+//   renders contactLinkedIn field from slidedata.json.
+//   v1.8.0: Increased PDF body/bullet font sizes for readability. bullet_pt raised
+//   from 11-13pt to 14-15pt across all themes; bullet_px/line_heights adjusted proportionally.
+//   Auto-calibrate FONT_PT_MULT tuned from 0.85→0.94 to produce readable estimates.
 //   v1.7.0: Background image support. When lecture-profile.md → background_image.enabled
 //   is true, renders full-bleed background image (cover-crop) with semi-transparent overlay.
 //   Supports scope: all | divider-cover | individual. Reads background image config from
@@ -36,25 +93,25 @@
 // `regions.*` uniformly for every theme; renderers iterate `slide_types[type].regions`.
 // Merges gen_full.py + gen_sample5.py — use --sample N to limit slide count.
 // Usage:
-//   bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5]
-//   bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>
-//   --auto-calibrate  estimate layout_overrides from CSS and print layout_overrides YAML (no PDF)
+//   bun scripts/gen-slides-pdf.ts --project deliverables/<project> [--out name.pdf] [--sample 5]
+//   bun scripts/gen-slides-pdf.ts --auto-calibrate --project deliverables/<project>
+//   --auto-calibrate  estimate fonts/line_heights from CSS and print layout_overrides YAML (no PDF)
 //   --project  project folder (relative to workspace root)
 //   --out      output PDF filename (default: <folder>.pdf or <folder>_sample<N>.pdf)
 //   --sample   limit to first N slides only (omit for full deck)
-//   --font-dir directory containing font TTF files (default: presentations/assets/fonts/)
+//   --font-dir directory containing font TTF files (default: deliverables/assets/fonts/)
 //   --data     path to slidedata.json (default: <project>/slidedata.json)
 // Requires: pdf-lib @pdf-lib/fontkit (bun install pdf-lib @pdf-lib/fontkit)
 
-import { PDFDocument, PDFFont, PDFPage, rgb, RGB,
+import CustomFontEmbedder from 'pdf-lib/cjs/core/embedders/CustomFontEmbedder';
+import { createCmap as pdfLibCreateCmap } from 'pdf-lib/cjs/core/embedders/CMap';
+import { PDFDocument, PDFFont, PDFPage, PDFString, rgb, RGB,
   pushGraphicsState, popGraphicsState, moveTo, lineTo, closePath, clip, endPath } from 'pdf-lib';
 import fontkit, { create as fontkitCreate } from '@pdf-lib/fontkit';
+import { Resvg } from '@resvg/resvg-js';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { platform, homedir } from 'os';
-import { deepMerge, parseFrontmatter, parseScalar } from './lib/layout-overrides';
-import { patchCustomFontEmbedder } from './lib/pdf-font-patch';
-import { wrapMarkdownWords } from './lib/markdown';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -82,11 +139,53 @@ function deepMerge(base: any, override: any): any {
 // Convert an [R, G, B] array (0-255) to a pdf-lib RGB value
 const toRGB = (arr: number[]) => rgb(arr[0] / 255, arr[1] / 255, arr[2] / 255);
 
+// Picks a readable text color for text drawn on top of `bg` (a pdf-lib RGB with
+// 0..1 components): dark navy on a light card, white on a dark card. Avoids
+// hardcoding per-style text colors for the content card, whose fill color
+// (card_dark in pdf_color_spec.json) flips from white (white-bubble) to dark
+// navy (classic) depending on style.
+function readableTextOn(bg: RGB): RGB {
+  const luma = 0.299 * bg.red + 0.587 * bg.green + 0.114 * bg.blue;
+  return luma > 0.6 ? toRGB([31, 42, 68]) : rgb(1, 1, 1);
+}
+function readableMutedOn(bg: RGB): RGB {
+  const luma = 0.299 * bg.red + 0.587 * bg.green + 0.114 * bg.blue;
+  return luma > 0.6 ? toRGB([90, 99, 120]) : toRGB([203, 213, 225]);
+}
+
 // ── Frontmatter parser ────────────────────────────────────────────────────────
-// parseFrontmatter / parseLayoutOverrides / parseScalar moved to
-// scripts/co-deck/lib/layout-overrides.ts (U-20261105-003): the two consumers
-// (estimate-layout.ts layout gate + this renderer) must accept the SAME
-// layout_overrides dialect (flat + dotted + nested-indented keys).
+
+function parseFrontmatter(content: string): Record<string, any> {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const frontmatterContent = match[1];
+  const lines = frontmatterContent.split('\n');
+  const result: Record<string, any> = {};
+  for (const line of lines) {
+    const themeMatch = line.match(/^\s{2}theme:\s*(\S+)/);
+    const styleMatch = line.match(/^\s{2}style:\s*(\S+)/);
+    if (themeMatch) result.theme = themeMatch[1];
+    if (styleMatch) result.style = styleMatch[1];
+  }
+  const overrides = parseLayoutOverrides(frontmatterContent);
+  if (Object.keys(overrides).length > 0) {
+    result.layout_overrides = overrides;
+  }
+  return result;
+}
+
+function parseScalar(raw: string): any {
+  // RGB array: [R, G, B]
+  const arrMatch = raw.match(/^\[(\d+),\s*(\d+),\s*(\d+)\]$/);
+  if (arrMatch) return [Number(arrMatch[1]), Number(arrMatch[2]), Number(arrMatch[3])];
+  // Number
+  if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw);
+  // Boolean
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  // String (strip optional quotes)
+  return raw.replace(/^["']|["']$/g, '');
+}
 
 function parseIndentedBlock(lines: string[], baseIndent: number): { value: Record<string, any>, consumed: number } {
   const result: Record<string, any> = {};
@@ -119,6 +218,42 @@ function parseIndentedBlock(lines: string[], baseIndent: number): { value: Recor
   }
 
   return { value: result, consumed: i };
+}
+
+function parseLayoutOverrides(frontmatter: string): Record<string, any> {
+  const lines = frontmatter.split('\n');
+
+  // Find the layout_overrides: line (uncommented)
+  let startIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed === 'layout_overrides:' && !lines[i].trimStart().startsWith('#')) {
+      startIdx = i;
+      break;
+    }
+  }
+  if (startIdx === -1) return {};
+
+  // Collect subsequent indented uncommented lines
+  const block: string[] = [];
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;  // skip blank/comment
+    // Stop if we hit a top-level key (no leading spaces)
+    if (line.length > 0 && line[0] !== ' ') break;
+    block.push(line);
+  }
+
+  // Determine the base indent from the first non-blank block line so that
+  // parseIndentedBlock sees the correct depth (block lines are already indented
+  // relative to the YAML root, not to column 0).
+  const minIndent = block.reduce((min, l) => {
+    const ind = l.search(/\S/);
+    return ind >= 0 ? Math.min(min, ind) : min;
+  }, Infinity);
+  const baseIndent = minIndent === Infinity ? 0 : minIndent;
+  return parseIndentedBlock(block, baseIndent).value;
 }
 
 // ── Background image config parser ───────────────────────────────────────────
@@ -187,21 +322,37 @@ function resolveBgImagePath(
   imgDir: string,
   globalBgPath: string | null,
   slideBgEntries: Map<number, string>,
+  workspaceRoot: string,
 ): string | null {
   if (!bgConfig.enabled) return null;
 
-  // Individual mode: only slides with explicit background entries
+  // Individual mode: only slides with explicit background entries.
+  // Entries come from two sources with different base dirs: image-manifest.json
+  // paths are repo-root-relative pool paths ("deliverables/assets/..."),
+  // while the slideData.json backgroundImage fallback is HTML/imgDir-relative
+  // ("../assets/images/..."). Try both bases (plus already-absolute) rather
+  // than assuming one — guessing wrong silently drops the image (ENOENT
+  // inside embedImg's own try/catch), leaving a flat color behind the play
+  // button with no visible error.
   if (bgConfig.scope === 'individual') {
-    return slideBgEntries.get(slideIdx) ?? null;
+    const raw = slideBgEntries.get(slideIdx);
+    if (!raw) return null;
+    if (existsSync(raw)) return raw;
+    const viaImgDir = resolve(imgDir, raw);
+    if (existsSync(viaImgDir)) return viaImgDir;
+    const viaWorkspace = resolve(workspaceRoot, raw);
+    if (existsSync(viaWorkspace)) return viaWorkspace;
+    return null;
   }
 
   // 'all' or 'divider-cover' mode: use global background image
   if (!globalBgPath) return null;
 
   if (bgConfig.scope === 'divider-cover') {
-    // Only title, divider, punchline slides (isPunchlineSlide = html-build
-    // contract key, isPunchline = legacy renderer key — U-20261105-002c).
-    if (!data.isTitleSlide && !data.isDividerSlide && !data.isPunchline && !data.isPunchlineSlide) return null;
+    // LOCAL-PATCH(upstream-request: U-20261105-002) F4 — accept both
+    // isPunchline and isPunchlineSlide spellings.
+    // Only title, divider, punchline slides
+    if (!data.isTitleSlide && !data.isDividerSlide && !(data.isPunchline || data.isPunchlineSlide)) return null;
   }
 
   // scope === 'all' or divider-cover with matching slide type
@@ -229,8 +380,6 @@ class Renderer {
   private curColor: RGB;
   readonly pageW: number;   // pts
   readonly pageH: number;   // pts
-  /** Count of image embed failures (missing/corrupt files) — surfaced at exit. */
-  imageFailures = 0;
 
   constructor(regular: PDFFont, bold: PDFFont, pageWMm: number, pageHMm: number, defaultColor: RGB,
               fallbackRegular?: PDFFont | null, fallbackBold?: PDFFont | null,
@@ -371,43 +520,6 @@ class Renderer {
     return y;
   }
 
-  // Multi-line cell with **bold** inline runs (U-20261105-005 item 6b):
-  // bold words draw with the bold face + accentColour, regular words with the
-  // current colour. Line breaking runs per-word so mixed-weight lines wrap
-  // correctly. Returns Y position after last line (mm from top) — same
-  // contract as multiCell.
-  multiCellMarkdown(
-    wMm: number, hMm: number, text: string, xMm: number, yMm: number,
-    sizePt: number, accentColour: RGB, align: 'L' | 'R' | 'C' = 'L',
-  ): number {
-    const prevColour = this.curColor;
-    const measure = (word: string, bold: boolean) => {
-      this.setFont(bold, sizePt);
-      return this.stringWidth(word);
-    };
-    const lines = wrapMarkdownWords(text, measure, wMm);
-    let y = yMm;
-    for (const line of lines) {
-      if (line.length > 0) {
-        // Measure the whole line for alignment (per-word, weight-correct).
-        const lineW = line.reduce((acc, t) => acc + measure(t.word, t.bold), 0);
-        let drawX = xMm;
-        if (align === 'C') drawX = xMm + (wMm - lineW) / 2;
-        else if (align === 'R') drawX = xMm + wMm - lineW;
-        let curX = drawX;
-        for (const tok of line) {
-          this.setFont(tok.bold, sizePt);
-          this.setColor(tok.bold ? accentColour : prevColour);
-          this.drawLine(tok.word, curX, y, hMm);
-          curX += measure(tok.word, tok.bold);
-        }
-        this.setColor(prevColour);
-      }
-      y += hMm;
-    }
-    return y;
-  }
-
   // Returns text width in mm (accounts for CJK fallback font width differences)
   stringWidth(text: string): number {
     const runs = this.buildFontRuns(text);
@@ -482,6 +594,47 @@ class Renderer {
   }
 
   /**
+   * Draws a circular "play" button (dark disc + white triangle), centered at
+   * (cxMm, cyMm), matching the HTML deck's .yt-play-btn look. PDF viewers
+   * don't support live embedded video, so this is the practical substitute:
+   * a visible button a reader taps, paired with addLinkAnnotation() to make
+   * that exact spot open the YouTube video.
+   */
+  drawPlayButton(cxMm: number, cyMm: number, diamMm: number) {
+    const cx = this.pt(cxMm);
+    const cy = this.fy(cyMm);
+    const r  = this.pt(diamMm) / 2;
+    this.page.drawEllipse({
+      x: cx, y: cy, xScale: r, yScale: r,
+      color: rgb(11 / 255, 15 / 255, 25 / 255), opacity: 0.68,
+      borderColor: rgb(1, 1, 1), borderOpacity: 0.9, borderWidth: this.pt(diamMm) * 0.012,
+    });
+    const triR = r * 0.42;
+    const path = `M ${-triR * 0.6},${-triR} L ${-triR * 0.6},${triR} L ${triR},0 Z`;
+    this.page.drawSvgPath(path, { x: cx, y: cy, color: rgb(1, 1, 1) });
+  }
+
+  /**
+   * Attaches a clickable URI link annotation over a rectangular area
+   * (mm, same top-left coordinate space as fillRect/cell).
+   */
+  addLinkAnnotation(doc: PDFDocument, xMm: number, yMm: number, wMm: number, hMm: number, url: string) {
+    const x1 = this.pt(xMm);
+    const y2 = this.fy(yMm);
+    const x2 = this.pt(xMm + wMm);
+    const y1 = this.fy(yMm + hMm);
+    const annotDict = doc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [x1, y1, x2, y2],
+      Border: [0, 0, 0],
+      A: { Type: 'Action', S: 'URI', URI: PDFString.of(url) },
+    });
+    const annotRef = doc.context.register(annotDict);
+    this.page.node.addAnnot(annotRef);
+  }
+
+  /**
    * Detect actual image format from magic bytes, falling back to extension.
    * Prevents "SOI not found in JPEG" errors when a PNG is saved with .jpg extension.
    */
@@ -497,8 +650,8 @@ class Renderer {
     return 'jpeg'; // fallback default
   }
 
-  async embedImg(doc: PDFDocument, imgPath: string) {
-    const data = readFileSync(imgPath);
+  async embedImg(doc: PDFDocument, img: string | Buffer) {
+    const data = typeof img === 'string' ? readFileSync(img) : img;
     const format = this.detectImageFormat(data);
     return format === 'png' ? await doc.embedPng(data) : await doc.embedJpg(data);
   }
@@ -510,10 +663,37 @@ class Renderer {
     });
   }
 
-  async placeImageCover(doc: PDFDocument, imgPath: string, xMm: number, yMm: number, wMm: number, hMm: number) {
+  /**
+   * Filled rounded rectangle (mm, top-left origin) drawn as an SVG path —
+   * pdf-lib's drawRectangle has no corner radius. Used for the video slide's
+   * HTML-parity title pill (.video-slide title chip).
+   */
+  drawRoundedRect(xMm: number, yMm: number, wMm: number, hMm: number, rMm: number,
+                  color: RGB, opacity = 1) {
+    const w = this.pt(wMm), h = this.pt(hMm), rr = Math.min(this.pt(rMm), w / 2, h / 2);
+    const k = 0.5523;  // circle-to-bezier control-point constant
+    const path =
+      `M ${rr},0 H ${w - rr}` +
+      ` C ${w - rr + k * rr},0 ${w},${rr - k * rr} ${w},${rr}` +
+      ` V ${h - rr}` +
+      ` C ${w},${h - rr + k * rr} ${w - rr + k * rr},${h} ${w - rr},${h}` +
+      ` H ${rr}` +
+      ` C ${rr - k * rr},${h} 0,${h - rr + k * rr} 0,${h - rr}` +
+      ` V ${rr}` +
+      ` C 0,${rr - k * rr} ${rr - k * rr},0 ${rr},0 Z`;
+    this.page.drawSvgPath(path, {
+      // drawSvgPath translate point is the path's BOTTOM edge in PDF space —
+      // it scales (1,-1), so local SVG +y extends UPWARD from it. fy(yMm) is
+      // the PDF y of the rect's bottom edge.
+      x: this.pt(xMm), y: this.fy(yMm),
+      color, opacity, borderColor: color, borderWidth: 0,
+    });
+  }
+
+  async placeImageCover(doc: PDFDocument, img: string | Buffer, xMm: number, yMm: number, wMm: number, hMm: number) {
     try {
-      const img = await this.embedImg(doc, imgPath);
-      const { width: ow, height: oh } = img;
+      const embedded = await this.embedImg(doc, img);
+      const { width: ow, height: oh } = embedded;
       const imgAsp = ow / oh;
       const boxAsp = wMm / hMm;
       let iw: number, ih: number;
@@ -528,26 +708,24 @@ class Renderer {
         moveTo(cx, cy), lineTo(cx + cw, cy), lineTo(cx + cw, cy + ch), lineTo(cx, cy + ch),
         closePath(), clip(), endPath(),
       );
-      this.drawEmbeddedImage(img, ix, iy, iw, ih);
+      this.drawEmbeddedImage(embedded, ix, iy, iw, ih);
       this.page.pushOperators(popGraphicsState());
     } catch (e: any) {
-      this.imageFailures++;
       console.warn(`  img err: ${e.message}`);
     }
   }
 
-  async placeImage(doc: PDFDocument, imgPath: string, xMm: number, yMm: number, mwMm: number, mhMm: number) {
+  async placeImage(doc: PDFDocument, img: string | Buffer, xMm: number, yMm: number, mwMm: number, mhMm: number) {
     try {
-      const img  = await this.embedImg(doc, imgPath);
-      const { width: ow, height: oh } = img;
+      const embedded  = await this.embedImg(doc, img);
+      const { width: ow, height: oh } = embedded;
       const asp = oh / ow;
       let iw = mwMm, ih = iw * asp;
       if (ih > mhMm) { ih = mhMm; iw = ih / asp; }
       const ix = xMm + (mwMm - iw) / 2;
       const iy = yMm + (mhMm - ih) / 2;
-      this.drawEmbeddedImage(img, ix, iy, iw, ih);
+      this.drawEmbeddedImage(embedded, ix, iy, iw, ih);
     } catch (e: any) {
-      this.imageFailures++;
       console.warn(`  img err: ${e.message}`);
     }
   }
@@ -568,6 +746,76 @@ function imgPath(src: string | undefined, imgDir: string): string | null {
   return existsSync(p) ? p : null;
 }
 
+// ── SVG rasterization (v1.11.0) ───────────────────────────────────────────────
+// pdf-lib cannot embed SVG, but decks increasingly author diagram visuals as
+// SVG-only (the diagram pipeline's primary delivery format) with no committed
+// .png sibling — imgPath() then resolved to null and the slide's visual branch
+// painted a blank full-page panel instead. Rasterize on demand with
+// @resvg/resvg-js (the same engine scripts/co-deck/diagram-helpers.ts uses).
+
+// Korean text inside diagram SVGs needs a font with Hangul glyphs — prefer the
+// deck's own font dir, then the usual system CJK candidates (mirrors
+// diagram-helpers.ts systemFontCandidates, plus the deck font dir first).
+function findSvgFontFile(fontDir: string): string | null {
+  const candidates = [
+    join(fontDir, 'Pretendard-Regular.ttf'),
+    join(fontDir, 'NotoSansKR-Regular.ttf'),
+    join(fontDir, 'MaruBuri-Regular.ttf'),
+    join(homedir(), 'Library/Fonts/Pretendard-Regular.ttf'),
+    '/Library/Fonts/Pretendard-Regular.ttf',
+    '/Library/Fonts/AppleSDGothicNeo-Regular.otf',
+    '/System/Library/Fonts/PingFang.ttc',
+    join(homedir(), '.local/share/fonts/NotoSansCJK-Regular.ttc'),
+    '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+  ];
+  return candidates.find(existsSync) ?? null;
+}
+
+// resvg does not resolve CSS var() expressions — an unresolvable var() makes
+// the declaration invalid and the SVG falls back to its DEFAULT fill (black),
+// so a diagram authored `style="fill:var(--card-bg,#ffffff)"` (white boxes in
+// the HTML deck, where the deck CSS defines the variables) rasterizes as
+// solid black boxes. Substitute each var() with its declared fallback before
+// rasterizing; every pool diagram declares hex fallbacks for exactly this
+// standalone-consumption case.
+function substituteSvgVars(svg: string): string {
+  return svg.replace(/var\(--[\w-]+\s*,\s*([^)]+)\)/g, '$1');
+}
+
+function rasterizeSvg(svgPath: string, fontDir: string): Buffer {
+  const svg = substituteSvgVars(readFileSync(svgPath, 'utf-8'));
+  // Render at 2x the authored width for print-sharp output (SVGs are embedded
+  // at up to ~200mm; original-size rendering reads soft in print).
+  const widthMatch = svg.match(/<svg[^>]*\swidth="([\d.]+)/);
+  const opts: Record<string, any> = widthMatch
+    ? { fitTo: { mode: 'width', value: Math.round(parseFloat(widthMatch[1]) * 2) } }
+    : { fitTo: { mode: 'original' } };
+  const fontFile = findSvgFontFile(fontDir);
+  if (fontFile) opts.font = { fontFiles: [fontFile], loadSystemFonts: false };
+  return Buffer.from(new Resvg(svg, opts).render().asPng());
+}
+
+// Resolve a visual/src to embeddable raster input: PNG/JPG path as-is; SVG via
+// its committed .png sibling when one exists, else on-demand rasterization.
+// Returns null when nothing resolvable exists — callers must NOT paint a
+// placeholder panel over a background-image slide in that case (that was the
+// blank-navy defect on diagram slides).
+function resolveVisualRaster(src: string | undefined, imgDir: string, fontDir: string): string | Buffer | null {
+  if (!src) return null;
+  const resolved = join(imgDir, src);
+  if (!src.endsWith('.svg')) return existsSync(resolved) ? resolved : null;
+  const pngSibling = resolved.replace(/\.svg$/, '.png');
+  if (existsSync(pngSibling)) return pngSibling;
+  if (!existsSync(resolved)) return null;
+  try {
+    return rasterizeSvg(resolved, fontDir);
+  } catch (e: any) {
+    console.warn(`  svg rasterize err (${src}): ${e.message}`);
+    return null;
+  }
+}
+
 // ── Slide data type ───────────────────────────────────────────────────────────
 
 interface SlideData {
@@ -583,12 +831,23 @@ interface SlideData {
   visual?:        string;
   visualImage?:   string;
   backgroundImage?: string;   // relative path to full-bleed background image (from html-build)
+  videoId?:       string;   // YouTube video ID. HTML plays a local assets/videos/yt-<id>.mp4
+                             // if present; the PDF never plays video — always a play-button
+                             // link annotation to youtube.com/watch?v=<id> (docs/co-deck.context.md "Video Rules").
   visualTitle?:   string;
   visualDisplay?: string;
+  visualCaption?: string;
+  visualSource?: string;
+  [k: `contact${string}`]: string | undefined;
   isTitleSlide?:  boolean;
   isDividerSlide?: boolean;
   isPunchline?:   boolean;
-  isPunchlineSlide?: boolean;  // html-build contract key (U-20261105-002c)
+  // LOCAL-PATCH(upstream-request: U-20261105-002) F4 — the slidedata producer
+  // emits isPunchlineSlide (HTML isPunchlineSlide flag); accept both spellings.
+  isPunchlineSlide?: boolean;
+  // LOCAL-PATCH(upstream-request: U-20261105-002) F3 — per-slide source
+  // citations (design_spec §3 source line); previously never rendered.
+  footnotes?:     string[];
   isProfileSlide?: boolean;
   speakerName?:   string;
   speakerTitle?:  string;
@@ -600,7 +859,6 @@ interface SlideData {
   contactLinkedIn?:  string;
   contactPhone?:     string;
   contactNote?:      string;
-  footnotes?:        string[];  // per-slide abbreviation citations (U-20261105-002b)
 }
 
 // ── Region-based layout spec type (ADR-0045 Decision #2) ──────────────────────
@@ -756,13 +1014,86 @@ interface RenderCtx {
   n:        number;
   total:    number;
   imgDir?:  string;
+  fontDir?: string;                   // deck font dir (SVG rasterization font lookup)
   spec:     LayoutSpec;
   coords:   ReturnType<typeof buildCoords>;
   colors:   ReturnType<typeof buildColors>;
   sizes:    ReturnType<typeof buildSizes>;
   declared: string[];                 // slide_types[type].regions
+  /** True when the generic per-slide step drew this slide's own full-bleed
+   *  background image (slideData.backgroundImage or the global bg). Standard
+   *  renderers must not paint opaque panels over it (v1.11.0). */
+  bgDrawn?: boolean;
   region:   (name: string) => ResolvedRegion;
-  bgDrawn:  boolean;                  // full-bleed bg image already painted on this slide
+}
+
+// LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.0 — white bubble card
+// helpers shared by the cover / punchline / contact bgDrawn branches. The card
+// matches the divider v1.12.0 card and HTML .slide-content (white-bubble:
+// rgba(255,255,255,0.97), radius 14px, padding 2rem 2.75rem, fit-content width).
+// LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.2 — optional card-rect log
+// (env CARD_RECTS_OUT=<file.json>): per-page card rect as fractions of the page.
+const CARD_LOG: Array<{ n: number; x: number; y: number; w: number; h: number }> = [];
+function logCard(ctx: RenderCtx, x: number, y: number, w: number, h: number) {
+  CARD_LOG.push({ n: ctx.n, x: x / ctx.coords.PW, y: y / ctx.coords.PH, w: w / ctx.coords.PW, h: h / ctx.coords.PH });
+}
+// HTML .slide-content cap: max-width 88% of the 1200px area inside the 1280px
+// slide (40px side padding) = 0.825 of the frame width (measured max card w).
+function cardCapMm(coords: any): number { return 0.88 * (coords.PW - 2 * coords.px2mm(40)); }
+// LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.3 — rich (bold-accent) text.
+// `**x**` / <strong>x</strong> = bold + accent colour inline (HTML `.slide-card strong`).
+type RichRun = { t: string; b: boolean };
+function richRuns(raw: string | undefined | null): RichRun[] {
+  const src = (raw ?? '').replace(/<\/?(strong|b)\s*>/gi, '**').replace(/<[^>]+>/g, '');
+  const out: RichRun[] = [];
+  src.split('**').forEach((t, i) => { if (t) out.push({ t, b: i % 2 === 1 }); });
+  return out;
+}
+function richRunW(r: Renderer, run: RichRun, sizePt: number, forceBold = false): number {
+  r.setFont(run.b || forceBold, sizePt);
+  return r.stringWidth(run.t);
+}
+// Greedy word wrap (same rule as Renderer.wrapText) over styled runs.
+function richLines(r: Renderer, raw: string, maxW: number, sizePt: number, forceBold = false): RichRun[][] {
+  const atoms: RichRun[][] = [];
+  let cur: RichRun[] = [];
+  for (const run of richRuns(raw)) {
+    const parts = run.t.split(' ');
+    parts.forEach((w, i) => {
+      const last = i === parts.length - 1;
+      const txt = last ? w : w + ' ';
+      if (txt) cur.push({ t: txt, b: run.b });
+      if (!last) { atoms.push(cur); cur = []; }
+    });
+  }
+  if (cur.length) atoms.push(cur);
+  const lines: RichRun[][] = [];
+  let line: RichRun[] = [], lineW = 0;
+  for (const atom of atoms) {
+    const aw = atom.reduce((a, x) => a + richRunW(r, x, sizePt, forceBold), 0);
+    if (lineW > 0 && lineW + aw > maxW) { lines.push(line); line = [...atom]; lineW = aw; }
+    else { line.push(...atom); lineW += aw; }
+  }
+  lines.push(line);
+  for (const l of lines) if (l.length) l[l.length - 1] = { ...l[l.length - 1], t: l[l.length - 1].t.trimEnd() };
+  return lines;
+}
+function richWidth(r: Renderer, runs: RichRun[], sizePt: number): number {
+  return runs.reduce((a, x) => a + richRunW(r, x, sizePt), 0);
+}
+function widestWrappedLine(r: Renderer, text: string, maxW: number, sizePt: number, bold: boolean): number {
+  if (!text) return 0;
+  r.setFont(bold, sizePt);
+  return Math.max(0, ...r.wrapText(text, maxW).map(l => r.stringWidth(l)));
+}
+function drawBubbleBehind(ctx: RenderCtx, centerX: number, topY: number, blockH: number, textW: number) {
+  const { r, coords, colors } = ctx;
+  const padX  = coords.px2mm(44);   // HTML card padding: 2.75rem horizontal
+  const padY  = coords.px2mm(32);   // HTML card padding: 2rem vertical
+  const cardW = Math.min(textW + padX * 2, cardCapMm(coords));
+  logCard(ctx, centerX - cardW / 2, topY - padY, cardW, blockH + padY * 2);
+  r.drawRoundedRect(centerX - cardW / 2, topY - padY, cardW, blockH + padY * 2,
+    coords.px2mm(14), colors.C_CARD, 0.97);
 }
 
 async function renderTitleSlide(ctx: RenderCtx) {
@@ -829,19 +1160,47 @@ async function renderTitleSlide(ctx: RenderCtx) {
     await r.placeImage(doc, ip!, visR!.x, visR!.y, visR!.w, visR!.h);
   } else {
     // No image: single centered column (HTML: grid-template-columns: 1fr, text-align: center)
+    // LOCAL-PATCH(upstream-request: U-20261105-002) R1 — ink text on a drawn
+    // background: C_WHITE title (≈1.08:1) + light C_MUTED/C_META on the
+    // warm-paper wash were invisible; when the per-slide loop drew this
+    // slide's own background photo + wash, mirror the F4 punchline pattern —
+    // title ink (colors.C_DARK), subtitle/meta body-ink (C_BODY, the darkest
+    // non-ink text role, F4 sub-line analog); eyebrow keeps C_ACCENT. Without
+    // a drawn background, legacy colors unchanged.
+    const bgDrawn = ctx.bgDrawn === true;
     const eyebrow = strip(data.section);
-    if (eyebrow && metaR) {
+    // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.0 — white bubble card
+    // behind the cover text block (title + subtitle + meta) when a background
+    // photo was drawn; the card is drawn BEFORE any ink text.
+    if (bgDrawn) {
+      const tTxt = strip(data.title), sTxt = strip(data.subtitle), mTxt = strip(data.meta);
+      r.setFont(true, T_TS_TITLE);
+      const tLines = r.wrapText(tTxt, titleR.w).length;
+      r.setFont(false, T_TS_SUB);
+      const sLines = sTxt ? r.wrapText(sTxt, subR.w).length : 0;
+      const metaBottom = mTxt ? subR.y + LH_TS_SUB + GAP_TS_SUB_META + LH_TS_META : 0;
+      const bottom = Math.max(titleR.y + tLines * LH_TS_TITLE, subR.y + sLines * LH_TS_SUB, metaBottom);
+      const textW = Math.max(
+        widestWrappedLine(r, tTxt, titleR.w, T_TS_TITLE, true),
+        widestWrappedLine(r, sTxt, subR.w, T_TS_SUB, false),
+        widestWrappedLine(r, mTxt, subR.w, T_TS_META, false),
+      );
+      drawBubbleBehind(ctx, titleR.x + titleR.w / 2, titleR.y, bottom - titleR.y, textW);
+    }
+    // (eyebrow skipped when the card is drawn: zen hides .slide-header in HTML, and
+    // the eyebrow would sit outside the card on the photo — U-20261105-005 v1.14.0)
+    if (eyebrow && metaR && !bgDrawn) {
       r.setFont(true, T_TS_EYEBROW); r.setColor(C_ACCENT);
       r.multiCell(metaR.w, LH_TS_META, eyebrow.toUpperCase(), metaR.x, metaR.y, 'C');
     }
-    r.setFont(true, T_TS_TITLE); r.setColor(C_WHITE);
+    r.setFont(true, T_TS_TITLE); r.setColor(bgDrawn ? colors.C_DARK : C_WHITE);
     r.multiCell(titleR.w, LH_TS_TITLE, strip(data.title), titleR.x, titleR.y, 'C');
-    r.setFont(false, T_TS_SUB); r.setColor(C_MUTED);
+    r.setFont(false, T_TS_SUB); r.setColor(bgDrawn ? colors.C_BODY : C_MUTED);
     r.multiCell(subR.w, LH_TS_SUB, strip(data.subtitle), subR.x, subR.y, 'C');
     const meta = strip(data.meta);
     if (meta) {
       const metaY = subR.y + LH_TS_SUB + GAP_TS_SUB_META;
-      r.setFont(false, T_TS_META); r.setColor(C_META);
+      r.setFont(false, T_TS_META); r.setColor(bgDrawn ? colors.C_BODY : C_META);
       r.multiCell(subR.w, LH_TS_META, meta, subR.x, metaY, 'C');
     }
   }
@@ -849,7 +1208,7 @@ async function renderTitleSlide(ctx: RenderCtx) {
 
 async function renderDividerSlide(ctx: RenderCtx) {
   const { r, doc, data, imgDir, spec, coords, colors, sizes, region } = ctx;
-  const { C_BG, C_DARK3, C_DARK, C_BORDER, C_ACCENT, C_MUTED, C_TEXT } = colors;
+  const { C_DARK3, C_DARK, C_BORDER, C_ACCENT, C_MUTED, C_WHITE } = colors;
   const { CX, CY, CW, CH } = coords;
   const {
     T_DIV_PART, T_DIV_TITLE, T_DIV_DESC, T_SECT, T_NUM,
@@ -857,15 +1216,15 @@ async function renderDividerSlide(ctx: RenderCtx) {
     GAP_DIV_PART_TITLE, GAP_DIV_TITLE_DESC,
   } = sizes;
 
-  // Divider fills the full card with the SAME surface as the cover/standard card
-  // (C_BG). HTML .slide[data-type="divider"] uses --divider-bg which is identical
-  // to --cover-bg (radial #1E293B→#0B0F19); the PDF flattens that radial to C_BG
-  // for the cover, so the divider must too — otherwise it renders as a darker slab
-  // (#0A0E16) that differs from every other slide. Then (if declared) draws the
-  // section header bar, then places a part/title/desc block (left + optional image).
-  // Skipped when a full-bleed background image was already painted (U-20261105-005
-  // item 8) — the fill would cover the photo.
-  if (!ctx.bgDrawn) r.fillRect(CX, CY, CW, CH, C_BG);
+  // v1.12.0 — dividers WITH a drawn background (bgDrawn) mirror the HTML deck:
+  // the white-bubble style paints divider text inside the same white rounded
+  // bubble card as standard slides ([data-theme="zen"] .slide-content:
+  // rgba(255,255,255,0.97), border-radius 14px) with a dark navy title
+  // (--divider-text #1f2a44), not white type straight on the photo. The CH
+  // part-number chip stays accent (HTML .part-number) and the desc uses
+  // readableMutedOn. Dividers WITHOUT a resolvable background fall through to
+  // the legacy white-text-on-photo path below (dark-overlaid backdrop).
+  const bgDrawn = ctx.bgDrawn === true;
 
   const titleR = region('title');
   const visR   = region('visual');
@@ -874,6 +1233,59 @@ async function renderDividerSlide(ctx: RenderCtx) {
   if (hdrR) {
     drawHeaderBar(r, strip(data.section), ctx.n, ctx.total, hdrR, titleR, titleR.x, ctx.coords.CY, C_DARK, C_ACCENT, C_MUTED, C_BORDER, T_SECT, T_NUM);
   }
+
+  if (bgDrawn) {
+    const onCardText  = readableTextOn(colors.C_CARD);
+    const onCardMuted = readableMutedOn(colors.C_CARD);
+    // Bubble card: ~55-60% of the printable width (task spec; HTML caps the
+    // fit-content card at 88%), horizontally centered, sized to the wrapped
+    // text block + padding, vertically centered in the printable card area.
+    const padX   = coords.px2mm(44);   // HTML card padding: 2.75rem horizontal
+    const padY   = coords.px2mm(32);   // HTML card padding: 2rem vertical
+    // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.2 — hug the content like
+    // HTML (fit-content, max 88%) instead of a fixed 58% card.
+    const innerMaxD = cardCapMm(coords) - padX * 2;
+    const dPart  = strip(data.partNum).toUpperCase();
+    const dTitle = strip(data.title), dDesc = strip(data.desc ?? '');
+    const hugW   = Math.max(
+      widestWrappedLine(r, dPart, innerMaxD, T_DIV_PART, true),
+      widestWrappedLine(r, dTitle, innerMaxD, T_DIV_TITLE, true),
+      widestWrappedLine(r, dDesc, innerMaxD, T_DIV_DESC, false));
+    const cardW  = Math.min(hugW + padX * 2, cardCapMm(coords));
+    const innerW = cardW - padX * 2 + 0.01;
+
+    r.setFont(true, T_DIV_TITLE);
+    const titleH = r.estimateTextHeight(strip(data.title), innerW, T_DIV_TITLE, LH_DIV_TITLE, true);
+    r.setFont(false, T_DIV_DESC);
+    const descH  = r.estimateTextHeight(strip(data.desc ?? ''), innerW, T_DIV_DESC, LH_DIV_DESC, false);
+    const blockH = LH_DIV_PART + GAP_DIV_PART_TITLE + titleH + GAP_DIV_TITLE_DESC + descH;
+
+    const cardH = blockH + padY * 2;
+    const cardX = CX + (CW - cardW) / 2;
+    const cardY = Math.min(coords.PH * 0.95 - cardH, Math.max(coords.PH * 0.05, (coords.PH - cardH) / 2));
+    logCard(ctx, cardX, cardY, cardW, cardH);
+    r.drawRoundedRect(cardX, cardY, cardW, cardH, coords.px2mm(14), colors.C_CARD, 0.97);
+
+    const textX = cardX + padX;
+    let y = cardY + padY;
+    r.setFont(true, T_DIV_PART); r.setColor(C_ACCENT);
+    r.cell(innerW, LH_DIV_PART, (strip(data.partNum)).toUpperCase(), textX, y, 'C');
+    y += LH_DIV_PART + GAP_DIV_PART_TITLE;
+    r.setFont(true, T_DIV_TITLE); r.setColor(onCardText);
+    y = r.multiCell(innerW, LH_DIV_TITLE, strip(data.title), textX, y, 'C');
+    y += GAP_DIV_TITLE_DESC;
+    r.setFont(false, T_DIV_DESC); r.setColor(onCardMuted);
+    r.multiCell(innerW, LH_DIV_DESC, strip(data.desc), textX, y, 'C');
+    return;
+  }
+
+  // Legacy path (no resolvable background): do NOT re-fill the card here — the
+  // generic per-slide step in main() painted the flat card background, and
+  // re-filling with C_BG used to blot out a photo and left C_TEXT (a pale
+  // "text on dark" default) nearly invisible against a light style's flat card
+  // color (e.g. white-bubble's cream). Title/desc use the same fixed white/
+  // muted colors renderTitleSlide uses, since both slide types assume a
+  // dark-overlaid backdrop.
 
   const ip = imgPath(data.visualImage, imgDir ?? '');
   const align: 'L' | 'C' = ip ? 'L' : 'C';
@@ -894,7 +1306,7 @@ async function renderDividerSlide(ctx: RenderCtx) {
   r.cell(titleR.w, LH_DIV_PART, (strip(data.partNum)).toUpperCase(), titleR.x, py0, align);
 
   const py1 = py0 + LH_DIV_PART + GAP_DIV_PART_TITLE;
-  r.setFont(true, T_DIV_TITLE); r.setColor(C_TEXT);
+  r.setFont(true, T_DIV_TITLE); r.setColor(C_WHITE);
   const afterTitle = r.multiCell(titleR.w, LH_DIV_TITLE, strip(data.title), titleR.x, py1, align);
 
   const py2 = afterTitle + GAP_DIV_TITLE_DESC;
@@ -905,46 +1317,6 @@ async function renderDividerSlide(ctx: RenderCtx) {
     r.fillRect(visR.x, visR.y, visR.w, visR.h, C_DARK3);
     await r.placeImageCover(doc, ip, visR.x, visR.y, visR.w, visR.h);
   }
-}
-
-// Rich (bold-accent) runs for the punchline statement: `**x**` / <strong>x</strong>
-// = bold + accent colour inline (HTML `.punch-text strong`). Ported from the
-// Projects/co-deck v1.14.5 LOCAL-PATCH (U-20261105-005).
-type RichRun = { t: string; b: boolean };
-function richRuns(raw: string | undefined | null): RichRun[] {
-  const src = (raw ?? '').replace(/<\/?(strong|b)\s*>/gi, '**').replace(/<[^>]+>/g, '');
-  const out: RichRun[] = [];
-  src.split('**').forEach((t, i) => { if (t) out.push({ t, b: i % 2 === 1 }); });
-  return out;
-}
-function richRunW(r: Renderer, run: RichRun, sizePt: number, forceBold = false): number {
-  r.setFont(run.b || forceBold, sizePt);
-  return r.stringWidth(run.t);
-}
-// Greedy word wrap (same rule as Renderer.wrapText) over styled runs.
-function richLines(r: Renderer, raw: string, maxW: number, sizePt: number, forceBold = false): RichRun[][] {
-  const atoms: RichRun[][] = [];
-  let cur: RichRun[] = [];
-  for (const run of richRuns(raw)) {
-    const parts = run.t.split(' ');
-    parts.forEach((w, i) => {
-      const last = i === parts.length - 1;
-      const txt = last ? w : w + ' ';
-      if (txt) cur.push({ t: txt, b: run.b });
-      if (!last) { atoms.push(cur); cur = []; }
-    });
-  }
-  if (cur.length) atoms.push(cur);
-  const lines: RichRun[][] = [];
-  let line: RichRun[] = [], lineW = 0;
-  for (const atom of atoms) {
-    const aw = atom.reduce((a, x) => a + richRunW(r, x, sizePt, forceBold), 0);
-    if (lineW > 0 && lineW + aw > maxW) { lines.push(line); line = [...atom]; lineW = aw; }
-    else { line.push(...atom); lineW += aw; }
-  }
-  lines.push(line);
-  for (const l of lines) if (l.length) l[l.length - 1] = { ...l[l.length - 1], t: l[l.length - 1].t.trimEnd() };
-  return lines;
 }
 
 function renderPunchlineSlide(ctx: RenderCtx) {
@@ -964,25 +1336,53 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   // wraps to ~2 centered lines. Reproduce that exact max-width (measured from slide-7,
   // whose natural width 169.3mm > 160.6mm → wraps). Count the wrapped lines so blockH /
   // vertical centering accounts for the ACTUAL statement height.
-  // Keep the raw `**keyword**` markup (HTML `.punch-text strong` = accent) and
-  // wrap/draw through richLines (ported from Projects/co-deck v1.14.5).
+  // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.5 — keep the raw `**keyword**`
+  // markup (HTML `.punch-text strong` = accent) and wrap/draw through richLines.
   const statementRaw = (data.text ?? '').replace(/<[^>]+>/g, '').trim() ? (data.text as string) : (data.title ?? '');
   const statement = strip(statementRaw);
   r.setFont(true, T_PUNCH_TEXT);
-  const textBand = Math.min(bandW, coords.px2mm(607));
+  // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.2 — with the white bubble
+  // card (bgDrawn) HTML zen shows ONLY the statement (+ optional sub) in the card:
+  // title max-width 85% of the card inner width, tag / quote mark not rendered.
+  const cardMode = ctx.bgDrawn === true;
+  const padXp = coords.px2mm(44), padYp = coords.px2mm(32);
+  const capW  = cardCapMm(coords);
+  const textBand = cardMode ? 0.85 * (capW - padXp * 2) : Math.min(bandW, coords.px2mm(607));
   const textX    = box.x + (bandW - textBand) / 2;
   const stmtLines = statement ? richLines(r, statementRaw, textBand, T_PUNCH_TEXT, true) : [];
-  const textLineH = (stmtLines.length || 1) * LH_PUNCH_TEXT;
+  const nTextLines = stmtLines.length || 1;
+  const textLineH = nTextLines * LH_PUNCH_TEXT;
 
-  const blockH = LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK + LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT + textLineH + GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB;
-  let y = box.y + Math.max(0, (box.h - blockH) / 2);
+  const subPre = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
+  const blockH = cardMode
+    ? textLineH + (subPre ? GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB : 0)
+    : LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK + LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT + textLineH + GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB;
+  let y = cardMode
+    ? Math.min(coords.PH * 0.95 - padYp - blockH, Math.max(coords.PH * 0.05 + padYp, (coords.PH - blockH) / 2))
+    : box.y + Math.max(0, (box.h - blockH) / 2);
 
-  // Full-bleed dark background (HTML .slide[data-type=”punchline”] is radial navy).
-  // Skipped when a full-bleed background image was already painted (U-20261105-005 item 8).
-  if (!ctx.bgDrawn) r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+  // LOCAL-PATCH(upstream-request: U-20261105-002) F4 — skip the flat C_BG
+  // full-page repaint when the per-slide loop already drew this slide's own
+  // background photo + wash (mirror of the v1.12.1 contact pattern); the
+  // repaint would erase the drawn background. Decks without a drawn background
+  // keep the legacy full-bleed fill (HTML .slide[data-type="punchline"] radial navy).
+  if (ctx.bgDrawn !== true) {
+    r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+  } else {
+    // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.0 — white bubble card
+    // behind the whole punchline block (tag + mark + statement + sub), drawn
+    // before any ink text; width = widest wrapped line (HTML fit-content).
+    const subForCard = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
+    // HTML: a statement that wraps makes the fit-content card hit its cap.
+    const textW = nTextLines > 1 ? capW - padXp * 2 : Math.max(
+      widestWrappedLine(r, statement, textBand, T_PUNCH_TEXT, true),
+      widestWrappedLine(r, subForCard, bandW, T_PUNCH_SUB, false),
+    );
+    drawBubbleBehind(ctx, box.x + bandW / 2, y, blockH, textW);
+  }
 
   // part-tag (gold, uppercase) — e.g. “PART 01 · 패러다임 전환”
-  const sec = strip(data.section);
+  const sec = cardMode ? '' : strip(data.section);
   if (sec) {
     r.setFont(false, T_PUNCH_TAG); r.setColor(C_ACCENT);
     r.cell(bandW, LH_PUNCH_TAG, sec.toUpperCase(), box.x, y, 'C');
@@ -990,19 +1390,26 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   }
 
   // decorative gold quote mark (“) above the statement
-  r.setFont(false, T_PUNCH_MARK); r.setColor(C_ACCENT);
-  r.cell(bandW, LH_PUNCH_MARK, '”', box.x, y, 'C');
-  y += LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT;
+  if (!cardMode) {
+    r.setFont(false, T_PUNCH_MARK); r.setColor(C_ACCENT);
+    r.cell(bandW, LH_PUNCH_MARK, '”', box.x, y, 'C');
+    y += LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT;
+  }
 
-  // punch-text (WHITE, bold) — the statement (data.text, fallback title), wrapped at the
+  // LOCAL-PATCH(upstream-request: U-20261105-002) F4 — when the background
+  // photo + wash was drawn, the statement renders in ink (colors.C_DARK,
+  // design_spec §5 "잉크 64px 한 문장") instead of the legacy C_WHITE tuned
+  // for the dark radial background; without a drawn background, legacy colors
+  // unchanged. Sub line keeps C_BODY; tag/quote mark keep C_ACCENT.
+  // punch-text — the statement (data.text, fallback title), wrapped at the
   // HTML max-width (textBand), centered on the same axis as the tag/mark/sub above.
-  // **keyword** runs render in the accent colour; the rest stays C_WHITE.
   r.setFont(true, T_PUNCH_TEXT);
+  const stmtInk = ctx.bgDrawn === true ? colors.C_DARK : C_WHITE;
   let sy = y;
   for (const ln of stmtLines) {
-    let lx = textX + (textBand - ln.reduce((a, x) => a + richRunW(r, x, T_PUNCH_TEXT, true), 0)) / 2;
+    let lx = textX + (textBand - richWidth(r, ln.map(x => ({ ...x, b: true })), T_PUNCH_TEXT)) / 2;
     for (const run of ln) {
-      r.setFont(true, T_PUNCH_TEXT); r.setColor(run.b ? C_ACCENT : C_WHITE);
+      r.setFont(true, T_PUNCH_TEXT); r.setColor(run.b ? C_ACCENT : stmtInk);
       if (run.t) r.cell(1, LH_PUNCH_TEXT, run.t, lx, sy, 'L');
       lx += richRunW(r, run, T_PUNCH_TEXT, true);
     }
@@ -1031,8 +1438,7 @@ function renderProfileSlide(ctx: RenderCtx) {
   //   flex column, centered, text-align:center, padding: 4rem
   //   profile-eyebrow (section) → profile-name → profile-affiliation (accent) → profile-bio
   //   No slide-title element.
-  // Skipped when a full-bleed background image was already painted (U-20261105-005 item 8).
-  if (!ctx.bgDrawn) r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
+  r.fillRect(0, 0, coords.CW, coords.CH, C_BG);
 
   const bandW = coords.CW * 0.80;
   const bandX = coords.CX + (coords.CW - bandW) / 2;
@@ -1075,38 +1481,66 @@ function renderContactSlide(ctx: RenderCtx) {
     GAP_CONT_THANKS_LINE, GAP_CONT_LINE_NOTE,
   } = sizes;
 
-  // Skipped when a full-bleed background image was already painted (U-20261105-005 item 8).
-  if (!ctx.bgDrawn) r.fillRect(0, 0, coords.CW, coords.CH, C_BG);   // full-bleed surface, no header strip
+  // v1.12.1 — when the generic per-slide step already drew this slide's own
+  // background photo + dark wash (ctx.bgDrawn), SKIP the flat C_BG fill: the
+  // opaque fill painted straight over the photo, leaving a blank surface (same
+  // overpaint class as the v1.12.0 divider fix). The light contact text reads
+  // fine on the dark wash and is kept as-is. Decks WITHOUT a per-slide
+  // background keep the legacy flat full-bleed surface, unchanged.
+  const bgDrawn = ctx.bgDrawn === true;
+  if (!bgDrawn) {
+    r.fillRect(0, 0, coords.CW, coords.CH, C_BG);   // full-bleed surface, no header strip
+  }
 
   const bandW = coords.CW * 0.80;                 // centered 80% band (HTML centers everything)
   const bandX = coords.CX + (coords.CW - bandW) / 2;
 
   const thanks = strip(data.title);
-  const name   = strip(data.contactName);
-  const email  = strip(data.contactEmail);
-  const linkedin = strip(data.contactLinkedIn);
-  const phone  = strip(data.contactPhone);   // U-20261105-005 item 7: was dropped
+  // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.3 — render every contact*
+  // field generically (known order first, then any extra contact* key); the
+  // note (contactNote) stays the accent CTA line.
   const note   = strip(data.contactNote);
-  const nLines = (name ? 1 : 0) + (email ? 1 : 0) + (linkedin ? 1 : 0) + (phone ? 1 : 0) || 1;
+  const known  = ['contactName', 'contactEmail', 'contactLinkedIn', 'contactPhone'];
+  const extra  = Object.keys(data).filter(k => /^contact/.test(k) && !known.includes(k) && k !== 'contactNote');
+  const cLines = [...known, ...extra].map(k => strip((data as any)[k])).filter(Boolean);
+  const nLines = cLines.length || 1;
 
   r.setFont(false, T_CONT_NOTE);
   const noteLines = note ? Math.max(1, r.wrapText(note, bandW).length) : 1;
 
   // Vertically center the whole contact group, then stack with measured gaps.
-  const blockH = LH_CONT_THANKS + GAP_CONT_THANKS_LINE + LH_CONT_LINE * nLines + GAP_CONT_LINE_NOTE + LH_CONT_NOTE * noteLines;
+  const blockH = LH_CONT_THANKS + GAP_CONT_THANKS_LINE + LH_CONT_LINE * nLines + (note ? GAP_CONT_LINE_NOTE + LH_CONT_NOTE * noteLines : 0);   // v1.14.3: no empty note row
   let y = coords.CY + Math.max(0, (coords.CH - blockH) / 2);
 
+  // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.0 — white bubble card
+  // behind the contact group (thanks + lines + note) when a background photo
+  // was drawn, before any ink text; width = widest wrapped line.
+  if (bgDrawn) {
+    const cardTextW = Math.max(
+      widestWrappedLine(r, thanks, bandW, T_CONT_THANKS, true),
+      ...cLines.map(l => widestWrappedLine(r, l, bandW, T_CONT_LINE, false)),
+      widestWrappedLine(r, note, bandW, T_CONT_NOTE, false),
+      // HTML contact card min-width: min(28rem, 80%)
+      Math.min(coords.px2mm(448), coords.PW * 0.80) - coords.px2mm(88),
+    );
+    drawBubbleBehind(ctx, bandX + bandW / 2, y, blockH, cardTextW);
+  }
+
   // "감사합니다" — WHITE bold (HTML .contact-thanks is white, not gold)
-  r.setFont(true, T_CONT_THANKS); r.setColor(C_WHITE);
+  // LOCAL-PATCH(upstream-request: U-20261105-002) R2 — when the background
+  // photo + warm wash was drawn, the thanks hero renders in ink
+  // (colors.C_DARK, ≈15:1 on the wash) — the v1.12.1 fill-skip assumed the
+  // legacy dark overlay; white on the light wash was ≈1.08:1. Contact lines
+  // keep C_BODY (already legible ink-muted), note keeps C_ACCENT. Without a
+  // drawn background, legacy white on the dark flat surface unchanged.
+  r.setFont(true, T_CONT_THANKS);
+  r.setColor(bgDrawn ? colors.C_DARK : C_WHITE);
   r.cell(bandW, LH_CONT_THANKS, thanks, bandX, y, 'C');
   y += LH_CONT_THANKS + GAP_CONT_THANKS_LINE;
 
   // contact lines — secondary #CBD5E1 (C_BODY), regular weight
   r.setFont(false, T_CONT_LINE); r.setColor(C_BODY);
-  if (name)     { r.cell(bandW, LH_CONT_LINE, name,     bandX, y, 'C'); y += LH_CONT_LINE; }
-  if (email)    { r.cell(bandW, LH_CONT_LINE, email,    bandX, y, 'C'); y += LH_CONT_LINE; }
-  if (linkedin) { r.cell(bandW, LH_CONT_LINE, linkedin, bandX, y, 'C'); y += LH_CONT_LINE; }
-  if (phone)    { r.cell(bandW, LH_CONT_LINE, phone,    bandX, y, 'C'); y += LH_CONT_LINE; }
+  for (const l of cLines) { r.cell(bandW, LH_CONT_LINE, l, bandX, y, 'C'); y += LH_CONT_LINE; }
 
   // note / CTA — GOLD (HTML .contact-next is accent gold)
   y += GAP_CONT_LINE_NOTE;
@@ -1137,56 +1571,39 @@ async function renderStandardSlide(ctx: RenderCtx) {
   // data.visual (text description) maps to visualDisplay; "none" is excluded.
   const rawVisual = data.visual && data.visual.toLowerCase() !== 'none' ? data.visual : undefined;
   const visualDisplay = data.visualDisplay || (!data.visualImage ? rawVisual : undefined);
-  const hasRight = !!(data.visualImage || visualDisplay || data.visualTitle) && !!visR;
 
-  // U-20261105-002(a): OVERLAP-AWARE visual path selection. When the theme's
-  // visual region starts at or left of the content region (zen declares
-  // visual = full page), the visual is a BACKGROUND, not an in-card right
-  // panel: it must be painted BEFORE the title/bullets and the text keeps the
-  // full content width. The previous single path drew the visual panel AFTER
-  // the text, so C_VIS_BG covered title/bullets and bulTxtW computed negative
-  // (visR.x = 0 < contentR.x) whenever background_image.enabled=false — the
-  // v1.9-era in-card-diagram fix only covered the bgDrawn=true case.
-  const visualIsBackground = hasRight && visR!.x <= contentR.x;
-
+  // v1.11.0 — background-image layering (individual-scope decks): when the
+  // generic per-slide step already drew this slide's own full-bleed background
+  // photo + dark wash, the "visual" must NOT repaint the page. The zen theme's
+  // standard "visual" region is the FULL PAGE (x0 y0 w1 h1), so the old
+  // C_VIS_BG panel + photo repaint here painted straight over the white
+  // C_CARD bubble and all text drawn moments earlier — the photo survived,
+  // the content vanished (Gate 5 defect: bubble/text invisible on slides 2-3,
+  // blank navy on the journey-map slide). Decks WITHOUT a per-slide background
+  // keep the legacy full-bleed visual panel below, unchanged.
+  const bgDrawn = ctx.bgDrawn === true;
+  const visualIsBackground = !!data.visualImage && !!data.backgroundImage
+    && data.visualImage === data.backgroundImage;
+  // LOCAL-PATCH(upstream-request: U-20261105-002) F1 — full-page-cover guard:
+  // a visual region that CONTAINS the content region (zen: 0,0,100%,100%) can
+  // never host a side panel; route to the in-card path even when bgDrawn=false
+  // (extends the v1.11.0 bgDrawn-only condition). Containment uses a ±0.5 mm
+  // float epsilon.
+  const visCoversContent = !!visR
+    && visR.x <= contentR.x + 0.5 && visR.y <= contentR.y + 0.5
+    && (visR.x + visR.w) >= (contentR.x + contentR.w) - 0.5
+    && (visR.y + visR.h) >= (contentR.y + contentR.h) - 0.5;
+  const forceInCard = bgDrawn || visCoversContent;
+  // With the background drawn (or a full-page-cover visual): a visual that IS
+  // the background is redundant (HTML draws the photo once as the bg and
+  // floats the bubble on top); any OTHER visual is a diagram embedded inside
+  // the card under the bullets.
+  const diagramRaster = forceInCard && !visualIsBackground && !data.videoId
+    ? resolveVisualRaster(data.visualImage, imgDir ?? '', ctx.fontDir ?? imgDir ?? '')
+    : null;
+  const hasRight = !forceInCard && !!(data.visualImage || visualDisplay || data.visualTitle) && !!visR;
   const titleW   = titleR.w;
-  const bulTxtW  = hasRight && !visualIsBackground
-    ? Math.max(6, Math.min(contentR.w, visR!.x - contentR.x - 6))
-    : contentR.w;
-
-  // ── Background-mode visual first (under the text) ──
-  if (visualIsBackground) {
-    const ip = imgPath(data.visualImage, imgDir ?? '');
-    if (ip) {
-      // Full-bleed cover-crop of the visual image across the whole visual
-      // region (zen: the entire page) — mirrors the HTML background-image:
-      // cover; center rendering.
-      await r.placeImageCover(doc, ip, visR!.x, visR!.y, visR!.w, visR!.h);
-      // Readability scrim behind the text band (HTML zen-overlay parity):
-      // translucent dark wash under the title/bullets, not an opaque fill.
-      r.fillRectOverlay(contentR.x - coords.px2mm(24), coords.CY, contentR.w + coords.px2mm(48), coords.CH, C_DARK, 0.45);
-    } else if (visualDisplay || data.visualTitle) {
-      // Text-panel-only visual (no image): C_VIS_BG surface + centered panel
-      // text, drawn under the title/bullets.
-      r.fillRect(visR!.x, visR!.y, visR!.w, visR!.h, C_VIS_BG);
-      const vt = strip(data.visualTitle);
-      const vd = strip((visualDisplay ?? '').replace(/<br\s*\/?>/gi, '\n'));
-      const gap = 5;
-      const visPad = Math.max(2, coords.px2mm(ctx.spec.visual_inner_padding_px ?? 0));
-      const hVt = vt ? r.estimateTextHeight(vt, visR!.w - visPad * 2, T_VIS_T, LH_VIS_TITLE, true)  : 0;
-      const hVb = vd ? r.estimateTextHeight(vd, visR!.w - visPad * 2, T_VIS_B, LH_VIS_BODY, false) : 0;
-      const totalH = hVt + (vt && vd ? gap : 0) + hVb;
-      let vy = visR!.y + visPad + Math.max(0, (visR!.h - visPad * 2 - totalH) / 2);
-      if (vt) {
-        r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
-        vy = r.multiCell(visR!.w - visPad * 2, LH_VIS_TITLE, vt, visR!.x + visPad, vy, 'L') + gap;
-      }
-      if (vd) {
-        r.setFont(true, T_VIS_B); r.setColor(C_WHITE);
-        r.multiCell(visR!.w - visPad * 2, LH_VIS_BODY, vd, visR!.x + visPad, vy, 'L');
-      }
-    }
-  }
+  const bulTxtW  = hasRight ? Math.min(contentR.w, visR!.x - contentR.x - 6) : contentR.w;
 
   // HTML .slide-content uses justify-content: center — vertically center the
   // [title + gap + bullets] block as a unit in the available area below the header.
@@ -1195,30 +1612,275 @@ async function renderStandardSlide(ctx: RenderCtx) {
   const availStart   = headerBottom + coords.px2mm(8);
   const availH       = cardBottom - availStart;
 
-  const bullets  = data.bullets ?? [];
-  const titleH   = r.estimateTextHeight(strip(data.title), hasRight && !visualIsBackground ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
-  const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BULLET, LH_BULLET_GAP);
-  const blockGap = bullets.length > 0 ? coords.px2mm(24) : 0;
-  const blockH   = titleH + blockGap + totalBh;
-  const blockY   = availStart + Math.max(0, (availH - blockH) * 0.5);
+  // Video slides (data.videoId) get a clean thumbnail + play button (see
+  // below) instead of the usual title/bullets overlay — the title bar and
+  // any "Link: youtube.com/watch?v=..." bullet are both redundant once the
+  // button itself is the call to action.
+  const bullets = data.videoId ? [] : (data.bullets ?? []);
+  if (!data.videoId && forceInCard) {
+    // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.2 — hugging card (HTML
+    // `.slide-content { width: fit-content; max-width: 88% }` parity). Width =
+    // max(title, bullets column, visual, panel) + horizontal padding, capped at
+    // 88% of the page, centered; height = content + vertical padding, centered
+    // in the 5-95% band. HTML px (1280px frame) are scaled via coords.px2mm.
+    const px = (v: number) => coords.px2mm(v);
+    const padX = px(44), padY = px(32);                 // HTML padding 2rem 2.75rem
+    const maxCardW = cardCapMm(coords);
+    const innerMax = maxCardW - padX * 2;
+    const titleTxt = strip(data.title);
+    const titleW   = widestWrappedLine(r, titleTxt, innerMax, T_TITLE, true);
+    const titleH   = r.estimateTextHeight(titleTxt, innerMax, T_TITLE, LH_TITLE, true);
 
-  r.setFont(true, T_TITLE); r.setColor(C_WHITE);
-  const afterTitle = r.multiCellMarkdown(titleW, LH_TITLE, data.title, titleR.x, blockY, T_TITLE, C_ACCENT, 'L');
+    // Bullets column: CSS shrink-to-fit = min(max-content, max-width 600px).
+    const bTxts = bullets.filter((b: string) => strip(b));   // raw (rich) strings
+    const mi = (T_BUL / MM_TO_PT) * 1.1;                // hanging-indent marker (1.1em)
+    const bulBox = Math.min(px(600), innerMax);
+    r.setFont(false, T_BUL);
+    let maxUn = 0, anyWrap = false;
+    for (const t of bTxts) {
+      const w = richWidth(r, richRuns(t), T_BUL);
+      maxUn = Math.max(maxUn, w);
+      if (mi + w > bulBox) anyWrap = true;
+    }
+    let bulCol = bTxts.length ? (anyWrap ? bulBox : mi + maxUn) : 0;
 
-  let by = afterTitle + blockGap;
-  for (const b of bullets) {
-    const txt = strip(b);
-    if (!txt) continue;
-    if (by > cardBottom) break;
-    r.drawEllipse(contentR.x, by + LH_BULLET * 0.28, 3.2, C_ACCENT);
-    r.setFont(false, T_BUL); r.setColor(C_BODY);
-    const afterBul = r.multiCellMarkdown(bulTxtW - 6, LH_BULLET, b, contentR.x + 6, by, T_BUL, C_ACCENT, 'L');
-    by = afterBul + LH_BULLET_GAP;
+    // Visual: raster diagram wrapper = min(760px, 72vw) wide; text panel <= 600px.
+    const visTitleTxt = !diagramRaster ? strip(data.visualTitle) : '';
+    const visBodyTxt  = !diagramRaster ? strip((visualDisplay ?? '').replace(/<br\s*\/?>/gi, '\n')) : '';
+    const visTxtOn    = !!(visTitleTxt || visBodyTxt);
+    const panelPad    = px(19.2) + px(2);               // 1.2rem + half border (accent bar 3px + 1px)
+    let panelW = 0, panelInner = 0;
+    if (visTxtOn) {
+      r.setFont(true, T_VIS_T);
+      let un = visTitleTxt ? r.stringWidth(visTitleTxt) : 0;
+      r.setFont(false, T_VIS_B);
+      for (const ln of visBodyTxt.split('\n')) un = Math.max(un, r.stringWidth(ln));
+      panelW = Math.min(px(600), innerMax, un + panelPad * 2);
+      panelInner = panelW - panelPad * 2 + 0.01;
+      // `:has(.zen-visual-panel)` makes the bullets column width:100% (<= 600px)
+      bulCol = Math.min(bulBox, Math.max(titleW, bulCol, panelW));
+    }
+    const bulTextW = Math.max(10, bulCol - mi) + 0.01;
+    const bLines  = bTxts.map((t: string) => richLines(r, t, bulTextW, T_BUL));
+    const totalBh = bTxts.length ? bLines.reduce((a: number, l: RichRun[][]) => a + l.length * LH_BULLET, 0) + LH_BULLET_GAP * (bTxts.length - 1) : 0;
+    const gap1 = bTxts.length > 0 ? px(12) : 0;         // title -> bullets (HTML flex gap .75rem)
+
+    const cardMaxH = coords.PH * 0.90;                  // keep >= 5% page margin top/bottom
+    let diagramImg: any = null;
+    let visW = 0, boxH = 0, diaW = 0, diaH = 0, gap2 = 0;
+    // Diagram caption (14px) + source (12px) siblings under the diagram (HTML
+    // .zen-visual-caption / -source: centered, muted navy, 4px / 2.4px margin-top).
+    const capTxt = diagramRaster ? strip(data.visualCaption) : '';
+    const srcTxt = diagramRaster ? strip(data.visualSource) : '';
+    const fpt = spec.calibration?.font_px_to_pt ?? 0.85;
+    const T_CAP = 14 * fpt, T_SRC = 12 * fpt;
+    const capH = capTxt ? px(16) : 0, srcH = srcTxt ? px(14) : 0;
+    const capBlockH = (capTxt ? px(16) + capH : 0) + (srcTxt ? px(14.4) + srcH : 0);   // gap 12 + margin
+    if (diagramRaster) {
+      try {
+        diagramImg = await r.embedImg(doc, diagramRaster);
+        const asp = diagramImg.width / diagramImg.height;
+        visW = Math.min(px(760), innerMax);
+        boxH = Math.min(visW / asp, px(216));           // img max-height 24vh
+        gap2 = px(12);
+        const availForDia = cardMaxH - 2 * padY - (titleH + gap1 + totalBh) - gap2 - capBlockH;
+        if (boxH > availForDia && availForDia > 24) boxH = availForDia;
+        diaW = Math.min(visW, boxH * asp);              // object-fit: contain inside the box
+        diaH = diaW / asp;
+      } catch (e: any) {
+        console.warn(`  diagram embed err (slide ${ctx.n}): ${e.message}`);
+        diagramImg = null; visW = 0; boxH = 0; gap2 = 0;
+      }
+    }
+    const capOn = !!diagramImg;
+    const visTxtGap = px(28);
+    const visInnerGap = (visTitleTxt && visBodyTxt) ? px(6.4) : 0;   // heading margin-bottom .4rem
+    const panelPadY = px(14.4) + px(1);                 // .9rem + 1px border
+    const hVt = visTitleTxt ? r.estimateTextHeight(visTitleTxt, panelInner, T_VIS_T, LH_VIS_TITLE, true) : 0;
+    const hVb = visBodyTxt  ? r.estimateTextHeight(visBodyTxt,  panelInner, T_VIS_B, LH_VIS_BODY, false) : 0;
+    const visTxtH = visTxtOn ? hVt + visInnerGap + hVb + panelPadY * 2 : 0;
+
+    const blockH = titleH + gap1 + totalBh + (diagramImg ? gap2 + boxH + capBlockH : 0) + (visTxtH > 0 ? visTxtGap + visTxtH : 0);
+    const cardInnerW = Math.max(titleW, bulCol, diagramImg ? visW : 0, panelW);
+    const cardW  = Math.min(cardInnerW + padX * 2, maxCardW);
+    const cardX  = coords.CX + (coords.CW - cardW) / 2;
+    const cardH  = Math.min(blockH + padY * 2, cardMaxH);
+    const cardY  = Math.min(coords.PH * 0.95 - cardH, Math.max(coords.PH * 0.05, (coords.PH - cardH) / 2));
+    logCard(ctx, cardX, cardY, cardW, cardH);
+    r.drawRoundedRect(cardX, cardY, cardW, cardH, px(14), colors.C_CARD, 0.97);   // HTML radius 14px
+    const onCardText  = readableTextOn(colors.C_CARD);
+    const onCardMuted = readableMutedOn(colors.C_CARD);
+
+    const innerX = cardX + padX, innerW = cardW - padX * 2;
+    r.setFont(true, T_TITLE); r.setColor(onCardText);
+    let by = r.multiCell(innerW + 0.01, LH_TITLE, titleTxt, innerX, cardY + padY, 'C') + gap1;
+
+    const bulX = cardX + (cardW - bulCol) / 2;          // column centered, text left-aligned
+    bLines.forEach((lines: RichRun[][], bi: number) => {
+      r.drawEllipse(bulX + mi * 0.1, by + (LH_BULLET - px(6)) / 2, px(6), C_ACCENT);
+      for (const ln of lines) {
+        let bx = bulX + mi;
+        for (const run of ln) {
+          r.setFont(run.b, T_BUL); r.setColor(run.b ? C_ACCENT : onCardMuted);
+          if (run.t) r.cell(1, LH_BULLET, run.t, bx, by, 'L');
+          bx += richRunW(r, run, T_BUL);
+        }
+        by += LH_BULLET;
+      }
+      if (bi < bLines.length - 1) by += LH_BULLET_GAP;
+    });
+
+    if (diagramImg) {
+      const dy = by + gap2 + (boxH - diaH) / 2;
+      r.drawEmbeddedImage(diagramImg, cardX + (cardW - diaW) / 2, dy, diaW, diaH);
+      let cy = by + gap2 + boxH;
+      if (capOn && capTxt) {
+        cy += px(16);
+        r.setFont(false, T_CAP); r.setColor(onCardMuted);
+        r.cell(innerW, capH, capTxt, innerX, cy, 'C'); cy += capH;
+      }
+      if (capOn && srcTxt) {
+        cy += px(14.4);
+        r.setFont(false, T_SRC); r.setColor(colors.C_MUTED);
+        r.cell(innerW, srcH, srcTxt, innerX, cy, 'C');
+      }
+    }
+    if (visTxtH > 0) {
+      let vy = by + visTxtGap;
+      const panelX = cardX + (cardW - panelW) / 2;
+      r.fillRectOverlay(panelX, vy, panelW, visTxtH, C_ACCENT, 0.07);
+      r.fillRect(panelX, vy, px(3), visTxtH, C_ACCENT);
+      vy += panelPadY;
+      const vx = panelX + panelPad;
+      if (visTitleTxt) {
+        r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
+        vy = r.multiCell(panelInner, LH_VIS_TITLE, visTitleTxt, vx, vy, 'L') + visInnerGap;
+      }
+      if (visBodyTxt) {
+        r.setFont(false, T_VIS_B); r.setColor(onCardText);
+        r.multiCell(panelInner, LH_VIS_BODY, visBodyTxt, vx, vy, 'L');
+      }
+    }
+  } else if (!data.videoId) {
+    const titleH   = r.estimateTextHeight(strip(data.title), hasRight ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
+    const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BULLET, LH_BULLET_GAP);
+    const blockGap = bullets.length > 0 ? coords.px2mm(24) : 0;
+
+    const cardMaxH = (coords.PH ?? 0) * 0.90;
+    // Diagram slides: embed the visual INSIDE the white card under the
+    // bullets (HTML zen layout — the diagram sits in the bubble, not on a
+    // full-bleed panel). Embed first so the card height can include it;
+    // an unresolvable diagram is skipped (no placeholder panel).
+    let diagramImg: any = null;
+    let diaW = 0, diaH = 0, diaGap = 0;
+    if (diagramRaster) {
+      try {
+        diagramImg = await r.embedImg(doc, diagramRaster);
+        const asp = diagramImg.width / diagramImg.height;
+        diaW = Math.max(30, bulTxtW);
+        diaH = diaW / asp;
+        // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.1 — keep the card
+        // >= 5% of page height away from the top and bottom page edges: the diagram
+        // shrinks to fit (title + bullets + diagram + card padding <= 90% PH).
+        const availForDia = Math.min(
+          availH - (titleH + blockGap + totalBh) - coords.px2mm(40),
+          cardMaxH - 2 * coords.px2mm(28) - (titleH + blockGap + totalBh) - coords.px2mm(28));
+        if (diaH > availForDia && availForDia > 24) {
+          diaH = availForDia;
+          diaW = diaH * asp;
+        }
+        diaGap = coords.px2mm(28);
+      } catch (e: any) {
+        console.warn(`  diagram embed err (slide ${ctx.n}): ${e.message}`);
+        diagramImg = null;
+      }
+    }
+
+    // LOCAL-PATCH(upstream-request: U-20261105-002) F1 — in-card text-visual:
+    // with forceInCard and NO raster diagram, visualTitle/visualDisplay would
+    // silently vanish (the legacy full-page C_VIS_BG text panel never fires).
+    // Render the checklist text INSIDE the white card under the bullets,
+    // parallel to the diagram embed; height included in blockH so vertical
+    // centering accounts for it (same pattern as diaH). Ink colors
+    // (onCardText), NOT the legacy C_WHITE tuned for the dark C_VIS_BG panel.
+    // If both a raster diagram and visual text exist, the diagram wins and
+    // text is skipped.
+    const visTitleTxt = forceInCard && !diagramRaster ? strip(data.visualTitle) : '';
+    const visBodyTxt  = forceInCard && !diagramRaster
+      ? strip((visualDisplay ?? '').replace(/<br\s*\/?>/gi, '\n')) : '';
+    const visTxtOn    = !!(visTitleTxt || visBodyTxt);
+    const visTxtGap   = coords.px2mm(28);   // same spacing as the diagram embed
+    const visInnerGap = (visTitleTxt && visBodyTxt) ? 5 : 0;
+    const hVt = visTitleTxt ? r.estimateTextHeight(visTitleTxt, bulTxtW - 6, T_VIS_T, LH_VIS_TITLE, true) : 0;
+    const hVb = visBodyTxt  ? r.estimateTextHeight(visBodyTxt,  bulTxtW - 6, T_VIS_B, LH_VIS_BODY, false) : 0;
+    const visTxtH = visTxtOn ? hVt + visInnerGap + hVb : 0;
+
+    const blockH   = titleH + blockGap + totalBh + (diagramImg ? diaGap + diaH : 0) + (visTxtH > 0 ? visTxtGap + visTxtH : 0);
+    const pageH_mm = coords.PH;
+    const cardMinY = pageH_mm * 0.05, cardMaxY = pageH_mm * 0.95;
+    // center the card (block + padding) vertically within the 5%..95% band
+    const blockY   = Math.max(cardMinY + coords.px2mm(28),
+                       Math.min(availStart + Math.max(0, (availH - blockH) * 0.5),
+                                cardMaxY - coords.px2mm(28) - blockH));
+
+    // Content "card": a translucent panel behind the title/bullets block,
+    // matching the HTML deck's white-bubble .slide-content box (which the PDF
+    // previously never drew — text floated directly on the photo). Sized to
+    // the text column (not the full slide) like the HTML's fit-content card,
+    // clamped to stay inside the printable card area.
+    const padX   = coords.px2mm(40);
+    const padY   = coords.px2mm(28);
+    const cardW0 = Math.min((hasRight ? titleW : bulTxtW) + padX * 2, coords.CW - coords.px2mm(8));
+    // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.1 — card centered horizontally (HTML parity)
+    const cardX  = coords.CX + (coords.CW - cardW0) / 2;
+    const cardW  = cardW0;
+    const shiftX = cardX + padX - contentR.x;
+    const cardY  = Math.max(cardMinY, blockY - padY);
+    const cardH  = Math.min(blockH + padY * 2, cardMaxY - cardY);
+    logCard(ctx, cardX, cardY, cardW, cardH);
+    r.fillRectOverlay(cardX, cardY, cardW, cardH, colors.C_CARD, 0.94);
+    const onCardText  = readableTextOn(colors.C_CARD);
+    const onCardMuted = readableMutedOn(colors.C_CARD);
+
+    r.setFont(true, T_TITLE); r.setColor(onCardText);
+    const afterTitle = r.multiCell(cardW - padX * 2, LH_TITLE, strip(data.title), cardX + padX, blockY, 'C');
+
+    let by = afterTitle + blockGap;
+    for (const b of bullets) {
+      const txt = strip(b);
+      if (!txt) continue;
+      if (by > cardBottom) break;
+      r.drawEllipse(contentR.x + shiftX, by + LH_BULLET * 0.28, 3.2, C_ACCENT);
+      r.setFont(false, T_BUL); r.setColor(onCardMuted);
+      const afterBul = r.multiCell(bulTxtW - 6, LH_BULLET, txt, contentR.x + shiftX + 6, by, 'L');
+      by = afterBul + LH_BULLET_GAP;
+    }
+
+    if (diagramImg) {
+      // Center the diagram horizontally in the card, below the bullets; clamp
+      // the top edge so a clamped-height diagram can never overlap the text.
+      const dx = cardX + (cardW - diaW) / 2;
+      const dy = Math.min(by + diaGap, cardY + cardH - padY - diaH);
+      r.drawEmbeddedImage(diagramImg, dx, dy, diaW, diaH);
+    }
+
+    // LOCAL-PATCH(upstream-request: U-20261105-002) F1 — draw the in-card
+    // checklist text (visualTitle accent + visualDisplay ink on-card) under
+    // the bullets; top edge clamped so it can never overlap the text above.
+    if (visTxtH > 0) {
+      let vy = Math.min(by + visTxtGap, cardY + cardH - padY - visTxtH);
+      if (visTitleTxt) {
+        r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
+        vy = r.multiCell(bulTxtW - 6, LH_VIS_TITLE, visTitleTxt, contentR.x + shiftX, vy, 'L') + visInnerGap;
+      }
+      if (visBodyTxt) {
+        r.setFont(false, T_VIS_B); r.setColor(onCardText);
+        r.multiCell(bulTxtW - 6, LH_VIS_BODY, visBodyTxt, contentR.x + shiftX, vy, 'L');
+      }
+    }
   }
 
-  // ── In-card right-panel visual (non-overlapping themes) — after the text,
-  // safe because visR sits strictly right of the content column. ──
-  if (hasRight && !visualIsBackground) {
+  if (hasRight) {
     const ip = imgPath(data.visualImage, imgDir ?? '');
     if (ip) {
       const pad = visR!.w * 0.052;
@@ -1252,6 +1914,51 @@ async function renderStandardSlide(ctx: RenderCtx) {
     // renders the number on the right side of the header bar.
     r.setFont(false, T_NUM); r.setColor(C_MUTED);
     r.cell(metaR.w, metaR.h, `${n} / ${total}`, metaR.x, metaR.y, 'R');
+  }
+
+  // Video slide — standing project rule (docs/co-deck.context.md "Video Rules"):
+  // HTML plays the local assets/videos/yt-<id>.mp4 file; the PDF export NEVER
+  // embeds or references a local video file, regardless of whether one exists
+  // on disk. It always draws a play button over the (already full-bleed)
+  // thumbnail background and makes that spot a clickable link to the YouTube
+  // video — PDF viewers can't play embedded web video, so "click the button
+  // to watch on YouTube" is the PDF-appropriate equivalent of the HTML deck's
+  // inline local player, not a lesser fallback. Do not add a local-file code
+  // path here even if `data.videoLocal` or similar becomes available.
+  if (data.videoId) {
+    const diam = Math.min(coords.CW, coords.CH) * 0.22;
+    const cx = coords.CX + coords.CW / 2;
+    const cy = coords.CY + coords.CH / 2;
+    // Title pill — HTML video slides show the title in a dark translucent chip
+    // at the top center of the thumbnail; reproduce that chip (rounded rect,
+    // white text) so the PDF page identifies the video it links to.
+    const pillText = strip(data.title);
+    if (pillText) {
+      r.setFont(false, T_BUL);
+      const pillPadX  = coords.px2mm(16);
+      const pillMaxW  = coords.CW * 0.86;
+      const pillLines = r.wrapText(pillText, pillMaxW - pillPadX * 2);
+      const pillW     = Math.min(pillMaxW,
+        Math.max(...pillLines.map(l => r.stringWidth(l))) + pillPadX * 2);
+      const pillH     = pillLines.length * LH_BULLET + coords.px2mm(10);
+      const pillX     = coords.CX + (coords.CW - pillW) / 2;
+      const pillY     = coords.CY + coords.px2mm(12);
+      r.drawRoundedRect(pillX, pillY, pillW, pillH, coords.px2mm(8),
+        rgb(0, 0, 0), 0.55);
+      r.setFont(false, T_BUL); r.setColor(C_WHITE);
+      let py = pillY + coords.px2mm(5);
+      for (const line of pillLines) {
+        r.cell(pillW, LH_BULLET, line, pillX, py, 'C');
+        py += LH_BULLET;
+      }
+    }
+    r.drawPlayButton(cx, cy, diam);
+    // HTML .video-stage covers the whole slide (inset: 0) — make the ENTIRE
+    // page the clickable link, not just the button pad.
+    r.addLinkAnnotation(
+      doc, coords.CX, coords.CY, coords.CW, coords.CH,
+      `https://www.youtube.com/watch?v=${data.videoId}`
+    );
   }
 }
 
@@ -1338,11 +2045,23 @@ function buildColors(spec: LayoutSpec) {
     C_MUTED  : toRGB(c.text_muted  ?? [156, 163, 175]),
     C_ACCENT : toRGB(c.accent      ?? [217, 119, 6]),
     C_BORDER : toRGB(c.border      ?? [31,  41,  55]),
-    C_BODY   : toRGB(c.body        ?? [203, 213, 225]),
+    // LOCAL-PATCH(upstream-request: U-20261105-002) — C_BODY spec-key fallback:
+    // classic/pdf_color_spec.json names the role `text_body`, not `body`, so
+    // C_BODY never resolved from the spec and stayed light-slate [203,213,225]
+    // (≈1.15:1 on the warm wash) — S1 title subtitle/meta (R1), S59 punchline
+    // sub (F4) and S60 contact lines (R2) at full export. Accept both keys;
+    // all four C_BODY draw sites are light/wash backgrounds (standard-slide
+    // card text uses C_TEXT — no navy-card regression).
+    C_BODY   : toRGB(c.body ?? c.text_body ?? [203, 213, 225]),
     C_VIS_BG : toRGB(c.vis_bg      ?? [20,  28,  42]),
     C_DARK2  : toRGB(c.dark2       ?? [10,  14,  22]),
     C_DARK3  : toRGB(c.dark3       ?? [8,   12,  22]),
     C_META   : toRGB(c.meta        ?? [100, 108, 120]),
+    // Content "card" background behind title/bullets, matching the HTML
+    // deck's .slide-content bubble. pdf_color_spec.json's card_dark already
+    // carries this per-style (white for white-bubble, navy for classic) but
+    // was unused by the PDF renderer until now.
+    C_CARD   : toRGB(c.card_dark   ?? [11,  15,  25]),
   };
 }
 
@@ -1500,11 +2219,6 @@ async function autoCalibrate(workspaceRoot: string, projectArg: string) {
     const profile = parseFrontmatter(readFileSync(profilePath, 'utf-8'));
     theme = profile.theme ?? 'pitch-enhanced';
     style = profile.style ?? 'premium-dark';
-    if (!profile.theme || !profile.style) {
-      console.warn(`[frontmatter] ${profilePath} has no theme/style frontmatter — assuming defaults (pitch-enhanced / premium-dark).`);
-    }
-  } else {
-    console.warn(`[frontmatter] ${profilePath} not found — assuming default theme/style.`);
   }
 
   // CSS files to read (in cascade order: base → theme → style)
@@ -1660,12 +2374,10 @@ async function main() {
 
   const projectArg = get('--project');
   if (!projectArg) {
-    console.error('Usage: bun scripts/co-deck/gen-slides-pdf.ts --project presentations/<project> [--out name.pdf] [--sample 5] [--font-dir presentations/assets/fonts/] [--data path/to/slidedata.json]');
-    console.error('       bun scripts/co-deck/gen-slides-pdf.ts --auto-calibrate --project presentations/<project>');
+    console.error('Usage: bun scripts/gen-slides-pdf.ts --project deliverables/<project> [--out name.pdf] [--sample 5] [--font-dir deliverables/assets/fonts/] [--data path/to/slidedata.json]');
+    console.error('       bun scripts/gen-slides-pdf.ts --auto-calibrate --project deliverables/<project>');
     process.exit(1);
   }
-
-  const workspaceRoot = resolve(dirname(import.meta.path), '../..');
 
   // ── --auto-calibrate mode: estimate layout_overrides from CSS ─────────────
   if (args.includes('--auto-calibrate')) {
@@ -1673,6 +2385,7 @@ async function main() {
     return;
   }
 
+  const workspaceRoot = resolve(dirname(import.meta.path), '../..');
   const projectDir    = resolve(workspaceRoot, projectArg);
   if (!existsSync(projectDir)) {
     console.error(`Project folder not found: ${projectDir}`); process.exit(1);
@@ -1686,11 +2399,6 @@ async function main() {
     const profileContent = readFileSync(lectureProfilePath, 'utf-8');
     lectureProfile = parseFrontmatter(profileContent);
     bgImageConfig = parseBackgroundImage(profileContent);
-    if (!lectureProfile.theme || !lectureProfile.style) {
-      console.warn(`[frontmatter] ${lectureProfilePath} has no theme/style frontmatter — assuming defaults (pitch-enhanced / premium-dark).`);
-    }
-  } else {
-    console.warn(`[frontmatter] ${lectureProfilePath} not found — assuming default theme/style.`);
   }
 
   const theme = lectureProfile.theme ?? 'pitch-enhanced';
@@ -1755,14 +2463,14 @@ async function main() {
     : `${projectDir.split(/[/\\]/).pop()}.pdf`;
 
   const outName  = get('--out') ?? defaultPdfName;
-  const fontDir  = resolve(workspaceRoot, get('--font-dir') ?? 'presentations/assets/fonts');
+  const fontDir  = resolve(workspaceRoot, get('--font-dir') ?? 'deliverables/assets/fonts');
   const dataPath = resolve(get('--data') ?? join(projectDir, 'slidedata.json'));
   const imgDir   = projectDir;  // visualImage paths in slidedata.json are relative to projectDir (imgPath = join(imgDir, src), no prefix strip)
   const outPath  = join(projectDir, outName);
 
   if (!existsSync(dataPath)) {
     console.error(`slidedata.json not found: ${dataPath}`);
-    console.error('   Run bun scripts/co-deck/extract_slidedata.mjs <html> first.');
+    console.error('   Run bun scripts/extract_slidedata.mjs <html> first.');
     process.exit(1);
   }
 
@@ -1848,7 +2556,14 @@ async function main() {
         if (manifest.background_image?.path) {
           globalBgPath = manifest.background_image.path;
         }
-        // Collect individual per-slide background entries
+        // Collect individual per-slide background entries. These are keyed
+        // by slide_index, but image-manifest.json is sourcing/licensing
+        // metadata that isn't regenerated every time the deck is reordered
+        // or edited — its slide_index → path map drifts out of sync with
+        // the current slidedata.json (e.g. a video slide moved from index 39
+        // to 15 left behind a stale index-39 entry that now silently points
+        // another, unrelated slide at that old thumbnail). Use these only as
+        // a fallback for slides slidedata.json itself has no image for.
         for (const entry of (manifest.slides ?? [])) {
           if (entry.image_role === 'background' && entry.slide_index >= 0) {
             slideBgEntries.set(entry.slide_index, entry.path);
@@ -1856,9 +2571,11 @@ async function main() {
         }
       } catch { /* ignore parse errors — background is optional */ }
     }
-    // Fallback: check slideData backgroundImage fields for individual entries
+    // slideData.backgroundImage is the authoritative, always-current source
+    // (rebuilt alongside the deck itself) — let it override any
+    // manifest entry rather than the other way around.
     for (let i = 0; i < slideData.length; i++) {
-      if (slideData[i].backgroundImage && !slideBgEntries.has(i)) {
+      if (slideData[i].backgroundImage) {
         slideBgEntries.set(i, slideData[i].backgroundImage!);
       }
     }
@@ -1870,14 +2587,50 @@ async function main() {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
-  // U-20261105-005 items 1+2: /W + ToUnicode must cover OpenType SHAPED
-  // (calt-alternate) glyphs — Pretendard substitutes ':'/'-' contextual
-  // alternates in running text, and pdf-lib's default glyph cache (unshaped
-  // glyphForCodePoint set) omits them, so viewers fell back to /DW and
-  // over-advanced ':' and '-'. Idempotent prototype patch, must run before
-  // the first embedFont (glyph cache producer captured at construction).
-  patchCustomFontEmbedder();
-
+  // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.1 — pdf-lib's computeWidths()
+  // emitted a wrong /W table for this font (':' '-' etc. rendered with huge gaps,
+  // e.g. "K-  뷰티"). Replace with a dense per-glyph-id table from fontkit.
+  // (subset:true was tried: it drops glyphs — do not use.)
+  (CustomFontEmbedder as any).prototype.computeWidths = function () {
+    const n = this.font.numGlyphs; const w: number[] = [];
+    for (let i = 0; i < n; i++) w.push(this.font.getGlyph(i).advanceWidth * this.scale);
+    return [0, w];
+  };
+  // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.4 — text extraction fix.
+  // Root cause: pdf-lib writes the ToUnicode CMap only for glyphs found via
+  // font.characterSet (cmap table), but font.layout() substitutes contextual
+  // alternates (Pretendard calt: digit-adjacent '-', ':' '+' '→' '–' ...) whose
+  // glyph ids (e.g. 13252) are NOT in that set, so those glyphs got no CMap
+  // entry (viewers then guessed CJK-compat code points like U+3395 / U+33C4).
+  // Fix: record every glyph id laid out by encodeText() with its code points and
+  // write them into the CMap (one preferred code point per glyph; ligatures keep
+  // their full sequence). Rendering and widths are unchanged.
+  const embProto = (CustomFontEmbedder as any).prototype;
+  const origEncodeText = embProto.encodeText;
+  embProto.encodeText = function (text: string) {
+    const seen: Map<number, number[]> = (this.__laidOut ??= new Map());
+    for (const g of this.font.layout(text, this.fontFeatures).glyphs) {
+      if (!seen.has(g.id)) seen.set(g.id, [...g.codePoints]);
+    }
+    return origEncodeText.call(this, text);
+  };
+  embProto.embedUnicodeCmap = function (context: any) {
+    // rank: ASCII < other code points outside the compat ranges < compat; ties -> lowest
+    const rank = (cp: number) => cp < 0x80 ? 0 : ((cp >= 0x3000 && cp <= 0x33ff) || cp >= 0xf900 || cp === 0xad) ? 2 : 1;
+    const pick = (cps: number[]) => [cps.reduce((a: number, c: number) =>
+      (rank(c) < rank(a) || (rank(c) === rank(a) && c < a)) ? c : a)];
+    const map = new Map<number, number[]>();
+    for (const cp of this.font.characterSet as number[]) {
+      const id = this.font.glyphForCodePoint(cp).id;
+      map.set(id, pick([...(map.get(id) ?? []), cp]));
+    }
+    // glyphs actually laid out: their own code points are the true source chars
+    const laid: Map<number, number[]> = this.__laidOut ?? new Map();
+    for (const [id, cps] of laid) if (cps.length) map.set(id, cps);
+    const glyphs = [...map.entries()].sort((a, b) => a[0] - b[0]).map(([id, codePoints]) => ({ id, codePoints }));
+    const stream = context.flateStream(pdfLibCreateCmap(glyphs as any, (g: any) => g.id));
+    return context.register(stream);
+  };
   const regularFont = await pdfDoc.embedFont(readFileSync(fontR));
   const boldFont    = await pdfDoc.embedFont(readFileSync(fontB));
 
@@ -1933,19 +2686,15 @@ async function main() {
     const data = slideData[idx];
     const page = pdfDoc.addPage([mm(PW), mm(PH)]);
     renderer.setPage(page);
-    // Whether a full-bleed background image was painted on THIS slide
-    // (U-20261105-005 item 8: full-bleed surface fills in the slide-type
-    // renderers must then be skipped — they painted over the photo).
-    let bgDrawn = false;
 
     renderer.fillRect(0, 0, PW, PH, C_DARK);
     renderer.fillRect(CX, CY, CW, CH, C_BG);
 
     // ── Background image rendering (full-bleed + overlay) ────────────────
+    let bgDrawn = false;
     if (bgImageConfig) {
-      const bgPath = resolveBgImagePath(data, idx, bgImageConfig, imgDir, globalBgPath, slideBgEntries);
+      const bgPath = resolveBgImagePath(data, idx, bgImageConfig, imgDir, globalBgPath, slideBgEntries, workspaceRoot);
       if (bgPath) {
-        bgDrawn = true;
         try {
           // Draw full-bleed background image (cover-crop to entire page)
           const pageWmm = PW;  // page width in mm (same as PW from coords)
@@ -1956,10 +2705,31 @@ async function main() {
             const [or, og, ob] = bgImageConfig.overlay.color;
             renderer.fillRectOverlay(0, 0, pageWmm, pageHmm, rgb(or / 255, og / 255, ob / 255), bgImageConfig.overlay.opacity);
           }
+          bgDrawn = true;
         } catch (e: any) {
-          renderer.imageFailures++;
           console.warn(`  bg image err (slide ${idx + 1}): ${e.message}`);
         }
+      }
+    }
+
+    // ── Video slide thumbnail (HTML .cdk-video-thumb parity, v1.11.0) ────
+    // data.videoThumbnail is the slide's actual CONTENT layer — the full-bleed
+    // YouTube thumbnail the HTML deck draws as <img class="cdk-video-thumb">
+    // (object-fit: cover, z-index 1). Video slides carry no backgroundImage, so
+    // the bgImageConfig step above never fires for them and the play button
+    // previously sat on a flat C_BG page. Not gated on bgImageConfig: the
+    // thumbnail is slide content, not a deck-wide background preference. No
+    // dark wash — HTML shows the raw thumbnail; the play button and title pill
+    // carry their own contrast (ADR-0002 layering: thumbnail → play → link →
+    // title pill).
+    if (data.videoId && data.videoThumbnail) {
+      const thumbRaw = data.videoThumbnail;
+      const thumbPath = [thumbRaw, resolve(imgDir, thumbRaw), resolve(workspaceRoot, thumbRaw)]
+        .find(p => existsSync(p));
+      if (thumbPath) {
+        await renderer.placeImageCover(pdfDoc, thumbPath, 0, 0, PW, PH);
+      } else {
+        console.warn(`  video thumbnail not found (slide ${idx + 1}): ${thumbRaw}`);
       }
     }
 
@@ -1974,11 +2744,10 @@ async function main() {
     const has        = (t: string) => !!(slideTypes[t] && slideTypes[t].regions);
 
     let type: 'title' | 'divider' | 'punchline' | 'profile' | 'contact' | 'standard';
+    // LOCAL-PATCH(upstream-request: U-20261105-002) F4 — accept both isPunchline
+    // and isPunchlineSlide spellings (the slidedata producer emits the latter).
     if (data.isTitleSlide && has('title'))           type = 'title';
     else if (data.isDividerSlide && has('divider'))  type = 'divider';
-    // isPunchlineSlide = html-build contract key; isPunchline = legacy
-    // renderer key (U-20261105-002c — decks emit the former, the renderer
-    // only checked the latter, so punchline slides rendered as standard).
     else if ((data.isPunchline || data.isPunchlineSlide) && has('punchline')) type = 'punchline';
     else if (data.isProfileSlide && has('profile'))  type = 'profile';
     else if (data.isContactSlide && has('contact'))  type = 'contact';
@@ -1990,7 +2759,7 @@ async function main() {
 
     const ctx: RenderCtx = {
       r: renderer, doc: pdfDoc, data, n, total: TOTAL, imgDir,
-      spec: layoutSpec, coords, colors, sizes, declared, region,
+      fontDir, spec: layoutSpec, coords, colors, sizes, declared, region,
       bgDrawn,
     };
 
@@ -2001,21 +2770,18 @@ async function main() {
     else if (type === 'contact')   renderContactSlide(ctx);
     else                           await renderStandardSlide(ctx);
 
-    // Per-slide footnotes (U-20261105-002b): abbreviation citation lines that
-    // the HTML deck renders via the shared FootnoteBuilder (ppt-engine.js)
-    // as a small wrap-enabled bottom-left line. PDF parity: same join, same
-    // placement (left/right 1.1rem, bottom 3.5rem), muted color.
-    if (data.footnotes && data.footnotes.length > 0) {
-      const footTxt = data.footnotes.map(f => strip(f)).filter(Boolean).join('  ·  ');
-      if (footTxt) {
-        const footPx = 10.88;               // CSS 0.68rem
-        const footPt = footPx * (layoutSpec.calibration?.font_px_to_pt ?? 0.85);
-        const sidePad  = coords.px2mm(17.6); // 1.1rem
-        const footYTop = coords.PH - coords.px2mm(56) - coords.px2mm(18); // bottom 3.5rem band
-        renderer.setFont(false, footPt);
-        renderer.setColor(colors.C_MUTED);
-        renderer.multiCell(coords.CW - sidePad * 2, coords.px2mm(18), footTxt, sidePad, footYTop, 'L');
-      }
+    // LOCAL-PATCH(upstream-request: U-20261105-002) F3 — footnote source citations
+    // (design_spec §3: source line 12px ≈ 9pt, dim/muted) — previously never rendered.
+    // Generic loop placement (not renderStandardSlide) so every slide type can
+    // carry citations; draw-last guarantees the line sits on top of the
+    // background/card layers already painted.
+    const fns = (data.footnotes ?? []).map(s => strip(s)).filter(Boolean);
+    if (fns.length > 0) {
+      const footR = region('content');
+      renderer.setFont(false, 9);              // 12px × 0.75 = 9pt
+      renderer.setColor(colors.C_MUTED);       // dim ink (#4A4A6A text_muted)
+      renderer.multiCell(footR.w, 4.2, fns.join('  ·  '), footR.x,
+        coords.CY + coords.CH - coords.px2mm(18), 'L');
     }
 
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {
@@ -2025,19 +2791,11 @@ async function main() {
 
   const pdfBytes = await pdfDoc.save();
   writeFileSync(outPath, pdfBytes);
+  if (process.env.CARD_RECTS_OUT) writeFileSync(process.env.CARD_RECTS_OUT, JSON.stringify(CARD_LOG));
 
   const sizeKb = Math.round(statSync(outPath).size / 1024);
   console.log(`\nSaved -> ${outPath}`);
   console.log(`   Size: ${sizeKb}KB`);
-
-  // Loud summary + non-zero exit when any slide lost its visual: the PDF is
-  // still written (useful for inspection), but callers must not treat a deck
-  // with missing images as a successful render.
-  if (renderer.imageFailures > 0) {
-    console.error(`\n❌ ${renderer.imageFailures} image embed failure(s) — affected slides render WITHOUT their visual.`);
-    console.error('   Check the image paths in slidedata.json / image-manifest.json (SVG visuals need a PNG sibling).');
-    process.exitCode = 1;
-  }
 }
 
 main().catch(err => { console.error('Error:', err); process.exit(1); });
