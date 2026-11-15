@@ -1,7 +1,7 @@
 ---
 name: storyline
 scope: co-deck
-version: 1.3.1
+version: 1.3.2
 lang: ko
 lang_reason: proper-noun (Step 3.5 quotes verbatim Korean defect strings and replacement wording from the affected deck)
 description: >
@@ -43,6 +43,39 @@ Designs the lecture narrative flow (`storyline.md`) and per-slide content (`slid
   - Total slide count (e.g., 40, 60)
   - Chapter (part) count and rough proportions
   - Whether to include cover / speaker intro / contact slides (default: include all)
+
+---
+
+
+### Step 1.6: Optional Pre-Build Lint (Humanize, U-20261114-009 item 3)
+
+When a Humanize rule-engine server is reachable (the offline Korean AI-tic rule
+engine; default `http://localhost:8765`), run a deck-wide lint of the authored
+narration and bullets through `POST /api/analyze` before the build:
+
+```bash
+curl -s -X POST http://localhost:8765/api/analyze \
+  -H "Content-Type: application/json" -d "$(bun -e 'const t = await Bun.file(process.argv[1]).text(); console.log(JSON.stringify({ text: t }))' slide_deck.md)"
+```
+
+Report the finding count and the top patterns; severe findings are rewritten at
+authoring time (numbers and density preserved — the lint flags AI-tic phrasing,
+not content). The step is OPTIONAL and skips silently when the server is
+unreachable (connection refused = lint unavailable, never a build blocker).
+
+### Step 1.7: Slidedata Generator Hygiene (U-20261114-009 item 4)
+
+Projects that generate `slidedata.json` from a script (gen-slidedata-*.py and
+friends) follow two rules:
+
+- **Single source**: presentation constants (cover metadata, speaker bio,
+  chapter titles) derive from `lecture-profile.md` at generation time — a
+  hardcoded constant that drifted from lecture-profile.md silently reintroduces
+  stale text on every rebuild (observed: credential re-entry risk).
+- **Round-trip parity gate**: a rebuild regenerating an unchanged
+  lecture-profile.md must produce a byte-identical slidedata.json (modulo
+  timestamps); regenerate-then-diff gates the rebuild, so generator-vs-slidedata
+  drift is caught before the build consumes it.
 
 ---
 

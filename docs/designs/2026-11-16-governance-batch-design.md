@@ -91,3 +91,23 @@ cleanup rides the T-20261112-008 wave (the ticket's own recommendation).
 - The seeded-drift acceptance for the settings validator demonstrated live.
 - snapshot.ts smoke: full-failure rollback + repo-relative resolution + desc
   truncation warning verified live.
+
+## R6 — Addendum (U-20261114-009 / -012 completion, same day)
+
+- U-20261114-012 → done: the promotion path is now concrete — the parameterized
+  patch layer `scripts/co-deck/patch-zen-white-bubble.ts` (project v1.1.0,
+  carries NO oscillating fit-pin logic — the oscillation was deck-specific
+  rev5) is promoted into the template with a SCRIPTS.md row, and the html-build
+  SKILL (v1.7.3) Patch-Layer Convergence Doctrine gains the three-step
+  promotion path: deck-local fix → parameterize into the shared patcher with a
+  version bump → backport-gate promotion. Deck-local copies that cannot be
+  parameterized stay deck-local and are re-assessed at rebuild. The idempotency
+  pin (injector byte-identical re-run) and the SKILL doctrine landed earlier in
+  the batch.
+- U-20261114-009 → done: items (3) and (4) land as storyline SKILL v1.3.2
+  steps — Step 1.6 Optional Pre-Build Lint (Humanize POST /api/analyze on
+  localhost:8765, deterministic rules engine, graceful skip when the server is
+  unreachable — never a build blocker) and Step 1.7 Slidedata Generator Hygiene
+  (constants derive from lecture-profile.md at generation time; regenerate-then-
+  diff round-trip parity gates the rebuild). The project-side generators adopt
+  the rules at the project's next session; the template ships the doctrine.

@@ -365,6 +365,10 @@
       {
         "name": "download-videos",
         "path": "scripts/co-deck/download-videos.ts"
+      },
+      {
+        "path": "scripts/co-deck/patch-zen-white-bubble.ts",
+        "reason": "U-20261114-012 promotion path — the parameterized zen x white-bubble patch layer ships in the template (2026-11-16)"
       }
     ],
     "external": []

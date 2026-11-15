@@ -6354,8 +6354,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "e9fbd5dafb17e65e",
-      "version": "1.7.2",
+      "content_hash": "915114c6a999bffe",
+      "version": "1.7.3",
       "mirrors": [
         "templates/co-deck/skills/html-build/SKILL.md"
       ],
@@ -6454,8 +6454,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "0633ecf6affe0518",
-      "version": "1.3.1",
+      "content_hash": "83eee6c06aaff725",
+      "version": "1.3.2",
       "mirrors": [
         "templates/co-deck/skills/storyline/SKILL.md"
       ],
