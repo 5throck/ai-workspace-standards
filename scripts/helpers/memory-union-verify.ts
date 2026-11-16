@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-17, U-20261116-012 PR-2 compat — design
+//          docs/designs/2026-11-17-root-machinery-batch-design.md §2.2 item 4): the
+//          block-start well-formedness rule accepts a leading single-line HTML comment
+//          before the first '## ' heading. dev-sync 1.50.0 prefixes its session blocks
+//          with a `<!-- dev-sync:session branch=<branch> -->` identity marker (one block
+//          per branch per day), and this gate's Arm B runs FATAL on every flat memory
+//          log — without the relaxation every post-1.50.0 memory log would fail
+//          "block does not begin with a '## ' heading". Scope is deliberately narrow:
+//          only whole single-line `<!-- ... -->` lines at the top of a block are skipped;
+//          prose, unterminated comments, and multi-line comments still fail the rule,
+//          and the block/separator count invariant plus the fused-heading check are
+//          untouched.
 // v1.2.0 (2026-11-06, T-20261106-007 — the gate-deadlock closure): the
 //          archive↔union-verify fight. Merge e73b51057 deleted
 //          memory/2026-10-29.md (archive-memory 7-day retention, post-
@@ -187,7 +199,14 @@ export function verifyWellFormed(opts: { file: string; content: string }): Union
     });
   }
   for (const block of blocks) {
-    if (!block.text.startsWith("## ")) {
+    // v1.3.0: leading single-line HTML-comment lines (the dev-sync session marker) do
+    // not disqualify a block — evaluate the rule on the text after them.
+    const blockLines = block.text.split("\n");
+    let headingStart = 0;
+    while (headingStart < blockLines.length && /^<!--.*-->$/.test(blockLines[headingStart].trim())) {
+      headingStart++;
+    }
+    if (!blockLines.slice(headingStart).join("\n").startsWith("## ")) {
       findings.push({
         kind: "malformed-result",
         file,

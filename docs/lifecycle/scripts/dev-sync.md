@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.49.0
+- **Version**: 1.50.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-16
+- **Last Updated**: 2026-11-17
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-17 | production | production | v1.50.0 (U-20261116-012, spec docs/designs/2026-11-17-root-machinery-batch-design.md §2, DEC-20261117-03): (1) ignore-aware promotion staging — the step-6.5 sweep classifies with `git ls-files -z` + `git check-ignore --no-index` (default check-ignore silently excludes TRACKED paths — the exact class to find — and `-z` is argv-invalid without --stdin; both verified on git 2.56.1) and partitions: tracked∩ignored → `git add -f` with a DIM line per path, untracked∩ignored → WARN + skip, everything else → the plain batch add; the absent loop skips -f-batched paths (a staged deletion removes the index entry, so a re-attempt fatals 128). (2) branch-keyed session-block replace — step 2's block gains a `<!-- dev-sync:session branch=<branch> -->` marker; same-branch same-day re-runs replace the marker-plus-block segment (stray duplicates collapse; the replaced block's `## Skills Used` section carries forward verbatim); legacy markerless blocks keep the exact-subject skip + append. Block-start well-formedness accepts the leading comment (memory-union-verify v1.3.0). Pinned by tests/unit/dev-sync-rerun-hygiene.test.ts. | automation-engineer |
 | 2026-11-16 | production | production | v1.49.0: empty-index guard at S0 with --stage/--allow-generated-only (T-20261114-007) and multi-line commit body preservation (T-20261114-006); spec docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md, DEC-20261116-01 | automation-engineer |
 | 2026-11-12 | production | production | v1.47.0 (U-20261112-005 PR-3): step 4.505 runs generate-skill-lifecycle-records.ts --write after the 4.5 publish (L0 only, fatal on failure) so a template skill change never lands without its generated record. | automation-engineer |
 | 2026-11-12 | production | production | v1.46.2 (U-20261112-007): missing-spec hint cites docs/governance/agents/execution-plan-templates.md §5.1.1 instead of the stale AGENTS.md §5.1.1; message string only. | automation-engineer |

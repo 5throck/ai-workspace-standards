@@ -3,16 +3,17 @@
 ## Metadata
 - **Skill**: sync
 - **Status**: active
-- **Version**: 1.9.1
+- **Version**: 1.9.2
 - **Owner**: automation-engineer
 - **Created**: 2026-07-08
-- **Last Updated**: 2026-11-12
+- **Last Updated**: 2026-11-17
 
 ## Description
 Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
 
 ## Changelog
 
+- 2026-11-17: v1.9.2 — step 0 documents the dev-sync 1.50.0 ignore-aware sweep classification (tracked-but-ignored force-staged with `git add -f`, untracked-but-ignored WARN-listed and skipped) and the Session Evidence Duty documents the dev-sync 1.50.0 branch-keyed session-block marker/replace (`<!-- dev-sync:session branch=<branch> -->`, one block per branch per day, `## Skills Used` carried forward verbatim; legacy markerless blocks keep the plain append). Design docs/designs/2026-11-17-root-machinery-batch-design.md §2 (U-20261116-012). Docs-only body change.
 - 2026-11-12: v1.9.1 — owner retargeted pm -> automation-engineer (common agent; D9 of design 2026-11-12-sync-ownership-and-common-automation-engineer, CA-3+AE-3). Metadata-only.
 - 2026-11-07: v1.9.0 — new "Worktree Landing Variant" section: 9-step isolated-worktree landing procedure under concurrency evidence (T-20261106-010; spec `2026-11-07-session-worktree-convention-design`), including the two live-validated mechanics (CWD guard anchors to `import.meta.dir` so in-worktree dev-sync passes by construction; per-worktree private git dir for the PR body file). Docs-only body change.
 - 2026-10-08: v1.8.0 — pipeline table gains step 4.85 Version-Bump Test Gate (dev-sync v1.24.0): a staged `SKILL.md` frontmatter `version:` or script `@version` header change forces `bun run test:unit` before the audit gate, FATAL on failure; skipped when `package.json` has no `test:unit` script (user directive 2026-10-08).

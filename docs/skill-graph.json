@@ -8083,7 +8083,11 @@
       "version": "1.2.0",
       "mirrors": [
         "templates/co-safety/skills/script-lifecycle-manager/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-11-17"
+      }
     },
     {
       "id": "skill:co-safety/signal-detector",
@@ -8564,8 +8568,8 @@
       "name": "sync",
       "scope": "common",
       "capability": "sync",
-      "content_hash": "e2acf3d04016e92d",
-      "version": "1.9.1",
+      "content_hash": "2143809a7b0a3935",
+      "version": "1.9.2",
       "mirrors": [
         "templates/common/skills/sync/SKILL.md"
       ],
@@ -9105,7 +9109,11 @@
         ".agents/skills/script-lifecycle-manager/SKILL.md",
         ".codex/skills/script-lifecycle-manager/SKILL.md",
         ".hermes/skills/script-lifecycle-manager/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-11-17"
+      }
     },
     {
       "id": "skill:root/security-scan",
@@ -9246,8 +9254,8 @@
       "name": "sync",
       "scope": "root",
       "capability": "sync",
-      "content_hash": "006873a2e0886f71",
-      "version": "1.9.1",
+      "content_hash": "c99a2b25471feb1b",
+      "version": "1.9.2",
       "mirrors": [
         "skills/sync/SKILL.md",
         ".claude/skills/sync/SKILL.md",

@@ -1,4 +1,33 @@
-// @version 1.49.0
+// @version 1.50.0
+// v1.50.0 (2026-11-17, U-20261116-012, spec
+//          docs/designs/2026-11-17-root-machinery-batch-design.md §2, DEC-20261117-03):
+//          two re-run-hygiene defects. (1) IGNORE-AWARE PROMOTION STAGING — a plain `git
+//          add` refuses an explicitly named ignored path even when tracked (verified on
+//          git 2.56.1, the .zcode/config.json class; .gitignore negations cannot fix it —
+//          a negation cannot re-include a file under an excluded parent), so the step-6.5
+//          promotion sweep's batched add exited 1 and the catch killed the whole sync.
+//          The sweep now classifies with two batched queries (git ls-files -z, git
+//          check-ignore --no-index in line mode: default check-ignore silently
+//          excludes TRACKED paths from its report — exactly the class to find —
+//          and -z is only meaningful with --stdin; exits 0/1/128 all handled)
+//          and partitions: tracked∩ignored →
+//          `git add -f`, one DIM line per path (tracked-status intent wins); untracked∩
+//          ignored → WARN + skip (never force-add scratch); everything else → the plain
+//          batch add, unchanged. The absent-path branch applies the same rule (tracked∩
+//          ignored worktree deletion staged with -f; an absent ignored-untracked path
+//          keeps the ghost-path failure). (2) BRANCH-KEYED SESSION-BLOCK REPLACE — step
+//          2's memory session block gains a leading `<!-- dev-sync:session branch=
+//          <branch> -->` marker and a same-branch same-day re-run REPLACES the
+//          marker-plus-block segment (through the next `\n---\n` boundary or EOF; stray
+//          duplicates of the same-branch marker collapse) instead of appending a
+//          near-duplicate: the v1.32.0 idempotency check keyed on the exact commit
+//          subject, which misses whenever the derived subject differs between attempts
+//          (the normal case — step 6.9 re-derives from the final staged set). Different
+//          branch → separate block, untouched; no marker (legacy blocks, other tools) →
+//          the exact-subject skip + plain append, unchanged. A replaced block carries its
+//          old `## Skills Used` section forward verbatim so session evidence filled
+//          between runs survives. Block-start well-formedness accepts the leading marker
+//          comment (memory-union-verify v1.3.0, design §2.2 item 4).
 // v1.49.0 (2026-11-16, T-20261114-007 + T-20261114-006, spec
 //          docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §1-§2, DEC-20261116-01):
 //          (1) empty-index guard at S0 — scoped staging with NOTHING staged at start but tracked
@@ -879,29 +908,9 @@ if (fs.existsSync(memoryFile)) {
   separator = "\n---\n\n";
 }
 
-// Idempotency check: skip append if a Session Summary with the same
-// commit message already exists for today (prevents duplicates when
-// /sync is re-run on the same day).
-let alreadyLogged = false;
-if (fs.existsSync(memoryFile)) {
-  const existing = fs.readFileSync(memoryFile, "utf-8");
-  // Match a Session Summary header followed by the same message
-  const duplicatePattern = new RegExp(`^## Session Summary\\s*\\n${msg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "m");
-  alreadyLogged = duplicatePattern.test(existing);
-}
-
-if (alreadyLogged) {
-  console.log(`${YELLOW}⚙ Session summary already logged for today — skipping append (idempotent).${RESET}`);
-} else {
-  // Session-evidence section (skill review loop): only append the skeleton
-  // when the log doesn't already carry a `## Skills Used` section — the
-  // agent is expected to fill it while the session is still open, BEFORE
-  // /sync runs (skills/sync/SKILL.md).
-  const skillsUsedSection = /^## Skills Used\s*$/m.test(
-    fs.existsSync(memoryFile) ? fs.readFileSync(memoryFile, "utf-8") : "",
-  )
-    ? ""
-    : `
+// Session-evidence skeleton (skill review loop) — shared by the append and the B2
+// replace paths (docs/designs/2026-09-06-skill-session-review-design.md).
+const SKILLS_USED_SKELETON = `
 ## Skills Used
 <!-- Optional session evidence for the skill review loop
      (docs/designs/2026-09-06-skill-session-review-design.md). Edit this entry
@@ -916,7 +925,108 @@ Remove this comment when filled. Unfilled sections are skipped by
 skill-session-review.ts (WARN only on malformed entries).
 -->
 `;
-  const template = `${separator}## Session Summary
+
+// B2 (dev-sync 1.50.0, design docs/designs/2026-11-17-root-machinery-batch-design.md §2.2,
+// owner default O-4): session-block identity = ONE block per branch per day, carried by an
+// explicit marker comment. The branch is resolved here (same symbolic-ref → rev-parse
+// fallback as step 5) because the marker keys the replace-vs-append decision at step 2,
+// before step 5 resolves its own copy. An empty branch (git failure / unborn HEAD edge)
+// falls back to the legacy append path (no marker).
+let sessionBranch = "";
+try {
+  const symbolicRes = await $`git symbolic-ref --short -q HEAD`.quiet().nothrow();
+  if (symbolicRes.exitCode === 0) {
+    sessionBranch = symbolicRes.stdout.toString().trim();
+  } else {
+    const { stdout } = await $`git rev-parse --abbrev-ref HEAD`.quiet().nothrow();
+    sessionBranch = stdout.toString().trim();
+  }
+} catch (err) {
+  console.error(`[dev-sync] Error: ${err}`);
+}
+const sessionMarkerLine = sessionBranch ? `<!-- dev-sync:session branch=${sessionBranch} -->` : "";
+
+// Idempotency / replace decision (B2): a marker for THIS branch makes the block
+// replaceable per branch per day — a same-branch re-run REPLACES the marker-plus-block
+// segment instead of appending a near-duplicate (the v1.32.0 check keyed on the exact
+// commit subject, which misses whenever the derived subject differs between attempts —
+// the normal case, since step 6.9 re-derives from the final staged set). A different
+// branch's block is untouched. No marker (legacy blocks, other tools) → the legacy
+// exact-subject skip + plain append, unchanged.
+let alreadyLogged = false;
+let existingMemory = "";
+let hasMarkerForBranch = false;
+if (fs.existsSync(memoryFile)) {
+  existingMemory = fs.readFileSync(memoryFile, "utf-8");
+  if (sessionMarkerLine && existingMemory.includes(sessionMarkerLine)) {
+    hasMarkerForBranch = true;
+  } else {
+    // Legacy exact-subject skip (prevents duplicates when /sync is re-run on the
+    // same day with an identical derived subject).
+    const duplicatePattern = new RegExp(`^## Session Summary\\s*\\n${msg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "m");
+    alreadyLogged = duplicatePattern.test(existingMemory);
+  }
+}
+
+if (hasMarkerForBranch) {
+  // Session-evidence section (`## Skills Used`, skill review loop): the section
+  // belongs to the branch/day session, not to a single run — when replacing this
+  // branch's block, carry the old block's section forward VERBATIM (filled or
+  // skeleton) so session evidence filled between runs survives the replace. Only
+  // when the replaced block has none does the skeleton gate below decide (other
+  // tools' sections elsewhere in the file are left alone).
+  const oldSegment = existingMemory.match(
+    new RegExp(
+      `<!-- dev-sync:session branch=${sessionBranch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} -->[\\s\\S]*?(?=\\n---\\n|$)`,
+    ),
+  )!;
+  const oldSkillsMatch = oldSegment[0].match(/\n## Skills Used[\s\S]*$/);
+  const skillsUsedSection = oldSkillsMatch
+    ? oldSkillsMatch[0]
+    : /^## Skills Used\s*$/m.test(existingMemory)
+      ? ""
+      : SKILLS_USED_SKELETON;
+  const blockTemplate = `${sessionMarkerLine}
+## Session Summary
+${msg}
+
+## Changes
+${fileLines}
+
+## Decisions
+- None
+
+## Open Issues
+- None
+${skillsUsedSection}`;
+  // Replace every marker-plus-block segment for this branch (first occurrence gets
+  // the fresh block, any stray duplicates collapse — one block per branch per day).
+  // The segment runs from the marker through the next `\n---\n` separator boundary
+  // or EOF; the separator itself stays in the file, so the replacement carries no
+  // leading separator.
+  const markerBlockRe = new RegExp(
+    `<!-- dev-sync:session branch=${sessionBranch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} -->[\\s\\S]*?(?=\\n---\\n|$)`,
+    "g",
+  );
+  let replaced = 0;
+  const rewritten = existingMemory.replace(markerBlockRe, () => (replaced++ === 0 ? blockTemplate : ""));
+  fs.writeFileSync(memoryFile, rewritten, "utf8");
+  console.log(
+    `${DIM}   session summary: replaced the dev-sync block for branch '${sessionBranch}' (${replaced} prior block(s))${RESET}`,
+  );
+} else if (alreadyLogged) {
+  console.log(`${YELLOW}⚙ Session summary already logged for today — skipping append (idempotent).${RESET}`);
+} else {
+  // Session-evidence section (skill review loop): only append the skeleton
+  // when the log doesn't already carry a `## Skills Used` section — the
+  // agent is expected to fill it while the session is still open, BEFORE
+  // /sync runs (skills/sync/SKILL.md).
+  const skillsUsedSection = /^## Skills Used\s*$/m.test(
+    fs.existsSync(memoryFile) ? fs.readFileSync(memoryFile, "utf-8") : "",
+  )
+    ? ""
+    : SKILLS_USED_SKELETON;
+  const template = `${separator}${sessionMarkerLine ? `${sessionMarkerLine}\n` : ""}## Session Summary
 ${msg}
 
 ## Changes
@@ -2442,11 +2552,74 @@ if (scopedStaging) {
       const toStage = [...committable].filter((p) => !indexRemoved.has(p)).sort();
       const present = toStage.filter((p) => fs.existsSync(p));
       const absent = toStage.filter((p) => !fs.existsSync(p));
-      if (present.length > 0) {
-        const addRes = await $`git add -- ${present}`.nothrow();
+      // B1 (dev-sync 1.50.0, design docs/designs/2026-11-17-root-machinery-batch-design.md
+      // §2.2, U-20261116-012 defect 1): a plain `git add` REFUSES an explicitly named
+      // ignored path even when the path is tracked (verified on git 2.56.1 — the
+      // .zcode/config.json class; `git add -u` stages tracked-but-ignored edits, and the
+      // S0∩S1 content-overlap classifier can route one into pipelineOutputs, so such
+      // paths DO reach this sweep) — the batch add exited 1 and the catch below killed
+      // the whole sync. `.gitignore` negations cannot fix it: a negation cannot
+      // re-include a file whose parent directory is excluded (documented gitignore rule,
+      // probed). Classify once with two batched queries, then partition:
+      //   tracked ∩ ignored → `git add -f`, one DIM log line per path (tracked-status
+      //     intent wins; -f is the only accepted pathspec form; every such path is in
+      //     the index, so even the absent ones are index-resolvable);
+      //   untracked ∩ ignored → WARN + skip, never force-added (scratch stays out; the
+      //     WARN makes an unexpected pipeline output in an ignored dir observable);
+      //   everything else → the plain batch add, unchanged.
+      const trackedSet = new Set<string>();
+      const ignoredSet = new Set<string>();
+      if (toStage.length > 0) {
+        const lsRes = await $`git ls-files -z -- ${toStage}`.quiet().nothrow();
+        if (lsRes.exitCode === 0) {
+          for (const p of lsRes.stdout.toString().split("\0").filter(Boolean)) trackedSet.add(p);
+        }
+        // check-ignore exits 0 when at least one path is ignored (stdout names them),
+        // 1 when none is, 128 on error — treat non-zero as "no classification" and
+        // keep the legacy plain add (fail-closed: an actually-ignored path then hits
+        // the add refusal below instead of being silently skipped). Two flags the
+        // design's sketch missed (both verified on git 2.56.1): `--no-index` is
+        // REQUIRED because default check-ignore silently excludes TRACKED paths
+        // from its report — precisely the tracked∩ignored class this partition
+        // must find — and `-z` cannot be used in the argv form at all (`-z` is
+        // only meaningful with `--stdin`, exit 128 otherwise), so the output is
+        // parsed line-wise.
+        const ciRes = await $`git check-ignore --no-index -- ${toStage}`.nothrow();
+        if (ciRes.exitCode === 0) {
+          for (const p of ciRes.stdout.toString().split("\n").filter(Boolean)) ignoredSet.add(p);
+        } else if (ciRes.exitCode === 128) {
+          console.log(`${YELLOW}   scoped staging: git check-ignore failed — falling back to the plain add${RESET}`);
+        }
+      }
+      const forceStage = toStage.filter((p) => trackedSet.has(p) && ignoredSet.has(p));
+      const neverForce = toStage.filter((p) => !trackedSet.has(p) && ignoredSet.has(p));
+      if (forceStage.length > 0) {
+        for (const p of forceStage) {
+          console.log(`${DIM}   scoped staging: tracked-but-ignored: staged with -f (${p})${RESET}`);
+        }
+        const forceAddRes = await $`git add -f -- ${forceStage}`.nothrow();
+        if (forceAddRes.exitCode !== 0) throw new Error(forceAddRes.stderr.toString());
+      }
+      for (const p of neverForce) {
+        // Only PRESENT untracked-ignored paths are skipped here; an ABSENT one has no
+        // worktree file to protect — the ghost-path loop below fails closed on it.
+        if (fs.existsSync(p)) {
+          console.log(
+            `${YELLOW}⚠️  ignored path not staged: ${p} — gitignored and untracked; never force-added${RESET}`,
+          );
+        }
+      }
+      const normalPresent = present.filter((p) => !forceStage.includes(p) && !neverForce.includes(p));
+      if (normalPresent.length > 0) {
+        const addRes = await $`git add -- ${normalPresent}`.nothrow();
         if (addRes.exitCode !== 0) throw new Error(addRes.stderr.toString());
       }
       for (const p of absent) {
+        // Absent tracked∩ignored paths were already handled by the -f batch above
+        // (the worktree deletion is staged; re-attempting the pathspec fatals 128
+        // because the staged deletion removed the index entry — verified on git
+        // 2.56.1).
+        if (forceStage.includes(p)) continue;
         const addRes = await $`git add -- ${p}`.nothrow();
         if (addRes.exitCode !== 0) {
           console.log(
