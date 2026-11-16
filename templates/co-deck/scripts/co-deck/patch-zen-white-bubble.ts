@@ -1,3 +1,12 @@
+// @version 1.2.0 — punchline 2-sentence layout section (design
+//   2026-11-16-co-deck-pdf-html-backport §4.2 item 3, U-20261116-009 item 3):
+//   the deck-proven punchline CSS patch (white bubble widened to
+//   min(1120px, 90%) + title clamped to clamp(2rem, 3.6vw, 3.1rem) so each
+//   \n-separated sentence stays on one line) promotes into the P2 override
+//   block as this layer's punchline section. This is the template's
+//   designated promotion path for the deck patch family (variant.json
+//   script_manifest, U-20261114-012); decks built without the patch keep the
+//   legacy zen 64px title (the patch layer stays opt-in per deck).
 // @version 1.1.0 — template promotion (U-20261114-012, 2026-11-16): the parameterized
 // zen x white-bubble patch layer ships in the template so per-deck copies stop
 // diverging; deck-local fixes flow back via version bumps at the backport gate.
@@ -137,6 +146,19 @@ ${accentBlock}    /* design_spec §4 — project-fixed variables (diagram/chart 
     [data-theme="zen"] .slide:not([data-bg]) .slide-footnote {
       color: rgba(31, 42, 68, 0.55);
       text-shadow: none;
+    }
+
+    /* punchline 2-sentence layout (v1.2.0, U-20261116-009 item 3 promotion,
+       design §4.2 item 3 — deck-patch parity): widen the white bubble card
+       and clamp the punchline title so each \n-separated sentence stays on
+       one line. Decks built WITHOUT this patch keep the legacy zen
+       calc(--font-size-title * 2) = 64px title (the patch layer is opt-in
+       per deck, unchanged contract). */
+    [data-theme="zen"] .slide[data-type="punchline"] .slide-content {
+      width: min(1120px, 90%);
+    }
+    [data-theme="zen"] .slide[data-type="punchline"] .slide-title {
+      font-size: clamp(2rem, 3.6vw, 3.1rem);
     }
   </style>
 `;
