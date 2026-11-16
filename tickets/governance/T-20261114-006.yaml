@@ -37,7 +37,7 @@ title: >-
   across the 2026-11 fleet upgrade session (root PRs #2012-#2031, co-security
   #112).
 priority: low
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-14T18:12:28.993+09:00'
 history:
@@ -47,5 +47,15 @@ history:
   - at: '2026-11-16T07:45:42.669+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-16T19:35:49.556+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T19:35:49.631+09:00'
+    from: review
+    to: done
+result: >-
+  PR #2045 (merge 59acb21b2). Commit body preservation only; a Co-Authored-By in
+  the subject now exits 1 (O-1). A repo-wide trailer convention was NOT adopted
+  (owner decision: no). The .githooks/commit-msg first-paragraph drop is split
+  into a follow-up ticket.
 error: null

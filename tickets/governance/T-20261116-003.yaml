@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261116-003
+kind: manual
+title: >-
+  Templates-side PRs to heal variant shadows reported by variant-common-shadow
+  (249 undeclared copies, 133 paths, 12 variants; 95 frontmatter-only).
+  templates/ change: isolate from root per CLAUDE.md section 9. Design:
+  docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section
+  8 (follow-ups). Evidence: PR #2047 (merge 56e2ae1c5) live result 12 WARN
+  lines; source T-20261114-012.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-16T19:35:50.110+09:00'
+history:
+  - at: '2026-11-16T19:35:50.110+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
