@@ -2885,6 +2885,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261116-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -12347,6 +12352,18 @@
       "type": "cites_skill",
       "from": "dec:DEC-20261111-01",
       "to": "skill:root/upgrade-project",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261116-01",
+      "to": "skill:common/decision-record",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261116-01",
+      "to": "skill:root/sync",
       "source": "skills_used"
     },
     {

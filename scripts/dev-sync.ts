@@ -1,4 +1,16 @@
-// @version 1.48.0
+// @version 1.49.0
+// v1.49.0 (2026-11-16, T-20261114-007 + T-20261114-006, spec
+//          docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §1-§2, DEC-20261116-01):
+//          (1) empty-index guard at S0 — scoped staging with NOTHING staged at start but tracked
+//          working-tree edits exits 1 BEFORE any pipeline write (a PR can no longer ship without the
+//          intended edits); new `--stage <path|glob>` (repeatable, `git add` before step 1) and
+//          `--allow-generated-only` override; the guard reads the start-of-run index, not the step-6.5
+//          taskStaged (pipeline steps `git add` on their own). Tracked residual is reported under its
+//          own header at step 6.5 and repeated after the PR URL. (2) multi-line commit body preserved:
+//          the message is split into subject + body (helpers/commit-message.ts splitCommitMessage);
+//          the subject feeds memory/slug/PR title as before, the body is committed via a second `-m`
+//          and language-gated. A trailer token joined onto the subject (O-1) exits 1 with a copy-safe
+//          hint. No repo-wide trailer convention is introduced.
 // v1.47.0 (2026-11-12, U-20261112-005 PR-3, design docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md
 //          section 9 T4): new step 4.505 runs `generate-skill-lifecycle-records.ts --write` right after the 4.5 publish
 //          (L0 only), so a skill added or changed under templates/ gets its generated lifecycle record in the same
@@ -454,14 +466,20 @@ import * as path from "node:path";
 import * as crypto from "node:crypto";
 import { withRetry, DEFAULT_CONFIG } from "./retry-handler.ts";
 import { hasNonEnglish } from "./lib/language-guard.ts";
-import { parseCachedNameStatus, parseStatusPorcelain } from "./lib/git-status.ts";
+import { parseCachedNameStatus, parseStatusPorcelain, parseTrackedWorktreeChanges } from "./lib/git-status.ts";
 import { gitCleanEnvForShell } from "./lib/git-env.ts";
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from "./helpers/merge-state.ts";
 import { isDeliveredDiff, manifestHasUnresolvedErrors } from "./lib/upgrade-policy.ts";
 import { detectVersionBumps, hasTestUnitScript } from "./helpers/version-bump.ts";
 import { changelogGateFindings } from "./helpers/changelog-duplicates.ts";
 import { runDeclaredGenerators } from "./lib/generator-manifest.ts";
-import { composeCommitMessage, deriveCommitMessage, isWeakCommitMessage } from "./helpers/commit-message.ts";
+import {
+  composeCommitMessage,
+  deriveCommitMessage,
+  findTrailerInSubject,
+  isWeakCommitMessage,
+  splitCommitMessage,
+} from "./helpers/commit-message.ts";
 import { localDateISO } from "./lib/local-date.ts";
 import { isAgentMdPath, bumpMechanicalLastUpdated } from "./helpers/agent-mechanical-date-bump.ts";
 import { driftCheck } from "./helpers/ticket-drift.ts";
@@ -555,6 +573,8 @@ let scopedStaging = process.env.SYNC_SCOPED_STAGING !== "0";
 //   stays fail-closed exactly as before.
 let requireCurrentMain = false;
 let concludeMerge = false;
+let allowGeneratedOnly = false;
+const stagePathspecs: string[] = [];
 const msgArgs: string[] = [];
 for (let i = 0; i < rawArgs.length; i++) {
   const arg = rawArgs[i];
@@ -573,16 +593,34 @@ for (let i = 0; i < rawArgs.length; i++) {
     requireCurrentMain = true;
   } else if (arg === "--conclude-merge") {
     concludeMerge = true;
+  } else if (arg === "--allow-generated-only") {
+    allowGeneratedOnly = true;
+  } else if (arg === "--stage") {
+    stagePathspecs.push(rawArgs[++i] ?? "");
+  } else if (arg.startsWith("--stage=")) {
+    stagePathspecs.push(arg.slice("--stage=".length));
   } else {
     msgArgs.push(arg);
   }
 }
-let msg =
-  (msgArgs.join(" ") || "chore: update")
-    // Collapse newlines/control chars — safe for git -m and gh --title arguments
-    .replace(/[\r\n\t]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim() || "chore: update";
+// T-20261114-006: split into subject + preserved body. `msg` stays the one-line subject
+// (safe for git -m / gh --title; feeds memory header, slug, step 6.9, PR title); the body
+// is committed as a second -m paragraph.
+const { subject: msgSubject, body: msgBody } = splitCommitMessage(msgArgs.join(" ") || "chore: update");
+let msg = msgSubject;
+
+// O-1 (design 2026-11-16): a Co-Authored-By / Signed-off-by token joined onto the subject
+// (trailer passed as a separate argument) would ship a mangled subject — hard-fail with
+// the copy-safe form. This is NOT a trailer convention, only a malformed-subject guard.
+{
+  const trailerKey = findTrailerInSubject(msg);
+  if (trailerKey && import.meta.main) {
+    console.error(`\x1b[31m✗ dev-sync: a ${trailerKey} trailer was joined onto the commit subject.\x1b[0m`);
+    console.error(`  Pass the message as ONE argument with an embedded blank line before the trailer:`);
+    console.error(`    bun scripts/dev-sync.ts $'feat: your subject\\n\\n${trailerKey}: Name <email>'`);
+    process.exit(1);
+  }
+}
 
 // T-20261024-001: a flag leaked into the message position (swapped argument
 // order, e.g. `dev-sync "--body-file <path>" <message>`) silently becomes the
@@ -613,6 +651,21 @@ if (import.meta.main && !concludeMerge) {
   }
 }
 
+// T-20261114-007: `--stage <path|glob>` — stage the intended edits before anything reads the
+// index, so they count as operator-staged in step 1, S0 and step 6.5. A pathspec that matches
+// nothing is a hard error (same shape as the ghost-path rule at step 6.5).
+if (import.meta.main && stagePathspecs.length > 0) {
+  for (const spec of stagePathspecs) {
+    const addRes = spec ? await $`git add -- ${spec}`.quiet().nothrow() : { exitCode: 1 };
+    if (addRes.exitCode !== 0) {
+      console.error(
+        `\x1b[31m✗ dev-sync: --stage "${spec}" matched nothing (or git add failed) — nothing staged.\x1b[0m`,
+      );
+      process.exit(1);
+    }
+  }
+}
+
 // Step 1 (U-20261008-001): weak messages — the no-arg fallback "chore: update" and
 // the bare "chore: upgrade template to X" shape — are replaced by a descriptive
 // conventional-commit summary derived from the task-staged change set. Snapshot the
@@ -626,11 +679,15 @@ if (import.meta.main && !concludeMerge) {
 // (helpers/commit-message.ts) and its output is English by construction, so the
 // language gate below still applies unchanged to caller-supplied text.
 const originalMsg = msg; // T-20261028-012: caller message retained for the step-6.9 re-derivation.
+// T-20261114-007: the start-of-run index (null = unreadable). The empty-index guard at S0 keys
+// on THIS, not on step 6.5's taskStaged, which includes pipeline-made `git add` (CHANGELOG, agent bump).
+let agentStagedAtStart: string[] | null = null;
 if (import.meta.main) {
   try {
     const earlyStagedRes = await $`git diff --cached --name-only -z`.quiet().nothrow();
     if (earlyStagedRes.exitCode === 0) {
       const stagedPaths = earlyStagedRes.stdout.toString().split("\0").filter(Boolean);
+      agentStagedAtStart = stagedPaths;
       msg = composeCommitMessage(msg, stagedPaths);
     }
   } catch (e) {
@@ -643,7 +700,7 @@ if (import.meta.main) {
 // (previously this was only checked late, inside gen-pr-body.ts, and its failure was
 // silently swallowed by the PR-creation fallback below). Shared detector also catches
 // Japanese/Chinese, not just Korean — see scripts/lib/language-guard.ts.
-if (hasNonEnglish(msg)) {
+if (hasNonEnglish(msg) || hasNonEnglish(msgBody)) {
   console.log(
     `${RED}❌ Commit message / PR title must be written in English (${fs.existsSync("CONSTITUTION.md") ? "CONSTITUTION.md §3" : "docs/context.md §3"}).${RESET}`,
   );
@@ -721,6 +778,37 @@ try {
   // output — today's behavior). Scoped mode must not misclassify agent files
   // as generated, so it aborts at step 6 via snapshotFailed.
   snapshotFailed = true;
+}
+
+// ── Empty-index guard (T-20261114-007, design 2026-11-16 §1.2) ───────────────
+// Scoped staging with NOTHING staged at start but tracked edits in the tree is the
+// "forgot git add" failure (PRs #2009/#2010/#2025): the run would otherwise ship a plausible
+// "workspace sync" PR WITHOUT the intended edits. Fires here — before any pipeline write —
+// so a re-run starts from the same tree. Exempt: sweep mode, --conclude-merge,
+// --allow-generated-only; untracked-only trees pass (WARN at step 6.5).
+if (
+  import.meta.main &&
+  scopedStaging &&
+  !concludeMerge &&
+  !allowGeneratedOnly &&
+  !snapshotFailed &&
+  agentStagedAtStart !== null &&
+  agentStagedAtStart.length === 0
+) {
+  const s0Raw = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+  const trackedDirty = s0Raw.exitCode === 0 ? parseTrackedWorktreeChanges(s0Raw.stdout.toString()) : [];
+  if (trackedDirty.length > 0) {
+    console.error(
+      `${RED}❌ dev-sync: nothing is staged, but ${trackedDirty.length} tracked file(s) have working-tree changes — scoped staging would ship a PR WITHOUT them:${RESET}`,
+    );
+    trackedDirty.slice(0, 20).forEach((f) => console.error(`   ${f}`));
+    if (trackedDirty.length > 20) console.error(`   ... and ${trackedDirty.length - 20} more`);
+    console.error(`${YELLOW}   Nothing was written. Re-run after one of:${RESET}`);
+    console.error(`${YELLOW}     git add <paths>                       (stage the intended edits)${RESET}`);
+    console.error(`${YELLOW}     dev-sync --stage <path|glob> ...      (stage them via dev-sync)${RESET}`);
+    console.error(`${YELLOW}     dev-sync --allow-generated-only ...   (intended generated-only run)${RESET}`);
+    process.exit(1);
+  }
 }
 
 // U-20261107-003 (v1.43.0): per-path content capture for the dirty set —
@@ -2281,6 +2369,7 @@ const pipelineOutputs = new Set([
 ]);
 const committable = new Set([...taskStaged, ...pipelineOutputs]);
 const residual = [...s1Paths].filter((p) => !committable.has(p)).sort();
+let trackedResidual: string[] = [];
 
 if (residual.length > 0) {
   const disposition = scopedStaging
@@ -2289,7 +2378,23 @@ if (residual.length > 0) {
   console.log(
     `${YELLOW}⚠️  Scoped-staging check: ${residual.length} working-tree file(s) were neither staged for this task nor generated by the pipeline — ${disposition}:${RESET}`,
   );
-  residual.forEach((f) => console.log(`   ${f}`));
+  // T-20261114-007: tracked edits (M/D/R) are the high-risk residual — a forgotten `git add`
+  // of real work — so list them under their own header; untracked scratch stays a plain WARN.
+  try {
+    const trackedRes = await $`git status --porcelain=v1 -z -uall`.quiet().nothrow();
+    if (trackedRes.exitCode === 0) {
+      const trackedSet = new Set(parseTrackedWorktreeChanges(trackedRes.stdout.toString()));
+      trackedResidual = residual.filter((f) => trackedSet.has(f));
+    }
+  } catch {
+    /* visibility only — never block on it */
+  }
+  const untrackedResidual = residual.filter((f) => !trackedResidual.includes(f));
+  if (trackedResidual.length > 0) {
+    console.log(`${RED}   TRACKED edits left out of this commit (verify this is intended):${RESET}`);
+    trackedResidual.forEach((f) => console.log(`   ${f}`));
+  }
+  untrackedResidual.forEach((f) => console.log(`   ${f}`));
   console.log(
     `${YELLOW}   Stage task files explicitly with 'git add <file>' before /sync, or gitignore scratch paths.${RESET}`,
   );
@@ -2480,7 +2585,7 @@ const cleanupTmp = () => {
 process.on("exit", cleanupTmp);
 
 try {
-  const commitRes = await $`git commit -m ${msg}`.nothrow();
+  const commitRes = await (msgBody ? $`git commit -m ${msg} -m ${msgBody}` : $`git commit -m ${msg}`).nothrow();
   cleanupTmp();
   if (commitRes.exitCode !== 0) throw new Error(commitRes.stderr.toString());
 } catch (e) {
@@ -2767,4 +2872,11 @@ if (existingPrUrl) {
       process.exit(1);
     }
   }
+}
+
+// T-20261114-007: repeat tracked residual in one line AFTER the PR step so it cannot scroll away.
+if (import.meta.main && trackedResidual.length > 0) {
+  console.log(
+    `${YELLOW}⚠️  ${trackedResidual.length} tracked file(s) were left OUT of this PR: ${trackedResidual.slice(0, 10).join(", ")}${trackedResidual.length > 10 ? ", ..." : ""}${RESET}`,
+  );
 }
