@@ -53,3 +53,4 @@ Every session log entry MUST include the following four sections:
   - Move completed ADR summaries and resolved decisions to `docs/history.md`
   - Retain the last 7 days in `memory/MEMORY.md`; move older daily logs to `memory/archive/` (Note: `memory/archive/` is intentionally ignored by Git to save space, but files are preserved locally).
   - Never delete logs - archive them
+  - When `archive-memory.ts` breaks index links, it tombstones them: date-session rows become plain-text dates, and non-date links become `*(archived — local only)*`
