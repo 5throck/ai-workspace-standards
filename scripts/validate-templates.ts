@@ -1,6 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
+ * @version 1.83.0
+ *
+ * v1.83.0 (2026-11-16, design docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §4, T-20261114-012):
+ *          new WARN-only check `variant-common-shadow` — a templates/co-* file that shadows a templates/common
+ *          file (same relative path, bytes differ after LF normalization) must be declared in the root-only
+ *          docs/templates/variant-shadow-allowlist.json (variant-owned | tracked + commonSha256). Reports
+ *          shadow-undeclared (one WARN per variant), shadow-common-moved, shadow-allowlist-stale. Never fails.
  * @version 1.82.0
  *
  * v1.82.0 (2026-11-14, spec docs/designs/2026-11-14-consult-output-destination-and-constitution-refs-ruling.md
@@ -607,6 +614,7 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 
 const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
   try {
@@ -8465,6 +8473,201 @@ function checkProjectIdentityPlaceholders(): void {
   }
 }
 
+// ─── variant-common-shadow (T-20261114-012, design 2026-11-16 §4) ────────────────────────
+// WARN-only drift guard: a variant file that replaces a templates/common file wholesale never
+// receives later common edits. The shadow set is compared to a root-only allowlist.
+export interface ShadowAllowlistEntry {
+  path: string;
+  variants: "*" | string[];
+  class: "variant-owned" | "tracked";
+  commonSha256?: string;
+  reason?: string;
+}
+export interface ShadowInstance {
+  variant: string;
+  path: string;
+  frontmatterOnly: boolean;
+}
+export interface ShadowReport {
+  undeclared: ShadowInstance[];
+  moved: { variant: string; path: string; recorded: string; current: string }[];
+  stale: { path: string; variant: string }[];
+  declaredSilent: number;
+}
+
+function normalizeLf(buf: Buffer): string {
+  return buf.toString("utf-8").replace(/\r\n/g, "\n");
+}
+export function shadowSha256(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
+}
+function stripFrontmatter(text: string): string {
+  return text.replace(/^---\n[\s\S]*?\n---\n/, "");
+}
+
+function walkFiles(dir: string, base = dir, out: string[] = []): string[] {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === "node_modules" || e.name === ".git") continue;
+    const p = join(dir, e.name);
+    if (e.isDirectory()) walkFiles(p, base, out);
+    else if (e.isFile()) out.push(relative(base, p).split(/[\\/]/).join("/"));
+  }
+  return out;
+}
+
+/** Pure: compute the shadow instances per variant (path in both trees, LF-normalized bytes differ). */
+export function computeShadowSet(
+  commonDir: string,
+  variantDirs: Record<string, string>,
+  commonFiles: string[] = walkFiles(commonDir),
+): ShadowInstance[] {
+  const out: ShadowInstance[] = [];
+  for (const [variant, vdir] of Object.entries(variantDirs)) {
+    for (const rel of commonFiles) {
+      const vp = join(vdir, rel);
+      if (!existsSync(vp) || !statSync(vp).isFile()) continue;
+      const a = normalizeLf(readFileSync(join(commonDir, rel)));
+      const b = normalizeLf(readFileSync(vp));
+      if (a === b) continue;
+      out.push({ variant, path: rel, frontmatterOnly: stripFrontmatter(a) === stripFrontmatter(b) });
+    }
+  }
+  return out;
+}
+
+/** Pure: classify shadow instances against the allowlist. */
+export function classifyShadows(
+  commonDir: string,
+  instances: ShadowInstance[],
+  entries: ShadowAllowlistEntry[],
+): ShadowReport {
+  const report: ShadowReport = { undeclared: [], moved: [], stale: [], declaredSilent: 0 };
+  const covers = (e: ShadowAllowlistEntry, variant: string) => e.variants === "*" || e.variants.includes(variant);
+  const shadowKey = new Set(instances.map((i) => `${i.variant}\0${i.path}`));
+  const movedSeen = new Set<string>();
+  for (const inst of instances) {
+    const entry = entries.find((e) => e.path === inst.path && covers(e, inst.variant));
+    if (!entry) {
+      report.undeclared.push(inst);
+      continue;
+    }
+    report.declaredSilent++;
+    if (entry.class === "tracked" && entry.commonSha256) {
+      const current = shadowSha256(normalizeLf(readFileSync(join(commonDir, entry.path))));
+      const key = `${inst.variant}\0${entry.path}`;
+      if (current !== entry.commonSha256 && !movedSeen.has(key)) {
+        movedSeen.add(key);
+        report.moved.push({ variant: inst.variant, path: entry.path, recorded: entry.commonSha256, current });
+      }
+    }
+  }
+  for (const e of entries) {
+    if (e.variants === "*") {
+      if (!instances.some((i) => i.path === e.path)) report.stale.push({ path: e.path, variant: "*" });
+    } else {
+      for (const v of e.variants) {
+        if (!shadowKey.has(`${v}\0${e.path}`)) report.stale.push({ path: e.path, variant: v });
+      }
+    }
+  }
+  return report;
+}
+
+const SKILL_COPY_RE = /^(?:\.(?:claude|codex|gemini|agents|hermes)\/)?skills\/([^/]+)\/SKILL\.md$/;
+/** Pure: one display item per variant, collapsing a skill's platform copies into one item. */
+export function collapseShadowItems(instances: ShadowInstance[]): string[] {
+  const skills = new Map<string, number>();
+  const items: string[] = [];
+  for (const i of instances) {
+    const m = SKILL_COPY_RE.exec(i.path);
+    if (m) skills.set(m[1], (skills.get(m[1]) ?? 0) + 1);
+    else items.push(i.frontmatterOnly ? `${i.path} (frontmatter-only)` : i.path);
+  }
+  for (const [n, c] of skills) items.push(`skill ${n} (${c} copies)`);
+  return items;
+}
+
+function checkVariantCommonShadow(): void {
+  if (!JSON_MODE) console.log("\n=== Check variant-common-shadow: undeclared variant shadows of templates/common ===");
+  const commonDir = join(TEMPLATES_DIR, "common");
+  const allowPath = join(ROOT, "docs", "templates", "variant-shadow-allowlist.json");
+  if (!existsSync(commonDir)) return;
+  let entries: ShadowAllowlistEntry[] = [];
+  if (existsSync(allowPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(allowPath, "utf-8")) as { entries?: ShadowAllowlistEntry[] };
+      entries = Array.isArray(parsed.entries) ? parsed.entries : [];
+    } catch (err) {
+      warn(
+        "common",
+        "variant-common-shadow",
+        `docs/templates/variant-shadow-allowlist.json is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+        "Fix the allowlist; until then every shadow is reported as undeclared",
+      );
+    }
+  } else {
+    warn(
+      "common",
+      "variant-common-shadow",
+      "docs/templates/variant-shadow-allowlist.json not found — every variant shadow is reported as undeclared",
+      "Create the allowlist (design 2026-11-16 section 4.2)",
+    );
+  }
+  const variantDirs: Record<string, string> = {};
+  for (const e of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (e.isDirectory() && e.name.startsWith("co-")) variantDirs[e.name] = join(TEMPLATES_DIR, e.name);
+  }
+  let commonFiles: string[] | undefined;
+  try {
+    commonFiles = execFileSync("git", ["ls-files", "-z", "--", "templates/common"], {
+      cwd: ROOT,
+      encoding: "utf-8",
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .split("\0")
+      .filter(Boolean)
+      .map((f) => f.slice("templates/common/".length))
+      .filter((f) => existsSync(join(commonDir, f)));
+    if (commonFiles.length === 0) commonFiles = undefined;
+  } catch {
+    commonFiles = undefined;
+  }
+  const instances = computeShadowSet(commonDir, variantDirs, commonFiles);
+  const report = classifyShadows(commonDir, instances, entries);
+
+  const byVariant = new Map<string, ShadowInstance[]>();
+  for (const i of report.undeclared) byVariant.set(i.variant, [...(byVariant.get(i.variant) ?? []), i]);
+  for (const [variant, list] of [...byVariant].sort()) {
+    const items = collapseShadowItems(list);
+    const fmOnly = list.filter((i) => i.frontmatterOnly).length;
+    warn(
+      variant,
+      "variant-common-shadow",
+      `${variant}: ${list.length} undeclared shadow(s) of templates/common (${fmOnly} frontmatter-only); e.g. ${items.slice(0, 5).join(", ")}${items.length > 5 ? `, +${items.length - 5} more` : ""}`,
+      "Re-sync from common (frontmatter-only), or declare the intended divergence in docs/templates/variant-shadow-allowlist.json",
+    );
+  }
+  for (const m of report.moved) {
+    warn(
+      m.variant,
+      "variant-common-shadow",
+      `shadow-common-moved: templates/${m.variant}/${m.path} shadows common, and common changed since the recorded hash`,
+      "Merge the common change into the variant copy, then update commonSha256 in docs/templates/variant-shadow-allowlist.json",
+    );
+  }
+  for (const s of report.stale) {
+    warn(
+      s.variant === "*" ? "common" : s.variant,
+      "variant-common-shadow",
+      `shadow-allowlist-stale: ${s.path} (${s.variant}) is no longer a shadow of templates/common`,
+      "Remove the stale entry from docs/templates/variant-shadow-allowlist.json",
+    );
+  }
+  if (report.undeclared.length === 0 && report.moved.length === 0 && report.stale.length === 0) {
+    pass(`variant-common-shadow: no undeclared shadows (${report.declaredSilent} declared instance(s) silent)`);
+  }
+}
+
 function main(): number {
   if (!JSON_MODE) {
     console.log(`${colors.cyan}Template Lifecycle Validator${colors.reset}`);
@@ -8789,6 +8992,7 @@ function main(): number {
   checkAgentsMdPointerIntegrity(); // ADR-0090 W0: pointer-table references resolve on disk
   checkAgentsMdDestructiveFileOpsPin(); // §7 baseline pin: destructive-file-operations bullet on every template AGENTS.md (WARN; T-20261104-004 item 4)
   checkSkillGraphVersionDrift(); // skill-graph v2 E2: same-version-different-content across scopes (WARN)
+  checkVariantCommonShadow(); // T-20261114-012: undeclared variant shadows of common files (WARN-only)
 
   // B-07: Sync validated variant info back to VERSION_REGISTRY.json
   if (!JSON_MODE) console.log("\n=== B-07: VERSION_REGISTRY.json sync ===");

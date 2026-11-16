@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "entries": [
+    { "path": "README.md", "variants": "*", "class": "variant-owned", "reason": "per-variant identity" },
+    { "path": "README_ko.md", "variants": "*", "class": "variant-owned", "reason": "per-variant identity" },
+    { "path": "HERMES.md", "variants": "*", "class": "variant-owned", "reason": "per-variant platform instruction file" },
+    { "path": "AGENTS.md", "variants": "*", "class": "variant-owned", "reason": "per-variant roster and boilerplate (validate-variant-claims check j covers boilerplate drift)" },
+    { "path": "agents/pm.md", "variants": "*", "class": "variant-owned", "reason": "per-variant PM definition" },
+    { "path": "agents/i18n-specialist.md", "variants": "*", "class": "variant-owned", "reason": "per-variant localization scope" },
+    { "path": "docs/lifecycle/agents/pm.md", "variants": "*", "class": "variant-owned", "reason": "per-variant PM lifecycle record" },
+    { "path": "skills/SKILLS.md", "variants": "*", "class": "variant-owned", "reason": "per-variant skill registry" },
+    { "path": "docs/skill-graph.json", "variants": "*", "class": "variant-owned", "reason": "per-variant skill graph" },
+    { "path": ".gemini/settings.json", "variants": "*", "class": "variant-owned", "reason": "per-variant platform overlay" },
+    { "path": ".claude/settings.json", "variants": "*", "class": "variant-owned", "reason": "per-variant platform overlay" },
+    { "path": "docs/phase-definitions.md", "variants": "*", "class": "variant-owned", "reason": "variant-customized phase definitions are the accepted norm (design 2026-10-28-l0-only-governance-doc-cleanup)" },
+    { "path": "docs/governance/agents/workflows.md", "variants": ["co-learning"], "class": "tracked", "commonSha256": "904db8ef08542d56bcc2d833cb63c53ddb9ad14e9e603af93cb88ea6f37cfa74", "reason": "Stream Boundaries insertion in the VARIANT-ROLE-BOUNDARY zone (PR #2032)" }
+  ]
+}
