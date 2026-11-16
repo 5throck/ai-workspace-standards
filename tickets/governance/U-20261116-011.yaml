@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: U-20261116-011
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-16T17:05:55.983+09:00
+history:
+  - at: 2026-11-16T17:05:55.983+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'PDF punchline slide does not match the HTML zen punchline. HTML (zen x white-bubble, deck punchline CSS) renders the title at 46px bold on both lines (line 1 accent, line 2 ink) — text ≈60% of slide width. gen-slides-pdf.ts defaults punchline_px 38.4 / punchline_sub_px 16 (sub ≈ one third of HTML), and renders the sub line (data.sub) regular weight with no option for bold. A 2-line punchline therefore looks small and the second sentence is much lighter than in HTML. Expected: defaults derived from the theme''s punchline CSS and a bold/ink option for the sub line (or rendering a ''\n'' title as two equal lines — see U-20261116-008).'
+  affected_paths:
+    - scripts/co-deck/gen-slides-pdf.ts
+  identity_source: self_declared
+  repro: 'deliverables/2026-11-open-innovation-keynote S45 (text + sub). Default PDF: main line wraps mid-phrase, sub 16px. Deck workaround in lecture-profile.md layout_overrides: fonts.punchline_px 50, punchline_sub_px 50, line_heights.punch_text_px 66, punch_sub_px 66 → size matches HTML; sub still non-bold. Related: U-20261116-008, U-20261116-009.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - project_soft_cap
+    - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=false
+  dedupe_key: 89d1f564846377b4efedcc1abd1558a603cbbecf2bc3ecf3864a7a74a52886c6
+  duplicates:
+    - project: co-deck
+      at: 2026-11-16T17:05:55.983+09:00
