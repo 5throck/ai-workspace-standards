@@ -3,7 +3,7 @@ id: U-20261114-011
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-14T23:05:02.197+09:00'
 history:
@@ -16,7 +16,22 @@ history:
   - at: '2026-11-15T19:08:24.890+09:00'
     from: waiting
     to: waiting
-result: null
+  - at: '2026-11-16T13:18:55.845+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T13:18:55.845+09:00'
+    from: review
+    to: done
+result: >-
+  background_image.chapters[] is a first-class manifest concept:
+  validate-image-manifest v1.5.0 parses {chapter, slug} entries, exempts a
+  fully-registered chapter hash group from rule 3 (WARN names the group), still
+  ERRORs partial registration and malformed entries, WARNs an unused declared
+  slug; html-build SKILL v1.7.4 documents when chapter backdrops are appropriate
+  vs the global backdrop and the re-registration rule on restructure; build-side
+  expansion rides gen-slides-pdf v1.14.7's per-slide precedence (landed earlier)
+  + the generator CHAPTER_BG table pattern. 5 test pins in
+  tests/validate-image-manifest.test.ts.
 error: null
 upstream:
   project: co-deck
@@ -68,3 +83,16 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-14T23:05:02.197+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2044
+    summary: >-
+      background_image.chapters[] is a first-class manifest concept:
+      validate-image-manifest v1.5.0 parses {chapter, slug} entries, exempts a
+      fully-registered chapter hash group from rule 3 (WARN names the group),
+      still ERRORs partial registration and malformed entries, WARNs an unused
+      declared slug; html-build SKILL v1.7.4 documents when chapter backdrops
+      are appropriate vs the global backdrop and the re-registration rule on
+      restructure; build-side expansion rides gen-slides-pdf v1.14.7's per-slide
+      precedence (landed earlier) + the generator CHAPTER_BG table pattern. 5
+      test pins in tests/validate-image-manifest.test.ts.

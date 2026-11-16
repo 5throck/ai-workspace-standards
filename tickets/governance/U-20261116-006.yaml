@@ -3,14 +3,25 @@ id: U-20261116-006
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-16T10:21:11.752+09:00
+created_at: '2026-11-16T10:21:11.752+09:00'
 history:
-  - at: 2026-11-16T10:21:11.752+09:00
+  - at: '2026-11-16T10:21:11.752+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-16T13:18:43.613+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T13:18:43.613+09:00'
+    from: review
+    to: done
+result: >-
+  storyline SKILL v1.4.0 Step 3.7 Gate 2 audience-fit checklist: (1) case mix
+  matches the declared audience's locality/scale (relevance, not just search
+  language); (2) problem → cause → answer order, each PART ends on tension not a
+  meta matrix; (3) punchline not buried behind references; (4) diagram accents
+  mark the key message, never the excluded item.
 error: null
 upstream:
   project: co-deck
@@ -19,7 +30,24 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'Gate 2 (content approval) has no audience-fit review, so structural content problems reach a finished deck and are only caught by the end user. Found in one Korean keynote (audience: Korean startups + mid/large companies): (1) Case selection ignored audience locality/scale — PART 02 was almost all global mega-deals (Microsoft–OpenAI, NVIDIA, Isomorphic, Waymo, nuclear PPAs); the only domestic cases were internal AI adoption, none were startup×corporate collaborations. Research adjusts search LANGUAGES to the target market but nothing governs case relevance. (2) Narrative order fought the deck''s own message: PART 01 gave the answer (OI definition) before the problem and cause; PART 02 ended on a meta coverage matrix instead of tension; PART 03''s slides did not follow its own 사람·기술·미래 axes. (3) The punchline slide sat behind the references slide. (4) Diagram emphasis pointed at the wrong thing: the coverage matrix highlighted the one field the deck explicitly does NOT cover (양자 ''명시적 미커버''). Expected: a Gate 2 checklist (storyline/PM) that checks case mix vs audience, problem→cause→answer order and part-ending tension, punchline placement, and that diagram accents mark the key message, not excluded items.'
+  symptom: >-
+    Gate 2 (content approval) has no audience-fit review, so structural content
+    problems reach a finished deck and are only caught by the end user. Found in
+    one Korean keynote (audience: Korean startups + mid/large companies): (1)
+    Case selection ignored audience locality/scale — PART 02 was almost all
+    global mega-deals (Microsoft–OpenAI, NVIDIA, Isomorphic, Waymo, nuclear
+    PPAs); the only domestic cases were internal AI adoption, none were
+    startup×corporate collaborations. Research adjusts search LANGUAGES to the
+    target market but nothing governs case relevance. (2) Narrative order fought
+    the deck's own message: PART 01 gave the answer (OI definition) before the
+    problem and cause; PART 02 ended on a meta coverage matrix instead of
+    tension; PART 03's slides did not follow its own 사람·기술·미래 axes. (3) The
+    punchline slide sat behind the references slide. (4) Diagram emphasis
+    pointed at the wrong thing: the coverage matrix highlighted the one field
+    the deck explicitly does NOT cover (양자 '명시적 미커버'). Expected: a Gate 2
+    checklist (storyline/PM) that checks case mix vs audience,
+    problem→cause→answer order and part-ending tension, punchline placement, and
+    that diagram accents mark the key message, not excluded items.
   affected_paths:
     - agents/storyline.md
     - skills/storyline/SKILL.md
@@ -28,8 +56,27 @@ upstream:
     - agents/pm.md
     - agents/diagram-specialist.md
   identity_source: client_roots
-  local_workaround_diff: 'Deck-local, by hand: reordered PART 01 to problem→cause→answer, moved the coverage matrix to the front of PART 02 as a case map and closed the part on failures, regrouped PART 03 by axis, put PART 04 in execution order, moved the punchline before references; added 6 domestic cases at relatable scale (GS25/GS리테일/CJ프레시웨이/롯데 pilots, 마키나락스–현대차, 리벨리온–KT·SKT, 삼성–레인보우로보틱스) plus a PoC→commercialization reality slide (한경협 2026-11); removed matrix emphasis. Suggested upstream: lecture-profile field for audience market/scale; research guidance to source cases matching it; a Gate 2 audience-fit checklist in storyline/PM; diagram-specialist rule that accents mark the key message only.'
-  repro: 'Deck: deliverables/2026-11-open-innovation-keynote. Pre-restructure storyline/slide_deck in _versions/2026-11-16_09-03_pm_v2_storyline_restructure/ (answer-before-problem order, matrix last in PART 02, punchline after references). Pre-domestic case set in _versions/2026-11-16_09-59_pm_pre_domestic_cases/. Coverage-matrix highlight: deliverables/assets/diagrams/oi-coverage-matrix.svg comment ''cell 7: 양자 (강조 — 명시적 미커버)''. Note research.md line ~29/47/91 only adjusts search language to target market.'
+  local_workaround_diff: >-
+    Deck-local, by hand: reordered PART 01 to problem→cause→answer, moved the
+    coverage matrix to the front of PART 02 as a case map and closed the part on
+    failures, regrouped PART 03 by axis, put PART 04 in execution order, moved
+    the punchline before references; added 6 domestic cases at relatable scale
+    (GS25/GS리테일/CJ프레시웨이/롯데 pilots, 마키나락스–현대차, 리벨리온–KT·SKT, 삼성–레인보우로보틱스) plus a
+    PoC→commercialization reality slide (한경협 2026-11); removed matrix emphasis.
+    Suggested upstream: lecture-profile field for audience market/scale;
+    research guidance to source cases matching it; a Gate 2 audience-fit
+    checklist in storyline/PM; diagram-specialist rule that accents mark the key
+    message only.
+  repro: >-
+    Deck: deliverables/2026-11-open-innovation-keynote. Pre-restructure
+    storyline/slide_deck in
+    _versions/2026-11-16_09-03_pm_v2_storyline_restructure/
+    (answer-before-problem order, matrix last in PART 02, punchline after
+    references). Pre-domestic case set in
+    _versions/2026-11-16_09-59_pm_pre_domestic_cases/. Coverage-matrix
+    highlight: deliverables/assets/diagrams/oi-coverage-matrix.svg comment 'cell
+    7: 양자 (강조 — 명시적 미커버)'. Note research.md line ~29/47/91 only adjusts search
+    language to target market.
   triage: ready
   flagged: false
   triage_reasons:
@@ -42,4 +89,13 @@ upstream:
   dedupe_key: ff7026f01f62060b21ff9c875e7334df64fd19e730d3ea9402845d44fdbc03e5
   duplicates:
     - project: co-deck
-      at: 2026-11-16T10:21:11.752+09:00
+      at: '2026-11-16T10:21:11.752+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2044
+    summary: >-
+      storyline SKILL v1.4.0 Step 3.7 Gate 2 audience-fit checklist: (1) case
+      mix matches the declared audience's locality/scale (relevance, not just
+      search language); (2) problem → cause → answer order, each PART ends on
+      tension not a meta matrix; (3) punchline not buried behind references; (4)
+      diagram accents mark the key message, never the excluded item.

@@ -3,14 +3,27 @@ id: U-20261116-005
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-16T10:17:26.749+09:00
+created_at: '2026-11-16T10:17:26.749+09:00'
 history:
-  - at: 2026-11-16T10:17:26.749+09:00
+  - at: '2026-11-16T10:17:26.749+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-16T13:18:43.592+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T13:18:43.592+09:00'
+    from: review
+    to: done
+result: >-
+  storyline SKILL v1.4.0 narration-consistency rules:
+  literal-translation/noun-stacked jargon banned (concept translation, 사례 not
+  표본, English SVG labels rewritten in Korean unless proper nouns); narration
+  numbers must match the slide/SVG figure; relative dates computed from the
+  presentation date (never copied framing); asset claims verified against files
+  (inject-video-players sidecar report is the check) — unverified claims move to
+  notes with a TODO.
 error: null
 upstream:
   project: co-deck
@@ -19,7 +32,22 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'Companion to U-20261116-003 (internal wording). The storyline/diagram pipeline lets four more classes of audience-facing defects through to a finished Korean deck, all found by hand in one review: (1) Literal-translation and noun-stacked jargon in slides, SVG labels and narration, e.g. ''기업 기능의 약 10%'' (= ''business functions''), ''$3B 워스'', ''선불 럼프섬'', ''Buy 답'', ''워크플로우 미재설계'', ''규제 통행증'', ''질문에 걸리는 기술 위치'', English labels like ''2 Front War'', and ''표본'' for ''사례'' throughout. (2) Narration numbers that contradict the slide: script said ''1천5백억 달러 규모의 금융 백스톱'' while the slide/SVG said $105B. (3) Relative dates in narration not computed from the presentation date: an event dated 2026-08 narrated as ''작년 8월'' in a 2026-11 deck. (4) Asset claims not checked against files: two video slides stated ''mp4·한국어 자막 확보 완료'' (and storyline.md said subtitles were localized) but no assets/videos/subs/yt-<id>.ko.vtt sidecars exist; inject-video-players reported ''no subtitle sidecars found''. Expected: each class is caught before Gate 2 / before build, not by the end user.'
+  symptom: >-
+    Companion to U-20261116-003 (internal wording). The storyline/diagram
+    pipeline lets four more classes of audience-facing defects through to a
+    finished Korean deck, all found by hand in one review: (1)
+    Literal-translation and noun-stacked jargon in slides, SVG labels and
+    narration, e.g. '기업 기능의 약 10%' (= 'business functions'), '$3B 워스', '선불 럼프섬',
+    'Buy 답', '워크플로우 미재설계', '규제 통행증', '질문에 걸리는 기술 위치', English labels like '2
+    Front War', and '표본' for '사례' throughout. (2) Narration numbers that
+    contradict the slide: script said '1천5백억 달러 규모의 금융 백스톱' while the slide/SVG
+    said $105B. (3) Relative dates in narration not computed from the
+    presentation date: an event dated 2026-08 narrated as '작년 8월' in a 2026-11
+    deck. (4) Asset claims not checked against files: two video slides stated
+    'mp4·한국어 자막 확보 완료' (and storyline.md said subtitles were localized) but no
+    assets/videos/subs/yt-<id>.ko.vtt sidecars exist; inject-video-players
+    reported 'no subtitle sidecars found'. Expected: each class is caught before
+    Gate 2 / before build, not by the end user.
   affected_paths:
     - agents/storyline.md
     - skills/storyline/SKILL.md
@@ -27,8 +55,28 @@ upstream:
     - scripts/co-deck/estimate-layout.ts
     - scripts/co-deck/inject-video-players.ts
   identity_source: client_roots
-  local_workaround_diff: 'Deck-local, by hand: rewrote visible text on 36 slides, 15 SVG label sets (deck-local copies in deliverables/assets/diagrams/oi-keynote-crop/) and narration on 41 slides; fixed the two factual narration errors; removed the false subtitle claims. Suggested upstream checks: (a) a translationese/jargon glossary lint with suggested replacements over slide-visible fields, SVG <text> and script; (b) number parity check — every number in a script must appear in that slide''s bullets/footnotes/SVG (or be whitelisted); (c) relative-date check — ''작년/올해/지난달'' resolved against presentation_date in lecture-profile.md vs the dated facts on the slide; (d) asset-claim check — phrases like ''자막 확보'', ''mp4 확보'' require the referenced files to exist; (e) diagram-specialist contract: labels in audience Korean, no English source-framework labels or internal terms.'
-  repro: 'Example deck: deliverables/2026-11-open-innovation-keynote. Pre-fix states are in _versions/2026-11-16_*_pm_pre_plain_korean/ (visible text + SVG labels) and _versions/2026-11-16_*_pm_pre_script_review/ (narration: S17 1천5백억 vs $105B, S21 작년 8월). For (4): grep ''자막 확보 완료'' in the pre-fix slidedata.json, then ls deliverables/assets/videos/subs/ for yt-u6XAPnuFjJc / yt-NugRZGDbPFU (absent). Note: the project was on storyline SKILL v1.3.0; template v1.3.2 adds Step 1.6 Humanize lint and Step 3.5 hygiene check, which may cover part of (1) — please confirm coverage rather than assume.'
+  local_workaround_diff: >-
+    Deck-local, by hand: rewrote visible text on 36 slides, 15 SVG label sets
+    (deck-local copies in deliverables/assets/diagrams/oi-keynote-crop/) and
+    narration on 41 slides; fixed the two factual narration errors; removed the
+    false subtitle claims. Suggested upstream checks: (a) a
+    translationese/jargon glossary lint with suggested replacements over
+    slide-visible fields, SVG <text> and script; (b) number parity check — every
+    number in a script must appear in that slide's bullets/footnotes/SVG (or be
+    whitelisted); (c) relative-date check — '작년/올해/지난달' resolved against
+    presentation_date in lecture-profile.md vs the dated facts on the slide; (d)
+    asset-claim check — phrases like '자막 확보', 'mp4 확보' require the referenced
+    files to exist; (e) diagram-specialist contract: labels in audience Korean,
+    no English source-framework labels or internal terms.
+  repro: >-
+    Example deck: deliverables/2026-11-open-innovation-keynote. Pre-fix states
+    are in _versions/2026-11-16_*_pm_pre_plain_korean/ (visible text + SVG
+    labels) and _versions/2026-11-16_*_pm_pre_script_review/ (narration: S17
+    1천5백억 vs $105B, S21 작년 8월). For (4): grep '자막 확보 완료' in the pre-fix
+    slidedata.json, then ls deliverables/assets/videos/subs/ for yt-u6XAPnuFjJc
+    / yt-NugRZGDbPFU (absent). Note: the project was on storyline SKILL v1.3.0;
+    template v1.3.2 adds Step 1.6 Humanize lint and Step 3.5 hygiene check,
+    which may cover part of (1) — please confirm coverage rather than assume.
   triage: ready
   flagged: false
   triage_reasons:
@@ -40,4 +88,15 @@ upstream:
   dedupe_key: 900cc6613b4100a170554776d3b7f37daab36953136f53e7bb8f0b0108aefe9c
   duplicates:
     - project: co-deck
-      at: 2026-11-16T10:17:26.749+09:00
+      at: '2026-11-16T10:17:26.749+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2044
+    summary: >-
+      storyline SKILL v1.4.0 narration-consistency rules:
+      literal-translation/noun-stacked jargon banned (concept translation, 사례
+      not 표본, English SVG labels rewritten in Korean unless proper nouns);
+      narration numbers must match the slide/SVG figure; relative dates computed
+      from the presentation date (never copied framing); asset claims verified
+      against files (inject-video-players sidecar report is the check) —
+      unverified claims move to notes with a TODO.

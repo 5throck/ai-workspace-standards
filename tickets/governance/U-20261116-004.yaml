@@ -3,7 +3,7 @@ id: U-20261116-004
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-16T10:07:00.056+09:00'
 history:
@@ -13,7 +13,17 @@ history:
   - at: '2026-11-16T13:11:54.053+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-16T13:18:21.866+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T13:18:21.866+09:00'
+    from: review
+    to: done
+result: >-
+  build-theme-deck v0.2.3: unterminated lecture-profile frontmatter parses to
+  EOF with a stderr note (was: silent {} and a misleading theme-not-found
+  error); zen template.html header comment paraphrases the INJECT markers so the
+  duplicate-marker validator stays quiet.
 error: null
 upstream:
   project: co-deck
@@ -59,3 +69,11 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-16T10:07:00.056+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2044
+    summary: >-
+      build-theme-deck v0.2.3: unterminated lecture-profile frontmatter parses
+      to EOF with a stderr note (was: silent {} and a misleading theme-not-found
+      error); zen template.html header comment paraphrases the INJECT markers so
+      the duplicate-marker validator stays quiet.
