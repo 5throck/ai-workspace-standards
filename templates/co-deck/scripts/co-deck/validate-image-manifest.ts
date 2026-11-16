@@ -1,4 +1,13 @@
-// @version 1.4.2
+// @version 1.5.0
+// v1.5.0 (2026-11-16, U-20261114-011 — spec docs/designs/2026-11-16-governance-batch-design.md §R7):
+//   background_image.chapters[] — chapter/section-scoped background groups are a
+//   first-class manifest concept. Each entry {chapter, slug} declares that the
+//   chapter's content slides share one pool backdrop; rule 3 (duplicate content
+//   hash) EXEMPTS a hash group every slide of which carries a chapter-declared
+//   slug (partial registration — a chapter slug shared by some slides plus the
+//   same file on an undeclared slide — is still an ERROR). Malformed chapter
+//   entries (missing chapter/slug, empty slug) are ERRORs; a declared slug with
+//   no matching slides[] entry is a WARN (registered but unused).
 // v1.4.2 (2026-11-16, U-20261114-010): --project accepted as a --workspace alias (DX unification with the sibling co-deck tools; usage docs updated).
 // v1.4.0 (LOCAL-PATCH — deck-wide photo background doctrine, 2026-11-14
 // rebuild of 2026-11-ai-era-business-survival): Rule A amended — scope
@@ -236,6 +245,9 @@ if (!workspaceArg) {
 }
 
 const workspaceDir = resolve(instanceRoot, workspaceArg);
+function isPlainObj(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
 const manifestPath = join(workspaceDir, 'image-manifest.json');
 
 if (!existsSync(manifestPath)) {
@@ -251,6 +263,29 @@ if (!manifest) {
 }
 
 const slides: any[] = Array.isArray(manifest.slides) ? manifest.slides : [];
+
+// U-20261114-011: chapter backdrop groups — background_image.chapters[] maps
+// chapter → pool slug; the slides[] entries of that chapter's content slides
+// share the slug's file, which rule 3 would otherwise flag as duplicate content.
+const chapterBackdrops: Array<{ chapter: string | number; slug: string }> = [];
+const chapterSlugs = new Set<string>();
+const bgRoot = isPlainObj(manifest.background_image) ? manifest.background_image : {};
+if (Array.isArray((bgRoot as Record<string, unknown>).chapters)) {
+  for (const c of (bgRoot as Record<string, unknown>).chapters as unknown[]) {
+    if (!isPlainObj(c) || (typeof c.chapter !== 'string' && typeof c.chapter !== 'number') || typeof c.slug !== 'string' || c.slug === '') {
+      err(`background_image.chapters entry malformed — expected {chapter, slug} with a non-empty slug: ${JSON.stringify(c)}`);
+      continue;
+    }
+    chapterBackdrops.push({ chapter: c.chapter as string | number, slug: c.slug });
+    chapterSlugs.add(c.slug);
+  }
+}
+const slugOf = (relPath: string): string => {
+  const base = relPath.split('/').pop() ?? '';
+  const dot = base.lastIndexOf('.');
+  return dot > 0 ? base.slice(0, dot) : base;
+};
+const idxPath = new Map<number, string>();
 const theme = detectTheme(workspaceDir);
 
 // ── 1. Per-slide: hash + dimensions + aspect + missing-field tally ────────────
@@ -266,6 +301,7 @@ for (const slide of slides) {
   if (!relPath || typeof relPath !== 'string') continue; // missing-image / no-image entry
 
   imageCount++;
+  idxPath.set(idx, relPath);
   if (!checkPoolPathStyle(`slide ${idx} (${slide.slide_title ?? '?'})`, relPath)) continue;
   const absPath = resolveAssetPath(relPath);
   if (!existsSync(absPath)) {
@@ -317,9 +353,22 @@ if (missingFieldEntries > 0) {
 // ── 2. Duplicate content-hash ERROR (hard block) ───────────────────────────────
 
 for (const [hash, idxs] of hashToSlides) {
-  if (idxs.length > 1) {
-    err(`duplicate image across slides ${idxs.join(', ')} — identical content hash sha256:${hash.slice(0, 12)}… (re-curate one of them before html-build handoff)`);
+  if (idxs.length <= 1) continue;
+  // U-20261114-011: a hash group whose slides ALL carry a chapter-declared slug
+  // is the registered chapter backdrop — intentional reuse, not duplication.
+  const slugs = [...new Set(idxs.map((i) => slugOf(idxPath.get(i) ?? '')))];
+  const allChapter = slugs.length >= 1 && slugs.every((s) => chapterSlugs.has(s));
+  if (allChapter) {
+    warn(`chapter backdrop group (chapters: ${slugs.join(', ')}) serves slides ${idxs.join(', ')} — intentional reuse, not rule-3 duplication`);
+    continue;
   }
+  err(`duplicate image across slides ${idxs.join(', ')} — identical content hash sha256:${hash.slice(0, 12)}… (re-curate one of them, or register the shared backdrop under background_image.chapters[], before html-build handoff)`);
+}
+
+// Chapter slugs with no matching slides[] entry — registered but unused (drift).
+for (const c of chapterBackdrops) {
+  const used = slides.some((s) => typeof s.path === 'string' && slugOf(s.path) === c.slug);
+  if (!used) warn(`background_image.chapters declares chapter ${JSON.stringify(c.chapter)} → slug \"${c.slug}\", but no slides[] entry uses that slug`);
 }
 
 // ── 2b. background_image section rules (U-20261029-007) ────────────────────────

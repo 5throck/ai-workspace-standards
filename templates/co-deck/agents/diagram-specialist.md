@@ -1,7 +1,7 @@
 ---
 name: diagram-specialist
-version: "1.3.2"
-last_updated: 2026-11-15
+version: "1.3.3"
+last_updated: 2026-11-16
 role: Concept diagram and data chart generator for lecture slide decks
 status: active
 tier: medium
@@ -297,3 +297,14 @@ In a `meeting-facilitation` session, Claude role-plays you inline. This section 
 **Auto-Dispatch To**: html-build
 **Tier**: medium
 **Communication Style**: async
+
+## Diagram Canvas and Text Legibility (U-20261116-002)
+
+- **Tight canvas**: the SVG viewBox hugs the drawing's actual bounding box — a
+  fixed 960x540 canvas with a middle-band drawing wastes contain-fit height and
+  shrinks every label. Compute the tight box from the drawn elements, or trim
+  empty bands before export.
+- **Minimum rendered text**: smallest SVG text renders at ≥ 11px at 1280x720
+  (zen body is 14px). At the white-bubble bubble width (~480px), a 960px-wide
+  canvas halves label size — prefer compact layouts and larger base font sizes
+  over dense wide canvases.

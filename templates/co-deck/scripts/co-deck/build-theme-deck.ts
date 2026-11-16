@@ -1,4 +1,4 @@
-// @version 0.2.2
+// @version 0.2.3
 // v0.2.2 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // build-theme-deck.ts — CLI wrapper for deterministic theme deck builder.
 //
@@ -32,8 +32,16 @@ function parseYamlFrontmatter(content: string): Record<string, any> {
   const lines = content.split('\n');
   const startIdx = lines.findIndex((l) => l.trim() === '---');
   if (startIdx < 0) return {};
-  const endIdx = lines.indexOf('---', startIdx + 1);
-  if (endIdx < 0) return {};
+  // U-20261116-004 (1): EOF terminates the frontmatter — a profile that opens
+  // with --- but forgets the closing fence still parses (the whole file is the
+  // YAML block) instead of silently returning {} and failing downstream with a
+  // misleading 'presentation.theme not found'.
+  let endIdx = lines.indexOf('---', startIdx + 1);
+  const unterminated = endIdx < 0;
+  if (unterminated) {
+    console.error(`  ⚠️  lecture-profile.md frontmatter is not closed (missing the closing ---) — parsing to EOF`);
+    endIdx = lines.length;
+  }
   const yamlBlock = lines.slice(startIdx + 1, endIdx).join('\n');
 
   // Simple YAML parser: handles top-level key: value and nested structures

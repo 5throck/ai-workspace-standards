@@ -83,7 +83,7 @@
       "max_title_chars": 50,
       "min_bullets": 3,
       "min_body_chars": 40,
-      "max_body_chars": 80
+      "max_body_chars": 600
     },
     "punchline": {
       "max_title_chars": 50,

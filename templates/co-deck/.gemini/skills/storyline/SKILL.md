@@ -1,7 +1,7 @@
 ---
 name: storyline
 scope: co-deck
-version: 1.3.2
+version: 1.4.0
 lang: ko
 lang_reason: proper-noun (Step 3.5 quotes verbatim Korean defect strings and replacement wording from the affected deck)
 description: >
@@ -191,6 +191,8 @@ Ban list (matched against slide-visible fields of `slide_deck.md`):
 | `—` aside headers: `— (해석 주의\|배제 검토\|검토 필요\|추후 확인)` | `— 해석 주의`, `— 배제 검토` |
 | Bracketed caveat asides: `\((근사치\|단일 소스\|Unverified\|미검증)\)` | `(⚠️ 근사치)` |
 | Bare meta-words standing alone as an aside (not inside a sentence) | `Unverified`, `근사치` as a lone bullet tail |
+| Internal production wording (U-20261116-003): verification state and instructions | `Stage 1.5 권장`, `[프레임: …]`, `v1 검증 문구 이식`, `원문 미확인`, `직접 비교 금지`, `확장 서술 금지`, `보조 표본은 내레이션으로` |
+| Verification-tag glyphs riding research_notes tags into slide text | `⚠️` attached to a source note, `명시적 미커버` as audience text |
 
 Regex sketch: `⚠|※|—\s*(해석 주의|배제 검토|검토 필요|추후 확인)|\((⚠️|근사치|단일 소스|Unverified|미검증)[^)]*\)`
 
@@ -240,6 +242,14 @@ References slide spec:
 
 ---
 
+**Audience language only (U-20261116-003):** slide-visible fields carry citation = outlet/institution/date; verification state, framing notes, and production instructions stay in storyline.md / notes. Research_notes verification tags and Gate-1.5 conditions NEVER ride into footnotes, bullets, captions or SVG labels.
+
+**Narration consistency (U-20261116-005):**
+- **No literal-translation or noun-stacked jargon** — translate the CONCEPT into natural Korean (기업 기능 not '비즈니스 펑션', 사례 not '표본'); English labels in SVGs are rewritten in Korean unless they are proper nouns. '워스', '럼프섬', 'Buy 답' class jargon is banned from slides, SVG labels and narration.
+- **Narration numbers match the slide** — the script's figure equals the slide/SVG figure ($105B on the slide is '1천5억 달러' level-checked in the script; '1천5백억' vs $105B is a defect).
+- **Relative dates computed from the presentation date** — an event dated 2026-08 narrated in a 2026-11 deck is '3개월 전', never '작년 8월'; compute, don't copy the source's framing.
+- **Asset claims checked against files** — a narration line like 'mp4·한국어 자막 확보 완료' must match reality (inject-video-players reports sidecar presence; 'no subtitle sidecars found' contradicts the claim). Unverified asset claims move to the notes with a TODO, out of audience text.
+
 ### Step 4: Balance Check
 
 Self-review after writing both files:
@@ -253,6 +263,35 @@ Self-review after writing both files:
 - No `⚠️`/`※`/`— 해석 주의`-style internal annotations in any slide-visible field
 - No coined term or internal code used before its defining slide (dividers use plain language)
 - No `[Source: R#]` footers; references slide present before the punchline (if research_notes.md exists)
+
+### Step 3.6: Layout Gate Re-run (U-20261116-007)
+
+Every slide_deck/slidedata edit is followed by the layout lint before Gate 2:
+
+```bash
+bun scripts/co-deck/estimate-layout.ts --project deliverables/<deck> --lint
+```
+
+min/max bullet counts and title length are BLOCKING (content edits silently
+broke a 3-bullet minimum in one deck — caught only by the end user). The
+body-chars bound is calibrated at the theme level (zen ships 600, DEC-
+20261114-04) and is advisory; real violations (bullet-count min, title length)
+must not drown in bound-noise.
+
+### Step 3.7: Gate 2 Audience-Fit Checklist (U-20261116-006)
+
+Before content approval, the storyline/PM check verifies:
+
+1. **Case mix matches the audience** — locality and scale of the cases fit the
+   declared audience (Korean startups × corporates need startup×corporate
+   cases, not only global mega-deals); research adjusts search languages to
+   the market, this gate checks RELEVANCE.
+2. **Problem → cause → answer order** — the answer is not given before the
+   problem and cause; each PART ends on tension, not on a meta matrix.
+3. **Punchline placement** — the punchline slide is not buried behind the
+   references appendix.
+4. **Diagram accents mark the key message** — the highlighted field is the
+   message, never the explicitly-excluded item.
 
 ---
 

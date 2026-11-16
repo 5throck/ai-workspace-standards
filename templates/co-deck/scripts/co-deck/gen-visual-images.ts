@@ -1,4 +1,7 @@
-// @version 3.3.1 — U-20261105-006: stripDiagramFooterText() runs on every generated SVG
+// @version 3.3.2
+// v3.3.2 (2026-11-16, U-20261116-002): SVG legibility
+// WARN — svgMinFontSize under 16 in a 960-wide canvas renders under ~11px at the
+// white-bubble bubble width; regenerate rather than ship 8px labels. — U-20261105-006: stripDiagramFooterText() runs on every generated SVG
 // v3.3.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // (caption/source lines are slidedata-owned; generators must not draw them) and
 // svgTextDuplicatesSlide() audits each diagram for echoes of the slide's caption/source/
@@ -13,7 +16,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
-import { svgToPng, fontPath, stripDiagramFooterText, svgTextDuplicatesSlide } from './diagram-helpers.ts';
+import { svgToPng, fontPath, stripDiagramFooterText, svgTextDuplicatesSlide, svgMinFontSize } from './diagram-helpers.ts';
 
 const args    = process.argv.slice(2);
 const getArg  = (flag: string) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : undefined; };
@@ -97,6 +100,12 @@ for (const { slide: slideIdx, data } of targets) {
     const dupHits = svgTextDuplicatesSlide(svg, data);
     for (const hit of dupHits) {
       console.warn(`   ⚠️  Slide ${slideIdx}: SVG ${hit.kind} echoes slide text — regenerate without it: "${hit.text.slice(0, 50)}"`);
+    }
+    // U-20261116-002: legibility floor — a label sized under 16 in a 960-wide
+    // canvas renders under ~11px at the white-bubble bubble width (~480px).
+    const minFs = svgMinFontSize(svg);
+    if (minFs !== null && minFs < 16) {
+      console.warn(`   ⚠️  Slide ${slideIdx}: SVG min font-size ${minFs} renders under ~11px at bubble width — regenerate with larger base fonts or a tighter layout`);
     }
 
     // Update slidedata visualImage path to shared pool SVG reference (HTML primary delivery format)

@@ -1,4 +1,7 @@
-// @version 1.3.1 — U-20261105-006: stripDiagramFooterText() + svgTextDuplicatesSlide()
+// @version 1.3.2
+// v1.3.2 (2026-11-16, U-20261116-002): svgMinFontSize() —
+// smallest declared font-size in an SVG, consumed by gen-visual-images'
+// legibility WARN (labels rendering under ~11px at 1280x720 bubble widths). — U-20261105-006: stripDiagramFooterText() + svgTextDuplicatesSlide()
 // v1.3.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // (SVGs must not embed caption/takeaway/source lines — slidedata visualCaption /
 // visualSource own them; deterministic dedup audit for bullet echoes).
@@ -242,3 +245,19 @@ export const B2B_NAVY = {
   TEXT_M:  '#9CA3AF',
   BORDER:  '#1F2937',
 };
+
+/**
+ * Smallest font-size declared in the SVG (U-20261116-002). Text without an
+ * explicit font-size inherits the SVG default (16) and is not counted — the
+ * audit targets labels the generator sized down.
+ */
+export function svgMinFontSize(svg: string): number | null {
+  let min: number | null = null;
+  const re = /font-size="([\d.]+)"/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(svg)) !== null) {
+    const v = parseFloat(m[1]);
+    if (Number.isFinite(v) && (min === null || v < min)) min = v;
+  }
+  return min;
+}

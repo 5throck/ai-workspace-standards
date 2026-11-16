@@ -6,7 +6,9 @@
  * without downloading, no-videoId slidedata is a clean no-op, and missing
  * QuickDL with pending downloads is a clear fatal (exit 1) — not a crash.
  *
- * @version 1.0.0
+ * v1.1.0 (2026-11-16, quickdl external): `selftest` pins — a fake MIT clone passes (exit 0), a non-MIT or incomplete clone fails (exit 1).
+ *
+ * @version 1.1.0
  */
 import { describe, expect, test } from 'bun:test';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -87,6 +89,26 @@ describe('download-videos (U-20261105-007)', () => {
     const res = spawnSync('bun', [TOOL, '--project', join(d, 'project')], { encoding: 'utf-8' });
     expect(res.status).toBe(1);
     expect(res.stderr).toContain('slidedata not found');
+    rmSync(d, { recursive: true, force: true });
+  });
+  test('selftest passes for an MIT clone with cli.py + requirements.txt (exit 0)', () => {
+    const d = mkdtempSync(join(tmpdir(), 'cdk-dlvid-st-'));
+    writeFileSync(join(d, 'cli.py'), '# stub');
+    writeFileSync(join(d, 'requirements.txt'), 'yt-dlp\n');
+    writeFileSync(join(d, 'LICENSE'), 'MIT License\n\nCopyright (c) test');
+    const res = spawnSync('bun', [TOOL, 'selftest', '--quickdl-dir', d], { encoding: 'utf-8' });
+    expect(res.status).toBe(0);
+    expect(res.stdout).toContain('selftest: OK');
+    rmSync(d, { recursive: true, force: true });
+  });
+
+  test('selftest fails for a non-MIT or incomplete clone (exit 1)', () => {
+    const d = mkdtempSync(join(tmpdir(), 'cdk-dlvid-st-bad-'));
+    writeFileSync(join(d, 'LICENSE'), 'GNU AFFERO GENERAL PUBLIC LICENSE');
+    const res = spawnSync('bun', [TOOL, 'selftest', '--quickdl-dir', d], { encoding: 'utf-8' });
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('LICENSE is not MIT');
+    expect(res.stderr).toContain('cli.py missing');
     rmSync(d, { recursive: true, force: true });
   });
 });

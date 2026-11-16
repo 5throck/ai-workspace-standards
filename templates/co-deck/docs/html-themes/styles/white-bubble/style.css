@@ -363,26 +363,16 @@
       max-height: calc(100% - 1rem);
     }
 
-    /* fix f — per-slide .zen-visual caps for the slides whose content stack
-       still exceeds the relaxed card (measured with the geometry probe).
-       Per-slide (not deck-wide) so the diagram slides that already fit
-       (S41/S47/S49/S55 canaries) keep their 42vh-sized visuals. */
-    [data-theme="zen"] #slide-2 .zen-visual,
-    [data-theme="zen"] #slide-20 .zen-visual,
-    [data-theme="zen"] #slide-28 .zen-visual,
-    [data-theme="zen"] #slide-32 .zen-visual,
-    [data-theme="zen"] #slide-37 .zen-visual,
-    [data-theme="zen"] #slide-43 .zen-visual { max-height: 32vh; }
-    [data-theme="zen"] #slide-11 .zen-visual,
-    [data-theme="zen"] #slide-13 .zen-visual,
-    [data-theme="zen"] #slide-35 .zen-visual,
-    [data-theme="zen"] #slide-49 .zen-visual,
-    [data-theme="zen"] #slide-52 .zen-visual { max-height: 36vh; }
-    [data-theme="zen"] #slide-7 .zen-visual,
-    [data-theme="zen"] #slide-30 .zen-visual,
-    [data-theme="zen"] #slide-31 .zen-visual { max-height: 30vh; }
-    [data-theme="zen"] #slide-27 .zen-visual { max-height: 24vh; }
-    [data-theme="zen"] #slide-17 .zen-visual { max-height: 24vh; }
+    /* U-20261116-001: per-slide .zen-visual caps REMOVED from the shared style —
+       slide-index ID selectors (#slide-7 etc.) in a shared style apply to whatever
+       slide holds that index in ANY zen x white-bubble deck (after a restructure
+       they silently capped unrelated slides and outranked deck-level overrides).
+       Per-slide caps belong in the deck's own override block only; deck-wide
+       sizing stays with the .zen-visual rules above. Diagram slides keep a
+       readable floor so SVG text stays legible (U-20261116-002). */
+    [data-theme="zen"] .slide-content:has(> .zen-visual-wrap img[src$=".svg"]) img.zen-visual {
+      min-height: 30vh;
+    }
 
     /* design_spec §2.8/§7-3 — contact primary identity line (name·직함) stays
        navy 700, out of the 0.55 muted role (WARN-3 mitigation). Locked tokens
@@ -587,26 +577,16 @@
       max-height: calc(100% - 1rem);
     }
 
-    /* fix f — per-slide .zen-visual caps for the slides whose content stack
-       still exceeds the relaxed card (measured with the geometry probe).
-       Per-slide (not deck-wide) so the diagram slides that already fit
-       (S41/S47/S49/S55 canaries) keep their 42vh-sized visuals. */
-    [data-theme="zen"] #slide-2 .zen-visual,
-    [data-theme="zen"] #slide-20 .zen-visual,
-    [data-theme="zen"] #slide-28 .zen-visual,
-    [data-theme="zen"] #slide-32 .zen-visual,
-    [data-theme="zen"] #slide-37 .zen-visual,
-    [data-theme="zen"] #slide-43 .zen-visual { max-height: 32vh; }
-    [data-theme="zen"] #slide-11 .zen-visual,
-    [data-theme="zen"] #slide-13 .zen-visual,
-    [data-theme="zen"] #slide-35 .zen-visual,
-    [data-theme="zen"] #slide-49 .zen-visual,
-    [data-theme="zen"] #slide-52 .zen-visual { max-height: 36vh; }
-    [data-theme="zen"] #slide-7 .zen-visual,
-    [data-theme="zen"] #slide-30 .zen-visual,
-    [data-theme="zen"] #slide-31 .zen-visual { max-height: 30vh; }
-    [data-theme="zen"] #slide-27 .zen-visual { max-height: 24vh; }
-    [data-theme="zen"] #slide-17 .zen-visual { max-height: 24vh; }
+    /* U-20261116-001: per-slide .zen-visual caps REMOVED from the shared style —
+       slide-index ID selectors (#slide-7 etc.) in a shared style apply to whatever
+       slide holds that index in ANY zen x white-bubble deck (after a restructure
+       they silently capped unrelated slides and outranked deck-level overrides).
+       Per-slide caps belong in the deck's own override block only; deck-wide
+       sizing stays with the .zen-visual rules above. Diagram slides keep a
+       readable floor so SVG text stays legible (U-20261116-002). */
+    [data-theme="zen"] .slide-content:has(> .zen-visual-wrap img[src$=".svg"]) img.zen-visual {
+      min-height: 30vh;
+    }
 
     /* design_spec §2.8/§7-3 — contact primary identity line (name·직함) stays
        navy 700, out of the 0.55 muted role (WARN-3 mitigation). Locked tokens

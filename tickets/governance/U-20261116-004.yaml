@@ -1,0 +1,61 @@
+schemaVersion: 1
+id: U-20261116-004
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-16T10:07:00.056+09:00'
+history:
+  - at: '2026-11-16T10:07:00.056+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-16T13:11:54.053+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    build-theme-deck.ts reports a misleading error and noisy warnings. (1) If
+    lecture-profile.md opens frontmatter with '---' but has no closing '---'
+    (the whole file is YAML), parseYamlFrontmatter returns {} (line 35-36:
+    endIdx < 0 -> return {}) and the CLI fails with 'Error: presentation.theme
+    not found in lecture-profile.md' even though presentation.theme exists.
+    Expected: treat EOF as the end of frontmatter, or say 'frontmatter not
+    closed (missing ---)'. (2) Every build prints 'WARNING:
+    [validate:template.html] INJECT marker
+    "INJECT:CSS"/"INJECT:slides"/"INJECT:slideData" appears 2 times (expected
+    exactly 1)' because the zen template.html also mentions the markers inside
+    its header comment; the validator should ignore comment occurrences or the
+    comment should not repeat the literal markers.
+  affected_paths:
+    - scripts/co-deck/build-theme-deck.ts
+    - docs/html-themes/themes/zen/template.html
+  identity_source: client_roots
+  local_workaround_diff: >-
+    Project data fix only: appended the missing closing '---' to
+    deliverables/2026-11-open-innovation-keynote/lecture-profile.md. No script
+    change.
+  repro: >-
+    1) Remove the closing '---' from a lecture-profile.md that has
+    presentation.theme: zen; run bun scripts/co-deck/build-theme-deck.ts
+    --project deliverables/<deck> -> 'presentation.theme not found'. 2) With a
+    valid profile, run the same command on a zen deck -> three INJECT duplicate
+    warnings, build still succeeds.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/co-deck/build-theme-deck.ts=true
+    - info:in_last_delivery docs/html-themes/themes/zen/template.html=false
+  dedupe_key: 470d00e0d311e522800b585ee6e75626707bf67ef994b2dc77c36c06ed78ad9b
+  duplicates:
+    - project: co-deck
+      at: '2026-11-16T10:07:00.056+09:00'

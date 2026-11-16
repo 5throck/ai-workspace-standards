@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: "1.7.3"
+version: "1.7.4"
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -217,6 +217,24 @@ Insert if either is missing. Populate with `instructor` fields from `lecture-pro
 
 ---
 
+## Chapter Backdrop Groups (U-20261114-011)
+
+`background_image.chapters[]` in image-manifest.json maps chapter → pool slug
+(`{chapter, slug}`); the chapter's content slides bind that slug's file as
+their per-slide background, and validate-image-manifest exempts the registered
+group from the duplicate-content rule (partial registration still errors).
+
+**When content-slide backgrounds are appropriate vs the global backdrop**: use
+chapter backdrops when each chapter carries its own visual identity (a section
+photo that recurs across that chapter's content slides) — register the group
+rather than copying one global image everywhere. Use the global backdrop
+(`background_image.path` + scope) only when ONE image is intentionally the
+whole deck's backdrop. Chapter backdrops pair with the storyline)s chapter
+structure: the slug names the chapter, so a restructure that moves slides
+between chapters re-registers the mapping instead of silently misfiring
+slide-index selectors.
+
+---
 ## Patch-Layer Convergence Doctrine (U-20261114-012)
 
 Deck CSS/JS patch layers (style patches, player injectors, fit correctors) must be

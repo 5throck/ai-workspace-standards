@@ -1,0 +1,41 @@
+schemaVersion: 1
+id: U-20261116-003
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-16T10:06:59.981+09:00
+history:
+  - at: 2026-11-16T10:06:59.981+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'Internal production wording reaches audience-visible slide text. In one deck, 33 occurrences across footnotes, bullets, captions and SVG labels, e.g. footnotes ''1차 보도자료 대조는 Stage 1.5 권장'', ''개념 재표현 [프레임: 참고자료 PDF, 2019]'', ''교환 구조는 v1 검증 문구 이식'', ''McKinsey 수치는 뉴스 인덱스 등급 이식'', ''직접 비교 금지'', ''확장 서술 금지'', ''BCG ... 원문 미확인 ⚠️'', ''보조 표본은 내레이션으로''; bullet ''양자·로보틱스 단독 케이스 없음 — 선택과 집중을 명시''; SVG cell ''명시적 미커버 — 선택과 집중''. Source: storyline carries research_notes verification tags and Gate-1.5 conditions into slide_deck footnotes/bullets, and diagram-specialist copies visual_spec ''sub'' text verbatim. Expected: slide-visible fields contain audience language only (citation = outlet/institution/date); verification state and instructions stay in storyline.md / notes.'
+  affected_paths:
+    - agents/storyline.md
+    - skills/storyline/SKILL.md
+    - agents/diagram-specialist.md
+    - scripts/co-deck/estimate-layout.ts
+  identity_source: client_roots
+  local_workaround_diff: 'Deck-local: rewrote all 33 strings by hand (sources kept as outlet/date; process notes removed; open verification items left only in storyline.md §6). Suggested upstream: (1) storyline contract rule — footnotes are citations/definitions only, no tags, gate conditions or instructions; (2) a lint (e.g. estimate-layout --lint or a new check) flagging internal-token patterns in slide-visible fields and SVG text.'
+  repro: 'Scan slidedata.json title/bullets/footnotes/visualCaption/desc and SVG <text> of deliverables/2026-11-open-innovation-keynote (backup before fix: _versions/2026-11-16_*_pm_pre_internal_wording/) with a regex such as ''Stage|태그|research_notes|\bv[12]\b|프레임:|재표현|미복사|확인 필요|권장|열람|미커버|이식|스냅샷|밑수|층위|⚠️|미확인|내레이션|등급|대조''.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery agents/storyline.md=false
+    - info:in_last_delivery skills/storyline/SKILL.md=false
+    - info:in_last_delivery agents/diagram-specialist.md=false
+    - info:in_last_delivery scripts/co-deck/estimate-layout.ts=true
+  dedupe_key: 13081d8b90efa09b180924f1472afbc4a302851b19e640836c40010e741ab191
+  duplicates:
+    - project: co-deck
+      at: 2026-11-16T10:06:59.981+09:00
