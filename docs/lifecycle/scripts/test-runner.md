@@ -4,7 +4,7 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.17.0
+- **Version**: 1.17.1
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-16 (v1.17.0 junit batched-tail execution, windows CI test speedup spec; v1.16.0 four more co-workspace files join FILE_TIME_BUDGETS, T-20261114-008; v1.15.0 longest-first parallel dispatch, CI speed; v1.14.0 `upgrade-vintage-pending.test.ts` budget row, overwrite-protection PR-B; v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
 ## Description
@@ -16,6 +16,7 @@ default suite `integration`).
 
 ## Phase History
 
+- **1.17.1** (v1.17.1 (2026-11-16): tail batching SHIPPED OFF (default 0) after CI run 43788899945 measured the windows unit step at 414s vs a 371s ideal at batch size 12 (pre-batching baseline packed near-perfectly at 361/359), with a failing batch member costing the whole batch an individual re-run; `TEST_RUNNER_BATCH_SIZE=N` re-enables.)
 - **1.17.0** (v1.17.0 (2026-11-16, spec 2026-11-15-windows-ci-test-speedup-design): non-budgeted unit-suite tail batched ~12 files per `bun test --reporter=junit` process with per-file attribution and a mandatory individual re-run fallback; new `TEST_RUNNER_CONCURRENCY` / `TEST_RUNNER_BATCH_SIZE` env knobs. Renumbered from 1.16.0 on the origin/main merge — main independently claimed 1.16.0 for the T-20261114-008 budget rows.)
 - **1.16.0** (v1.16.0 (2026-11-16, T-20261114-008): migrations/shared-team-quarantine/admin-console-r2/admin-page join FILE_TIME_BUDGETS at the co-workspace family budget (suite 300s / test 45s) — windows per-test timeouts at 15.2-21.5s across four rerun-green runs; first-time entries per the v1.6.0 convention.)
 

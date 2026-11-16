@@ -1,6 +1,15 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.17.0
+ * @version 1.17.1
+ *
+ * v1.17.1 (2026-11-16): tail BATCHING SHIPPED OFF (default 0). CI run 43788899945
+ *          measured the windows unit step at 414s at batch size 12 against a 371s
+ *          ideal (1485s cumulative / 4 workers), while the pre-batching baseline
+ *          packed almost perfectly (361s vs 359s ideal); one failing batch member
+ *          also costs the whole batch an individual re-run (local runs showed 2-3
+ *          fallbacks per suite), so the spawn saving (312 → ~36) never converted
+ *          into wall clock. `TEST_RUNNER_BATCH_SIZE=N` re-enables batching once
+ *          the tail is residue-free.
  *
  * v1.17.0 (2026-11-16, spec docs/designs/2026-11-15-windows-ci-test-speedup-design.md
  *          items 3+4 — windows "Run unit tests" step 361s vs ubuntu 41s, run
@@ -448,12 +457,21 @@ async function executeTestFile(
   }
 }
 
-/** Batch size for the non-budgeted unit-suite tail (v1.16.0, design item 3):
- * ~12-file `bun test` invocations replace one process per file. The
- * `TEST_RUNNER_BATCH_SIZE` env knob shrinks batches as the FIRST mitigation
- * for cross-file residue flakes (files in a batch share one process and one
- * TEST_TEMP_DIR; they run sequentially inside bun) — a knob, not a revert. */
-const DEFAULT_BATCH_SIZE = 12;
+/** Batch size for the non-budgeted unit-suite tail (v1.17.0, design item 3).
+ * A positive value enables batching: N-file `bun test` invocations replace one
+ * process per file. Files in a batch share one process and one TEST_TEMP_DIR and
+ * run sequentially inside bun.
+ *
+ * SHIPPED OFF (0) — 2026-11-16 CI evidence run 43788899945: at batch size 12 the
+ * windows unit step took 414s against a 371s ideal (1485s cumulative / 4
+ * workers), while the pre-batching baseline packed almost perfectly (361s vs
+ * 359s ideal). A coarse granule cannot pack around the 13 individually
+ * dispatched budgeted files, and one failing member costs the whole batch an
+ * individual re-run (local runs showed 2-3 such fallbacks per suite), so the
+ * spawn saving does not convert into wall-clock. Optimise item 1's per-test
+ * spawns first; re-enable with `TEST_RUNNER_BATCH_SIZE=N` once the tail is
+ * residue-free and the heavy files no longer dominate. */
+const DEFAULT_BATCH_SIZE = 0;
 
 function resolveBatchSize(): number {
   const raw = process.env.TEST_RUNNER_BATCH_SIZE;
@@ -867,8 +885,10 @@ export async function runTests(suiteName: string = "integration", options: RunOp
   // Batch mode (v1.16.0, design item 3): unit suite only — non-budgeted files
   // grouped into ~12-file `bun test` invocations; budgeted files (per-file
   // kill budgets + BUDGET-HEADROOM WARN semantics) and all other suites keep
-  // one process per file. Sequential mode never batches.
-  const batchingEnabled = suiteName === "unit" && isParallel;
+  // one process per file. Sequential mode never batches, and the tail batching
+  // itself is OPT-IN (`TEST_RUNNER_BATCH_SIZE=N`, default 0 = disabled — see
+  // DEFAULT_BATCH_SIZE for the CI evidence that turned it off).
+  const batchingEnabled = suiteName === "unit" && isParallel && resolveBatchSize() > 0;
   // Explicit `--timeout` CLI wins over the per-file overrides (manual runs
   // know what they asked for); otherwise overridden files get their budgets
   // and everything else the suite default + DEFAULT_TEST_TIMEOUT_MS.
