@@ -30,7 +30,12 @@
  *      DEC-20261110-02) are enforced once the project phase lands.
  *   3. Projects leg — active only when the gitignored `Projects/` tree is
  *      present (inert on CI checkouts, mirroring the
- *      meeting-command-retirement pin's Projects discipline). Two-phase:
+ *      meeting-command-retirement pin's Projects discipline). A `Projects/`
+ *      that holds no `co-<repo>/agents/` directory counts as INERT (2026-11-16,
+ *      test-runner v1.17.0 batch exposure: a sibling test in the same batched
+ *      process can leave an empty `Projects/` residue at the repo root, which
+ *      the earlier existsSync-only guard misread as a pre-sweep backlog —
+ *      CI run 43787401281 failed with Expected 388 / Received 0). Two-phase:
  *      before the per-repo sweep lands (Projects still carries zero NEW
  *      prefix) the pin holds the sweep's outstanding debt at the DEC's
  *      verified backlog of 161 + 135 = 296 occurrences — the debt must
@@ -188,9 +193,24 @@ describe("meeting participation boilerplate pin (spec 2026-11-10-meeting-partici
   test(
     "Projects leg: backlog pinned pre-sweep, hard zero pin once the project phase lands",
     () => {
-      if (!existsSync(join(REPO_ROOT, "Projects"))) {
-        // CI / worktree checkouts carry only tracked files; the leg is inert.
-        expect(existsSync(join(REPO_ROOT, "Projects"))).toBe(false);
+      // A fleet checkout is `Projects/` holding at least one co-* repo. An empty or
+      // co-*-less Projects/ is NOT a fleet checkout: CI checkouts carry only tracked
+      // files (no Projects/ at all), and a sibling unit test running in the same
+      // batched process can leave an empty Projects/ residue at the repo root
+      // (test-runner v1.17.0 batches the sub-5s tail into one process). Guarding on
+      // the co-* presence keeps the leg inert in both cases instead of reading
+      // residue as a pre-sweep backlog.
+      const projectsDir = join(REPO_ROOT, "Projects");
+      const isFleetCheckout =
+        existsSync(projectsDir) &&
+        readdirSync(projectsDir, { withFileTypes: true }).some(
+          (entry) =>
+            entry.isDirectory() &&
+            entry.name.startsWith("co-") &&
+            existsSync(join(projectsDir, entry.name, "agents")),
+        );
+      if (!isFleetCheckout) {
+        expect(isFleetCheckout).toBe(false);
         return;
       }
       const projectFiles = listInstructionSurfaceFiles("Projects");

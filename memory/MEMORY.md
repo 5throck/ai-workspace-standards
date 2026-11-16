@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-16](2026-11-16.md) | docs(docs): workspace sync (21 files) |
 | [2026-11-16](2026-11-16.md) | chore(templates): workspace sync (61 files) |
 | [2026-11-15](2026-11-15.md) | feat(co-deck): backport project script improvements into templates/co-deck (U-20261114-006/-008/-009, T-20261109-003 batch) |
 | [2026-11-14](2026-11-14.md) | feat(upgrade): country-scoped agents registry relocation (schema pair) + pre-delivery country guard (v1.105.0) — T-20261112-004/-005; orphan mirror removal (T-20261112-006) + SLR fix-text refresh (T-20261112-007); spec 2026-11-14-country-scoped-agents-registry-and-prune-design |

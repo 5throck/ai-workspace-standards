@@ -34,7 +34,32 @@
  *        both servers end up in the merged file, the preserved list names the
  *        project-only entry, and the template server arrives (design D6).
  *
- * @version 1.6.0
+ * @version 1.7.0
+ * v1.7.1 (2026-11-16): baseline-copy race fix — CI run 43786496770 (macos-latest)
+ *         failed with `ENOENT: lstat ...\.git/objects/maintenance.lock` because
+ *         `git commit` in the module-level baseline can trigger background
+ *         maintenance that unlinks lock files while `freshFromBaseline()`'s
+ *         cpSync walks the tree. The baseline now sets `gc.auto=0` and
+ *         `maintenance.auto=false` before its commit, and the copy retries up
+ *         to three times on ENOENT onto a clean target. No assertion changed.
+ * v1.7.0 (2026-11-15, engine-run + git-spawn consolidation — spec
+ *         docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1):
+ *         23 engine spawns → 18 and per-seed git spawns 5 → 2, with every
+ *         expect() preserved verbatim (only fixture constants/variables
+ *         re-pointed). (a) One git-seeded baseline project (init + config×2 +
+ *         add + commit) built once at module scope; `freshFromBaseline()`
+ *         cpSync-copies it per test so seeding costs one `add -A` + `commit`
+ *         instead of a full repo-init + config×2 + add + commit. No-HEAD
+ *         fixtures (dry-run NEW, identity AC5a-b/c/e — the dirty-tree guard
+ *         and stash semantics depend on the absent HEAD) keep the original
+ *         makeTempProject path. (b) Four dry-run scenes that asserted
+ *         non-overlapping negative/positive lines (codex overwrite guards,
+ *         codex MERGE dry parity, identity AC5a-d never-seed, .codex/
+ *         config.toml silence) share ONE dry run on a combined project —
+ *         every toContain/not.toContain line is per-path and disjoint. (c)
+ *         The CODEX MERGE apply run and the .agents/mcp.json merge run share
+ *         one apply project (disjoint paths). (d) The identity seed apply run
+ *         is shared by AC5a-b and AC5a-c's first run (identical fixture).
  * v1.6.0 (2026-11-12, upgrade-policy v1.43.0): `.mcp.json` left TRAIL_RETIRED_SEEDS (trail 0.29
  *          stores its `trail mcp` server there). Migrated-shape test now asserts `.mcp.json` IS seeded
  *          (no retired-surface SEED_SKIP for it); new test: a `.trail/` project with an existing
@@ -56,17 +81,75 @@ import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect, afterAll } from 'bun:test';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 const upgradeScript = join(workspaceRoot, 'scripts', 'upgrade-project.ts');
 const VARIANT = 'co-develop';
 
+const SHARED_DIRS: string[] = [];
+afterAll(() => {
+  for (const d of SHARED_DIRS) rmSync(d, { recursive: true, force: true });
+});
+
+function git(cwd: string, ...args: string[]): void {
+  spawnSync('git', ['-C', cwd, ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
+}
+
+// ── Shared git-seeded baseline (v1.7.0, design 2026-11-15 item 1) ────────────
+// One committed baseline project (init + config×2 + add + commit) built ONCE;
+// `freshFromBaseline()` cpSync-copies it per test, so seeding costs a single
+// `add -A` + `commit` (2 git spawns) instead of a full 5-spawn init. The
+// copy carries a real .git with one commit — the same HEAD-present semantics
+// the old per-test seeds produced.
+const BASELINE_DIR = mkdtempSync(join(tmpdir(), 'upgrade-tree-sync-baseline-'));
+SHARED_DIRS.push(BASELINE_DIR);
+spawnSync('git', ['init', '-q'], { cwd: BASELINE_DIR, stdio: ['ignore', 'pipe', 'pipe'] });
+git(BASELINE_DIR, 'config', 'user.email', 'test@example.com');
+git(BASELINE_DIR, 'config', 'user.name', 'Test');
+// v1.7.1: disable background maintenance in the baseline repo BEFORE the commit.
+// `git commit` can trigger `gc --auto`/maintenance, which unlinks `.git/objects/*.lock`
+// while `cpSync` walks the tree — macOS run 43786496770 failed with
+// `ENOENT: lstat .../.git/objects/maintenance.lock`. Config first, plus the
+// retry in freshFromBaseline() below for the residual window.
+git(BASELINE_DIR, 'config', 'gc.auto', '0');
+git(BASELINE_DIR, 'config', 'maintenance.auto', 'false');
+mkdirSync(join(BASELINE_DIR, '.claude'), { recursive: true });
+writeFileSync(
+  join(BASELINE_DIR, '.claude', 'template-version.txt'),
+  `variant=${VARIANT}\nversion=0.0.0\ncountry=none\n`
+);
+git(BASELINE_DIR, 'add', '-A');
+git(BASELINE_DIR, 'commit', '-q', '-m', 'chore: baseline');
+
+function freshFromBaseline(): string {
+  const tmp = mkdtempSync(join(tmpdir(), 'upgrade-tree-sync-'));
+  // v1.7.1: a concurrent git maintenance can unlink a lock file mid-walk even with
+  // gc.auto disabled (the commit's own upkeep can still be in flight). ENOENT on a
+  // vanished source entry is the signature — retry onto a clean target; the source
+  // is immutable after the first copy attempt.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      cpSync(BASELINE_DIR, tmp, { recursive: true });
+      return tmp;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== 'ENOENT' || attempt >= 2) throw err;
+      rmSync(tmp, { recursive: true, force: true });
+      mkdirSync(tmp, { recursive: true });
+    }
+  }
+}
+
+/** The original no-HEAD fixture — kept ONLY for the tests whose assertions
+ *  pin the absent-HEAD semantics (the dirty-tree guard skips the pre-upgrade
+ *  rollback snapshot without a HEAD; an uncommitted identity seed must
+ *  survive the run, and the identity-seed apply fixture relies on the same). */
 function makeTempProject(): string {
   const tmp = mkdtempSync(join(tmpdir(), 'upgrade-tree-sync-'));
-  spawnSync('git', ['init', '-q'], { cwd: tmp });
-  spawnSync('git', ['-C', tmp, 'config', 'user.email', 'test@example.com'], { cwd: tmp });
-  spawnSync('git', ['-C', tmp, 'config', 'user.name', 'Test'], { cwd: tmp });
+  spawnSync('git', ['init', '-q'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
+  git(tmp, 'config', 'user.email', 'test@example.com');
+  git(tmp, 'config', 'user.name', 'Test');
   mkdirSync(join(tmp, '.claude'), { recursive: true });
   writeFileSync(
     join(tmp, '.claude', 'template-version.txt'),
@@ -75,24 +158,119 @@ function makeTempProject(): string {
   return tmp;
 }
 
+function runUpgrade(tmp: string, extraArgs: string[] = []): { status: number; out: string } {
+  const result = spawnSync(
+    'bun',
+    [upgradeScript, tmp, '--variant', VARIANT, '--yes', ...extraArgs],
+    { encoding: 'utf-8', timeout: 300000 }
+  );
+  return { status: result.status ?? -1, out: `${result.stdout ?? ''}\n${result.stderr ?? ''}` };
+}
+
+// ── Shared engine runs (v1.7.0) ───────────────────────────────────────────────
+// Three consolidated runs serving multiple tests; every consuming test keeps
+// its own expect() lines verbatim, re-pointed at the shared result. Scenes on
+// a shared project are path-disjoint so per-path output lines never collide.
+
+const codexTemplatePathShared = join(workspaceRoot, 'templates', 'common', 'CODEX.md');
+const CODEX_ZONE_RE = /<!-- COMMON-CODEX:START -->[\s\S]*?<!-- COMMON-CODEX:END -->/;
+const CODEX_PROSE_SENTINEL = 'Project-owned intro line that must survive every upgrade.';
+
+/** CODEX.md seeded from the live common template: stale zone interior + one
+ *  project-owned prose line before the zone (the CODEX MERGE fixture shape). */
+function seededProjectCodex(): string {
+  const tpl = readFileSync(codexTemplatePathShared, 'utf8');
+  const tplZone = tpl.match(CODEX_ZONE_RE)![0];
+  const staleZone = tplZone.replace('Skill Resolution Priority', 'Skill Resolution Priority (STALE COPY)');
+  expect(staleZone).not.toBe(tplZone);
+  return tpl
+    .replace(CODEX_ZONE_RE, () => staleZone)
+    .replace('<!-- COMMON-CODEX:START -->', () => `${CODEX_PROSE_SENTINEL}\n\n<!-- COMMON-CODEX:START -->`);
+}
+
+/** ONE dry run carrying four path-disjoint scenes (v1.7.0):
+ *  - .codex/prompts/security-check.md: project-owned divergent codex asset
+ *    (overwrite guards — no VARIANT ASSET DIRS verdict),
+ *  - CODEX.md: stale-zone + prose (codex MERGE dry parity — MERGE verdict,
+ *    no overwrite verdict),
+ *  - docs/project.md: user-edited (identity AC5a-d — no seed verdict),
+ *  - .codex/config.toml: project copy (silent ADD_IF_MISSING — no verdict).
+ *  Every consuming assertion is a toContain / not.toContain on a per-path
+ *  line, so the combined output satisfies all four tests unchanged. */
+let codexDryRun: { tmp: string; result: { status: number; out: string }; userProjectMd: string } | null = null;
+function useCodexDryRun() {
+  if (!codexDryRun) {
+    const tmp = freshFromBaseline();
+    mkdirSync(join(tmp, '.codex', 'prompts'), { recursive: true });
+    writeFileSync(join(tmp, '.codex', 'prompts', 'security-check.md'),
+      '# project-owned security prompt — local customization\n');
+    const seededCodex = seededProjectCodex();
+    writeFileSync(join(tmp, 'CODEX.md'), seededCodex);
+    mkdirSync(join(tmp, 'docs'), { recursive: true });
+    const userProjectMd = '# user-edited — Project Overview\n\n- **Description**: Our real description.\n- **Type**: api\n';
+    writeFileSync(join(tmp, 'docs', 'project.md'), userProjectMd);
+    mkdirSync(join(tmp, '.codex'), { recursive: true });
+    writeFileSync(join(tmp, '.codex', 'config.toml'), '[features]\ncodex_hooks = true\n');
+    git(tmp, 'add', '-A');
+    git(tmp, 'commit', '-q', '-m', 'chore: shared dry-run scenes (codex asset, CODEX.md, project.md, config.toml)');
+    codexDryRun = { tmp, result: runUpgrade(tmp, ['--dry-run']), userProjectMd };
+    SHARED_DIRS.push(tmp);
+  }
+  return codexDryRun;
+}
+
+/** ONE apply run carrying two path-disjoint scenes (v1.7.0): the CODEX MERGE
+ *  fixture (stale zone refreshed by the MERGE pass) and the .agents/mcp.json
+ *  project-only MCP server (JSON MERGE pass). Disjoint files, so the merged
+ *  bytes and verdict lines of each scene are independent. */
+let codexApplyRun: { tmp: string; result: { status: number; out: string }; seededCodex: string } | null = null;
+function useCodexApplyRun() {
+  if (!codexApplyRun) {
+    const tmp = freshFromBaseline();
+    const seededCodex = seededProjectCodex();
+    writeFileSync(join(tmp, 'CODEX.md'), seededCodex);
+    mkdirSync(join(tmp, '.agents'), { recursive: true });
+    writeFileSync(join(tmp, '.agents', 'mcp.json'), JSON.stringify({
+      mcpServers: {
+        'project-only-server': {
+          command: 'uvx',
+          args: ['project-mcp', 'serve'],
+        },
+      },
+    }, null, 2) + '\n');
+    git(tmp, 'add', '-A');
+    git(tmp, 'commit', '-q', '-m', 'chore: shared apply scenes (CODEX.md, .agents/mcp.json)');
+    codexApplyRun = { tmp, result: runUpgrade(tmp), seededCodex };
+    SHARED_DIRS.push(tmp);
+  }
+  return codexApplyRun;
+}
+
+/** ONE apply run on a bare, no-HEAD project (v1.7.0): shared by identity
+ *  AC5a-b (seed content assertions) and AC5a-c's first run (its second run
+ *  continues on the same directory). */
+let identityApplyRun: { tmp: string; result: { status: number; out: string }; seeded: string } | null = null;
+function useIdentityApplyRun() {
+  if (!identityApplyRun) {
+    const tmp = makeTempProject();
+    const result = runUpgrade(tmp);
+    const seeded = readFileSync(join(tmp, 'docs', 'project.md'), 'utf8');
+    identityApplyRun = { tmp, result, seeded };
+    SHARED_DIRS.push(tmp);
+  }
+  return identityApplyRun;
+}
+
 describe('upgrade-project.ts TEMPLATE TREE SYNC', () => {
   test('dry-run reports NEW for uncovered docs and .github files and writes nothing', () => {
-    const tmp = makeTempProject();
+    // v1.7.0: baseline copy (committed, clean tree) — same NEW verdicts, no
+    // per-test repo-init/config spawns.
+    const tmp = freshFromBaseline();
     try {
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
-        { encoding: 'utf-8', timeout: 180000 }
-      );
+      const result = runUpgrade(tmp, ['--dry-run']);
 
-      if (result.status !== 0) {
-        console.error('--- dry-run spawn failed ---');
-        console.error('status:', result.status, 'signal:', result.signal, 'error:', result.error);
-        console.error('stderr:', (result.stderr ?? '').slice(0, 3000));
-        console.error('stdout:', (result.stdout ?? '').slice(0, 3000));
-      }
       expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
+      const out = result.out;
       expect(out).toContain('TEMPLATE TREE SYNC');
       expect(out).toContain('NEW    docs/user-guide.md');
       expect(out).toContain('NEW    .github/CODEOWNERS');
@@ -106,7 +284,7 @@ describe('upgrade-project.ts TEMPLATE TREE SYNC', () => {
   }, 60000);
 
   test('apply run delivers uncovered files, preserves project-owned files, JSON-merges settings', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       // Pre-seed project-owned state (files upgrade must never clobber)
       mkdirSync(join(tmp, 'docs', 'designs'), { recursive: true });
@@ -118,16 +296,12 @@ describe('upgrade-project.ts TEMPLATE TREE SYNC', () => {
         projectFlag: true,
       }, null, 2) + '\n');
 
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: pre-upgrade'], { cwd: tmp });
+      git(tmp, 'add', '-A');
+      git(tmp, 'commit', '-q', '-m', 'chore: pre-upgrade');
 
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
+      const out = result.out;
       expect(out).toContain('Tree-sync delivered');
 
       // Delivered: previously-uncovered template files now reach the project
@@ -164,8 +338,8 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
   function seedProjectContext(tmp: string, content: string): void {
     mkdirSync(join(tmp, 'docs'), { recursive: true });
     writeFileSync(join(tmp, 'docs', 'context.md'), content);
-    spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-    spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seed context'], { cwd: tmp });
+    git(tmp, 'add', '-A');
+    git(tmp, 'commit', '-q', '-m', 'chore: seed context');
   }
 
   function templateWithOlderFooter(): string {
@@ -182,7 +356,7 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
   }
 
   test('a. project-only section → PRESERVE (dry-run and apply), template NOT applied', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       const tpl = templateWithOlderFooter();
       const footerMatch = tpl.match(FOOTER_RE);
@@ -192,24 +366,22 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
       const seededContent = body + '\n\n## Project Only Section\nproject-specific content that must survive the upgrade\n' + footer;
       mkdirSync(join(tmp, 'docs'), { recursive: true });
       writeFileSync(join(tmp, 'docs', 'context.md'), seededContent);
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seed context'], { cwd: tmp });
+      git(tmp, 'add', '-A');
+      git(tmp, 'commit', '-q', '-m', 'chore: seed context');
 
       // Dry-run must produce the identical PRESERVE verdict.
-      const dry = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
+      const dry = runUpgrade(tmp, ['--dry-run']);
       expect(dry.status).toBe(0);
-      expect(dry.stdout).toContain('CONTEXT PRESERVE docs/context.md');
-      expect(dry.stdout).toContain('project-only: project only section');
-      expect(dry.stdout).toContain('preserved — re-run with --force-context-sync');
+      expect(dry.out).toContain('CONTEXT PRESERVE docs/context.md');
+      expect(dry.out).toContain('project-only: project only section');
+      expect(dry.out).toContain('preserved — re-run with --force-context-sync');
       expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8')).toBe(seededContent);
 
       // Apply run: file preserved byte-for-byte, template content NOT applied.
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain('CONTEXT PRESERVE docs/context.md');
-      expect(result.stdout).toContain('project-only: project only section');
+      expect(result.out).toContain('CONTEXT PRESERVE docs/context.md');
+      expect(result.out).toContain('project-only: project only section');
       expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8')).toBe(seededContent);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
@@ -217,7 +389,7 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
   }, 400000);
 
   test('b. --force-context-sync applies the template and logs the discarded sections', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       const tpl = templateWithOlderFooter();
       const footerMatch = tpl.match(FOOTER_RE)!;
@@ -226,13 +398,10 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
         + tpl.slice(footerMatch.index);
       seedProjectContext(tmp, seededContent);
 
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--yes', '--force-context-sync'],
-        { encoding: 'utf-8', timeout: 300000 });
+      const result = runUpgrade(tmp, ['--force-context-sync']);
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain('FORCED OVERWRITE docs/context.md');
-      expect(result.stdout).toContain('1 project-only section(s) discarded');
+      expect(result.out).toContain('FORCED OVERWRITE docs/context.md');
+      expect(result.out).toContain('1 project-only section(s) discarded');
 
       // Template version applied: project-only section gone, footer back at template text.
       const applied = readFileSync(join(tmp, 'docs', 'context.md'), 'utf8');
@@ -256,7 +425,7 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
   }, 400000);
 
   test('c. no project-only content (drift inside shared sections) → UPDATE fires unchanged', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       // Same shared headings as the template; only inline wording inside a shared
       // section drifted + footer is one version behind.
@@ -267,11 +436,10 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
       expect(seededContent).not.toBe(readFileSync(contextTemplatePath, 'utf8'));
       seedProjectContext(tmp, seededContent);
 
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      expect(result.stdout).not.toContain('CONTEXT PRESERVE');
-      expect(result.stdout).toMatch(/UPDATE docs\/context\.md/);
+      expect(result.out).not.toContain('CONTEXT PRESERVE');
+      expect(result.out).toMatch(/UPDATE docs\/context\.md/);
 
       // The template version was applied (current pre-preservation behavior preserved),
       // with the scaffold placeholder map rendered (T-20260930-025).
@@ -286,18 +454,17 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
   }, 400000);
 
   test('d. project copy with no version footer → PRESERVE (wholeFileOwned)', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       const tpl = readFileSync(contextTemplatePath, 'utf8');
       const footerMatch = tpl.match(FOOTER_RE)!;
       const noFooter = tpl.slice(0, footerMatch.index).trimEnd() + '\n';
       seedProjectContext(tmp, noFooter);
 
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain('CONTEXT PRESERVE docs/context.md');
-      expect(result.stdout).toContain('(entire file — no version footer; treated as project-owned)');
+      expect(result.out).toContain('CONTEXT PRESERVE docs/context.md');
+      expect(result.out).toContain('(entire file — no version footer; treated as project-owned)');
       expect(readFileSync(join(tmp, 'docs', 'context.md'), 'utf8')).toBe(noFooter);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
@@ -314,12 +481,11 @@ describe('upgrade-project.ts docs/context.md CONTEXT PRESERVE gate', () => {
 // write parity, and the AC4 never-overwrite guarantee.
 describe('upgrade-project.ts IDENTITY SEED (docs/project.md, §13.2)', () => {
   test('AC5a-a: absent docs/project.md → dry-run prints the seed verdict, writes nothing', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
+      const result = runUpgrade(tmp, ['--dry-run']);
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain('NEW    docs/project.md  (identity seed — add-if-missing)');
+      expect(result.out).toContain('NEW    docs/project.md  (identity seed — add-if-missing)');
       expect(existsSync(join(tmp, 'docs', 'project.md'))).toBe(false);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
@@ -327,59 +493,40 @@ describe('upgrade-project.ts IDENTITY SEED (docs/project.md, §13.2)', () => {
   }, 300000);
 
   test('AC5a-b: apply run seeds docs/project.md with the TODO(project-overview) fallback intact', () => {
-    const tmp = makeTempProject();
-    try {
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
-      expect(result.status).toBe(0);
-      expect(result.stdout).toContain('NEW    docs/project.md  (identity seed — add-if-missing)');
-      const seeded = readFileSync(join(tmp, 'docs', 'project.md'), 'utf8');
-      // applySubstitutions rendered the project name from basename(projectDir)…
-      expect(seeded).not.toContain('[Project Name]');
-      // …while the non-token TODO(project-overview) fallback lines survived untouched
-      // (an undescribed seeded project lands in the audit-WARN-visible state R4 intends).
-      expect(seeded).toContain('TODO(project-overview): [One-sentence description');
-      expect(seeded).toContain('TODO(project-overview): [TBD]');
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    // v1.7.0: rides the shared identity-seed apply run (identical bare, no-HEAD
+    // fixture); AC5a-c's first run is this same run.
+    const { result, seeded } = useIdentityApplyRun();
+    expect(result.status).toBe(0);
+    expect(result.out).toContain('NEW    docs/project.md  (identity seed — add-if-missing)');
+    // applySubstitutions rendered the project name from basename(projectDir)…
+    expect(seeded).not.toContain('[Project Name]');
+    // …while the non-token TODO(project-overview) fallback lines survived untouched
+    // (an undescribed seeded project lands in the audit-WARN-visible state R4 intends).
+    expect(seeded).toContain('TODO(project-overview): [One-sentence description');
+    expect(seeded).toContain('TODO(project-overview): [TBD]');
   }, 300000);
 
   test('AC5a-c: second run seeds nothing — no verdict, file byte-unchanged', () => {
-    const tmp = makeTempProject();
-    try {
-      const first = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
-      expect(first.status).toBe(0);
-      const seeded = readFileSync(join(tmp, 'docs', 'project.md'), 'utf8');
+    // v1.7.0: run 1 is the shared identity-seed apply run; only this test's
+    // SECOND run remains a dedicated spawn.
+    const { tmp, result: first, seeded } = useIdentityApplyRun();
+    expect(first.status).toBe(0);
+    expect(readFileSync(join(tmp, 'docs', 'project.md'), 'utf8')).toBe(seeded);
 
-      const second = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
-      expect(second.status).toBe(0);
-      expect(second.stdout).not.toContain('(identity seed');
-      expect(readFileSync(join(tmp, 'docs', 'project.md'), 'utf8')).toBe(seeded);
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    const second = runUpgrade(tmp);
+    expect(second.status).toBe(0);
+    expect(second.out).not.toContain('(identity seed');
+    expect(readFileSync(join(tmp, 'docs', 'project.md'), 'utf8')).toBe(seeded);
   }, 600000);
 
   test('AC5a-d: pre-existing user-edited docs/project.md is never written (AC4)', () => {
-    const tmp = makeTempProject();
-    try {
-      const dest = join(tmp, 'docs', 'project.md');
-      mkdirSync(join(tmp, 'docs'), { recursive: true });
-      writeFileSync(dest, '# user-edited — Project Overview\n\n- **Description**: Our real description.\n- **Type**: api\n');
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: user identity'], { cwd: tmp });
-
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
-      expect(result.status).toBe(0);
-      expect(result.stdout).not.toContain('(identity seed');
-      expect(readFileSync(dest, 'utf8')).toContain('Our real description.');
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    // v1.7.0: rides the shared codex dry-run (its docs/project.md scene is
+    // exactly this user-edited, committed fixture).
+    const { tmp, result } = useCodexDryRun();
+    const dest = join(tmp, 'docs', 'project.md');
+    expect(result.status).toBe(0);
+    expect(result.out).not.toContain('(identity seed');
+    expect(readFileSync(dest, 'utf8')).toContain('Our real description.');
   }, 300000);
 });
 
@@ -394,10 +541,9 @@ describe('upgrade-project.ts IDENTITY SEED — dirty-tree corner (§13.2 guard)'
       // preUpgradeDirty carries the path, and isLocallyModified must keep the
       // seed off — AC4 holds for dirty trees, not just committed ones.
       writeFileSync(dest, '# user-edited uncommitted — Project Overview\n\n- **Description**: Uncommitted identity.\n- **Type**: web\n');
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 });
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      expect(result.stdout).not.toContain('(identity seed');
+      expect(result.out).not.toContain('(identity seed');
       expect(readFileSync(dest, 'utf8')).toContain('Uncommitted identity.');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
@@ -414,48 +560,26 @@ describe('upgrade-project.ts IDENTITY SEED — dirty-tree corner (§13.2 guard)'
 // ============================================================================
 describe('upgrade-project.ts CODEX OVERWRITE GUARDS (P1 bugs 3+4)', () => {
   test('divergent project .codex file and CODEX.md get no overwrite verdicts (dry-run exits 0)', () => {
-    const tmp = makeTempProject();
-    try {
-      // Project-owned copy of a co-develop .codex template file, deliberately
-      // divergent — pre-fix the VARIANT ASSET DIRS pass hash-synced it
-      // (UPDATE/COPIED verdicts), overwriting project-owned Codex config.
-      mkdirSync(join(tmp, '.codex', 'prompts'), { recursive: true });
-      writeFileSync(join(tmp, '.codex', 'prompts', 'security-check.md'),
-        '# project-owned security prompt — local customization\n');
-      // Divergent project CODEX.md (committed → clean tree → the tree-sync hash
-      // branch fires pre-fix and wholesale-overwrites with the raw template).
-      writeFileSync(join(tmp, 'CODEX.md'),
-        '# CODEX.md — project-customized\n\nMy local agent instructions that must survive upgrades.\n');
+    // v1.7.0: rides the shared codex dry-run — its .codex/prompts/
+    // security-check.md scene is this project-owned divergent asset and its
+    // CODEX.md scene is a divergent project copy (stale-zone + prose form of
+    // the same "project-divergent CODEX.md" state), so both negative verdicts
+    // assert against one committed dry run.
+    const { result } = useCodexDryRun();
+    // Integration guard (D8): the full run must exit 0 — the skip-set change
+    // must not disturb neighboring passes.
+    expect(result.status).toBe(0);
+    const out = result.out;
 
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: project-owned codex state'], { cwd: tmp });
+    // Bug 3: no VARIANT ASSET DIRS verdict for the project-owned .codex file.
+    expect(out).not.toContain('UPDATE .codex/prompts/security-check.md');
+    expect(out).not.toContain('COPIED: .codex/prompts/security-check.md');
 
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
-      if (result.status !== 0) {
-        console.error('stdout:', (result.stdout ?? '').slice(-3000));
-        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
-      }
-      // Integration guard (D8): the full run must exit 0 — the skip-set change
-      // must not disturb neighboring passes.
-      expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
-
-      // Bug 3: no VARIANT ASSET DIRS verdict for the project-owned .codex file.
-      expect(out).not.toContain('UPDATE .codex/prompts/security-check.md');
-      expect(out).not.toContain('COPIED: .codex/prompts/security-check.md');
-
-      // Bug 4 (integration assert): no TEMPLATE TREE SYNC overwrite verdict for
-      // the divergent project CODEX.md. (The MERGE pass still prints its own
-      // "MERGE: CODEX.md" line — that is the owning pass, not an overwrite.)
-      expect(out).not.toContain('UPDATE CODEX.md');
-      expect(out).not.toContain('COPIED: CODEX.md');
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    // Bug 4 (integration assert): no TEMPLATE TREE SYNC overwrite verdict for
+    // the divergent project CODEX.md. (The MERGE pass still prints its own
+    // "MERGE: CODEX.md" line — that is the owning pass, not an overwrite.)
+    expect(out).not.toContain('UPDATE CODEX.md');
+    expect(out).not.toContain('COPIED: CODEX.md');
   }, 300000);
 });
 
@@ -468,80 +592,41 @@ describe('upgrade-project.ts CODEX OVERWRITE GUARDS (P1 bugs 3+4)', () => {
 // ============================================================================
 describe('upgrade-project.ts CODEX MERGE (COMMON-CODEX zone — T-20260924-010)', () => {
   const codexTemplatePath = join(workspaceRoot, 'templates', 'common', 'CODEX.md');
-  const ZONE_RE = /<!-- COMMON-CODEX:START -->[\s\S]*?<!-- COMMON-CODEX:END -->/;
-  const PROSE_SENTINEL = 'Project-owned intro line that must survive every upgrade.';
-
-  /** Project CODEX.md seeded from the live common template: zone interior made
-   *  stale (marker text untouched) + one project-owned prose line before the zone. */
-  function seededProjectCodex(): string {
-    const tpl = readFileSync(codexTemplatePath, 'utf8');
-    const tplZone = tpl.match(ZONE_RE)![0];
-    const staleZone = tplZone.replace('Skill Resolution Priority', 'Skill Resolution Priority (STALE COPY)');
-    expect(staleZone).not.toBe(tplZone);
-    return tpl
-      .replace(ZONE_RE, () => staleZone)
-      .replace('<!-- COMMON-CODEX:START -->', () => `${PROSE_SENTINEL}\n\n<!-- COMMON-CODEX:START -->`);
-  }
-
-  function seedCommittedCodex(tmp: string): string {
-    const seeded = seededProjectCodex();
-    writeFileSync(join(tmp, 'CODEX.md'), seeded);
-    spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-    spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seeded CODEX.md'], { cwd: tmp });
-    return seeded;
-  }
+  const ZONE_RE = CODEX_ZONE_RE;
+  const PROSE_SENTINEL = CODEX_PROSE_SENTINEL;
 
   test('apply run merges the stale COMMON-CODEX zone; customized prose survives byte-identical', () => {
-    const tmp = makeTempProject();
-    try {
-      const seeded = seedCommittedCodex(tmp);
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
-      if (result.status !== 0) {
-        console.error('stdout:', (result.stdout ?? '').slice(-3000));
-        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
-      }
-      expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
-      // The MERGE pass owns the file and delivered the zone union.
-      expect(out).toContain('MERGE: CODEX.md');
-      expect(out).toContain('MERGED COMMON-CODEX block in: CODEX.md');
+    // v1.7.0: rides the shared codex apply run (this file's CODEX.md scene is
+    // exactly this fixture; the run also carries the path-disjoint
+    // .agents/mcp.json merge scene — see the MCP JSON MERGE describe).
+    const { tmp, result, seededCodex: seeded } = useCodexApplyRun();
+    expect(result.status).toBe(0);
+    const out = result.out;
+    // The MERGE pass owns the file and delivered the zone union.
+    expect(out).toContain('MERGE: CODEX.md');
+    expect(out).toContain('MERGED COMMON-CODEX block in: CODEX.md');
 
-      const applied = readFileSync(join(tmp, 'CODEX.md'), 'utf8');
-      const tplZone = readFileSync(codexTemplatePath, 'utf8').match(ZONE_RE)![0];
-      const projZone = seeded.match(ZONE_RE)![0];
-      // Zone refreshed to the template's bytes…
-      expect(applied.match(ZONE_RE)![0]).toBe(tplZone);
-      expect(applied).not.toContain('(STALE COPY)');
-      // …and the result is EXACTLY the seeded file with only the zone span
-      // replaced — outside-zone prose byte-identical.
-      expect(applied).toBe(seeded.replace(projZone, () => tplZone));
-      expect(applied).toContain(PROSE_SENTINEL);
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    const applied = readFileSync(join(tmp, 'CODEX.md'), 'utf8');
+    const tplZone = readFileSync(codexTemplatePath, 'utf8').match(ZONE_RE)![0];
+    const projZone = seeded.match(ZONE_RE)![0];
+    // Zone refreshed to the template's bytes…
+    expect(applied.match(ZONE_RE)![0]).toBe(tplZone);
+    expect(applied).not.toContain('(STALE COPY)');
+    // …and the result is EXACTLY the seeded file with only the zone span
+    // replaced — outside-zone prose byte-identical.
+    expect(applied).toBe(seeded.replace(projZone, () => tplZone));
+    expect(applied).toContain(PROSE_SENTINEL);
   }, 300000);
 
   test('no overwrite verdict for CODEX.md from any pass other than MERGE (holds pre- and post-fix)', () => {
-    const tmp = makeTempProject();
-    try {
-      seedCommittedCodex(tmp);
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
-      expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
-      expect(out).toContain('MERGE: CODEX.md');
-      expect(out).not.toContain('UPDATE CODEX.md');
-      expect(out).not.toContain('COPIED: CODEX.md');
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    // v1.7.0: rides the shared codex dry-run (its CODEX.md scene is this
+    // stale-zone committed fixture).
+    const { result } = useCodexDryRun();
+    expect(result.status).toBe(0);
+    const out = result.out;
+    expect(out).toContain('MERGE: CODEX.md');
+    expect(out).not.toContain('UPDATE CODEX.md');
+    expect(out).not.toContain('COPIED: CODEX.md');
   }, 300000);
 });
 
@@ -554,7 +639,7 @@ describe('upgrade-project.ts CODEX MERGE (COMMON-CODEX zone — T-20260924-010)'
 // ============================================================================
 describe('upgrade-project.ts VARIANT ASSET DIRS claim routing (T-20260924-011)', () => {
   test('modified committed procedure file under an owned entry survives the upgrade', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       // Seed procedures/ from the variant template, then:
       //  - architecture-design/schema.yaml: locally modified + committed (clean tree)
@@ -573,20 +658,12 @@ describe('upgrade-project.ts VARIANT ASSET DIRS claim routing (T-20260924-011)',
         + '\n# project-local workflow edit that must survive the upgrade\n';
       writeFileSync(join(tmp, modifiedRel), modifiedContent);
       rmSync(join(tmp, 'procedures', 'security-release-retrospective'), { recursive: true, force: true });
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: seeded procedures'], { cwd: tmp });
+      git(tmp, 'add', '-A');
+      git(tmp, 'commit', '-q', '-m', 'chore: seeded procedures');
 
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
-      if (result.status !== 0) {
-        console.error('stdout:', (result.stdout ?? '').slice(-3000));
-        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
-      }
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
+      const out = result.out;
 
       // No asset-dir verdict for any procedures/ path — the modified file is
       // neither UPDATEd nor CONFLICT-reported nor COPIED by this pass.
@@ -613,7 +690,7 @@ describe('upgrade-project.ts VARIANT ASSET DIRS claim routing (T-20260924-011)',
     // D4 row 5: proves the claim filter did not neuter the pass — files whose
     // claim pass IS the VARIANT ASSET DIRS pass keep the hash-sync semantics.
     const CONTROL_VARIANT = 'co-design';
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       // Seed decisions/gates.yaml from the co-design template, diverge it
       // project-side, commit (clean tree → UPDATE, not CONFLICT).
@@ -621,18 +698,14 @@ describe('upgrade-project.ts VARIANT ASSET DIRS claim routing (T-20260924-011)',
       const tplContent = readFileSync(join(workspaceRoot, 'templates', CONTROL_VARIANT, rel), 'utf8');
       mkdirSync(join(tmp, 'decisions'), { recursive: true });
       writeFileSync(join(tmp, rel), tplContent + '\n# project-side divergence that the pass must overwrite back\n');
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: diverged decisions file'], { cwd: tmp });
+      git(tmp, 'add', '-A');
+      git(tmp, 'commit', '-q', '-m', 'chore: diverged decisions file');
 
       const result = spawnSync(
         'bun',
         [upgradeScript, tmp, '--variant', CONTROL_VARIANT, '--yes'],
         { encoding: 'utf-8', timeout: 300000 }
       );
-      if (result.status !== 0) {
-        console.error('stdout:', (result.stdout ?? '').slice(-3000));
-        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
-      }
       expect(result.status).toBe(0);
       const out = result.stdout ?? '';
       expect(out).toContain('UPDATE decisions/gates.yaml');
@@ -654,78 +727,42 @@ describe('upgrade-project.ts VARIANT ASSET DIRS claim routing (T-20260924-011)',
 // ============================================================================
 describe('upgrade-project.ts MCP JSON MERGE (.agents/mcp.json, registry completeness R4.5)', () => {
   test('apply-mode upgrade merges both MCP servers and logs the preserved project-only entry', () => {
-    const tmp = makeTempProject();
-    try {
-      // Project-only MCP server registration (the customization the old SYNC
-      // claim would have destroyed).
-      mkdirSync(join(tmp, '.agents'), { recursive: true });
-      writeFileSync(join(tmp, '.agents', 'mcp.json'), JSON.stringify({
-        mcpServers: {
-          'project-only-server': {
-            command: 'uvx',
-            args: ['project-mcp', 'serve'],
-          },
-        },
-      }, null, 2) + '\n');
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: project mcp servers'], { cwd: tmp });
+    // v1.7.0: rides the shared codex apply run — its .agents/mcp.json scene is
+    // exactly this project-only server registration (path-disjoint from the
+    // CODEX.md merge scene on the same run).
+    const { tmp, result } = useCodexApplyRun();
+    expect(result.status).toBe(0);
+    const out = result.out;
 
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
-      if (result.status !== 0) {
-        console.error('stdout:', (result.stdout ?? '').slice(-3000));
-        console.error('stderr:', (result.stderr ?? '').slice(0, 2000));
-      }
-      expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
+    // The merge verdict names the file and the preserved project-only entry.
+    expect(out).toContain('MERGE  .agents/mcp.json');
+    expect(out).toContain('preserved project-only: mcpServers.project-only-server');
 
-      // The merge verdict names the file and the preserved project-only entry.
-      expect(out).toContain('MERGE  .agents/mcp.json');
-      expect(out).toContain('preserved project-only: mcpServers.project-only-server');
+    // Merged bytes: the project-only server survived AND the template seed's
+    // graft server arrived.
+    const merged = JSON.parse(readFileSync(join(tmp, '.agents', 'mcp.json'), 'utf8'));
+    expect(merged.mcpServers['project-only-server']).toEqual({
+      command: 'uvx',
+      args: ['project-mcp', 'serve'],
+    });
+    expect(merged.mcpServers['trail']).toBeDefined();
 
-      // Merged bytes: the project-only server survived AND the template seed's
-      // graft server arrived.
-      const merged = JSON.parse(readFileSync(join(tmp, '.agents', 'mcp.json'), 'utf8'));
-      expect(merged.mcpServers['project-only-server']).toEqual({
-        command: 'uvx',
-        args: ['project-mcp', 'serve'],
-      });
-      expect(merged.mcpServers['trail']).toBeDefined();
-
-      // No overwrite verdict from any pass for the file.
-      expect(out).not.toContain('UPDATE .agents/mcp.json');
-      expect(out).not.toContain('COPIED: .agents/mcp.json');
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    // No overwrite verdict from any pass for the file.
+    expect(out).not.toContain('UPDATE .agents/mcp.json');
+    expect(out).not.toContain('COPIED: .agents/mcp.json');
   }, 300000);
 
   test('dry-run: .codex/config.toml never appears with a verdict; a present project copy is silent', () => {
-    const tmp = makeTempProject();
-    try {
-      mkdirSync(join(tmp, '.codex'), { recursive: true });
-      writeFileSync(join(tmp, '.codex', 'config.toml'), '[features]\ncodex_hooks = true\n');
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: project codex config'], { cwd: tmp });
-
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--dry-run', '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
-      expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
-      // ADD_IF_MISSING on an existing file is a silent seed-only skip — no
-      // config.toml verdict line of any kind in the run output.
-      expect(out).not.toContain('config.toml');
-      // …and the customized project bytes are untouched (dry-run writes nothing).
-      expect(readFileSync(join(tmp, '.codex', 'config.toml'), 'utf8')).toBe('[features]\ncodex_hooks = true\n');
-    } finally {
-      rmSync(tmp, { recursive: true, force: true });
-    }
+    // v1.7.0: rides the shared codex dry-run (its .codex/config.toml scene is
+    // exactly this present project copy).
+    const { tmp, result } = useCodexDryRun();
+    expect(result.status).toBe(0);
+    const out = result.out;
+    // ADD_IF_MISSING on an existing file is a silent seed-only skip — no
+    // config.toml verdict line of any kind in the run output.
+    expect(out).not.toContain('config.toml');
+    // …and the customized project bytes are untouched (dry-run writes nothing).
+    expect(readFileSync(join(tmp, '.codex', 'config.toml'), 'utf8')).toBe('[features]\ncodex_hooks = true\n');
   }, 300000);
 });
 
@@ -759,20 +796,16 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
   }
 
   test('migrated shape (.trail/ present): graft helpers not re-seeded, .mcp.json seeded; no graft hook re-add', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       mkdirSync(join(tmp, '.trail'), { recursive: true }); // the migration marker
       writeTrailSettings(tmp);
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: trail-migrated project'], { cwd: tmp });
+      git(tmp, 'add', '-A');
+      git(tmp, 'commit', '-q', '-m', 'chore: trail-migrated project');
 
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
+      const out = result.out;
 
       // (b) .mcp.json left the retired list (upgrade-policy v1.43.0): absent + .trail/ → seeded.
       expect(existsSync(join(tmp, '.mcp.json'))).toBe(true);
@@ -795,17 +828,17 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
   }, 300000);
 
   test('.trail/ project WITH an existing .mcp.json: merged (not overwritten), project-local server preserved', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       mkdirSync(join(tmp, '.trail'), { recursive: true });
       writeTrailSettings(tmp);
       writeFileSync(join(tmp, '.mcp.json'), JSON.stringify({
         mcpServers: { 'my-local': { command: 'node', args: ['local.js'] } },
       }, null, 2) + '\n');
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: trail project with local mcp'], { cwd: tmp });
+      git(tmp, 'add', '-A');
+      git(tmp, 'commit', '-q', '-m', 'chore: trail project with local mcp');
 
-      const result = spawnSync('bun', [upgradeScript, tmp, '--variant', VARIANT, '--yes'], { encoding: 'utf-8', timeout: 300000 });
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
       const mcp = JSON.parse(readFileSync(join(tmp, '.mcp.json'), 'utf8'));
       expect(mcp.mcpServers['my-local']).toEqual({ command: 'node', args: ['local.js'] });
@@ -816,7 +849,7 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
   }, 60000);
 
   test('unmigrated shape (no .trail/, helper present): .mcp.json is seeded and template no longer re-adds graft hooks', () => {
-    const tmp = makeTempProject();
+    const tmp = freshFromBaseline();
     try {
       // Pre-migration graft-era state: the helper shelf is present (no .trail/).
       mkdirSync(join(tmp, '.claude', 'helpers'), { recursive: true });
@@ -824,16 +857,12 @@ describe('upgrade-project.ts TRAIL MIGRATION TOLERANCE', () => {
       writeFileSync(join(tmp, '.claude', 'settings.json'), JSON.stringify({
         permissions: { allow: ['Bash(my-project-tool *)'] },
       }, null, 2) + '\n');
-      spawnSync('git', ['-C', tmp, 'add', '-A'], { cwd: tmp });
-      spawnSync('git', ['-C', tmp, 'commit', '-q', '-m', 'chore: pre-migration project'], { cwd: tmp });
+      git(tmp, 'add', '-A');
+      git(tmp, 'commit', '-q', '-m', 'chore: pre-migration project');
 
-      const result = spawnSync(
-        'bun',
-        [upgradeScript, tmp, '--variant', VARIANT, '--yes'],
-        { encoding: 'utf-8', timeout: 300000 }
-      );
+      const result = runUpgrade(tmp);
       expect(result.status).toBe(0);
-      const out = result.stdout ?? '';
+      const out = result.out;
 
       // .mcp.json seeded exactly as before the trail migration policy existed.
       expect(existsSync(join(tmp, '.mcp.json'))).toBe(true);

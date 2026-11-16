@@ -90,7 +90,20 @@
  * Engine suites spawn scripts/upgrade-project.ts against a temp project and
  * the real workspace templates (the established upgrade-tree-sync pattern).
  *
- * @version 2.1.1
+ * @version 2.2.0
+ * v2.2.0 (2026-11-15, engine-run consolidation — spec
+ *         docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1):
+ *         the mirror-only VARIANT-SCOPE SKILL PRUNE scene (a registry-foreign
+ *         .claude/skills/sound-synth mirror with no SSOT dir) moved into the
+ *         'fresh-governance' shape as a path-disjoint seed, and its test
+ *         asserts the DELETE (WARN) row against the shared run — 22 engine
+ *         runs → 21, every expect() preserved verbatim. The two --dry-run
+ *         flag-refusal tests were NOT merged: the engine validates the
+ *         tombstone refusal first and process.exit(1)s before the changelog
+ *         refusal branch (scripts/upgrade-project.ts), so a combined run
+ *         would exercise only one refusal and the other test would pass
+ *         without proving its own branch. Lifecycle pairs and the per-shape
+ *         fixture cache (v2.0.0) are untouched.
  * v2.1.1 (2026-11-09, rogue-commit incident): the fixture git calls
  *          (makeTempProject/commitAll) run under scripts/lib/git-env.ts
  *          gitCleanEnv(). Under a hook context (GIT_DIR exported) they used to
@@ -357,6 +370,23 @@ const SHAPES: Record<string, { args: string[]; setup: (tmp: string) => void }> =
       writeFileSync(join(tmp, PHASE_DEFS_REL), EVOLVED_PHASE_DEFS);
       mkdirSync(join(tmp, 'agents'), { recursive: true });
       writeFileSync(join(tmp, 'agents', 'pm.md'), stalePmStub());
+      // Mirror-only foreign-skill scene (v2.2.0 consolidation — spec
+      // docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1): the
+      // VARIANT-SCOPE SKILL PRUNE mirror-only test asserts its DELETE (WARN)
+      // row against this shared run instead of paying a dedicated engine
+      // spawn. Path-disjoint from every other member's assertions.
+      mkdirSync(join(tmp, '.claude', 'skills', 'sound-synth'), { recursive: true });
+      writeFileSync(join(tmp, '.claude', 'skills', 'sound-synth', 'SKILL.md'), [
+        '---',
+        'name: sound-synth',
+        'version: "1.0.0"',
+        '---',
+        '',
+        '# Sound Synth',
+        '',
+        'Mirror-only residue of the sound-synth promotion-mistake class (co-game-scoped).',
+        '',
+      ].join('\n'));
       commitAll(tmp, 'chore: fresh governance seeds (license, changelog, evolved doc, stale stub)');
     },
   },
@@ -504,8 +534,9 @@ const ADOPTED_SKILL_MD = [
 ].join('\n');
 
 // v2.1.0: the mirror-only prune shape is MUTATING (the engine deletes the
-// mirror), so it cannot share the apply-run shapes above — one dedicated
-// seeded project, asserted after its own run.
+// mirror), so it cannot share the apply-run shapes above — v2.2.0 consolidated
+// it onto the fresh-governance run instead (path-disjoint scene), leaving
+// 'tombstone-candidate' the only DIR_SHAPE.
 const DIR_SHAPES: Record<string, () => string> = {
   // Members: the dry-run report (TOMBSTONED (ERROR) candidate + persists
   // nothing), the --dry-run tombstone-flag refusal, and the --tombstone
@@ -516,27 +547,6 @@ const DIR_SHAPES: Record<string, () => string> = {
     const tmp = makeTempProject();
     seedPriorDelivery(tmp, WORKFLOWS_REL, OLD_WORKFLOWS);
     commitAll(tmp, 'chore: prior delivery recorded');
-    return tmp;
-  },
-  // Registry-detected foreign skill present ONLY as a platform mirror (no
-  // skills/ SSOT dir) — the adoption guard does not apply (it protects the
-  // SSOT), the pass's real job proceeds: the mirror is pruned WITH a DELETE
-  // (WARN) decision row — never silently.
-  'variant-scope-mirror-prune': (): string => {
-    const tmp = makeTempProject();
-    mkdirSync(join(tmp, '.claude', 'skills', 'sound-synth'), { recursive: true });
-    writeFileSync(join(tmp, '.claude', 'skills', 'sound-synth', 'SKILL.md'), [
-      '---',
-      'name: sound-synth',
-      'version: "1.0.0"',
-      '---',
-      '',
-      '# Sound Synth',
-      '',
-      'Mirror-only residue of the sound-synth promotion-mistake class (co-game-scoped).',
-      '',
-    ].join('\n'));
-    commitAll(tmp, 'chore: seed mirror-only foreign variant skill');
     return tmp;
   },
 };
@@ -1351,13 +1361,16 @@ describe('upgrade-project.ts VARIANT-SCOPE SKILL PRUNE decisions (T-20261101-001
   }, 600000);
 
   test('mirror-only foreign residue is still pruned — with a DELETE (WARN) row, never silently', () => {
-    const tmp = useDir('variant-scope-mirror-prune');
-    const result = runUpgrade(tmp);
-    expect(result.status).toBe(0);
+    // v2.2.0 consolidation (spec docs/designs/2026-11-15-windows-ci-test-speedup-design.md
+    // item 1): the mirror-only scene rides the fresh-governance run (the shape
+    // seeds exactly this .claude/skills/sound-synth mirror; path-disjoint from
+    // every other member's assertions). DELETE is contractually WARN, so the
+    // shared run's exit 0 holds.
+    const { tmp, status, manifest } = useShape('fresh-governance');
+    expect(status).toBe(0);
     // The pass's real job proceeds: the mirror is gone.
     expect(existsSync(join(tmp, '.claude', 'skills', 'sound-synth'))).toBe(false);
     // ...and the deletion is decision-logged (DELETE is contractually WARN).
-    const manifest = readManifest(tmp);
     const row = manifest.decisions.find((d) => d.path === '.claude/skills/sound-synth' && d.verdict === 'DELETE');
     expect(row).toBeDefined();
     expect(row!.severity).toBe('WARN');

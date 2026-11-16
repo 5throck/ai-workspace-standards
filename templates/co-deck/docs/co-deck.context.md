@@ -1,6 +1,6 @@
 ---
 # co-deck — Variant Configuration
-# Last Updated: 2026-11-15
+# Last Updated: 2026-11-16
 ---
 
 > Extends docs/context.md. This file IS the customization layer for this project.
@@ -677,6 +677,7 @@ This ensures the same `agents/*.md` files work under Claude, Gemini, and any fut
 
 ---
 
+*co-deck.context.md version: 4.8 — updated 2026-11-16: header `Last Updated` refresh landed via the origin/main template sync (no substantive content change); version bumped so upgrade-project can distinguish old from new (CV-02 same-version-content-change).*
 *co-deck.context.md version: 4.5 — updated 2026-07-19: merged Architecture Principles (Why Multi-Agent, Harness Pattern, Layer Separation, AI Neutrality) from root ARCHITECTURE.md.*
 *co-deck.context.md version: 4.4 — updated 2026-08-17: handbook search index is manifest-driven (`search-manifest.json` → `build-search-index.ts` → `search-data.js`); validation layered and aggregated via `validate-handbook.ts` (8 check groups).*
 *co-deck.context.md version: 4.5 — updated 2026-11-15: scaffold deliverables/ migration (presentations/ → deliverables/); path references updated throughout.*
