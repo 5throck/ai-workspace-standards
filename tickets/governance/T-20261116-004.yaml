@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261116-004
+kind: manual
+title: >-
+  Design: convert co-learning docs/governance/agents/workflows.md into a zone
+  override instead of a frozen 150+-line shadow of common (only a 29-line Stream
+  Boundaries insertion differs). Design:
+  docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section
+  8 (follow-ups). Evidence: variant-common-shadow check (PR #2047),
+  T-20261114-012.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-16T19:35:50.156+09:00'
+history:
+  - at: '2026-11-16T19:35:50.156+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

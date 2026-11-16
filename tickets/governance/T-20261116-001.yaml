@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261116-001
+kind: manual
+title: >-
+  COMMON-CLAUDE merge should keep the newer Last Updated date. Design:
+  docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section
+  8 (follow-ups). Follow-up from the upgrade-project/dev-sync batch (PRs
+  #2045-#2047).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-16T19:35:50.014+09:00'
+history:
+  - at: '2026-11-16T19:35:50.014+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,20 @@
+schemaVersion: 1
+id: T-20261116-002
+kind: manual
+title: >-
+  .githooks/commit-msg drops the first body paragraph: 'tail -n +2 | sed
+  '"'"'1,/^$/d'"'"'' on 'subj, blank, para one, blank, para two' returns only
+  'para two'; affects the memory auto-log only. Note: .githooks/ changes need
+  extra review. Design:
+  docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section
+  8 (follow-ups). Split from T-20261114-006 (PR #2045).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-16T19:35:50.066+09:00'
+history:
+  - at: '2026-11-16T19:35:50.066+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

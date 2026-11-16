@@ -50,7 +50,7 @@ title: >-
   silently. Relations: T-20261001-015 (archived), U-20261107-003 (v1.43.0
   overlap classification), U-20261006-006.
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-14T18:12:29.029+09:00'
 history:
@@ -60,5 +60,17 @@ history:
   - at: '2026-11-16T07:45:42.686+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-16T19:35:40.251+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T19:35:49.522+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by PR #2045
+  (https://github.com/5throck/ai-workspace-standards/pull/2045, merge
+  59acb21b2). Empty-index guard right after the S0 snapshot (--stage,
+  --allow-generated-only) plus tracked-residual listing. co-security #112
+  CLAUDE.md omission root cause NOT established; only mitigated by the
+  unstaged-tracked-files listing.
 error: null
