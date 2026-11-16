@@ -21,7 +21,8 @@
  * real workspace templates (the upgrade-decision-log pattern). One run per
  * seeded shape; scenarios ride the shared run as read-only assertions.
  *
- * @version 1.1.0 (engine-run consolidation — spec docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1)
+ * @version 1.1.1 (2026-11-16, T-20261114-005: the re-stale loop test really commits the first run — it previously relied on a silently failed commit and a second apply run over an uncommitted delivery, which the engine now refuses)
+ * v1.1.0 (engine-run consolidation — spec docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1)
  * v1.1.0 (2026-11-15): two dedicated engine spawns consolidated onto shared
  *          runs with every expect() preserved verbatim — (a) the
  *          regression-guard scene (docs/phase-definitions.md, stale baseline +
@@ -209,6 +210,11 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
   });
 
   test('re-stale loop (co-newbiz): the second run gives the same verdict and still delivers nothing', () => {
+    // The delivered .githooks pre-commit hook (core.hooksPath, set by the first run) rejects direct
+    // commits in the scratch fixture, so the fixture drops that hook path before landing the first run.
+    // Without a real commit the previous delivery stays uncommitted and the engine (v1.109.0,
+    // T-20261114-005) correctly refuses the second apply run.
+    git(applyProject, 'config', '--unset', 'core.hooksPath');
     commitAll(applyProject, 'land first run');
     const second = runUpgrade(applyProject);
     expect(second.status).toBe(0);

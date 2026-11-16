@@ -58,7 +58,8 @@
  *          the fail-closed direction (a differently-styled leak still refuses), and the
  *          both-sides seam wiring of both probes.
  *
- * @version 1.3.3 (2026-11-12: registry gains template-vintage.test.ts and upgrade-vintage-pending.test.ts — overwrite-protection PR-B)
+ * @version 1.3.4 (2026-11-16: registry gains upgrade-project-disposition-grants.test.ts — T-20261114-005)
+ * v1.3.3 (2026-11-12: registry gains template-vintage.test.ts and upgrade-vintage-pending.test.ts — overwrite-protection PR-B)
  * v1.3.2 (2026-11-12: registry gains upgrade-core-locked-fork.test.ts — core-locked fork arm fix)
  * v1.3.1 (2026-11-11: registry gains upgrade-overwrite-protection.test.ts — overwrite-protection PR-A)
  */
@@ -99,6 +100,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "upgrade-decision-log.test.ts",
   "upgrade-core-locked-fork.test.ts",
   "upgrade-overwrite-protection.test.ts",
+  "upgrade-project-disposition-grants.test.ts",
   "upgrade-project-tenant-guard.test.ts",
   "upgrade-vintage-pending.test.ts",
   "workspace-hygiene.test.ts",
