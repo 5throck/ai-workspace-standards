@@ -31,7 +31,7 @@
  *   3. Projects leg — active only when the gitignored `Projects/` tree is
  *      present (inert on CI checkouts, mirroring the
  *      meeting-command-retirement pin's Projects discipline). A `Projects/`
- *      that holds no `co-*/agents/` directory counts as INERT (2026-11-16,
+ *      that holds no `co-<repo>/agents/` directory counts as INERT (2026-11-16,
  *      test-runner v1.17.0 batch exposure: a sibling test in the same batched
  *      process can leave an empty `Projects/` residue at the repo root, which
  *      the earlier existsSync-only guard misread as a pre-sweep backlog —
