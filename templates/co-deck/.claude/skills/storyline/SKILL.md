@@ -1,7 +1,7 @@
 ---
 name: storyline
 scope: co-deck
-version: 1.4.0
+version: 1.5.0
 lang: ko
 lang_reason: proper-noun (Step 3.5 quotes verbatim Korean defect strings and replacement wording from the affected deck)
 description: >
@@ -12,7 +12,7 @@ description: >
   of the lecture workflow.
 status: active
 owner: storyline
-last_reviewed: "2026-11-16"
+last_reviewed: "2026-11-17"
 prerequisites: research
 relates_to:
   - skill: design
@@ -239,6 +239,18 @@ References slide spec:
 - **Bullet cap exemption**: the references slide is exempt from the 4-bullet content rule. If entries exceed ~10, group by category (the script may narrate the grouping). Record this exemption in the slide's own design note so Gate 2/3 reviewers do not flag it as a density violation.
 
 **Exception — methodology / quality-gate teaching slides.** A slide whose **designed purpose** is to teach the audience how the analysis was verified (methodology, quality gates, data-provenance explanation) may present verification concepts as first-class content. What remains banned even there: bare internal-process glyphs and asides (R1 patterns), citation-code footers, and citation codes outside the references slide. The exception covers *the concepts*, not *the artifact formats*.
+
+**R4 — `footnotes` vs `notes` field split (slidedata, U-20261116-009).** The two slidedata fields have distinct rendering targets and MUST NOT be mixed (the deck defect this rule formalizes: sources authored into `footnotes` forced every footnote in-card and pushed abbreviations into the card):
+
+| Field | Content | Rendered as |
+|-------|---------|-------------|
+| `footnotes` | Abbreviation definitions only (`"ABBR = definition"`) | Slide-level bottom-left line OUTSIDE the card (shared FootnoteBuilder pill, `.slide-footnote`) |
+| `notes` | Source / caveat lines | Muted line INSIDE the card at the end of the content flow (`.slide-footnote.slide-notes`) |
+
+- **Both fields are optional** — a slide may carry either, both, or neither. The PDF renders both (merged band, sources first).
+- **First-appearance abbreviation convention unchanged**: define each abbreviation at its FIRST appearance per PART; skip divider/video slides and widely known terms (AI, company/model names).
+- **Sources, caveats, and scope qualifiers never go into `footnotes`** — they belong in `notes` (in-card, audience-appropriate per R1) or the speaker script.
+- **Video-local playback is not authored here**: whether a slide gets `videoLocal` is decided by html-build from the video pool (see the html-build SKILL, "Local video playback"); storyline only records the `videoId` claim.
 
 ---
 

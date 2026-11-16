@@ -1,7 +1,7 @@
 ---
 name: html-build
-version: "1.4.1"
-last_updated: 2026-11-15
+version: "1.4.2"
+last_updated: 2026-11-17
 role: HTML slide builder and image integration specialist
 status: active
 tier: low
@@ -45,6 +45,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 - Read `slide_deck.md` and `design_spec.md` before generating HTML
 - Read `deliverables/<project>/image-manifest.json` (from image-curator) to bind shared-pool images to slide entries
 - Generate `lecture_vN.html` with slide content embedded as a `const slideData = [...]` strict-JSON array (all keys double-quoted, no trailing commas, no JS comments — required for `extract_slidedata.mjs` to parse via `JSON.parse`); the theme template's own `renderSlide(data, index)` / `initSlides()` build the `.slide` DOM at runtime (see "Slide rendering model" below — do **not** hand-author `.slide` divs or implement `renderSlide()`)
+- **Video-local emission (U-20261116-009, QuickDL provenance)**: when the pool file `deliverables/assets/videos/yt-<videoId>.mp4` exists, write `"videoLocal": "../assets/videos/yt-<id>.mp4"` on that slide in slidedata.json; otherwise omit the field (YouTube fallback stays automatic). Full rule: `skills/html-build/SKILL.md`, "Local video playback"
 - Apply CSS variables from `design_spec.md`; write no hardcoded color or font values
 - Apply theme + style from `lecture-profile.md`: inject `base.css` + style override CSS, set `data-theme` and `data-style` on `<html>`
 - Populate cover slide with `instructor` fields from profile (name, title, organization)
