@@ -171,3 +171,59 @@ describe('composeCommitMessage — re-derivation from the final staged set (T-20
     expect(composeCommitMessage('chore: resync template', [])).toBe('chore: workspace sync (0 files)');
   });
 });
+
+// T-20261114-006 (design 2026-11-16 §2): subject/body split + O-1 trailer guard.
+import { findTrailerInSubject, splitCommitMessage } from '../../scripts/helpers/commit-message.ts';
+
+describe('splitCommitMessage', () => {
+  test('subject only', () => {
+    expect(splitCommitMessage('feat: x')).toEqual({ subject: 'feat: x', body: '' });
+  });
+
+  test('subject plus body keeps inner blank lines verbatim', () => {
+    const r = splitCommitMessage('feat: x\n\npara one\n\npara two');
+    expect(r.subject).toBe('feat: x');
+    expect(r.body).toBe('para one\n\npara two');
+  });
+
+  test('trailer paragraph stays in the body', () => {
+    const r = splitCommitMessage('feat: x\n\nbody\n\nCo-Authored-By: A <a@b.c>');
+    expect(r.body).toBe('body\n\nCo-Authored-By: A <a@b.c>');
+  });
+
+  test('CRLF and lone CR are normalized', () => {
+    expect(splitCommitMessage('feat: x\r\n\r\nbody\r\nmore')).toEqual({ subject: 'feat: x', body: 'body\nmore' });
+    expect(splitCommitMessage('feat: x\rbody')).toEqual({ subject: 'feat: x', body: 'body' });
+  });
+
+  test('leading blank lines in the body are dropped, trailing whitespace trimmed', () => {
+    expect(splitCommitMessage('feat: x\n\n\n\nbody  \n\n').body).toBe('body');
+  });
+
+  test('subject whitespace and tabs are collapsed', () => {
+    expect(splitCommitMessage('feat:\tx   y').subject).toBe('feat: x y');
+  });
+
+  test('empty input falls back to chore: update', () => {
+    expect(splitCommitMessage('')).toEqual({ subject: 'chore: update', body: '' });
+    expect(splitCommitMessage('\n\nbody').subject).toBe('chore: update');
+  });
+
+  test('weak subject plus body: derived subject path keeps the body untouched', () => {
+    const { subject, body } = splitCommitMessage('chore: update\n\nkeep me');
+    expect(composeCommitMessage(subject, ['scripts/dev-sync.ts'])).toMatch(/^chore\(scripts\):/);
+    expect(body).toBe('keep me');
+  });
+});
+
+describe('findTrailerInSubject (O-1)', () => {
+  test('flags a trailer joined onto the subject', () => {
+    expect(findTrailerInSubject('feat: x Co-Authored-By: A <a@b.c>')).toBe('Co-Authored-By');
+    expect(findTrailerInSubject('feat: x signed-off-by: A')).toBe('signed-off-by');
+  });
+
+  test('plain subjects pass', () => {
+    expect(findTrailerInSubject('feat: x')).toBeNull();
+    expect(findTrailerInSubject('docs: explain Co-Authored-By usage')).toBeNull();
+  });
+});

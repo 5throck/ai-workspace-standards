@@ -1,4 +1,9 @@
-// @version 1.1.1
+// @version 1.2.0
+// v1.2.0 (2026-11-16, T-20261114-006 — spec
+//           docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §2):
+//           add splitCommitMessage() (subject + preserved body) and
+//           findTrailerInSubject() (O-1 guard for a trailer joined onto the subject).
+//           Existing exports unchanged.
 // v1.1.1 (2026-10-28, T-20261028-012 — spec
 //           docs/designs/2026-10-28-dev-sync-staged-count-design.md): comment-only —
 //           documents the two-phase caller contract (dev-sync step 1 composes from
@@ -134,4 +139,31 @@ export function deriveCommitMessage(paths: string[]): string {
 export function composeCommitMessage(rawMsg: string, changedPaths: string[]): string {
   if (!isWeakCommitMessage(rawMsg)) return rawMsg.trim();
   return deriveCommitMessage(changedPaths);
+}
+
+/**
+ * Split a raw commit message into a one-line subject and a preserved body
+ * (T-20261114-006). The subject keeps the historical guarantee — whitespace
+ * collapsed, safe for `git -m` and `gh --title`; an empty subject falls back to
+ * "chore: update". The body is everything after the first line with leading
+ * blank lines and trailing whitespace removed; inner lines stay verbatim.
+ */
+export function splitCommitMessage(raw: string): { subject: string; body: string } {
+  const lines = raw.replace(/\r\n?/g, "\n").split("\n");
+  const subject = (lines.shift() ?? "").replace(/\s+/g, " ").trim() || "chore: update";
+  const body = lines
+    .join("\n")
+    .replace(/^(?:[ \t]*\n)+/, "")
+    .trimEnd();
+  return { subject, body };
+}
+
+/**
+ * O-1 guard: a trailer token (Co-Authored-By / Signed-off-by) joined onto the
+ * subject line — what happens when a trailer is passed as a separate argument.
+ * Returns the matched trailer key, or null.
+ */
+export function findTrailerInSubject(subject: string): string | null {
+  const m = /\s(Co-Authored-By|Signed-off-by):\s/i.exec(subject);
+  return m ? m[1] : null;
 }

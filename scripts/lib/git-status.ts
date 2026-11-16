@@ -1,4 +1,7 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-16, T-20261114-007): add parseTrackedWorktreeChanges() — tracked
+//           (non-untracked, non-ignored) paths from porcelain v1 -z, for dev-sync's
+//           empty-index guard.
 // v1.1.0: add parseCachedNameStatus() — parses `git diff --cached --name-status -z`
 //           into the set of paths the index records as REMOVED (status `D` plus the
 //           SOURCE path of every `R<score>` staged rename). Consumed by dev-sync
@@ -83,4 +86,24 @@ export function parseCachedNameStatus(out: string): Set<string> {
     // A / M / T / U and unknown statuses remove nothing.
   }
   return removed;
+}
+
+/**
+ * Parse `git status --porcelain=v1 -z -uall` into the TRACKED paths with any
+ * modification (M/D/R/C/A/T/U in either column). Untracked (`??`) and ignored
+ * (`!!`) entries are excluded. Rename/copy source fields are skipped, as in
+ * parseStatusPorcelain.
+ */
+export function parseTrackedWorktreeChanges(out: string): string[] {
+  const paths: string[] = [];
+  const records = out.split("\0").filter(Boolean);
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    if (record.length < 4) continue;
+    const x = record[0];
+    const y = record[1];
+    if (!(x === "?" && y === "?") && !(x === "!" && y === "!")) paths.push(record.slice(3));
+    if (x === "R" || x === "C" || y === "R" || y === "C") i++;
+  }
+  return paths;
 }

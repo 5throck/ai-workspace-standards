@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.48.0
+- **Version**: 1.49.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-12
+- **Last Updated**: 2026-11-16
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-16 | production | production | v1.49.0: empty-index guard at S0 with --stage/--allow-generated-only (T-20261114-007) and multi-line commit body preservation (T-20261114-006); spec docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md, DEC-20261116-01 | automation-engineer |
 | 2026-11-12 | production | production | v1.47.0 (U-20261112-005 PR-3): step 4.505 runs generate-skill-lifecycle-records.ts --write after the 4.5 publish (L0 only, fatal on failure) so a template skill change never lands without its generated record. | automation-engineer |
 | 2026-11-12 | production | production | v1.46.2 (U-20261112-007): missing-spec hint cites docs/governance/agents/execution-plan-templates.md §5.1.1 instead of the stale AGENTS.md §5.1.1; message string only. | automation-engineer |
 | 2026-11-10 | production | production | v1.46.1 (design docs/designs/2026-11-09-delivered-scripts-strict-profile-design.md §4.3, U-20261108-001 / DEC-20261109-01): strict-profile compliance sweep — formatting reflow (double quotes, 2-space, lineWidth 120) and the enumerated while-((match=re.exec())) loop rewrites (noAssignInExpressions/noImplicitAnyLet). Behavior unchanged — version-only bump for the format-class sweep; no step numbers added or reordered. | automation-engineer |

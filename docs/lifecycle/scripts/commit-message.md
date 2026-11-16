@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.1.1
+- **Version**: 1.2.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-11-16
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-16 | production | production | v1.2.0: splitCommitMessage() and findTrailerInSubject() added (T-20261114-006, spec docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section 2) | automation-engineer |
 | 2026-10-28 | - | production | Record seeded at v1.1.1 (T-20261028-012, spec docs/designs/2026-10-28-dev-sync-staged-count-design.md): comment-only — documents the two-phase caller contract (dev-sync step 1 early composition; step 6.9 re-composition from the final staged set); no behavior change | automation-engineer |
 | 2026-10-12 | (pre-record) | (pre-record) | v1.1.0 (T-20261012-011): the count is always present in fallback subjects — even the zero-classifiable case carries "(N files)" | pm |
 | 2026-10-11 | - | production | v1.0.0 (U-20261008-001, spec docs/designs/2026-10-11-backlog-batch-2-design.md): pure commit-message composition for dev-sync step 1 — weak caller shapes replaced by a task-staged-set summary, 72-char budget, spec-id citation | automation-engineer |
