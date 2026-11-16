@@ -2,7 +2,7 @@
 
 ## Sessions
 
-> Link-free rows are tombstones: their session logs were archived to `memory/archive/`, which is deliberately git-ignored (local preservation only — see docs/constitution/02-memory-system.md §2.3), so archive links would be dead on fresh clones.
+> Link-free rows are tombstones: their session logs were archived to `memory/archive/`, which is deliberately git-ignored (local preservation only — see docs/constitution/02-memory-system.md §2.3), so archive links would be dead on fresh clones. Non-date index rows broken by archival are rewritten to `*(archived — local only)*` by archive-memory.ts.
 
 | Date | Summary |
 |------|---------|
