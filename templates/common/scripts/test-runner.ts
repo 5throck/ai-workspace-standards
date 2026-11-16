@@ -522,9 +522,8 @@ export function parseJunitPerFile(xml: string): Map<string, JunitFileResult> {
   // attribute) and everything else are skipped. `<failure>`/`<error>` tokens
   // anywhere inside a file suite's span force that file to failure (belt and
   // braces; the depth-1 `failures` attribute is the primary signal).
-  const tokens = xml.match(
-    /<testsuites\b[^>]*>|<\/testsuites>|<testsuite\b[^>]*>|<\/testsuite>|<failure\b|<error\b/g,
-  ) ?? [];
+  const tokens =
+    xml.match(/<testsuites\b[^>]*>|<\/testsuites>|<testsuite\b[^>]*>|<\/testsuite>|<failure\b|<error\b/g) ?? [];
   const stack: Array<{ file: string | null; failures: number; time: number }> = [];
   const forcedFailure = new Set<string>();
   for (const token of tokens) {
@@ -627,9 +626,12 @@ async function executeBatch(
     }, batchTimeoutMs);
   });
 
-  const execPromise = Promise.all([stdoutPromise, stderrPromise, proc.exited]).then(
-    ([stdout, stderr, exitCode]) => ({ timedOut: false as const, stdout, stderr, exitCode }),
-  );
+  const execPromise = Promise.all([stdoutPromise, stderrPromise, proc.exited]).then(([stdout, stderr, exitCode]) => ({
+    timedOut: false as const,
+    stdout,
+    stderr,
+    exitCode,
+  }));
 
   const raced = await Promise.race([execPromise, timeoutPromise]);
   if (timer) clearTimeout(timer);
@@ -639,9 +641,7 @@ async function executeBatch(
     : (raced as { timedOut: false; stdout: string; stderr: string; exitCode: number });
 
   const fallback = async (reason: string): Promise<TestFileResult[]> => {
-    console.log(
-      `  [batch] falling back to individual runs for ${batch.length} file(s): ${reason}`,
-    );
+    console.log(`  [batch] falling back to individual runs for ${batch.length} file(s): ${reason}`);
     const results: TestFileResult[] = [];
     // Each member re-runs at its OWN suite budget (exactly the individual-dispatch
     // kill semantics — the batch sum is only the batch's kill timer), so a
