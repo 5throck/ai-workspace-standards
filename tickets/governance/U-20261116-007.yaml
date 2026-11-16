@@ -1,0 +1,100 @@
+schemaVersion: 1
+id: U-20261116-007
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-16T10:38:14.728+09:00'
+history:
+  - at: '2026-11-16T10:38:14.728+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-16T13:18:55.825+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T13:18:55.825+09:00'
+    from: review
+    to: done
+result: >-
+  Three arms: (1) calibrated bound — zen max_body_chars 80 → 600
+  (pdf_layout_spec.json; DEC-20261114-04 precedent), body-chars is advisory
+  while bullet-count min/title length stay blocking; (2) storyline SKILL v1.4.0
+  Step 3.6 — every slide_deck/slidedata edit is followed by estimate-layout
+  --lint with min/max bullets + title length blocking; (3) slide-layout-gate
+  SKILL documents the video-slide bullet policy (bullets counted, layout probes
+  skipped) and the calibrated-bounds rule (overrides need a PM decision record).
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    The slide-layout gate already checks min_bullets (estimate-layout.ts 'bullet
+    count (min)'), but its signal is lost in practice. (1) Noise: zen
+    content_constraints.standard.max_body_chars = 80 (pdf_layout_spec.json)
+    fails nearly every standard slide of white-bubble lecture decks — 40 of 47
+    slides in 2026-11-open-innovation-keynote, and 82 of ~79 measurable slides
+    in 2026-11-ai-era-business-survival, which had to override it to 600
+    (DEC-20261114-04). Real violations (here: S43 'bullet count (min) 1 ≥ 3',
+    S45 punchline 'title chars 52 ≤ 50') sit inside 40+ body-chars FAILs and go
+    unnoticed. (2) Not run during editing: storyline/html-build edits to
+    slide_deck/slidedata are not followed by --lint, so content edits silently
+    broke the minimum (S15 went from 3 to 2 bullets after a revision; caught
+    only by the user). (3) Video slides are skipped by the lint while the theme
+    rule says min 3 bullets per slide; whether video bullets count should be
+    explicit. Expected: a calibrated body-chars bound for zen×white-bubble (or
+    style-level constraint) so the gate is quiet on normal decks; lint run after
+    every slide_deck/slidedata edit in the storyline flow (Step 3.5) with
+    min/max bullets and title length treated as blocking; documented video-slide
+    policy.
+  affected_paths:
+    - docs/html-themes/themes/zen/pdf_layout_spec.json
+    - docs/html-themes/themes/zen/theme.json
+    - scripts/co-deck/estimate-layout.ts
+    - skills/storyline/SKILL.md
+    - skills/slide-layout-gate/SKILL.md
+  identity_source: client_roots
+  local_workaround_diff: >-
+    Deck-local content fixes only: S15/S33/S43 brought to ≥3 bullets, S45
+    punchline shortened to ≤50 chars; all non-body-chars checks now pass. No
+    layout_overrides added for this deck yet (would need a PM decision record
+    like DEC-20261114-04).
+  repro: >-
+    bun scripts/co-deck/estimate-layout.ts --project
+    deliverables/2026-11-open-innovation-keynote --lint → 40 'body chars ≤ 80'
+    FAILs. With the earlier slidedata
+    (_versions/2026-11-16_*_pm_pre_s15_quantum/slidedata.json) the same run also
+    reports '| 43 | standard | bullet count (min) | 1 | ≥ 3 | FAIL |' and '| 45
+    | punchline | title chars | 52 | ≤ 50 | FAIL |' among them. Precedent:
+    docs/decisions/DEC-20261114-04.md (max_body_chars override to 600 for a
+    90-slide zen×white-bubble deck after 82 body-chars FAILs).
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - >-
+      info:in_last_delivery
+      docs/html-themes/themes/zen/pdf_layout_spec.json=false
+    - info:in_last_delivery docs/html-themes/themes/zen/theme.json=false
+    - info:in_last_delivery scripts/co-deck/estimate-layout.ts=true
+    - info:in_last_delivery skills/storyline/SKILL.md=false
+    - info:in_last_delivery skills/slide-layout-gate/SKILL.md=false
+  dedupe_key: f1107a3852ad8ad3acf0c5895f28b1e6949abbec675bb08b1adcebfd3d628b9f
+  duplicates:
+    - project: co-deck
+      at: '2026-11-16T10:38:14.728+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2044
+    summary: >-
+      Three arms: (1) calibrated bound — zen max_body_chars 80 → 600
+      (pdf_layout_spec.json; DEC-20261114-04 precedent), body-chars is advisory
+      while bullet-count min/title length stay blocking; (2) storyline SKILL
+      v1.4.0 Step 3.6 — every slide_deck/slidedata edit is followed by
+      estimate-layout --lint with min/max bullets + title length blocking; (3)
+      slide-layout-gate SKILL documents the video-slide bullet policy (bullets
+      counted, layout probes skipped) and the calibrated-bounds rule (overrides
+      need a PM decision record).

@@ -1,4 +1,4 @@
-// @version 1.3.0
+// @version 1.3.1
 // v1.3.0 (validator v1.4.0 LOCAL-PATCH — deck-wide photo background doctrine):
 // Rule A amended — scope all/divider-cover with a REGISTERED global background
 // (background_image.path + matching slides[] entry at slide_index -1) passes;
@@ -110,7 +110,7 @@ const poolName = (f: string): string => f.replace(/^images\//, '');
  * bindings resolve to the same pool file, exactly as in the real tree.
  */
 function workspace(
-  background: { enabled: boolean; scope: string; path?: string } | null,
+  background: ({ enabled: boolean; scope: string; path?: string } & Record<string, unknown>) | null,
   slides: Array<Record<string, any> & { _file?: string; _rgb?: [number, number, number] }>,
   opts: { withSlidedata?: boolean; slideTypes?: string[] } = {},
 ): string {
@@ -121,10 +121,12 @@ function workspace(
   mkdirSync(ws, { recursive: true });
   const manifest: any = { generated_at: '2026-10-30T00:00:00Z' };
   if (background !== null) {
+    const { enabled, scope, path: bgPath, ...extra } = background;
     manifest.background_image = {
-      enabled: background.enabled,
-      scope: background.scope,
-      ...(background.path ? { path: `deliverables/assets/images/${poolName(background.path)}` } : {}),
+      enabled,
+      scope,
+      ...(bgPath ? { path: `deliverables/assets/images/${poolName(bgPath)}` } : {}),
+      ...extra,
     };
     // Materialize the global background file unless the test expects it missing.
     if (background.path && !background.path.includes('missing')) {
@@ -431,5 +433,83 @@ describe('validate-image-manifest pool rules (U-20261114-005)', () => {
     expect(res.stderr).toContain('deliverables/assets/images/b.png');
     expect(res.stdout).not.toContain('validate-image-manifest PASSED');
     expect(res.stderr).toContain('validate-image-manifest FAILED');
+  });
+});
+
+describe('validate-image-manifest chapter backdrop groups (v1.5.0, U-20261114-011)', () => {
+  test('a fully-registered chapter group is exempt from rule 3 (WARN, exit 0)', () => {
+    const dir = workspace(
+      { enabled: true, scope: 'individual', chapters: [{ chapter: 1, slug: 'ch1-bg' }, { chapter: 2, slug: 'ch2-bg' }] },
+      [
+        { slide_index: 0, image_role: 'background', _file: 'images/ch1-bg.png', _rgb: [11, 11, 11] },
+        { slide_index: 2, image_role: 'background', _file: 'images/ch1-bg.png', _rgb: [11, 11, 11] },
+        { slide_index: 4, image_role: 'background', _file: 'images/ch2-bg.png', _rgb: [22, 22, 22] },
+        { slide_index: 6, image_role: 'background', _file: 'images/ch2-bg.png', _rgb: [22, 22, 22] },
+      ],
+      { withSlidedata: true, slideTypes: ['cover', 'standard', 'divider', 'standard', 'divider', 'standard', 'divider'] },
+    );
+    const res = run(dir);
+    expect(res.status).toBe(0);
+    expect(res.stderr).toContain('chapter backdrop group');
+    expect(res.stderr).not.toContain('duplicate image across slides');
+  });
+
+  test('the same sharing WITHOUT the chapters registration still ERRORs (rule 3)', () => {
+    const dir = workspace(
+      null,
+      [
+        { slide_index: 0, image_role: 'background', _file: 'images/ch1-bg.png', _rgb: [11, 11, 11] },
+        { slide_index: 2, image_role: 'background', _file: 'images/ch1-bg.png', _rgb: [11, 11, 11] },
+      ],
+      { withSlidedata: true, slideTypes: ['cover', 'standard', 'divider'] },
+    );
+    const res = run(dir);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('duplicate image across slides 0, 2');
+    expect(res.stderr).toContain('background_image.chapters');
+  });
+
+  test('partial registration (chapter slug + undeclared slide on the same file) still ERRORs', () => {
+    const dir = workspace(
+      { enabled: true, scope: 'individual', chapters: [{ chapter: 1, slug: 'ch1-bg' }] },
+      [
+        { slide_index: 0, image_role: 'background', _file: 'images/ch1-bg.png', _rgb: [11, 11, 11] },
+        { slide_index: 2, image_role: 'background', _file: 'images/ch1-bg.png', _rgb: [11, 11, 11] },
+        { slide_index: 4, image_role: 'background', _file: 'images/ch1-bg-copy.png', _rgb: [11, 11, 11] },
+      ],
+      { withSlidedata: true, slideTypes: ['cover', 'standard', 'divider', 'standard', 'divider'] },
+    );
+    // slide 4 shares the BYTES (identical PNG) under a slug that is NOT declared —
+    // the hash group mixes the declared slug with an undeclared copy → rule 3.
+    void 0;
+    const res = run(dir);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('duplicate image across slides');
+  });
+
+  test('malformed chapter entry (empty slug) ERRORs', () => {
+    const dir = workspace(
+      { enabled: true, scope: 'individual', chapters: [{ chapter: 1, slug: '' }] },
+      [
+        { slide_index: 0, image_role: 'illustrative', _file: 'images/a.png', _rgb: [1, 2, 3] },
+      ],
+      { withSlidedata: false },
+    );
+    const res = run(dir);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('chapters entry malformed');
+  });
+
+  test('declared slug with no matching slides[] entry WARNs (registered but unused)', () => {
+    const dir = workspace(
+      { enabled: true, scope: 'individual', chapters: [{ chapter: 3, slug: 'unused-bg' }] },
+      [
+        { slide_index: 0, image_role: 'illustrative', _file: 'images/a.png', _rgb: [4, 5, 6] },
+      ],
+      { withSlidedata: false },
+    );
+    const res = run(dir);
+    expect(res.status).toBe(0);
+    expect(res.stderr).toContain('no slides[] entry uses that slug');
   });
 });

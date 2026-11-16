@@ -1,7 +1,7 @@
 ---
 name: slide-layout-gate
 scope: co-deck
-version: "1.0.1"
+version: "1.0.2"
 description: >
   Slide content conformance gate. Runs estimate-layout.ts --lint to check every
   slide in slidedata.json against the merged 4-layer spec's content_constraints
@@ -10,7 +10,7 @@ description: >
   "check slide bounds", "slide content conformance".
 status: active
 owner: pdf-export
-last_reviewed: "2026-11-15"
+last_reviewed: "2026-11-16"
 prerequisites: html-build
 relates_to:
   - skill: pdf-export
@@ -101,3 +101,18 @@ a deck failing both was non-compliant at creation.
 - `html-build` — produces the slideData this gate reads
 - `prep-pdf` — same 4-layer merge, produces layout_summary.md
 - `pdf-export` — the gated consumer; never dispatch Stage 9 on a failing gate
+
+## Video-Slide Bullet Policy (U-20261116-007)
+
+Video slides are skipped by the lint's layout probes but the THEME rule (min 3
+bullets per slide) still applies to their bullet fields: video-slide bullets
+count and are linted like any other slide; the layout probes (which need a
+rendered box) remain skipped. A video slide with fewer than the theme minimum
+bullets is a real violation, not a probe skip.
+
+## Calibrated Bounds (U-20261116-007)
+
+zen ships max_body_chars 600 (DEC-20261114-04 calibration — the 80-char bound
+failed 40+/47 slides of normal lecture decks and buried real violations). The
+bound is advisory; bullet-count min, title length and structure checks are
+blocking. A deck overriding a calibrated bound needs a PM decision record.

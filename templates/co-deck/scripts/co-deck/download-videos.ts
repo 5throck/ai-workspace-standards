@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
+// v1.1.0 (2026-11-16, spec docs/designs/2026-11-16-quickdl-external-design.md): QuickDL becomes a declared external (templates/co-deck/external-deps.json, id `quickdl`, pin v1.0.0, MIT) and this script is its single adapter — resolution order --quickdl-dir > CDK_QUICKDL_DIR > <project root>/external/quickdl > legacy ~/git/project/QuickDL; python from <dir>/.venv or CDK_QUICKDL_PYTHON; downloads staged in an OS temp dir (the clone is never written to); new `selftest` mode for the manifest compatibility_test.
 // v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // download-videos.ts — offline video fetch for lecture decks (U-20261105-007).
 //
@@ -9,11 +10,18 @@
 // `yt-<videoId>.mp4` into the shared video pool so the offline play-mode
 // fallback of inject-video-players.ts can resolve a local file.
 //
-// Download engine: the QuickDL CLI (external optional tool). Configure with
-// `--quickdl-dir <dir>` or the `CDK_QUICKDL_DIR` environment variable; default
-// is `~/git/project/QuickDL`. QuickDL must contain `cli.py` and a `.venv`
-// python. If QuickDL is missing, every needed video already exists locally, or
-// `--check-only` is passed, no download is attempted.
+// Download engine: the QuickDL CLI — a declared external (external-deps.json id
+// `quickdl`, installed by `bun scripts/external-deps.ts install --id quickdl`).
+// This file is its only adapter. Resolution order: `--quickdl-dir <dir>` >
+// `CDK_QUICKDL_DIR` > `<project root>/external/quickdl` > legacy
+// `~/git/project/QuickDL`. Python: `<dir>/.venv/bin/python`, else
+// `CDK_QUICKDL_PYTHON`. One-time setup after install:
+//   python3 -m venv external/quickdl/.venv && external/quickdl/.venv/bin/pip install -r external/quickdl/requirements.txt
+// Downloads are staged in an OS temp dir, so the read-only clone is never
+// written to. If QuickDL is missing, every needed video already exists locally,
+// or `--check-only` is passed, no download is attempted.
+// `bun scripts/co-deck/download-videos.ts selftest` checks the resolved clone
+// (cli.py, requirements.txt, MIT LICENSE) — the manifest compatibility_test.
 //
 // Contract:
 //   1. IDEMPOTENT — a destination file larger than MIN_VALID_BYTES is skipped;
@@ -37,8 +45,8 @@
 //     --check-only  report which videos are missing without downloading
 //     --force       re-download even when a local file already exists
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, rmSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, statSync, rmSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
 import { dirname, join, normalize, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -52,14 +60,45 @@ function hasFlag(flag: string): boolean {
   return process.argv.includes(flag);
 }
 
+const scriptDir = resolve(dirname(import.meta.path));
+const workspaceRoot = resolve(scriptDir, '../..');
+
+// ── QuickDL resolution (single adapter for the `quickdl` external) ───────────
+function resolveQuickdlDir(): string {
+  if (argValue('--quickdl-dir')) return resolve(workspaceRoot, argValue('--quickdl-dir')!);
+  if (process.env.CDK_QUICKDL_DIR) return resolve(process.env.CDK_QUICKDL_DIR);
+  const external = join(workspaceRoot, 'external', 'quickdl');
+  if (existsSync(join(external, 'cli.py'))) return external;
+  return join(homedir(), 'git', 'project', 'QuickDL');
+}
+function resolveQuickdlPython(dir: string): string {
+  const venv = join(dir, '.venv', 'bin', 'python');
+  if (existsSync(venv)) return venv;
+  return process.env.CDK_QUICKDL_PYTHON ? resolve(process.env.CDK_QUICKDL_PYTHON) : venv;
+}
+
+if (process.argv[2] === 'selftest') {
+  const dir = resolveQuickdlDir();
+  const problems: string[] = [];
+  if (!existsSync(join(dir, 'cli.py'))) problems.push('cli.py missing');
+  if (!existsSync(join(dir, 'requirements.txt'))) problems.push('requirements.txt missing');
+  const lic = join(dir, 'LICENSE');
+  if (!existsSync(lic) || !readFileSync(lic, 'utf-8').startsWith('MIT License')) problems.push('LICENSE is not MIT');
+  if (problems.length) {
+    console.error(`download-videos selftest: FAIL at ${dir} — ${problems.join('; ')}`);
+    process.exit(1);
+  }
+  const py = resolveQuickdlPython(dir);
+  console.log(`download-videos selftest: OK — QuickDL at ${dir}${existsSync(py) ? '' : ' (python not set up yet: see setup note in the header)'}`);
+  process.exit(0);
+}
+
 const projectArg = argValue('--project');
 if (!projectArg) {
   console.error('Usage: bun scripts/co-deck/download-videos.ts --project deliverables/<project> [--slidedata <path>] [--assets-dir <dir>] [--quickdl-dir <dir>] [--check-only] [--force]');
   process.exit(1);
 }
 
-const scriptDir = resolve(dirname(import.meta.path));
-const workspaceRoot = resolve(scriptDir, '../..');
 const projectPath = resolve(workspaceRoot, projectArg);
 
 const slidedataPath = argValue('--slidedata') ? resolve(workspaceRoot, argValue('--slidedata')!) : join(projectPath, 'slidedata.json');
@@ -109,24 +148,19 @@ if (pending.length === 0) {
 }
 
 // ── QuickDL resolution ────────────────────────────────────────────────────────
-const quickdlDir = argValue('--quickdl-dir')
-  ? resolve(workspaceRoot, argValue('--quickdl-dir')!)
-  : process.env.CDK_QUICKDL_DIR
-    ? resolve(process.env.CDK_QUICKDL_DIR)
-    : join(homedir(), 'git', 'project', 'QuickDL');
-const quickdlPython = join(quickdlDir, '.venv', 'bin', 'python');
+const quickdlDir = resolveQuickdlDir();
+const quickdlPython = resolveQuickdlPython(quickdlDir);
 const quickdlCli = join(quickdlDir, 'cli.py');
-const quickdlTmp = join(quickdlDir, 'downloads');
 
 if (!existsSync(quickdlPython) || !existsSync(quickdlCli)) {
-  console.error(`download-videos: QuickDL not found at ${quickdlDir} (need cli.py + .venv/bin/python).`);
-  console.error('  Install/point it via --quickdl-dir <dir> or the CDK_QUICKDL_DIR environment variable.');
+  console.error(`download-videos: QuickDL not found at ${quickdlDir} (need cli.py + a python with its requirements).`);
+  console.error('  Install it with `bun scripts/external-deps.ts install --id quickdl`, set up its venv (see header), or point to a clone via --quickdl-dir / CDK_QUICKDL_DIR (python: CDK_QUICKDL_PYTHON).');
   console.error(`  ${pending.length} video(s) remain missing: ${pending.map((id) => `yt-${id}`).join(', ')}`);
   process.exit(1);
 }
 
 mkdirSync(assetsDir, { recursive: true });
-if (!existsSync(quickdlTmp)) mkdirSync(quickdlTmp, { recursive: true });
+const quickdlTmp = mkdtempSync(join(tmpdir(), 'cdk-quickdl-'));
 
 let ok = 0;
 const failed: string[] = [];
@@ -142,7 +176,13 @@ for (const [i, id] of pending.entries()) {
     ? readdirSync(quickdlTmp).filter((f) => f.endsWith('.mp4')).sort((a, b) => statSync(join(quickdlTmp, b)).mtimeMs - statSync(join(quickdlTmp, a)).mtimeMs)
     : [];
   if (res.status === 0 && mp4s.length > 0) {
-    renameSync(join(quickdlTmp, mp4s[0]), dest);
+    try {
+      renameSync(join(quickdlTmp, mp4s[0]), dest);
+    } catch {
+      // temp dir may sit on another filesystem (EXDEV) — copy then remove
+      copyFileSync(join(quickdlTmp, mp4s[0]), dest);
+      rmSync(join(quickdlTmp, mp4s[0]));
+    }
     // Clean residual staging files (m4a, fxxx partials) for this id.
     for (const f of readdirSync(quickdlTmp)) {
       if (f.includes(id)) {
@@ -156,6 +196,8 @@ for (const [i, id] of pending.entries()) {
     console.error(`    -> FAILED ${id}`);
   }
 }
+
+try { rmSync(quickdlTmp, { recursive: true, force: true }); } catch { /* best effort */ }
 
 console.log(`download-videos: done — ${ok} downloaded, ${videoIds.length - pending.length} already present, ${failed.length} failed`);
 if (failed.length > 0) {

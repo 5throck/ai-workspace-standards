@@ -47,13 +47,13 @@
 | `co-consult/stakeholder-review-management` | variant:co-consult | 1.0.0 | co-consult/delivery-manager | co-consult/phase 4 | co-consult/project-delivery (composes_with) | — | — |
 | `co-consult/technical-feasibility` | variant:co-consult | 1.0.0 | co-consult/sme, co-consult/solutions-architect, co-consult/technology-specialist | co-consult/phase 1, co-consult/phase 2, co-consult/phase 3, co-consult/phase 4 | co-consult/change-impact-assessment (follows), co-consult/company-intelligence (composes_with), co-consult/executive-presentation (enables), co-consult/project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
 | `co-deck/design` | variant:co-deck | 1.2.2 | co-deck/design | co-deck/phase 3 | co-deck/html-build (enables), co-deck/html-build (follows), co-deck/pdf-export (composes_with), co-deck/research (composes_with) | storyline-outline | design-spec, theme-lock |
-| `co-deck/html-build` | variant:co-deck | 1.7.3 | co-deck/html-build | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows), co-deck/research (composes_with), co-deck/slide-layout-gate (follows), co-deck/storyline (composes_with) | slide-deck-draft, design-spec | slide-html |
+| `co-deck/html-build` | variant:co-deck | 1.7.4 | co-deck/html-build | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows), co-deck/research (composes_with), co-deck/slide-layout-gate (follows), co-deck/storyline (composes_with) | slide-deck-draft, design-spec | slide-html |
 | `co-deck/pdf-export` | variant:co-deck | 2.1.3 | co-deck/pdf-export | co-deck/phase 4, co-deck/phase 5 | co-deck/research (composes_with), co-deck/storyline (composes_with) | slide-html | final-pdf |
 | `co-deck/prep-pdf` | variant:co-deck | 2.0.1 | co-deck/measure, co-deck/pdf-export | co-deck/phase 4 | co-deck/version (follows) | — | — |
 | `co-deck/presenter-mode` | variant:co-deck | 1.0.2 | co-deck/html-build | co-deck/phase 4 | — | — | — |
 | `co-deck/research` | variant:co-deck | 1.2.2 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
-| `co-deck/slide-layout-gate` | variant:co-deck | 1.0.1 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
-| `co-deck/storyline` | variant:co-deck | 1.3.2 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
+| `co-deck/slide-layout-gate` | variant:co-deck | 1.0.2 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
+| `co-deck/storyline` | variant:co-deck | 1.4.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
 | `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | — | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.1 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
 | `co-design/design-foundation` | variant:co-design | 1.3.0 | — | — | co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (enables), root/accessibility-audit (composes_with) | — | — |
@@ -721,6 +721,26 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | Term | Layer | Referencing skills |
 |------|-------|--------------------|
 | `100대 통계지표` | common | `common/k-ecos` |
+| `balPayments` | common | `common/k-opendata` |
+| `ELW 일별매매정보` | common | `common/k-krx` |
+| `ESG` | common | `common/k-krx` |
+| `ESG 증권상품` | common | `common/k-krx` |
+| `ESG 지수` | common | `common/k-krx` |
+| `ETF 일별매매정보` | common | `common/k-krx` |
+| `ETN 일별매매정보` | common | `common/k-krx` |
+| `expDlr` | common | `common/k-opendata` |
+| `expWgt` | common | `common/k-opendata` |
+| `hsCd` | common | `common/k-opendata` |
+| `hsCode` | common | `common/k-opendata` |
+| `impDlr` | common | `common/k-opendata` |
+| `impWgt` | common | `common/k-opendata` |
+| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
+| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
+| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
+| `statCd` | common | `common/k-opendata` |
+| `statKor` | common | `common/k-opendata` |
 | `가구당월평균소득` | common | `common/k-ecos` |
 | `감사` | variant:co-consult | `co-consult/company-intelligence` |
 | `감사보고서` | variant:co-consult | `co-consult/company-intelligence` |
@@ -749,11 +769,11 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `반년` | common | `common/k-ecos` |
 | `반월` | common | `common/k-ecos` |
 | `배출권 시장 일별매매정보` | common | `common/k-krx` |
+| `법령ID` | common | `common/k-law` |
 | `법령명한글` | common | `common/k-law` |
 | `법령용어` | common | `common/k-law` |
 | `법령일련번호` | common | `common/k-law` |
 | `법령해석례` | common | `common/k-law` |
-| `법령ID` | common | `common/k-law` |
 | `법원명` | common | `common/k-law` |
 | `별표` | common | `common/k-law` |
 | `별표서식` | common | `common/k-law` |
@@ -872,26 +892,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `현행법령` | common | `common/k-law` |
 | `활용신청` | common | `common/k-opendata` |
 | `회장` | variant:co-consult | `co-consult/company-intelligence` |
-| `balPayments` | common | `common/k-opendata` |
-| `ELW 일별매매정보` | common | `common/k-krx` |
-| `ESG` | common | `common/k-krx` |
-| `ESG 증권상품` | common | `common/k-krx` |
-| `ESG 지수` | common | `common/k-krx` |
-| `ETF 일별매매정보` | common | `common/k-krx` |
-| `ETN 일별매매정보` | common | `common/k-krx` |
-| `expDlr` | common | `common/k-opendata` |
-| `expWgt` | common | `common/k-opendata` |
-| `hsCd` | common | `common/k-opendata` |
-| `hsCode` | common | `common/k-opendata` |
-| `impDlr` | common | `common/k-opendata` |
-| `impWgt` | common | `common/k-opendata` |
-| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
-| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
-| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
-| `statCd` | common | `common/k-opendata` |
-| `statKor` | common | `common/k-opendata` |
 
 ## Same-Name Divergence (E2)
 

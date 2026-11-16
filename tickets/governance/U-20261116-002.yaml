@@ -1,0 +1,97 @@
+schemaVersion: 1
+id: U-20261116-002
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-16T10:06:59.903+09:00'
+history:
+  - at: '2026-11-16T10:06:59.903+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-16T13:18:34.002+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T13:18:34.002+09:00'
+    from: review
+    to: done
+result: >-
+  Legibility floor landed: white-bubble style.css gives svg-backed .zen-visual a
+  30vh min-height, gen-visual-images v3.3.2 WARNs when an SVG's min font-size
+  renders under ~11px at bubble width (regenerate rather than ship 8px labels),
+  diagram-helpers v1.3.2 adds svgMinFontSize, and diagram-specialist v1.3.3
+  doctrine requires a tight viewBox (compute the bounding box; no 960x540 dead
+  bands) plus >=11px rendered text. Generator-side tight-viewBox remains
+  agent-doctrine-enforced.
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Diagram SVG text renders far smaller than slide body text in zen x
+    white-bubble decks. Measured at 1280x720 on 18 diagram slides: smallest SVG
+    text 7.2-10px (10 of 18 below 10px) vs 14px bullets. Two compounding causes:
+    (a) generated SVGs use a fixed 960x540 viewBox but the drawing often
+    occupies only a middle band (e.g. 108px empty top / 58px bottom), so
+    object-fit:contain shrinks the content further; (b) the white bubble
+    (.slide-content) shrink-wraps to its text width (~480px), so .zen-visual
+    renders at 345-500px wide. Expected: diagram text at least ~11px rendered at
+    1280x720, and SVG canvas tight to its content.
+  affected_paths:
+    - agents/diagram-specialist.md
+    - scripts/co-deck/diagram-helpers.ts
+    - scripts/co-deck/gen-visual-images.ts
+    - docs/html-themes/styles/white-bubble/style.css
+  identity_source: client_roots
+  local_workaround_diff: >-
+    Deck-local, verified in browser (no overflow on 47 slides, min text
+    10-17.6px except two dense slides at 8-9px):
+
+    1) Deck CSS <style id="deck-wide-diagram-cards">:
+       .slide-content:has(> .zen-visual-wrap img[src$=".svg"]) { width: min(860px, 76%) !important; max-width: 76% !important; padding: 24px 40px 20px !important; }
+       ... .zen-visual-wrap { width:100%; margin: 8px 0 4px !important; display:flex; justify-content:center; }
+       ... img.zen-visual { width:100%; height:auto; max-height:40vh !important; object-fit:contain; }
+       (First tried 90% width: text lines became too long and cards pushed titles to the top edge; 76%/860px + 40vh cap kept >=46px top margin.)
+    2) Deck-local SVG copies in deliverables/assets/diagrams/oi-keynote-crop/
+    with viewBox cropped to the measured content bbox + 12px pad (CSS
+    object-view-box was tried first; it crops the drawing but does not shrink
+    the img box, so the gap stayed).
+
+    Suggested upstream: diagram-helpers already re-fits viewBox after footer
+    strip — extend it to crop to content bbox; add a rendered-min-font gate;
+    consider a visual-slide card width rule in white-bubble (promotion via the
+    U-20261114-012 three-step path).
+  repro: >-
+    Open a zen x white-bubble deck with diagram slides at 1280x720 and, per
+    diagram slide, compute min(text font-size) x (rendered img width / viewBox
+    width). Example deck: deliverables/2026-11-open-innovation-keynote
+    (oi-coverage-matrix.svg rendered 345x194 -> 7.2px; agenda-four-parts-v2.svg
+    7.5px; contract-design-principles.svg 7.6px). Content bbox of most SVGs
+    leaves 100-140 viewBox units empty above the drawing.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery agents/diagram-specialist.md=false
+    - info:in_last_delivery scripts/co-deck/diagram-helpers.ts=false
+    - info:in_last_delivery scripts/co-deck/gen-visual-images.ts=true
+    - info:in_last_delivery docs/html-themes/styles/white-bubble/style.css=true
+  dedupe_key: eb5fbc87af868953ee3ae5bb314ac7cdcd3fc4125023066168181af4b40b400c
+  duplicates:
+    - project: co-deck
+      at: '2026-11-16T10:06:59.903+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2044
+    summary: >-
+      Legibility floor landed: white-bubble style.css gives svg-backed
+      .zen-visual a 30vh min-height, gen-visual-images v3.3.2 WARNs when an
+      SVG's min font-size renders under ~11px at bubble width (regenerate rather
+      than ship 8px labels), diagram-helpers v1.3.2 adds svgMinFontSize, and
+      diagram-specialist v1.3.3 doctrine requires a tight viewBox (compute the
+      bounding box; no 960x540 dead bands) plus >=11px rendered text.
+      Generator-side tight-viewBox remains agent-doctrine-enforced.

@@ -1,0 +1,89 @@
+schemaVersion: 1
+id: U-20261116-001
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-16T10:06:59.814+09:00'
+history:
+  - at: '2026-11-16T10:06:59.814+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-16T13:18:21.847+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-16T13:18:21.847+09:00'
+    from: review
+    to: done
+result: >-
+  The shared white-bubble style.css carries NO slide-index rules (both
+  duplicated fix-f blocks removed; grep '#slide-N' = 0 outside comments). A
+  diagram min-height floor (30vh via :has(.zen-visual-wrap img[src$=.svg]))
+  keeps SVG slides legible deck-wide. Per-slide caps are deck-override-only
+  material (html-build doctrine). Project copy sweeps at its next upgrade visit.
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    docs/html-themes/styles/white-bubble/style.css (template and project copies)
+    contains 32 lines of deck-specific per-slide caps ("fix f":
+    [data-theme="zen"]
+    #slide-2/-7/-11/-13/-17/-20/-27/-28/-30/-31/-32/-35/-37/-43/-49/-52
+    .zen-visual { max-height: 24-36vh }) that were measured for one engagement
+    (2026-11-open-innovation-keynote v1, 58 slides). Because the selectors are
+    slide-index IDs in a shared style, they apply to whatever slide happens to
+    have that index in ANY zen x white-bubble deck. Observed: after the keynote
+    was restructured to 47 slides, the S8 chart (#slide-7) and S30 diagram
+    (#slide-29... via #slide-30/31) were capped at 216px (30vh) and rendered 8px
+    text, while unrelated slides lost height. ID selectors also out-rank
+    deck-level overrides, so a deck must use !important to undo them. Expected:
+    the shared style carries no slide-index rules; per-slide caps live only in
+    the deck HTML override block.
+  affected_paths:
+    - docs/html-themes/styles/white-bubble/style.css
+  identity_source: client_roots
+  local_workaround_diff: >-
+    Deck-local only (lecture_2026-11-open-innovation-keynote_v2.html): removed
+    the copied 'fix f' block from the deck override and added
+
+    .slide-content:has(> .zen-visual-wrap img[src$=".svg"]) img.zen-visual {
+    max-height: 40vh !important; }
+
+    #slide-33 img.zen-visual, #slide-34 img.zen-visual, #slide-37 img.zen-visual
+    { max-height: 33vh !important; }
+
+    (!important is needed only to beat the shared #slide-N rules.) Shared
+    style.css not modified yet.
+  repro: >-
+    1) Build any zen x white-bubble deck with a diagram slide at index 7
+    (0-based), e.g. bun scripts/co-deck/build-theme-deck.ts --project
+    deliverables/<deck>. 2) In the browser at 1280x720, inspect img.zen-visual
+    on that slide: computed max-height is 30vh from the shared style.css
+    '#slide-7 .zen-visual' rule. 3) grep -c '#slide-[0-9]'
+    docs/html-themes/styles/white-bubble/style.css returns 32 on both template
+    and project. Likely origin: the U-20261114-002 promotion of one deck's
+    override block into the shared style.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/html-themes/styles/white-bubble/style.css=true
+  dedupe_key: 1f45e315a05248d385a92e29d8f97d157c0fab4b6b8e3e5c0ccb1f1c4bf4ec67
+  duplicates:
+    - project: co-deck
+      at: '2026-11-16T10:06:59.814+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2044
+    summary: >-
+      The shared white-bubble style.css carries NO slide-index rules (both
+      duplicated fix-f blocks removed; grep '#slide-N' = 0 outside comments). A
+      diagram min-height floor (30vh via :has(.zen-visual-wrap img[src$=.svg]))
+      keeps SVG slides legible deck-wide. Per-slide caps are deck-override-only
+      material (html-build doctrine). Project copy sweeps at its next upgrade
+      visit.
