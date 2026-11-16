@@ -14,7 +14,8 @@
     - ThumbnailNav: thumbnail-panel sidebar for supported themes
     - FullscreenManager: browser Fullscreen API toggle via F key or button
     - NarrationEngine v2.4: Web Speech API TTS narration with auto-advance
-    - FootnoteBuilder: abbreviation footnotes from slideData[i].footnotes
+    - FootnoteBuilder: slide-level bands — slideData[i].notes (sources, in-card)
+      and slideData[i].footnotes (abbreviations, outside-card pill)
     - VideoSlide: chrome-free video slides from slideData[i].videoId (U-20261029-005)
     - Keyboard shortcuts, showSlide, changeSlide, initPPT, toggleTOC, closeTOC
 
@@ -1088,14 +1089,25 @@ function closeTOC() {
   if (btn) btn.classList.remove('active');
 }
 
-// ── FootnoteBuilder (abbreviation footnotes) ─────────────────────────────
-// Renders slideData[i].footnotes (array of "ABBR: definition" strings) as a
-// small wrap-enabled line at the bottom-left of each slide that declares it.
-// Authoring convention (from the 2026-10 abbreviation-footnote rollout):
-// define an abbreviation at its FIRST appearance within each PART; skip
-// divider/video slides and widely known terms (AI, company/model names).
-// Styling lives in ppt-engine.css (.slide-footnote); themes and styles can
-// override via the --footnote-color / --footnote-bg CSS variables.
+// ── FootnoteBuilder (slide-level notes + abbreviation footnotes) ────────
+// Two distinct slide-level text bands (U-20261116-009 item 2, design
+// 2026-11-16-co-deck-pdf-html-backport §2 — the deck-proven split):
+//   slideData[i].notes     sources / caveat lines — rendered INSIDE the card,
+//                          a static muted line at the end of the .slide-content
+//                          flow (.slide-footnote.slide-notes; skipped when the
+//                          slide has no .slide-content, e.g. video slides).
+//   slideData[i].footnotes abbreviation definitions ("ABBR = definition") —
+//                          rendered OUTSIDE the card, a small wrap-enabled
+//                          line at the bottom-left of the slide host
+//                          (legacy pill, unchanged).
+// Each field renders independently and both render when only one is present
+// (backward compat: pre-split decks carry footnotes only and render exactly
+// as before). Authoring convention (from the 2026-10 abbreviation-footnote
+// rollout): define an abbreviation at its FIRST appearance within each PART;
+// skip video slides and widely known terms (AI, company/model names).
+// Styling lives in ppt-engine.css (.slide-footnote / .slide-footnote.slide-notes);
+// themes and styles can override via the --footnote-color / --footnote-bg
+// CSS variables.
 
 var FootnoteBuilder = {
   render: function() {
@@ -1106,12 +1118,28 @@ var FootnoteBuilder = {
     var slides = document.querySelectorAll('.slide');
     for (var i = 0; i < data.length; i++) {
       var d = data[i];
-      if (!d || !d.footnotes || !d.footnotes.length) continue;
+      if (!d) continue;
       var host = slides[i];
-      if (!host || host.querySelector('.slide-footnote')) continue;
-      var box = el('div', 'slide-footnote');
-      box.textContent = d.footnotes.join('  ·  ');
-      host.appendChild(box);
+      if (!host) continue;
+      // notes: sources/caveats — in-card, end of the .slide-content flow.
+      // Guard: skip when .slide-content is absent (video-style slides without
+      // a card) and on re-run (idempotent, like the pill branch below).
+      if (d.notes && d.notes.length && !host.querySelector('.slide-notes')) {
+        var content = host.querySelector('.slide-content');
+        if (content) {
+          var srcBox = el('div', 'slide-footnote slide-notes');
+          srcBox.textContent = d.notes.join('  ·  ');
+          content.appendChild(srcBox);
+        }
+      }
+      // footnotes: abbreviations — slide host, outside the card (legacy pill).
+      // The :not(.slide-notes) guard keeps the two bands independent even
+      // though .slide-notes also carries the .slide-footnote class.
+      if (d.footnotes && d.footnotes.length && !host.querySelector('.slide-footnote:not(.slide-notes)')) {
+        var box = el('div', 'slide-footnote');
+        box.textContent = d.footnotes.join('  ·  ');
+        host.appendChild(box);
+      }
     }
   }
 };

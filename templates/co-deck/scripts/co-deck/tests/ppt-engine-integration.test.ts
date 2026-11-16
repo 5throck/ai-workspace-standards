@@ -1,4 +1,9 @@
-// @version 1.1.1
+// @version 1.2.0
+// v1.2.0 (design 2026-11-16-co-deck-pdf-html-backport PR-2, U-20261116-009 item 2
+//   + U-008 item 4): FootnoteBuilder notes/footnotes split pins (source + CSS +
+//   DOM) and zen contact-bullets fallback DOM pins. The DOM suite launches
+//   system Chrome via puppeteer-core and self-skips when no Chrome/Edge is
+//   installed (CI), mirroring the gen-slides-pdf font-skip convention.
 // v1.1.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // ppt-engine-integration.test.ts — builder-side integration tests for the shared PPT runtime.
 //
@@ -15,10 +20,11 @@
 // Run via:
 //   bun test scripts/co-deck/tests/ppt-engine-integration.test.ts
 
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect, beforeAll, afterAll, test } from 'bun:test';
 import { buildThemeDeck, type BuildOptions } from '../lib/theme-builder.js';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { resolve, dirname, join } from 'path';
+import puppeteer from 'puppeteer-core';
 
 // ── Workspace root & paths ─────────────────────────────────────────────
 
@@ -340,6 +346,216 @@ describe('abbreviation footnotes contract', () => {
     expect(result.errors).toHaveLength(0);
     expect(result.html).toContain('"footnotes"');
     expect(result.html).toContain('Small Modular Reactor');
+  });
+});
+
+// ── Part F: notes/footnotes split (U-20261116-009 item 2, PR-2) ────────
+//
+// The FootnoteBuilder splits two slide-level bands: slideData[i].notes
+// (sources/caveats — in-card, static at the end of .slide-content flow, class
+// .slide-footnote.slide-notes) and slideData[i].footnotes (abbreviations —
+// outside the card, legacy pill on the slide host). Each field renders
+// independently; single-field decks render exactly as before.
+
+describe('notes/footnotes split — source and CSS pins', () => {
+  it('shared engine should render the notes band in-card and keep the pill branch independent', () => {
+    const source = readFileSync(pptEnginePath, 'utf-8');
+    // notes branch: in-card .slide-footnote.slide-notes, appended to .slide-content
+    expect(source).toMatch(/d\.notes && d\.notes\.length/);
+    expect(source).toContain("'slide-footnote slide-notes'");
+    expect(source).toContain("host.querySelector('.slide-content')");
+    // in-card guard: skip when .slide-content is absent (video-style slides)
+    expect(source).toMatch(/if \(content\) \{/);
+    // pill branch stays independent of the notes band despite the shared class
+    expect(source).toContain(".slide-footnote:not(.slide-notes)");
+  });
+
+  it('shared CSS should style the in-card notes band (static, no pill, dim ink)', () => {
+    const css = readFileSync(
+      join(ROOT, 'docs', 'html-themes', 'themes', '_shared', 'ppt-engine.css'),
+      'utf-8',
+    );
+    const idx = css.indexOf('.slide-footnote.slide-notes');
+    expect(idx).toBeGreaterThan(0);
+    const block = css.slice(idx, css.indexOf('}', idx) + 1);
+    expect(block).toMatch(/position:\s*static/);           // no absolute pill
+    expect(block).toMatch(/text-shadow:\s*none/);          // no photo shadow
+    expect(block).toMatch(/--text-dim/);                   // muted in-card ink
+    // wrap behavior is inherited from the base .slide-footnote rule
+    expect(css.slice(0, idx)).toMatch(/\.slide-footnote \{[\s\S]*?white-space:\s*normal/);
+  });
+});
+
+// ── Part G: rendered-DOM pins (Chrome; self-skips without a browser) ───
+//
+// Executes a built zen deck in headless Chrome and pins the two PR-2
+// rendering contracts on real DOM output:
+//   1. FootnoteBuilder split — a slide with notes + footnotes renders two
+//      distinct bands (.slide-content > .slide-footnote.slide-notes and
+//      .slide > .slide-footnote); single-field slides render their one band;
+//      a video slide with footnotes keeps the legacy pill (no .slide-notes).
+//   2. zen contact bullets fallback (U-008 item 4 / O-1) — a bullets-only
+//      contact slide renders the speaker title + up to 5 .contact-item lines
+//      with the first as .contact-primary; a contact*-first slide ignores
+//      bullets (parity with the PDF renderer's contact*-first contract).
+
+const CHROME_CANDIDATES = [
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium-browser',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome Beta',
+  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+  '/usr/bin/microsoft-edge',
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+];
+const chromePath = CHROME_CANDIDATES.find((c) => existsSync(c));
+
+const DOM_SLIDE_DATA = [
+  { section: 'S1', title: 'Notes And Footnotes', bullets: ['bullet one', 'bullet two'],
+    notes: ['Source: Co-deck Annual Data 2026'],
+    footnotes: ['ABBRZ = Abbreviation Definition Line'] },
+  { section: 'S1', title: 'Notes Only Slide', bullets: ['bullet one', 'bullet two'],
+    notes: ['Source: Notes Only Source Line'] },
+  { section: 'S1', title: 'Footnotes Only Slide', bullets: ['bullet one', 'bullet two'],
+    footnotes: ['ABBR2 = Legacy Pill Gloss'] },
+  { section: 'S1', title: 'Video With Gloss', videoId: 'abc123XYZ_-',
+    footnotes: ['ABBR3 = Video Slide Gloss'] },
+  { isContactSlide: true, title: '감사합니다',
+    bullets: ['김데크 연구원 · 총괄', 'deck@example.com', '+82-10-1234-5678',
+              'linkedin.com/in/deck', 'newsletter.example.com'] },
+  { isContactSlide: true, title: 'Reach Out',
+    contactEmail: 'keep@existing.deck',
+    bullets: ['Fallback bullet that must stay hidden'] },
+];
+
+const domDeck = (() => {
+  const data = DOM_SLIDE_DATA;
+  const result = buildThemeDeck(makeOpts({
+    theme: 'zen',
+    style: 'white-bubble',
+    slideData: data,
+    outputPath: join(ROOT, 'scripts', 'co-deck', 'tests', 'tmp', 'ppt-integration-footnote-dom.html'),
+  }));
+  expect(result.errors).toHaveLength(0);
+  return result.html;
+})();
+
+describe.skipIf(!chromePath)('notes/footnotes split — rendered DOM (Chrome)', () => {
+  let browser: import('puppeteer-core').Browser | null = null;
+  let page: import('puppeteer-core').Page | null = null;
+
+  beforeAll(async () => {
+    browser = await puppeteer.launch({
+      executablePath: chromePath,
+      headless: true,
+      args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+    });
+    page = await browser.newPage();
+    await page.setContent(domDeck, { waitUntil: 'load' });
+    await page.waitForSelector('.slide');
+    // FootnoteBuilder.render runs inside initPPT (DOMContentLoaded / immediate)
+    await page.waitForFunction(() => document.querySelectorAll('.slide-footnote').length >= 3);
+  }, 60000);
+
+  afterAll(async () => { if (browser) await browser.close(); });
+
+  test('a slide with notes + footnotes renders two distinct bands (in-card notes, outside pill)', async () => {
+    const bands = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[0];
+      const notes = slide.querySelector('.slide-content > .slide-footnote.slide-notes');
+      const pill = slide.querySelector(':scope > .slide-footnote');
+      return {
+        notesText: notes ? (notes as HTMLElement).textContent : null,
+        pillText: pill ? (pill as HTMLElement).textContent : null,
+        distinct: !!notes && !!pill && notes !== pill,
+        notesOutsideContent: !!notes && !notes.closest('.slide-content'),
+      };
+    });
+    expect(bands.distinct).toBe(true);
+    expect(bands.notesText).toContain('Source: Co-deck Annual Data 2026');
+    expect(bands.pillText).toContain('ABBRZ = Abbreviation Definition Line');
+    // the notes band must be INSIDE the card, the pill outside it
+    expect(bands.notesOutsideContent).toBe(false);
+  });
+
+  test('a notes-only slide renders the in-card band and no outside pill', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[1];
+      return {
+        notes: !!slide.querySelector('.slide-content > .slide-footnote.slide-notes'),
+        notesText: (slide.querySelector('.slide-notes') as HTMLElement | null)?.textContent ?? null,
+        pill: !!slide.querySelector(':scope > .slide-footnote'),
+      };
+    });
+    expect(r.notes).toBe(true);
+    expect(r.notesText).toContain('Source: Notes Only Source Line');
+    expect(r.pill).toBe(false);
+  });
+
+  test('a footnotes-only slide renders the legacy pill and no notes band (backward compat)', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[2];
+      return {
+        pillText: (slide.querySelector(':scope > .slide-footnote') as HTMLElement | null)?.textContent ?? null,
+        notes: !!slide.querySelector('.slide-notes'),
+      };
+    });
+    expect(r.pillText).toContain('ABBR2 = Legacy Pill Gloss');
+    expect(r.notes).toBe(false);
+  });
+
+  test('a video slide with footnotes keeps the legacy pill and gains no in-card notes', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[3];
+      return {
+        isVideo: slide.classList.contains('video-slide'),
+        hasContent: !!slide.querySelector('.slide-content'),
+        pillText: (slide.querySelector(':scope > .slide-footnote') as HTMLElement | null)?.textContent ?? null,
+        notes: !!slide.querySelector('.slide-notes'),
+      };
+    });
+    expect(r.isVideo).toBe(true);
+    expect(r.hasContent).toBe(false);       // guard: no .slide-content on video slides
+    expect(r.pillText).toContain('ABBR3 = Video Slide Gloss');
+    expect(r.notes).toBe(false);
+  });
+
+  test('a bullets-only contact slide renders the title + 5 contact-item lines, first as .contact-primary', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[4];
+      const items = Array.from(slide.querySelectorAll('.slide-content > .contact-item')) as HTMLElement[];
+      return {
+        title: (slide.querySelector('.slide-title') as HTMLElement | null)?.textContent ?? null,
+        itemCount: items.length,
+        firstIsPrimary: items[0]?.classList.contains('contact-primary') ?? false,
+        restPlain: items.slice(1).every((el) => !el.classList.contains('contact-primary')),
+        primaryText: items[0]?.textContent ?? null,
+        lastText: items[items.length - 1]?.textContent ?? null,
+      };
+    });
+    expect(r.title).toContain('감사합니다');
+    expect(r.itemCount).toBe(5);
+    expect(r.firstIsPrimary).toBe(true);
+    expect(r.restPlain).toBe(true);
+    expect(r.primaryText).toContain('김데크 연구원');
+    expect(r.lastText).toContain('newsletter.example.com');
+  });
+
+  test('a contact*-first slide ignores bullets (contact*-first order, PDF parity)', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[5];
+      const items = Array.from(slide.querySelectorAll('.slide-content > .contact-item')) as HTMLElement[];
+      return {
+        itemCount: items.length,
+        texts: items.map((el) => el.textContent),
+        hasPrimary: items.some((el) => el.classList.contains('contact-primary')),
+      };
+    });
+    expect(r.itemCount).toBe(1);
+    expect(r.texts[0]).toContain('keep@existing.deck');
+    expect(r.hasPrimary).toBe(false);
+    expect(r.texts.join(' ')).not.toContain('Fallback bullet that must stay hidden');
   });
 });
 

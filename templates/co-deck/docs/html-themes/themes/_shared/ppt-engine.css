@@ -686,6 +686,28 @@ body {
   pointer-events: none;
 }
 
+/* ── In-card source notes (slideData[i].notes) ───────────────────────
+   U-20261116-009 item 2 (design 2026-11-16-co-deck-pdf-html-backport §2):
+   sources/caveats render INSIDE the card as a static muted line at the end
+   of the .slide-content flow; abbreviations keep the outside-card
+   .slide-footnote pill above. Neutralizes the pill's absolute positioning,
+   photo-optimized white ink and shadow — the in-card line follows the card's
+   own text alignment and --text-dim-family ink (fallback matches the
+   white-bubble --text-dim value for themes that declare none). */
+.slide-footnote.slide-notes {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: auto;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  text-align: inherit;
+  color: var(--text-dim, rgba(31, 42, 68, 0.4));
+  background: none;
+  text-shadow: none;
+}
+
 /* ── Neutralize base.css responsive scaling for PPT themes ───────────
    base.css applies transform: scale(calc(100vw / 1280)) on .slide at
    ≤1340px for viewport-based layouts.
