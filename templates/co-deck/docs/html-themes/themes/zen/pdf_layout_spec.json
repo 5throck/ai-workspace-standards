@@ -1,6 +1,6 @@
 {
-  "version": "2.0.0",
-  "_comment": "zen theme PDF layout — v2.0.0: unified CSS px font/line-height system with font_px_to_pt ratio.",
+  "version": "2.1.0",
+  "_comment": "zen theme PDF layout — v2.1.0 (U-20261116-010/-011, design 2026-11-16-co-deck-pdf-html-backport-design): line_heights.punchline_px renamed to punch_text_px — buildSizes reads punch_text_px, so the theme's 76.8 punch line height never reached the renderer under the legacy key; punch_sub_px added (46px sub × 1.2, the zen title ratio) and fonts.punchline_sub_px: 46 (deck-verified HTML-visual punch sub size, O-3 = opt-in bold via fonts.punchline_sub_bold). Layer 0 layout_base.json defaults stay 16/regular. — v2.0.0: unified CSS px font/line-height system with font_px_to_pt ratio.",
   "page": {
     "width_mm": 338.7,
     "height_mm": 190.5,
@@ -56,6 +56,7 @@
     "title_px": 32,
     "bullet_px": 16,
     "punchline_px": 64,
+    "punchline_sub_px": 46,
     "ts_title_px": 64,
     "div_title_px": 56
   },
@@ -63,7 +64,8 @@
     "title_px": 38.4,
     "bullet_px": 26.4,
     "bullet_gap_px": 9.6,
-    "punchline_px": 76.8,
+    "punch_text_px": 76.8,
+    "punch_sub_px": 55.2,
     "ts_title_px": 76.8,
     "div_title_px": 67.2
   },
