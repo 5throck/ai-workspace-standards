@@ -7,7 +7,7 @@
 - **Skill**: storyline
 - **Status**: active
 - **Owner**: storyline
-- **Created**: 2026-11-16
+- **Created**: 2026-11-17
 
 ## Description
 
@@ -17,7 +17,7 @@ Designs lecture storyline and slide deck composition. Given research_notes.md (o
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-11-16 | - | production | Initial record derived from SKILL.md frontmatter | storyline |
+| 2026-11-17 | - | production | Initial record derived from SKILL.md frontmatter | storyline |
 
 ## Acceptance Criteria
 

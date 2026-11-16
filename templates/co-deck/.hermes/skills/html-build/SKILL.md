@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: "1.7.4"
+version: "1.8.0"
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -11,7 +11,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: "2026-11-16"
+last_reviewed: "2026-11-17"
 prerequisites: design
 relates_to:
   - skill: pdf-export
@@ -98,6 +98,8 @@ Generates a single HTML file from `slide_deck.md` + `design_spec.md`, applies th
 { section: "섹션명", title: "슬라이드 제목", bullets: ["불릿 1"],
   footnotes: ["SMR: 소형모듈원전(Small Modular Reactor)", "EREV: 주행거리 연장형 전동화(Extended-Range Electric Vehicle)"] }
 ```
+
+**Local video playback (`videoLocal` emission, U-20261116-009):** when a slide carries `videoId` and the pool file `deliverables/assets/videos/yt-<videoId>.mp4` exists (pool checked before injection), write `"videoLocal": "../assets/videos/yt-<id>.mp4"` on that slide in slidedata.json; otherwise omit the field — the YouTube embed fallback stays automatic (the native VideoSlide prefers `videoLocal` and falls through to YouTube on error). Injector bindings are index-based and regenerate on every build: `build-theme-deck.ts` auto-runs the idempotent `inject-video-players.ts` after every successful build (U-20261105-007), so a rebuild never needs manual re-binding.
 
 Use `design_spec.md`'s CSS variables directly. Unify slide rendering through a single `renderSlide(data)` function. Do not hardcode color or font values.
 

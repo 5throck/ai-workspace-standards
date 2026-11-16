@@ -7,7 +7,7 @@
 - **Skill**: pdf-export
 - **Status**: active
 - **Owner**: pdf-export
-- **Created**: 2026-11-15
+- **Created**: 2026-11-17
 
 ## Description
 
@@ -17,7 +17,7 @@ Generates PDF from slide data using pdf-lib. Extracts slidedata.json, runs sampl
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-11-15 | - | production | Initial record derived from SKILL.md frontmatter | pdf-export |
+| 2026-11-17 | - | production | Initial record derived from SKILL.md frontmatter | pdf-export |
 
 ## Acceptance Criteria
 
