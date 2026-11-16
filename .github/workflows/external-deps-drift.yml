@@ -1,8 +1,11 @@
 # Weekly external-deps upstream drift scan (T-20261107-006, follow-up to the
 # external-deps standard T-20261107-005 / DEC-20261107-02). Signal-only: scans
-# every project's external-deps.json pins against the upstream repo's latest
-# release tag and opens an issue naming old→new. Pins move ONLY through a
-# reviewed, compat-gated delivery — this workflow never bumps anything.
+# every tracked template seed (templates/*/external-deps.json) against the
+# upstream repo's latest release tags (design 2026-11-17-external-deps-drift-workflow-fix-design;
+# DEC-20261117-02). Project-side pins are swept locally by the PM Weekly Health
+# Check (CONSTITUTION §9.1) — CI cannot see Projects/ (gitignored sibling repos).
+# Opens an issue naming old→new. Pins move ONLY through a reviewed, compat-gated
+# delivery — this workflow never bumps anything.
 name: External-deps drift
 
 on:
@@ -20,7 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (T-20261026-009a: SHA pin)
 
-      - name: Scan project external-deps.json pins vs upstream latest releases
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          # Pinned to match test.yml and the locally verified Bun version.
+          bun-version: 1.4.0
+
+      - name: Scan template external-deps seed pins vs upstream latest releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -28,38 +37,36 @@ jobs:
           summary="$GITHUB_STEP_SUMMARY"
           drift=0
           findings=""
-          for manifest in Projects/*/external-deps.json; do
-            project=$(dirname "$manifest" | xargs basename)
-            count=$(jq '.dependencies | length' "$manifest")
-            for i in $(seq 0 $((count - 1))); do
-              id=$(jq -r ".dependencies[$i].id" "$manifest")
-              repo=$(jq -r ".dependencies[$i].repo" "$manifest")
-              pin=$(jq -r ".dependencies[$i].pin" "$manifest")
-              [ "$repo" = "null" ] || [ "$pin" = "null" ] && continue
-              upstream=${repo#https://github.com/}
-              [ "$upstream" = "$repo" ] && continue # non-github repos: no release API signal here
-              latest=$(gh api "repos/$upstream/releases/latest" --jq .tag_name 2>/dev/null || echo "")
-              [ -n "$latest" ] || continue # no releases published upstream
-              echo "$project/$id: pinned=$pin latest=$latest"
-              if [ "$pin" != "$latest" ]; then
-                drift=1
-                findings="${findings}- **$project** \`$id\`: $pin → $latest ($upstream)"$'\n'
-              fi
-            done
+          for manifest in templates/*/external-deps.json; do
+            tpl=$(dirname "$manifest" | xargs basename)
+            echo "--- template: $tpl ---" | tee -a "$summary"
+            out=$(bun scripts/external-deps.ts check-updates --project "templates/$tpl")
+            printf '%s\n' "$out" | tee -a "$summary"
+            while IFS= read -r line; do
+              case "$line" in
+                "[UPDATE]"*)
+                  drift=1
+                  findings="${findings}- **$tpl** \`${line#\[UPDATE\] }\`"$'\n'
+                  ;;
+                "[WARN]"*)
+                  echo "- $tpl: \`${line#\[WARN\] }\`" >> "$summary"
+                  ;;
+              esac
+            done <<< "$out"
           done
           if [ "$drift" -eq 1 ]; then
             {
-              echo "### External-deps pin drift detected"
+              echo "### External-deps seed pin drift detected"
               echo ""
               echo "$findings"
               echo ""
-              echo "_Signal-only (T-20261107-006): pins move through a reviewed, compat-gated delivery — never auto-bumped. Gated entries need their compatibility_test green before any pin move._"
+              echo "_Signal-only (T-20261107-006): template seed pins move through a reviewed, compat-gated delivery — never auto-bumped. Gated entries need their compatibility_test green before any pin move._"
             } >> "$summary"
-            title="[fleet] external-deps pins drifted from upstream releases"
+            title="[templates] external-deps seed pins drifted from upstream releases"
             existing=$(gh issue list --search "$title in:title" --state open --json number -q 'length' || echo 0)
             if [ "$existing" -eq 0 ]; then
-              gh issue create --title "$title" --body "$(printf 'Weekly external-deps drift scan (T-20261107-006) found drifted pins:\n\n%s\nHandle per the external-deps standard (DEC-20261107-02): compat-gated, review-only pin moves.' "$findings")"
+              gh issue create --title "$title" --body "$(printf 'Weekly external-deps drift scan (T-20261107-006) found drifted template seed pins:\n\n%s\nHandle per the external-deps standard (DEC-20261107-02): compat-gated, review-only pin moves.' "$findings")"
             fi
           else
-            echo "No external-deps pin drift." >> "$summary"
+            echo "No external-deps seed pin drift." >> "$summary"
           fi

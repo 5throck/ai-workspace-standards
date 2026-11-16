@@ -29,6 +29,11 @@ bun scripts/ticket.ts list --ready --kind manual
 # Ticket archive dry-run — surface done tickets past the 7-day dwell (AGENTS.md §3.7.5);
 # the Weekly Health Check workflow runs the same report automatically (report-only)
 bun scripts/ticket.ts archive
+
+# External-deps sweep — report-only (exit 0 always); a [UPDATE] row is a finding for the
+# compat-gated upgrade pass, never a hand-edit (private upstreams unreachable from CI are
+# visible here — the sweep runs with the operator's git credentials)
+for d in Projects/*/; do bun scripts/external-deps.ts check-updates --project "$d"; done
 ```
 
 **Checklist**:
