@@ -48,12 +48,18 @@ title: >-
   behaviour - ride it or stay separate), T-20261112-004, U-20261113-003, design
   docs/designs/2026-11-12-common-agents-for-common-skills-design.md.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-14T18:12:29.135+09:00'
 history:
   - at: '2026-11-14T18:12:29.135+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-16T07:45:13.802+09:00'
+    from: backlog
+    to: review
+  - at: '2026-11-16T07:45:13.820+09:00'
+    from: review
+    to: done
+result: 'Landed in PR #2042.'
 error: null

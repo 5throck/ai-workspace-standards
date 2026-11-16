@@ -96,7 +96,8 @@
             "timeout": 10,
             "statusMessage": "Checking PM dispatch policy..."
           }
-        ]
+        ],
+        "matcher": "Agent"
       },
       {
         "hooks": [
@@ -105,6 +106,18 @@
             "command": "bun scripts/hooks/delete-guard.ts",
             "timeout": 10,
             "statusMessage": "Checking recursive-delete guard..."
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/agent-model-gate.ts",
+            "timeout": 10,
+            "statusMessage": "Checking Agent dispatch model tier..."
           }
         ]
       }
@@ -161,12 +174,9 @@
       "Bash(bun scripts/audit.ts *)",
       "Bash(bun scripts/lifecycle-sync-audit.ts *)",
       "Bash(bun run agent:verify *)",
-      "Bash(curl -sI *)",
       "Bash(bun scripts/validate-templates.ts *)",
       "WebSearch(*)",
-      "WebFetch(*)",
-      "Bash(trail:*)",
-      "Bash(node dist/cli.js:*)"
+      "Bash(trail:*)"
     ],
     "deny": [
       "Bash(git push --force*)",

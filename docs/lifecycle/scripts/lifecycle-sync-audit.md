@@ -4,9 +4,9 @@
 
 - **Script**: lifecycle-sync-audit
 - **Status**: active
-- **Version**: 1.21.0
+- **Version**: 1.22.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-31
+- **Last Updated**: 2026-11-16
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -18,6 +18,8 @@
 Cross-surface lifecycle sync audit (Checks A–I): script @version vs SCRIPTS.md (A), SCRIPTS.md mirror parity (B), skills/ vs templates/common/skills/ content (C), intentional-duplicate registry (D), skill lifecycle records vs SKILL.md frontmatter (E), agent tier cross-surface parity anchored on frontmatter (F), .githooks mirror parity (G), script lifecycle record versions (H), and .claude/settings.json hook drift (I). SSOT: `scripts/SCRIPTS.md` registry row.
 
 ## Phase History
+
+- **1.22.0** (2026-11-16, T-20261114-009 item 4): Check I consumes the governance-hook presence arm (missing + matcher-mismatch at ERROR level).
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|

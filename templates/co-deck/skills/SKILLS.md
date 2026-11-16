@@ -7,13 +7,13 @@ Curated registry for the co-deck variant-exclusive skills (T-20260924-009). One 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `design` | 1.2.2 | active | design | 2026-11-15 | — | co-deck only — visual style locking — layout, palette, fonts |
-| `html-build` | 1.7.1 | active | html-build | 2026-11-15 | — | co-deck only — HTML slide generation; v1.7.0 adds the mandatory Font Parity (PDF ↔ HTML) section — typography SSOT = the PDF engine font family, embedded via @font-face and verified with document.fonts.check() (backport of co-deck DEC-20261110-02, U-20261111-004); v1.6.1 adds the canonical rebuild order (build → style patch → video inject, U-20261105-007) |
+| `html-build` | 1.7.3 | active | html-build | 2026-11-16 | — | co-deck only — HTML slide generation; v1.7.0 adds the mandatory Font Parity (PDF ↔ HTML) section — typography SSOT = the PDF engine font family, embedded via @font-face and verified with document.fonts.check() (backport of co-deck DEC-20261110-02, U-20261111-004); v1.6.1 adds the canonical rebuild order (build → style patch → video inject, U-20261105-007) |
 | `pdf-export` | 2.1.3 | active | pdf-export | 2026-11-15 | — | co-deck only — PDF generation from the measured layout spec; v2.1.2 names the PDF font family as the deck typography source of truth (Font Parity, U-20261111-004) |
 | `prep-pdf` | 2.0.1 | active | pdf-export | 2026-11-15 | — | co-deck only — PDF layout preparation with estimate-layout.ts calibration |
 | `presenter-mode` | 1.0.2 | active | html-build | 2026-11-15 | — | co-deck only — dual-window presenter state sync (BroadcastChannel) |
 | `research` | 1.2.2 | active | research | 2026-11-15 | — | co-deck only — web research and source collection for lecture topics |
 | `slide-layout-gate` | 1.0.1 | active | pdf-export | 2026-11-15 | — | co-deck only — slide-content conformance gate (estimate-layout.ts --lint) |
-| `storyline` | 1.3.0 | active | storyline | 2026-11-07 | — | co-deck only — lecture storyline and slide deck composition |
+| `storyline` | 1.3.2 | active | storyline | 2026-11-16 | — | co-deck only — lecture storyline and slide deck composition |
 | `theme-authoring` | 1.0.1 | active | pm | 2026-06-21 | — | co-deck only — theme/style authoring pipeline (template.html + theme.json) |
 | `version` | 1.3.1 | active | version | 2026-11-15 | — | co-deck only — version snapshots before every file modification |
 

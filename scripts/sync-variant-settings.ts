@@ -7,6 +7,15 @@
 //           every variant's .claude/settings.json like the pm-role-bootstrap
 //           class. The command embeds `|| exit 0`, so pre-skeleton or
 //           hand-deleted .trail trees fail safe (hook absent → silent pass).
+// v1.5.0 (2026-11-16, T-20261114-009 — spec
+//          docs/designs/2026-11-16-governance-batch-design.md): MANAGED_SUBSTRINGS
+//          gains 'agent-model-gate' — the CLAUDE.md §6 tier-to-model enforcement
+//          hook (templates/common/.claude/settings.json PreToolUse/Agent) now
+//          propagates to every variant like the pm-dispatch-gate class, closing
+//          the gap where 14/15 variant fleets never invoked the delivered script.
+//          Matcher normalization (pm-dispatch-gate → Agent, delete-guard → Bash)
+//          applied directly to the variant files in the same pass.
+//
 // v1.4.0 (2026-11-06, T-20261106-003 — delete-guard scaffold wiring asymmetry):
 //          MANAGED_SUBSTRINGS gains 'delete-guard' — the Claude Code
 //          PreToolUse/Bash delete-guard entry (templates/common/.claude/
@@ -97,6 +106,7 @@ export const SYNC_TARGETS: ReadonlyArray<{ platform: Platform; event: string }> 
 export const MANAGED_SUBSTRINGS: readonly string[] = [
   "pm-role-bootstrap",
   "pm-dispatch-gate",
+  "agent-model-gate",
   "delete-guard",
   "trail/hook.cjs",
 ];

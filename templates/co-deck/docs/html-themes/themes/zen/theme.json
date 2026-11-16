@@ -15,9 +15,21 @@
     "min_bullets_per_slide": 3,
     "min_body_chars": 40,
     "recommended_slide_count": "15-25",
-    "notes": "Presentation Zen style. Titles up to 50 chars. Max 5 bullets per slide as subtle secondary text. Background image expected on every slide. Speaker script for narration."
+    "notes": "Presentation Zen style. Titles up to 50 chars. Max 5 bullets per slide as subtle secondary text. Background image expected on every slide. Speaker script for narration.",
+    "bullet_doctrine": {
+      "bullets_carry_context": "Each bullet carries an interpretation or takeaway — never a bare source/number listing (수치 — 출처 style is banned); the number and its meaning live in the same line.",
+      "source_attributions": "Per-slide source attributions belong in the speaker narration and the references appendix, never in slide bullets.",
+      "next_slide_announcements": "Next-slide announcement sentences belong in the speaker script, never in bullets.",
+      "biography_line_breaks": "Biography credentials render one per line (structured line breaks) so profile cards keep a readable width instead of stretching full-width."
+    }
   },
-  "compatible_styles": ["classic", "minimal", "premium-dark", "academic", "white-bubble"],
+  "compatible_styles": [
+    "classic",
+    "minimal",
+    "premium-dark",
+    "academic",
+    "white-bubble"
+  ],
   "partial_styles": [],
   "incompatible_styles": [
     {
@@ -27,7 +39,11 @@
   ],
   "recommended_structure": {
     "pattern": "Cover → [Topic → 2-3 Detail → Punchline] × N → Contact",
-    "audience_fit": ["general", "practitioner", "undergraduate"],
+    "audience_fit": [
+      "general",
+      "practitioner",
+      "undergraduate"
+    ],
     "notes": "Optimized for concise visual storytelling. Each chapter = topic + detail + punchline. Background images essential."
   },
   "requires_slideData": true,
