@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.82.0
+- **Version**: 1.83.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-13
+- **Last Updated**: 2026-11-16
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-16 | production | production | v1.82.0 → v1.83.0 (design docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section 4, T-20261114-012): new WARN-only check `variant-common-shadow` — undeclared variant shadows of templates/common files, checked against the root-only docs/templates/variant-shadow-allowlist.json (variant-owned, tracked + commonSha256); one WARN per variant plus shadow-common-moved and shadow-allowlist-stale; the exit code never changes. Unit-pinned by tests/unit/validate-templates-variant-shadow.test.ts. | automation-engineer |
 | 2026-11-13 | production | production | v1.80.0 → v1.81.0 (merge consolidation of parallel v1.80.0 waves U-20261112-013 + U-20261112-010): version consolidation — content unchanged; the two v1.80.0 arms (hook-command-targets, TB-01 HERMES/CODEX trail parity + graft-era block detection) are both retained. | automation-engineer |
 | 2026-11-13 | production | production | v1.79.1 → v1.80.0 (U-20261112-013, upstream co-abap): new check `hook-command-targets` — every script-file target in template platform settings hook commands (.claude/settings.json, .gemini/settings.json, .codex/hooks.json; common + every variant) must exist in the effective template tree (variant dir → templates/common fallback); `${VAR}/`/`$(...)/` prefixes resolved; TRAIL_RETIRED_SEEDS skipped; fail-on-missing. Primitives collectHookCommands/extractHookScriptTargets unit-pinned (tests/unit/validate-templates-hook-targets.test.ts). | automation-engineer |
 | 2026-11-13 | production | production | v1.79.1 → v1.80.0 (U-20261112-010, design docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-010): TB-01 arm widened — (1) HERMES.md/CODEX.md trail parity (templates/common seed == variant copy where the variant carries the file); (2) graft-era block detection (Error) in every instruction file across common + variants — the 2026-11-08 fleet standard missed the 15 variant HERMES.md copies and co-architect/CODEX.md, and the tool-owned block sits outside every managed zone so nothing else saw the drift. Primitives: lib/trail-block-parity.ts v1.1.0. | automation-engineer |
