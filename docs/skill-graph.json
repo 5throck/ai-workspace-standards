@@ -2900,6 +2900,16 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261116-04",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261116-05",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -8100,7 +8110,7 @@
       ],
       "usage": {
         "sessions": 2,
-        "last_used": "2026-11-16"
+        "last_used": "2026-11-17"
       }
     },
     {
@@ -8546,7 +8556,7 @@
       ],
       "usage": {
         "sessions": 2,
-        "last_used": "2026-11-16"
+        "last_used": "2026-11-17"
       }
     },
     {
@@ -9233,7 +9243,7 @@
       ],
       "usage": {
         "sessions": 2,
-        "last_used": "2026-11-16"
+        "last_used": "2026-11-17"
       }
     },
     {
@@ -12397,6 +12407,30 @@
     {
       "type": "cites_skill",
       "from": "dec:DEC-20261116-03",
+      "to": "skill:root/sync",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261116-04",
+      "to": "skill:common/decision-record",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261116-04",
+      "to": "skill:root/sync",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261116-05",
+      "to": "skill:common/decision-record",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261116-05",
       "to": "skill:root/sync",
       "source": "skills_used"
     },

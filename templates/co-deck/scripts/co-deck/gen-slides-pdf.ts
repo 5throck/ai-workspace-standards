@@ -1,3 +1,36 @@
+// @version 1.15.0 — LOCAL-PATCH(U-20261116-008/-010/-011, design
+//   2026-11-16-co-deck-pdf-html-backport-design PR-1): ①U-010 — the private
+//   frontmatter/override parsers are REPLACED by the shared lib
+//   (lib/layout-overrides.ts, the same parser estimate-layout's gate uses):
+//   the private block parser's key regex could not match dotted keys
+//   (`fonts.punchline_px: 32`) and silently dropped them, so a dotted override
+//   passed the gate and never reached this renderer. flat + dotted + nested +
+//   mixed forms all parse now; gate and renderer see the same merged spec.
+//   ②U-008 item 2 / U-009 item 2 (owner decision O-2) — per-slide `notes`
+//   (sources/caveats) render in the footnote band, sources first then the
+//   `footnotes` abbreviations, one joined band through the v1.14.9 fit ladder
+//   (zero new placement logic, zero drops). ③U-008 item 3 — punchline
+//   statements split on `\n` into equal full-size bold sentence groups
+//   (HTML inlineTitle renders `\n` as <br>; the PDF never split, gluing the
+//   second sentence onto the first), and U+2060 WORD JOINER / U+FEFF are
+//   stripped globally in strip() and from the punchline raw before the rich
+//   splitter (joiners glued words into one atom that drew past the band —
+//   S45). ④U-008 item 4 PDF side (owner decision O-1) — a contact slide with
+//   no `contact*` fields falls back to `bullets` (max 5, first line bold in
+//   the card ink mirroring HTML .contact-primary; contact*-first order keeps
+//   existing decks unchanged). ⑤U-011 — new opt-in `fonts.punchline_sub_bold`
+//   flips the punchline sub to bold in the statement ink (C_DARK on a drawn
+//   background, mirroring HTML line-2); the absent key keeps today's regular
+//   C_BODY output unchanged. zen's theme spec ships the matching defaults
+//   (fonts.punchline_sub_px: 46 + the punch_text_px/punch_sub_px line-height
+//   key rename — the legacy `line_heights.punchline_px` never reached
+//   buildSizes, which reads punch_text_px).
+//   ⑥Amendment A (DEC-20261116-05, design §7.2) — the punch tag is DECOUPLED
+//   from punchline_sub_px (it borrowed the sub size, so zen's sub 46px would
+//   have ballooned the legacy punchline tag to 34.5pt): new
+//   `fonts.punch_tag_px` key with a 16.0 fallback (CSS px through calibration
+//   — 12.0 would shrink the tag to 9pt deck-wide); layout_base.json pins
+//   16.0, no zen entry (zen tag stays at its pre-PR-1 12pt).
 // @version 1.14.9 — LOCAL-PATCH(pm-2026-11-15 footnote-scrim): photo-aware footnote
 //   scrim + placement fit ladder. Audit of the 24 gloss slides / 37 glosses found
 //   NO absent text, NO off-page text and NO card overlap — the reported
@@ -176,29 +209,19 @@ import { Resvg } from '@resvg/resvg-js';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { platform, homedir } from 'os';
+// v1.15.0 (U-20261116-010) — shared frontmatter/layout_overrides parser (the
+// same module estimate-layout's gate imports). The private copies below it were
+// deleted: the private block parser silently dropped DOTTED keys
+// (`fonts.punchline_px: 32` — its key regex stopped at the `.`), so dotted
+// overrides passed the lint gate but never reached this renderer. The shared
+// lib accepts the union dialect (flat + dotted + nested + mixed), so gate and
+// renderer always see the same merged spec.
+import { deepMerge, parseFrontmatter, parseScalar } from './lib/layout-overrides';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const MM_TO_PT = 2.835;
 const mm = (v: number) => v * MM_TO_PT;
-
-// ── Spec merge helpers ────────────────────────────────────────────────────────
-
-function deepMerge(base: any, override: any): any {
-  if (!override) return base;
-  const result = { ...base };
-  for (const key of Object.keys(override)) {
-    if (override[key] === null) {
-      // Explicit null overrides (e.g. toc: null) — clear the slot.
-      result[key] = null;
-    } else if (typeof override[key] === 'object' && !Array.isArray(override[key])) {
-      result[key] = deepMerge(base[key] ?? {}, override[key]);
-    } else {
-      result[key] = override[key];
-    }
-  }
-  return result;
-}
 
 // Convert an [R, G, B] array (0-255) to a pdf-lib RGB value
 const toRGB = (arr: number[]) => rgb(arr[0] / 255, arr[1] / 255, arr[2] / 255);
@@ -217,39 +240,13 @@ function readableMutedOn(bg: RGB): RGB {
   return luma > 0.6 ? toRGB([90, 99, 120]) : toRGB([203, 213, 225]);
 }
 
-// ── Frontmatter parser ────────────────────────────────────────────────────────
-
-function parseFrontmatter(content: string): Record<string, any> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return {};
-  const frontmatterContent = match[1];
-  const lines = frontmatterContent.split('\n');
-  const result: Record<string, any> = {};
-  for (const line of lines) {
-    const themeMatch = line.match(/^\s{2}theme:\s*(\S+)/);
-    const styleMatch = line.match(/^\s{2}style:\s*(\S+)/);
-    if (themeMatch) result.theme = themeMatch[1];
-    if (styleMatch) result.style = styleMatch[1];
-  }
-  const overrides = parseLayoutOverrides(frontmatterContent);
-  if (Object.keys(overrides).length > 0) {
-    result.layout_overrides = overrides;
-  }
-  return result;
-}
-
-function parseScalar(raw: string): any {
-  // RGB array: [R, G, B]
-  const arrMatch = raw.match(/^\[(\d+),\s*(\d+),\s*(\d+)\]$/);
-  if (arrMatch) return [Number(arrMatch[1]), Number(arrMatch[2]), Number(arrMatch[3])];
-  // Number
-  if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw);
-  // Boolean
-  if (raw === 'true') return true;
-  if (raw === 'false') return false;
-  // String (strip optional quotes)
-  return raw.replace(/^["']|["']$/g, '');
-}
+// ── background_image block parser ─────────────────────────────────────────────
+// v1.15.0 (U-20261116-010) — the frontmatter/layout_overrides parsing itself
+// moved to the shared lib (see the import above): private parseFrontmatter /
+// parseScalar / parseLayoutOverrides were deleted. `parseIndentedBlock` stays
+// as a PRIVATE helper because it serves a different frontmatter section
+// (`background_image:`, below) that the shared lib does not model; it now
+// consumes the shared parseScalar so scalar semantics cannot diverge again.
 
 function parseIndentedBlock(lines: string[], baseIndent: number): { value: Record<string, any>, consumed: number } {
   const result: Record<string, any> = {};
@@ -282,42 +279,6 @@ function parseIndentedBlock(lines: string[], baseIndent: number): { value: Recor
   }
 
   return { value: result, consumed: i };
-}
-
-function parseLayoutOverrides(frontmatter: string): Record<string, any> {
-  const lines = frontmatter.split('\n');
-
-  // Find the layout_overrides: line (uncommented)
-  let startIdx = -1;
-  for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].trim();
-    if (trimmed === 'layout_overrides:' && !lines[i].trimStart().startsWith('#')) {
-      startIdx = i;
-      break;
-    }
-  }
-  if (startIdx === -1) return {};
-
-  // Collect subsequent indented uncommented lines
-  const block: string[] = [];
-  for (let i = startIdx + 1; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;  // skip blank/comment
-    // Stop if we hit a top-level key (no leading spaces)
-    if (line.length > 0 && line[0] !== ' ') break;
-    block.push(line);
-  }
-
-  // Determine the base indent from the first non-blank block line so that
-  // parseIndentedBlock sees the correct depth (block lines are already indented
-  // relative to the YAML root, not to column 0).
-  const minIndent = block.reduce((min, l) => {
-    const ind = l.search(/\S/);
-    return ind >= 0 ? Math.min(min, ind) : min;
-  }, Infinity);
-  const baseIndent = minIndent === Infinity ? 0 : minIndent;
-  return parseIndentedBlock(block, baseIndent).value;
 }
 
 // ── Background image config parser ───────────────────────────────────────────
@@ -823,7 +784,12 @@ class Renderer {
 // ── Text utilities ────────────────────────────────────────────────────────────
 
 function strip(s: string | undefined | null): string {
-  return (s ?? '').replace(/<[^>]+>/g, '').replace(/\*\*/g, '');
+  // v1.15.0 (U-20261116-008 item 3) — U+2060 WORD JOINER / U+FEFF are pure
+  // glue: browsers never render them (HTML decks are unaffected), but the PDF
+  // treats them as word characters — they glued words into one giant atom the
+  // line wrappers cannot break, which then drew past the band (S45). Strip
+  // globally so titles/bullets/footnotes are fixed in one place.
+  return (s ?? '').replace(/<[^>]+>/g, '').replace(/\*\*/g, '').replace(/[\u2060\uFEFF]/g, '');
 }
 
 function imgPath(src: string | undefined, imgDir: string): string | null {
@@ -937,6 +903,11 @@ interface SlideData {
   // LOCAL-PATCH(upstream-request: U-20261105-002) F3 — per-slide source
   // citations (design_spec §3 source line); previously never rendered.
   footnotes?:     string[];
+  // v1.15.0 (U-20261116-008 item 2 / U-20261116-009 item 2) — per-slide
+  // source/caveat lines. Authoring contract (formalized in PR-3):
+  // `notes` = sources/caveats, `footnotes` = abbreviation definitions. The
+  // footnote band merges both (sources first) through the existing fit ladder.
+  notes?:         string[];
   isProfileSlide?: boolean;
   speakerName?:   string;
   speakerTitle?:  string;
@@ -986,6 +957,13 @@ interface LayoutSpec {
     bullet_px?:        number;
     punchline_px?:     number;
     punchline_sub_px?: number;
+    // v1.15.0 (U-20261116-011) — opt-in punchline sub weight/ink parity with
+    // the deck-patched HTML (bold + statement ink). Absent key = regular
+    // C_BODY, byte-shape identical to pre-1.15.0 output.
+    punchline_sub_bold?: boolean;
+    // Amendment A (DEC-20261116-05) — the punch tag no longer borrows
+    // punchline_sub_px; it has its own size key.
+    punch_tag_px?:     number;
     vis_title_px?:     number;
     vis_body_px?:      number;
     ts_eyebrow_px?:    number;
@@ -1439,8 +1417,17 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   // vertical centering accounts for the ACTUAL statement height.
   // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.5 — keep the raw `**keyword**`
   // markup (HTML `.punch-text strong` = accent) and wrap/draw through richLines.
-  const statementRaw = (data.text ?? '').replace(/<[^>]+>/g, '').trim() ? (data.text as string) : (data.title ?? '');
-  const statement = strip(statementRaw);
+  // v1.15.0 (U-20261116-008 item 3) — resolve text/sub as before, then split
+  // the statement on `\n` into sentences: HTML's inlineTitle renders `\n` as a
+  // <br> (equal full-size lines), but the PDF never split — the literal `\n`
+  // rode along inside the next atom and U+2060 word joiners glued words into
+  // one giant atom that drew past the band (S45). Strip the joiners from the
+  // raw BEFORE the rich splitter (strip() alone cannot: richLines receives the
+  // `**keyword**` markup raw). Every sentence wraps and draws as its own group
+  // at the full T_PUNCH_TEXT size and bold weight.
+  const statementRaw = ((data.text ?? '').replace(/<[^>]+>/g, '').trim() ? (data.text as string) : (data.title ?? ''))
+    .replace(/[\u2060\uFEFF]/g, '');
+  const punchSentences = statementRaw.split('\n').map((s) => s.trim()).filter(Boolean);
   r.setFont(true, T_PUNCH_TEXT);
   // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.2 — with the white bubble
   // card (bgDrawn) HTML zen shows ONLY the statement (+ optional sub) in the card:
@@ -1450,9 +1437,11 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   const capW  = cardCapMm(coords);
   const textBand = cardMode ? 0.85 * (capW - padXp * 2) : Math.min(bandW, coords.px2mm(607));
   const textX    = box.x + (bandW - textBand) / 2;
-  const stmtLines = statement ? richLines(r, statementRaw, textBand, T_PUNCH_TEXT, true) : [];
+  const stmtLines = punchSentences.flatMap((s) => richLines(r, s, textBand, T_PUNCH_TEXT, true));
   const nTextLines = stmtLines.length || 1;
   const textLineH = nTextLines * LH_PUNCH_TEXT;
+  // v1.15.0 (U-20261116-011) — opt-in sub bold/ink parity (fonts.punchline_sub_bold).
+  const subBold = ctx.spec.fonts?.punchline_sub_bold === true;
 
   const subPre = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
   const blockH = cardMode
@@ -1475,9 +1464,11 @@ function renderPunchlineSlide(ctx: RenderCtx) {
     // before any ink text; width = widest wrapped line (HTML fit-content).
     const subForCard = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
     // HTML: a statement that wraps makes the fit-content card hit its cap.
+    // v1.15.0: the card width takes the widest SENTENCE (a `\n` title means
+    // ≥2 sentence groups); the sub measures bold when punchline_sub_bold set.
     const textW = nTextLines > 1 ? capW - padXp * 2 : Math.max(
-      widestWrappedLine(r, statement, textBand, T_PUNCH_TEXT, true),
-      widestWrappedLine(r, subForCard, bandW, T_PUNCH_SUB, false),
+      ...punchSentences.map((s) => widestWrappedLine(r, s, textBand, T_PUNCH_TEXT, true)),
+      widestWrappedLine(r, subForCard, bandW, T_PUNCH_SUB, subBold),
     );
     drawBubbleBehind(ctx, box.x + bandW / 2, y, blockH, textW);
   }
@@ -1519,9 +1510,12 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   y = sy + GAP_PUNCH_TEXT_SUB;
 
   // punch-sub (slate) — support line (data.sub, fallback subtitle/bullets)
+  // v1.15.0 (U-20261116-011): fonts.punchline_sub_bold flips the sub to bold
+  // in the statement ink (stmtInk = C_DARK when a background was drawn,
+  // mirroring the HTML line-2 ink); the absent key keeps regular C_BODY.
   const subText = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
   if (subText) {
-    r.setFont(false, T_PUNCH_SUB); r.setColor(C_BODY);
+    r.setFont(subBold, T_PUNCH_SUB); r.setColor(subBold ? stmtInk : C_BODY);
     r.multiCell(bandW, LH_PUNCH_SUB, subText, box.x, y, 'C');
   }
 }
@@ -1628,7 +1622,17 @@ function renderContactSlide(ctx: RenderCtx) {
   const note   = strip(data.contactNote);
   const known  = ['contactName', 'contactEmail', 'contactLinkedIn', 'contactPhone'];
   const extra  = Object.keys(data).filter(k => /^contact/.test(k) && !known.includes(k) && k !== 'contactNote');
-  const cLines = [...known, ...extra].map(k => strip((data as any)[k])).filter(Boolean);
+  let cLines = [...known, ...extra].map(k => strip((data as any)[k])).filter(Boolean);
+  // v1.15.0 (U-20261116-008 item 4 PDF side, owner decision O-1) — bullets-only
+  // contact slide (deck S47 shape): when NO contact* line resolves, fall back to
+  // `bullets` (max 5), the first line bold in the card ink mirroring the HTML
+  // .contact-primary treatment. The contact*-first order keeps every existing
+  // deck unchanged.
+  let primaryFirst = false;
+  if (cLines.length === 0) {
+    cLines = (data.bullets ?? []).slice(0, 5).map(s => strip(s)).filter(Boolean);
+    primaryFirst = cLines.length > 0;
+  }
   const nLines = cLines.length || 1;
 
   r.setFont(false, T_CONT_NOTE);
@@ -1644,7 +1648,7 @@ function renderContactSlide(ctx: RenderCtx) {
   if (bgDrawn) {
     const cardTextW = Math.max(
       widestWrappedLine(r, thanks, bandW, T_CONT_THANKS, true),
-      ...cLines.map(l => widestWrappedLine(r, l, bandW, T_CONT_LINE, false)),
+      ...cLines.map((l, i) => widestWrappedLine(r, l, bandW, T_CONT_LINE, primaryFirst && i === 0)),
       widestWrappedLine(r, note, bandW, T_CONT_NOTE, false),
       // HTML contact card min-width: min(28rem, 80%)
       Math.min(coords.px2mm(448), coords.PW * 0.80) - coords.px2mm(88),
@@ -1664,9 +1668,17 @@ function renderContactSlide(ctx: RenderCtx) {
   r.cell(bandW, LH_CONT_THANKS, thanks, bandX, y, 'C');
   y += LH_CONT_THANKS + GAP_CONT_THANKS_LINE;
 
-  // contact lines — secondary #CBD5E1 (C_BODY), regular weight
-  r.setFont(false, T_CONT_LINE); r.setColor(C_BODY);
-  for (const l of cLines) { r.cell(bandW, LH_CONT_LINE, l, bandX, y, 'C'); y += LH_CONT_LINE; }
+  // contact lines — secondary #CBD5E1 (C_BODY), regular weight. v1.15.0: the
+  // first bullets-fallback line renders bold in the card ink — bgDrawn ? C_DARK
+  // : C_WHITE, the same conditional the R2 thanks hero uses on this surface
+  // (bare C_DARK would be invisible on the legacy dark flat background).
+  for (let i = 0; i < cLines.length; i++) {
+    const primary = primaryFirst && i === 0;
+    r.setFont(primary, T_CONT_LINE);
+    r.setColor(primary ? (bgDrawn ? colors.C_DARK : C_WHITE) : C_BODY);
+    r.cell(bandW, LH_CONT_LINE, cLines[i], bandX, y, 'C');
+    y += LH_CONT_LINE;
+  }
 
   // note / CTA — GOLD (HTML .contact-next is accent gold)
   y += GAP_CONT_LINE_NOTE;
@@ -2277,7 +2289,7 @@ function buildSizes(spec: LayoutSpec): FontSizes {
     T_DIV_PART:      pt(divPartPx, 12.0),
     T_DIV_TITLE:     pt(divTitlePx, 36.8),
     T_DIV_DESC:      pt(divDescPx, 16.0),
-    T_PUNCH_TAG:     pt(f.punchline_sub_px ?? 12.0, 12.0),
+    T_PUNCH_TAG:     pt(f.punch_tag_px ?? 16.0, 16.0),   // Amendment A (DEC-20261116-05): own key; 16.0 fallback (CSS px through calibration), NOT the sub size
     T_PUNCH_MARK:    pt(57.6, 57.6),
     T_PUNCH_TEXT:    pt(punchPx, 38.4),
     T_PUNCH_SUB:     pt(punchSubPx, 16.0),
@@ -2922,7 +2934,11 @@ async function main() {
     //    (2) the top margin above the card;
     //    (3) drop — last resort only, with a loud per-gloss ⚠ log and a run
     //         summary (none of the 24 audited slides can reach it).
-    const fns = (data.footnotes ?? []).map(s => strip(s)).filter(Boolean);
+    // v1.15.0 (U-20261116-008 item 2 / U-20261116-009 item 2, owner decision
+    // O-2) — the band merges the authoring split: `notes` (sources/caveats)
+    // first, then `footnotes` (abbreviation definitions), one joined band
+    // through the existing ladder below — zero drops, zero new placement logic.
+    const fns = [...(data.notes ?? []), ...(data.footnotes ?? [])].map(s => strip(s)).filter(Boolean);
     if (fns.length > 0) {
       const footR = region('content');
       const footText = fns.join('  ·  ');

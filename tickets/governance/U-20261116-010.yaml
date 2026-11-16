@@ -3,13 +3,16 @@ id: U-20261116-010
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
-created_at: 2026-11-16T17:05:55.908+09:00
+created_at: '2026-11-16T17:05:55.908+09:00'
 history:
-  - at: 2026-11-16T17:05:55.908+09:00
+  - at: '2026-11-16T17:05:55.908+09:00'
     from: null
     to: backlog
+  - at: '2026-11-16T20:59:09.429+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,13 +22,27 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'gen-slides-pdf.ts (v1.14.9, same in templates/co-deck) does not use the shared parser scripts/co-deck/lib/layout-overrides.ts that U-20261105-003 created; it still uses its private parseLayoutOverrides(), which silently drops DOTTED keys (e.g. `fonts.punchline_px: 32` under layout_overrides). estimate-layout.ts (via the shared lib) accepts the same lines, so a dotted override passes the layout gate but never reaches the PDF renderer — no warning. Expected: both scripts parse layout_overrides through the shared lib (flat + dotted + nested union dialect).'
+  symptom: >-
+    gen-slides-pdf.ts (v1.14.9, same in templates/co-deck) does not use the
+    shared parser scripts/co-deck/lib/layout-overrides.ts that U-20261105-003
+    created; it still uses its private parseLayoutOverrides(), which silently
+    drops DOTTED keys (e.g. `fonts.punchline_px: 32` under layout_overrides).
+    estimate-layout.ts (via the shared lib) accepts the same lines, so a dotted
+    override passes the layout gate but never reaches the PDF renderer — no
+    warning. Expected: both scripts parse layout_overrides through the shared
+    lib (flat + dotted + nested union dialect).
   affected_paths:
     - scripts/co-deck/gen-slides-pdf.ts
     - scripts/co-deck/lib/layout-overrides.ts
   identity_source: self_declared
-  repro: 'In a deck lecture-profile.md add under layout_overrides: `fonts.punchline_px: 32`. Run gen-slides-pdf.ts --project <deck>: punchline size unchanged (default 38.4). Rewrite as nested `fonts:` / `  punchline_px: 32` → applied. Seen 2026-11-16 on deliverables/2026-11-open-innovation-keynote (S45). Local workaround: nested form in the deck profile; script not patched.'
-  triage: inbox
+  repro: >-
+    In a deck lecture-profile.md add under layout_overrides:
+    `fonts.punchline_px: 32`. Run gen-slides-pdf.ts --project <deck>: punchline
+    size unchanged (default 38.4). Rewrite as nested `fonts:` / `  punchline_px:
+    32` → applied. Seen 2026-11-16 on
+    deliverables/2026-11-open-innovation-keynote (S45). Local workaround: nested
+    form in the deck profile; script not patched.
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
@@ -35,4 +52,4 @@ upstream:
   dedupe_key: 0c0bb0574e0888893d331d95c160fd843f3b7f39a95651ef42f98af4d79594ed
   duplicates:
     - project: co-deck
-      at: 2026-11-16T17:05:55.908+09:00
+      at: '2026-11-16T17:05:55.908+09:00'

@@ -1,3 +1,11 @@
+// @version 1.6.0 — v1.15.0 pins (design 2026-11-16-co-deck-pdf-html-backport
+//   PR-1): U-010 shared-parser adoption (source pin + dotted/nested render
+//   parity with estimate-layout), U-008(2) notes band merged sources-first,
+//   U-008(3) \n punchline equal sentence rows + U+2060 strip, U-008(4) PDF
+//   contact bullets fallback (max 5, contact*-first unchanged), U-011
+//   punchline_sub_bold ink flip (absent key unchanged), zen spec
+//   punch_text_px/punchline_sub_px keys reach the renderer; Amendment A
+//   (DEC-20261116-05) punch_tag_px decoupling pins
 // @version 1.5.0 — v1.14.9 pins: photo-aware scrim + body-navy ink when a
 //   background was drawn (legacy grey without), tall-card × long-gloss ladder
 //   pin (no drop, full text, Tm in-page)
@@ -672,5 +680,470 @@ describe.skipIf(!haveFonts)('v1.14.9 footnote scrim and placement ladder', () =>
     const txt = extractText(noBgRun.pdfPath);
     if (txt === null) return;
     expect(txt).toContain(TAIL_TOKEN);
+  });
+});
+
+// ── v1.15.0 pins (design 2026-11-16-co-deck-pdf-html-backport PR-1) ──────────
+//
+// U-010 — the shared layout-overrides parser reaches the renderer. The deleted
+// private parser silently dropped DOTTED keys (`fonts.punchline_px: 32`), so a
+// dotted override passed the estimate-layout gate but never changed the render.
+// Observable: the punchline statement's Tf size in the content stream
+// (zen calibration font_px_to_pt = 0.75 → 32px = 24pt; unfixed = 48pt).
+// U-008(2) — `notes` (sources) render in the footnote band, sources FIRST,
+// then `footnotes` (abbreviations); zero drops.
+// U-008(3) — a `\n` punchline title renders as equal full-size sentence rows
+// and no U+2060/U+FEFF reaches any drawn run.
+// U-008(4) — a bullets-only contact slide falls back to `bullets` (max 5,
+// contact*-first order keeps existing decks unchanged).
+// U-011 — `fonts.punchline_sub_bold` flips the sub's ink; the absent key keeps
+// today's regular/C_BODY output.
+// Amendment A (DEC-20261116-05) — `fonts.punch_tag_px` decouples the punch tag
+// from punchline_sub_px: zen tag stays 12pt (16.0 × zen 0.75) while the zen sub
+// enlarges to 34.5pt (46 × 0.75); layout_base-only decks keep 16 × calibration.
+import { parseFrontmatter, deepMerge } from '../lib/layout-overrides';
+
+const ESTIMATE_TOOL = join(ROOT, 'scripts/co-deck/estimate-layout.ts');
+const PAGE_W_PT = 338.7 * 2.835;                        // zen page width in pt
+const C_DARK_OP  = `${11 / 255} ${15 / 255} ${25 / 255} rg`;   // colors.dark default [11,15,25]
+
+// One entry per drawn text run: the active Tf size / rg colour / Tm position.
+function textRunOps(page: string): Array<{ size: number; x: number; y: number; rg: string | null }> {
+  const out: Array<{ size: number; x: number; y: number; rg: string | null }> = [];
+  let size = NaN, x = NaN, y = NaN, rg: string | null = null;
+  for (const raw of page.split('\n')) {
+    const l = raw.trim();
+    const tf = l.match(/^\/\S+\s+([\d.]+)\s+Tf$/);
+    if (tf) { size = parseFloat(tf[1]); continue; }
+    const rgM = l.match(/^(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+rg$/);
+    if (rgM) { rg = l; continue; }
+    const tm = l.match(/^(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm$/);
+    if (tm) { x = parseFloat(tm[1]); y = parseFloat(tm[6]); continue; }
+    if (l.endsWith('Tj') && Number.isFinite(size) && Number.isFinite(y)) out.push({ size, x, y, rg });
+  }
+  return out;
+}
+
+/** bgDrawn-enabling profile extra (scope individual binding), the v1.14.6
+ *  fixture shape — without it bgImageConfig stays null and bgDrawn is always
+ *  false regardless of slideData.backgroundImage. */
+const BG_PROFILE = [
+  'background_image:',
+  '  enabled: true',
+  '  scope: individual',
+  '  source: download',
+  '  overlay:',
+  '    color: [0, 0, 0]',
+  '    opacity: 0.4',
+  '  keywords: []',
+  '  fallback_color: null',
+];
+
+/** Render one punchline/contact/standard fixture and return its paths. */
+function renderFixture(
+  name: string,
+  profileExtra: string[],
+  slides: Record<string, any>[],
+  theme = 'zen',
+  style = 'white-bubble',
+) {
+  const dir = join(ROOT, 'deliverables', name);
+  mkdirSync(dir, { recursive: true });
+  tmpDirs.push(dir);
+  writeFileSync(join(dir, 'lecture-profile.md'), [
+    '---',
+    'presentation:',
+    `  theme: ${theme}`,
+    `  style: ${style}`,
+    ...profileExtra,
+    '---',
+    '# t',
+    '',
+  ].join('\n'));
+  writeFileSync(join(dir, 'slidedata.json'), JSON.stringify(slides));
+  return { dir, rel: join('deliverables', name) };
+}
+
+function runTool(tool: string, rel: string) {
+  return spawnSync('bun', [tool, '--project', rel, '--font-dir', FONT_DIR],
+    { cwd: ROOT, encoding: 'utf-8', timeout: 120000 });
+}
+
+describe('v1.15.0 U-010: shared layout-overrides parser', () => {
+  test('gen-slides-pdf imports the shared lib and no private parser copies remain', () => {
+    const src = readFileSync(TOOL, 'utf-8');
+    expect(src).toContain("from './lib/layout-overrides'");
+    expect(src).not.toMatch(/function parseLayoutOverrides\b/);
+    expect(src).not.toMatch(/function parseFrontmatter\b/);
+    expect(src).not.toMatch(/function parseScalar\b/);
+  });
+
+  test('gen-slides-pdf-side pin: mixed flat + dotted + nested forms parse and merge (U-010 repro)', () => {
+    const md = [
+      '---',
+      'presentation:',
+      '  theme: zen',
+      '  style: white-bubble',
+      'layout_overrides:',
+      '  fonts.punchline_px: 32',
+      '  fonts:',
+      '    title_px: 40',
+      '  bullet_px: 18',
+      '---',
+      '# t',
+    ].join('\n');
+    const fm = parseFrontmatter(md);
+    expect(fm.layout_overrides).toEqual({
+      fonts: { punchline_px: 32, title_px: 40 },
+      bullet_px: 18,
+    });
+    const merged = deepMerge({ fonts: { punchline_px: 64, bullet_px: 16 } }, fm.layout_overrides);
+    expect(merged.fonts.punchline_px).toBe(32);
+    expect(merged.fonts.title_px).toBe(40);
+    expect(merged.bullet_px).toBe(18);
+  });
+
+  const dottedRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_dotovr_${tag}`, [
+      'layout_overrides:',
+      '  fonts.punchline_px: 32',
+    ], [{ isPunchlineSlide: true, text: 'Dotted override lands' }]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { dir, rel, pdfPath, page: decompressedStreams(pdfPath).find((s) => s.includes('Tj'))! };
+  })();
+
+  test.skipIf(!haveFonts)('ticket repro: dotted fonts.punchline_px: 32 reaches the renderer (24pt, not the zen 48pt)', () => {
+    const runs = textRunOps(dottedRun.page);
+    expect(runs.some((r) => r.size === 24)).toBe(true);   // 32px × 0.75
+    expect(runs.some((r) => r.size === 48)).toBe(false);  // the silently-dropped era: zen 64px
+  });
+
+  test.skipIf(!haveFonts)('every drawn run stays inside the page (no past-the-band giant atom)', () => {
+    const runs = textRunOps(dottedRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) {
+      expect(r.x).toBeGreaterThanOrEqual(0);
+      expect(r.x).toBeLessThan(PAGE_W_PT);
+    }
+  });
+
+  const nestedRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_nestovr_${tag}`, [
+      'layout_overrides:',
+      '  fonts:',
+      '    punchline_px: 44',
+    ], [{ isPunchlineSlide: true, text: 'Nested override lands' }]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath, page: decompressedStreams(pdfPath).find((s) => s.includes('Tj'))! };
+  })();
+
+  test.skipIf(!haveFonts)('nested form still applies (legacy dialect unchanged: 33pt)', () => {
+    const runs = textRunOps(nestedRun.page);
+    expect(runs.some((r) => r.size === 33)).toBe(true);   // 44px × 0.75
+    expect(runs.some((r) => r.size === 48)).toBe(false);
+  });
+
+  test.skipIf(!haveFonts)('parity: estimate-layout sees the same dotted override for the same profile', () => {
+    const res = runTool(ESTIMATE_TOOL, dottedRun.rel);
+    expect(res.status).toBe(0);
+    expect(String(res.stdout ?? '')).toContain('punchline_px=32');
+  });
+});
+
+describe('v1.15.0 U-008(2): notes band merged sources-first', () => {
+  const run = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_notesbd_${tag}`, [], [{
+      section: 'S1', title: 'Notes And Footnotes',
+      bullets: ['first bullet line', 'second bullet line'],
+      notes: ['Source: Co-deck Annual Data 2026'],
+      footnotes: ['ABBRZ = Abbreviation Definition Line'],
+    }]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath, log: String(res.stdout ?? '') };
+  })();
+
+  test.skipIf(!haveFonts)('a slide with both fields renders both in one band, sources first', () => {
+    const txt = extractText(run.pdfPath);
+    if (txt === null) return;
+    const flat = txt.replace(/\s+/g, ' ');
+    expect(flat).toContain('Source: Co-deck Annual Data 2026');
+    expect(flat).toContain('ABBRZ = Abbreviation Definition Line');
+    expect(flat.indexOf('Source: Co-deck Annual Data')).toBeLessThan(flat.indexOf('ABBRZ ='));
+  });
+
+  test.skipIf(!haveFonts)('zero drops: the ladder reports placement and nothing is dropped', () => {
+    expect(run.log).toMatch(/footnotes \(slide 1\): \d+ line\(s\)/);
+    expect(run.log).not.toContain('DROPPED');
+  });
+
+  const notesOnlyRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_notesonly_${tag}`, [], [{
+      section: 'S1', title: 'Notes Only Slide',
+      bullets: ['first bullet line', 'second bullet line'],
+      notes: ['Source: Notes Only Source Line'],
+    }]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath };
+  })();
+
+  test.skipIf(!haveFonts)('a slide with only `notes` renders its source line', () => {
+    const txt = extractText(notesOnlyRun.pdfPath);
+    if (txt === null) return;
+    expect(txt.replace(/\s+/g, ' ')).toContain('Source: Notes Only Source Line');
+  });
+});
+
+describe('v1.15.0 U-008(3): punchline \\n sentence rows and U+2060 strip', () => {
+  // zen defaults: statement 64px → 48pt, punch_text_px 76.8 → 57.6pt row delta
+  // (both depend on the zen spec key rename reaching buildSizes).
+  const TITLE = 'Bold equal one\nBold\u2060equal\u2060two';
+  const run = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_nljoin_${tag}`, [], [
+      { isPunchlineSlide: true, title: TITLE },
+    ]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath, page: decompressedStreams(pdfPath).find((s) => s.includes('Tj'))! };
+  })();
+
+  test.skipIf(!haveFonts)('no U+2060 / U+FEFF reaches any drawn run', () => {
+    const txt = extractText(run.pdfPath);
+    if (txt === null) return;
+    expect(txt).not.toContain('\u2060');
+    expect(txt).not.toContain('\uFEFF');
+    expect(txt.replace(/\s+/g, ' ')).toContain('Bold equal one');
+  });
+
+  test.skipIf(!haveFonts)('a \\n title produces exactly 2 equal-size statement rows at the zen punch_text line height', () => {
+    const runs = textRunOps(run.page).filter((r) => r.size === 48);   // 64px × 0.75
+    expect(runs.length).toBeGreaterThan(0);
+    const ys = [...new Set(runs.map((r) => Math.round(r.y * 100) / 100))];
+    ys.sort((a, b) => b - a);                                         // PDF y grows upward
+    expect(ys.length).toBe(2);                                        // one row per sentence
+    expect(Math.abs((ys[0] - ys[1]) - 57.6)).toBeLessThan(0.5);       // 76.8px × 0.75
+  });
+
+  test.skipIf(!haveFonts)('every statement run stays inside the page width (no overlap past the band)', () => {
+    const runs = textRunOps(run.page).filter((r) => r.size === 48);
+    for (const r of runs) {
+      expect(r.x).toBeGreaterThanOrEqual(0);
+      expect(r.x).toBeLessThan(PAGE_W_PT);
+    }
+  });
+
+  test.skipIf(!haveFonts)('a single-sentence title renders at full size (legacy path unchanged)', () => {
+    const singleRuns = textRunOps(run.page).filter((r) => r.size === 48);
+    // Sentence 1 ("Bold equal one") is one unwrapped row of several word runs.
+    expect(singleRuns.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('v1.15.0 U-008(4) PDF side: contact bullets fallback', () => {
+  const run = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_cbulles_${tag}`, BG_PROFILE, [{
+      isContactSlide: true, title: 'Thank You All',
+      bullets: [
+        'Contact bullet one', 'Contact bullet two', 'Contact bullet three',
+        'Contact bullet four', 'Contact bullet five', 'Contact bullet six',
+        'Contact bullet seven',
+      ],
+      backgroundImage: 'images/test.png',
+    }]);
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath, page: decompressedStreams(pdfPath).find((s) => s.includes('Tj'))! };
+  })();
+
+  test.skipIf(!haveFonts)('a bullets-only contact slide renders the speaker line and up to 5 bullets', () => {
+    const txt = extractText(run.pdfPath);
+    if (txt === null) return;
+    const flat = txt.replace(/\s+/g, ' ');
+    expect(flat).toContain('Thank You All');
+    for (const b of ['one', 'two', 'three', 'four', 'five']) {
+      expect(flat).toContain(`Contact bullet ${b}`);
+    }
+    expect(flat).not.toContain('Contact bullet six');
+    expect(flat).not.toContain('Contact bullet seven');
+  });
+
+  test.skipIf(!haveFonts)('the first fallback line renders bold in the card ink (C_DARK), the rest stay C_BODY', () => {
+    const runs = textRunOps(run.page);
+    expect(runs.length).toBeGreaterThan(0);
+    // Thanks hero (C_DARK) + primary bullet (C_DARK) + 4 C_BODY bullets.
+    expect(runs.filter((r) => r.rg === C_DARK_OP).length).toBeGreaterThanOrEqual(2);
+    expect(runs.filter((r) => r.rg === C_BODY_OP).length).toBe(4);
+  });
+
+  const contactFirstRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_ccfirst_${tag}`, [], [{
+      isContactSlide: true, title: 'Reach Out',
+      contactEmail: 'keep@existing.deck',
+      bullets: ['Fallback bullet that must stay hidden'],
+    }]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath };
+  })();
+
+  test.skipIf(!haveFonts)('contact*-first order keeps existing decks unchanged (bullets ignored)', () => {
+    const txt = extractText(contactFirstRun.pdfPath);
+    if (txt === null) return;
+    const flat = txt.replace(/\s+/g, ' ');
+    expect(flat).toContain('keep@existing.deck');
+    expect(flat).not.toContain('Fallback bullet that must stay hidden');
+  });
+});
+
+describe('v1.15.0 U-011: punchline_sub_bold opt-in', () => {
+  const makeSubProject = (tag: string, profileExtra: string[]) => {
+    const name = `_subbold_${tag}`;
+    const { dir, rel } = renderFixture(name, [...BG_PROFILE, ...profileExtra], [{
+      isPunchlineSlide: true, title: 'Statement Head',
+      text: 'Main **key** statement', sub: 'Sub support line',
+      backgroundImage: 'images/test.png',
+    }]);
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { page: decompressedStreams(pdfPath).find((s) => s.includes('Tj'))! };
+  };
+
+  // zen spec punchline_sub_px = 46 → sub Tf 34.5pt (46 × 0.75); the sub is the
+  // only 34.5pt text on the page.
+  const boldPage = makeSubProject(`${Date.now()}_on`, [
+    'layout_overrides:',
+    '  fonts.punchline_sub_bold: true',
+  ]);
+  const plainPage = makeSubProject(`${Date.now()}_off`, []);
+
+  test.skipIf(!haveFonts)('punchline_sub_bold: true renders the sub bold in the statement ink (C_DARK)', () => {
+    const subRuns = textRunOps(boldPage.page).filter((r) => r.size === 34.5);
+    expect(subRuns.length).toBeGreaterThan(0);
+    for (const r of subRuns) expect(r.rg).toBe(C_DARK_OP);
+  });
+
+  test.skipIf(!haveFonts)('absent key keeps today\u2019s output: regular weight, C_BODY ink', () => {
+    const subRuns = textRunOps(plainPage.page).filter((r) => r.size === 34.5);
+    expect(subRuns.length).toBeGreaterThan(0);
+    for (const r of subRuns) expect(r.rg).toBe(C_BODY_OP);
+  });
+});
+
+describe('v1.15.0 zen pdf_layout_spec keys reach the renderer', () => {
+  const zenSpec = JSON.parse(
+    readFileSync(join(ROOT, 'docs/html-themes/themes/zen/pdf_layout_spec.json'), 'utf-8'),
+  );
+
+  test('the legacy line-height key is renamed and the sub-size default lands', () => {
+    expect(zenSpec.fonts.punchline_sub_px).toBe(46);
+    expect(zenSpec.line_heights.punch_text_px).toBe(76.8);
+    expect(zenSpec.line_heights.punch_sub_px).toBe(55.2);
+    expect(zenSpec.line_heights.punchline_px).toBeUndefined();
+  });
+
+  test('layer-0 defaults stay 16/regular (no punchline_sub_bold at Layer 0)', () => {
+    const base = JSON.parse(
+      readFileSync(join(ROOT, 'docs/html-themes/themes/_shared/layout_base.json'), 'utf-8'),
+    );
+    expect(base.fonts.punchline_sub_px).toBe(16.0);
+    expect(base.fonts.punchline_sub_bold).toBeUndefined();
+  });
+});
+
+// ── v1.15.0 Amendment A (DEC-20261116-05, design §7.2): punch_tag_px decoupling
+//
+// T_PUNCH_TAG previously borrowed fonts.punchline_sub_px, so zen's new sub
+// default (46px) would have ballooned the legacy punchline "PART" tag to
+// 34.5pt. The tag now has its own key: 16.0 fallback (CSS px through the
+// theme calibration — 12.0 would shrink the tag to 9pt on every deck),
+// layout_base.json pins 16.0, and zen declares NO punch_tag_px entry so the
+// zen tag stays at its pre-PR-1 12pt (16.0 × zen 0.75).
+describe('v1.15.0 Amendment A: punch_tag_px decoupled from the sub size', () => {
+  const zenRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_punchtag_${tag}`, [], [{
+      isPunchlineSlide: true, section: 'PART 01 · Test',
+      text: 'Statement body', sub: 'Sub line here',
+    }]);                                     // legacy path: no background_image section → tag IS drawn
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { page: decompressedStreams(pdfPath).find((s) => s.includes('Tj'))! };
+  })();
+
+  test.skipIf(!haveFonts)('zen punchline: tag stays 12pt while the sub renders 34.5pt (zen spec)', () => {
+    const runs = textRunOps(zenRun.page);
+    // Tag: fallback 16.0 × zen calibration 0.75 — the only 12pt runs on the
+    // page (quote mark 43.2pt, statement 48pt, sub 34.5pt).
+    expect(runs.some((r) => r.size === 12)).toBe(true);
+    // Sub: the zen punchline_sub_px = 46 lands unchanged.
+    expect(runs.some((r) => r.size === 34.5)).toBe(true);
+    // Decoupling proof: the tag renders exactly once, at 12pt — not at the
+    // 34.5pt the old sub-borrowing would have given it.
+    expect(runs.filter((r) => r.size === 12).length).toBe(1);
+  });
+
+  const outlineRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // outline: calibration font_px_to_pt 0.85, declares punchline, no
+    // punch_tag_px override → the effective size comes from layout_base alone.
+    // No `sub` on the slide: the tag is the only text at its size.
+    const { dir, rel } = renderFixture(`_punchtag_out_${tag}`, [], [{
+      isPunchlineSlide: true, section: 'Part One',
+      text: 'Outline statement',
+    }], 'outline', 'premium-dark');
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { page: decompressedStreams(pdfPath).find((s) => s.includes('Tj'))! };
+  })();
+
+  test.skipIf(!haveFonts)('layout_base-only deck: tag = 16 × calibration (13.6pt on outline), unchanged from pre-PR-1', () => {
+    const runs = textRunOps(outlineRun.page);
+    expect(runs.some((r) => r.size === 13.6)).toBe(true);   // 16.0 × 0.85
+    expect(runs.filter((r) => r.size === 13.6).length).toBe(1);
+  });
+
+  test('layout_base pins punch_tag_px 16.0; zen declares no punch_tag_px entry (Amendment A items 2-3)', () => {
+    const base = JSON.parse(
+      readFileSync(join(ROOT, 'docs/html-themes/themes/_shared/layout_base.json'), 'utf-8'),
+    );
+    expect(base.fonts.punch_tag_px).toBe(16.0);
+    const zen = JSON.parse(
+      readFileSync(join(ROOT, 'docs/html-themes/themes/zen/pdf_layout_spec.json'), 'utf-8'),
+    );
+    expect(zen.fonts.punch_tag_px).toBeUndefined();
   });
 });
