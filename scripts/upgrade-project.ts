@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.108.0
+// @version 1.109.0
+// v1.109.0 (2026-11-16, T-20261114-005 — spec
+//          docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §3):
+//          (a) --disposition is repeatable — grants accumulate (OR semantics, a bare
+//          adopt-template stays "all"); ADOPT decision details name the matched
+//          grant. (b) grant values accept {a,b} alternation and comma lists.
+//          (c) an apply run on a tree that still holds the previous run's
+//          UNCOMMITTED delivery (.claude/last-upgrade-delivery.json dirty) now
+//          REFUSES (exit 1) before the stash instead of silently un-adopting the
+//          previous run's files; guidance: commit/restore/stash the previous
+//          delivery, then re-run once with all grants. A conflicted run prints the stash name. (d) the
+//          preUpgradeDirty parser now reuses the -z parseStatusPorcelain helper —
+//          the old line.trim() + slice(3) turned ' M AGENTS.md' into 'GENTS.md',
+//          so unstaged edits were never seen as locally modified (isLocallyModified
+//          now flags them: some dry-run UPDATE verdicts become CONFLICT, the H1 intent).
 // v1.108.0 (2026-11-16, T-20261114-010 — spec
 //          docs/designs/2026-11-16-governance-batch-design.md): the WORKSPACE seed
 //          branch consults assetGate.agents for docs/lifecycle/agents/<name>.md —
@@ -1340,6 +1354,7 @@ import {
   baselineKeyFor,
   classifyProjectState,
   globToRegExp,
+  expandGrantGlobs,
   INSTRUCTION_FILE_RELS,
   isExtendsStub,
   isTrailRetiredSeed,
@@ -1409,6 +1424,7 @@ import {
   runTestFile,
 } from "./lib/post-delivery-verify.ts";
 import { composeResolvedAgentContent } from "./helpers/resolve-pm-stub.ts";
+import { parseStatusPorcelain } from "./lib/git-status.ts";
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
 let projectPath = "";
@@ -1478,6 +1494,8 @@ let changelogEntry = false;
 // (ERROR) default SKIP to deliver-and-adopt, optionally narrowed to paths
 // matching the glob. Accepts `--disposition <value>` and `--disposition=<value>`.
 let disposition: DispositionFlag = { mode: "default" };
+// T-20261114-005 (a): every --disposition value accumulates here (OR semantics).
+const dispositionGrants: string[] = [];
 // U-20261028-001 (D3): tombstone grants (--tombstone, repeatable) record the
 // project-side deletion of a delivered path as intended; clear grants
 // (--clear-tombstone, repeatable) drop entries so the next run delivers the
@@ -1608,26 +1626,49 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-/** Parse one --disposition value: '' | 'adopt-template' | 'adopt-template=<glob>'. */
+/** Parse one --disposition value ('' | 'adopt-template' | 'adopt-template=<glob>[,<glob>...]').
+ *  Repeated flags accumulate; `{a,b}` and comma lists expand to several globs. */
 function applyDispositionArg(raw: string): void {
   const value = (raw ?? "").trim();
-  if (value === "") return; // flag with no value — keep the default disposition
+  if (value === "") return; // flag with no value — keep the current disposition
   if (value === "adopt-template") {
-    disposition = { mode: "adopt-template", matches: () => true };
-    return;
-  }
-  if (value.startsWith("adopt-template=")) {
+    dispositionGrants.push("adopt-template");
+  } else if (value.startsWith("adopt-template=")) {
     const glob = value.slice("adopt-template=".length).trim();
     if (!glob) {
       console.error('ERROR: --disposition adopt-template=<glob>: the glob after "=" is empty.');
       process.exit(1);
     }
-    const re = globToRegExp(glob);
-    disposition = { mode: "adopt-template", matches: (rel: string) => re.test(rel) };
-    return;
+    try {
+      if (expandGrantGlobs(glob).length === 0) throw new Error("no glob after '='");
+    } catch (e) {
+      console.error(`ERROR: --disposition ${value}: ${(e as Error).message}`);
+      process.exit(1);
+    }
+    dispositionGrants.push(value);
+  } else {
+    console.error(
+      `ERROR: unknown --disposition value '${value}' (supported: adopt-template, adopt-template=<glob>[,<glob>] with {a,b} alternation).`,
+    );
+    process.exit(1);
   }
-  console.error(`ERROR: unknown --disposition value '${value}' (supported: adopt-template, adopt-template=<glob>).`);
-  process.exit(1);
+  const compiled: Array<{ source: string; test: (rel: string) => boolean }> = [];
+  for (const g of dispositionGrants) {
+    if (g === "adopt-template") {
+      compiled.push({ source: g, test: () => true });
+      continue;
+    }
+    for (const glob of expandGrantGlobs(g.slice("adopt-template=".length))) {
+      const re = globToRegExp(glob);
+      compiled.push({ source: `adopt-template=${glob}`, test: (rel: string) => re.test(rel) });
+    }
+  }
+  disposition = {
+    mode: "adopt-template",
+    matches: (rel: string) => compiled.some((c) => c.test(rel)),
+    grants: [...dispositionGrants],
+    grantFor: (rel: string) => compiled.find((c) => c.test(rel))?.source,
+  };
 }
 
 // U-20261028-001 (D3/D1): tombstone confirmation and clearing are apply-mode
@@ -1686,7 +1727,7 @@ function applyClearTombstoneArg(raw: string): void {
 
 if (!projectPath) {
   console.error(
-    "Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--confirm] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>]] [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]",
+    "Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--confirm] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>[,<glob>...]]]... [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]",
   );
   process.exit(1);
 }
@@ -2298,14 +2339,42 @@ if (rollback) {
 // against the same pre-upgrade snapshot of the tree.
 const preUpgradeDirty = new Set<string>();
 {
-  const st = spawnSync("git", ["-C", projectDir, "status", "--porcelain"], { encoding: "utf8" });
-  for (const line of (st.stdout || "").split("\n")) {
-    const entry = line.trim();
-    if (!entry) continue;
-    const dirtyPath = entry.slice(3).trim().replace(/^"|"$/g, "");
-    if (dirtyPath) preUpgradeDirty.add(dirtyPath);
+  // T-20261114-005 (d): -z porcelain via the shared parser. The previous
+  // line.trim() + slice(3) mangled worktree-only entries (' M AGENTS.md' ->
+  // 'GENTS.md') and C-quoted paths with spaces.
+  const st = spawnSync("git", ["-C", projectDir, "status", "--porcelain=v1", "-z", "-uall"], {
+    encoding: "utf8",
+    maxBuffer: 256 * 1024 * 1024,
+  });
+  for (const dirtyPath of parseStatusPorcelain(st.stdout || "")) preUpgradeDirty.add(dirtyPath);
+}
+
+// T-20261114-005 (c, owner decision O-3 Option R): a tree that still holds the
+// previous apply run's UNCOMMITTED delivery cannot take another apply run — the
+// stash below would hide that delivery (and its baseline manifest) and the next
+// classification would silently un-adopt it. Refuse before any write.
+if (!dryRun && preUpgradeDirty.has(".claude/last-upgrade-delivery.json")) {
+  const hasHeadForGuard =
+    spawnSync("git", ["-C", projectDir, "rev-parse", "--verify", "-q", "HEAD"], { encoding: "utf8" }).status === 0;
+  if (hasHeadForGuard) {
+    console.error(
+      "ERROR: the working tree still holds a previous upgrade run's uncommitted delivery (.claude/last-upgrade-delivery.json is modified or untracked).",
+    );
+    console.error("  A second apply run would stash that delivery and silently un-adopt its files. Choose one:");
+    console.error("    1. commit the previous delivery, then re-run;");
+    console.error(
+      "    2. discard the previous delivery (git restore the paths listed in its manifest and remove its untracked files; --rollback only pops the pre-upgrade stash, it does not revert delivered files), then re-run ONCE with every grant, e.g.",
+    );
+    console.error(
+      "         --disposition adopt-template=<fileA> --disposition adopt-template=<fileB>   (or adopt-template={<fileA>,<fileB>});",
+    );
+    console.error("    3. stash the previous delivery yourself (git stash push -u), then re-run.");
+    if (import.meta.main) process.exit(1);
   }
 }
+
+/** Name of this run's pre-upgrade stash entry (null when none was created) - printed on a conflicted exit. */
+let preUpgradeStashName: string | null = null;
 
 if (!dryRun) {
   console.log("--- Creating pre-upgrade git stash snapshot (tracked + untracked) ---");
@@ -2357,6 +2426,7 @@ if (!dryRun) {
   } else if (stash.stdout.includes("No local changes")) {
     console.log("INFO: Nothing to stash (working tree clean) — snapshot skipped.");
   } else {
+    preUpgradeStashName = `pre-upgrade-snapshot-${snapDate}`;
     console.log("Snapshot saved. To revert: git stash pop or --rollback");
   }
   console.log("");
@@ -9334,9 +9404,11 @@ if (import.meta.main && !securityPass) process.exit(1);
     }
     if (conflictErrors.length > 0) {
       console.log("\n  How to proceed:");
-      console.log("   1. Re-run with --disposition adopt-template (optionally =<glob>) to take the");
-      console.log("      template copy for the listed paths — project-side changes are lost; the");
-      console.log("      pre-upgrade stash (--rollback) covers the reversal.");
+      console.log("   1. Take the template copy for the listed paths: this run's delivery is uncommitted and");
+      console.log("      a second apply run on it is refused, so commit it or discard it first, then re-run");
+      console.log("      ONCE with every grant — repeat --disposition adopt-template=<path> per file, or");
+      console.log("      adopt-template={<a>,<b>} / <a>,<b> — project-side changes are lost; the");
+      console.log("      pre-upgrade stash (--rollback) covers the reversal of local edits.");
       console.log("   2. If the project side is canonical, port it into the template side per the");
       console.log("      adjudicated-port procedure (docs/designs/2026-10-27-sync-overwrite-policy-");
       console.log("      design.md §6 — bidirectional superset diff, dry-run no-op proof, protected-");
@@ -9350,6 +9422,9 @@ if (import.meta.main && !securityPass) process.exit(1);
       console.log("      as T-20261110-012 did) or a real behavior break (port the fix template-side).");
       console.log("   2. Re-run the upgrade (or the listed test files) until no new failures remain;");
       console.log("      --rollback restores the pre-upgrade stash if the delivery must be reverted.");
+    }
+    if (preUpgradeStashName) {
+      console.log(`\n  Pre-upgrade stash of this run: ${preUpgradeStashName} (restore with --rollback)`);
     }
     console.log("========================================================");
     process.exit(1);

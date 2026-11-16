@@ -22,7 +22,8 @@
  * All assertions are byte-verbatim from tests/unit/upgrade-decision-log.test.ts
  * v1.4.0 (the extraction moves describes, never expectations).
  *
- * @version 1.3.0 (2026-11-12: overwrite-protection PR-B — E3 resolveEqualVersionDisposition table, vintage UNBASELINED row, PROJECT_AHEAD verdict, E4 pendingKindForDecision / mergePendingBackport)
+ * @version 1.4.0 (2026-11-16: T-20261114-005 — globToRegExp {a,b} alternation, expandGrantGlobs, grant named in the ADOPT detail)
+ * v1.3.0 (2026-11-12: overwrite-protection PR-B — E3 resolveEqualVersionDisposition table, vintage UNBASELINED row, PROJECT_AHEAD verdict, E4 pendingKindForDecision / mergePendingBackport)
  * v1.2.0 (2026-11-11: overwrite-protection PR-A — E1 EVOLVED_PRESERVE verdict matrix, E2 marker counting/markerLoss, supersetCheck)
  * v1.1.0 (2026-11-11: resolveUnbaselinedDisposition four-cell matrix + new verdict severities — T-20261110-009/012)
  */
@@ -35,6 +36,7 @@ import {
   LOCAL_PATCH_MARKER_RE,
   classifyProjectState,
   countLocalPatchMarkers,
+  expandGrantGlobs,
   globToRegExp,
   isDeliveredDiff,
   lifecyclelessText,
@@ -520,5 +522,49 @@ describe('E3/E4 PROJECT_AHEAD verdict and pending writer rule', () => {
     expect(out[0]).toMatchObject({ kind: 'PROJECT_AHEAD', projectHash: 'h1b', firstSeen: '2026-01-02', firstSeenTemplateVersion: '0.20.0' });
     expect(out[1]).toMatchObject({ firstSeen: '2026-11-12', firstSeenTemplateVersion: '0.30.0' });
     expect(mergePendingBackport([], prior, '2026-11-12', '0.30.0')).toEqual([]);
+  });
+});
+
+describe('T-20261114-005 grant globs: {a,b} alternation and comma lists', () => {
+  test('expandGrantGlobs: a top-level comma list and a brace group', () => {
+    expect(expandGrantGlobs('A.md,B.md')).toEqual(['A.md', 'B.md']);
+    expect(expandGrantGlobs('{A,B}.md')).toEqual(['{A,B}.md']);
+    expect(expandGrantGlobs('agents/{pm,qa}.md,docs/x.md')).toEqual(['agents/{pm,qa}.md', 'docs/x.md']);
+    expect(expandGrantGlobs('a\\,b,c')).toEqual(['a,b', 'c']);
+  });
+
+  test('globToRegExp: {pm,qa} matches both alternatives and nothing else', () => {
+    const re = globToRegExp('agents/{pm,qa}.md');
+    expect(re.test('agents/pm.md')).toBe(true);
+    expect(re.test('agents/qa.md')).toBe(true);
+    expect(re.test('agents/x.md')).toBe(false);
+    expect(re.test('agents/{pm,qa}.md')).toBe(false);
+    expect(globToRegExp('{AGENTS.md,agents/i18n-specialist.md}').test('docs/workspace-schema.json')).toBe(false);
+  });
+
+  test('globToRegExp: braces compose with * and the | character stays literal', () => {
+    expect(globToRegExp('docs/{a,b}/*.md').test('docs/b/z.md')).toBe(true);
+    expect(globToRegExp('docs/{a,b}/*.md').test('docs/c/z.md')).toBe(false);
+    expect(globToRegExp('a|b').test('a')).toBe(false);
+    expect(globToRegExp('a|b').test('a|b')).toBe(true);
+  });
+
+  test('unbalanced or nested braces throw', () => {
+    expect(() => globToRegExp('a{b')).toThrow();
+    expect(() => globToRegExp('a}b')).toThrow();
+    expect(() => globToRegExp('a{b,{c,d}}')).toThrow();
+    expect(() => expandGrantGlobs('{a')).toThrow();
+  });
+
+  test('resolveDisposition names the matched grant in the ADOPT detail (and stays unchanged without grantFor)', () => {
+    const evolved = { state: 'PROJECT_EVOLVED', matchesDeliverable: false, templateChanged: true } as const;
+    const flag = {
+      mode: 'adopt-template' as const,
+      matches: (rel: string) => rel === 'x.md',
+      grantFor: (rel: string) => (rel === 'x.md' ? 'adopt-template=x.md' : undefined),
+    };
+    expect(resolveDisposition(evolved, 'x.md', flag).detail).toContain('[grant: adopt-template=x.md]');
+    const plain = resolveDisposition(evolved, 'x.md', { mode: 'adopt-template', matches: () => true });
+    expect(plain.detail).not.toContain('[grant:');
   });
 });
