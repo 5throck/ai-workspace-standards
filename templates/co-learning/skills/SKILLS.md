@@ -8,7 +8,7 @@ Curated registry for the co-learning variant-exclusive skills (T-20260924-009 pa
 
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
-| `exam-bank-operations` | 1.1.0 | active | exam-bank-steward | 2026-10-06 | — | co-learning only — question-bank authoring with bias checks, remediation ledger, exam operations |
+| `exam-bank-operations` | 1.2.0 | active | exam-bank-steward | 2026-10-07 | — | 1.2.0 adds invigilation policy + misconduct handling (DEC-20261007-01); scope unchanged — co-learning only question-bank authoring with bias checks, remediation ledger, exam operations |
 
 ## Usage
 

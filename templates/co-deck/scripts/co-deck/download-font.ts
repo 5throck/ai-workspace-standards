@@ -1,13 +1,14 @@
-// @version 2.1.0 — supply-chain hardening: Pretendard pinned to a concrete release
+// @version 2.1.1 — supply-chain hardening: Pretendard pinned to a concrete release
+// v2.1.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 //   tag (no releases/latest), optional per-font expected_sha256 verification of the
 //   downloaded archive, hard failure when extraction does not cover spec.files
 //   (partial font sets previously exited 0 and surfaced later as PDF font fallback),
 //   project-local default font dir (OS font dir writes are opt-in via --os-font-dir),
 //   English console output.
-// Download Korean TTF fonts for PDF generation — saves to presentations/assets/fonts/ directory.
+// Download Korean TTF fonts for PDF generation — saves to deliverables/assets/fonts/ directory.
 // Detects fonts already installed system-wide and skips the download.
 // Usage: bun scripts/co-deck/download-font.ts <font_name> [output_dir] [--os-font-dir]
-//   output_dir defaults to the project-local presentations/assets/fonts/; pass
+//   output_dir defaults to the project-local deliverables/assets/fonts/; pass
 //   --os-font-dir (without output_dir) to write to the OS user font directory instead.
 // Fonts: maruburi | notosanskr | nanumsquareneo | pretendard
 // Requires: fflate (bun install fflate)
@@ -92,7 +93,7 @@ const FONT_CATALOG: Record<string, FontSpec> = {
 
 // Project-local default: font downloads stay inside the project so scaffolds are
 // self-contained. Writing to OS font directories is opt-in via --os-font-dir.
-const PROJECT_FONT_DIR = 'presentations/assets/fonts';
+const PROJECT_FONT_DIR = 'deliverables/assets/fonts';
 
 function getOsFontDir(): string | null {
   const p = platform();

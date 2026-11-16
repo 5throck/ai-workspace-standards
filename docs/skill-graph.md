@@ -46,16 +46,16 @@
 | `co-consult/stakeholder-alignment` | variant:co-consult | 1.0.1 | co-consult/change-management-partner, co-consult/workstream-lead | co-consult/phase 1, co-consult/phase 2, co-consult/phase 4 | co-consult/change-impact-assessment (composes_with), co-consult/insight-synthesis (follows), co-consult/org-readiness-assessment (composes_with), co-consult/project-delivery (composes_with) | — | — |
 | `co-consult/stakeholder-review-management` | variant:co-consult | 1.0.0 | co-consult/delivery-manager | co-consult/phase 4 | co-consult/project-delivery (composes_with) | — | — |
 | `co-consult/technical-feasibility` | variant:co-consult | 1.0.0 | co-consult/sme, co-consult/solutions-architect, co-consult/technology-specialist | co-consult/phase 1, co-consult/phase 2, co-consult/phase 3, co-consult/phase 4 | co-consult/change-impact-assessment (follows), co-consult/company-intelligence (composes_with), co-consult/executive-presentation (enables), co-consult/project-delivery (follows) | — | complexity-grades, risk-cost-ranges, preconditions |
-| `co-deck/design` | variant:co-deck | 1.2.1 | co-deck/design | co-deck/phase 3 | co-deck/html-build (enables), co-deck/html-build (follows), co-deck/pdf-export (composes_with), co-deck/research (composes_with) | storyline-outline | design-spec, theme-lock |
-| `co-deck/html-build` | variant:co-deck | 1.7.0 | co-deck/html-build | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows), co-deck/research (composes_with), co-deck/slide-layout-gate (follows), co-deck/storyline (composes_with) | slide-deck-draft, design-spec | slide-html |
-| `co-deck/pdf-export` | variant:co-deck | 2.1.2 | co-deck/pdf-export | co-deck/phase 4, co-deck/phase 5 | co-deck/research (composes_with), co-deck/storyline (composes_with) | slide-html | final-pdf |
-| `co-deck/prep-pdf` | variant:co-deck | 2.0.0 | co-deck/measure, co-deck/pdf-export | co-deck/phase 4 | co-deck/version (follows) | — | — |
-| `co-deck/presenter-mode` | variant:co-deck | 1.0.1 | co-deck/html-build | co-deck/phase 4 | — | — | — |
-| `co-deck/research` | variant:co-deck | 1.2.1 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
-| `co-deck/slide-layout-gate` | variant:co-deck | 1.0.0 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
-| `co-deck/storyline` | variant:co-deck | 1.2.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
+| `co-deck/design` | variant:co-deck | 1.2.2 | co-deck/design | co-deck/phase 3 | co-deck/html-build (enables), co-deck/html-build (follows), co-deck/pdf-export (composes_with), co-deck/research (composes_with) | storyline-outline | design-spec, theme-lock |
+| `co-deck/html-build` | variant:co-deck | 1.7.1 | co-deck/html-build | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows), co-deck/research (composes_with), co-deck/slide-layout-gate (follows), co-deck/storyline (composes_with) | slide-deck-draft, design-spec | slide-html |
+| `co-deck/pdf-export` | variant:co-deck | 2.1.3 | co-deck/pdf-export | co-deck/phase 4, co-deck/phase 5 | co-deck/research (composes_with), co-deck/storyline (composes_with) | slide-html | final-pdf |
+| `co-deck/prep-pdf` | variant:co-deck | 2.0.1 | co-deck/measure, co-deck/pdf-export | co-deck/phase 4 | co-deck/version (follows) | — | — |
+| `co-deck/presenter-mode` | variant:co-deck | 1.0.2 | co-deck/html-build | co-deck/phase 4 | — | — | — |
+| `co-deck/research` | variant:co-deck | 1.2.2 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
+| `co-deck/slide-layout-gate` | variant:co-deck | 1.0.1 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
+| `co-deck/storyline` | variant:co-deck | 1.3.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
 | `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | — | — | — | — | — |
-| `co-deck/version` | variant:co-deck | 1.3.0 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
+| `co-deck/version` | variant:co-deck | 1.3.1 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
 | `co-design/design-foundation` | variant:co-design | 1.3.0 | — | — | co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (enables), root/accessibility-audit (composes_with) | — | — |
 | `co-design/design-review` | variant:co-design | 1.1.0 | — | — | co-design/design-foundation (follows), co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (composes_with), root/accessibility-audit (composes_with), root/meeting-facilitation (composes_with), root/project-review (composes_with), root/service-design (composes_with) | — | — |
 | `co-design/token-usage-lint` | variant:co-design | 1.1.1 | co-design/prototype-engineer | co-design/phase 4 | co-design/ui-ux-design-intelligence (follows) | — | — |
@@ -90,7 +90,7 @@
 | `co-hr/performance-system-design` | variant:co-hr | 1.0.0 | co-hr/performance-management-consultant | co-hr/phase 2 | co-hr/career-path-succession-planning (follows), co-hr/stakeholder-alignment (composes_with), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/stakeholder-alignment` | variant:co-hr | 1.0.1 | co-hr/change-management-partner | co-hr/phase 1, co-hr/phase 2 | co-hr/org-readiness-assessment (follows), co-hr/talent-acquisition-strategy (composes_with) | — | — |
 | `co-hr/talent-acquisition-strategy` | variant:co-hr | 1.0.0 | co-hr/talent-acquisition-specialist | co-hr/phase 2 | co-hr/compensation-benchmarking (follows) | — | — |
-| `co-learning/exam-bank-operations` | variant:co-learning | 1.1.0 | co-learning/exam-bank-steward | co-learning/phase 4, co-learning/phase 5 | root/documentation-writing (composes_with) | — | — |
+| `co-learning/exam-bank-operations` | variant:co-learning | 1.2.0 | co-learning/exam-bank-steward | co-learning/phase 4, co-learning/phase 5 | root/documentation-writing (composes_with) | — | — |
 | `co-news/ai-tell-reduction` | variant:co-news | 1.0.0 | co-news/style-editor | co-news/phase 4 | co-news/financial-journalism-style (composes_with) | — | — |
 | `co-news/financial-infographic-svg` | variant:co-news | 1.0.1 | co-news/visual-editor | co-news/phase 5 | — | — | — |
 | `co-news/financial-journalism-style` | variant:co-news | 1.0.0 | co-news/reporter, co-news/style-editor | co-news/phase 3, co-news/phase 4 | co-news/ai-tell-reduction (composes_with), co-news/financial-narrative-brief (composes_with), co-news/source-verification-ledger (composes_with) | — | — |
@@ -721,26 +721,6 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | Term | Layer | Referencing skills |
 |------|-------|--------------------|
 | `100대 통계지표` | common | `common/k-ecos` |
-| `balPayments` | common | `common/k-opendata` |
-| `ELW 일별매매정보` | common | `common/k-krx` |
-| `ESG` | common | `common/k-krx` |
-| `ESG 증권상품` | common | `common/k-krx` |
-| `ESG 지수` | common | `common/k-krx` |
-| `ETF 일별매매정보` | common | `common/k-krx` |
-| `ETN 일별매매정보` | common | `common/k-krx` |
-| `expDlr` | common | `common/k-opendata` |
-| `expWgt` | common | `common/k-opendata` |
-| `hsCd` | common | `common/k-opendata` |
-| `hsCode` | common | `common/k-opendata` |
-| `impDlr` | common | `common/k-opendata` |
-| `impWgt` | common | `common/k-opendata` |
-| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
-| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
-| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
-| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
-| `statCd` | common | `common/k-opendata` |
-| `statKor` | common | `common/k-opendata` |
 | `가구당월평균소득` | common | `common/k-ecos` |
 | `감사` | variant:co-consult | `co-consult/company-intelligence` |
 | `감사보고서` | variant:co-consult | `co-consult/company-intelligence` |
@@ -769,11 +749,11 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `반년` | common | `common/k-ecos` |
 | `반월` | common | `common/k-ecos` |
 | `배출권 시장 일별매매정보` | common | `common/k-krx` |
-| `법령ID` | common | `common/k-law` |
 | `법령명한글` | common | `common/k-law` |
 | `법령용어` | common | `common/k-law` |
 | `법령일련번호` | common | `common/k-law` |
 | `법령해석례` | common | `common/k-law` |
+| `법령ID` | common | `common/k-law` |
 | `법원명` | common | `common/k-law` |
 | `별표` | common | `common/k-law` |
 | `별표서식` | common | `common/k-law` |
@@ -892,6 +872,26 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `현행법령` | common | `common/k-law` |
 | `활용신청` | common | `common/k-opendata` |
 | `회장` | variant:co-consult | `co-consult/company-intelligence` |
+| `balPayments` | common | `common/k-opendata` |
+| `ELW 일별매매정보` | common | `common/k-krx` |
+| `ESG` | common | `common/k-krx` |
+| `ESG 증권상품` | common | `common/k-krx` |
+| `ESG 지수` | common | `common/k-krx` |
+| `ETF 일별매매정보` | common | `common/k-krx` |
+| `ETN 일별매매정보` | common | `common/k-krx` |
+| `expDlr` | common | `common/k-opendata` |
+| `expWgt` | common | `common/k-opendata` |
+| `hsCd` | common | `common/k-opendata` |
+| `hsCode` | common | `common/k-opendata` |
+| `impDlr` | common | `common/k-opendata` |
+| `impWgt` | common | `common/k-opendata` |
+| `KOSDAQ 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KOSPI 시리즈 일별시세정보` | common | `common/k-krx` |
+| `KRX 시리즈 일별시세정보` | common | `common/k-krx` |
+| `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` | common | `common/k-opendata` |
+| `SERVICE_KEY_IS_NULL` | common | `common/k-opendata` |
+| `statCd` | common | `common/k-opendata` |
+| `statKor` | common | `common/k-opendata` |
 
 ## Same-Name Divergence (E2)
 
@@ -925,7 +925,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.1 #5485334c |
 | `i18n-layout` | skill | divergence | co-work@1.1.2 #55cc9f30; common@1.1.1 #67b31c6f |
 | `meeting-facilitation` | skill | version-drift | co-safety@1.5.0 #690ba21e; root@1.5.0 #f4da9e5e |
-| `pdf-export` | skill | divergence | co-deck@2.1.2 #63cf9c38; co-price@1.1.0 #e11de512 |
+| `pdf-export` | skill | divergence | co-deck@2.1.3 #cdab3e30; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
 | `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
@@ -981,7 +981,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-15), window 90 days. Skill nodes with usage: 3.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-16), window 90 days. Skill nodes with usage: 3.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (2): co-safety/sync, root/sync
 - **unused** (0 sessions in 90 days) (244): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 204 more

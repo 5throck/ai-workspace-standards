@@ -1,7 +1,7 @@
 ---
 name: research
 scope: co-deck
-version: 1.2.1
+version: "1.2.2"
 description: >
   Source collection and ideation for lecture materials. After confirming
   topic/audience/purpose, performs web research (Korean and English by
@@ -12,7 +12,7 @@ description: >
   lecture workflow.
 status: active
 owner: research
-last_reviewed: 2026-08-23
+last_reviewed: "2026-11-15"
 prerequisites: none
 relates_to:
   - skill: storyline
@@ -115,7 +115,7 @@ Key points the audience must take away.
 
 ## Output Format
 
-`presentations/<project>/research_notes.md` with sections: Lecture Overview, Core Messages, Key Concepts & Content, Data / Statistics, Case Studies, References. See Step 3 template above for full structure.
+`deliverables/<project>/research_notes.md` with sections: Lecture Overview, Core Messages, Key Concepts & Content, Data / Statistics, Case Studies, References. See Step 3 template above for full structure.
 
 ## Related Skills
 

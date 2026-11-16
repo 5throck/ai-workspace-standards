@@ -1,4 +1,5 @@
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // lib-slide-type.test.ts — pin slideTypeOf() schema detection (U-20261105-001)
 // plus one CLI e2e: a boolean-flag deck must NOT produce false standard-slide
 // min-content FAILs in the layout gate. Before the fix, estimate-layout read
@@ -47,13 +48,13 @@ afterAll(() => { for (const d of tmpDirs) rmSync(d, { recursive: true, force: tr
 
 function fixture(slides: any[]): string {
   const name = `_boolflag_test_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const dir = join(ROOT, 'presentations', name);
+  const dir = join(ROOT, 'deliverables', name);
   mkdirSync(dir, { recursive: true });
   tmpDirs.push(dir);
   writeFileSync(join(dir, 'lecture-profile.md'),
     '---\npresentation:\n  theme: zen\n  style: white-bubble\n---\n# t\n');
   writeFileSync(join(dir, 'slidedata.json'), JSON.stringify(slides));
-  return join('presentations', name);
+  return join('deliverables', name);
 }
 
 describe('layout gate e2e (U-20261105-001)', () => {

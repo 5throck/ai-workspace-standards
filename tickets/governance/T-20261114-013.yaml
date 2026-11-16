@@ -25,12 +25,21 @@ title: >-
   co-learning no longer lists PROJECT_AHEAD for this path; if (c), decision
   recorded in the project and the engine pending-backport entry resolved.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-14T19:45:31.001+09:00'
 history:
   - at: '2026-11-14T19:45:31.001+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-15T23:04:53.572+09:00'
+    from: backlog
+    to: review
+  - at: '2026-11-15T23:05:03.416+09:00'
+    from: review
+    to: done
+result: >-
+  Promoted exam-bank-operations v1.2.0 to templates/co-learning
+  (education-generic per owner decision; skills/ + 5 mirrors + SKILLS.md row +
+  lifecycle history row). PR #2041.
 error: null

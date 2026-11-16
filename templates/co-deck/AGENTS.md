@@ -177,7 +177,7 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 <!-- VARIANT-PHASE-GATE-START -->
 | design_spec.md (color palette, fonts, CSS variables) | Phase 3 | `design` | medium | |
 | lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | low | |
-| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | low | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace presentations/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
+| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | low | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace deliverables/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
 | assets/diagrams/*.svg (+ optional *.png) + diagram-manifest.json | Phase 3.5 | `diagram-specialist` | medium | optional: skip if no visual_spec fields in slide_deck.md; SVG is primary delivery format for HTML, PNG optional for PDF export |
 | layout_summary.md (4-layer spec merge validation + font check) | Phase 4 | `measure` | low | |
 | <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | low | |

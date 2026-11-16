@@ -1,4 +1,5 @@
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // video-slide.test.ts — builder-side render-path pin for the chrome-free
 // video-slide branch (U-20261029-005).
 //
@@ -38,7 +39,7 @@ const ALL_THEMES = ['outline', 'outlook', 'pitch', 'pitch-enhanced', 'vertical',
 function makeOpts(overrides: Partial<BuildOptions> = {}): BuildOptions {
   return {
     root: ROOT,
-    projectPath: join(ROOT, 'presentations', '_test'),
+    projectPath: join(ROOT, 'deliverables', '_test'),
     theme: 'outline',
     style: 'classic',
     title: 'Video Slide Test Deck',

@@ -1,7 +1,7 @@
 ---
 name: design
-version: "1.1.2"
-last_updated: 2026-11-06
+version: "1.1.3"
+last_updated: 2026-11-15
 role: Visual design specialist for lecture slide aesthetics and brand alignment
 status: active
 tier: medium
@@ -52,7 +52,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Output Format
 
-`presentations/<project>/design_spec.md` containing:
+`deliverables/<project>/design_spec.md` containing:
 - Layout spec (aspect ratio, header, panel, margins)
 - Color palette table (8 roles: slide-bg, bg-dark, title, body, accent, muted, border, vis-bg)
 - Font selection (family, web URL or TTF path)

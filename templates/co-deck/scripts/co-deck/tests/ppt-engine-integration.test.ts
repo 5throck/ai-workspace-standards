@@ -1,4 +1,5 @@
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // ppt-engine-integration.test.ts — builder-side integration tests for the shared PPT runtime.
 //
 // Validates the ppt-engine.js inline-at-build-time contract (Task 7, Parts A & C):
@@ -41,7 +42,7 @@ const NON_PPT_THEMES: string[] = [];
 function makeOpts(overrides: Partial<BuildOptions> = {}): BuildOptions {
   return {
     root: ROOT,
-    projectPath: join(ROOT, 'presentations', '_test'),
+    projectPath: join(ROOT, 'deliverables', '_test'),
     theme: 'outline',
     style: 'classic',
     title: 'Integration Test Deck',

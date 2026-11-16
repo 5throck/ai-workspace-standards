@@ -3,8 +3,8 @@ name: presenter-mode
 description: >
   Dual-window presenter state synchronization using browser BroadcastChannel API,
   syncing slide index, speaker notes, timer, current/next slide preview.
-version: 1.0.1
-last_reviewed: 2026-08-16
+version: "1.0.2"
+last_reviewed: "2026-11-15"
 status: active
 scope: co-deck
 l2_propagate: true
@@ -59,7 +59,7 @@ State updates are dispatched as JSON messages matching the `PresenterStateMessag
 
 ## Related Skills
 
-The pdf-export agent renders HTML presentation decks into paginated PDF files using Playwright (scripts/co-deck/gen-slides-pdf.ts).
+- `render-pdf-deck`: Renders HTML presentation decks into paginated PDF files using Playwright.
 - `explain-me`: Generates executive presentation summaries and documentation dashboards.
 
 ## Core Architecture & State Model
@@ -113,7 +113,7 @@ export interface PresenterStateMessage {
 
 ### 1. Audience Window (Main Display)
 - Primary display focused on full-screen slide rendering.
-- Handles user key events (`ArrowRight`, `ArrowLeft`, `Space`, `PageDown`, `PageUp`).
+- Handles user key events (`ArrowRight`, `ArrowLeft`, `Space`, `PageDown`, `PageUp`, `Home`, `End`).
 - On slide change: parses slide notes (`<aside class="notes">` or `data-notes` attribute), extracts next slide title/preview, and posts `STATE_UPDATE` to the channel.
 - Responds to `NAVIGATE` requests received from the Presenter window.
 - Responds to `SYNC_REQUEST` by broadcasting its current state immediately.

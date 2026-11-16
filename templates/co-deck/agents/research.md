@@ -1,7 +1,7 @@
 ---
 name: research
-version: "1.1.2"
-last_updated: 2026-11-06
+version: "1.1.3"
+last_updated: 2026-11-15
 role: Web research and source collection specialist for lecture preparation
 status: active
 tier: medium
@@ -51,7 +51,7 @@ This ensures all work flows through the proper 11-stage workflow with quality ga
 
 ## Profile Loading
 
-At the start of Stage 1, check for `presentations/<project>/lecture-profile.md`:
+At the start of Stage 1, check for `deliverables/<project>/lecture-profile.md`:
 
 **If the file exists:**
 1. Read `audience`, `level`, `keywords`, `slide_count`, `language` fields
@@ -65,16 +65,16 @@ At the start of Stage 1, check for `presentations/<project>/lecture-profile.md`:
 
 **If the file does not exist:**
 1. Proceed with default settings (practitioner audience, intermediate level)
-2. After confirming topic with the user, suggest creating `presentations/<project>/lecture-profile.md`:
+2. After confirming topic with the user, suggest creating `deliverables/<project>/lecture-profile.md`:
    ```
-   💡 presentations/<project>/lecture-profile.md 파일이 없습니다.
+   💡 deliverables/<project>/lecture-profile.md 파일이 없습니다.
       프로필 파일을 작성하면 검색 쿼리와 이미지 선택이 자동으로 최적화됩니다.
       (강의 시작 후 언제든 생성 가능합니다)
    ```
 
 ## Output Format
 
-`presentations/<project>/research_notes.md` containing:
+`deliverables/<project>/research_notes.md` containing:
 - Lecture Overview (topic, audience, purpose, slide count, **profile settings if loaded**)
 - Core Messages (3-5 key takeaways)
 - Key Concepts & Content (by concept/section)
@@ -87,7 +87,7 @@ Full template and Korean example: see `skills/research/SKILL.md`.
 ## Constraints
 
 - Do not start research without a confirmed topic and target audience
-- Always load `presentations/<project>/lecture-profile.md` before searching — do not skip this step
+- Always load `deliverables/<project>/lecture-profile.md` before searching — do not skip this step
 - Search in Korean and English by default — adjust to the engagement's target market and audience when they differ
 - Record actual source URLs — do not fabricate references
 - Proceed directly to Stage 1.5/2 once research is done (Gate 1 is retired)

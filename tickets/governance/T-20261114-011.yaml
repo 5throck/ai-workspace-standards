@@ -29,12 +29,21 @@ title: >-
   and T-20261114-003 (co-learning upgrade blockers, project-side port of the
   Stream Boundaries section), DEC-20261007-01.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-14T18:12:29.168+09:00'
 history:
   - at: '2026-11-14T18:12:29.168+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-15T23:04:53.608+09:00'
+    from: backlog
+    to: review
+  - at: '2026-11-15T23:05:03.438+09:00'
+    from: review
+    to: done
+result: >-
+  workflows.md dangling citation reworded per option (b): cites DEC-20261007-01
+  as project-local design doc, no docs/designs/ path, boundary rules intact. PR
+  #2041.
 error: null

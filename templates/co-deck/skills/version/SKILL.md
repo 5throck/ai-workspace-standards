@@ -1,7 +1,7 @@
 ---
 name: version
 scope: co-deck
-version: 1.3.0
+version: "1.3.1"
 description: >
   Manages version snapshots of lecture files. Auto-backs up files before edits
   and restores prior versions on demand. Must be called before any file
@@ -10,7 +10,7 @@ description: >
   Cross-cutting — applies to all workflow stages.
 status: active
 owner: version
-last_reviewed: 2026-06-20
+last_reviewed: "2026-11-15"
 prerequisites: none
 ---
 
@@ -36,25 +36,25 @@ Always create a snapshot **before** editing a file. `--workspace` is required.
 ```bash
 # Single file
 bun scripts/co-deck/snapshot.ts slide_deck.md \
-  --workspace presentations/<project> \
+  --workspace deliverables/<project> \
   --desc "shrink chapter 3 slide count" \
   --agent content
 
 # Multiple files
 bun scripts/co-deck/snapshot.ts slide_deck.md storyline.md \
-  --workspace presentations/<project> \
+  --workspace deliverables/<project> \
   --desc "full chapter restructure" \
   --agent content
 
 # HTML file (large — snapshot only when layout changes)
 bun scripts/co-deck/snapshot.ts lecture_v1.html \
-  --workspace presentations/<project> \
+  --workspace deliverables/<project> \
   --desc "backup before image swap" \
   --agent build
 
 # Diagram assets (shared pool)
 bun scripts/co-deck/snapshot.ts ../assets/diagrams/ \
-  --workspace presentations/<project> \
+  --workspace deliverables/<project> \
   --desc "backup before diagram regeneration" \
   --agent build
 ```
@@ -79,7 +79,7 @@ bun scripts/co-deck/snapshot.ts ../assets/diagrams/ \
 ### Step 2: List Versions
 
 ```bash
-bun scripts/co-deck/snapshot.ts --workspace presentations/<project> --list
+bun scripts/co-deck/snapshot.ts --workspace deliverables/<project> --list
 ```
 
 Example output:
@@ -101,12 +101,12 @@ Example output:
 ```bash
 # Full version ID
 bun scripts/co-deck/snapshot.ts \
-  --workspace presentations/<project> \
+  --workspace deliverables/<project> \
   --restore 2026-06-17_14-30_content_chapter-adjust
 
 # Partial version ID (if uniquely matched)
 bun scripts/co-deck/snapshot.ts \
-  --workspace presentations/<project> \
+  --workspace deliverables/<project> \
   --restore 2026-06-17_14-30
 ```
 
@@ -116,22 +116,22 @@ bun scripts/co-deck/snapshot.ts \
 
 ## Output Format
 
-Snapshots are stored under `presentations/<project>/_versions/`:
+Snapshots are stored under `deliverables/<project>/_versions/`:
 
 ```
-presentations/<project>/
+deliverables/<project>/
 └── _versions/
     └── 2026-06-17_14-30_content_chapter-adjust/
         ├── slide_deck.md
         └── storyline.md
 ```
 
-Each snapshot auto-appends an entry to `presentations/<project>/VERSIONS.md` with date, agent, description, file sizes, and restore command.
+Each snapshot auto-appends an entry to `deliverables/<project>/VERSIONS.md` with date, agent, description, file sizes, and restore command.
 
 **Caveats:**
 - Add `_versions/` to `.gitignore` — large folders make Git inefficient
 - HTML files are 100KB–several MB; snapshot only on layout changes
-- `presentations/assets/fonts/` does not need snapshots — re-downloadable any time via `download-font.ts`
+- `deliverables/assets/fonts/` does not need snapshots — re-downloadable any time via `download-font.ts`
 - Snapshot `layout_spec.json` + `pdf_layout_spec.md` together when HTML layout changes (they become invalid if HTML changes)
 
 ## Related Skills

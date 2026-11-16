@@ -7,7 +7,7 @@
 - **Skill**: research
 - **Status**: active
 - **Owner**: research
-- **Created**: 2026-08-23
+- **Created**: 2026-11-15
 
 ## Description
 
@@ -17,7 +17,7 @@ Source collection and ideation for lecture materials. After confirming topic/aud
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-08-23 | - | production | Initial record derived from SKILL.md frontmatter | research |
+| 2026-11-15 | - | production | Initial record derived from SKILL.md frontmatter | research |
 
 ## Acceptance Criteria
 
