@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: T-20261117-001
+kind: manual
+title: >-
+  EXTERNAL DEPS pass cannot adopt variant-seed ids into valid v2 project
+  manifests (seed-id adoption gap). Evidence: runExternalDepsPass
+  (scripts/upgrade-project.ts:3660-3975) has three write channels — absent-file
+  seed copy (:3698), parse-failure reconcile (:3710-3738), v1→v2 migration
+  (:3798) — and none fires for a valid v2 manifest with an empty dependencies
+  array, so a seed id added to templates/<variant>/external-deps.json after the
+  project was scaffolded is silently never delivered. ensureGitignoreCoverage is
+  keyed on parsed deps, so the gitignore append also no-ops; resolveClaim pins
+  templates/<variant>/external-deps.json to PROJECT_STATE/EXTERNAL DEPS so
+  TEMPLATE TREE SYNC never delivers it either (scripts/lib/upgrade-policy.ts:708-714);
+  the project CLI (bun scripts/external-deps.ts list | install | verify |
+  check-updates) has no reconcile subcommand. Net effect: no documented path
+  merges a variant-seed id into a valid v2 project manifest with empty deps.
+  Fleet impact: every project scaffolded before its variant seed gains deps is
+  affected — Projects/co-deck/quickdl is the first observed instance (template
+  0.30.0 seed never reached the project manifest). Proposed fix direction
+  (needs Design Gate): a seed-id adoption step in runExternalDepsPass or
+  helpers/external-deps-reconcile.ts v1.2.0 (add-if-missing per template-seed
+  id, one decision row per id, then D5 gitignore coverage as today), plus a
+  design-doc addendum to docs/designs/2026-11-07-external-deps-standard-design.md.
+  One-off fix applied in the meantime (PM-sanctioned): Projects/co-deck via
+  5throck/co-deck PR #248 (quickdl entry adopted verbatim + external/ gitignore
+  coverage). This ticket supersedes no in-flight work.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-17T00:22:36.300+09:00'
+history:
+  - at: '2026-11-17T00:22:36.300+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
