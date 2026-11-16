@@ -35,6 +35,13 @@
  *        project-only entry, and the template server arrives (design D6).
  *
  * @version 1.7.0
+ * v1.7.1 (2026-11-16): baseline-copy race fix — CI run 43786496770 (macos-latest)
+ *         failed with `ENOENT: lstat ...\.git/objects/maintenance.lock` because
+ *         `git commit` in the module-level baseline can trigger background
+ *         maintenance that unlinks lock files while `freshFromBaseline()`'s
+ *         cpSync walks the tree. The baseline now sets `gc.auto=0` and
+ *         `maintenance.auto=false` before its commit, and the copy retries up
+ *         to three times on ENOENT onto a clean target. No assertion changed.
  * v1.7.0 (2026-11-15, engine-run + git-spawn consolidation — spec
  *         docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1):
  *         23 engine spawns → 18 and per-seed git spawns 5 → 2, with every
@@ -100,6 +107,13 @@ SHARED_DIRS.push(BASELINE_DIR);
 spawnSync('git', ['init', '-q'], { cwd: BASELINE_DIR, stdio: ['ignore', 'pipe', 'pipe'] });
 git(BASELINE_DIR, 'config', 'user.email', 'test@example.com');
 git(BASELINE_DIR, 'config', 'user.name', 'Test');
+// v1.7.1: disable background maintenance in the baseline repo BEFORE the commit.
+// `git commit` can trigger `gc --auto`/maintenance, which unlinks `.git/objects/*.lock`
+// while `cpSync` walks the tree — macOS run 43786496770 failed with
+// `ENOENT: lstat .../.git/objects/maintenance.lock`. Config first, plus the
+// retry in freshFromBaseline() below for the residual window.
+git(BASELINE_DIR, 'config', 'gc.auto', '0');
+git(BASELINE_DIR, 'config', 'maintenance.auto', 'false');
 mkdirSync(join(BASELINE_DIR, '.claude'), { recursive: true });
 writeFileSync(
   join(BASELINE_DIR, '.claude', 'template-version.txt'),
@@ -110,8 +124,21 @@ git(BASELINE_DIR, 'commit', '-q', '-m', 'chore: baseline');
 
 function freshFromBaseline(): string {
   const tmp = mkdtempSync(join(tmpdir(), 'upgrade-tree-sync-'));
-  cpSync(BASELINE_DIR, tmp, { recursive: true });
-  return tmp;
+  // v1.7.1: a concurrent git maintenance can unlink a lock file mid-walk even with
+  // gc.auto disabled (the commit's own upkeep can still be in flight). ENOENT on a
+  // vanished source entry is the signature — retry onto a clean target; the source
+  // is immutable after the first copy attempt.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      cpSync(BASELINE_DIR, tmp, { recursive: true });
+      return tmp;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== 'ENOENT' || attempt >= 2) throw err;
+      rmSync(tmp, { recursive: true, force: true });
+      mkdirSync(tmp, { recursive: true });
+    }
+  }
 }
 
 /** The original no-HEAD fixture — kept ONLY for the tests whose assertions
