@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261117-005
+kind: manual
+title: >-
+  Template-side contactName rendering parity (DEC-20261117-01 recorded edge).
+  Evidence: the zen template contact branch gates bullets on
+  contactEmail/contactLinkedIn/contactPhone only and has never rendered
+  contactName, while gen-slides-pdf.ts's known contact list includes
+  contactName (gen-slides-pdf.ts:1623). A slide with BOTH contactName and
+  bullets diverges (PDF: name only; HTML: bullets only). Recorded as an edge
+  in DEC-20261117-01 ("recorded not fixed"; redundant authoring, never in
+  parity pre-batch). Expected (owner to scope at triage): either
+  zen/template.html renders contactName (full field parity) or the PDF
+  known-list drops contactName (align both sides); prefer whichever keeps the
+  fallback-only bullets contract (DEC-20261117-01) intact. Affected:
+  templates/co-deck/docs/html-themes/themes/zen/template.html,
+  templates/co-deck/scripts/co-deck/gen-slides-pdf.ts.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-17T02:44:11.523+09:00'
+history:
+  - at: '2026-11-17T02:44:11.523+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

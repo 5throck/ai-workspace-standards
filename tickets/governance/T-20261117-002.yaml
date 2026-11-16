@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261117-002
+kind: manual
+title: >-
+  UI-chrome print leak: html-to-pdf 1.3.0 full-deck render emits non-slide
+  pages (R-A1 anomaly A). Evidence: html-to-pdf 1.3.0 full-deck render of the
+  zen keynote deck (Projects/co-deck deliverables/2026-11-open-innovation-keynote
+  lecture_..._v2.html, R-A1 check 2026-11-17) produced 49 pages for 47 slides:
+  p1 = #toc-drawer (TOC overlay) and p49 = speaker-notes panel leak into print.
+  Cause: the injected print CSS sets `html, body { overflow: visible; height:
+  auto }` without hiding non-slide chrome (overlays outside #presentation).
+  All 47 slides map 1:1 to pages 2-48 in correct order. Expected: print CSS
+  hides non-slide UI chrome (e.g. `#toc-drawer`, speaker-notes panel, any
+  non-#presentation overlay) so page count == slide count. Affected:
+  templates/co-deck/scripts/co-deck/html-to-pdf.ts (print-CSS block).
+  Evidence source: R-A1 verification in PR #2053's body thread.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-17T02:44:11.523+09:00'
+history:
+  - at: '2026-11-17T02:44:11.523+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
