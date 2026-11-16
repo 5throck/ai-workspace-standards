@@ -228,9 +228,24 @@
         addZenOverlay(card);
         var content = el("div", "slide-content");
         content.appendChild(inlineTitle("h1", title));
+        var hasContactLine = !!(data.contactEmail || data.contactLinkedIn || data.contactPhone);
         if (data.contactEmail) content.appendChild(el("p", "contact-item", data.contactEmail));
         if (data.contactLinkedIn) content.appendChild(el("p", "contact-item", data.contactLinkedIn));
         if (data.contactPhone) content.appendChild(el("p", "contact-item", data.contactPhone));
+        // Contact bullets fallback (U-20261116-008 item 4, owner decision O-1
+        // promotion, design §4.2): when no contact* line resolved, render up
+        // to 5 bullets as .contact-item lines with the first as
+        // .contact-primary — the deck-proven shape (deck design_spec §2.8).
+        // Fallback-only mirrors the PDF renderer's contact*-first contract
+        // (gen-slides-pdf), so both outputs stay in parity for mixed decks.
+        if (!hasContactLine && Array.isArray(data.bullets) && data.bullets.length) {
+          var contactBullets = data.bullets.slice(0, 5);
+          for (var ci = 0; ci < contactBullets.length; ci++) {
+            var contactLine = el("p", "contact-item" + (ci === 0 ? " contact-primary" : ""));
+            appendInline(contactLine, contactBullets[ci]);
+            content.appendChild(contactLine);
+          }
+        }
         card.appendChild(content);
         slide.appendChild(card);
         return;

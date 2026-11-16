@@ -1,4 +1,17 @@
-// @version 1.2.0 — Generate PDF from self-contained HTML slide deck using Puppeteer.
+// @version 1.3.0 — Generate PDF from self-contained HTML slide deck using Puppeteer.
+// v1.3.0 (design 2026-11-16-co-deck-pdf-html-backport PR-2, U-008 item 1):
+//   dual-selector slide discovery — every current theme renders slides
+//   client-side as `div.slide` (ppt-engine runtime), while this script only
+//   counted `<section>` (legacy static decks) and silently produced a 0-page
+//   exit-0 PDF on modern decks. Both selectors are now counted after the
+//   fonts wait; exactly ONE non-empty set renders (`.slide` wins when
+//   present, else `section` — never both, so hand-edited mixed decks cannot
+//   double-count, design R-A2). The section print-CSS block gains `.slide`
+//   twins (same rules; centered-page rules map to
+//   `[data-type="cover"|"divider"|"closing"]`). A zero-slide input is a loud
+//   failure: both selector counts printed, exit 1 after cleanup, NO PDF
+//   written (owner decision O-4 — the old exit-0 blank PDF was the reported
+//   failure mode). Legacy `<section>` decks render unchanged.
 // v1.2.0 (design 2026-11-14-html-to-pdf-pool-asset-serving): pool-asset
 //   intercept-fallback — `/assets/…` requests that miss deck-locally re-resolve
 //   against the shared pool dir beside the deck (containment-guarded; `🔀 pool:`
@@ -6,10 +19,12 @@
 //   a final missing-asset summary (favicon.ico excluded — browser artifact) —
 //   loud but non-fatal, exit code unchanged.
 // Uses system Chrome/Edge (WebSocket transport, more reliable than Playwright pipe in VMs).
-// Captures each <section> as a full-page PDF with correct centering and large layout.
+// Captures each slide — `div.slide` (PPT-engine runtime-rendered decks) or
+// legacy `<section>` (static decks) — as a full-page PDF with correct centering
+// and large layout. Zero-slide input fails loudly with exit 1 (no PDF written).
 // Usage:
 //   bun scripts/co-deck/html-to-pdf.ts --html deliverables/<project>/lecture_vN.html [--out output.pdf] [--width 1920] [--height 1080] [--scale 1.5] [--pages N]
-//   --pages N: only render first N sections (useful for sample/preview PDF)
+//   --pages N: only render first N slides/sections (useful for sample/preview PDF)
 
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 import { resolve, dirname, join, sep } from 'path';
@@ -113,6 +128,9 @@ async function main() {
   let browser: Browser | null = null;
   let server: ReturnType<typeof Bun.serve> | null = null;
   let hadError = false;
+  // Zero-slide loud failure (v1.3.0, O-4): declared out here so the exit-1
+  // decision after the finally cleanup can see it (same pattern as hadError).
+  let zeroSlides = false;
   // Server-observed 404 count (v1.2.0). An HTTP 404 is a *successful* network
   // request, so the `requestfailed` listener below never sees it — count here.
   let missingRequests = 0;
@@ -249,8 +267,12 @@ async function main() {
           width: ${viewWidth}px !important;
         }
 
-        /* Each section becomes a standalone page */
-        section {
+        /* Each section / runtime slide becomes a standalone page.
+           v1.3.0: the div.slide twin mirrors the section rules so ppt-engine
+           runtime-rendered decks (div.slide, e.g. zen) print like the legacy
+           static decks did; a section deck contains no .slide elements
+           and vice versa, so the twins never interact. */
+        section, .slide {
           width: ${viewWidth}px !important;
           min-width: ${viewWidth}px !important;
           height: ${viewHeight}px !important;
@@ -275,8 +297,12 @@ async function main() {
           text-align: left !important;
         }
 
-        /* Centered sections (cover, divider, closing): center horizontally */
-        section.center, section.act-cover {
+        /* Centered sections (cover, divider, closing): center horizontally.
+           v1.3.0: zen marks slide kinds via dataset.type
+           (zen/template.html renderSlide) — the .slide twins map the same
+           three kinds. */
+        section.center, section.act-cover,
+        .slide[data-type="cover"], .slide[data-type="divider"], .slide[data-type="closing"] {
           align-items: center !important;
           text-align: center !important;
         }
@@ -284,8 +310,19 @@ async function main() {
           align-self: center !important;
           text-align: center !important;
         }
+        .slide[data-type="cover"] > .num,
+        .slide[data-type="divider"] > .num,
+        .slide[data-type="closing"] > .num {
+          align-self: center !important;
+          text-align: center !important;
+        }
         /* All children inside .center sections inherit center alignment */
         section.center > * {
+          text-align: center !important;
+        }
+        .slide[data-type="cover"] > *,
+        .slide[data-type="divider"] > *,
+        .slide[data-type="closing"] > * {
           text-align: center !important;
         }
 
@@ -304,23 +341,32 @@ async function main() {
         section > .grid, section > .split, section > .card,
         section > table, section > .chart-wrap, section > .tp,
         section > .svg-wrap, section > .two-col,
-        section > .cols {
+        section > .cols,
+        .slide > .grid, .slide > .split, .slide > .card,
+        .slide > table, .slide > .chart-wrap, .slide > .tp,
+        .slide > .svg-wrap, .slide > .two-col,
+        .slide > .cols {
           width: 100% !important;
           max-width: 100% !important;
         }
         /* legend-row and src-note: stretch width but keep original alignment */
-        section > .legend-row, section > .src-note {
+        section > .legend-row, section > .src-note,
+        .slide > .legend-row, .slide > .src-note {
           width: 100% !important;
           max-width: 100% !important;
         }
         /* icon-row: left-align in normal sections */
-        section > .icon-row {
+        section > .icon-row,
+        .slide > .icon-row {
           width: 100% !important;
           max-width: 100% !important;
           justify-content: flex-start !important;
         }
         /* icon-row: center in .center sections */
-        section.center > .icon-row {
+        section.center > .icon-row,
+        .slide[data-type="cover"] > .icon-row,
+        .slide[data-type="divider"] > .icon-row,
+        .slide[data-type="closing"] > .icon-row {
           justify-content: center !important;
         }
 
@@ -330,7 +376,13 @@ async function main() {
         section > .act-label,
         section > .divider,
         section > .stat-big,
-        section > .stat-row {
+        section > .stat-row,
+        .slide > .badge,
+        .slide > .tag,
+        .slide > .act-label,
+        .slide > .divider,
+        .slide > .stat-big,
+        .slide > .stat-row {
           width: auto !important;
           max-width: ${Math.floor(viewWidth * 0.88)}px !important;
         }
@@ -349,7 +401,13 @@ async function main() {
         section > .kicker, section > .blockquote,
         section > ul, section > ol,
         section > .final-tag, section > .ref,
-        section > *[class*="slide"], section > *[class*="content"] {
+        section > *[class*="slide"], section > *[class*="content"],
+        .slide > h1, .slide > h2, .slide > h3, .slide > p:not(.src-note),
+        .slide > .lead, .slide > .echo, .slide > .disclaim,
+        .slide > .kicker, .slide > .blockquote,
+        .slide > ul, .slide > ol,
+        .slide > .final-tag, .slide > .ref,
+        .slide > *[class*="slide"], .slide > *[class*="content"] {
           max-width: ${Math.floor(viewWidth * 0.88)}px !important;
           width: auto !important;
           text-align: left !important;
@@ -358,7 +416,16 @@ async function main() {
         /* .quote respects center alignment in .center sections */
         section.center > .quote,
         section.center > p,
-        section.center > .lead {
+        section.center > .lead,
+        .slide[data-type="cover"] > .quote,
+        .slide[data-type="divider"] > .quote,
+        .slide[data-type="closing"] > .quote,
+        .slide[data-type="cover"] > p,
+        .slide[data-type="divider"] > p,
+        .slide[data-type="closing"] > p,
+        .slide[data-type="cover"] > .lead,
+        .slide[data-type="divider"] > .lead,
+        .slide[data-type="closing"] > .lead {
           text-align: center !important;
         }
 
@@ -416,60 +483,84 @@ async function main() {
           display: none !important;
         }
 
-        /* ── Remove last section trailing break ── */
-        section:last-of-type {
+        /* ── Remove last section/slide trailing break ── */
+        section:last-of-type,
+        .slide:last-of-type {
           page-break-after: auto !important;
           break-after: auto !important;
         }
       `,
     });
 
-    // 4. Count sections
-    const sectionCount = await page.$$eval('section', (sections) => sections.length);
-    console.log(`📊 Total sections: ${sectionCount}`);
-
-    // 4b. If page limit is set, hide sections beyond the limit
-    if (pageLimit > 0 && pageLimit < sectionCount) {
-      const hidden = await page.evaluate((limit) => {
-        const sections = Array.from(document.querySelectorAll('section'));
-        let count = 0;
-        for (const s of sections) {
-          count++;
-          if (count > limit) {
-            s.style.display = 'none';
-          }
-        }
-        return sections.length - limit;
-      }, pageLimit);
-      console.log(`✂️  Hidden ${hidden} sections (keeping first ${pageLimit})`);
-    }
+    // 4. Slide counting moved after the fonts wait (step 6): ppt-engine
+    //    runtime decks render their div.slide elements at DOMContentLoaded,
+    //    and v1.3.0 must count them together with legacy sections in one
+    //    dual-selector discovery pass.
 
     // 5. Wait for web fonts to load
     await new Promise(r => setTimeout(r, 3000));
     // Additional wait for fonts like Pretendard that load via @font-face
     await page.evaluate(() => document.fonts.ready);
 
-    // 6. Generate PDF — each section = one page
-    const pdfBuffer = await page.pdf({
-      path: outPath,
-      width: viewWidth,
-      height: viewHeight,
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-      scale: printScale,
-      preferCSSPageSize: false,
-    });
+    // 6. Dual-selector slide discovery (v1.3.0, after the fonts wait so
+    // runtime-rendered decks have painted their slides): `.slide` (ppt-engine
+    // runtime decks — every theme html-build produces today) wins when
+    // present; `section` (legacy static decks) is the fallback. Exactly one
+    // set renders — never both (design R-A2, no double-count on mixed decks).
+    const slideCount = await page.$$eval('.slide', (els) => els.length);
+    const sectionCount = await page.$$eval('section', (els) => els.length);
+    const useSlideSelector = slideCount > 0;
+    const slideSelector = useSlideSelector ? '.slide' : 'section';
+    const totalSlides = useSlideSelector ? slideCount : sectionCount;
+    console.log(`📊 Slides: ${totalSlides} (selector: '${slideSelector}' — .slide: ${slideCount}, section: ${sectionCount})`);
 
-    // Loud but non-fatal failure summary (v1.2.0): the render itself succeeds,
-    // so exit code stays 0 — the operator decides what to do with the blanks.
-    if (missingRequests > 0) {
-      console.warn(`⚠️ ${missingRequests} asset request(s) missing — images/fonts may be blank in the PDF`);
+    // 6b. Loud zero-slide failure (owner decision O-4): the pre-v1.3.0
+    // behavior produced an exit-0 PDF with 0 pages (the reported failure
+    // mode). Both selector counts are 0 → name the input and both selectors,
+    // skip PDF generation entirely (no output file), exit 1 after cleanup.
+    zeroSlides = totalSlides === 0;
+    if (zeroSlides) {
+      console.error(`\n❌ Zero slides found — no PDF written.`);
+      console.error(`   Input: ${resolvedHtml}`);
+      console.error(`   Tried both selectors: '.slide' (ppt-engine runtime-rendered decks) and 'section' (legacy static decks) — 0 matches for each.`);
+      console.error(`   This HTML is not a deck this renderer understands; rebuild it via build-theme-deck.ts before exporting to PDF.`);
     }
 
-    console.log(`\n✅ PDF generated: ${outPath}`);
-    console.log(`   Size: ${(pdfBuffer.length / 1024 / 1024).toFixed(2)} MB`);
-    const renderedPages = (pageLimit > 0 && pageLimit < sectionCount) ? pageLimit : sectionCount;
-    console.log(`   Pages: ${renderedPages} (total sections: ${sectionCount})`);
+    // 6c. If page limit is set, hide slides beyond the limit (either selector)
+    if (!zeroSlides && pageLimit > 0 && pageLimit < totalSlides) {
+      const hidden = await page.evaluate(({ sel, limit }) => {
+        const slides = Array.from(document.querySelectorAll(sel));
+        for (let i = limit; i < slides.length; i++) {
+          (slides[i] as HTMLElement).style.display = 'none';
+        }
+        return slides.length - limit;
+      }, { sel: slideSelector, limit: pageLimit });
+      console.log(`✂️  Hidden ${hidden} slides (keeping first ${pageLimit})`);
+    }
+
+    // 7. Generate PDF — each slide/section = one page
+    if (!zeroSlides) {
+      const pdfBuffer = await page.pdf({
+        path: outPath,
+        width: viewWidth,
+        height: viewHeight,
+        printBackground: true,
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        scale: printScale,
+        preferCSSPageSize: false,
+      });
+
+      // Loud but non-fatal failure summary (v1.2.0): the render itself succeeds,
+      // so exit code stays 0 — the operator decides what to do with the blanks.
+      if (missingRequests > 0) {
+        console.warn(`⚠️ ${missingRequests} asset request(s) missing — images/fonts may be blank in the PDF`);
+      }
+
+      console.log(`\n✅ PDF generated: ${outPath}`);
+      console.log(`   Size: ${(pdfBuffer.length / 1024 / 1024).toFixed(2)} MB`);
+      const renderedPages = (pageLimit > 0 && pageLimit < totalSlides) ? pageLimit : totalSlides;
+      console.log(`   Pages: ${renderedPages} (total ${useSlideSelector ? 'slides' : 'sections'}: ${totalSlides})`);
+    }
 
   } catch (err) {
     console.error('❌ Error generating PDF:', err);
@@ -485,7 +576,7 @@ async function main() {
       server.stop();
     }
   }
-  if (hadError) {
+  if (hadError || zeroSlides) {
     process.exit(1);
   }
 }
