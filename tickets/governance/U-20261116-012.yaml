@@ -1,0 +1,52 @@
+schemaVersion: 1
+id: U-20261116-012
+kind: manual
+title: Upstream request from co-architect
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-16T18:35:13.999+09:00
+history:
+  - at: 2026-11-16T18:35:13.999+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-architect
+  variant: co-architect
+  template_version: 0.30.0
+  source: project/co-architect
+  trust: untrusted
+  suspected_layer: L1
+  symptom: |-
+    Two re-run hygiene defects in the core sync pipeline (scripts/dev-sync.ts, L1-owned, standardized across templates), observed 2026-11-16 while landing an 82-file change through repeated /sync runs in Projects/co-architect (PR #399) after mid-pipeline failures.
+
+    (1) Tracked-but-ignored paths crash step 6 fatally. The variant ships `.zcode/` in .gitignore while `.zcode/config.json` has been tracked since PR #195. The S0/S1 snapshot sweep re-adds dirty paths, and `git add .zcode` fails fatally ("The following paths are ignored by one of your .gitignore files: .zcode — Use -f") — the sync dies at commit-prep even though the task-staged set is complete and valid in the index (git add -u had staged it fine). Expected: the sweep detects tracked-but-ignored paths and either stages them with -f, or WARNs and skips them, instead of a fatal error. Alternative root fix at the template layer: .gitignore negations for deliberately tracked config files under ignored directories.
+
+    (2) Step 2 appends a duplicate memory session-summary block on every re-run. A mid-pipeline failure followed by another /sync on the same day/branch appended three near-identical "## Session Summary" blocks to memory/YYYY-MM-DD.md (one per attempt: 79-file, 82-file, 82-file), which had to be deduplicated by hand. Expected: step 2 replaces or dedups its own pending session block for the same branch/run before appending.
+  affected_paths:
+    - scripts/dev-sync.ts
+    - .zcode/config.json
+    - .gitignore
+  identity_source: cwd
+  local_workaround_diff: |-
+    Reference only (local resolution applied in co-architect, not a root-cause fix):
+    1. Untracked the machine-local file instead of force-adding: `git rm --cached .zcode/config.json` (its content stays as a local working-tree file; .gitignore untouched).
+    2. Manually deduplicated memory/2026-11-16.md: split on '\n---\n' and dropped exact-duplicate session blocks, keeping the last run's block.
+    --- a/.gitignore
+    +++ b/.gitignore (no change kept — negation `!.zcode/config.json` was tried and reverted because the sweep adds the directory path `.zcode`, which still trips the ignore error even with the negation present)
+  repro: |-
+    For (1): in any variant with a tracked file inside an ignored directory (co-architect case: `.zcode/config.json` tracked, `.gitignore` line 163 `.zcode/`), modify the file, stage the task set, run `bun scripts/dev-sync.ts --body-file <body>` → step 6 fails with the gitignore error. Reproduced twice on 2026-11-16 (co-architect, dev-sync 1.28+).
+    For (2): run /sync and let it fail after step 2 (e.g. at the step-6 git add), fix the blocker, re-run /sync the same day on the same branch → a second session-summary block is appended to memory/YYYY-MM-DD.md; one more per further attempt (observed: 3 blocks after 3 runs).
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: .zcode/config.json'
+    - info:in_last_delivery scripts/dev-sync.ts=true
+    - info:in_last_delivery .zcode/config.json=false
+    - info:in_last_delivery .gitignore=false
+  dedupe_key: e6b3e90c1bbc1d1985e2fbde503cbe233f2b74c38d2fe1e6ccf1720c881e2dbe
+  duplicates:
+    - project: co-architect
+      at: 2026-11-16T18:35:13.999+09:00
