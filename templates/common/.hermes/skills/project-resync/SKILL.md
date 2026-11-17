@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.8.0
+version: 1.9.0
 description: >
   Full bidirectional sync cycle for fleet member projects (Projects/co-*
   minus the docs/fleet-membership.json exclusions): provenance-audit
@@ -15,7 +15,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_updated: 2026-11-07
+last_updated: 2026-11-18
 last_reviewed: 2026-11-08
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
@@ -74,8 +74,8 @@ Review the per-project verdict tables:
 
 | Verdict | Meaning | Action |
 |---|---|---|
-| STALE-RESIDUE | equals a current L0/L1/L2 source, or an older revision corroborated by project mtime older + line-order agreement | snapshot → discard (tracked: `git checkout --`, untracked: delete) |
-| PRESUME-STALE | subset of a source without mtime/order corroboration — possible deliberate reordering or legitimate deletion | human confirm before discard; routes to commit-side review like LOCAL-WORK |
+| STALE-RESIDUE | equals a current L0/L1/L2 source, or an older revision corroborated by project mtime older + line-order agreement — **never merge-delivered files**: a path whose upgrade claim is MERGE_MANAGED / JSON_MERGE / SCHEMA_MERGE (e.g. `.agents/mcp.json`) always routes to PRESUME-STALE, even on exact template-source equality, because the wave delivers a union and the project's merge-block edits are authoritative between waves (T-20261117-010) | snapshot → discard (tracked: `git checkout --`, untracked: delete) |
+| PRESUME-STALE | subset of a source without mtime/order corroboration — possible deliberate reordering or legitimate deletion; **or a merge-delivered file whose content equals the template source** (the equality can be the wave's own union output, not stale residue) | human confirm before discard; routes to commit-side review like LOCAL-WORK |
 | LOCAL-WORK | diverges from HEAD and every source; or non-template file | commit candidate (Step 1); feeds backport review (Step 2) |
 | KEEP | unresolvable | human review; default to commit on a side branch if risky |
 

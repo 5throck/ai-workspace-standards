@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: T-20261118-002
+kind: manual
+title: >-
+  Cheap subfile-mirror drift gate for templates/common/skills/* non-SKILL.md
+  files. Evidence (2026-11-18, T-20261117-011 root cause): propagation-map.json
+  skills domain include_pattern "*/SKILL.md" never crosses a slash (globToRegExp
+  single-* is segment-bound), so L1 skill SUBFILES (references/, scripts/,
+  templates/) have no L0→L1 propagation path at all; sync-skills.ts targets the
+  five platform dirs, not templates/common/skills/; subfile mirrors therefore
+  update only on hand-synced "chore(templates): workspace sync" commits (last
+  full sync of explain-me references: 066f3959c) — root commit 57dcdc191
+  (Codex/Hermes prompt-only fallback sections) left
+  templates/common/skills/explain-me/references/PLATFORM_HARNESS.md stale until
+  a manual byte-copy redeploy (T-20261117-011 fix, PR 2026-11-18). qa-gate
+  step 4 (collectMirrorParityFailures) was the ONLY detector, and it
+  short-circuits behind audit.ts step 1, so the drift stayed masked whenever
+  any other audit failure was present (T-011's masking history: multiple QA
+  reports stated "explain-me FAIL confirmed gone" on short-circuit artifacts).
+  Expected: a cheap deterministic drift gate — compare skills/<skill>/**
+  against templates/common/skills/<skill>/** for L0+L1 skills' non-SKILL.md
+  files, in qa-gate step 4 (already there — but add a standalone early signal)
+  or as a verify-scripts check / audit.ts check — so subfile drift surfaces at
+  audit time instead of only at full qa-gate runs. Design-lite; no new
+  machinery, reuse collectMirrorParityFailures or extract it into scripts/lib
+  for dual consumption.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-18T00:00:00.000+09:00'
+history:
+  - at: '2026-11-18T00:00:00.000+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

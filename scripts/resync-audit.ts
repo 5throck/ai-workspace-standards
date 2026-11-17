@@ -2,7 +2,25 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.9.0
+ * @version 1.10.0
+ *
+ * v1.10.0 (2026-11-18, T-20261117-010): merge-delivered files are never
+ *          auto-discarded on content-equality. A file whose upgrade claim is
+ *          a merge-delivery policy (MERGE_MANAGED / JSON_MERGE /
+ *          SCHEMA_MERGE — e.g. .agents/mcp.json) is project-operated between
+ *          waves: the wave delivers a UNION, so "upgrade re-delivers" — the
+ *          STALE-RESIDUE justification — is false for it, and content
+ *          equality with the template source can be the wave's own union
+ *          output (the 2026-11-17 fleet sweep discarded co-game/co-hr/co-news
+ *          .agents/mcp.json on that verdict while T-20261117-007 showed the
+ *          TEMPLATE side was the stale one — the discarded union re-injected
+ *          a retired graft server the project had hand-removed). classify()
+ *          now consults mergeDeliveryPolicy() (resolveClaim-backed, exported
+ *          for unit tests) and routes those files to PRESUME-STALE — human
+ *          confirm before discard, never snapshotted as a discard candidate —
+ *          for BOTH the content-equality and the corroborated-stale branches,
+ *          in the modified and untracked paths alike. Non-merge verdicts are
+ *          byte-for-byte unchanged (the guard is a pure additional branch).
  *
  * v1.9.0 (2026-11-08, spec
  *          docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
@@ -118,12 +136,17 @@
  *   3. classifies template-delivered files by comparing the dirty content
  *      against the workspace source of truth:
  *        - dirty content == L0/L1/L2 source  → STALE-RESIDUE
- *          (an older sync wave; DISCARD + let upgrade re-deliver)
+ *          (an older sync wave; DISCARD + let upgrade re-deliver) — EXCEPT
+ *          merge-delivered files (MERGE_MANAGED / JSON_MERGE /
+ *          SCHEMA_MERGE claim, e.g. .agents/mcp.json): those are
+ *          project-operated between waves and the wave delivers a union,
+ *          so equality never auto-discards — PRESUME-STALE (T-20261117-010)
  *        - subset of a source (older-revision shape) → STALE-RESIDUE only
  *          with corroboration (project mtime older than source AND
  *          line-order agreement on the common lines); otherwise
  *          PRESUME-STALE — human confirm before discard (routes to
- *          commit-side review like LOCAL-WORK)
+ *          commit-side review like LOCAL-WORK). Merge-delivered files
+ *          never receive the corroborated STALE-RESIDUE verdict either.
  *        - divergent from HEAD and not equal to any source → LOCAL-WORK
  *          (candidate COMMIT; feeds the backport review)
  *        - unresolvable → KEEP (default-safe; human review)
@@ -153,8 +176,9 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { exclusionNotice, listFleetProjects, listTenantLoopProjects, tenantForProjectPath } from "./lib/fleet.ts";
+import { resolveClaim } from "./lib/upgrade-policy.ts";
 
-const VERSION = "1.9.0";
+const VERSION = "1.10.0";
 
 interface FileRow {
   file: string;
@@ -424,6 +448,24 @@ function isTemplateDelivered(relFile: string): boolean {
 }
 
 /**
+ * Merge-delivery claim check (v1.10.0, T-20261117-010). Returns the claim's
+ * policy name when the upgrade wave delivers this path through a
+ * union/managed merge rather than a wholesale overwrite — MERGE_MANAGED
+ * (MERGE/DOCS_MERGE pass), JSON_MERGE (TEMPLATE TREE SYNC union, e.g.
+ * .agents/mcp.json), or SCHEMA_MERGE (workspace-schema leaf merge) — else
+ * null. For these files the project's merge-block edits are authoritative
+ * between waves: the STALE-RESIDUE justification "upgrade re-delivers" is
+ * FALSE, and content equality with the template source can be the wave's own
+ * union output rather than stale residue (the 2026-11-17 sweep discarded
+ * co-game/co-hr/co-news .agents/mcp.json on that verdict while the template
+ * side was the stale one — T-20261117-007). Exported for unit tests.
+ */
+export function mergeDeliveryPolicy(relFile: string, variant = ""): string | null {
+  const { policy } = resolveClaim(relFile, variant);
+  return policy === "MERGE_MANAGED" || policy === "JSON_MERGE" || policy === "SCHEMA_MERGE" ? policy : null;
+}
+
+/**
  * True when every line of `older` appears in `newer` (multiset containment) and
  * `newer` has extra lines — i.e. the project copy is an OLDER REVISION of the
  * current source (typical: a newer template added fields/sections).
@@ -521,7 +563,12 @@ export function corroboratedStale(
   };
 }
 
-function classify(
+/**
+ * Classify one dirty/untracked file. Exported for unit tests (v1.10.0,
+ * T-20261117-010 merge-delivery guard pin) — the only impure dependency is
+ * the git HEAD read, so tests drive it against a temp repo.
+ */
+export function classify(
   projectPath: string,
   relFile: string,
   state: "modified" | "untracked",
@@ -581,17 +628,33 @@ function classify(
     }
     const sources = sourceCandidates(projectPath, relFile);
     if (isTemplateDelivered(relFile) && sources.length > 0) {
+      // v1.10.0 (T-20261117-010): a merge-delivered file (union/managed-merge
+      // claim) is project-operated between waves — content equality with the
+      // template source is the wave's own union output as often as stale
+      // residue, so it must never auto-discard. Both the equality and the
+      // corroborated-stale branches route to PRESUME-STALE instead.
+      const mergePolicy = mergeDeliveryPolicy(relFile, variantName(projectPath) ?? "");
       for (const src of sources) {
         const srcContent = readFileSync(src, "utf-8").replace(/\r\n/g, "\n");
         if (dirty === srcContent) {
-          row.verdict = "STALE-RESIDUE";
-          row.basis = `content equals current template source (${src})`;
+          if (mergePolicy) {
+            row.verdict = "PRESUME-STALE";
+            row.basis = `content equals current template source (${src}) but the path is merge-delivered (${mergePolicy}) — union merge, project merge-block edits are authoritative between waves; human confirm before discard`;
+          } else {
+            row.verdict = "STALE-RESIDUE";
+            row.basis = `content equals current template source (${src})`;
+          }
           return row;
         }
         if (isOlderRevision(dirty, srcContent)) {
           const c = corroboratedStale(abs, src, dirty, srcContent);
-          row.verdict = c.verdict;
-          row.basis = c.basis;
+          if (mergePolicy && c.verdict === "STALE-RESIDUE") {
+            row.verdict = "PRESUME-STALE";
+            row.basis = `${c.basis} — but the path is merge-delivered (${mergePolicy}) — union merge; human confirm before discard`;
+          } else {
+            row.verdict = c.verdict;
+            row.basis = c.basis;
+          }
           return row;
         }
       }
@@ -609,17 +672,31 @@ function classify(
     const sources = sourceCandidates(projectPath, relFile);
     if (sources.length > 0) {
       const dirty = readFileSync(abs, "utf-8").replace(/\r\n/g, "\n");
+      // v1.10.0 (T-20261117-010): same merge-delivery guard as the modified
+      // branch — a wave-delivered union file is often untracked (delivered
+      // after the last commit), and content equality still never auto-discards.
+      const mergePolicy = mergeDeliveryPolicy(relFile, variantName(projectPath) ?? "");
       for (const src of sources) {
         const srcContent = readFileSync(src, "utf-8").replace(/\r\n/g, "\n");
         if (dirty === srcContent) {
-          row.verdict = "STALE-RESIDUE";
-          row.basis = `untracked but equals current template source (${src})`;
+          if (mergePolicy) {
+            row.verdict = "PRESUME-STALE";
+            row.basis = `untracked but equals current template source (${src}) — and the path is merge-delivered (${mergePolicy}) — union merge, project merge-block edits are authoritative between waves; human confirm before discard`;
+          } else {
+            row.verdict = "STALE-RESIDUE";
+            row.basis = `untracked but equals current template source (${src})`;
+          }
           return row;
         }
         if (isOlderRevision(dirty, srcContent)) {
           const c = corroboratedStale(abs, src, dirty, srcContent);
-          row.verdict = c.verdict;
-          row.basis = c.basis;
+          if (mergePolicy && c.verdict === "STALE-RESIDUE") {
+            row.verdict = "PRESUME-STALE";
+            row.basis = `${c.basis} — but the path is merge-delivered (${mergePolicy}) — union merge; human confirm before discard`;
+          } else {
+            row.verdict = c.verdict;
+            row.basis = c.basis;
+          }
           return row;
         }
       }
@@ -684,7 +761,7 @@ function markdownReport(reports: ProjectReport[]): string {
   const lines: string[] = [
     `# resync-audit report — ${new Date().toISOString().slice(0, 10)}`,
     "",
-    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration) · LOCAL-WORK = commit candidate · KEEP = default-safe · TOMBSTONE-UNCONFIRMED = deleted delivered path without a recorded tombstone (the next wave refuses it, TOMBSTONED ERROR) · TOMBSTONE-VIOLATION = a tombstoned path is present on disk (wave re-delivery or project re-application) — adjudicate intent.`,
+    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration, or a merge-delivered file whose content equals the template source — union merge, project edits are authoritative between waves) · LOCAL-WORK = commit candidate · KEEP = default-safe · TOMBSTONE-UNCONFIRMED = deleted delivered path without a recorded tombstone (the next wave refuses it, TOMBSTONED ERROR) · TOMBSTONE-VIOLATION = a tombstoned path is present on disk (wave re-delivery or project re-application) — adjudicate intent.`,
     "",
   ];
   for (const p of reports) {
