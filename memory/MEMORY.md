@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-18](2026-11-18.md) | docs(trail): record co-deck bgpool PNG leak learning |
 | [2026-11-18](2026-11-18.md) | feat(design): sync-embedded detection — opt-in backport marking and upstream filing (DEC-20261117-06, batch PR-A) |
 | [2026-11-17](2026-11-17.md) | chore(housekeeping): land memory archival, README regens, governance tickets T-20261117-001..005 |
 | [2026-11-16](2026-11-16.md) | docs(docs): workspace sync (21 files) |
