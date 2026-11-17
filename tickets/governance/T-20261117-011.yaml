@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261117-011
+kind: manual
+title: >-
+  explain-me L0↔L1 skill-mirror drift: skills/explain-me/references/PLATFORM_HARNESS.md
+  differs from templates/common/skills/explain-me/references/PLATFORM_HARNESS.md and no
+  gate catches it until qa-gate step 4 (which other failures were masking all day).
+  Evidence (2026-11-17, lifecycle PR-5 QA): root gained Codex/Hermes prompt-only fallback
+  sections in 57dcdc191 (fleet-review hardening batch) but the L1 mirror was last synced at
+  066f3959c and never regenerated; both files clean at HEAD, byte comparison reproduces on
+  origin/main f5abee33e. qa-gate.ts step 4 reports "Lifecycle Manager deployment not run!".
+  The finding was repeatedly reported "gone" earlier in the day because qa-gate short-circuits
+  at step 1 whenever the shared-tree audit failed on other grounds (language gate on untracked
+  parallel-batch docs) — the drift was masked, not healed; multiple QA reports today state
+  "explain-me FAIL confirmed gone" which was a short-circuit artifact. Expected: regenerate the
+  L1 mirror from the root SSOT (one-file mirror redeployment via the sanctioned sync path /
+  Lifecycle Manager deployment), then verify qa-gate step 4 green from a clean tree; consider
+  a drift-detection follow-up so L0+L1-class skill reference files are covered by a cheaper
+  gate than qa-gate step 4 (related: the verify-scripts detectDrift source!="L0" skip noted in
+  lifecycle PR-1's QA).
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-17T00:00:00.000+09:00
+history:
+  - at: 2026-11-17T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null
