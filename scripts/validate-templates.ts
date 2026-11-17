@@ -1,6 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
+ * @version 1.84.0
+ *
+ * v1.84.0 (2026-11-17, DEC-20261117-07, design docs/designs/2026-11-17-template-lifecycle-batch-design.md
+ *          Amendment 1; T-20261116-003 lifecycle PR-4): CV-02 gains a narrow convergence exemption — a
+ *          templates/co-<variant>/<rel> candidate whose head bytes are IDENTICAL to its common twin
+ *          templates/common/<rel> no longer fails, because "equal version ⇒ same content" is then true
+ *          again and the unbumped-edit hazard cannot occur. Absent or divergent twin still fails. No other
+ *          check changes. (Design PR-5 zone-override work now takes v1.85.0.)
  * @version 1.83.0
  *
  * v1.83.0 (2026-11-16, design docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §4, T-20261114-012):
@@ -724,6 +732,12 @@ interface ValidationIssue {
   fix?: string;
 }
 
+/** Non-failing, explicitly reasoned exemptions (v1.84.0 CV-02 convergence; reported in JSON too). */
+interface ValidationExemption {
+  check: string;
+  message: string;
+}
+
 interface ValidationResult {
   variantsScanned: number;
   errors: ValidationIssue[];
@@ -757,6 +771,7 @@ const variantArg = (() => {
 })();
 
 const issues: ValidationIssue[] = [];
+const exemptions: ValidationExemption[] = [];
 
 /** v1.76.0 (R2, graft-mcp-corrective-pass-design): every template MCP surface
  * carries ZERO graft-era registrations — pins the 2026-11-08 mcpServers flip
@@ -919,6 +934,11 @@ function checkHookCommandTargets(): void {
 
 function pass(msg: string) {
   if (!JSON_MODE) console.log(`${colors.green}[PASS]${colors.reset} ${msg}`);
+}
+
+function reportExemption(check: string, msg: string) {
+  exemptions.push({ check, message: msg });
+  if (!JSON_MODE) console.log(`${colors.dim}[EXEMPT]${colors.reset} ${msg}`);
 }
 
 function fail(variant: string, check: string, msg: string, fix?: string) {
@@ -3267,7 +3287,10 @@ function checkCommonScriptVersions(): void {
 // Universe: modified tracked files with a version — .ts/.mjs (@version), SKILL.md and
 // agents/*.md (frontmatter version), docs with an inline `*<name> version: N.M` footer.
 // Base: env CV02_BASE, else merge-base HEAD origin/main, else HEAD. Added/deleted/renamed
-// files are out of scope. No exemption (format sweeps bump the patch version).
+// files are out of scope. Convergence exemption (v1.84.0, DEC-20261117-07): a candidate
+// whose head is byte-identical to its common twin templates/common/<rel> is exempt — the
+// copy IS the source, so equal version ⇒ same content holds again. Otherwise no exemption
+// (format sweeps bump the patch version).
 export function extractCv02Version(relPath: string, content: string): string | undefined {
   const name = basename(relPath);
   if (/\.(ts|mjs)$/.test(name)) return content.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1];
@@ -3298,6 +3321,45 @@ export function findSameVersionContentChanges(
   return out;
 }
 
+export interface Cv02ConvergenceInput {
+  change: SameVersionChange;
+  /** Working-tree content of the candidate. */
+  head: string;
+  /** Content of the candidate's common twin (templates/common/<rel>), or null when absent. */
+  common: string | null;
+}
+
+export interface Cv02Partition {
+  /** Candidates that stay failures (no twin, or twin content differs). */
+  failing: SameVersionChange[];
+  /** Candidates that converged to their common source and are exempt. */
+  converged: SameVersionChange[];
+}
+
+/**
+ * Pure core (v1.84.0, DEC-20261117-07): split CV-02 candidates by convergence to the
+ * common source. A variant copy whose head is byte-identical to templates/common/<rel>
+ * no longer trips CV-02's hazard: upgrade-project's "equal version ⇒ same content" is
+ * then TRUE, so the unbumped edit cannot be silently skipped or hash-clobber project
+ * copies. A missing or divergent twin is NOT exempt (the original protection holds).
+ */
+export function partitionCv02Converged(inputs: Cv02ConvergenceInput[]): Cv02Partition {
+  const out: Cv02Partition = { failing: [], converged: [] };
+  for (const i of inputs) {
+    if (i.common !== null && i.head === i.common) out.converged.push(i.change);
+    else out.failing.push(i.change);
+  }
+  return out;
+}
+
+/** CV-02 twin lookup: templates/co-<variant>/<rel> → templates/common/<rel> (POSIX repo-relative). */
+export function cv02CommonTwinPath(candidatePath: string): string | null {
+  const m = /^templates\/(co-[^/]+)\/(.+)$/.exec(candidatePath);
+  // String concat, not join(): join() emits backslashes on Windows while the candidate
+  // path (git output) and this lookup are always POSIX repo-relative.
+  return m ? `templates/common/${m[2]}` : null;
+}
+
 function checkSameVersionContentChange(): void {
   if (!JSON_MODE) console.log("\n=== Check CV-02: same-version-content-change under templates/** ===");
   const git = (args: string[]): string | null => {
@@ -3326,7 +3388,26 @@ function checkSameVersionContentChange(): void {
     );
     return;
   }
-  for (const b of bad) {
+  // v1.84.0 (DEC-20261117-07): convergence exemption — a candidate byte-identical to its
+  // common twin is the source itself, so an equal version now truthfully means equal content.
+  const headByPath = new Map(files.map((f) => [f.path, f.head]));
+  const inputs: Cv02ConvergenceInput[] = bad.map((change) => {
+    const twinRel = cv02CommonTwinPath(change.path);
+    const twinAbs = twinRel ? join(ROOT, twinRel) : null;
+    const common = twinAbs && existsSync(twinAbs) ? readFileSync(twinAbs, "utf-8") : null;
+    return { change, head: headByPath.get(change.path) ?? "", common };
+  });
+  const { failing, converged } = partitionCv02Converged(inputs);
+  for (const c of converged) {
+    reportExemption("cv02-converged-to-common", `CV-02: ${c.path} converged to common source (re-sync) — exempt`);
+  }
+  if (failing.length === 0) {
+    pass(
+      `CV-02: ${bad.length} same-version candidate(s) vs ${base.slice(0, 12)} converged to their common source — exempt`,
+    );
+    return;
+  }
+  for (const b of failing) {
     fail(
       "common",
       "same-version-content-change",
@@ -9008,7 +9089,8 @@ function main(): number {
           variantsScanned: variantsChecked,
           errors,
           warnings,
-          summary: `${errors.length} error(s), ${warnings.length} warning(s)`,
+          exemptions,
+          summary: `${errors.length} error(s), ${warnings.length} warning(s), ${exemptions.length} exemption(s)`,
         },
         null,
         2,

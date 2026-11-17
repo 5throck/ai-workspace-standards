@@ -1,5 +1,4 @@
 ---
-gemini-parity: skip
 description: Redirects commit+push+PR requests to the /sync pipeline (workspace enforcement)
 ---
 

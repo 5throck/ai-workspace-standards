@@ -164,6 +164,14 @@ Phase 1 deliverable statement: after PR-4 + PR-5 the validator reports 129 undec
 - PR-5's byte-copies reset variant frontmatter (last_updated/version) to common's — intended (the mirrors are distribution copies, not independent records); the skill-graph version-drift check must stay green (mv=cv verified today).
 - Declarations must be variant-scoped, not `"*"`, so a future NEW variant copy of a declared path still gets flagged.
 
+#### Amendment 1 (PM ruling 2026-11-17; architect quota-unavailable)
+
+PR-5 (the design's PR-4 implementation row) surfaced a gate collision this design did not anticipate: **CV-02 `same-version-content-change`** (v1.78.0, DEC-20261111-01, blocking, previously "no exemption") fails any modified `templates/**` versioned file whose bytes changed while its extracted version is unchanged — 87 of the 95 re-synced candidates. Satisfying it by bumping versions would break this design's own acceptance (§8 PR-4: mirror TRACE `mv=cv`), since the copy would then differ from its common source.
+
+Ruling ([DEC-20261117-07](../decisions/DEC-20261117-07.md)): CV-02 gains a **narrow convergence exemption** — a `templates/co-<variant>/<rel>` candidate whose working-tree bytes are identical to its common twin `templates/common/<rel>` is exempt (reported per candidate in text mode; new top-level `exemptions` key in `--json`), while an absent or divergent twin still fails. The hazard CV-02 guards against cannot occur when the copy *is* the source: "equal version ⇒ same content" becomes true. Alternatives rejected: `CV02_BASE` pin (leaves `main` red for every runner), patch-bumping the 87 copies (breaks `mv=cv` and the upgrade story).
+
+Consequence: `validate-templates.ts` takes **1.84.0**; the version this design's §7 PR-5 row reserved for the zone-override work is therefore consumed, and **PR-5 must take 1.85.0**.
+
 ## 6. Owner decisions
 
 - **O-7 (T-001)**: Last Updated merge direction. **Default: Option A** — monotonic date guard inside managed-block-merge (template prose wins, newer date line wins). Alternative: Option B (move the line out of the zone; rejected — date stops propagating).
