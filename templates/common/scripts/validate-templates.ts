@@ -1,8 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.84.0
+ * @version 1.84.1
  *
+ * v1.84.1 (2026-11-17, design docs/designs/2026-11-17-new-project-precheck-argv-design.md §3.1, T-20261117-009):
+ *          delete the two unconditional `TRACE mirror-check` / `TRACE verdict` console.log calls (since cd8a3e496)
+ *          that polluted stdout (260 lines, even with --json). No check semantics change; the classifier is now
+ *          pinned by a table test instead. (Design PR-5 zone-override work still takes v1.85.0.)
  * v1.84.0 (2026-11-17, DEC-20261117-07, design docs/designs/2026-11-17-template-lifecycle-batch-design.md
  *          Amendment 1; T-20261116-003 lifecycle PR-4): CV-02 gains a narrow convergence exemption — a
  *          templates/co-<variant>/<rel> candidate whose head bytes are IDENTICAL to its common twin
@@ -3793,9 +3797,6 @@ function checkVariantMirrorParity(): void {
             const mirrorVersion = readFmVersion(join(mirrorDir, name, "SKILL.md"));
             const commonVersion = commonSkillVersions.get(name) ?? null;
             const peerCount = (mirrorCarriers.get(name)?.size ?? 1) - 1;
-            console.log(
-              `TRACE mirror-check: ${entry.name}/${mirror}/${name} inV=${inVariant} inC=${inCommon} flag=${flagged} mv=${mirrorVersion} cv=${commonVersion} peers=${peerCount}`,
-            );
             const verdict = classifyVariantMirrorCopy({
               inVariant,
               inCommon,
@@ -3804,7 +3805,6 @@ function checkVariantMirrorParity(): void {
               commonVersion,
               peerCount,
             });
-            console.log(`TRACE verdict: ${verdict}`);
             if (verdict === "fail-stale-orphan") {
               fail(
                 entry.name,

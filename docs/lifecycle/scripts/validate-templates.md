@@ -4,7 +4,7 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.84.0
+- **Version**: 1.84.1
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-17
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
@@ -21,6 +21,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-17 | production | production | v1.84.0 → v1.84.1 (design docs/designs/2026-11-17-new-project-precheck-argv-design.md, T-20261117-009, DEC-20261117-08): deleted the two unconditional TRACE console.log calls in the mirror-check (stdout is valid JSON with --json again); no check semantics change; classifyVariantMirrorCopy pinned by a unit table test. | automation-engineer |
 | 2026-11-17 | production | production | v1.83.0 → v1.84.0 (DEC-20261117-07, design docs/designs/2026-11-17-template-lifecycle-batch-design.md Amendment 1; T-20261116-003 lifecycle PR-4): CV-02 convergence exemption — a templates/co-<variant>/<rel> candidate byte-identical to its common twin templates/common/<rel> no longer FAILs (re-sync convergence restores "equal version ⇒ same content"); absent or divergent twin still FAILs; exemptions reported per candidate in both output modes and as a new `exemptions` key in --json. Pure helpers partitionCv02Converged/cv02CommonTwinPath unit-pinned. L1 mirror in lockstep. PR-5 zone-override work now takes 1.85.0. | automation-engineer |
 | 2026-11-16 | production | production | v1.82.0 → v1.83.0 (design docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section 4, T-20261114-012): new WARN-only check `variant-common-shadow` — undeclared variant shadows of templates/common files, checked against the root-only docs/templates/variant-shadow-allowlist.json (variant-owned, tracked + commonSha256); one WARN per variant plus shadow-common-moved and shadow-allowlist-stale; the exit code never changes. Unit-pinned by tests/unit/validate-templates-variant-shadow.test.ts. | automation-engineer |
 | 2026-11-13 | production | production | v1.80.0 → v1.81.0 (merge consolidation of parallel v1.80.0 waves U-20261112-013 + U-20261112-010): version consolidation — content unchanged; the two v1.80.0 arms (hook-command-targets, TB-01 HERMES/CODEX trail parity + graft-era block detection) are both retained. | automation-engineer |

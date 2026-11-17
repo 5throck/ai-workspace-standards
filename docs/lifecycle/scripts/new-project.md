@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.44.0
+- **Version**: 1.45.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-07
+- **Last Updated**: 2026-11-17
 - **Last Reviewer**: automation-engineer
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
@@ -20,6 +20,7 @@
 - **2026-09-24**: v1.26.0 — §5.2 renders docs/project.md from the identity seed template (templates/common/docs/project.template.md) and removes the raw copy; additive --description/--type flags fill the identity fields, absent flags keep the audit-visible TODO(project-overview) fallback. Spec: docs/designs/2026-09-24-scaffold-identity-overview-design.md
 - **2026-09-24**: v1.29.0 — §2.3b generalizes extends-stub resolution to every agents/*.md carrying `extends:` frontmatter (13 variant i18n-specialist stubs now resolve against templates/common bodies). Spec: docs/designs/2026-09-25-inventory-decisions-batch-design.md
 - **2026-09-25**: v1.30.0 — `--platform hermes` profile joins (ADR-0088 W2): hermes-primary keeps `.hermes/` and drops CLAUDE.md/GEMINI.md; all other profiles are hermes-opt-out.
+- **2026-11-17**: v1.45.0 — lifecycle governance pre-check runs in-process via helpers/validate-output.ts runGovernancePrecheck (design docs/designs/2026-11-17-new-project-precheck-argv-design.md, T-20261117-009, DEC-20261117-08): no validator JSON through argv (Windows 32K limit), spawn failures report error code/signal + stderr tail, unparsable validator output blocks the scaffold (fail-closed, no bypass), blocking errors scoped to the target variant + common.
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
