@@ -2,34 +2,55 @@ schemaVersion: 1
 id: T-20261117-007
 kind: manual
 title: >-
-  Template-side graft→trail MCP migration incomplete: templates/common
-  config and skill surfaces still carry graft-era references that the next
-  upgrade wave will re-deliver over projects' completed trail migrations
-  (fleet echo from the 2026-11-17 project-resync Step-1 landings, co-game
-  PR #75 + co-hr PR #28). Evidence: resync-audit flagged .agents/mcp.json as
-  STALE-RESIDUE in co-game/co-hr/news BECAUSE its graft-era content equals
-  the CURRENT template source (templates/common/.agents/mcp.json) — i.e. the
-  template itself still teaches graft; project sessions migrated to trail
-  (.trail/hook.cjs, trail MCP) but the delivered template config/skills never
-  followed. Verified graft references remain in templates/common/.codex/
-  config.toml and related templates/common/.agents|.claude|.codex skill
-  surfaces and templates/co-hr/.gemini per the Step-1 agent's echo scan.
-  Expected: a template-side graft→trail sweep (config.toml MCP server
-  entries, any skill/agent prose referencing graft commands or paths) so the
-  next upgrade wave delivers trail-aligned content instead of re-introducing
-  graft-era config over migrated projects; then the projects adopt it via
-  their own reviewed resync (ADR-0031 Principle 5 — report-only echo, no
-  automated sibling sync). Discovered during project-resync Step 1
-  (co-game/co-hr landings, 2026-11-17); snapshots of the discarded
-  STALE-RESIDUE files live at /tmp/resync-snapshots/ (local-only, per skill
-  Safety Rule 2).
+  Template-side graft→trail MCP migration incomplete: templates/common config
+  and skill surfaces still carry graft-era references that the next upgrade wave
+  will re-deliver over projects' completed trail migrations (fleet echo from the
+  2026-11-17 project-resync Step-1 landings, co-game PR #75 + co-hr PR #28).
+  Evidence: resync-audit flagged .agents/mcp.json as STALE-RESIDUE in
+  co-game/co-hr/news BECAUSE its graft-era content equals the CURRENT template
+  source (templates/common/.agents/mcp.json) — i.e. the template itself still
+  teaches graft; project sessions migrated to trail (.trail/hook.cjs, trail MCP)
+  but the delivered template config/skills never followed. Verified graft
+  references remain in templates/common/.codex/ config.toml and related
+  templates/common/.agents|.claude|.codex skill surfaces and
+  templates/co-hr/.gemini per the Step-1 agent's echo scan. Expected: a
+  template-side graft→trail sweep (config.toml MCP server entries, any
+  skill/agent prose referencing graft commands or paths) so the next upgrade
+  wave delivers trail-aligned content instead of re-introducing graft-era config
+  over migrated projects; then the projects adopt it via their own reviewed
+  resync (ADR-0031 Principle 5 — report-only echo, no automated sibling sync).
+  Discovered during project-resync Step 1 (co-game/co-hr landings, 2026-11-17);
+  snapshots of the discarded STALE-RESIDUE files live at /tmp/resync-snapshots/
+  (local-only, per skill Safety Rule 2).
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-17T00:00:00.000+09:00
+created_at: '2026-11-17T00:00:00.000+09:00'
 history:
-  - at: 2026-11-17T00:00:00.000+09:00
+  - at: '2026-11-17T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-17T18:10:58.045+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-17T18:10:58.063+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-17T18:10:58.098+09:00'
+    from: review
+    to: done
+result: >-
+  Closed: no template-side work needed. Verified 2026-11-17 by read-only
+  investigation: templates/ has 0 graft MCP registrations;
+  templates/common/.agents/mcp.json and .codex/config.toml register trail only
+  (last change cf890efe2); templates/co-hr/.gemini has 0 graft hits; remaining
+  graft strings are rename-history prose, tool-owned legacy mirrors and
+  reintroduction guards (checkGraftMcpSurfaces, TRAIL_RETIRED_SEEDS). Scope
+  already covered by T-20261108-010 (done). The STALE-RESIDUE observation was
+  real but its cause is in scripts/resync-audit.ts, not stale template refs:
+  sourceCandidates() compares against the current working-tree templates, and
+  .agents/mcp.json is a JSON_MERGE file (union, project-owned servers survive),
+  so a dirty trail-only project copy equal to the template was classified
+  STALE-RESIDUE and discarded; co-game/co-hr/co-news still carry graft+trail.
+  Tracked in the follow-up ticket.
 error: null
