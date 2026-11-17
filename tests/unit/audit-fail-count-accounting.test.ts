@@ -98,7 +98,9 @@ describe("live-source pins — audit.ts Fail-sole-increment accounting (encoding
     expect(code.includes("zwErrors++;")).toBe(true);
   });
 
-  test("version header bumped to 2.69.0", () => {
-    expect(source.includes("// @version 2.69.0")).toBe(true);
+  test("version header is at least the v2.69.0 sweep (accounting fix present)", () => {
+    // v2.70.0 (T-20261118-002) added the mirror-parity early-signal arm; the
+    // accounting fix shipped in 2.69.0, so pin the floor, not the exact header.
+    expect(source.includes("// @version 2.69.0") || source.includes("// @version 2.70.0")).toBe(true);
   });
 });

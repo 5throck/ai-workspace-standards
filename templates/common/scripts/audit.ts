@@ -1,4 +1,17 @@
-// @version 2.69.0
+// @version 2.70.0
+// v2.70.0 (2026-11-18, design docs/designs/2026-11-18-subfile-mirror-drift-gate-design.md,
+//          T-20261118-002): new check arm — L0↔L1 mirror parity EARLY SIGNAL
+//          (workspace root only, placed after the VERSION_MANIFEST gate). Calls the
+//          already-exported pure collector qa-gate.ts collectMirrorParityFailures
+//          (T-20260912-021) and reports each failure as an audit [FAIL] row — the
+//          comparison semantics are unchanged (recursive content compare + one-sided
+//          detection over scripts/ and L0+L1 skill dirs, CRLF/CONSTITUTION-scrub
+//          tolerant). Motivation (T-20261117-011 chain): skill SUBFILES have no
+//          propagation path (propagation-map.json include_pattern "*/SKILL.md" never
+//          crosses a slash) and qa-gate step 4 was the only detector, short-circuited
+//          behind audit step 1 — drift surfaced only at full qa-gate runs. Import
+//          safety: qa-gate.ts is mirrored to L1 alongside audit.ts, so the edge
+//          survives delivery in both layers (no layer-filter.ts dangle).
 // v2.69.0 (2026-11-18, DEC-20261118-01 direct fix — no ticket): Fail-then-increment
 //          double-count sweep across 5 check sites (same class as the v2.68.0 §3.5
 //          accounting fix): §3.7 homoglyph, §3.8 zero-width, agent-state sync,
@@ -373,6 +386,11 @@ import { classifySpecHeader } from "./helpers/spec-header-consistency.ts";
 import * as url from "node:url";
 import { safeFetch } from "./lib/ssrf.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
+// v2.70.0 (T-20261118-002): the L0↔L1 mirror parity early signal reuses qa-gate's
+// exported pure collector — audit-time and qa-gate-time verdicts share one
+// implementation and can never disagree. qa-gate.ts is itself mirrored to L1
+// alongside audit.ts, so this import survives delivery in both layers.
+import { collectMirrorParityFailures } from "./qa-gate.ts";
 import { findCwdRootAssignments, isContractTestPath } from "./lib/hermetic-test-roots.ts";
 import {
   detectEncoding,
@@ -4305,6 +4323,45 @@ if (fs.existsSync(path.join("scripts", "generate-version-manifest.ts"))) {
     );
   } else {
     Pass("VERSION_MANIFEST gate: committed manifest matches regenerated output");
+  }
+}
+
+// ── L0↔L1 mirror parity EARLY SIGNAL (v2.70.0, T-20261118-002; design
+//    docs/designs/2026-11-18-subfile-mirror-drift-gate-design.md) ──
+// Same collector as qa-gate step 4 (collectMirrorParityFailures, T-20260912-021):
+// recursive content comparison + one-sided detection over scripts/ vs
+// templates/common/scripts/ and, per L0+L1 skill, skills/<skill>/** vs
+// templates/common/skills/<skill>/** — including the non-SKILL.md SUBFILES that
+// have no automated propagation path (propagation-map.json's skills
+// include_pattern "*/SKILL.md" is segment-bound, never crosses a slash).
+// Surfacing the same verdict at audit time removes the short-circuit mask
+// (qa-gate step 4 never ran when audit step 1 failed — the T-20261117-011
+// masking history). Workspace-root scoping follows the IS_WORKSPACE_ROOT
+// convention; in L2/L3 contexts the gate self-skips and the audit verdict there
+// is unchanged. Comparison semantics are qa-gate's, byte for byte.
+if (IS_WORKSPACE_ROOT) {
+  const l0ScriptsDir = "scripts";
+  const l1ScriptsDir = path.join("templates", "common", "scripts");
+  const l0SkillsDir = "skills";
+  const l1SkillsDir = path.join("templates", "common", "skills");
+  if (
+    fs.existsSync(l0ScriptsDir) &&
+    fs.existsSync(l1ScriptsDir) &&
+    fs.existsSync(l0SkillsDir) &&
+    fs.existsSync(l1SkillsDir)
+  ) {
+    const mirrorFailures = collectMirrorParityFailures(l0ScriptsDir, l1ScriptsDir, l0SkillsDir, l1SkillsDir);
+    for (const failure of mirrorFailures) {
+      // One Fail() call per failure — the sole-increment accounting rule (v2.69.0).
+      Fail(failure);
+    }
+    if (mirrorFailures.length === 0) {
+      Pass(
+        "L0↔L1 mirror parity early signal: scripts tree + L0+L1 skill dirs (incl. subfiles) match templates/common/",
+      );
+    }
+  } else {
+    Skip("L0↔L1 mirror parity early signal skipped (scripts/ or skills/ mirror trees not present in this checkout)");
   }
 }
 
