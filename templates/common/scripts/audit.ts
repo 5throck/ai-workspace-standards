@@ -1,4 +1,17 @@
-// @version 2.67.0
+// @version 2.68.0
+// v2.68.0 (2026-11-17, spec docs/designs/2026-11-17-audit-external-scan-fix-design.md):
+//          §3.5 UTF-8 BOM check — two fixes. (1) Scan scope: in a scaffolded project
+//          (docs/context.md present → searchDirs=["."]) the whole tree was walked with
+//          no external/ skip, so BOM-bearing .md files inside a gitignored
+//          external-dependency clone (install_dir external/<id>, external-deps
+//          machinery D5 — never workspace content) failed the workspace UTF-8 gate
+//          (QuickDL: 5 upstream BOM files). The census now lives in
+//          lib/encoding-utils.ts v1.4.0 scanMarkdownBomFiles() (extracted verbatim for
+//          unit-testability, audit-hook-sweep precedent) with `external` in its skip
+//          set. (2) Accounting: the `errors += bomErrors` epilogue double-counted —
+//          Fail() already increments, so N BOM files reported as 2N failed checks;
+//          the epilogue is deleted and Fail() is the sole increment (pinned by
+//          tests/unit/encoding-utils-bom-scan.test.ts).
 // v2.67.0 (2026-11-14, spec docs/designs/2026-11-14-consult-output-destination-and-constitution-refs-ruling.md
 //          §5-item4, U-20261113-010): L0 Leakage scan-scope extension — .ts and .json under templates/
 //          join the sweep at WARN severity (soak-before-FAIL). .ts lines carrying the l0-functional:
@@ -350,7 +363,13 @@ import * as url from "node:url";
 import { safeFetch } from "./lib/ssrf.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
 import { findCwdRootAssignments, isContractTestPath } from "./lib/hermetic-test-roots.ts";
-import { detectEncoding, detectHomoglyphs, detectZeroWidthChars, readUTF8File } from "./lib/encoding-utils.ts";
+import {
+  detectEncoding,
+  detectHomoglyphs,
+  detectZeroWidthChars,
+  readUTF8File,
+  scanMarkdownBomFiles,
+} from "./lib/encoding-utils.ts";
 import { variantContextPlacement } from "./helpers/variant-context.ts";
 import {
   resolveDesignLintRoots,
@@ -623,25 +642,28 @@ if (fs.existsSync("docs/decisions") && fs.statSync("docs/decisions").isDirectory
 
 // 3.5. UTF-8 BOM check for Markdown files
 if (!LIFECYCLE_ONLY) {
-  let bomErrors = 0;
   let searchDirs = ["."];
+  let rootMdScan = false;
   if (!fs.existsSync(projectCtxPath) && fs.existsSync("templates")) {
-    // Zero-width/homoglyph scan covers the .agents and .codex platform trees
+    // Zero-width/homoglyph scan dirs gain the .agents and .codex platform trees
     // too — whole-tree by design: .codex/prompts/*.md is as much an injection
     // surface as a skill mirror (spec 2026-09-25-verifier-platform-expansion-design
     // site 2c; .json/.toml files are outside the Markdown/YAML scan filter).
     searchDirs = ["agents", "docs", "memory", "scripts", "skills", "templates", ".claude", ".agents", ".codex"];
-    if (fs.existsSync(".")) {
-      for (const file of fs.readdirSync(".")) {
-        if (file.endsWith(".md")) {
-          const buf = fs.readFileSync(file);
-          if (buf.length >= 3 && buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf) {
-            Fail(`UTF-8 BOM found in ${file} - files must be UTF-8 without BOM`);
-            bomErrors++;
-          }
-        }
-      }
-    }
+    rootMdScan = true;
+  }
+  // Census extracted to lib/encoding-utils.ts v1.4.0 (spec
+  // 2026-11-17-audit-external-scan-fix): unit-testable, skips gitignored
+  // external-dependency install trees (D5 — external/<id> is never workspace
+  // content), and counts each BOM file exactly once — Fail() is the sole
+  // increment; the old `errors += bomErrors` epilogue double-counted.
+  const { bomFiles, skipped: bomSkipped } = scanMarkdownBomFiles({ searchDirs, rootMdScan });
+  for (const s of bomSkipped) recordSkippedFile(s.path, s.reason);
+  for (const file of bomFiles) {
+    Fail(`UTF-8 BOM found in ${file} - files must be UTF-8 without BOM`);
+  }
+  if (bomFiles.length === 0) {
+    Pass("UTF-8 BOM check: all markdown files are clean");
   }
 
   function walkDir(dir: string, callback: (fPath: string) => void, depth = 0) {
@@ -668,26 +690,6 @@ if (!LIFECYCLE_ONLY) {
         recordSkippedFile(dirPath, e?.code || e?.message || "stat/read error");
       }
     }
-  }
-
-  for (const dir of searchDirs) {
-    if (fs.existsSync(dir)) {
-      walkDir(dir, (filePath) => {
-        if (filePath.replace(/\\/g, "/").includes("memory/archive/")) return;
-        if (filePath.endsWith(".md") && !filePath.includes("node_modules") && !filePath.includes(".git")) {
-          const buf = fs.readFileSync(filePath);
-          if (buf.length >= 3 && buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf) {
-            Fail(`UTF-8 BOM found in ${filePath} - files must be UTF-8 without BOM`);
-            bomErrors++;
-          }
-        }
-      });
-    }
-  }
-  if (bomErrors === 0) {
-    Pass("UTF-8 BOM check: all markdown files are clean");
-  } else {
-    errors += bomErrors;
   }
 
   // 3.6. CRLF line ending check for source files
