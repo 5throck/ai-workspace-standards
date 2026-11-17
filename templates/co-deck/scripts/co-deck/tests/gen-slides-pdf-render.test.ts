@@ -1,3 +1,12 @@
+// @version 1.7.0 — PR-5 reference pins (design 2026-11-17-co-deck-pdf-followups
+//   T-20261117-005, owner decision O-5 default Option A): the PDF side of the
+//   contactName parity pin. ZERO renderer change — gen-slides-pdf has rendered
+//   contactName all along (v1.14.3 known-list order: name, email, linkedin,
+//   phone; primaryFirst bold is the bullets fallback only). These pins freeze
+//   the contract the zen template now aligns to: a contactName+bullets mixed
+//   slide renders the name and NOT the bullets (the PDF side of the mixed
+//   parity pin; HTML side in ppt-engine-integration.test.ts), and a
+//   contactName-only slide renders the name.
 // @version 1.6.0 — v1.15.0 pins (design 2026-11-16-co-deck-pdf-html-backport
 //   PR-1): U-010 shared-parser adoption (source pin + dotted/nested render
 //   parity with estimate-layout), U-008(2) notes band merged sources-first,
@@ -151,7 +160,11 @@ function decompressedStreams(pdfPath: string): string[] {
 function extractText(pdfPath: string): string | null {
   if (!havePdftotext) return null;
   const bin = spawnSync('pdftotext', [pdfPath, '-'], { encoding: 'utf-8' });
-  return bin.exitCode === 0 ? bin.stdout : null;
+  // PR-5: read `status` too — bun's spawnSync leaves `exitCode` undefined on
+  // success, so the exitCode-only check silently vacated every null-guarded
+  // pdftotext pin below (they passed without asserting). Non-behavioral for
+  // the renderer; test-correctness only.
+  return bin.status === 0 || bin.exitCode === 0 ? bin.stdout : null;
 }
 
 describe.skipIf(!haveFonts)('gen-slides-pdf render-path regressions', () => {
@@ -1018,6 +1031,60 @@ describe('v1.15.0 U-008(4) PDF side: contact bullets fallback', () => {
     const flat = txt.replace(/\s+/g, ' ');
     expect(flat).toContain('keep@existing.deck');
     expect(flat).not.toContain('Fallback bullet that must stay hidden');
+  });
+});
+
+// ── PR-5 (T-20261117-005, O-5 Option A): contactName parity — PDF reference ──
+//
+// The PDF is the side that already renders contactName; PR-5's zen change
+// aligns the HTML to it (first plain line, gate widened). These pins freeze
+// the PDF contract — no renderer change in this batch (design §4.2: "No PDF
+// change"). The mixed fixture here plus its HTML twin in
+// ppt-engine-integration.test.ts form the BOTH-sides mixed parity pin.
+
+describe('PR-5 T-20261117-005 PDF side: contactName renders (reference pins, zero renderer change)', () => {
+  const mixedRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_cnmixed_${tag}`, [], [{
+      isContactSlide: true, title: 'Mixed Reach Out',
+      contactName: 'Parity Deck Name',
+      bullets: ['PDF mixed bullet that must stay hidden', 'Second hidden bullet'],
+    }]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath };
+  })();
+
+  const nameOnlyRun = (() => {
+    const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { dir, rel } = renderFixture(`_cnonly_${tag}`, [], [{
+      isContactSlide: true, title: 'Name Only Reach Out',
+      contactName: 'Solo Deck Name',
+    }]);
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { pdfPath };
+  })();
+
+  test.skipIf(!haveFonts)('a contactName+bullets mixed slide renders the name and NOT the bullets (PDF side of the mixed parity pin)', () => {
+    const txt = extractText(mixedRun.pdfPath);
+    if (txt === null) return;
+    const flat = txt.replace(/\s+/g, ' ');
+    expect(flat).toContain('Parity Deck Name');
+    expect(flat).not.toContain('PDF mixed bullet that must stay hidden');
+    expect(flat).not.toContain('Second hidden bullet');
+  });
+
+  test.skipIf(!haveFonts)('a contactName-only slide renders the name (the capability the zen change aligns to)', () => {
+    const txt = extractText(nameOnlyRun.pdfPath);
+    if (txt === null) return;
+    const flat = txt.replace(/\s+/g, ' ');
+    expect(flat).toContain('Solo Deck Name');
+    expect(flat).toContain('Name Only Reach Out');
   });
 });
 
