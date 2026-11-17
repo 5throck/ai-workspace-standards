@@ -89,6 +89,7 @@ const TESTS_UNIT_DIR = join(REPO_ROOT, "tests", "unit");
  */
 const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "external-deps-cli.test.ts",
+  "external-deps-reconcile-adoption.test.ts",
   "external-deps.test.ts",
   "fixture-git-identity.test.ts",
   "generate-scripts-mirror.test.ts",

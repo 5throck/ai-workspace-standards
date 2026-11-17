@@ -513,3 +513,41 @@ verbatim in the written file with a WARN row); the written `schema_version`
 comes from the schema the reconciled document conforms to, never a literal; a
 project file that is not valid JSON is never overwritten (SKIP + WARN).
 
+
+### A.4 Seed-id adoption as implemented (2026-11-17 — spec docs/designs/2026-11-17-root-machinery-batch-design.md §3, T-20261117-001)
+
+**The gap.** §5.6's write channels (seed copy on absent file, parse-failure
+reconcile, v1→v2 migration) all key on the project manifest being absent,
+invalid, or schema-v1. A manifest that is valid under the current schema but
+missing template-seed ids — a project scaffolded before its variant seed gained
+deps, the co-deck/quickdl class — had no adoption path: nothing in the pass
+compared the project's id set against the seed's.
+
+**Adoption contract (pass channel 2c, after the v1→v2 migration, before D5).**
+The pure core is `adoptSeedEntries` in `scripts/helpers/external-deps-reconcile.ts`
+(v1.2.0):
+
+- add-if-missing per seed id, in seed order — a seed id absent from the project
+  dependencies is APPENDED verbatim (license, usage, adapter,
+  excluded_components, license_decision, plus the seed's pin/commit). The
+  template's attestation is a declared fact, not an invented one; the "never
+  invent an attestation" rule is untouched.
+- existing project entries — including project-only and invalid-kept-verbatim
+  ones — are never modified, reordered, or dropped. A project's operative pin
+  for an id it already has is the project's fact; adoption never touches it.
+- the written `schema_version` is the project document's own; adopted ids are
+  appended at the end.
+- empty seed, or a seed fully covered by the project → `adopted: []`, no write
+  (byte-identical pass — the fleet majority).
+- a project text that does not strictly revalidate → `ok: false`, caller skip
+  (unreachable through the normal pass flow; the pass reconcile channel owns
+  documents with invalid-verbatim entries).
+
+**Delivery rule.** The upgrade pass is the ONLY adoption vehicle (owner default
+O-5): it produces one `UPDATE` decision row per adopted id ("seed-id adoption"),
+honors `--dry-run` (rows printed, nothing written), and runs the adoption
+BEFORE `ensureGitignoreCoverage`, so every adopted `install_dir` receives
+`external/<dir>/` gitignore coverage on arrival — the second half of the
+co-deck one-off closes automatically. `bun scripts/external-deps.ts` gains no
+reconcile subcommand: a CLI reconcile would bypass decision-row attribution,
+dry-run semantics, and compat-gate framing (`check-updates` stays report-only).
