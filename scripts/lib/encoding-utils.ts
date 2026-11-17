@@ -4,16 +4,23 @@
  * UTF-8 encoding helpers for cross-platform file operations.
  * Addresses Risk #3: UTF-8 Encoding.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @Risk #3: UTF-8 Encoding (P0 - Critical)
  *
+ * 1.4.0 (2026-11-17, spec docs/designs/2026-11-17-audit-external-scan-fix-design.md):
+ * new scanMarkdownBomFiles() — audit.ts §3.5's UTF-8 BOM census extracted verbatim
+ * so it is unit-testable (audit-hook-sweep precedent). Behavior deltas vs the inline
+ * code: `external` joins the skip set (external-deps standard D5 — install_dir
+ * `external/<id>` is gitignored and never workspace content, so a vendored clone's
+ * BOM-bearing upstream files must not fail the workspace UTF-8 gate), and per-file
+ * read failures land in result.skipped instead of propagating a throw.
  * 1.3.0 (2026-11-12, U-20261112-012): detectEncoding classifies zero-line-ending
  * content (no CR and no LF bytes) as "lf" instead of "mixed" — a single-line or
  * minified file cannot carry CRLF or mixed endings, and the old else-branch made
  * the audit print a false "CRLF/Mixed line endings" WARN for those fixtures.
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, readdirSync, lstatSync, existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 // ============================================================================
@@ -241,6 +248,119 @@ export function batchConvertToUTF8(filePaths: string[]): {
     skipped,
     errors,
   };
+}
+
+// ============================================================================
+// MARKDOWN BOM CENSUS (audit.ts §3.5 — spec 2026-11-17-audit-external-scan-fix)
+// ============================================================================
+
+export interface BomScanSkipped {
+  path: string;
+  reason: string;
+}
+
+export interface BomScanResult {
+  /** BOM-bearing .md files, forward-slashed, relative to `root`. */
+  bomFiles: string[];
+  /** Files/dirs that could not be stat'd or read (counted by the caller). */
+  skipped: BomScanSkipped[];
+}
+
+export interface BomScanOptions {
+  /** Directories to walk recursively (relative to `root`). */
+  searchDirs: string[];
+  /** Also scan *.md files directly at the root (workspace-root non-scaffold arm). */
+  rootMdScan?: boolean;
+  /** Walk root. Defaults to "."; tests pass explicit fixture roots. */
+  root?: string;
+}
+
+/** True when the buffer starts with a UTF-8 BOM (EF BB BF). */
+export function hasUtf8Bom(buf: Buffer): boolean {
+  return buf.length >= 3 && buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf;
+}
+
+/**
+ * Census of BOM-bearing Markdown files for audit.ts §3.5.
+ *
+ * Walk semantics ported verbatim from the audit's inline walker: depth cap 64,
+ * existsSync guards, symlinks never followed (lstatSync), skip set applied
+ * basename-style at every depth, `memory/archive/` filtered, `.md` suffix only.
+ * Skip set gains `external` per the external-deps standard (design
+ * 2026-11-07-external-deps-machinery, D5): every install_dir is `external/<id>`
+ * and gitignore-covered — vendored clones are never workspace content, so their
+ * upstream files must not fail the workspace UTF-8 gate.
+ *
+ * @version 1.4.0
+ */
+export function scanMarkdownBomFiles(opts: BomScanOptions): BomScanResult {
+  const root = opts.root ?? ".";
+  const SKIP_DIRS = new Set(["node_modules", ".git", ".bun", ".temp", "external"]);
+  const bomFiles: string[] = [];
+  const skipped: BomScanSkipped[] = [];
+
+  const walk = (dir: string, depth: number): void => {
+    // Symlink + depth guards (T-20260910-026, mirrored from audit.ts §3.5):
+    // lstatSync reports the link itself — symlinks are never followed; depth is
+    // capped as defense-in-depth against deep generated trees.
+    if (depth > 64) return;
+    const absDir = join(root, dir);
+    if (!existsSync(absDir)) return;
+    let entries: string[];
+    try {
+      entries = readdirSync(absDir);
+    } catch (e: any) {
+      skipped.push({ path: dir, reason: e?.code || e?.message || "readdir error" });
+      return;
+    }
+    for (const f of entries) {
+      if (SKIP_DIRS.has(f)) continue;
+      const rel = dir === "." ? f : `${dir}/${f}`;
+      const absPath = join(absDir, f);
+      try {
+        const st = lstatSync(absPath);
+        if (st.isSymbolicLink()) continue;
+        if (st.isDirectory()) {
+          walk(rel, depth + 1);
+        } else if (rel.endsWith(".md") && !rel.includes("memory/archive/")) {
+          const buf = readFileSync(absPath);
+          if (hasUtf8Bom(buf)) bomFiles.push(rel);
+        }
+      } catch (e: any) {
+        skipped.push({ path: rel, reason: e?.code || e?.message || "stat/read error" });
+      }
+    }
+  };
+
+  for (const dir of opts.searchDirs) {
+    walk(dir, 0);
+  }
+
+  // Workspace-root non-scaffold arm (faithful port of audit.ts §3.5's
+  // readdirSync(".") loop): plain *.md files directly at the root.
+  if (opts.rootMdScan) {
+    const absRoot = join(root, ".");
+    if (existsSync(absRoot)) {
+      let entries: string[] = [];
+      try {
+        entries = readdirSync(absRoot);
+      } catch (e: any) {
+        skipped.push({ path: ".", reason: e?.code || e?.message || "readdir error" });
+      }
+      for (const file of entries) {
+        if (!file.endsWith(".md")) continue;
+        const absFile = join(absRoot, file);
+        try {
+          const buf = readFileSync(absFile);
+          if (hasUtf8Bom(buf)) bomFiles.push(file);
+        } catch (e: any) {
+          skipped.push({ path: file, reason: e?.code || e?.message || "read error" });
+        }
+      }
+    }
+  }
+
+  return { bomFiles, skipped };
 }
 
 // ============================================================================
