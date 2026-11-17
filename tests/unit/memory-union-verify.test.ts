@@ -543,4 +543,68 @@ describe('unionScan repaired-at-head tier (T-20261105-002)', () => {
     expect(results).toHaveLength(1);
     expect(results[0].tier).toBe('blocking');
   });
+
+  // ── v1.4.0: the T-20261117-008 archival-provenance tier (design
+  //    docs/designs/2026-11-18-memory-union-archival-tier-design.md §2) ──────
+  /** The v1.4.0 shape: the file EXISTED at the dropping merge (so the v1.1.1
+   * merged===null tombstone arm never runs), and a LATER housekeeping commit
+   * archived the whole log — worktree file gone, MEMORY.md tombstone row left
+   * behind (the archive-memory.ts documented convention). */
+  function archiveLogWithTombstone(tombstone: boolean): void {
+    localDroppingMerge();
+    if (tombstone) {
+      writeFileSync(
+        join(memoryDir, 'MEMORY.md'),
+        '| Date | Summary |\n|---|---|\n| 2026-11-04 | archived — retention cycle |\n',
+      );
+    } else {
+      writeFileSync(join(memoryDir, 'MEMORY.md'), '| Date | Summary |\n|---|---|\n');
+    }
+    rmSync(join(memoryDir, '2026-11-04.md')); // housekeeping archival (step 3.8)
+    localCommit('housekeeping archives the dropped log');
+  }
+
+  test('block-drop on a merge whose log was LATER archived, no archive copy → historical (T-20261117-008 fresh-worktree shape)', () => {
+    archiveLogWithTombstone(true);
+    const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(results).toHaveLength(1);
+    expect(results[0].tier).toBe('historical');
+    expect(results[0].findings.some((f) => f.kind === 'dropped-block')).toBe(true);
+  });
+
+  test('same archival shape WITHOUT the MEMORY.md tombstone row stays blocking (fail-closed)', () => {
+    archiveLogWithTombstone(false);
+    const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(results).toHaveLength(1);
+    expect(results[0].tier).toBe('blocking');
+  });
+
+  test('tombstone present but the archive copy is readable and damaged → blocking (readable evidence outranks provenance)', () => {
+    archiveLogWithTombstone(true);
+    // the archive holds what the merge produced — C is NOT in it
+    mkdirSync(join(memoryDir, 'archive'), { recursive: true });
+    writeFileSync(
+      join(memoryDir, 'archive', '2026-11-04.md'),
+      `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n`,
+    );
+    const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(results).toHaveLength(1);
+    expect(results[0].tier).toBe('blocking');
+  });
+
+  test('tombstone present and the archive copy carries the parent-union → repaired-at-head (v1.2.0 arm in the provenance context)', () => {
+    archiveLogWithTombstone(true);
+    mkdirSync(join(memoryDir, 'archive'), { recursive: true });
+    const repairedContent = [
+      block('A', 'alpha'),
+      block('B', 'beta'),
+      'SHARED-TAIL-B',
+      block('C', 'gamma'),
+      'SHARED-TAIL-C',
+    ].join('\n---\n');
+    writeFileSync(join(memoryDir, 'archive', '2026-11-04.md'), repairedContent + '\n');
+    const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(results).toHaveLength(1);
+    expect(results[0].tier).toBe('repaired-at-head');
+  });
 });

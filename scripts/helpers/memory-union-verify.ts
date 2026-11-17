@@ -1,5 +1,28 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-11-18, T-20261117-008 — design
+//          docs/designs/2026-11-18-memory-union-archival-tier-design.md §2): the
+//          archival tier now also satisfies block-drop findings for merges whose
+//          dropped-block file was LATER archived. v1.2.0's archive fallback fires
+//          only when the local gitignored memory/archive/<basename> copy exists AND
+//          carries the parent-owed blocks — but a merge whose file existed AT the
+//          merge with a block dropped (the v1.1.1 merged===null tombstone arm never
+//          runs) and whose log a later housekeeping commit archived leaves a fresh
+//          worktree with NO worktree file and NO archive copy: the finding stayed
+//          FATAL until the merge aged out of the 7-day window (3 live /sync FATALs
+//          on 2026-11-17, co-deck PR-2/PR-4/PR-5; the gate's own "restore in the
+//          working tree" guidance fights step 3.8's re-archival — the T-20261106-007
+//          deadlock one level up). Fix: when neither the worktree file nor the
+//          archive copy is readable, consult the MEMORY.md tombstone row for the
+//          file (tracked; same regex as the v1.1.1 arm, now shared as
+//          hasMemoryTombstone) — tombstone present = sanctioned archival provenance
+//          = tier 'historical' (WARN, ages out with the window; the drop content
+//          stays recoverable from git history); no tombstone keeps the original
+//          tier (fail-closed). An archive copy that IS readable but does not carry
+//          the parent-union stays blocking (readable evidence outranks provenance,
+//          locally actionable). Fresh clones get the WARN, not the FATAL — the
+//          documented degradation (machinery design
+//          docs/designs/2026-11-17-root-machinery-batch-design.md §6).
 // v1.3.0 (2026-11-17, U-20261116-012 PR-2 compat — design
 //          docs/designs/2026-11-17-root-machinery-batch-design.md §2.2 item 4): the
 //          block-start well-formedness rule accepts a leading single-line HTML comment
@@ -420,6 +443,20 @@ export function showBlob(commit: string, file: string, cwd?: string): string | n
   return git(["show", `${commit}:${file}`], cwd ?? process.cwd());
 }
 
+/** MEMORY.md tombstone-row check for one flat memory log — the sanctioned-
+ * archival positive-evidence token (v1.1.1 posture: the tombstone IS the
+ * evidence; positive-evidence-only). False when the index is unreadable, so
+ * every caller is fail-closed by construction. */
+function hasMemoryTombstone(file: string, cwd: string): boolean {
+  try {
+    const memoryIndex = readFileSync(join(cwd, "memory", "MEMORY.md"), "utf8");
+    const base = file.replace(/^memory\//, "").replace(/\.md$/, "");
+    return new RegExp(`^\\| ${base} \\|`, "m").test(memoryIndex);
+  } catch {
+    return false;
+  }
+}
+
 /** Full Arm A: run verifyUnion over the bounded merge sweep. A parent blob
  * missing (file added on the other side) contributes no obligations; a merged
  * blob missing while a parent has one is itself the extreme drop shape and is
@@ -452,14 +489,8 @@ export function unionScan(opts: {
           // positive evidence — the same positive-evidence-only posture as
           // filterTransientCheckouts). No tombstone row = original tier.
           let deletedTier: MergeScanResult["tier"] = tier;
-          try {
-            const memoryIndex = readFileSync(join(cwd, "memory", "MEMORY.md"), "utf8");
-            const base = file.replace(/^memory\//, "").replace(/\.md$/, "");
-            if (new RegExp(`^\\| ${base} \\|`, "m").test(memoryIndex)) {
-              deletedTier = "repaired-at-head"; // sanctioned archival — INFO tier shared
-            }
-          } catch {
-            // MEMORY.md unreadable — keep the original tier (fail-closed)
+          if (hasMemoryTombstone(file, cwd)) {
+            deletedTier = "repaired-at-head"; // sanctioned archival — INFO tier shared
           }
           results.push({
             commit: target.commit,
@@ -510,7 +541,24 @@ export function unionScan(opts: {
               effectiveTier = "repaired-at-head";
             }
           } catch {
-            // neither worktree nor archive readable — keep the original tier
+            // v1.4.0 archival-provenance tier (T-20261117-008 — design
+            // docs/designs/2026-11-18-memory-union-archival-tier-design.md §2):
+            // neither the worktree file nor the archive copy is readable — the
+            // fresh-worktree shape. When the file was later archived by the
+            // documented retention cycle, its MEMORY.md tombstone row (tracked;
+            // same regex as the v1.1.1 merged===null arm, now shared as
+            // hasMemoryTombstone) is the positive evidence of sanctioned
+            // archival: the damaged blob is immutable history, the gate's
+            // "restore in the working tree" guidance fights step 3.8's
+            // re-archival, and the local-only archive fallback has nothing to
+            // read — re-tier to 'historical' (WARN, ages out with the window;
+            // the drop content stays recoverable from git history). No
+            // tombstone = no provenance = the original tier stands
+            // (fail-closed). Fresh clones get the WARN, not the FATAL — the
+            // documented degradation (machinery design §6).
+            if (hasMemoryTombstone(file, cwd)) {
+              effectiveTier = "historical"; // sanctioned archival — WARN tier shared
+            }
           }
         }
         results.push({ commit: target.commit, file, findings, tier: effectiveTier });

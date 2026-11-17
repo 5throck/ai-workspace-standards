@@ -3519,6 +3519,15 @@
       "last_updated": "2026-11-17"
     },
     {
+      "id": "2026-11-18-memory-union-archival-tier-design",
+      "title": "memory union archival tier design",
+      "file": "docs/designs/2026-11-18-memory-union-archival-tier-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-11-17",
+      "last_updated": "2026-11-17"
+    },
+    {
       "id": "2026-11-18-resync-audit-merge-delivery-routing-design",
       "title": "resync audit merge delivery routing design",
       "file": "docs/designs/2026-11-18-resync-audit-merge-delivery-routing-design.md",
