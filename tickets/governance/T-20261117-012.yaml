@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261117-012
+kind: manual
+title: >-
+  QuickDL upstream hygiene: 5 of 45 markdown files carry UTF-8 BOMs (CLAUDE.md,
+  GEMINI.md, SECURITY.md, docs/context.md, docs/security.md — hexdump-verified
+  EF BB BF, authored on Windows). Every fresh co-deck scaffold clones them via
+  the quickdl seed and the fetched bytes are what trips the scaffold audit
+  (T-20261117 diagnosis 2026-11-17). Expected: strip the BOMs upstream in
+  5throck/QuickDL and re-cut/move the pin (owner-owned repo; compatibility_test
+  gate applies to any pin move per the external-deps standard). Lower priority
+  once the audit scanner stops scanning external/ (machinery fix in flight) —
+  this is source hygiene, not a blocker.
+priority: low
+status: backlog
+attempts: 0
+created_at: 2026-11-17T00:00:00.000+09:00
+history:
+  - at: 2026-11-17T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null

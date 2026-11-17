@@ -2935,6 +2935,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261117-06",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "dec:DEC-20261117-07",
       "type": "decision",
       "layer": "L0"
@@ -2946,6 +2951,11 @@
     },
     {
       "id": "dec:DEC-20261117-09",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261118-01",
       "type": "decision",
       "layer": "L0"
     },
@@ -9658,6 +9668,106 @@
       "layer": "common"
     },
     {
+      "id": "term:balPayments",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ELW 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ESG",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ESG 증권상품",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ESG 지수",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ETF 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:ETN 일별매매정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:expDlr",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:expWgt",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:hsCd",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:hsCode",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:impDlr",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:impWgt",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:KOSDAQ 시리즈 일별시세정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:KOSPI 시리즈 일별시세정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:KRX 시리즈 일별시세정보",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:SERVICE_KEY_IS_NOT_REGISTERED_ERROR",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:SERVICE_KEY_IS_NULL",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:statCd",
+      "type": "term",
+      "layer": "common"
+    },
+    {
+      "id": "term:statKor",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:가구당월평균소득",
       "type": "term",
       "layer": "common"
@@ -9798,6 +9908,11 @@
       "layer": "common"
     },
     {
+      "id": "term:법령ID",
+      "type": "term",
+      "layer": "common"
+    },
+    {
       "id": "term:법령명한글",
       "type": "term",
       "layer": "common"
@@ -9814,11 +9929,6 @@
     },
     {
       "id": "term:법령해석례",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:법령ID",
       "type": "term",
       "layer": "common"
     },
@@ -10411,106 +10521,6 @@
       "id": "term:회장",
       "type": "term",
       "layer": "variant:co-consult"
-    },
-    {
-      "id": "term:balPayments",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:ELW 일별매매정보",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:ESG",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:ESG 증권상품",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:ESG 지수",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:ETF 일별매매정보",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:ETN 일별매매정보",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:expDlr",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:expWgt",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:hsCd",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:hsCode",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:impDlr",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:impWgt",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:KOSDAQ 시리즈 일별시세정보",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:KOSPI 시리즈 일별시세정보",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:KRX 시리즈 일별시세정보",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:SERVICE_KEY_IS_NOT_REGISTERED_ERROR",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:SERVICE_KEY_IS_NULL",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:statCd",
-      "type": "term",
-      "layer": "common"
-    },
-    {
-      "id": "term:statKor",
-      "type": "term",
-      "layer": "common"
     }
   ],
   "edges": [
@@ -12526,6 +12536,18 @@
     },
     {
       "type": "cites_skill",
+      "from": "dec:DEC-20261117-06",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261117-06",
+      "to": "skill:root/design-foundation",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
       "from": "dec:DEC-20261117-07",
       "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
@@ -12540,6 +12562,12 @@
       "type": "cites_skill",
       "from": "dec:DEC-20261117-09",
       "to": "skill:root/ci-triage",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261118-01",
+      "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
     },
     {
@@ -32138,6 +32166,96 @@
     {
       "type": "references",
       "from": "skill:common/k-krx",
+      "to": "term:ELW 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:ESG",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:ESG 증권상품",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:ESG 지수",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:ETF 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:ETN 일별매매정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:KOSDAQ 시리즈 일별시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:KOSPI 시리즈 일별시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
+      "to": "term:KRX 시리즈 일별시세정보",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-krx/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-krx",
       "to": "term:국채전문유통시장 일별매매정보",
       "source": "terms-ko.json",
       "provenance": {
@@ -32426,96 +32544,6 @@
       }
     },
     {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:ELW 일별매매정보",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:ESG",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:ESG 증권상품",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:ESG 지수",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:ETF 일별매매정보",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:ETN 일별매매정보",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:KOSDAQ 시리즈 일별시세정보",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:KOSPI 시리즈 일별시세정보",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-krx",
-      "to": "term:KRX 시리즈 일별시세정보",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-krx/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
       "type": "used_by",
       "from": "skill:common/k-law",
       "to": "agent:common/public-data-analyst",
@@ -32561,6 +32589,16 @@
     {
       "type": "references",
       "from": "skill:common/k-law",
+      "to": "term:법령ID",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-law/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-law",
       "to": "term:법령명한글",
       "source": "terms-ko.json",
       "provenance": {
@@ -32592,16 +32630,6 @@
       "type": "references",
       "from": "skill:common/k-law",
       "to": "term:법령해석례",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-law/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-law",
-      "to": "term:법령ID",
       "source": "terms-ko.json",
       "provenance": {
         "file": "templates/common/skills/k-law/references/terms-ko.json",
@@ -32861,96 +32889,6 @@
     {
       "type": "references",
       "from": "skill:common/k-opendata",
-      "to": "term:개발계정",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:국가별 수출입실적(GW)",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:수출입총괄(GW)",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:시도별 수출입실적(GW)",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:운영계정",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:총계",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:품목별 국가별 수출입실적(GW)",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:품목별 수출입실적(GW)",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
-      "to": "term:활용신청",
-      "source": "terms-ko.json",
-      "provenance": {
-        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
-        "field": "terms-ko.json"
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:common/k-opendata",
       "to": "term:balPayments",
       "source": "terms-ko.json",
       "provenance": {
@@ -33052,6 +32990,96 @@
       "type": "references",
       "from": "skill:common/k-opendata",
       "to": "term:statKor",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:개발계정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:국가별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:수출입총괄(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:시도별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:운영계정",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:총계",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:품목별 국가별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:품목별 수출입실적(GW)",
+      "source": "terms-ko.json",
+      "provenance": {
+        "file": "templates/common/skills/k-opendata/references/terms-ko.json",
+        "field": "terms-ko.json"
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:common/k-opendata",
+      "to": "term:활용신청",
       "source": "terms-ko.json",
       "provenance": {
         "file": "templates/common/skills/k-opendata/references/terms-ko.json",
