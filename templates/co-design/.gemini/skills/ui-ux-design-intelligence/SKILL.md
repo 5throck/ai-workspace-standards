@@ -5,16 +5,14 @@ description: >
   component design, visual hierarchy, and user-centered design principles. Use when:
   building design systems, creating visual designs, designing UI components, or establishing
   design specifications.
-version: 1.0.2
-scope: co-design
+version: 1.0.1
+scope: common
 status: active
 owner: pm
-last_reviewed: 2026-10-08
+last_reviewed: 2026-09-06
 prerequisites: none
 relates_to:
   - skill: documentation-writing
-    type: follows
-  - skill: service-design
     type: follows
 gemini-parity: skip
 metadata:
