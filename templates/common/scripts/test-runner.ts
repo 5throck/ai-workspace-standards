@@ -1,6 +1,12 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.17.1
+ * @version 1.17.2
+ *
+ * v1.17.2 (2026-11-17, CI evidence runs 44018675727 + 44052958547): `upgrade-decision-log.test.ts`
+ *          suite budget 300s -> 600s (test stays 60s). Both windows-latest main pushes hit
+ *          "Test timed out after 300000ms" for the file (windows suite 548s vs ~380s normal;
+ *          the file took ~163s on 2026-11-12). Raise #1 for the file this quarter since the
+ *          v1.9.0 trim to 300s; the v1.8.x split/trim review rule still applies on a second.
  *
  * v1.17.1 (2026-11-16): tail BATCHING SHIPPED OFF (default 0). CI run 43788899945
  *          measured the windows unit step at 414s at batch size 12 against a 371s
@@ -282,7 +288,9 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // v1.9.0 (T-20261030-002 stage 2): 600s → 300s on the design's evidence
   // gate — PR #1770's win32 run measured the split file at 99.9s (≤ ~150s),
   // restoring the family's ~2x headroom at 300s.
-  "upgrade-decision-log.test.ts": { suite: 300000, test: 60000 },
+  // v1.17.2 (2026-11-17): back to 600s — windows main runs 44018675727 and
+  // 44052958547 timed out at 300000ms (file ~163s on 2026-11-12, windows suite 548s).
+  "upgrade-decision-log.test.ts": { suite: 600000, test: 60000 },
   // v1.8.0 (T-20261030-002): the pure-helper suite extracted from
   // upgrade-decision-log.test.ts, pinned AT the family defaults — the row
   // exists so any runtime drift on the extracted file is visible without a
