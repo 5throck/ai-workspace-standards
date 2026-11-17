@@ -1,0 +1,5 @@
+# svg_check.py fingerprints hash the RAW bytes of these fixtures (pinned in
+# test_svg_check.py EXPECTED_FINGERPRINTS["fixture"]). Under Windows
+# core.autocrlf=true the *.svg files would check out as CRLF and change the hash,
+# so pin every fixture file to LF regardless of the platform/autocrlf setting.
+* text eol=lf
