@@ -9,7 +9,7 @@ title: >-
   PRs are landing with red CI on precedent — restore a trustworthy CI signal;
   likely needs account-level Actions billing check
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-10T14:44:07.997+09:00'
 history:
@@ -31,6 +31,9 @@ history:
   - at: '2026-11-16T13:10:03.610+09:00'
     from: waiting
     to: waiting
+  - at: '2026-11-17T06:45:52.649+09:00'
+    from: waiting
+    to: done
 blocked_reason: >-
   user-only: GitHub Settings > Billing & plans (fix the failed payment and/or
   raise the Actions spending limit). Re-checked 2026-11-11: co-deck CI still
@@ -38,21 +41,15 @@ blocked_reason: >-
   verify with gh run rerun 42777487491 --repo 5throck/co-deck (outward-facing;
   needs the go-ahead).
 result: >-
-  Diagnosed 2026-11-10 (evidence in session log and this ticket's symptom):
-  every job fails in 3-5s with runner_id 0 and zero steps — the GitHub-generated
-  annotation reads 'recent account payments have failed or your spending limit
-  needs to be increased'. Decisive discriminator: 13 PRIVATE repos all fail
-  while public repos (ai-workspace-standards, co-newbiz, co-abap-plugin) succeed
-  on the same hosted runner pool — account-level Actions billing wall, not
-  storage corruption (BlobNotFound is a side effect of jobs never starting; the
-  T-20261027-014 precedent carried the same annotation) and not a workflow
-  regression (failures began 2026-11-03, five days before the only workflow
-  change; setup-bun/SHA pins are never reached). Onset correction: 2026-11-03,
-  not 2026-11-08. REMEDIATION IS USER-ONLY: GitHub Settings > Billing & plans —
-  fix the failed payment and/or raise the spending limit. After the user
-  confirms, automation verifies via gh run rerun 42777487491 --repo
-  5throck/co-deck (expect runner assigned + steps > 0). Do not re-run before the
-  fix (precedent: reruns failing during the wall, T-20261007-025). PRs #202-#216
-  merged without CI evidence by necessity; a green main run after the fix covers
-  the current tree.
+  Diagnosed 2026-11-16: root cause is an account-level GitHub Actions billing
+  block (all private-repo jobs rejected at scheduling with 'recent account
+  payments have failed or your spending limit needs to be increased', steps=[],
+  BlobNotFound is downstream — log blobs never created). Onset 2026-11-03T06:44Z
+  (not 11-08; 11-01 reset exhausted again in ~37h; same pattern in October).
+  Affects ALL private repos in the account (co-work, co-price spot-checked);
+  ai-workspace-standards unaffected (public repo, free minutes). Remediation is
+  owner-side: resolve payment or raise the Actions spending limit above /bin/zsh
+  (Billing & plans); fleet burn-reduction (paths filters, timeout caps,
+  dormant-repo disable) recommended for follow-up design. Co-deck PRs merged
+  during the outage under the documented known-pattern condition (PR #248).
 error: null

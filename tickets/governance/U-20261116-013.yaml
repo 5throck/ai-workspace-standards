@@ -3,14 +3,29 @@ id: U-20261116-013
 kind: manual
 title: Upstream request from co-architect
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-16T18:35:27.086+09:00
+created_at: '2026-11-16T18:35:27.086+09:00'
 history:
-  - at: 2026-11-16T18:35:27.086+09:00
+  - at: '2026-11-16T18:35:27.086+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-17T07:39:21.748+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-17T07:39:21.748+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by archive-memory.ts v1.2.0 (machinery PR-1,
+  5throck/ai-workspace-standards PR #2057): tombstone generalization — every
+  flat index link broken by the run is rewritten to the established *(archived —
+  local only)* token (owner default O-6); date-session rows keep v1.1.0
+  plain-date behavior; no repoint guessing; verify-memory Check 3c stays the
+  session-block backstop. L0→L1 mirror published in the same PR. Note: the
+  ticket's session-block-links claim was excluded from scope (design §3 — no
+  handling exists, no instance reported; recorded in DEC-20261117-03). Design:
+  docs/designs/2026-11-17-root-machinery-batch-design.md §1, DEC-20261117-03.
 error: null
 upstream:
   project: co-architect
@@ -19,18 +34,42 @@ upstream:
   source: project/co-architect
   trust: untrusted
   suspected_layer: L1
-  symptom: |-
-    archive-memory.ts archives old memory files out of memory/ but leaves the MEMORY.md index rows (and any session-block links) pointing at the now-missing file. verify-memory.ts Check 3c only WARNs afterwards, so the index silently rots until someone notices a dead link.
+  symptom: >-
+    archive-memory.ts archives old memory files out of memory/ but leaves the
+    MEMORY.md index rows (and any session-block links) pointing at the
+    now-missing file. verify-memory.ts Check 3c only WARNs afterwards, so the
+    index silently rots until someone notices a dead link.
 
-    Observed 2026-11-16 in Projects/co-architect: memory/meeting-2026-09-25-adr019-step3b.md was archived out by a sync run (the transcript no longer exists in memory/ — and in this case not even under the archive target, since memory/archive/ is gitignored and local-only), leaving a dead Meetings row in memory/MEMORY.md. verify-memory reported "Missing MEMORY.md index link target ... repoint or tombstone the row" as a WARN only; the fix had to be done by hand (repointed the row to the ADR recording the same decision).
 
-    Expected: archive-memory.ts tombstones or repoints affected MEMORY.md rows as part of archiving (e.g. replace the link with the archive target, or a one-line tombstone naming where the content went), so Check 3c stays green after routine syncs instead of accumulating WARNs that only a manual pass clears.
+    Observed 2026-11-16 in Projects/co-architect:
+    memory/meeting-2026-09-25-adr019-step3b.md was archived out by a sync run
+    (the transcript no longer exists in memory/ — and in this case not even
+    under the archive target, since memory/archive/ is gitignored and
+    local-only), leaving a dead Meetings row in memory/MEMORY.md. verify-memory
+    reported "Missing MEMORY.md index link target ... repoint or tombstone the
+    row" as a WARN only; the fix had to be done by hand (repointed the row to
+    the ADR recording the same decision).
+
+
+    Expected: archive-memory.ts tombstones or repoints affected MEMORY.md rows
+    as part of archiving (e.g. replace the link with the archive target, or a
+    one-line tombstone naming where the content went), so Check 3c stays green
+    after routine syncs instead of accumulating WARNs that only a manual pass
+    clears.
   affected_paths:
     - scripts/archive-memory.ts
     - scripts/verify-memory.ts
     - memory/MEMORY.md
   identity_source: cwd
-  repro: 'In any variant: let a memory file referenced from a MEMORY.md table age past the archival threshold, run /sync (step 3.8 archive-memory runs), then `bun scripts/verify-memory.ts` → WARN "Missing MEMORY.md index link target: `<file>` — referenced from the index but not on disk; repoint or tombstone the row". Observed 2026-11-16 in Projects/co-architect for memory/meeting-2026-09-25-adr019-step3b.md (row added 2026-09-28 while the file existed; archived out by a later sync; the manual fix was repointing the row to the ADR that records the same outcome).'
+  repro: >-
+    In any variant: let a memory file referenced from a MEMORY.md table age past
+    the archival threshold, run /sync (step 3.8 archive-memory runs), then `bun
+    scripts/verify-memory.ts` → WARN "Missing MEMORY.md index link target:
+    `<file>` — referenced from the index but not on disk; repoint or tombstone
+    the row". Observed 2026-11-16 in Projects/co-architect for
+    memory/meeting-2026-09-25-adr019-step3b.md (row added 2026-09-28 while the
+    file existed; archived out by a later sync; the manual fix was repointing
+    the row to the ADR that records the same outcome).
   triage: ready
   flagged: false
   triage_reasons:
@@ -40,4 +79,19 @@ upstream:
   dedupe_key: 05670eb45af86d6b852b26614e88b9cb9fd2dc5900fa8ba76d6ee5b44fd9e286
   duplicates:
     - project: co-architect
-      at: 2026-11-16T18:35:27.086+09:00
+      at: '2026-11-16T18:35:27.086+09:00'
+  resolution:
+    outcome: fixed
+    template_version: 0.30.0
+    summary: >-
+      Fixed by archive-memory.ts v1.2.0 (machinery PR-1,
+      5throck/ai-workspace-standards PR #2057): tombstone generalization — every
+      flat index link broken by the run is rewritten to the established
+      *(archived — local only)* token (owner default O-6); date-session rows
+      keep v1.1.0 plain-date behavior; no repoint guessing; verify-memory Check
+      3c stays the session-block backstop. L0→L1 mirror published in the same
+      PR. Note: the ticket's session-block-links claim was excluded from scope
+      (design §3 — no handling exists, no instance reported; recorded in
+      DEC-20261117-03). Design:
+      docs/designs/2026-11-17-root-machinery-batch-design.md §1,
+      DEC-20261117-03.

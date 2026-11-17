@@ -4,22 +4,35 @@ kind: manual
 title: >-
   White-bubble theme font paths point at pre-migration locations (design §8
   observation). Evidence:
-  templates/co-deck/docs/html-themes/styles/white-bubble/style.css:208-209
-  still references `presentations/assets/fonts/...` (pre-migration paths). In
-  the R-A1 render this surfaced as 4 pre-existing CSS 404s (base.css,
-  ppt-engine.css, theme.css, white-bubble style.css relative font/asset
-  resolution). Expected: font/asset URLs in white-bubble/style.css (and audit
-  the other theme stylesheets for the same class) point at the current
-  template layout (docs/html-themes/... relative or build-emitted paths).
-  Affected: templates/co-deck/docs/html-themes/styles/white-bubble/style.css
-  (primary), sibling theme stylesheets (audit scope).
+  templates/co-deck/docs/html-themes/styles/white-bubble/style.css:208-209 still
+  references `presentations/assets/fonts/...` (pre-migration paths). In the R-A1
+  render this surfaced as 4 pre-existing CSS 404s (base.css, ppt-engine.css,
+  theme.css, white-bubble style.css relative font/asset resolution). Expected:
+  font/asset URLs in white-bubble/style.css (and audit the other theme
+  stylesheets for the same class) point at the current template layout
+  (docs/html-themes/... relative or build-emitted paths). Affected:
+  templates/co-deck/docs/html-themes/styles/white-bubble/style.css (primary),
+  sibling theme stylesheets (audit scope).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-17T02:44:11.523+09:00'
 history:
   - at: '2026-11-17T02:44:11.523+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-17T13:00:21.545+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed by co-deck PR-5 (5throck/ai-workspace-standards PR #2061, merge
+  9b7ea5ab5): white-bubble/style.css:208-209 + classic/style.css:104-105 font
+  URLs repointed to ../../../../deliverables/assets/fonts/ (download-font.ts
+  PROJECT_FONT_DIR; sibling-audit scope correction — exactly 2 files × 2 lines),
+  grep closure + attribute retention + swap fallback pinned, Chrome render pins
+  fonts-present/absent (new theme-font-paths.test.ts 1.0.0). VR baseline
+  recapture folded (12 pairs = designed effect; zen×white-bubble stale-baseline
+  failure honestly resolved). Design:
+  docs/designs/2026-11-17-co-deck-pdf-followups-design.md §T-004,
+  DEC-20261117-04.
 error: null

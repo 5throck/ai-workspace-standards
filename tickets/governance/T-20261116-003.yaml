@@ -9,12 +9,39 @@ title: >-
   8 (follow-ups). Evidence: PR #2047 (merge 56e2ae1c5) live result 12 WARN
   lines; source T-20261114-012.
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-16T19:35:50.110+09:00'
 history:
   - at: '2026-11-16T19:35:50.110+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-17T14:55:45.732+09:00'
+    from: backlog
+    to: review
+  - at: '2026-11-17T17:52:36.881+09:00'
+    from: review
+    to: done
+result: >-
+  Both phases landed (template-lifecycle PR-3 + PR-4). Phase 1a
+  (5throck/ai-workspace-standards PR #2062, commit 51c036754):
+  docs/templates/variant-shadow-allowlist.json +18 variant-owned declarations
+  (17 design items; skills/README.md+_ko split per-path), no wildcards, every
+  entry reasoned and verified against live governing records (ADR-0076 D1/D4,
+  MERGE_MANAGED, GOVERNANCE_FILES, PROJECT_STATE, VA-08); residual 249->224
+  (design arithmetic corrected in-doc: -25 live instances, not -34). Phase 1b
+  (PR #2066, merge e257171): 95 frontmatter-only instances re-synced
+  byte-identically to their common sources across 8 variants
+  (co-consult/co-deck/co-design/co-develop/co-game/co-hr/co-security/co-work +
+  co-safety 2 command copies); residual 224->129, 0 frontmatter-only remaining;
+  mirror TRACE 130 lines 0 mv!=cv. Enabling mechanism: validate-templates.ts
+  1.84.0 CV-02 convergence exemption (PM ruling 2026-11-17, DEC-20261117-07;
+  architect quota-unavailable) — a copy byte-identical to its templates/common
+  twin is convergence-to-source, not unflagged drift; divergent/no-twin cases
+  still fail. Final battery on merged main: validate-templates 0 errors,
+  test:unit 319/319, verify-scripts 283/283, audit exit 0. Phase-2 follow-ups
+  (NOT done): 13 per-skill adjudications, 20 non-skill content-drift paths,
+  co-design SSOT delete-to-inherit decision, ui-ux-design-intelligence 1.0.1
+  follows-metadata backport, 17 Projects commit-msg copies (LOCKED-claim), VR
+  matrix divergence observation.
 error: null

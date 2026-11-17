@@ -9,12 +9,29 @@ title: >-
   docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md section
   8 (follow-ups). Split from T-20261114-006 (PR #2045).
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-16T19:35:50.066+09:00'
 history:
   - at: '2026-11-16T19:35:50.066+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-17T16:25:23.182+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed by the commit-msg hook fix (template-lifecycle PR-2,
+  5throck/ai-workspace-standards PR #2065, commit 4c7e586f6): COMMIT_BODY
+  pipeline sed '1,/^$/d' (END-of-range cannot match on START line — ran to the
+  SECOND blank, deleting para one) replaced with comment-strip + POSIX awk
+  leading-blank-skip per O-8 Option A (BSD-sed 0,/re/ rejected, asserted-absent
+  in tests). Multi-paragraph COMMIT_BODY preserved (para one\n\npara two),
+  PURPOSE capture verified live on the landing commit; comment stripping/head
+  -5/no-body unchanged; Check G parity byte-identical root<->common; 14-test
+  hook suite added (real-pipeline extraction via bash -c, no full-hook spawn).
+  QA-noted follow-ups: PURPOSE is assigned-not-consumed downstream (dead
+  assignment, pre-existing) and 17 Projects copies are LOCKED-claim (design §9
+  routing, follow-up ticket pending PM filing). Design:
+  docs/designs/2026-11-17-template-lifecycle-batch-design.md §3,
+  DEC-20261117-05.
 error: null
