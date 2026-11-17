@@ -1,3 +1,12 @@
+// @version 1.3.0 — T-20261117-006 (pitch buildBullets template fix): the pitch
+//   spot-render blocker is resolved — pitch/template.html now defines
+//   buildBullets (the sibling-theme helper shape: ul.slide-bullets + li +
+//   appendInline, styled by pitch/theme.css .slide-bullets), so a built pitch
+//   deck renders MEASURED page count == slide count through html-to-pdf. The
+//   DEC-20261117-04 static fallback pin is swapped for the measured render;
+//   the fallback's static selector-safety checks (denylist hooks + template
+//   chrome ids) are retained alongside it, and the loud zero-slide blocker pin
+//   is removed — it pinned the defect, not the contract.
 // @version 1.2.0 — PR-5 folded deferrals (design 2026-11-17-co-deck-pdf-
 //   followups §1.3 auditor disposition, DEC-20261117-04 appended entry): the
 //   two verification items PR-4 deferred. (a) outlook + pitch spot-render
@@ -410,24 +419,32 @@ describe.skipIf(!haveChrome)('html-to-pdf PR-5 folded deferrals — outlook/pitc
     expect(await pdfPageCount(outPath)).toBe(3);
   }, 240000);
 
-  // Pitch spot-render disposition (DEC-20261117-04 fallback branch): the
-  // built pitch deck CANNOT render through html-to-pdf on origin/main — a
-  // PRE-EXISTING template defect unrelated to this batch. pitch/template.html
-  // calls `buildBullets(leftCol, data.bullets)` (:219, byte-identical on
-  // origin/main) but never defines it, so initSlides throws
-  // "buildBullets is not defined" in the renderer's Chrome, 0 slides are
-  // discoverable, and the tool exits 1 with the loud zero-slide error.
-  // Fixing it would mean touching pitch/template.html — a 4th file, outside
-  // PR-5's 3-file scope. Per the auditor disposition the pitch pin falls back
-  // to the static selector-safety check below (the wrapper-reset coverage the
-  // measured pitch render would have exercised is carried by the zen decks,
-  // which contain both wrappers). Needs its own ticket.
-  test('pitch chrome is statically covered by the injected denylist + wrapper reset (measured spot-render blocked by a pre-existing pitch template defect)', () => {
-    // evidence of the blocker: the undefined helper call, no definition
+  // Pitch spot-render (T-20261117-006): the DEC-20261117-04 fallback is
+  // retired. pitch/template.html now defines buildBullets (the sibling-theme
+  // helper shape — ul.slide-bullets + li + appendInline, styled by pitch's
+  // theme.css), so a built pitch deck renders like the other ppt-engine
+  // themes: measured page count == slide count. Pitch carries
+  // .presentation-container (the §1.2 wrapper reset), so this render also
+  // exercises the wrapper-reset coverage the DEC-04 fallback delegated to the
+  // zen decks.
+  test('a built pitch deck renders MEASURED page count == slide count (ppt-engine wrapper reset measured)', async () => {
+    const deck = buildSpotDeck('pitch');
+    const outPath = join(deck.dir, 'spot.pdf');
+    const res = runTool(deck.htmlPath, ['--out', outPath]);
+    expect(res.status).toBe(0);
+    const out = `${res.stdout ?? ''}${res.stderr ?? ''}`;
+    expect(out).toMatch(/Slides: 3/);
+    expect(await pdfPageCount(outPath)).toBe(3);
+    expect(existsSync(outPath)).toBe(true);
+  }, 240000);
+
+  test('source pin: pitch/template.html defines the helper it calls + carries the chrome hooks the denylist targets', () => {
     const pitchSrc = readFileSync(join(ROOT, 'docs', 'html-themes', 'themes', 'pitch', 'template.html'), 'utf-8');
+    // the T-20261117-006 defect shape (call without definition) pinned closed
     expect(pitchSrc).toContain('buildBullets(leftCol');
-    expect(pitchSrc).not.toMatch(/function\s+buildBullets\b/);
-    // static selector safety: pitch's chrome ids + wrapper are all covered
+    expect(pitchSrc).toMatch(/function\s+buildBullets\b/);
+    // static selector safety retained from the DEC-04 fallback pin:
+    // pitch's chrome ids + wrapper are all covered
     const src = readFileSync(TOOL, 'utf-8');
     for (const sel of ['#toc-drawer', '#toc-overlay', '.ppt-footer', 'footer']) {
       expect(src).toContain(sel);
@@ -439,16 +456,6 @@ describe.skipIf(!haveChrome)('html-to-pdf PR-5 folded deferrals — outlook/pitc
     }
     expect(pitchSrc).toContain('ppt-footer');
   });
-
-  test('a pitch deck built today still exits loud (zero-slide error) — pins the blocker this fallback documents', async () => {
-    const deck = buildSpotDeck('pitch');
-    const outPath = join(deck.dir, 'spot.pdf');
-    const res = runTool(deck.htmlPath, ['--out', outPath]);
-    expect(res.status).toBe(1);
-    const out = `${res.stdout ?? ''}${res.stderr ?? ''}`;
-    expect(out).toContain('Zero slides found');
-    expect(existsSync(outPath)).toBe(false);
-  }, 240000);
 });
 
 describe.skipIf(!haveChrome)('html-to-pdf PR-5 folded deferrals — first/last page content identity', () => {

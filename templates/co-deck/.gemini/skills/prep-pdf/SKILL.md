@@ -1,7 +1,7 @@
 ---
 name: prep-pdf
 scope: co-deck
-version: "2.0.1"
+version: 2.0.2
 description: >
   Playwright-free PDF preparation. Reads lecture-profile.md, resolves the 4-layer
   spec merge, validates fonts, outputs a layout summary, and optionally generates

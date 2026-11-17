@@ -2,7 +2,7 @@
 catalog-parity: skip  # variant-maintained fork — excluded from the root Variant-Exclusive catalog (W5 disposition)
 name: pdf-export
 scope: co-deck
-version: "2.2.0"
+version: 2.2.1
 description: >
   Generates PDF from slide data using pdf-lib. Extracts slidedata.json, runs sample
   (5-slide) then full PDF generation scripts, reviews results. Reads the 4-layer

@@ -155,6 +155,19 @@
 
     // Pitch-native slide children (classes styled by pitch/theme.css + style.css).
     // Appends child nodes onto the slide element; returns nothing.
+
+    function buildBullets(parent, arr) {
+      var ul = el('ul', 'slide-bullets');
+      if (Array.isArray(arr)) {
+        arr.forEach(function (b) {
+          var li = el('li');
+          appendInline(li, b);
+          ul.appendChild(li);
+        });
+      }
+      parent.appendChild(ul);
+    }
+
     function buildSlideChildren(slide, data, index) {
       var type    = slideType(data);
       var section = data.section || '';

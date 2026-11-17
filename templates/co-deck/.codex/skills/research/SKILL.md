@@ -1,7 +1,7 @@
 ---
 name: research
 scope: co-deck
-version: "1.2.2"
+version: 1.2.3
 description: >
   Source collection and ideation for lecture materials. After confirming
   topic/audience/purpose, performs web research (Korean and English by

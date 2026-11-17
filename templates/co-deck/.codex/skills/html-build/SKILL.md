@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: "1.8.0"
+version: 1.8.1
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
