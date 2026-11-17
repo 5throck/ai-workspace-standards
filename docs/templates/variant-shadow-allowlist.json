@@ -13,6 +13,24 @@
     { "path": ".gemini/settings.json", "variants": "*", "class": "variant-owned", "reason": "per-variant platform overlay" },
     { "path": ".claude/settings.json", "variants": "*", "class": "variant-owned", "reason": "per-variant platform overlay" },
     { "path": "docs/phase-definitions.md", "variants": "*", "class": "variant-owned", "reason": "variant-customized phase definitions are the accepted norm (design 2026-10-28-l0-only-governance-doc-cleanup)" },
-    { "path": "docs/governance/agents/workflows.md", "variants": ["co-learning"], "class": "tracked", "commonSha256": "904db8ef08542d56bcc2d833cb63c53ddb9ad14e9e603af93cb88ea6f37cfa74", "reason": "Stream Boundaries insertion in the VARIANT-ROLE-BOUNDARY zone (PR #2032)" }
+    { "path": "docs/governance/agents/workflows.md", "variants": ["co-learning"], "class": "tracked", "commonSha256": "904db8ef08542d56bcc2d833cb63c53ddb9ad14e9e603af93cb88ea6f37cfa74", "reason": "Stream Boundaries insertion in the VARIANT-ROLE-BOUNDARY zone (PR #2032)" },
+    { "path": ".agents/mcp.json", "variants": ["co-abap"], "class": "variant-owned", "reason": "per-variant agent-platform MCP overlay (ADR-0076 D1 per-host delivery matrix; project-evolved overlay)" },
+    { "path": ".agents/skills.json", "variants": ["co-abap"], "class": "variant-owned", "reason": "per-variant agent-platform skill registry overlay (project-evolved overlay)" },
+    { "path": ".codex/config.toml", "variants": ["co-abap"], "class": "variant-owned", "reason": "ADR-0076 D4: seed-only, per-project by nature (TOML semantic merge declined, upgrade-policy trade-off)" },
+    { "path": ".codex/hooks.json", "variants": ["co-abap", "co-architect"], "class": "variant-owned", "reason": "per-variant Codex hook overlay (ADR-0076 D4: .codex/** per-project config)" },
+    { "path": ".mcp.json", "variants": ["co-abap"], "class": "variant-owned", "reason": "per-variant root MCP registration (ADR-0076 D1; project-owned MCP servers survive the JSON union)" },
+    { "path": ".gemini/skills.json", "variants": ["co-safety"], "class": "variant-owned", "reason": "per-variant Gemini skill registry overlay (project-evolved overlay)" },
+    { "path": ".github/workflows/ci.yml", "variants": ["co-abap"], "class": "variant-owned", "reason": "per-variant CI workflow identity (variant-scoped build pipeline)" },
+    { "path": ".gitignore", "variants": ["co-abap", "co-price"], "class": "variant-owned", "reason": "MERGE_MANAGED claim (upgrade-policy MERGE_MANAGED_FILES): variant-side ignore additions survive the union" },
+    { "path": ".env.sample", "variants": ["co-price"], "class": "variant-owned", "reason": "per-variant identity/environment seed" },
+    { "path": ".gitattributes", "variants": ["co-deck"], "class": "variant-owned", "reason": "per-variant repo attribute seed (deck asset handling)" },
+    { "path": "package.json", "variants": ["co-architect", "co-consult", "co-deck", "co-work"], "class": "variant-owned", "reason": "variant build identity; shape governed by VA-08 scaffold-package-contract" },
+    { "path": "bun.lock", "variants": ["co-work"], "class": "variant-owned", "reason": "variant build identity lockfile" },
+    { "path": "external-deps.json", "variants": ["co-deck", "co-work"], "class": "variant-owned", "reason": "design 2026-11-07-external-deps-machinery D1/D3: variant-authored PROJECT_STATE manifest" },
+    { "path": "LICENSE", "variants": ["co-price"], "class": "variant-owned", "reason": "GOVERNANCE_FILES add-if-missing seed (upgrade-policy); variant-side governance identity" },
+    { "path": "SECURITY.md", "variants": ["co-architect", "co-price"], "class": "variant-owned", "reason": "GOVERNANCE_FILES add-if-missing seed (upgrade-policy); variant-side governance identity" },
+    { "path": "skills/README.md", "variants": ["co-price"], "class": "variant-owned", "reason": "per-variant skill registry readme (variant-scoped catalog)" },
+    { "path": "skills/README_ko.md", "variants": ["co-price"], "class": "variant-owned", "reason": "per-variant skill registry readme, Korean copy (variant-scoped catalog)" },
+    { "path": "docs/skill-graph.overrides.json", "variants": ["co-consult"], "class": "variant-owned", "reason": "per-variant skill-graph override record" }
   ]
 }
