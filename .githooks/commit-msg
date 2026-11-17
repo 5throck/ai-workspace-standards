@@ -6,7 +6,10 @@ set -euo pipefail
 
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(head -1 "$COMMIT_MSG_FILE" | sed 's/[[:space:]]*$//')
-COMMIT_BODY=$(tail -n +2 "$COMMIT_MSG_FILE" | sed -e '1,/^$/d' -e '/^#/d' | sed 's/^[[:space:]]*//' | head -5)
+# Skip blanks only BEFORE the first body line, keep every later paragraph
+# (sed '1,/^$/d' could not end its range on the start line and swallowed the
+# first paragraph; awk skip is portable where BSD sed '0,/re/' is not).
+COMMIT_BODY=$(tail -n +2 "$COMMIT_MSG_FILE" | sed -e '/^#/d' | awk 'found {print; next} /^[[:space:]]*$/{next} {found=1; print}' | sed 's/^[[:space:]]*//' | head -5)
 
 # Skip empty, Merge, WIP, fixup!, squash! commits
 [ -z "$COMMIT_MSG" ] && exit 0
