@@ -40,6 +40,8 @@ Scope note (platform mirror): only CLAUDE.md is affected. GEMINI.md's `*Last Upd
 - Rationale: the date's meaning is "when did this file's content last change" — a project-side newer stamp means the project's provenance record is younger than the template's; dropping it falsifies provenance even though the template content is authoritative for prose. Keeping the newer date is monotonic, idempotent (second run: template date >= project date → no-op), and zero-risk to prose.
 - Idempotency proof obligation: after the merge, the block's date is max(both sides); a re-run sees equal dates and does nothing.
 
+Correction (QA, 2026-11-17): the idempotency rationale above is mechanically imprecise — a re-run does not see equal dates; it re-compares the project's merged span (newer date) against the template's older-dated block, so the guard fires again. Idempotency is achieved at the call sites: the guard-resolved replacement then equals the span already on disk (its only byte difference from the template block is the `*Last Updated:` line the guard restores), so the replace path takes a silent no-op branch and reports `merged: false` (pinned by tests 2/7, tests/unit/managed-block-merge.test.ts v1.4.0). "the block's date is max(both sides)" describes the post-merge date state, not the re-run comparison.
+
 **Option B (rejected as default, recorded)** — move the Last Updated line OUTSIDE the COMMON-CLAUDE:END marker in templates/common/CLAUDE.md. Rejected: the line would never propagate to project copies again (out-of-zone content is census-gated), and existing projects would keep stale dates forever; it also churns every project copy on the next upgrade.
 
 ### 2.3 Test plan
