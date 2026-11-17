@@ -1,3 +1,5 @@
+// @version 1.7.1 — bgprec pool image moved into the per-test project dir so
+//   aborted runs no longer leak deliverables/_bgpool_*.png into the template.
 // @version 1.7.0 — PR-5 reference pins (design 2026-11-17-co-deck-pdf-followups
 //   T-20261117-005, owner decision O-5 default Option A): the PDF side of the
 //   contactName parity pin. ZERO renderer change — gen-slides-pdf has rendered
@@ -380,22 +382,18 @@ const RED:  [number, number, number] = [0xff, 0x00, 0x00];
 const BLUE: [number, number, number] = [0x00, 0x00, 0xff];
 
 describe.skipIf(!haveFonts)('v1.14.7 background resolution precedence', () => {
-  const poolFiles: string[] = [];
-  afterAll(() => { for (const f of poolFiles) rmSync(f, { force: true }); });
-
   function makeScopeAllProject(): { dir: string; rel: string } {
     const tag = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const name = `_bgprec_test_${tag}`;
     const dir = join(ROOT, 'deliverables', name);
     mkdirSync(join(dir, 'images'), { recursive: true });
     // Slide 1 owns a BLUE binding; slide 2 has none → must fall back to the
-    // global pool backdrop (RED), which lives at the workspace root so only the
-    // workspace-relative base can resolve it.
+    // global pool backdrop (RED). The pool lives inside the per-test project dir
+    // (cleaned via tmpDirs) but is addressed workspace-relative, so imgDir
+    // (= projectDir) + that path does not exist and only the workspace base resolves it.
     writeFileSync(join(dir, 'images', 'own.png'), writeSolidPng(32, 32, BLUE));
-    const poolAbs = join(ROOT, 'deliverables', `_bgpool_${tag}.png`);
-    writeFileSync(poolAbs, writeSolidPng(32, 32, RED));
-    poolFiles.push(poolAbs);
-    const poolRel = `deliverables/_bgpool_${tag}.png`;
+    writeFileSync(join(dir, '_pool.png'), writeSolidPng(32, 32, RED));
+    const poolRel = `deliverables/${name}/_pool.png`;
     writeFileSync(join(dir, 'image-manifest.json'), JSON.stringify({
       background_image: { enabled: true, scope: 'all', path: poolRel, overlay_color: [0, 0, 0], overlay_opacity: 0.4 },
       slides: [],
