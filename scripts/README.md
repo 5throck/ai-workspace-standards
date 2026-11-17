@@ -12,9 +12,12 @@
 Classifies dirty/untracked files as STALE-RESIDUE (equals a current L0/L1/L2 source, or an older
 revision corroborated by project mtime older + line-order agreement — discard, upgrade re-delivers),
 PRESUME-STALE (subset match without corroboration — possible deliberate reordering or legitimate
-deletion; human confirm before discard, routes to commit-side review), LOCAL-WORK (commit candidate;
-feeds backport review), or KEEP (default-safe). Emits markdown/JSON verdict tables; optional local
-snapshot tarball of discard candidates. Read-only — never modifies the tree, never pushes.
+deletion — or a merge-delivered file whose content equals the template source: MERGE_MANAGED /
+JSON_MERGE / SCHEMA_MERGE claims deliver a union and project merge-block edits are authoritative
+between waves, so equality never auto-discards; human confirm before discard, routes to commit-side
+review), LOCAL-WORK (commit candidate; feeds backport review), or KEEP (default-safe). Emits
+markdown/JSON verdict tables; optional local snapshot tarball of discard candidates. Read-only —
+never modifies the tree, never pushes.
 **Usage**: `bun scripts/resync-audit.ts [--project <path>]... [--json] [--snapshot-dir <dir>]`
 **Runs automatically**: never automatic — operator-invoked via the `project-resync` skill
 

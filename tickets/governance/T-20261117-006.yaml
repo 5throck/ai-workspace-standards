@@ -50,5 +50,5 @@ result: >-
   ul.slide-bullets + li + appendInline; pitch/theme.css .slide-bullets consumer
   already existed); html-to-pdf.test.ts v1.3.0 measured spot-render replaces the
   DEC-20261117-04 static fallback/blocker pins (built pitch deck exit 0,
-  MEASURED pages == slides == 3; 21/21 pass); QA verdict READY
+  MEASURED pages == slides == 3; 21/21 pass); QA verdict READY; PR #2080, merge bcfa66056
 error: null
