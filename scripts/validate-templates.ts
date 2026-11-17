@@ -3352,10 +3352,12 @@ export function partitionCv02Converged(inputs: Cv02ConvergenceInput[]): Cv02Part
   return out;
 }
 
-/** CV-02 twin lookup: templates/co-<variant>/<rel> → templates/common/<rel>. */
+/** CV-02 twin lookup: templates/co-<variant>/<rel> → templates/common/<rel> (POSIX repo-relative). */
 export function cv02CommonTwinPath(candidatePath: string): string | null {
   const m = /^templates\/(co-[^/]+)\/(.+)$/.exec(candidatePath);
-  return m ? join("templates", "common", m[2]) : null;
+  // String concat, not join(): join() emits backslashes on Windows while the candidate
+  // path (git output) and this lookup are always POSIX repo-relative.
+  return m ? `templates/common/${m[2]}` : null;
 }
 
 function checkSameVersionContentChange(): void {
