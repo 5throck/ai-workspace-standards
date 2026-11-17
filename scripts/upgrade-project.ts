@@ -1,5 +1,30 @@
 #!/usr/bin/env bun
-// @version 1.109.0
+// @version 1.110.0
+// v1.110.0 (2026-11-17, T-20261117-001 — spec
+//          docs/designs/2026-11-17-root-machinery-batch-design.md §3):
+//          EXTERNAL DEPS pass channel 2c — SEED-ID ADOPTION. The pass had three
+//          write channels (absent-file seed copy, parse-failure reconcile,
+//          v1→v2 migration) and NONE fired for a valid schema-v2 manifest
+//          missing template-seed ids — the co-deck/quickdl drift class (fixed
+//          one-off by co-deck PR #248; any project scaffolded before its
+//          variant seed gained deps has no adoption path). Channel 2c fires
+//          after the v1→v2 migration (2b) when the manifest parsed
+//          successfully and a valid seed exists: the current manifest text is
+//          adopted into via the pure adoptSeedEntries core
+//          (helpers/external-deps-reconcile.ts v1.2.0) — add-if-missing per
+//          seed id in seed order, the seed entry verbatim (the template's
+//          attestation is a declared fact), existing project entries never
+//          modified/reordered/dropped, schema_version stays the project's own.
+//          Zero adoptions → no row, no write (byte-identical pass for the
+//          16-dep-free fleet majority). One UPDATE decision row per adopted id
+//          ("seed-id adoption"); --dry-run prints the rows and writes nothing
+//          (existing dryTag machinery). 2c runs BEFORE the D5 gitignore
+//          coverage pass (3), so adopted install_dirs get `external/<dir>/`
+//          coverage on arrival — the second half of the co-deck one-off closes
+//          automatically. No CLI reconcile subcommand (owner default O-5 — the
+//          upgrade pass is the only adoption vehicle; it produces the decision
+//          rows and honors dry-run framing). upgrade-project.ts and the
+//          reconcile helper are L0-only (no templates/common mirrors).
 // v1.109.0 (2026-11-16, T-20261114-005 — spec
 //          docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §3):
 //          (a) --disposition is repeatable — grants accumulate (OR semantics, a bare
@@ -1304,7 +1329,11 @@ import {
   loadCountryScopedAgents,
   scrubAgentReferenceLines,
 } from "./lib/country-scoped-agents.ts";
-import { reconcileExternalDepsManifest, splitValidEntries } from "./helpers/external-deps-reconcile.ts";
+import {
+  adoptSeedEntries,
+  reconcileExternalDepsManifest,
+  splitValidEntries,
+} from "./helpers/external-deps-reconcile.ts";
 import { applySubstitutions } from "./helpers/substitute-placeholders.ts";
 import { selectIgnoredToolingArtifacts } from "./helpers/ignored-tooling.ts";
 import { mergeGitleaksToml } from "./helpers/gitleaks-merge.ts";
@@ -1408,6 +1437,7 @@ import {
   migrateManifestV1ToV2,
   preInstallGate,
   evaluateLicensePolicy,
+  type ExternalDepEntry,
   type ExternalDepsManifest,
 } from "./lib/external-deps.ts";
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from "./lib/env-sample.ts";
@@ -3652,6 +3682,13 @@ const externalInstallDirs: string[] = (() => {
  *      generic schema (D1/D8): template seed entries authoritative, per-id
  *      operative pin/commit preserved, non-schema fields dropped with a WARN
  *      decision row.
+ *   2b. Schema v1 → v2 migration (standard §5.6): contract fields from the
+ *      seed, project pin/commit preserved, unattested ids kept and WARNed.
+ *   2c. SEED-ID ADOPTION (v1.110.0, design 2026-11-17-root-machinery-batch §3):
+ *      a VALID manifest missing template-seed ids gains them add-if-missing,
+ *      verbatim, via the pure adoptSeedEntries core — one UPDATE decision row
+ *      per adopted id; existing project entries are never touched. Runs BEFORE
+ *      gitignore coverage so adopted install_dirs are covered on arrival (D5).
  *   3. install_dir .gitignore coverage validation with auto-append (D5).
  *   4. Per dependency (D3): git ls-remote upstream tag check (semver-aware) →
  *      current short-circuits to a hold no-op (with a pin-drift tripwire
@@ -3802,6 +3839,10 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
   //     the seed keeps its entry with NO license — an attestation is never
   //     invented, so `verify` FAILs until a human declares it. One decision row
   //     per entry. The migrated document is always written as schema v2.
+  //     v1.110.0: the migrated document is kept in `migratedDocument` so channel
+  //     2c below adopts into the POST-migration text even under --dry-run
+  //     (where nothing was written to disk).
+  let migratedDocument: Record<string, unknown> | null = null;
   if (manifest && manifest.schema_version === 1) {
     let seedForMigration: ExternalDepsManifest = { schema_version: 2, dependencies: [] };
     if (seedPath) {
@@ -3813,6 +3854,7 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
     }
     const currentRaw = existsSync(manifestPath) ? readFileSync(manifestPath, "utf8") : manifestRaw;
     const mig = migrateManifestV1ToV2(currentRaw, seedForMigration);
+    migratedDocument = mig.document;
     console.log(
       `  MIGRATE ${MANIFEST_REL}  schema v1 → v2 (standard §5.6)${mig.migrated.length ? ` — contract fields from the seed for: ${mig.migrated.join(", ")}` : ""}${mig.unattested.length ? ` — NOT attested (no seed entry; declare license/usage/adapter by hand): ${mig.unattested.join(", ")}` : ""}`,
     );
@@ -3849,6 +3891,65 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
     changed++;
     const split = splitValidEntries(mig.document["dependencies"] as unknown[], 2);
     manifest = { schema_version: 2, dependencies: split.valid };
+  }
+
+  // 2c. v1.110.0 — SEED-ID ADOPTION (design 2026-11-17-root-machinery-batch §3,
+  //     T-20261117-001). Fires when the manifest parsed successfully (post-
+  //     migration, `manifest !== null`) and a valid seed exists: a valid
+  //     manifest missing template-seed ids gains them add-if-missing, verbatim,
+  //     via the pure adoptSeedEntries core (helpers/external-deps-reconcile.ts
+  //     v1.2.0). One UPDATE decision row per adopted id; zero adoptions → no
+  //     row, no write (the fleet majority stays byte-identical). Ordered BEFORE
+  //     the D5 gitignore coverage (3) so adopted install_dirs are covered on
+  //     arrival. NO CLI reconcile subcommand exists for this (owner default
+  //     O-5) — the upgrade pass is the only adoption vehicle.
+  if (manifest && seedPath) {
+    let seedForAdoption: ExternalDepsManifest | null = null;
+    try {
+      seedForAdoption = parseExternalDepsManifest(readFileSync(seedPath, "utf8"), "template seed");
+    } catch {
+      seedForAdoption = null; // invalid seed — 2c does not fire (R-C3: adoption cannot write an invalid entry)
+    }
+    if (seedForAdoption) {
+      // Effective current text: after a 2b migration the post-migration
+      // document is the base to adopt into (under --dry-run nothing was
+      // written, so the disk file would still be the v1 original); otherwise
+      // the on-disk file, or the dry-run stand-in used for parsing.
+      const currentRaw = migratedDocument
+        ? JSON.stringify(migratedDocument, null, 2)
+        : existsSync(manifestPath)
+          ? readFileSync(manifestPath, "utf8")
+          : manifestRaw;
+      const adopt = adoptSeedEntries(currentRaw, seedForAdoption);
+      if (!adopt.ok) {
+        console.log(`  ⚠️  SKIP   ${MANIFEST_REL}  (seed-id adoption unavailable: ${adopt.error})`);
+        record(
+          MANIFEST_REL,
+          "PROJECT_STATE",
+          "EXTERNAL DEPS",
+          "SKIP",
+          `seed-id adoption unavailable — manifest does not strictly revalidate: ${adopt.error}`,
+          "WARN",
+        );
+      } else if (adopt.adopted.length > 0) {
+        console.log(
+          `  ADOPT   ${MANIFEST_REL}  (seed-id adoption, add-if-missing per id, seed entry verbatim: ${adopt.adopted.join(", ")})`,
+        );
+        if (!dryRun) writeFileSync(manifestPath, `${JSON.stringify(adopt.document, null, 2)}\n`, "utf8");
+        console.log(`  ${dryTag}WROTE: ${MANIFEST_REL}`);
+        for (const id of adopt.adopted) {
+          record(
+            MANIFEST_REL,
+            "PROJECT_STATE",
+            "EXTERNAL DEPS",
+            "UPDATE",
+            `seed-id adoption: dep \`${id}\` adopted from the template seed verbatim (no project entry existed)`,
+          );
+        }
+        changed++;
+        manifest = { schema_version: 2, dependencies: adopt.document.dependencies as ExternalDepEntry[] };
+      }
+    }
   }
 
   // 3. install_dir .gitignore coverage (D5) — an external clone committed into
