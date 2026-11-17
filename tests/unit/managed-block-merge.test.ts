@@ -54,7 +54,20 @@
  *         (zero rows), and the negative: byte-equal non-tier managed blocks
  *         get no row and stay byte-identical.
  *
- * @version 1.3.0
+ * v1.4.0 (2026-11-17, T-20261116-001 — design
+ *         docs/designs/2026-11-17-template-lifecycle-batch-design.md §2.3):
+ *         monotonic Last Updated guard coverage for lib v1.7.0 — the design
+ *         reproduction (COMMON-CLAUDE equal-count positional, project date
+ *         strictly newer → template prose + project date verbatim + one
+ *         `RESTAMPED Last Updated (project newer)` line, restamps[] row
+ *         unchanged), second-call idempotency (merged:false, zero RESTAMPED),
+ *         first-run silent no-op for a date-only divergence the guard
+ *         resolves, project-older → template date with no log, equal dates →
+ *         pure template-wins, missing dates on either side → template line,
+ *         the keyed by-key path (including second-call no-op), and dry-run
+ *         purity of the [DRY RUN]-tagged RESTAMPED line.
+ *
+ * @version 1.4.0
  */
 import { describe, test, expect } from 'bun:test';
 import {
@@ -848,5 +861,124 @@ describe('tier-vocabulary restamp rows (v1.6.0, 2026-11-01 addendum)', () => {
     const r = mergeManagedBlocks('plain project', 'plain template', null, 'AGENTS.md', false);
     expect(r.restamps).toEqual([]);
     expect(r.merged).toBe(false);
+  });
+});
+
+describe('monotonic Last Updated guard (v1.7.0, T-20261116-001)', () => {
+  // Mirrors the verified root cause (design
+  // docs/designs/2026-11-17-template-lifecycle-batch-design.md §2 work item A):
+  // templates/common/CLAUDE.md carries its `*Last Updated:` provenance line
+  // INSIDE the last COMMON-CLAUDE zone, so the equal-count positional replace
+  // overwrote a project's newer date with the template's older one (reproduced
+  // empirically pre-fix: project 2026-11-17 lost to template 2026-11-12).
+  const claudeZone = (date: string, prose: string): string =>
+    `<!-- COMMON-CLAUDE:START -->\n## Git & PR Additions (Claude Code)\n\n${prose}\n\n*Last Updated: ${date} — changelog note*\n<!-- COMMON-CLAUDE:END -->`;
+  const keyedZone = (date: string, prose: string): string =>
+    `<!-- WORKSPACE-MANAGED: graft repo context graph -->\n${prose}\n\n*Last Updated: ${date} — changelog note*\n<!-- /WORKSPACE-MANAGED -->`;
+
+  test('design reproduction: COMMON-CLAUDE equal-count positional — project date strictly newer wins verbatim, template prose wins everywhere else', () => {
+    const proj = `HEAD\n\n${claudeZone('2026-11-17', 'project-local prose')}\n\nTAIL\n`;
+    const tpl = `${claudeZone('2026-11-12', 'template prose')}\n`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+    expect(r.merged).toBe(true);
+    // template prose replaced the project's prose…
+    expect(r.content).toContain('template prose');
+    expect(r.content).not.toContain('project-local prose');
+    // …but the project's strictly newer date line survives verbatim
+    expect(r.content).toContain('*Last Updated: 2026-11-17 — changelog note*');
+    expect(r.content).not.toContain('*Last Updated: 2026-11-12');
+    // additive log contract: exactly one RESTAMPED line naming the direction
+    const restamped = r.log.filter((l) => l.includes('RESTAMPED Last Updated (project newer)'));
+    expect(restamped).toHaveLength(1);
+    expect(restamped[0]).toContain('2026-11-17 > 2026-11-12');
+    // v1.6.0 restamps[] semantics untouched: the byte divergence still rows
+    expect(r.restamps).toEqual([{ label: 'COMMON-CLAUDE', key: '', linesBefore: 7, linesAfter: 7 }]);
+  });
+
+  test('idempotency (design §2.3): the second merge call on merged content is a no-op — merged:false, no RESTAMPED', () => {
+    const proj = `HEAD\n\n${claudeZone('2026-11-17', 'project-local prose')}\n\nTAIL\n`;
+    const tpl = `${claudeZone('2026-11-12', 'template prose')}\n`;
+    const first = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+    const second = mergeManagedBlocks(first.content, tpl, null, 'CLAUDE.md', false);
+    expect(second.merged).toBe(false);
+    expect(second.content).toBe(first.content);
+    expect(second.log.join('\n')).not.toContain('RESTAMPED');
+    expect(second.restamps).toEqual([]);
+  });
+
+  test('date-only divergence resolved by the guard is a silent no-op on the first run too', () => {
+    // prose already template-identical; only the date line differs (project newer)
+    const proj = `HEAD\n\n${claudeZone('2026-11-17', 'template prose')}\n\nTAIL\n`;
+    const tpl = `${claudeZone('2026-11-12', 'template prose')}\n`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+    expect(r.merged).toBe(false);
+    expect(r.content).toBe(proj);
+    expect(r.log.join('\n')).not.toContain('RESTAMPED');
+    expect(r.restamps).toEqual([]);
+  });
+
+  test('project date older → template date wins, no RESTAMPED line', () => {
+    const proj = `HEAD\n\n${claudeZone('2026-10-01', 'project-local prose')}\n\nTAIL\n`;
+    const tpl = `${claudeZone('2026-11-12', 'template prose')}\n`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+    expect(r.merged).toBe(true);
+    expect(r.content).toContain('*Last Updated: 2026-11-12 — changelog note*');
+    expect(r.content).not.toContain('2026-10-01');
+    expect(r.log.join('\n')).not.toContain('RESTAMPED');
+  });
+
+  test('equal dates, divergent prose → pure template-wins, no RESTAMPED line', () => {
+    const proj = `HEAD\n\n${claudeZone('2026-11-12', 'project-local prose')}\n\nTAIL\n`;
+    const tpl = `${claudeZone('2026-11-12', 'template prose')}\n`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+    expect(r.merged).toBe(true);
+    expect(r.content).toContain('template prose');
+    expect(r.log.join('\n')).not.toContain('RESTAMPED');
+  });
+
+  test('missing dates on either side → template line (or bare template block), no RESTAMPED line', () => {
+    // project span without the line
+    const projNoDate =
+      'HEAD\n\n<!-- COMMON-CLAUDE:START -->\n## Z\n\nproject-local prose\n<!-- COMMON-CLAUDE:END -->\n\nTAIL\n';
+    const tpl = `${claudeZone('2026-11-12', 'template prose')}\n`;
+    const r1 = mergeManagedBlocks(projNoDate, tpl, null, 'CLAUDE.md', false);
+    expect(r1.content).toContain('*Last Updated: 2026-11-12 — changelog note*');
+    expect(r1.log.join('\n')).not.toContain('RESTAMPED');
+    // template block without the line (equal count, 7 lines) — nothing to
+    // splice, the template wins bare and the project date is NOT carried over
+    const proj = `HEAD\n\n${claudeZone('2026-11-17', 'project-local prose')}\n\nTAIL\n`;
+    const tplNoDate =
+      '<!-- COMMON-CLAUDE:START -->\n## Git & PR Additions (Claude Code)\n\ntemplate prose\n\n\n<!-- COMMON-CLAUDE:END -->\n';
+    const r2 = mergeManagedBlocks(proj, tplNoDate, null, 'CLAUDE.md', false);
+    expect(r2.content).toContain('template prose');
+    expect(r2.content).not.toContain('Last Updated');
+    expect(r2.log.join('\n')).not.toContain('RESTAMPED');
+  });
+
+  test('keyed path: the guard applies to the by-key replace too, second call a no-op', () => {
+    const proj = `HEAD\n\n${keyedZone('2026-11-17', 'project-local prose')}\n\nTAIL\n`;
+    const tpl = `${keyedZone('2026-11-12', 'template prose')}\n`;
+    const r = mergeManagedBlocks(proj, tpl, null, 'AGENTS.md', false);
+    expect(r.merged).toBe(true);
+    expect(r.content).toContain('template prose');
+    expect(r.content).toContain('*Last Updated: 2026-11-17 — changelog note*');
+    const restamped = r.log.filter((l) => l.includes('RESTAMPED Last Updated (project newer)'));
+    expect(restamped).toHaveLength(1);
+    expect(restamped[0]).toContain('(WORKSPACE-MANAGED:graft repo context graph)');
+    const second = mergeManagedBlocks(r.content, tpl, null, 'AGENTS.md', false);
+    expect(second.merged).toBe(false);
+    expect(second.content).toBe(r.content);
+    expect(second.log.join('\n')).not.toContain('RESTAMPED');
+  });
+
+  test('dry-run purity: the guard fires in the log with the [DRY RUN] tag, computed content identical', () => {
+    const proj = `HEAD\n\n${claudeZone('2026-11-17', 'project-local prose')}\n\nTAIL\n`;
+    const tpl = `${claudeZone('2026-11-12', 'template prose')}\n`;
+    const dry = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', true);
+    const wet = mergeManagedBlocks(proj, tpl, null, 'CLAUDE.md', false);
+    // dryRun only tags the logs, never the returned content (lib contract)
+    expect(dry.content).toBe(wet.content);
+    expect(dry.content).toContain('*Last Updated: 2026-11-17 — changelog note*');
+    expect(dry.log.join('\n')).toContain('[DRY RUN] RESTAMPED Last Updated (project newer)');
   });
 });
