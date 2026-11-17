@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261117-013
+kind: manual
+title: >-
+  co-deck platform-mirrored deck skills missing frontmatter version: the
+  scaffold's post-audit emits 33 [WARN] missing 'version:' rows for
+  .agents|.claude|.codex|.gemini/skills/{design,html-build,pdf-export,prep-pdf,
+  presenter-mode,research,slide-layout-gate,version}/SKILL.md (templates/co-deck).
+  Cosmetic noise on every scaffold and every audit run; the skills work but lack
+  the version field every other delivered skill carries (registry/parity gates
+  key off it). Expected: add version frontmatter to the 8 co-deck deck skills
+  (and their mirror copies), versioned consistently with templates/co-deck/
+  skills/SKILLS.md rows. Discovered in the 2026-11-17 scaffold diagnosis
+  (co-deck variant, fleet sweep clean elsewhere).
+priority: low
+status: backlog
+attempts: 0
+created_at: 2026-11-17T00:00:00.000+09:00
+history:
+  - at: 2026-11-17T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null
