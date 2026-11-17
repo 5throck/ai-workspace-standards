@@ -27,7 +27,7 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `security-scan` | 1.3.0 | active | pm | 2026-11-04 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `skill-lifecycle-manager` | 1.5.0 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
-| `sync` | 1.9.2 | active | automation-engineer | 2026-11-12 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
+| `sync` | 1.10.0 | active | automation-engineer | 2026-11-18 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan. 1.10.0: conditional opt-in detection steps (gate check, detect-backport filing, §5.8 warning, §5.6 auto-merge close-out; design 2026-11-17-sync-auto-detection) |
 | `team-builder` | 1.2.0 | active | pm | 2026-11-08 | — | — |
 | `translate` | 1.0.3 | active | pm | 2026-11-08 | — | — |
 | `explain-me` | 1.0.1 | experimental | pm | 2026-08-03 | — | Single-file interactive HTML report generation. Inspired by beret21/reportme (MIT). Korean loanword data in references/loanword-refinements.json |

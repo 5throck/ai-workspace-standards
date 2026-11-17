@@ -3,16 +3,17 @@
 ## Metadata
 - **Skill**: sync
 - **Status**: active
-- **Version**: 1.9.2
+- **Version**: 1.10.0
 - **Owner**: automation-engineer
 - **Created**: 2026-07-08
-- **Last Updated**: 2026-11-17
+- **Last Updated**: 2026-11-18
 
 ## Description
 Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
 
 ## Changelog
 
+- 2026-11-18: v1.10.0 — new "Conditional Steps (opt-in detection)" section: unconditional gate check (variant.json `syncDetection` OR one-off `--detect-backport` argument; absent = skip, zero new behavior), detector invocation (`scripts/detect-backport.ts --json`), §5.4 single-channel filing via `upstream_request_create` (template-defects layer-routed; reusable-assets `[sync-detect:reusable-asset]` + unsure; over-cap/duplicate/already-filed report-only), the §5.8 warning-only unresolved-template-defect line (never a gate) plus the standalone-upgrade gap-case ruling, and the §5.6 auto-merge close-out predicate (author guard, protected-path guard, checks-green arm OR ADR-0105 billing-block arm; real failures never merge). Design docs/designs/2026-11-17-sync-auto-detection-design.md §5.2/§5.4/§5.6/§5.8 (detection batch PR-D; T-20261118-001). Body change (two conditional sections); gate-off /sync behavior byte-identical (AC-1).
 - 2026-11-17: v1.9.2 — step 0 documents the dev-sync 1.50.0 ignore-aware sweep classification (tracked-but-ignored force-staged with `git add -f`, untracked-but-ignored WARN-listed and skipped) and the Session Evidence Duty documents the dev-sync 1.50.0 branch-keyed session-block marker/replace (`<!-- dev-sync:session branch=<branch> -->`, one block per branch per day, `## Skills Used` carried forward verbatim; legacy markerless blocks keep the plain append). Design docs/designs/2026-11-17-root-machinery-batch-design.md §2 (U-20261116-012). Docs-only body change.
 - 2026-11-12: v1.9.1 — owner retargeted pm -> automation-engineer (common agent; D9 of design 2026-11-12-sync-ownership-and-common-automation-engineer, CA-3+AE-3). Metadata-only.
 - 2026-11-07: v1.9.0 — new "Worktree Landing Variant" section: 9-step isolated-worktree landing procedure under concurrency evidence (T-20261106-010; spec `2026-11-07-session-worktree-convention-design`), including the two live-validated mechanics (CWD guard anchors to `import.meta.dir` so in-worktree dev-sync passes by construction; per-worktree private git dir for the PR body file). Docs-only body change.
