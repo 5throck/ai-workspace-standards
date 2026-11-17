@@ -117,7 +117,9 @@ describe("live validator", () => {
       stderr: "pipe",
     });
     const out = proc.stdout.toString();
-    const json = JSON.parse(out.slice(out.indexOf('{\n  "variantsScanned"')));
+    // T-20261117-009 T1: stdout is pure JSON (no TRACE prefix, no slicing).
+    expect(out.split("\n").some((line) => line.startsWith("TRACE"))).toBe(false);
+    const json = JSON.parse(out);
     expect(json.errors.filter((e: { check: string }) => e.check === "variant-common-shadow")).toEqual([]);
     expect(json.warnings.some((w: { check: string }) => w.check === "variant-common-shadow")).toBe(true);
   }, 120000);

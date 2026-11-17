@@ -1,4 +1,11 @@
 #!/usr/bin/env bun
+// @version 1.45.0
+// v1.45.0 (2026-11-17, design docs/designs/2026-11-17-new-project-precheck-argv-design.md, T-20261117-009):
+//          the lifecycle governance pre-check now runs in-process via helpers/validate-output.ts
+//          runGovernancePrecheck (no validator JSON through argv — it exceeded the Windows 32K command line
+//          and silently passed on unparsable input). Spawn failures report the error code/signal and stderr
+//          tail; unparsable validator output blocks the scaffold (fail-closed, no bypass); blocking errors
+//          are scoped to the target variant plus "common".
 // @version 1.44.0
 // v1.44.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
 //          §5.3/§5.4 E5, T-20261107-005): §7.9 reports entries refused by the
@@ -308,6 +315,7 @@ import { SCAFFOLD_COMMON_OWNED_FILES } from "./lib/upgrade-policy.ts";
 import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from "./lib/platforms.ts";
 import { pruneUnselectedProfiles } from "./lib/platform-prune.ts";
 import { appendRegistryRows } from "./helpers/registry-append.ts";
+import { runGovernancePrecheck } from "./helpers/validate-output.ts";
 import { fetchProjectExternalDeps } from "./lib/external-deps.ts";
 
 // ── Argument parsing ───────────────────────────────────────────────────────────
@@ -865,35 +873,19 @@ if (countryConfig?.supported && countryConfig.supported.length > 0) {
 const governanceJson = join(workspaceRoot, "docs", "templates", "lifecycle-governance.json");
 if (existsSync(join(workspaceRoot, "scripts", "validate-templates.ts")) && existsSync(governanceJson)) {
   console.log(`\nRunning lifecycle governance pre-check for variant '${variant}'…`);
-  const govResult = spawnSync(
-    process.execPath,
-    [join(workspaceRoot, "scripts", "helpers", "lifecycle-governance.ts")],
-    { encoding: "utf8" },
-  );
-  const mandatoryDomains = govResult.status === 0 ? govResult.stdout.trim() : "variant,agent,skill";
-
-  const validateResult = spawnSync(
-    process.execPath,
-    [join(workspaceRoot, "scripts", "validate-templates.ts"), "--variant", variant, "--json"],
-    { encoding: "utf8" },
-  );
-  const validateOutput =
-    validateResult.stdout || '{"errors":[{"check":"validate-failed","message":"validate-templates.ts failed to run"}]}';
-
-  const validateCheck = spawnSync(
-    process.execPath,
-    [join(workspaceRoot, "scripts", "helpers", "validate-output.ts"), mandatoryDomains, validateOutput],
-    { encoding: "utf8" },
-  );
-  if (validateCheck.status !== 0) {
+  const precheck = runGovernancePrecheck({ workspaceRoot, variant });
+  for (const line of precheck.lines) {
+    if (precheck.ok) console.log(line);
+    else console.error(line);
+  }
+  if (!precheck.ok) {
     console.error(`\n❌ Lifecycle governance pre-check FAILED for variant '${variant}'.`);
     console.error("   Fix the issues above before creating a project from this variant.");
-    console.error(`   Run: bun scripts/validate-templates.ts --variant ${variant}`);
     if (import.meta.main) {
       process.exit(1);
     }
   }
-  console.log(`  ✅ Lifecycle governance pre-check passed (mandatory domains: ${mandatoryDomains})`);
+  console.log(`  ✅ Lifecycle governance pre-check passed (mandatory domains: ${precheck.mandatoryDomains})`);
 }
 
 // ── Template validation ────────────────────────────────────────────────────────
