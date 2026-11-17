@@ -1,4 +1,23 @@
-// @version 1.3.0 — Generate PDF from self-contained HTML slide deck using Puppeteer.
+// @version 1.3.1 — Generate PDF from self-contained HTML slide deck using Puppeteer.
+// v1.3.1 (design 2026-11-17-co-deck-pdf-followups PR-4, T-20261117-002/-003):
+//   (T-002) the chrome-hide block's legacy selectors (.footer-bar/.note-panel/
+//   .toc — matching none of the audited theme chrome, so the TOC drawer became
+//   page 1 and the speaker-notes panel a trailing page) are EXTENDED with the
+//   audited theme-chrome denylist: `#toc-drawer`, `#toc-overlay`, `#script-panel`
+//   (5/6 themes; outlook has no script-panel), `footer`/`.ppt-footer` (all 6),
+//   `.progress-bar-wrap`. Legacy selectors kept — harmless, and the preview
+//   fixtures still use some. No `body > :not(…)` structural chain (rejected by
+//   design §1.2 — wrappers differ per theme). Result: PDF page count ==
+//   slide count.
+//   (T-003) `--pages` now works on div.slide decks: the filter ADDS the class
+//   `cdk-page-hidden` to filtered slides (inline display:none kept for any
+//   screen-context re-render) and the print block honors it with a `0,2,0`
+//   specificity rule (`section.cdk-page-hidden, .slide.cdk-page-hidden`) that
+//   beats the `0,1,0` section/.slide twin order-independently — the v1.2.0-era
+//   inline `display:none` (no !important) was silently overridden by the twin's
+//   stylesheet `!important`. Class-based per design §2.2 (one source of truth;
+//   inline-!important rejected). "Pages:" log stays computed — truthful once
+//   the §1 page-count invariant holds.
 // v1.3.0 (design 2026-11-16-co-deck-pdf-html-backport PR-2, U-008 item 1):
 //   dual-selector slide discovery — every current theme renders slides
 //   client-side as `div.slide` (ppt-engine runtime), while this script only
@@ -297,6 +316,18 @@ async function main() {
           text-align: left !important;
         }
 
+        /* ── --pages exclusion (v1.3.1, T-20261117-003): the class the filter
+           adds beats the twin rule order-independently — 0,2,0 vs the twin's
+           0,1,0 at equal importance. Break-after resets are belt-and-braces
+           (a display:none box generates no pages or breaks; they keep the
+           last-VISIBLE-slide trailing-break semantics identical to the
+           full-deck case). */
+        section.cdk-page-hidden, .slide.cdk-page-hidden {
+          display: none !important;
+          page-break-after: auto !important;
+          break-after: auto !important;
+        }
+
         /* Centered sections (cover, divider, closing): center horizontally.
            v1.3.0: zen marks slide kinds via dataset.type
            (zen/template.html renderSlide) — the .slide twins map the same
@@ -472,6 +503,24 @@ async function main() {
           max-width: 100% !important;
         }
 
+        /* ── v1.3.1 (T-002): ppt-engine runtime deck wrappers — ppt-engine.css
+           prints slides in block flow (its @media print block resets .slide to
+           position:relative + transform:none) but NEVER resets the wrappers:
+           .ppt-main keeps display:flex and .presentation-container keeps
+           flex:1 + overflow:hidden from screen mode, so the stacked slide flow
+           is clipped to a viewport-height box — pages ≠ slides even after the
+           chrome denylist below (observed: a 3-slide zen fixture rendered 2
+           pages, text of slides 2-3 clipped away). Unblock the flow for print;
+           a legacy <section> deck has neither class and is unaffected. */
+        .ppt-main, .presentation-container {
+          display: block !important;
+          overflow: visible !important;
+          height: auto !important;
+          max-height: none !important;
+          flex: none !important;
+          padding: 0 !important;
+        }
+
         /* ── Hide UI controls in PDF ── */
         .footer-bar,
         .progress-track,
@@ -479,7 +528,23 @@ async function main() {
         .toc,
         .toc-backdrop,
         .toc-toggle,
-        .note-panel {
+        .note-panel,
+        /* v1.3.1 (T-20261117-002): the audited theme-chrome denylist — the
+           legacy vocabulary above matched none of the six themes' actual
+           chrome, so the TOC drawer entered the printed flow as page 1 and
+           the speaker-notes panel as a trailing page. The bare "footer"
+           element selector covers the footer.ppt-footer pair across all
+           six themes; footer-internal counters/progress die with it. Ids are
+           deliberate (design §1.4 R-A1'): not class-greedy, theme-safe —
+           outlook has no #script-panel and needs only its drawer/footer
+           hidden. No structural selector chains: wrappers differ per
+           theme. These ids are RESERVED for theme chrome (design §6). */
+        #toc-drawer,
+        #toc-overlay,
+        #script-panel,
+        footer,
+        .ppt-footer,
+        .progress-bar-wrap {
           display: none !important;
         }
 
@@ -531,7 +596,14 @@ async function main() {
       const hidden = await page.evaluate(({ sel, limit }) => {
         const slides = Array.from(document.querySelectorAll(sel));
         for (let i = limit; i < slides.length; i++) {
+          // v1.3.1 (T-20261117-003): class-based exclusion — a plain inline
+          // display:none is silently overridden by the print block's
+          // `section, .slide { display: flex !important }` twin (a stylesheet
+          // !important beats a normal inline style). The print block honors
+          // .cdk-page-hidden at 0,2,0 specificity. The inline style stays
+          // (it makes the hide effective in any screen-context re-render).
           (slides[i] as HTMLElement).style.display = 'none';
+          (slides[i] as HTMLElement).classList.add('cdk-page-hidden');
         }
         return slides.length - limit;
       }, { sel: slideSelector, limit: pageLimit });

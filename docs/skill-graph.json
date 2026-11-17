@@ -2925,6 +2925,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261117-04",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -12485,6 +12490,18 @@
       "type": "cites_skill",
       "from": "dec:DEC-20261117-03",
       "to": "skill:root/design-foundation",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261117-04",
+      "to": "skill:common/decision-record",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261117-04",
+      "to": "skill:root/sync",
       "source": "skills_used"
     },
     {
