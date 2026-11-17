@@ -9011,8 +9011,8 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "29566e4228b0bf3d",
-      "version": "1.8.0",
+      "content_hash": "6296d77566fc68ca",
+      "version": "1.9.0",
       "mirrors": [
         "skills/project-resync/SKILL.md",
         ".claude/skills/project-resync/SKILL.md",

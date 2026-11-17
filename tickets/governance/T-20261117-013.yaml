@@ -28,5 +28,5 @@ result: >-
   rejects quoted values); format sweep unquoted + patch-bumped 48 SKILL.md
   copies (8 skills x SSOT + 5 platforms) + variant SKILLS.md rows
   (CV-02-sanctioned format-sweep bumps); hook-regex WARNs 32 -> 0; VA-07/VA-08
-  parity PASS; QA verdict READY
+  parity PASS; QA verdict READY; PR #2080, merge bcfa66056
 error: null
