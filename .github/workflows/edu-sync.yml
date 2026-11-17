@@ -209,6 +209,11 @@ jobs:
           set -e
           git config --global credential.helper \
             '!f() { printf "username=x-access-token\npassword=%s\n" "$EDU_SYNC_PAT"; }; f'
+          # Fixed deterministic committer identity: `git am --keep-non-patch`
+          # needs one and the runner has none (run 43532832172, 2026-11-14:
+          # "Committer identity unknown / fatal: empty ident name").
+          git config --global user.name "edu-sync[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           shopt -s nullglob
           declare -A REPOS=(
             [intro-to-ai-harness]="/tmp/intro-to-ai-harness"

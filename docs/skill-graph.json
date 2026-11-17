@@ -2945,6 +2945,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261117-09",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -12529,6 +12534,12 @@
       "type": "cites_skill",
       "from": "dec:DEC-20261117-08",
       "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261117-09",
+      "to": "skill:root/ci-triage",
       "source": "skills_used"
     },
     {
