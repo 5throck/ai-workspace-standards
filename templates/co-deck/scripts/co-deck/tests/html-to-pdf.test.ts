@@ -1,3 +1,17 @@
+// @version 1.2.0 — PR-5 folded deferrals (design 2026-11-17-co-deck-pdf-
+//   followups §1.3 auditor disposition, DEC-20261117-04 appended entry): the
+//   two verification items PR-4 deferred. (a) outlook + pitch spot-render
+//   pins — the §1.2 denylist + wrapper reset are theme-safe: a built outlook
+//   deck (no ppt-engine wrappers, own nav chrome) and a built pitch deck
+//   (carries .presentation-container) each render MEASURED page count ==
+//   slide count. (b) first/last page content identity — pdf-lib alone cannot
+//   do this (it reads the page tree and counts pages; it has no glyph/text
+//   decoder, so page CONTENT is invisible to it), so the identity pins run
+//   through pdftotext with the repo's graceful-skip convention
+//   (gen-slides-pdf-render.test.ts): page 1 is slide 1 (its title and its
+//   in-card notes render; the TOC drawer's later-slide titles do not), the
+//   last page is the last slide (its title renders; the notes text that a
+//   leaked #script-panel trailing page would carry does not).
 // @version 1.1.0 — v1.3.1 pins (design 2026-11-17-co-deck-pdf-followups PR-4,
 //   T-20261117-002/-003): MEASURED PDF page counts via pdf-lib (the "Pages:"
 //   log is computed, not measured — design §2.1). T-002 chrome-hide denylist:
@@ -335,4 +349,158 @@ describe.skipIf(!haveChrome)('html-to-pdf v1.3.1 T-003 — --pages class-based e
     scan(cssDir);
     expect(offenders).toEqual([]);
   });
+});
+
+// ── v1.2.0 (PR-5): folded PR-4 deferrals — theme-safety spot renders +
+//    first/last page content identity (DEC-20261117-04 appended entry) ───────
+//
+// Design §1.3's theme-safety pin ("spot-render an outlook and a pitch deck
+// fixture: page count == slide count") and content-identity pin ("first page
+// is slide 1, last page is the last slide") were deferred from PR-4's battery
+// into this batch. Both run here against BUILT decks — no outlook/pitch HTML
+// fixtures existed in the template test env, and buildThemeDeck produces them
+// at test time (the video-slide suite builds all six themes the same way).
+
+const havePdftotext = spawnSync('pdftotext', ['-v'], { encoding: 'utf-8' }).status !== null;
+
+/** Single-page text extraction (poppler -f/-l). pdf-lib cannot do this — it
+ *  reads the page tree (counts, boxes) but has no glyph/text decoder; this
+ *  mirrors the graceful-skip convention of gen-slides-pdf-render.test.ts.
+ *  Exit check reads `status` (bun's spawnSync leaves `exitCode` undefined on
+ *  success — the sibling file's exitCode-based check silently vacates its
+ *  null-guarded pins under bun). */
+function pdfPageText(pdfPath: string, page: number): string | null {
+  if (!havePdftotext) return null;
+  const bin = spawnSync('pdftotext', ['-f', String(page), '-l', String(page), pdfPath, '-'],
+    { encoding: 'utf-8' });
+  return bin.status === 0 || bin.exitCode === 0 ? bin.stdout : null;
+}
+
+/** Build a full ppt-engine deck of a non-zen theme at the house deliverables
+ *  layout (style: classic — the proven generic pairing, video-slide suite). */
+function buildSpotDeck(theme: string): { dir: string; htmlPath: string } {
+  const dir = makeFixtureDir(`spot-${theme}`);
+  const htmlPath = join(dir, 'lecture_v1.html');
+  const deck = buildThemeDeck({
+    root: ROOT,
+    projectPath: dir,
+    theme,
+    style: 'classic',
+    title: 'Theme Safety Spot Fixture',
+    slideData: [
+      { section: 'S1', title: `${theme} Spot One`, bullets: ['one', 'two'] },
+      { section: 'S1', title: `${theme} Spot Two`, bullets: ['three'] },
+      { section: 'S1', title: `${theme} Spot Three`, bullets: ['four'] },
+    ],
+    outputPath: htmlPath,
+  });
+  expect(deck.errors).toHaveLength(0);
+  writeFileSync(htmlPath, deck.html, 'utf-8');
+  return { dir, htmlPath };
+}
+
+describe.skipIf(!haveChrome)('html-to-pdf PR-5 folded deferrals — outlook/pitch spot renders (pages == slides)', () => {
+  test('a built outlook deck renders MEASURED page count == slide count (own nav chrome, no ppt-engine wrappers)', async () => {
+    const deck = buildSpotDeck('outlook');
+    const outPath = join(deck.dir, 'spot.pdf');
+    const res = runTool(deck.htmlPath, ['--out', outPath]);
+    expect(res.status).toBe(0);
+    const out = `${res.stdout ?? ''}${res.stderr ?? ''}`;
+    expect(out).toMatch(/Slides: 3/);
+    expect(await pdfPageCount(outPath)).toBe(3);
+  }, 240000);
+
+  // Pitch spot-render disposition (DEC-20261117-04 fallback branch): the
+  // built pitch deck CANNOT render through html-to-pdf on origin/main — a
+  // PRE-EXISTING template defect unrelated to this batch. pitch/template.html
+  // calls `buildBullets(leftCol, data.bullets)` (:219, byte-identical on
+  // origin/main) but never defines it, so initSlides throws
+  // "buildBullets is not defined" in the renderer's Chrome, 0 slides are
+  // discoverable, and the tool exits 1 with the loud zero-slide error.
+  // Fixing it would mean touching pitch/template.html — a 4th file, outside
+  // PR-5's 3-file scope. Per the auditor disposition the pitch pin falls back
+  // to the static selector-safety check below (the wrapper-reset coverage the
+  // measured pitch render would have exercised is carried by the zen decks,
+  // which contain both wrappers). Needs its own ticket.
+  test('pitch chrome is statically covered by the injected denylist + wrapper reset (measured spot-render blocked by a pre-existing pitch template defect)', () => {
+    // evidence of the blocker: the undefined helper call, no definition
+    const pitchSrc = readFileSync(join(ROOT, 'docs', 'html-themes', 'themes', 'pitch', 'template.html'), 'utf-8');
+    expect(pitchSrc).toContain('buildBullets(leftCol');
+    expect(pitchSrc).not.toMatch(/function\s+buildBullets\b/);
+    // static selector safety: pitch's chrome ids + wrapper are all covered
+    const src = readFileSync(TOOL, 'utf-8');
+    for (const sel of ['#toc-drawer', '#toc-overlay', '.ppt-footer', 'footer']) {
+      expect(src).toContain(sel);
+    }
+    expect(src).toContain('.ppt-main, .presentation-container');
+    // and the template itself carries exactly those chrome hooks
+    for (const id of ['toc-drawer', 'toc-overlay', 'presentation']) {
+      expect(pitchSrc).toContain(`id="${id}"`);
+    }
+    expect(pitchSrc).toContain('ppt-footer');
+  });
+
+  test('a pitch deck built today still exits loud (zero-slide error) — pins the blocker this fallback documents', async () => {
+    const deck = buildSpotDeck('pitch');
+    const outPath = join(deck.dir, 'spot.pdf');
+    const res = runTool(deck.htmlPath, ['--out', outPath]);
+    expect(res.status).toBe(1);
+    const out = `${res.stdout ?? ''}${res.stderr ?? ''}`;
+    expect(out).toContain('Zero slides found');
+    expect(existsSync(outPath)).toBe(false);
+  }, 240000);
+});
+
+describe.skipIf(!haveChrome)('html-to-pdf PR-5 folded deferrals — first/last page content identity', () => {
+  // Own fixture (PR-4 pins keep their deck untouched): notes on slide 1 make
+  // the identity pins two-sided — the notes text legitimately renders IN the
+  // slide-1 card, and a leaked #script-panel would also put it on a trailing
+  // page. Unique titles catch a leaked TOC drawer on page 1.
+  const idDir = makeFixtureDir('identity');
+  const idHtmlPath = join(idDir, 'identity_v1.html');
+  const idPdfPath = join(idDir, 'identity_v1.pdf');
+  beforeAll(() => {
+    const deck = buildThemeDeck({
+      root: ROOT,
+      projectPath: idDir,
+      theme: 'zen',
+      style: 'white-bubble',
+      title: 'Page Identity Fixture',
+      slideData: [
+        { section: 'S1', title: 'Identity Slide One First', bullets: ['alpha'],
+          notes: ['Source: Identity Notes Panel Probe Line'] },
+        { section: 'S1', title: 'Identity Slide Two Middle', bullets: ['beta'] },
+        { section: 'S1', title: 'Identity Slide Three Last', bullets: ['gamma'] },
+      ],
+      outputPath: idHtmlPath,
+    });
+    expect(deck.errors).toHaveLength(0);
+    writeFileSync(idHtmlPath, deck.html, 'utf-8');
+    const res = runTool(idHtmlPath, ['--out', idPdfPath]);
+    expect(res.status).toBe(0);
+  }, 240000);
+
+  test.skipIf(!havePdftotext)('MEASURED count == 3 and page 1 is slide 1 (title + in-card notes, no drawer titles)', async () => {
+    expect(await pdfPageCount(idPdfPath)).toBe(3);
+    const first = pdfPageText(idPdfPath, 1);
+    expect(first).not.toBeNull();
+    // normalize — wrapped slide titles extract with internal newlines
+    const flat = first!.replace(/\s+/g, ' ');
+    expect(flat).toContain('Identity Slide One First');
+    // the in-card notes band renders on slide 1's page
+    expect(flat).toContain('Identity Notes Panel Probe Line');
+    // a leaked TOC drawer page would carry the later slides' titles
+    expect(flat).not.toContain('Identity Slide Three Last');
+    expect(flat).not.toContain('Identity Slide Two Middle');
+  }, 120000);
+
+  test.skipIf(!havePdftotext)('the last page is the last slide (its title, no notes-panel text, no slide-1 content)', async () => {
+    const last = pdfPageText(idPdfPath, 3);
+    expect(last).not.toBeNull();
+    const flat = last!.replace(/\s+/g, ' ');
+    expect(flat).toContain('Identity Slide Three Last');
+    // a leaked #script-panel trailing page would carry the notes text
+    expect(flat).not.toContain('Identity Notes Panel Probe Line');
+    expect(flat).not.toContain('Identity Slide One First');
+  }, 120000);
 });

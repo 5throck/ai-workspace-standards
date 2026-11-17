@@ -100,9 +100,15 @@
 
 /* PDF engine parity (design: 2026-11-10-pretendard-font-parity): gen-slides-pdf.ts embeds
    Pretendard; HTML resolves to fallback fonts when Noto Sans KR is absent. Load the local
-   Pretendard TTFs and align the stack. */
-@font-face { font-family: 'Pretendard'; src: url('../../../../presentations/assets/fonts/Pretendard-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Pretendard'; src: url('../../../../presentations/assets/fonts/Pretendard-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+   Pretendard TTFs and align the stack.
+   T-20261117-004 (design 2026-11-17-co-deck-pdf-followups §3): repointed to the
+   migrated deliverables/ layout (the 2026-11-15 scaffold migration stranded the
+   pre-migration font paths). Resolution is relative to this CSS file
+   (consumer-independent): ../../../../ = the variant root →
+   deliverables/assets/fonts/ (the download-font.ts provisioning target).
+   Absent TTFs degrade via font-display: swap (unchanged degradation). */
+@font-face { font-family: 'Pretendard'; src: url('../../../../deliverables/assets/fonts/Pretendard-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Pretendard'; src: url('../../../../deliverables/assets/fonts/Pretendard-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
 
 :root {
   --font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;

@@ -1,4 +1,12 @@
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (design 2026-11-17-co-deck-pdf-followups PR-5, T-20261117-005,
+//   owner decision O-5 default Option A): zen contactName DOM pins —
+//   contactName renders as the FIRST plain .contact-item (regular weight,
+//   NOT .contact-primary) in the PDF known-list order (name, email, linkedin,
+//   phone); the bullets gate widens to include contactName, so a
+//   contactName+bullets mixed slide renders the name line and NO bullets
+//   (the HTML side of the mixed parity pin — the PDF side lives in
+//   gen-slides-pdf-render.test.ts; bullets-only S47 case unchanged).
 // v1.2.0 (design 2026-11-16-co-deck-pdf-html-backport PR-2, U-20261116-009 item 2
 //   + U-008 item 4): FootnoteBuilder notes/footnotes split pins (source + CSS +
 //   DOM) and zen contact-bullets fallback DOM pins. The DOM suite launches
@@ -398,6 +406,9 @@ describe('notes/footnotes split — source and CSS pins', () => {
 //      contact slide renders the speaker title + up to 5 .contact-item lines
 //      with the first as .contact-primary; a contact*-first slide ignores
 //      bullets (parity with the PDF renderer's contact*-first contract).
+//   3. zen contactName parity (T-20261117-005 / O-5 Option A) — contactName
+//      renders as the first plain .contact-item; the gate includes it, so a
+//      contactName+bullets mixed slide renders name-only (PDF parity).
 
 const CHROME_CANDIDATES = [
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -427,6 +438,16 @@ const DOM_SLIDE_DATA = [
   { isContactSlide: true, title: 'Reach Out',
     contactEmail: 'keep@existing.deck',
     bullets: ['Fallback bullet that must stay hidden'] },
+  // v1.3.0 (T-20261117-005, O-5 Option A): appended AFTER the existing pair —
+  // indices 4/5 are pinned by the v1.2.0 tests above and must not shift.
+  { isContactSlide: true, title: 'Name Only',
+    contactName: '김데크 대표' },
+  { isContactSlide: true, title: 'Name And Bullets',
+    contactName: '혼합 슬라이드 이름',
+    bullets: ['Mixed bullet one must stay hidden', 'Mixed bullet two must stay hidden'] },
+  { isContactSlide: true, title: 'Name Then Email',
+    contactName: 'Order Name',
+    contactEmail: 'order@deck.test' },
 ];
 
 const domDeck = (() => {
@@ -556,6 +577,72 @@ describe.skipIf(!chromePath)('notes/footnotes split — rendered DOM (Chrome)', 
     expect(r.texts[0]).toContain('keep@existing.deck');
     expect(r.hasPrimary).toBe(false);
     expect(r.texts.join(' ')).not.toContain('Fallback bullet that must stay hidden');
+  });
+
+  // ── v1.3.0 (T-20261117-005, O-5 Option A): contactName pins ──────────────
+  // The PDF known-list renders contactName first, regular weight
+  // (gen-slides-pdf: known = [contactName, contactEmail, contactLinkedIn,
+  // contactPhone]; primaryFirst bold applies to the bullets fallback only).
+  // Option A aligns the HTML: name first, plain .contact-item, gate widened.
+
+  test('a contactName-only slide renders the name as the first plain .contact-item (no bullets fallback)', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[6];
+      const items = Array.from(slide.querySelectorAll('.slide-content > .contact-item')) as HTMLElement[];
+      return {
+        title: (slide.querySelector('.slide-title') as HTMLElement | null)?.textContent ?? null,
+        itemCount: items.length,
+        firstText: items[0]?.textContent ?? null,
+        firstIsPrimary: items[0]?.classList.contains('contact-primary') ?? false,
+        hasPrimary: items.some((el) => el.classList.contains('contact-primary')),
+        slideText: (slide.querySelector('.slide-content') as HTMLElement | null)?.textContent ?? '',
+      };
+    });
+    expect(r.title).toContain('Name Only');
+    expect(r.itemCount).toBe(1);
+    expect(r.firstText).toContain('김데크 대표');
+    // plain line — regular weight; .contact-primary is the bullets-fallback
+    // first line's emphasis and would re-introduce an HTML/PDF divergence
+    expect(r.firstIsPrimary).toBe(false);
+    expect(r.hasPrimary).toBe(false);
+  });
+
+  test('a contactName+bullets mixed slide renders the name line and NO bullets (HTML side of the mixed parity pin)', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[7];
+      const items = Array.from(slide.querySelectorAll('.slide-content > .contact-item')) as HTMLElement[];
+      return {
+        itemCount: items.length,
+        texts: items.map((el) => el.textContent),
+        hasPrimary: items.some((el) => el.classList.contains('contact-primary')),
+        slideText: (slide.querySelector('.slide-content') as HTMLElement | null)?.textContent ?? '',
+      };
+    });
+    // the widened gate counts contactName as a contact line, so the
+    // fallback-only bullets contract keeps bullets out — matching the PDF,
+    // which already rendered name-only for this combination (DEC-20261117-01)
+    expect(r.itemCount).toBe(1);
+    expect(r.texts[0]).toContain('혼합 슬라이드 이름');
+    expect(r.hasPrimary).toBe(false);
+    expect(r.texts.join(' ')).not.toContain('Mixed bullet one must stay hidden');
+    expect(r.texts.join(' ')).not.toContain('Mixed bullet two must stay hidden');
+    expect(r.slideText).not.toContain('Mixed bullet');
+  });
+
+  test('a contactName+contactEmail slide renders name first, then email (PDF known-list order, both plain)', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[8];
+      const items = Array.from(slide.querySelectorAll('.slide-content > .contact-item')) as HTMLElement[];
+      return {
+        itemCount: items.length,
+        texts: items.map((el) => el.textContent),
+        primaries: items.map((el) => el.classList.contains('contact-primary')),
+      };
+    });
+    expect(r.itemCount).toBe(2);
+    expect(r.texts[0]).toContain('Order Name');
+    expect(r.texts[1]).toContain('order@deck.test');
+    expect(r.primaries).toEqual([false, false]);
   });
 });
 

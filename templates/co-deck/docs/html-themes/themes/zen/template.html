@@ -228,7 +228,16 @@
         addZenOverlay(card);
         var content = el("div", "slide-content");
         content.appendChild(inlineTitle("h1", title));
-        var hasContactLine = !!(data.contactEmail || data.contactLinkedIn || data.contactPhone);
+        // contactName parity (T-20261117-005, design
+        // 2026-11-17-co-deck-pdf-followups §4.2, owner decision O-5 default
+        // Option A): render contactName as the FIRST plain .contact-item —
+        // regular weight, NOT .contact-primary — matching the PDF known-list
+        // order and weight (gen-slides-pdf: name first, regular; the bold
+        // primaryFirst treatment is bullets-fallback only). The gate widens
+        // by one field on both sides symmetrically, so the fallback-only
+        // bullets contract below (DEC-20261117-01) is preserved exactly.
+        var hasContactLine = !!(data.contactName || data.contactEmail || data.contactLinkedIn || data.contactPhone);
+        if (data.contactName) content.appendChild(el("p", "contact-item", data.contactName));
         if (data.contactEmail) content.appendChild(el("p", "contact-item", data.contactEmail));
         if (data.contactLinkedIn) content.appendChild(el("p", "contact-item", data.contactLinkedIn));
         if (data.contactPhone) content.appendChild(el("p", "contact-item", data.contactPhone));
