@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Declares the common layer contract: which agents and skills are provided by templates/common/, their versions, and override governance rules. Variants inherit these via new-project.ts and may declare overrides in their variant.json. Country-scoped skills (k-law/k-dart/k-kosis, tracked in workspace-schema.json country_scoped_assets) and variant-scoped skills (tracked in variant_scoped_skills, living in templates/co-*/skills/) are deliberately out of this contract. The common_platform_skill_exclusions section records platform skills deliberately outside this inventory (L0-only operator skills, claude-only tools, variant-scoped skills); every skill dir under the templates/common/.{claude,gemini,agents,codex}/skills/ mirrors must be listed here, in common_skills/common_platform_skills, or documented as an exclusion (T-20260924-002 full-inventory ruling).",
   "governance": {
     "anti_swelling_threshold": 0.5,
@@ -575,7 +575,7 @@
     }
   },
   "common_scripts": {
-    "description": "Scripts shared across L0, L1, and L2 layers. Source of truth: scripts/SCRIPTS.md Layer column. Scripts with Layer='L0+L1' are in templates/common/scripts/ but not in L2. Scripts with Layer='L0+L1+L2' are copied to all layers during scaffolding.",
+    "description": "Scripts shared across L0, L1, and L2 layers. Source of truth: scripts/SCRIPTS.md Layer column. Scripts with Layer='L0+L1' are in templates/common/scripts/ but not in L2. Scripts with Layer='L0+L1+L2' are copied to all layers during scaffolding. Detection batch PR-C (2026-11-18, spec docs/designs/2026-11-17-sync-auto-detection-design.md \u00a75.7 P2, T-20261118-001): detect-backport.ts v1.0.0 joins the L0+L1 delivered set (SCRIPTS.md Layer column updated on both layers); validate-templates.ts v1.86.0 carries the syncDetection gate shape check whose SSOT is parseSyncDetection in the delivered detector.",
     "ssot": "scripts/SCRIPTS.md",
     "layer_column": "Layer",
     "layer_values": {

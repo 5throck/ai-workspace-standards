@@ -1,8 +1,25 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.85.0
+ * @version 1.86.0
  *
+ * v1.86.0 (2026-11-18, spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1,
+ *          DEC-20261117-06; detection batch PR-C, T-20261118-001): new check `sync-detection` —
+ *          a variant.json `syncDetection` block (optional top-level key, absent = OFF per the
+ *          §5.1 gate ruling) is shape-checked wherever a variant.json is read: template
+ *          variants (Check 2 loop, B-07 arm) and delivered Projects/<name>/variant.json
+ *          (checkProjectSyncDetectionGates, the fleet-wide sibling of the ADR-0091 R3
+ *          country_config check). The shape ruling is reused verbatim from
+ *          parseSyncDetection (scripts/detect-backport.ts v1.0.0 — the SSOT the detector
+ *          itself runs, so the validator and the runtime gate can never diverge): non-object
+ *          block, non-boolean/missing `enabled`, `max_tickets_per_sync` outside 1..5 or
+ *          non-integer, and `retired_tokens` not an array of strings each FAIL loudly with a
+ *          clear message — a silently ignored misconfigured gate would defeat the opt-in
+ *          (detector treats a malformed block as OFF + WARN; the validator owns the FAIL).
+ *          A present-and-valid block passes; the absent key is a no-op (every project starts
+ *          OFF by omission). schema registration pin: the block is declared in
+ *          docs/workspace-schema.json variant_extensions._shared.syncDetection and its
+ *          hand-maintained L1 pair templates/common/docs/workspace-schema.json.
  * v1.85.0 (2026-11-17, design docs/designs/2026-11-17-template-lifecycle-batch-design.md §4.2,
  *          DEC-20261117-05; T-20261116-004 batch PR-5): `variant-common-shadow` gains the
  *          `zone-override` allowlist class (O-9 Option A — checker-side, no delivery change).
@@ -713,6 +730,7 @@ import {
 import { PLATFORMS } from "./validate-model-registry.ts";
 import { PLATFORM_AGENT_ADAPTERS } from "./sync-agent-mirrors.ts";
 import { loadSkillGraph, findCapabilityDivergence } from "./lib/skill-graph-compat.ts";
+import { parseSyncDetection } from "./detect-backport.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
 import { evaluateScaffoldPackageContract } from "./lib/package-merge.ts";
 import { parseGeneratorManifest, validateManifestAgainstRoot } from "./lib/generator-manifest.ts";
@@ -1764,6 +1782,12 @@ function checkVariantManifests(): Map<string, VariantManifest> {
           );
         }
       }
+
+      // B-07: syncDetection shape check (spec docs/designs/2026-11-17-sync-auto-detection-design.md
+      // §5.1, DEC-20261117-06 — detection batch PR-C). Optional top-level key, absent = OFF;
+      // a malformed block FAILs loudly (the detector itself treats one as OFF + WARN — the
+      // validator owns the FAIL so a misconfigured gate can never be silently ignored).
+      checkVariantSyncDetectionBlock(dir, raw);
 
       // Check if docs/countries/*.md exists but no country_config declared
       const countriesDir = join(TEMPLATES_DIR, dir, "docs", "countries");
@@ -8486,6 +8510,36 @@ function checkPmExtendsStubBodies(): void {
 // still carrying the literal template placeholders (pre-2.13 residue), stays
 // visible until the project team fills the identity seed. Regrowth-prevention
 // sibling of T-20260924-004/007 for the identity class.
+// syncDetection gate shape check (spec docs/designs/2026-11-17-sync-auto-detection-design.md
+// §5.1, DEC-20261117-06 — detection batch PR-C): the variant.json `syncDetection` block
+// (optional top-level key; ABSENT KEY == OFF) is validated by the SSOT shape parser
+// parseSyncDetection (scripts/detect-backport.ts) so the validator and the runtime gate
+// can never diverge. Returns [] for absent/valid blocks and one clear message per
+// malformed shape (non-object block, non-boolean/missing enabled, cap outside 1..5 or
+// non-integer, retired_tokens not a string array). Unit-pinned by
+// tests/unit/validate-templates-sync-detection.test.ts.
+export function collectSyncDetectionIssues(raw: Record<string, unknown> | null): string[] {
+  const gate = parseSyncDetection(raw);
+  if (gate === null || !gate.configError) return [];
+  return [gate.configError];
+}
+
+function checkVariantSyncDetectionBlock(dir: string, raw: Record<string, unknown>): void {
+  const present = raw.syncDetection !== undefined;
+  const issues = collectSyncDetectionIssues(raw);
+  for (const issue of issues) {
+    fail(
+      dir,
+      "sync-detection",
+      `templates/${dir}/variant.json ${issue}`,
+      "Fix the syncDetection block per docs/workspace-schema.json variant_extensions._shared.syncDetection (spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1) — or delete the block to turn the feature off (absent key == OFF)",
+    );
+  }
+  if (present && issues.length === 0 && !JSON_MODE) {
+    pass(`templates/${dir}/variant.json syncDetection gate declaration OK (spec §5.1)`);
+  }
+}
+
 // T-20260927-012 (validator-hardening, ADR-0091 R3): the B-04 uniform country_config
 // declaration check scopes templates/ only — project-side variant.json could drift by
 // omission. Every delivered Projects/<name>/variant.json declares the mechanism too.
@@ -8526,6 +8580,46 @@ function checkProjectCountryConfigDeclarations(): void {
       );
     } else {
       pass(`Projects/${entry.name}/variant.json country_config declaration OK (ADR-0091 R3)`);
+    }
+  }
+}
+
+// Check: project-sync-detection-gate (spec
+// docs/designs/2026-11-17-sync-auto-detection-design.md §5.1, DEC-20261117-06 —
+// detection batch PR-C). The fleet-wide sibling of checkVariantSyncDetectionBlock:
+// a delivered Projects/<name>/variant.json may declare the opt-in `syncDetection`
+// gate (optional top-level key; absent = OFF — every project starts off by omission
+// and the validator must NOT require the key). A present-but-malformed block FAILs
+// loudly here — the detector itself only WARNs and stays off, so the validator owns
+// the fail-closed leg (a silently ignored misconfigured gate would defeat the opt-in).
+function checkProjectSyncDetectionGates(): void {
+  const projectsDir = join(ROOT, "Projects");
+  if (!existsSync(projectsDir)) return;
+  for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
+    const variantJsonPath = join(projectsDir, entry.name, "variant.json");
+    if (!existsSync(variantJsonPath)) continue; // projects without a variant.json are out of scope
+    let raw: Record<string, unknown> | null = null;
+    try {
+      raw = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      // Unparseable JSON is already reported by checkProjectCountryConfigDeclarations;
+      // skip here to avoid a double report for the same defect.
+      continue;
+    }
+    const present = raw.syncDetection !== undefined;
+    const issues = collectSyncDetectionIssues(raw);
+    for (const issue of issues) {
+      fail(
+        entry.name,
+        "sync-detection",
+        `Projects/${entry.name}/variant.json ${issue}`,
+        "Fix the syncDetection block per docs/workspace-schema.json variant_extensions._shared.syncDetection (spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1) — or delete the block to turn the feature off (absent key == OFF)",
+      );
+    }
+    if (present && issues.length === 0 && !JSON_MODE) {
+      pass(`Projects/${entry.name}/variant.json syncDetection gate declaration OK (spec §5.1)`);
     }
   }
 }
@@ -9259,6 +9353,7 @@ function main(): number {
   checkVariantReadinessGate(); // VRG-01: continuous Variant Readiness Gate enforcement
   checkProjectIdentityPlaceholders(); // fleet WARN: Projects/*/docs identity placeholders (spec 2026-09-24-scaffold-identity-overview-design)
   checkProjectCountryConfigDeclarations(); // T-20260927-012: project-side half of the ADR-0091 R3 uniform declaration
+  checkProjectSyncDetectionGates(); // sync-auto-detection PR-C: project-side syncDetection gate shape (spec §5.1)
   checkAgentsMdSizeBudget(); // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
   checkAgentsMdPointerIntegrity(); // ADR-0090 W0: pointer-table references resolve on disk
   checkAgentsMdDestructiveFileOpsPin(); // §7 baseline pin: destructive-file-operations bullet on every template AGENTS.md (WARN; T-20261104-004 item 4)

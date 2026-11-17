@@ -269,6 +269,17 @@
           "supported"
         ],
         "notes": "profiles_dir is 'docs/countries' in all current variants. Each supported code must have <profiles_dir>/<CODE>.md with frontmatter code/name/status/last_verified. Profiles are advisory jurisdiction knowledge (loaded at engagement start), never auto-executed. Country != language — language policy remains i18n.locale_codes."
+      },
+      "syncDetection": {
+        "description": "Opt-in sync-embedded detection gate (spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1, DEC-20261117-06). Optional top-level variant.json key — ABSENT KEY MEANS OFF (gate-off /sync is byte-identical to the pre-feature pipeline; upgrades never rewrite variant.json — PROJECT_STATE per ADR-0073 — so the opt-in flip can never be clobbered by a template wave). When enabled, the project's /sync flow runs scripts/detect-backport.ts (E1-E4 evidence classes) and files backport-candidate tickets via the upstream-request MCP; promotion into templates/ stays human-judged (ADR-0031). A malformed block FAILS validate-templates.ts (a silently ignored misconfigured gate would defeat the opt-in) and the detector itself treats it as OFF with a WARN.",
+        "required_fields": [
+          "enabled"
+        ],
+        "optional_fields": [
+          "max_tickets_per_sync",
+          "retired_tokens"
+        ],
+        "notes": "enabled: boolean, required (false = feature declared but off). max_tickets_per_sync: optional integer 1..5, default 3 — per-sync filing cap, allocation E1 > E2 > E3 > E4; overflow stays in the report as over-cap rows. retired_tokens: optional string[] — identifiers this project has migrated away from; a SYNC-class file still carrying one is a template-defect candidate (whole-token \\b-bounded match). One-off override: the sync skill accepts --detect-backport to run detection for a single invocation without flipping config (explicit argument > config)."
       }
     },
     "co-abap": {
