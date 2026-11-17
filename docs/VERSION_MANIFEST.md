@@ -1,7 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-17T16:02:01.908Z
-**Generated**: 2026-11-17T15:42:08.361Z
+**Generated**: 2026-11-17T16:36:32.433Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -114,7 +113,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.2.0 | scripts/archive-memory.ts | fs, path |
-| audit.ts | 2.68.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
+| audit.ts | 2.69.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
 | backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
