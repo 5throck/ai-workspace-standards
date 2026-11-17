@@ -7,12 +7,28 @@ title: >-
   8 (follow-ups). Follow-up from the upgrade-project/dev-sync batch (PRs
   #2045-#2047).
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-16T19:35:50.014+09:00'
 history:
   - at: '2026-11-16T19:35:50.014+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-17T15:37:29.495+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed by managed-block-merge.ts v1.7.0 (template-lifecycle PR-1,
+  5throck/ai-workspace-standards PR #2064, merge on green CI): O-7 Option A
+  monotonic Last Updated guard wired into BOTH template-wins paths (keyed +
+  equal-count positional) — template prose wins, strictly-newer project date
+  spliced verbatim with RESTAMPED log; idempotency per design §2.3 (second call
+  merged:false) achieved via call-site no-op when the guard-resolved replacement
+  equals the on-disk span — design §2.2's rationale was mechanically imprecise
+  and the QA correction paragraph landed in the design doc (PR-1). 8 new tests
+  (50/50 suite), L0→L1 mirror published in the same PR. QA findings recorded:
+  L0+L1 registry rows invisible to verify-scripts drift check (follow-up ticket
+  pending), $-metacharacter replace hardening deferred to next bump. Design:
+  docs/designs/2026-11-17-template-lifecycle-batch-design.md §2,
+  DEC-20261117-05.
 error: null

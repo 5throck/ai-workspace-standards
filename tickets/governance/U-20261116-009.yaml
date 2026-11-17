@@ -3,14 +3,28 @@ id: U-20261116-009
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-16T13:44:56.825+09:00
+created_at: '2026-11-16T13:44:56.825+09:00'
 history:
-  - at: 2026-11-16T13:44:56.825+09:00
+  - at: '2026-11-16T13:44:56.825+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-17T02:36:45.426+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-17T02:36:45.426+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved per design §12 mapping: (1) videoLocal emission contract now
+  documented in html-build SKILL 1.8.0 (×6 mirrors), agents/html-build.md 1.4.2,
+  co-deck.context.md 4.9 (PR #2055) — engine/injector claims closed as
+  not-defects per design §10 (ppt-engine already plays videoLocal; injector
+  native-slide skip intentional; index staleness mitigated by auto-injection);
+  (2) FootnoteBuilder notes/footnotes split landed in PR #2053 (ppt-engine.js +
+  css); (3) punchline 2-sentence layout promoted via patch-zen-white-bubble
+  1.2.0 (PR #2053). Authoring rule R4 in storyline SKILL 1.5.0 (PR #2055).
 error: null
 upstream:
   project: co-deck
@@ -19,7 +33,24 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'Two HTML-build gaps plus two deck-local fixes worth promoting. (1) Native zen video slides (ppt-engine VideoSlide, data-video) play a local mp4 only when slideData carries `videoLocal`; html-build/build-theme-deck emit only `videoId`, and inject-video-players skips native video slides, so decks fall back to YouTube even when yt-<id>.mp4 is in the pool. Its index-based binding list also goes stale when slides are inserted. (2) The co-deck contract says slideData.footnotes = abbreviation definitions rendered bottom-left outside the card, but storyline mixes sources into footnotes and a deck-local patch (''fix e'') renders all footnotes inside the card — abbreviations end up inside the card. Fixed deck-locally by splitting abbreviations (`footnotes`, slide-level outside the card) from sources (`notes`, in-card) in FootnoteBuilder. (3) Punchline with two sentences: deck CSS widens the punchline card (min(1120px, 90%)) and caps the title size so each ''\n''-separated sentence stays on one line. Expected: html-build emits videoLocal when the pool file exists; storyline writes abbreviations and sources to separate fields; FootnoteBuilder supports the split; punchline multi-line layout supported in the zen style.'
+  symptom: >-
+    Two HTML-build gaps plus two deck-local fixes worth promoting. (1) Native
+    zen video slides (ppt-engine VideoSlide, data-video) play a local mp4 only
+    when slideData carries `videoLocal`; html-build/build-theme-deck emit only
+    `videoId`, and inject-video-players skips native video slides, so decks fall
+    back to YouTube even when yt-<id>.mp4 is in the pool. Its index-based
+    binding list also goes stale when slides are inserted. (2) The co-deck
+    contract says slideData.footnotes = abbreviation definitions rendered
+    bottom-left outside the card, but storyline mixes sources into footnotes and
+    a deck-local patch ('fix e') renders all footnotes inside the card —
+    abbreviations end up inside the card. Fixed deck-locally by splitting
+    abbreviations (`footnotes`, slide-level outside the card) from sources
+    (`notes`, in-card) in FootnoteBuilder. (3) Punchline with two sentences:
+    deck CSS widens the punchline card (min(1120px, 90%)) and caps the title
+    size so each '\n'-separated sentence stays on one line. Expected: html-build
+    emits videoLocal when the pool file exists; storyline writes abbreviations
+    and sources to separate fields; FootnoteBuilder supports the split;
+    punchline multi-line layout supported in the zen style.
   affected_paths:
     - scripts/co-deck/build-theme-deck.ts
     - scripts/co-deck/lib/theme-builder.ts
@@ -29,8 +60,22 @@ upstream:
     - skills/storyline/SKILL.md
     - agents/html-build.md
   identity_source: client_roots
-  local_workaround_diff: 'Deck-local (lecture_2026-11-open-innovation-keynote_v2.html + slidedata.json): videoLocal added to S33/S36; injector re-run; FootnoteBuilder LOCAL-PATCH renders d.footnotes as a slide-level ''.slide-footnote.slide-abbr'' (bottom 1.6rem) and d.notes in-card; CSS ''.slide[data-type="punchline"] .slide-content { width: min(1120px, 90%) }'' + title clamp(2rem, 3.6vw, 3.1rem). The template docs/co-deck.context.md (External Dependencies section, QuickDL design 2026-11-16) already documents the videoLocal rule.'
-  repro: 'Deck deliverables/2026-11-open-innovation-keynote: before the fix, S33/S36 had videoId only and played from YouTube despite deliverables/assets/videos/yt-<id>.mp4 existing; `var vids` in the injected block pointed at stale indexes 27/30 after five slides were inserted. S20 ''PPA = …'' abbreviations rendered inside the white card next to source lines. Pre-fix copies in _versions/2026-11-16_*_pm_pre_abbr_video/.'
+  local_workaround_diff: >-
+    Deck-local (lecture_2026-11-open-innovation-keynote_v2.html +
+    slidedata.json): videoLocal added to S33/S36; injector re-run;
+    FootnoteBuilder LOCAL-PATCH renders d.footnotes as a slide-level
+    '.slide-footnote.slide-abbr' (bottom 1.6rem) and d.notes in-card; CSS
+    '.slide[data-type="punchline"] .slide-content { width: min(1120px, 90%) }' +
+    title clamp(2rem, 3.6vw, 3.1rem). The template docs/co-deck.context.md
+    (External Dependencies section, QuickDL design 2026-11-16) already documents
+    the videoLocal rule.
+  repro: >-
+    Deck deliverables/2026-11-open-innovation-keynote: before the fix, S33/S36
+    had videoId only and played from YouTube despite
+    deliverables/assets/videos/yt-<id>.mp4 existing; `var vids` in the injected
+    block pointed at stale indexes 27/30 after five slides were inserted. S20
+    'PPA = …' abbreviations rendered inside the white card next to source lines.
+    Pre-fix copies in _versions/2026-11-16_*_pm_pre_abbr_video/.
   triage: ready
   flagged: false
   triage_reasons:
@@ -44,4 +89,17 @@ upstream:
   dedupe_key: 3b4fc0becb6d3ab49652af4b9eae3e5a698485ba78c815023baeaf27d42e047d
   duplicates:
     - project: co-deck
-      at: 2026-11-16T13:44:56.825+09:00
+      at: '2026-11-16T13:44:56.825+09:00'
+  resolution:
+    outcome: fixed
+    template_version: 0.30.0
+    summary: >-
+      Resolved per design §12 mapping: (1) videoLocal emission contract now
+      documented in html-build SKILL 1.8.0 (×6 mirrors), agents/html-build.md
+      1.4.2, co-deck.context.md 4.9 (PR #2055) — engine/injector claims closed
+      as not-defects per design §10 (ppt-engine already plays videoLocal;
+      injector native-slide skip intentional; index staleness mitigated by
+      auto-injection); (2) FootnoteBuilder notes/footnotes split landed in PR
+      #2053 (ppt-engine.js + css); (3) punchline 2-sentence layout promoted via
+      patch-zen-white-bubble 1.2.0 (PR #2053). Authoring rule R4 in storyline
+      SKILL 1.5.0 (PR #2055).

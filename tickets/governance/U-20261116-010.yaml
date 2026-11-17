@@ -3,7 +3,7 @@ id: U-20261116-010
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-16T17:05:55.908+09:00'
 history:
@@ -13,7 +13,18 @@ history:
   - at: '2026-11-16T20:59:09.429+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-17T00:27:44.925+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-17T00:27:44.925+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by PR-1 (gen-slides-pdf 1.15.0): adopted shared lib/layout-overrides
+  parser, private parseLayoutOverrides deleted; union dialect pinned by tests;
+  estimate-layout parity green. Landed via 5throck/ai-workspace-standards PR
+  #2052 (merge 1a884d7fd), template-version 0.30.0-unreleased until next
+  delivery bump.
 error: null
 upstream:
   project: co-deck
@@ -53,3 +64,12 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-16T17:05:55.908+09:00'
+  resolution:
+    outcome: fixed
+    template_version: unreleased
+    summary: >-
+      Fixed by PR-1 (gen-slides-pdf 1.15.0): adopted shared lib/layout-overrides
+      parser, private parseLayoutOverrides deleted; union dialect pinned by
+      tests; estimate-layout parity green. Landed via
+      5throck/ai-workspace-standards PR #2052 (merge 1a884d7fd),
+      template-version 0.30.0-unreleased until next delivery bump.

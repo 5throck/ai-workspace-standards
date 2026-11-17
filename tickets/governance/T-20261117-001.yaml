@@ -11,27 +11,43 @@ title: >-
   project was scaffolded is silently never delivered. ensureGitignoreCoverage is
   keyed on parsed deps, so the gitignore append also no-ops; resolveClaim pins
   templates/<variant>/external-deps.json to PROJECT_STATE/EXTERNAL DEPS so
-  TEMPLATE TREE SYNC never delivers it either (scripts/lib/upgrade-policy.ts:708-714);
-  the project CLI (bun scripts/external-deps.ts list | install | verify |
-  check-updates) has no reconcile subcommand. Net effect: no documented path
-  merges a variant-seed id into a valid v2 project manifest with empty deps.
-  Fleet impact: every project scaffolded before its variant seed gains deps is
-  affected — Projects/co-deck/quickdl is the first observed instance (template
-  0.30.0 seed never reached the project manifest). Proposed fix direction
-  (needs Design Gate): a seed-id adoption step in runExternalDepsPass or
+  TEMPLATE TREE SYNC never delivers it either
+  (scripts/lib/upgrade-policy.ts:708-714); the project CLI (bun
+  scripts/external-deps.ts list | install | verify | check-updates) has no
+  reconcile subcommand. Net effect: no documented path merges a variant-seed id
+  into a valid v2 project manifest with empty deps. Fleet impact: every project
+  scaffolded before its variant seed gains deps is affected —
+  Projects/co-deck/quickdl is the first observed instance (template 0.30.0 seed
+  never reached the project manifest). Proposed fix direction (needs Design
+  Gate): a seed-id adoption step in runExternalDepsPass or
   helpers/external-deps-reconcile.ts v1.2.0 (add-if-missing per template-seed
   id, one decision row per id, then D5 gitignore coverage as today), plus a
-  design-doc addendum to docs/designs/2026-11-07-external-deps-standard-design.md.
-  One-off fix applied in the meantime (PM-sanctioned): Projects/co-deck via
-  5throck/co-deck PR #248 (quickdl entry adopted verbatim + external/ gitignore
-  coverage). This ticket supersedes no in-flight work.
+  design-doc addendum to
+  docs/designs/2026-11-07-external-deps-standard-design.md. One-off fix applied
+  in the meantime (PM-sanctioned): Projects/co-deck via 5throck/co-deck PR #248
+  (quickdl entry adopted verbatim + external/ gitignore coverage). This ticket
+  supersedes no in-flight work.
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-17T00:22:36.300+09:00'
 history:
   - at: '2026-11-17T00:22:36.300+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-17T09:29:41.667+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed by Machinery PR-3 (5throck/ai-workspace-standards PR #2059, commit
+  ac4c58020): EXTERNAL DEPS pass channel 2c — external-deps-reconcile.ts v1.2.0
+  adoptSeedEntries (pure) + upgrade-project.ts v1.110.0 adopts template-seed ids
+  add-if-missing verbatim into valid schema-v2 manifests, one UPDATE decision
+  row per id, D5 gitignore coverage ordered after adoption (adopted install_dirs
+  covered on arrival), dry-run tagged writes nothing, second run zero rows (e2e
+  C-T7: co-deck/quickdl adopted + gitignore appended + idempotent). No CLI
+  reconcile subcommand (O-5). Design addendum A.4 landed in the 2026-11-07
+  external-deps standard design. Fleet impact closed: any pre-seed project
+  adopts its variant seed at the next upgrade pass. Design:
+  docs/designs/2026-11-17-root-machinery-batch-design.md §3, DEC-20261117-03.
 error: null

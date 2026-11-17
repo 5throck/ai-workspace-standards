@@ -3,14 +3,30 @@ id: U-20261116-008
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-16T13:44:56.697+09:00
+created_at: '2026-11-16T13:44:56.697+09:00'
 history:
-  - at: 2026-11-16T13:44:56.697+09:00
+  - at: '2026-11-16T13:44:56.697+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-17T02:36:45.407+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-17T02:36:45.407+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed across the batch: (1) html-to-pdf 1.3.0 captures div.slide (zen keynote
+  deck: 47 slides via .slide selector, exit 0; zero-slide pages exit 1 loud, no
+  PDF — O-4) — R-A1 real-deck check PASSED post-merge (PR #2053, 47/49-page
+  render incl. 2 known UI-chrome leaks); (2) gen-slides-pdf 1.15.0 renders notes
+  merged into the footnote band sources-first (PR #2052, O-2); (3) punchline
+  \n/U+2060 handled in PDF (PR #2052) and 2-sentence layout in HTML via
+  patch-zen-white-bubble 1.2.0 (PR #2053); (4) contact bullets fallback-only
+  both sides (Amendment B, DEC-20261117-01). Contracts documented in PR #2055.
+  Follow-ups filed: UI-chrome print leak, --pages non-functional (pre-existing
+  v1.2.0 latent).
 error: null
 upstream:
   project: co-deck
@@ -19,14 +35,41 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'PDF export does not match the HTML deck in four ways (found exporting 2026-11-open-innovation-keynote, zen x white-bubble, 47 slides). (1) html-to-pdf.ts reports ''Total sections: 0'' and writes a 21 MB 0-page PDF with exit 0 — it captures <section> elements, but zen renders slides as div.slide. (2) gen-slides-pdf.ts reads only slideData.footnotes; source/caveat lines kept in a separate `notes` field (needed so abbreviations render outside the card and sources inside, per the co-deck abbreviation-footnote contract) are silently absent from the PDF. (3) Punchline: a title containing ''\n'' (HTML inlineTitle renders it as a line break) or U+2060 word joiners renders as overlapping text in the PDF; using text/sub instead works but the sub line renders far smaller than in HTML. (4) Contact slide: HTML renders `bullets`, the PDF renderer reads only contactName/contactEmail/contactLinkedIn/contactPhone/contactNote, so a bullets-only contact slide prints just its title. Expected: html-to-pdf either supports div.slide or fails loudly; gen-slides-pdf renders `notes`, multi-line punchlines and bullet contact content with HTML parity.'
+  symptom: >-
+    PDF export does not match the HTML deck in four ways (found exporting
+    2026-11-open-innovation-keynote, zen x white-bubble, 47 slides). (1)
+    html-to-pdf.ts reports 'Total sections: 0' and writes a 21 MB 0-page PDF
+    with exit 0 — it captures <section> elements, but zen renders slides as
+    div.slide. (2) gen-slides-pdf.ts reads only slideData.footnotes;
+    source/caveat lines kept in a separate `notes` field (needed so
+    abbreviations render outside the card and sources inside, per the co-deck
+    abbreviation-footnote contract) are silently absent from the PDF. (3)
+    Punchline: a title containing '\n' (HTML inlineTitle renders it as a line
+    break) or U+2060 word joiners renders as overlapping text in the PDF; using
+    text/sub instead works but the sub line renders far smaller than in HTML.
+    (4) Contact slide: HTML renders `bullets`, the PDF renderer reads only
+    contactName/contactEmail/contactLinkedIn/contactPhone/contactNote, so a
+    bullets-only contact slide prints just its title. Expected: html-to-pdf
+    either supports div.slide or fails loudly; gen-slides-pdf renders `notes`,
+    multi-line punchlines and bullet contact content with HTML parity.
   affected_paths:
     - scripts/co-deck/html-to-pdf.ts
     - scripts/co-deck/gen-slides-pdf.ts
     - skills/pdf-export/SKILL.md
   identity_source: client_roots
-  local_workaround_diff: 'PDF generated from a transient copy of slidedata (not committed): footnotes = notes + footnotes (sources and abbreviations together, bottom-left); S45 title without ''\n''/U+2060 plus text/sub fields; S47 contactName/contactNote filled from its bullets. Result: 47 pages, 0 footnotes dropped.'
-  repro: 'bun scripts/co-deck/html-to-pdf.ts --html deliverables/2026-11-open-innovation-keynote/lecture_2026-11-open-innovation-keynote_v2.html --pages 5 → ''Total sections: 0'', 0 pages. bun scripts/co-deck/gen-slides-pdf.ts --project deliverables/2026-11-open-innovation-keynote → S3 source line missing (it lives in `notes`), S45 punchline text overlaps (title has ''\n'' + U+2060), S47 contact shows only the title.'
+  local_workaround_diff: >-
+    PDF generated from a transient copy of slidedata (not committed): footnotes
+    = notes + footnotes (sources and abbreviations together, bottom-left); S45
+    title without '\n'/U+2060 plus text/sub fields; S47 contactName/contactNote
+    filled from its bullets. Result: 47 pages, 0 footnotes dropped.
+  repro: >-
+    bun scripts/co-deck/html-to-pdf.ts --html
+    deliverables/2026-11-open-innovation-keynote/lecture_2026-11-open-innovation-keynote_v2.html
+    --pages 5 → 'Total sections: 0', 0 pages. bun
+    scripts/co-deck/gen-slides-pdf.ts --project
+    deliverables/2026-11-open-innovation-keynote → S3 source line missing (it
+    lives in `notes`), S45 punchline text overlaps (title has '\n' + U+2060),
+    S47 contact shows only the title.
   triage: ready
   flagged: false
   triage_reasons:
@@ -36,4 +79,18 @@ upstream:
   dedupe_key: da4523f4765652f7122c1358d55b0c25970c0685042dfb7493d683f3ad557c8f
   duplicates:
     - project: co-deck
-      at: 2026-11-16T13:44:56.697+09:00
+      at: '2026-11-16T13:44:56.697+09:00'
+  resolution:
+    outcome: fixed
+    template_version: 0.30.0-unreleased
+    summary: >-
+      Fixed across the batch: (1) html-to-pdf 1.3.0 captures div.slide (zen
+      keynote deck: 47 slides via .slide selector, exit 0; zero-slide pages exit
+      1 loud, no PDF — O-4) — R-A1 real-deck check PASSED post-merge (PR #2053,
+      47/49-page render incl. 2 known UI-chrome leaks); (2) gen-slides-pdf
+      1.15.0 renders notes merged into the footnote band sources-first (PR
+      #2052, O-2); (3) punchline \n/U+2060 handled in PDF (PR #2052) and
+      2-sentence layout in HTML via patch-zen-white-bubble 1.2.0 (PR #2053); (4)
+      contact bullets fallback-only both sides (Amendment B, DEC-20261117-01).
+      Contracts documented in PR #2055. Follow-ups filed: UI-chrome print leak,
+      --pages non-functional (pre-existing v1.2.0 latent).
