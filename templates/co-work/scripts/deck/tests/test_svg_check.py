@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 r"""
-@version 2.0.0
+@version 2.0.1
 svg-check semantics suite (python-only): svg_check.py 2.1.0 pins over the real
 decks, the golden fixture, and synthetic single-page fixtures.
 
@@ -101,7 +101,7 @@ def _run_py(deck: str, content: str | None, stage: str = "final") -> dict:
     cmd = [sys.executable, "-I", PY_CHECKER, "--deck", deck, "--stage", stage, "--json"]
     if content:
         cmd += ["--content", content]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, encoding="utf-8", errors="replace")
     if proc.returncode not in (0, 1):
         raise AssertionError(f"python checker failed (rc={proc.returncode}): {proc.stderr}")
     return json.loads(proc.stdout)

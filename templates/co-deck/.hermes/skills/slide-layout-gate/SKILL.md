@@ -1,7 +1,7 @@
 ---
 name: slide-layout-gate
 scope: co-deck
-version: "1.0.2"
+version: 1.0.3
 description: >
   Slide content conformance gate. Runs estimate-layout.ts --lint to check every
   slide in slidedata.json against the merged 4-layer spec's content_constraints

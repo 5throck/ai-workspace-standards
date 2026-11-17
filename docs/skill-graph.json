@@ -2935,6 +2935,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261117-06",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "dec:DEC-20261117-07",
       "type": "decision",
       "layer": "L0"
@@ -2946,6 +2951,11 @@
     },
     {
       "id": "dec:DEC-20261117-09",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261118-01",
       "type": "decision",
       "layer": "L0"
     },
@@ -6400,7 +6410,7 @@
       "scope": "co-deck",
       "capability": "design",
       "content_hash": "9ed885b8d29b131c",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "mirrors": [
         "templates/co-deck/skills/design/SKILL.md"
       ],
@@ -6420,7 +6430,7 @@
       "scope": "co-deck",
       "capability": "html-build",
       "content_hash": "d117ac5d523cf47c",
-      "version": "1.8.0",
+      "version": "1.8.1",
       "mirrors": [
         "templates/co-deck/skills/html-build/SKILL.md"
       ],
@@ -6440,7 +6450,7 @@
       "scope": "co-deck",
       "capability": "pdf-export",
       "content_hash": "4250f2a6fb677ada",
-      "version": "2.2.0",
+      "version": "2.2.1",
       "mirrors": [
         "templates/co-deck/skills/pdf-export/SKILL.md"
       ],
@@ -6459,7 +6469,7 @@
       "scope": "co-deck",
       "capability": "prep-pdf",
       "content_hash": "411913fa4ca52162",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "mirrors": [
         "templates/co-deck/skills/prep-pdf/SKILL.md"
       ]
@@ -6472,7 +6482,7 @@
       "scope": "co-deck",
       "capability": "presenter-mode",
       "content_hash": "681adae7720b46ef",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "mirrors": [
         "templates/co-deck/skills/presenter-mode/SKILL.md"
       ]
@@ -6485,7 +6495,7 @@
       "scope": "co-deck",
       "capability": "research",
       "content_hash": "8cb93e9ffe84855e",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "mirrors": [
         "templates/co-deck/skills/research/SKILL.md"
       ],
@@ -6501,7 +6511,7 @@
       "scope": "co-deck",
       "capability": "slide-layout-gate",
       "content_hash": "236eb87833970e54",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "mirrors": [
         "templates/co-deck/skills/slide-layout-gate/SKILL.md"
       ],
@@ -6553,7 +6563,7 @@
       "scope": "co-deck",
       "capability": "version",
       "content_hash": "b9e098ad866a9c54",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "mirrors": [
         "templates/co-deck/skills/version/SKILL.md"
       ]
@@ -8140,8 +8150,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
-        "last_used": "2026-11-17"
+        "sessions": 3,
+        "last_used": "2026-11-18"
       }
     },
     {
@@ -8580,14 +8590,14 @@
       "name": "sync",
       "scope": "common",
       "capability": "sync",
-      "content_hash": "2143809a7b0a3935",
-      "version": "1.9.2",
+      "content_hash": "80a9c66a71aac4f1",
+      "version": "1.10.0",
       "mirrors": [
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
-        "last_used": "2026-11-17"
+        "sessions": 3,
+        "last_used": "2026-11-18"
       }
     },
     {
@@ -9001,8 +9011,8 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "29566e4228b0bf3d",
-      "version": "1.8.0",
+      "content_hash": "6296d77566fc68ca",
+      "version": "1.9.0",
       "mirrors": [
         "skills/project-resync/SKILL.md",
         ".claude/skills/project-resync/SKILL.md",
@@ -9266,8 +9276,8 @@
       "name": "sync",
       "scope": "root",
       "capability": "sync",
-      "content_hash": "c99a2b25471feb1b",
-      "version": "1.9.2",
+      "content_hash": "b0bfef1a602dbc5b",
+      "version": "1.10.0",
       "mirrors": [
         "skills/sync/SKILL.md",
         ".claude/skills/sync/SKILL.md",
@@ -9277,8 +9287,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 2,
-        "last_used": "2026-11-17"
+        "sessions": 3,
+        "last_used": "2026-11-18"
       }
     },
     {
@@ -12526,6 +12536,18 @@
     },
     {
       "type": "cites_skill",
+      "from": "dec:DEC-20261117-06",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261117-06",
+      "to": "skill:root/design-foundation",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
       "from": "dec:DEC-20261117-07",
       "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
@@ -12540,6 +12562,12 @@
       "type": "cites_skill",
       "from": "dec:DEC-20261117-09",
       "to": "skill:root/ci-triage",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261118-01",
+      "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
     },
     {

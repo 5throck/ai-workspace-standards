@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: T-20261118-001
+kind: manual
+title: >-
+  sync-auto-detection design amendment — upgrade-warning visibility (Option 2,
+  owner-approved 2026-11-17): the detection report gains an
+  unresolved_template_defects summary block and the conditional sync SKILL step
+  prints a warning-only line (upgrades are NEVER blocked; CONFLICT/PROJECT_EVOLVED
+  preserve semantics are the safety net; motivating evidence T-20261117-007
+  graft->trail re-delivery). State: NOT yet applied. The design artifacts exist
+  as untracked working-tree files restored from backup commit 0748cdcf8 —
+  docs/designs/2026-11-17-sync-auto-detection-design.md (lang: ko patched),
+  docs/decisions/DEC-20261117-06.md, docs/specs/entries/2026-11-17-sync-auto-detection-design.json,
+  plus a docs/specs/registry.json +9-line entry modification (all preserved for
+  this batch's PR-A landing; two architect dispatches to apply the amendment
+  were cancelled). Amendment scope: new §5.8 (owner decision, warning-only
+  invariant explicit), §5.3 schema delta (summary block resolved via state-file
+  dedupe + filed U-ids whose upstream.resolution != fixed), §6 step deltas
+  (detect-backport.ts + skill step), §11 acceptance addition, and a PLACEMENT
+  ruling the architect still owes: sync-time warning vs skill upgrade-guidance
+  coverage for the standalone-upgrade-without-sync gap case (minimal options:
+  upgrade guidance reads the last persisted report from <git-dir>, or
+  detect-backport gains a --warn-only standalone mode). Landing rides the
+  batch's PR-A (which also stages the three restored artifacts + registry
+  entry). Filed under the 2026-11-18 ticket-filing policy: design-needed,
+  deferred work (design approval still pending for the batch itself).
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-18T00:00:00.000+09:00
+history:
+  - at: 2026-11-18T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null

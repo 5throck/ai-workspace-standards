@@ -31,7 +31,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `simulate-pipeline` | 1.0.2 | active | automation-engineer | 2026-09-21 | — | Merged smoke-test skill for project creation and L3→variant promotion modes |
 | `skill-lifecycle-manager` | 1.5.0 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
-| `sync` | 1.9.2 | active | automation-engineer | 2026-11-12 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan |
+| `sync` | 1.10.0 | active | automation-engineer | 2026-11-18 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan. 1.10.0: conditional opt-in detection steps (gate check, detect-backport filing, §5.8 warning, §5.6 auto-merge close-out; design 2026-11-17-sync-auto-detection) |
 | `team-builder` | 1.2.0 | active | pm | 2026-11-08 | — | — |
 | `translate` | 1.0.3 | active | pm | 2026-11-08 | — | — |
 | `project-to-variant` | 1.3.0 | active | scaffolding-expert | 2026-11-08 | — | Convert existing standalone project into official variant template |
@@ -47,7 +47,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `standup-synthesizer` | 1.1.0 | active | pm | 2026-11-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
 | `api-documentation` | 1.0.2 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
 | `documentation-writing` | 1.0.3 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
-| `project-resync` | 1.8.0 | active | pm | 2026-11-08 | — | Whole-fleet bidirectional carrier cycle: provenance audit (resync-audit.ts) → project GitHub sync → selective backport (LOCAL-WORK + merged-window landings) → per-project review cadence → root sync → upgrades. Operator skill; distinct from `sync`. v1.8.0 (DEC-20261107-01): the project set derives ONLY via `bun scripts/fleet-list.ts --json` — the fleet membership SSOT (`Projects/co-*` minus `docs/fleet-membership.json` exclusions); raw-glob fallback banned |
+| `project-resync` | 1.9.0 | active | pm | 2026-11-08 | — | Whole-fleet bidirectional carrier cycle: provenance audit (resync-audit.ts) → project GitHub sync → selective backport (LOCAL-WORK + merged-window landings) → per-project review cadence → root sync → upgrades. Operator skill; distinct from `sync`. v1.8.0 (DEC-20261107-01): the project set derives ONLY via `bun scripts/fleet-list.ts --json` — the fleet membership SSOT (`Projects/co-*` minus `docs/fleet-membership.json` exclusions); raw-glob fallback banned |
 | `release-template` | 1.0.0 | active | pm | 2026-09-09 | — | Workspace operator only — atomically bumps templates/VERSION, cuts templates/CHANGELOG.md, and creates template tag |
 | `accessibility-audit` | 1.1.0 | active | pm | 2026-11-08 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
 | `token-usage-lint` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design: token SSOT compliance lint; delegates to scripts/design-lint.ts (L0+L1) |
@@ -72,26 +72,26 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 |-------|---------|--------|-------|---------------|--------------|---------|
 | `change-impact-assessment` | 1.0.0 | active | change-management-partner | 2026-06-13 | — | co-consult only |
 | `industry-research-pack` | 1.0.1 | active | pm | 2026-11-06 | — | co-consult only |
-| `design` | 1.2.2 | active | design | 2026-11-15 | — | co-deck only |
+| `design` | 1.2.3 | active | design | 2026-11-15 | — | co-deck only |
 | `design-review` | 1.1.0 | active | pm | 2026-11-02 | — | co-design only |
 | `financial-modeling` | 1.0.1 | active | strategy-analyst | 2026-08-26 | — | co-consult only |
-| `html-build` | 1.8.0 | active | html-build | 2026-11-17 | — | co-deck only |
+| `html-build` | 1.8.1 | active | html-build | 2026-11-17 | — | co-deck only |
 | `narrative-framework` | 1.0.0 | active | communications-lead | 2026-06-13 | — | co-consult only |
 | `project-delivery` | 1.0.0 | active | delivery-manager | 2026-06-13 | — | co-consult only |
-| `research` | 1.2.2 | active | research | 2026-11-15 | — | co-deck only |
+| `research` | 1.2.3 | active | research | 2026-11-15 | — | co-deck only |
 | `solution-design` | 1.0.0 | active | solutions-architect | 2026-06-13 | — | co-consult only |
 | `stakeholder-review-management` | 1.0.0 | active | delivery-manager | 2026-06-13 | — | co-consult only |
 | `storyline` | 1.5.0 | active | storyline | 2026-11-17 | — | co-deck only |
 | `technical-feasibility` | 1.0.0 | active | solutions-architect | 2026-06-13 | — | co-consult only |
 | `theme-authoring` | 1.0.1 | active | pm | 2026-06-21 | — | co-deck only |
 | `verify-authorization` | 1.1.0 | active | pm | 2026-11-02 | — | co-security only |
-| `version` | 1.3.1 | active | version | 2026-11-15 | — | co-deck only |
+| `version` | 1.3.2 | active | version | 2026-11-15 | — | co-deck only |
 | `swe-solve` | 1.1.1 | active | pm | 2026-08-25 | — | co-develop only |
 | `exam-bank-operations` | 1.2.0 | active | exam-bank-steward | 2026-10-07 | — | co-learning only |
 | `sound-synth` | 1.0.0 | active | sound-designer | 2026-08-06 | — | co-game only |
 | `mece-logic-auditor` | 1.0.0 | active | strategy-analyst | 2026-08-06 | — | co-consult only |
 | `sarif-exporter` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only |
-| `presenter-mode` | 1.0.2 | active | html-build | 2026-11-15 | — | co-deck only |
+| `presenter-mode` | 1.0.3 | active | html-build | 2026-11-15 | — | co-deck only |
 | `stride-threat-matrix` | 1.1.0 | active | security-expert | 2026-11-01 | — | co-security only |
 | `abap-code-review` | 1.0.0 | active | code-writer | 2026-08-25 | — | co-abap only |
 | `abap-dev` | 1.2.0 | active | code-writer | 2026-10-12 | — | co-abap only |
@@ -172,7 +172,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `permit-to-work` | 1.0.1 | active | safety-workflow-manager | — | — | co-safety only |
 | `post-write-chain` | 1.1.0 | active | test-runner | 2026-08-15 | — | co-abap only |
 | `pre-construction-technical-review` | 1.0.0 | active | gasterm-agent | — | — | co-safety only |
-| `prep-pdf` | 2.0.1 | active | pdf-export | 2026-11-15 | — | co-deck only |
+| `prep-pdf` | 2.0.2 | active | pdf-export | 2026-11-15 | — | co-deck only |
 | `price-waterfall-analysis` | 1.0.0 | active | finance-strategy-lead | 2026-08-25 | — | co-price only |
 | `pricing-governance` | 1.0.0 | active | pricing-strategist | 2026-08-25 | — | co-price only |
 | `pricing-playbook` | 1.0.0 | active | pricing-strategist | 2026-08-25 | — | co-price only |
@@ -201,7 +201,7 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `scenario-comparison` | 1.0.0 | active | engagement-director | 2026-08-25 | — | co-price only |
 | `sheet-model` | 2.0.0 | active | cpa-auditor | 2026-08-25 | — | co-price only |
 | `signal-detector` | 1.0.0 | active | gvp-agent | — | — | co-safety only |
-| `slide-layout-gate` | 1.0.2 | active | pdf-export | 2026-11-16 | — | co-deck only |
+| `slide-layout-gate` | 1.0.3 | active | pdf-export | 2026-11-16 | — | co-deck only |
 | `source-command-celebrate` | 1.0.0 | active | pm | 2026-08-15 | — | co-abap only |
 | `source-verification-ledger` | 1.0.1 | active | fact-checker | 2026-08-24 | — | co-news only |
 | `spdx-sbom` | 1.1.0 | active | pm | 2026-11-01 | — | co-security only |

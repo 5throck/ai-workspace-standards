@@ -1,4 +1,15 @@
-// @version 2.68.0
+// @version 2.69.0
+// v2.69.0 (2026-11-18, DEC-20261118-01 direct fix — no ticket): Fail-then-increment
+//          double-count sweep across 5 check sites (same class as the v2.68.0 §3.5
+//          accounting fix): §3.7 homoglyph, §3.8 zero-width, agent-state sync,
+//          variant-skill-sections, agent Required Tools. Each kept an
+//          `errors += <counter>` epilogue after reporting via Fail() — which already
+//          increments — so N failures were counted 2N in the summary. The epilogues
+//          are deleted; Fail() is the sole increment everywhere. §3.7/§3.8 overflow
+//          lines (`... and N more`) are one Fail() call each, so their gate counters
+//          now count calls, not occurrences; the counters keep their Pass-gate role
+//          (=== 0) only. No detection semantics changed. Pinned by
+//          tests/unit/audit-fail-count-accounting.test.ts.
 // v2.68.0 (2026-11-17, spec docs/designs/2026-11-17-audit-external-scan-fix-design.md):
 //          §3.5 UTF-8 BOM check — two fixes. (1) Scan scope: in a scaffolded project
 //          (docs/context.md present → searchDirs=["."]) the whole tree was walked with
@@ -771,7 +782,10 @@ if (!LIFECYCLE_ONLY) {
             if (matches.length > 5) {
               Fail(`... and ${matches.length - 5} more homoglyph(s) in ${filePath}`);
             }
-            homoglyphErrors += matches.length;
+            // Gate counter only (Pass iff every file was clean) — Fail() is the
+            // sole increment for the error summary (v2.69.0 double-count sweep);
+            // the overflow line above is one Fail() call, not N.
+            homoglyphErrors++;
           }
         } catch {
           /* skip unreadable files */
@@ -782,7 +796,6 @@ if (!LIFECYCLE_ONLY) {
     if (homoglyphErrors === 0) {
       Pass("Homoglyph check: no confusable Unicode characters found");
     }
-    errors += homoglyphErrors;
   }
 
   // 3.8. Zero-width character detection
@@ -823,7 +836,7 @@ if (!LIFECYCLE_ONLY) {
             }
             if (matches.length > 5) {
               Fail(`... and ${matches.length - 5} more zero-width char(s) in ${filePath}`);
-              zwErrors += matches.length - 5;
+              zwErrors++;
             }
           }
         } catch {
@@ -835,7 +848,8 @@ if (!LIFECYCLE_ONLY) {
     if (zwErrors === 0) {
       Pass("Zero-width character check: no invisible Unicode characters found");
     }
-    errors += zwErrors;
+    // Fail() is the sole increment for the error summary (v2.69.0 double-count
+    // sweep); zwErrors stays a Pass-gate counter only.
   }
 }
 
@@ -1339,9 +1353,9 @@ if (!LIFECYCLE_ONLY && fs.existsSync("AGENTS.md") && fs.existsSync("agents")) {
 
   if (syncErrors === 0) {
     Pass("Agent state synchronization: all agents in sync");
-  } else {
-    errors += syncErrors;
   }
+  // Fail() is the sole increment for the error summary (v2.69.0 double-count
+  // sweep); the old `errors += syncErrors` epilogue double-counted.
 }
 
 // Cross-Platform Command Parity Check
@@ -1646,8 +1660,9 @@ function checkVariantSkillSections() {
   if (allFailures.length === 0) {
     Pass("Variant skill sections: all skills have required sections and frontmatter");
   } else {
+    // Fail() is the sole increment for the error summary (v2.69.0 double-count
+    // sweep); the old `errors += allFailures.length` epilogue double-counted.
     allFailures.forEach((f) => Fail(`Variant skill sections: ${f}`));
-    errors += allFailures.length;
   }
 }
 
@@ -2898,7 +2913,8 @@ if (IS_WORKSPACE_ROOT && fs.existsSync("agents")) {
   if (missingSection === 0 && emptySection === 0) {
     Pass("Agent Required Tools sections: all present");
   }
-  errors += missingSection;
+  // Fail() is the sole increment for the error summary (v2.69.0 double-count
+  // sweep); the old `errors += missingSection` epilogue double-counted.
 }
 
 // Check: AGENTS.md PM Direct Execution Scope synced to templates/co-*/AGENTS.md (workspace root only)

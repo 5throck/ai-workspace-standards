@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-11-17T15:47:02.303Z
+**Generated**: 2026-11-17T21:47:14.358Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +11,7 @@
 
 - **Agents**: 9
 - **Skills**: 60
-- **Scripts**: 137 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 138 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -71,7 +72,7 @@
 | new-project | 1.0.0 | active | skills/new-project/SKILL.md | workspace | new project, create project, scaffold project, project from template, start a new engagement | scaffolding-expert |
 | platform-command-lifecycle-manager | 1.0.3 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.3 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
-| project-resync | 1.8.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
+| project-resync | 1.9.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
 | project-review | 1.3.2 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.4.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
@@ -85,7 +86,7 @@
 | skill-lifecycle-manager | 1.5.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.1.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
-| sync | 1.9.2 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | automation-engineer |
+| sync | 1.10.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | automation-engineer |
 | team-builder | 1.2.0 | active | skills/team-builder/SKILL.md | workspace | build new agent team, create agent team, agent team setup, team builder | pm |
 | ticket-run | 1.0.0 | active | skills/ticket-run/SKILL.md | workspace | ticket-run, process ticket queue, run next ticket | automation-engineer |
 | token-usage-lint | 1.1.0 | active | skills/token-usage-lint/SKILL.md | workspace | token lint, hardcoded color, design token compliance, raw hex values, hardcoded spacing | pm |
@@ -113,7 +114,7 @@
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |
 | archive-memory.ts | 1.2.0 | scripts/archive-memory.ts | fs, path |
-| audit.ts | 2.68.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
+| audit.ts | 2.69.0 | scripts/audit.ts | bun, child_process, crypto, fs, os, path, url |
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
 | backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
@@ -129,7 +130,8 @@
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
-| dev-sync.ts | 1.50.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| detect-backport.ts | 1.0.0 | scripts/detect-backport.ts | child_process, crypto, fs, path |
+| dev-sync.ts | 1.51.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |
@@ -178,7 +180,7 @@
 | render-commands.ts | 1.1.0 | scripts/render-commands.ts | fs, path |
 | render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | fs, path, url |
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
-| resync-audit.ts | 1.9.0 | scripts/resync-audit.ts | child_process, fs, path |
+| resync-audit.ts | 1.10.0 | scripts/resync-audit.ts | child_process, fs, path |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | path |
 | review-baseline.ts | 1.6.0 | scripts/review-baseline.ts | N/A |
 | route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | fs, path |
@@ -225,7 +227,7 @@
 | validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
-| validate-templates.ts | 1.85.0 | scripts/validate-templates.ts | child_process, crypto, fs, js-yaml, path, url |
+| validate-templates.ts | 1.86.0 | scripts/validate-templates.ts | child_process, crypto, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
 | validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |
