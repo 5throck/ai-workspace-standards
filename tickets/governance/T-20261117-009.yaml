@@ -6,12 +6,30 @@ title: >-
   and is a silent no-op elsewhere: TRACE debug lines pollute validate-templates
   --json stdout, and the whole stdout is passed as argv
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-17T17:38:02.810+09:00'
 history:
   - at: '2026-11-17T17:38:02.810+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-17T18:10:58.008+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-17T18:10:58.026+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-17T18:10:58.080+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by PR #2067
+  (https://github.com/5throck/ai-workspace-standards/pull/2067, merge
+  af38aa76b): TRACE debug lines removed from validate-templates --json,
+  pre-check now runs in-process (no JSON through argv), fail-closed with no
+  bypass flag, errors filtered to target variant + common, spawn failures report
+  code/signal and stderr tail. Measured: validate --json for co-deck dropped
+  from 56858 to 17390 bytes and parses as JSON; windows-latest CI passed. Not
+  verified on a real Windows scaffold run outside CI. Follow-up: --tag runs the
+  pre-check on working-tree templates.
 error: null
