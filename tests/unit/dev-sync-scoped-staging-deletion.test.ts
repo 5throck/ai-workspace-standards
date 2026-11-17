@@ -37,6 +37,7 @@ import * as path from 'node:path';
 const workspaceRoot = path.resolve(import.meta.dir, '..', '..');
 const devSyncPath = path.join(workspaceRoot, 'scripts', 'dev-sync.ts');
 const libPath = path.join(workspaceRoot, 'scripts', 'lib', 'git-status.ts');
+const specLandingPath = path.join(workspaceRoot, 'scripts', 'lib', 'spec-landing.ts');
 const scratchRoot = path.join(workspaceRoot, 'tests', '.temp', 'scoped-staging-deletion-test');
 
 const BLOCK_START = '// 6.5 Scoped staging';
@@ -66,6 +67,10 @@ function buildDriver(block: string): string {
     `import * as nodeFs from 'node:fs';`,
     `const fs = nodeFs;`,
     `import { parseCachedNameStatus, parseStatusPorcelain } from ${JSON.stringify(libPath)};`,
+    // T-20261117-015: the slice now extends through the new step 6.55 (it sits
+    // between the soak else-block and the step-6.9 marker), so the driver needs the
+    // spec-landing free variables the gate references.
+    `import { SPEC_REGISTRY_PATH, danglingSpecRefs, parseRegistryEntries, requiredPathsForEntry } from ${JSON.stringify(specLandingPath)};`,
     `const GREEN = '\\x1b[32m';`,
     `const RED = '\\x1b[31m';`,
     `const YELLOW = '\\x1b[33m';`,
@@ -96,6 +101,9 @@ function buildDriver(block: string): string {
     `  snapshotFailed = true;`,
     `}`,
     `const scopedStaging = process.env.SYNC_SCOPED_STAGING === '1';`,
+    // T-20261117-015: the honor set is a step-6.5 free variable — no honor opt-in
+    // under test here, so the prelude supplies the empty set.
+    `const honorSet = new Set<string>();`,
     // The ghost file is created AFTER the S0 snapshot so the block's S1 shot
     // classifies it as pipeline output (S1 \\ S0) and it joins committable.
     `if (GHOST_PATH) nodeFs.writeFileSync(GHOST_PATH, 'pipeline-output\\n');`,

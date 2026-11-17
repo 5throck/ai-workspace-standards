@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-17T19:46:20.542Z
+**Generated**: 2026-11-17T20:14:41.424Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -129,7 +129,7 @@
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
-| dev-sync.ts | 1.50.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| dev-sync.ts | 1.51.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |

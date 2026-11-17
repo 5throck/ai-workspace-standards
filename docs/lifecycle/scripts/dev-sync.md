@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.50.0
+- **Version**: 1.51.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-17
+- **Last Updated**: 2026-11-18
 - **Last Reviewer**: pm
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort.
 
@@ -17,6 +17,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-18 | production | production | v1.51.0 (T-20261117-015, spec docs/designs/2026-11-18-dev-sync-hunk-staging-design.md §2-§3): two strictly additive mechanisms for hunk-level adjudicated landings — the 2026-11-17 evidence chain (three manual hunk-edit stagings in one day, one silent-clobber landing incident, memory/2026-11-17.md via PR #2073). (1) HONOR-STAGED OPT-IN — `--honor-staged <path>` (repeatable) + `SYNC_HONOR_STAGED` (comma-separated) designate paths whose PRE-STAGED index blob is authoritative: the step-6.5 promotion sweep excludes honored paths from every `git add` batch (same "index already holds the desired state" contract as the staged-deletion skip), so a hunk-adjudicated partial docs/specs/registry.json survives the run instead of being silently clobbered by the path-level re-add; the worktree-landing pattern becomes first-class. Fail-closed: ghost opt-in (honored path with no staged delta) FATAL; honor under --warn-staging FATAL; worktree-vs-index divergence on an honored path is a WARN. (2) STEP 6.55 SPEC-REGISTRY DANGLING-REFERENCE GATE — when docs/specs/registry.json is landing, every entry's entry JSON (docs/specs/entries/<id>.json) and design `file` target must exist in the resulting commit (index blob, or HEAD blob not removed by this landing); dangling = FATAL before git commit; malformed staged registry fails closed. Pure detection: lib/spec-landing.ts v1.0.0 (one derivation, two callers). Pinned by tests/unit/dev-sync-hunk-staging.test.ts, tests/unit/spec-landing.test.ts, tests/unit/spec-landing-incident-sim.test.ts. | automation-engineer |
 | 2026-11-17 | production | production | v1.50.0 (U-20261116-012, spec docs/designs/2026-11-17-root-machinery-batch-design.md §2, DEC-20261117-03): (1) ignore-aware promotion staging — the step-6.5 sweep classifies with `git ls-files -z` + `git check-ignore --no-index` (default check-ignore silently excludes TRACKED paths — the exact class to find — and `-z` is argv-invalid without --stdin; both verified on git 2.56.1) and partitions: tracked∩ignored → `git add -f` with a DIM line per path, untracked∩ignored → WARN + skip, everything else → the plain batch add; the absent loop skips -f-batched paths (a staged deletion removes the index entry, so a re-attempt fatals 128). (2) branch-keyed session-block replace — step 2's block gains a `<!-- dev-sync:session branch=<branch> -->` marker; same-branch same-day re-runs replace the marker-plus-block segment (stray duplicates collapse; the replaced block's `## Skills Used` section carries forward verbatim); legacy markerless blocks keep the exact-subject skip + append. Block-start well-formedness accepts the leading comment (memory-union-verify v1.3.0). Pinned by tests/unit/dev-sync-rerun-hygiene.test.ts. | automation-engineer |
 | 2026-11-16 | production | production | v1.49.0: empty-index guard at S0 with --stage/--allow-generated-only (T-20261114-007) and multi-line commit body preservation (T-20261114-006); spec docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md, DEC-20261116-01 | automation-engineer |
 | 2026-11-12 | production | production | v1.47.0 (U-20261112-005 PR-3): step 4.505 runs generate-skill-lifecycle-records.ts --write after the 4.5 publish (L0 only, fatal on failure) so a template skill change never lands without its generated record. | automation-engineer |

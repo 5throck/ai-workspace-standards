@@ -1,4 +1,36 @@
-// @version 1.50.0
+// @version 1.51.0
+// v1.51.0 (2026-11-18, T-20261117-015, spec
+//          docs/designs/2026-11-18-dev-sync-hunk-staging-design.md §2-§3): two strictly
+//          additive mechanisms for hunk-level adjudicated landings — the 2026-11-17
+//          evidence chain (three manual hunk-edit stagings in one day, one landing
+//          incident, memory/2026-11-17.md landed via PR #2073). (1) HONOR-STAGED
+//          OPT-IN (design §2) — `--honor-staged <path>` (repeatable) and
+//          `SYNC_HONOR_STAGED` (comma-separated) designate paths whose PRE-STAGED
+//          index blob is authoritative for the commit: the step-6.5 promotion sweep
+//          excludes honored paths from every `git add` batch (the same
+//          "the index already holds the desired state" contract as the staged-deletion
+//          skip), so a hunk-adjudicated partial docs/specs/registry.json survives the
+//          run instead of being silently clobbered by the path-level re-add. The
+//          worktree-landing pattern (apply hunks with `git apply --cached`, then
+//          sync) becomes first-class — no worktree reconstruction, no
+//          shelved-unshelved dance around untracked parallel files. Fail-closed
+//          (no silent fallback, the pre-commit-hook precedent): an honored path with
+//          NO staged delta is a ghost opt-in → FATAL (the pre-staged adjudication was
+//          lost; silently proceeding would replay the clobber in reverse); an honor
+//          set under --warn-staging is FATAL (the `git add -A` soak cannot honor
+//          anything by construction); worktree-vs-index divergence on an honored
+//          path is a visible WARN (that divergence is the normal adjudication shape —
+//          the worktree keeps the sibling batch for a later sync). (2) STEP 6.55
+//          SPEC-REGISTRY DANGLING-REFERENCE GATE (design §3) — when
+//          docs/specs/registry.json is landing in THIS commit, every entry's
+//          one-file-per-spec entry JSON (docs/specs/entries/<id>.json) and its design
+//          `file` target must exist in the resulting commit (a blob in the index, or
+//          a blob in HEAD not removed by this landing); any dangling reference is
+//          FATAL before git commit, and a malformed staged registry fails closed.
+//          The 2026-11-17 incident's actual bite: the forbidden entry rode the commit
+//          as a dangling reference past every pre-commit gate — only push-time review
+//          caught it. Pure detection lives in scripts/lib/spec-landing.ts v1.0.0
+//          (one derivation, two callers: this gate + the unit suite).
 // v1.50.0 (2026-11-17, U-20261116-012, spec
 //          docs/designs/2026-11-17-root-machinery-batch-design.md §2, DEC-20261117-03):
 //          two re-run-hygiene defects. (1) IGNORE-AWARE PROMOTION STAGING — a plain `git
@@ -496,6 +528,13 @@ import * as crypto from "node:crypto";
 import { withRetry, DEFAULT_CONFIG } from "./retry-handler.ts";
 import { hasNonEnglish } from "./lib/language-guard.ts";
 import { parseCachedNameStatus, parseStatusPorcelain, parseTrackedWorktreeChanges } from "./lib/git-status.ts";
+import {
+  SPEC_REGISTRY_PATH,
+  danglingSpecRefs,
+  parseRegistryEntries,
+  requiredPathsForEntry,
+} from "./lib/spec-landing.ts";
+
 import { gitCleanEnvForShell } from "./lib/git-env.ts";
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from "./helpers/merge-state.ts";
 import { isDeliveredDiff, manifestHasUnresolvedErrors } from "./lib/upgrade-policy.ts";
@@ -604,6 +643,10 @@ let requireCurrentMain = false;
 let concludeMerge = false;
 let allowGeneratedOnly = false;
 const stagePathspecs: string[] = [];
+// T-20261117-015 (v1.51.0): --honor-staged argv values; unioned with SYNC_HONOR_STAGED
+// below into the honor set (design §2 — the pre-staged index blob is authoritative for
+// designated paths; step 6.5 never path-level re-adds them).
+const honorStagedArgs: string[] = [];
 const msgArgs: string[] = [];
 for (let i = 0; i < rawArgs.length; i++) {
   const arg = rawArgs[i];
@@ -628,9 +671,36 @@ for (let i = 0; i < rawArgs.length; i++) {
     stagePathspecs.push(rawArgs[++i] ?? "");
   } else if (arg.startsWith("--stage=")) {
     stagePathspecs.push(arg.slice("--stage=".length));
+  } else if (arg === "--honor-staged") {
+    // T-20261117-015 (v1.51.0): hunk-adjudicated staging opt-in — see the honor-set
+    // derivation below and design §2. Repeatable; also settable via SYNC_HONOR_STAGED.
+    honorStagedArgs.push(rawArgs[++i] ?? "");
+  } else if (arg.startsWith("--honor-staged=")) {
+    honorStagedArgs.push(arg.slice("--honor-staged=".length));
   } else {
     msgArgs.push(arg);
   }
+}
+
+// T-20261117-015 (v1.51.0, design docs/designs/2026-11-18-dev-sync-hunk-staging-design.md
+// §2): the honor set — paths whose PRE-STAGED index blob is authoritative for this
+// commit. Flag form is repeatable (`--honor-staged <path>`); env form is a
+// comma-separated list (`SYNC_HONOR_STAGED=a,b`). Validation (ghost opt-in, soak
+// contradiction) happens at step 6.5 where the cached diff is available; the set
+// itself is consumed by the promotion sweep's exclusion below.
+const honorSet = new Set<string>();
+for (const raw of [process.env.SYNC_HONOR_STAGED ?? "", ...honorStagedArgs]) {
+  for (const p of raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean))
+    honorSet.add(p);
+}
+if (honorSet.size > 0) {
+  console.log(
+    `${CYAN}ℹ️  honor-staged: ${honorSet.size} path(s) with pre-staged index authority (step 6.5 preserves the staged blob; T-20261117-015)${RESET}`,
+  );
+  for (const p of [...honorSet].sort()) console.log(`${DIM}   ${p}${RESET}`);
 }
 // T-20261114-006: split into subject + preserved body. `msg` stays the one-line subject
 // (safe for git -m / gh --title; feeds memory header, slug, step 6.9, PR title); the body
@@ -2460,6 +2530,63 @@ try {
   snapshotFailed = true;
 }
 
+// T-20261117-015 (v1.51.0, design §2): honor-set validation — fail-closed, no silent
+// fallback (the pre-commit-hook precedent). (a) SOAK CONTRADICTION: under the
+// `git add -A` WARN soak no path can be honored by construction — the sweep below
+// re-stages the whole worktree; abort rather than pretend. (b) GHOST OPT-IN: an
+// honored path with NO staged delta means the pre-staged adjudication was lost
+// (re-run, wrong worktree, wrong order) — silently proceeding would replay the
+// clobber in reverse. (c) WORKTREE DIVERGENCE on an honored path is a visible WARN,
+// not an error: the worktree carrying the sibling batch's content is the normal
+// adjudication shape (it stays out of the commit for a later sync).
+if (honorSet.size > 0) {
+  if (!scopedStaging) {
+    console.log(
+      `${RED}❌ honor-staged cannot be honored under --warn-staging (the git add -A soak re-stages every path from the worktree).${RESET}`,
+    );
+    console.log(`${YELLOW}   Drop --warn-staging / SYNC_SCOPED_STAGING=0, or remove the honor list.${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+  const ghostHonor = [...honorSet].filter((p) => !taskStaged.has(p)).sort();
+  if (ghostHonor.length > 0) {
+    console.log(
+      `${RED}❌ honor-staged ghost opt-in — ${ghostHonor.length} path(s) have NOTHING staged in the index, so there is no adjudicated blob to honor:${RESET}`,
+    );
+    for (const p of ghostHonor) console.log(`   ${p}`);
+    console.log(
+      `${YELLOW}   The pre-staged hunk state was lost (re-run in the wrong tree? staging overwritten?).${RESET}`,
+    );
+    console.log(
+      `${YELLOW}   Repair: re-apply the adjudicated hunks (git apply --cached <patch>), then re-run dev-sync.${RESET}`,
+    );
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
+  for (const p of [...honorSet].sort()) {
+    try {
+      const blobRes = await $`git show :${p}`.quiet().nothrow();
+      if (blobRes.exitCode !== 0) continue; // ghost rule above already fired
+      const stagedBytes = blobRes.stdout.toString();
+      let worktreeBytes: string | undefined;
+      try {
+        worktreeBytes = fs.readFileSync(p, "utf-8");
+      } catch {
+        /* absent in worktree — staged blob still lands verbatim; no divergence to warn */
+      }
+      if (worktreeBytes !== undefined && worktreeBytes !== stagedBytes) {
+        console.log(
+          `${YELLOW}⚠️  honor-staged: worktree diverges from the staged blob for '${p}' — the STAGED blob lands; the worktree content stays out of this commit (adjudication shape)${RESET}`,
+        );
+      }
+    } catch (err) {
+      console.error(`[dev-sync] Error: ${err}`);
+    }
+  }
+}
+
 // U-20261107-003 (v1.43.0): content comparison for the S0∩S1 overlap — a
 // dirty-at-S0 file whose bytes changed by S1 was mutated by THIS run's
 // pipeline (the regenerated docs/VERSION_MANIFEST.md leftover case) and is
@@ -2549,7 +2676,23 @@ if (scopedStaging) {
           `${DIM}   scoped staging: skipping ${skip.length} path(s) already removed in the index (staged deletion / rename source) — index state preserved${RESET}`,
         );
       }
-      const toStage = [...committable].filter((p) => !indexRemoved.has(p)).sort();
+      // T-20261117-015 (v1.51.0, design §2): honored paths are excluded from EVERY
+      // add batch below — the pre-staged index blob is authoritative for them (the
+      // same contract as the indexRemoved skip: the index already holds the desired
+      // state). This is the mechanism that keeps a hunk-adjudicated partial
+      // registry.json alive through the pipeline instead of being clobbered by the
+      // path-level re-add (the 2026-11-17 silent-clobber incident).
+      const honored = [...committable].filter((p) => honorSet.has(p)).sort();
+      if (honored.length > 0) {
+        console.log(
+          `${DIM}   scoped staging: honoring the pre-staged index blob for ${honored.length} adjudicated path(s) — no path-level re-add${RESET}`,
+        );
+        for (const p of honored) console.log(`${DIM}   ${p}${RESET}`);
+      }
+      const toStage = [...committable]
+        .filter((p) => !indexRemoved.has(p))
+        .filter((p) => !honorSet.has(p))
+        .sort();
       const present = toStage.filter((p) => fs.existsSync(p));
       const absent = toStage.filter((p) => !fs.existsSync(p));
       // B1 (dev-sync 1.50.0, design docs/designs/2026-11-17-root-machinery-batch-design.md
@@ -2650,6 +2793,75 @@ if (scopedStaging) {
     if (import.meta.main) {
       process.exit(1);
     }
+  }
+}
+
+// ── Step 6.55 — spec-registry dangling-reference gate (T-20261117-015, spec
+// docs/designs/2026-11-18-dev-sync-hunk-staging-design.md §3) ──────────────────
+// The 2026-11-17 audit-fix landing shipped a registry hunk whose
+// sync-auto-detection entry had NO entry JSON in the commit — every pre-commit
+// gate passed and only push-time review caught it (memory/2026-11-17.md, PR
+// #2073). Cheap commit-time gate: when the registry is landing in THIS commit,
+// every entry's one-file-per-spec entry JSON (docs/specs/entries/<id>.json) and
+// its design `file` target must exist in the resulting commit. Existence =
+// a blob in the index, or a blob in HEAD not removed by this landing (staged
+// deletion / rename source). Nothing stages between step 6.5 and the commit
+// (the step-6.9 invariant), so the index read here IS the commit.
+// Pure detection: scripts/lib/spec-landing.ts (one derivation, two callers).
+try {
+  const regDiffRes = await $`git diff --cached --name-only -z -- ${SPEC_REGISTRY_PATH}`.quiet().nothrow();
+  if (regDiffRes.exitCode !== 0) throw new Error(regDiffRes.stderr.toString());
+  const registryLanding = regDiffRes.stdout.toString().split("\0").filter(Boolean).length > 0;
+  if (!registryLanding) {
+    console.log(
+      `${DIM}✓ Step 6.55: spec registry not landing in this commit — dangling-reference gate skipped${RESET}`,
+    );
+  } else {
+    const stagedRegRes = await $`git show :${SPEC_REGISTRY_PATH}`.quiet().nothrow();
+    if (stagedRegRes.exitCode !== 0) {
+      throw new Error(`cannot read the staged registry blob: ${stagedRegRes.stderr.toString().trim()}`);
+    }
+    const entries = parseRegistryEntries(stagedRegRes.stdout.toString());
+    // Three batched spawns, then a sync predicate over sets (design §5 test plan
+    // keeps the predicate pure; this step only materializes it).
+    const required = [...new Set(entries.flatMap((entry) => requiredPathsForEntry(entry)))];
+    const idxSet = new Set<string>();
+    if (required.length > 0) {
+      const lsRes = await $`git ls-files -z -- ${required}`.quiet().nothrow();
+      if (lsRes.exitCode !== 0) throw new Error(lsRes.stderr.toString());
+      for (const p of lsRes.stdout.toString().split("\0").filter(Boolean)) idxSet.add(p);
+    }
+    const headTreeRes = await $`git ls-tree -r --name-only -z HEAD`.quiet().nothrow();
+    if (headTreeRes.exitCode !== 0) throw new Error(headTreeRes.stderr.toString());
+    const headSet = new Set(headTreeRes.stdout.toString().split("\0").filter(Boolean));
+    const rmRes = await $`git diff --cached --name-status -z`.quiet().nothrow();
+    if (rmRes.exitCode !== 0) throw new Error(rmRes.stderr.toString());
+    const removedInIndex = parseCachedNameStatus(rmRes.stdout.toString());
+    const existsInCommit = (p: string): boolean => idxSet.has(p) || (headSet.has(p) && !removedInIndex.has(p));
+    const dangling = danglingSpecRefs(entries, existsInCommit);
+    if (dangling.length > 0) {
+      console.log(
+        `${RED}❌ Step 6.55: spec-registry dangling-reference gate FAILED — ${dangling.length} required path(s) will NOT exist in this commit:${RESET}`,
+      );
+      for (const d of dangling) console.log(`   ${d}`);
+      console.log(
+        `${YELLOW}   Repair: stage the entry JSON (git add docs/specs/entries/<id>.json) or strip the entry${RESET}`,
+      );
+      console.log(
+        `${YELLOW}   from the staged registry hunk (git apply --cached / --honor-staged), then re-run dev-sync.${RESET}`,
+      );
+      if (import.meta.main) {
+        process.exit(1);
+      }
+    }
+    console.log(
+      `${GREEN}✓ Step 6.55: spec registry landing — ${entries.length} entr(ies), no dangling references${RESET}`,
+    );
+  }
+} catch (e) {
+  console.log(`${RED}❌ Step 6.55 (spec-registry dangling-reference gate) failed: ${e}${RESET}`);
+  if (import.meta.main) {
+    process.exit(1);
   }
 }
 
