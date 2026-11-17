@@ -1,8 +1,8 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.9.2
-last_reviewed: 2026-11-12
+version: 1.10.0
+last_reviewed: 2026-11-18
 status: active
 scope: common
 l2_propagate: true
@@ -109,6 +109,30 @@ Runs the full project sync pipeline (`scripts/dev-sync.ts`). This is the single 
 
 4. If audit fails, fix the reported issue before re-running.
 
+## Conditional Steps (opt-in detection — sync-embedded backport detection)
+
+These two steps run ONLY when the detection gate is ON. The gate check below is UNCONDITIONAL — every sync performs it and must state the outcome (on/off) in its log; silently skipping the check itself is a process violation. When the gate is OFF, steps 5–6 are skipped entirely and /sync behavior is byte-identical to the pre-detection pipeline (zero new artifacts, zero new behavior — AC-1 of `docs/designs/2026-11-17-sync-auto-detection-design.md`).
+
+5. **Detection & filing — CONDITIONAL (gate check first, design §5.2/§5.4/§5.8)**:
+   1. **Gate check (always performed)**: read the project's `variant.json` top-level `syncDetection` block AND check whether this sync invocation carried a `--detect-backport` argument. Gate is ON iff `syncDetection.enabled: true` (config) OR the invocation carried `--detect-backport` (one-off override; explicit argument > config). Absent key / `enabled: false` / no argument = feature OFF — log `sync-detection: disabled (feature off)` and skip steps 5.2–6 entirely. A malformed `syncDetection` block is treated as OFF by the detector with a stderr warning; the shape is validated loudly by `validate-templates.ts` (check `sync-detection`), so fix the config instead of relying on the silent OFF.
+   2. **Run the detector**: `bun scripts/detect-backport.ts --json > "$(git rev-parse --git-dir)/detect-backport-report.json"` — pass `--detect-backport` as well when the gate source is the invocation argument. The script reads only project-local facts (never diffs against `templates/`), writes the report + dedupe state to `<git-dir>/` (outside the working tree, never committed), and prints a console summary. Read the report (schema `detect-backport-report/1`).
+   3. **Filing** (§5.4 single channel — the upstream-request MCP for both kinds; `upstream_request_create`):
+      - `template-defect` candidates with disposition `within-cap` and `suggested_action: file-upstream` → file via `upstream_request_create` with `suspected_layer` from the claim class (delivered-common file → L1, variant-delivered file → L2, ambiguous → unsure), the report's `affected_paths`, and `drafted_symptom` as input. The session reviews and may refine the wording before calling (the script's text is declarative input, not the verbatim contract).
+      - `reusable-asset` candidates with disposition `within-cap` → file via `upstream_request_create` with `suspected_layer: "unsure"` and the symptom prefixed `[sync-detect:reusable-asset]` (lands inbox; promotion into `templates/` stays human-judged — ADR-0031).
+      - `over-cap`, `duplicate-local`, and `already-filed` rows (E1 markers carrying real U-ids) are report-only — never re-filed; they stay visible in the report.
+      - After each defect filing, mark the patch site with the returned `LOCAL-PATCH(upstream-request: <id>)` marker and update any `pending` E1 markers with the real id (closes the upgrade-report loop `local-patch-scan.ts` serves).
+   4. **Notes line**: append one line to the PR body Notes section and the task log: `sync-detection: N candidates, M filed, K over-cap`.
+   5. **Upgrade-warning line (§5.8 — warning-only, NEVER blocking)**: refine the report's `unresolved_template_defects` pending set by dropping U-ids whose `upstream.resolution = fixed` (looked up via `upstream_request_status`). When the refined count > 0, print and append to the same Notes line: `sync-detection: N unresolved template defects (upgrade NOT blocked; report: <git-dir>/detect-backport-report.json)`. An unresolved template defect never blocks the sync, the landing PR, the auto-merge, or an upgrade — no gate, exit code, or enforcement hook attaches to this line; the safety net is the pre-existing CONFLICT/PROJECT_EVOLVED preserve semantics of `lib/upgrade-policy.ts`.
+   6. **Standalone-upgrade gap case (§5.8 placement ruling)**: an upgrade wave applied outside this flow never runs detection. The upgrade-delivery guidance reads the last persisted `<git-dir>/detect-backport-report.json` when it exists and prints the same warning-only line when `unresolved_template_defects.count > 0`; an absent report (feature off / never run) produces no warning — documented designed behavior, not a defect.
+
+6. **Auto-merge close-out — CONDITIONAL (gate ON only; design §5.6; SSOT ADR-0105)**: merge the flow's own landing PR by the predicate below, then apply the same predicate at close-out to open self-authored PRs. The skill cites the ADR-0105 conditions rather than redefining them:
+   1. **Author guard**: PR author is this project's own automation identity or the user (ADR-0105 condition 4); a PR carrying foreign/ridden commits is never merged (condition 5) — report it instead.
+   2. **Protected-path guard**: the PR's changed files intersect no governance-control path — `.githooks/**`, `scripts/hooks/**`, `.claude/settings.json`, `.gemini/settings.json`, `docs/context.md`, `scripts/SCRIPTS.md` (ADR-0105 §2 protected-path class, project layout). Hit → human merge only.
+   3. **Checks-green arm**: `gh pr checks` reports all checks succeeded (a repo with no CI workflows qualifies vacuously — nothing ever ran to fail).
+   4. **Billing-block arm** (ADR-0105 conditions 1–2, standing disposition): the head SHA has a startup_failure-class failure — annotation "recent account payments have failed or your spending limit needs to be increased", `runner_id 0`, zero steps. "No checks appeared" is not evidence; the wall is the known account-level state (T-20261110-008 / DEC-20261110-03), not re-diagnosed per PR. Conditions 3/7/8 are satisfied at project scope: dev-sync's own audit/typecheck/test gates already ran locally before this PR exists, the session merges only its own 1–N PRs (no wave), and the merge evidence lands in the task log.
+   5. **Never-merge floor**: any other failure class (test failure, timeout, missing required check that is not startup_failure) → the PR stays open and the failing condition is reported. Real failures never auto-merge.
+   - **Close-out**: after the landing PR resolves, enumerate `gh pr list --state open`, apply the predicate to each self/user-authored PR, merge qualifying ones (squash/merge per repo convention), and report any that stay open with the failing condition. Foreign-authored PRs are reported, never merged.
+
 ## Worktree Landing Variant
 
 When concurrency evidence exists (shared tree dirty, shared checkout off `main`, or any open PR), land multi-file write batches from an isolated worktree instead of the shared checkout. Full rule set and rationale: `docs/designs/2026-11-07-session-worktree-convention-design.md` (T-20261106-010). PM bookkeeping (ticket moves, memory-log-only, CHANGELOG entries) and trivial single-file changes stay on the shared checkout.
@@ -136,6 +160,7 @@ Step 2 tags its session-summary block with `<!-- dev-sync:session branch=<branch
 ## Related Skills
 
 - `scripts/dev-sync.ts` — Core sync pipeline implementation
+- `scripts/detect-backport.ts` — Opt-in detection script invoked by conditional step 5 (gate: `variant.json` `syncDetection` or `--detect-backport`; design `docs/designs/2026-11-17-sync-auto-detection-design.md`)
 - `skills/gateguard/SKILL.md` — Pre-edit quality gate (run before edits that lead to sync)
 - `CONSTITUTION.md §3` — PR workflow and branch rules
 
