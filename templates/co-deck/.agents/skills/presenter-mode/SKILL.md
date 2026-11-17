@@ -3,7 +3,7 @@ name: presenter-mode
 description: >
   Dual-window presenter state synchronization using browser BroadcastChannel API,
   syncing slide index, speaker notes, timer, current/next slide preview.
-version: "1.0.2"
+version: 1.0.3
 last_reviewed: "2026-11-15"
 status: active
 scope: co-deck

@@ -1,7 +1,7 @@
 ---
 name: design
 scope: co-deck
-version: "1.2.2"
+version: 1.2.3
 description: >
   Locks visual design style. Decides layout, color palette, font family and
   saves design_spec.md. Can analyze reference URLs/images. Responds to "lock
