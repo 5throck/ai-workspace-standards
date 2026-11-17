@@ -1,8 +1,31 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.84.1
+ * @version 1.85.0
  *
+ * v1.85.0 (2026-11-17, design docs/designs/2026-11-17-template-lifecycle-batch-design.md §4.2,
+ *          DEC-20261117-05; T-20261116-004 batch PR-5): `variant-common-shadow` gains the
+ *          `zone-override` allowlist class (O-9 Option A — checker-side, no delivery change).
+ *          For an entry { class: "zone-override", zones: [...] } both sides of the byte comparison
+ *          have their managed-zone content (VARIANT-ROLE-BOUNDARY in docs/governance/agents/
+ *          workflows.md — markers follow the shared `<!-- <zone>-START/END -->` convention of
+ *          helpers/scaffold-markers.ts / the docs-zone generator propagate-to-templates.ts B-A10)
+ *          replaced with an empty span BEFORE comparing: an in-zone-only delta normalizes
+ *          byte-equal and goes silent; divergence reaching outside the zones reports
+ *          `shadow-out-of-zone-drift` (WARN). Two structural assertions join the same check:
+ *          `shadow-common-zone-dirty` (common's zone is missing or carries content — zone content
+ *          belongs to variants; the canonical empty form is the B-A10 placeholder,
+ *          CANONICAL_EMPTY_ZONE_CONTENT) and `shadow-zone-nested-markers` (variant zone content
+ *          nests a managed marker — no nested merge semantics for docs zones). A zone-override
+ *          path missing its markers on either side fail-closes as out-of-zone drift. The `tracked`
+ *          class and its commonSha256 guard are unchanged. computeShadowSet takes the parsed
+ *          allowlist entries as a new optional 4th arg; classifyShadows takes the variant dirs as
+ *          a new optional 4th arg (variant-side zone reads); pure helpers
+ *          zoneMarkers/stripManagedZones/extractZoneContent/CANONICAL_EMPTY_ZONE_CONTENT exported.
+ *          The co-learning workflows.md allowlist entry converts tracked → zone-override in the
+ *          same PR (atomic switch, design §4.3); the template copy itself stays untouched. Version
+ *          takes 1.85.0 because v1.84.0 was consumed by DEC-20261117-07 (this design's §4.2
+ *          originally reserved it).
  * v1.84.1 (2026-11-17, design docs/designs/2026-11-17-new-project-precheck-argv-design.md §3.1, T-20261117-009):
  *          delete the two unconditional `TRACE mirror-check` / `TRACE verdict` console.log calls (since cd8a3e496)
  *          that polluted stdout (260 lines, even with --json). No check semantics change; the classifier is now
@@ -8554,25 +8577,42 @@ function checkProjectIdentityPlaceholders(): void {
   }
 }
 
-// ─── variant-common-shadow (T-20261114-012, design 2026-11-16 §4) ────────────────────────
+// ─── variant-common-shadow (T-20261114-012, design 2026-11-16 §4; zone-override v1.85.0,
+//     design 2026-11-17-template-lifecycle-batch §4.2) ─────────────────────────────────
 // WARN-only drift guard: a variant file that replaces a templates/common file wholesale never
 // receives later common edits. The shadow set is compared to a root-only allowlist.
+// Classes: "variant-owned" (variant identity, unguarded), "tracked" (+ commonSha256 — fires
+// when common changes since recording), "zone-override" (+ zones — the variant's ONLY permitted
+// divergence is inside the named managed zones; in-zone deltas go silent via zone-aware
+// normalization, out-of-zone divergence reports shadow-out-of-zone-drift).
 export interface ShadowAllowlistEntry {
   path: string;
   variants: "*" | string[];
-  class: "variant-owned" | "tracked";
+  class: "variant-owned" | "tracked" | "zone-override";
   commonSha256?: string;
+  /** Managed-zone names for class "zone-override" (marker convention `<!-- <zone>-START/END -->`). */
+  zones?: string[];
   reason?: string;
 }
 export interface ShadowInstance {
   variant: string;
   path: string;
   frontmatterOnly: boolean;
+  /** zone-override path whose divergence lies entirely inside the managed zone(s) — silent. */
+  zoneInOnly?: boolean;
+  /** zone-override path whose divergence reaches outside the managed zone(s) — shadow-out-of-zone-drift. */
+  zoneOutOf?: boolean;
 }
 export interface ShadowReport {
   undeclared: ShadowInstance[];
   moved: { variant: string; path: string; recorded: string; current: string }[];
   stale: { path: string; variant: string }[];
+  /** zone-override paths diverging outside their managed zones (v1.85.0). */
+  outOfZone: { variant: string; path: string; zones: string[] }[];
+  /** common's managed zone missing or carrying content — zone content belongs to variants (v1.85.0). */
+  commonZoneDirty: { path: string; zone: string }[];
+  /** variant zone content nesting a managed marker — no nested merge semantics for docs zones (v1.85.0). */
+  zoneNestedMarkers: { variant: string; path: string; zone: string }[];
   declaredSilent: number;
 }
 
@@ -8586,6 +8626,55 @@ function stripFrontmatter(text: string): string {
   return text.replace(/^---\n[\s\S]*?\n---\n/, "");
 }
 
+/** Managed-zone marker pair for a zone name — the `<!-- <zone>-START/END -->` convention shared
+ *  by helpers/scaffold-markers.ts (VARIANT_SCAFFOLD_MARKER_NAMES) and the docs-zone generator
+ *  propagate-to-templates.ts B-A10 (v1.85.0). */
+export function zoneMarkers(zone: string): { start: string; end: string } {
+  return { start: `<!-- ${zone}-START -->`, end: `<!-- ${zone}-END -->` };
+}
+
+/** Canonical empty-zone content per zone (v1.85.0): what the generator writes for an empty
+ *  zone. Only VARIANT-ROLE-BOUNDARY is zone-capable today; the value must stay byte-equal to
+ *  the B-A10 placeholder in propagate-to-templates.ts (§4.3 Role Boundary Matrix replacement).
+ *  Zones without an entry here assert against the empty string. */
+export const CANONICAL_EMPTY_ZONE_CONTENT: Record<string, string> = {
+  "VARIANT-ROLE-BOUNDARY":
+    "<!-- Add project-specific role boundary rules here. Example:\n" +
+    "     | Design implementation approach | `[design specialist]` | `[implementation specialist]` |\n" +
+    "     | Write or modify documentation | `[docs specialist]` | `[design specialist]` | -->",
+};
+
+/** Pure: replace the content between each zone's first marker pair with an empty span (markers
+ *  kept, v1.85.0), so an in-zone-only delta compares byte-equal. A side missing either marker
+ *  is returned unchanged — the raw comparison then fail-closes as out-of-zone drift. */
+export function stripManagedZones(text: string, zones: string[]): string {
+  let out = text;
+  for (const zone of zones) {
+    const { start, end } = zoneMarkers(zone);
+    const s = out.indexOf(start);
+    if (s < 0) continue;
+    const e = out.indexOf(end, s + start.length);
+    if (e < 0) continue;
+    out = out.slice(0, s + start.length) + "\n" + out.slice(e);
+  }
+  return out;
+}
+
+/** Pure: the content between a zone's first marker pair, or null when either marker is missing. */
+export function extractZoneContent(text: string, zone: string): string | null {
+  const { start, end } = zoneMarkers(zone);
+  const s = text.indexOf(start);
+  if (s < 0) return null;
+  const e = text.indexOf(end, s + start.length);
+  if (e < 0) return null;
+  return text.slice(s + start.length, e);
+}
+
+/** True when the entry covers `variant` ("*" or list membership). */
+function coversVariant(e: ShadowAllowlistEntry, variant: string): boolean {
+  return e.variants === "*" || e.variants.includes(variant);
+}
+
 function walkFiles(dir: string, base = dir, out: string[] = []): string[] {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     if (e.name === "node_modules" || e.name === ".git") continue;
@@ -8596,41 +8685,93 @@ function walkFiles(dir: string, base = dir, out: string[] = []): string[] {
   return out;
 }
 
-/** Pure: compute the shadow instances per variant (path in both trees, LF-normalized bytes differ). */
+/** Pure: compute the shadow instances per variant (path in both trees, LF-normalized bytes differ).
+ *  `entries` enables the zone-override normalization (v1.85.0): for a path covered by a
+ *  zone-override entry, the zone-aware comparison decides zoneInOnly (silent) vs zoneOutOf
+ *  (shadow-out-of-zone-drift). The zone fields attach ONLY to zone-override paths — every other
+ *  path's instance shape is unchanged. */
 export function computeShadowSet(
   commonDir: string,
   variantDirs: Record<string, string>,
   commonFiles: string[] = walkFiles(commonDir),
+  entries: ShadowAllowlistEntry[] = [],
 ): ShadowInstance[] {
+  const zoneEntries = entries.filter((e) => e.class === "zone-override");
   const out: ShadowInstance[] = [];
   for (const [variant, vdir] of Object.entries(variantDirs)) {
     for (const rel of commonFiles) {
       const vp = join(vdir, rel);
       if (!existsSync(vp) || !statSync(vp).isFile()) continue;
-      const a = normalizeLf(readFileSync(join(commonDir, rel)));
-      const b = normalizeLf(readFileSync(vp));
-      if (a === b) continue;
-      out.push({ variant, path: rel, frontmatterOnly: stripFrontmatter(a) === stripFrontmatter(b) });
+      const aRaw = normalizeLf(readFileSync(join(commonDir, rel)));
+      const bRaw = normalizeLf(readFileSync(vp));
+      if (aRaw === bRaw) continue;
+      const inst: ShadowInstance = {
+        variant,
+        path: rel,
+        frontmatterOnly: stripFrontmatter(aRaw) === stripFrontmatter(bRaw),
+      };
+      const zoneEntry = zoneEntries.find((e) => e.path === rel && coversVariant(e, variant));
+      if (zoneEntry) {
+        const zones = zoneEntry.zones ?? [];
+        const a = stripManagedZones(aRaw, zones);
+        const b = stripManagedZones(bRaw, zones);
+        inst.zoneInOnly = a === b;
+        inst.zoneOutOf = a !== b;
+      }
+      out.push(inst);
     }
   }
   return out;
 }
 
-/** Pure: classify shadow instances against the allowlist. */
+/** Pure: classify shadow instances against the allowlist. `variantDirs` enables the
+ *  zone-override nested-marker assertion (v1.85.0) — it reads the variant copy. */
 export function classifyShadows(
   commonDir: string,
   instances: ShadowInstance[],
   entries: ShadowAllowlistEntry[],
+  variantDirs: Record<string, string> = {},
 ): ShadowReport {
-  const report: ShadowReport = { undeclared: [], moved: [], stale: [], declaredSilent: 0 };
-  const covers = (e: ShadowAllowlistEntry, variant: string) => e.variants === "*" || e.variants.includes(variant);
+  const report: ShadowReport = {
+    undeclared: [],
+    moved: [],
+    stale: [],
+    outOfZone: [],
+    commonZoneDirty: [],
+    zoneNestedMarkers: [],
+    declaredSilent: 0,
+  };
   const shadowKey = new Set(instances.map((i) => `${i.variant}\0${i.path}`));
   const movedSeen = new Set<string>();
   for (const inst of instances) {
-    const entry = entries.find((e) => e.path === inst.path && covers(e, inst.variant));
+    const entry = entries.find((e) => e.path === inst.path && coversVariant(e, inst.variant));
     if (!entry) {
       report.undeclared.push(inst);
       continue;
+    }
+    if (entry.class === "zone-override") {
+      // Structural assertion (design §4.2 item 4): variant zone content must not contain
+      // managed-block markers — no nested merge semantics for docs zones.
+      const vdir = variantDirs[inst.variant];
+      const vp = vdir ? join(vdir, inst.path) : null;
+      let nested = false;
+      if (vp && existsSync(vp)) {
+        const vtext = normalizeLf(readFileSync(vp));
+        for (const zone of entry.zones ?? []) {
+          const content = extractZoneContent(vtext, zone);
+          if (content === null) continue; // missing markers → out-of-zone drift owns the report
+          const { start, end } = zoneMarkers(zone);
+          if (content.includes(start) || content.includes(end)) {
+            report.zoneNestedMarkers.push({ variant: inst.variant, path: inst.path, zone });
+            nested = true;
+          }
+        }
+      }
+      if (nested) continue; // the precise row fired; removing the nested markers restores verifiability
+      if (inst.zoneOutOf) {
+        report.outOfZone.push({ variant: inst.variant, path: inst.path, zones: entry.zones ?? [] });
+        continue; // reported, not silent — the contract permits in-zone deltas only
+      }
     }
     report.declaredSilent++;
     if (entry.class === "tracked" && entry.commonSha256) {
@@ -8639,6 +8780,24 @@ export function classifyShadows(
       if (current !== entry.commonSha256 && !movedSeen.has(key)) {
         movedSeen.add(key);
         report.moved.push({ variant: inst.variant, path: entry.path, recorded: entry.commonSha256, current });
+      }
+    }
+  }
+  // Structural assertion (design §4.2 item 4): common's zone must be empty — the canonical
+  // generator placeholder at most. A common-side zone edit is itself a drift signal (zone
+  // content belongs to variants), independent of any instance.
+  const zonePathsSeen = new Set<string>();
+  for (const e of entries) {
+    if (e.class !== "zone-override" || zonePathsSeen.has(e.path)) continue;
+    zonePathsSeen.add(e.path);
+    const cp = join(commonDir, e.path);
+    if (!existsSync(cp)) continue;
+    const ctext = normalizeLf(readFileSync(cp));
+    for (const zone of e.zones ?? []) {
+      const content = extractZoneContent(ctext, zone);
+      const canonical = (CANONICAL_EMPTY_ZONE_CONTENT[zone] ?? "").trim();
+      if (content === null || content.trim() !== canonical) {
+        report.commonZoneDirty.push({ path: e.path, zone });
       }
     }
   }
@@ -8713,8 +8872,8 @@ function checkVariantCommonShadow(): void {
   } catch {
     commonFiles = undefined;
   }
-  const instances = computeShadowSet(commonDir, variantDirs, commonFiles);
-  const report = classifyShadows(commonDir, instances, entries);
+  const instances = computeShadowSet(commonDir, variantDirs, commonFiles, entries);
+  const report = classifyShadows(commonDir, instances, entries, variantDirs);
 
   const byVariant = new Map<string, ShadowInstance[]>();
   for (const i of report.undeclared) byVariant.set(i.variant, [...(byVariant.get(i.variant) ?? []), i]);
@@ -8744,7 +8903,38 @@ function checkVariantCommonShadow(): void {
       "Remove the stale entry from docs/templates/variant-shadow-allowlist.json",
     );
   }
-  if (report.undeclared.length === 0 && report.moved.length === 0 && report.stale.length === 0) {
+  for (const o of report.outOfZone) {
+    warn(
+      o.variant,
+      "variant-common-shadow",
+      `shadow-out-of-zone-drift: templates/${o.variant}/${o.path} diverges from common outside its managed zone(s) (${o.zones.join(", ") || "none declared"}) — the zone-override contract permits in-zone deltas only`,
+      "Re-sync the out-of-zone span from common (keep only the zone content), or reclassify the allowlist entry",
+    );
+  }
+  for (const c of report.commonZoneDirty) {
+    warn(
+      "common",
+      "variant-common-shadow",
+      `shadow-common-zone-dirty: common's ${c.zone} zone in ${c.path} is missing or carries content — zone content belongs to variants, not to common`,
+      "Restore the canonical empty zone in templates/common (the generator placeholder), or move the content out of the zone",
+    );
+  }
+  for (const n of report.zoneNestedMarkers) {
+    warn(
+      n.variant,
+      "variant-common-shadow",
+      `shadow-zone-nested-markers: templates/${n.variant}/${n.path} nests a managed-zone marker (${n.zone}) inside its own zone — no nested merge semantics for docs zones`,
+      "Remove the nested marker pair from the zone content",
+    );
+  }
+  if (
+    report.undeclared.length === 0 &&
+    report.moved.length === 0 &&
+    report.stale.length === 0 &&
+    report.outOfZone.length === 0 &&
+    report.commonZoneDirty.length === 0 &&
+    report.zoneNestedMarkers.length === 0
+  ) {
     pass(`variant-common-shadow: no undeclared shadows (${report.declaredSilent} declared instance(s) silent)`);
   }
 }

@@ -3,17 +3,24 @@
  * (v1.83.0, T-20261114-012): pure helpers computeShadowSet / classifyShadows /
  * collapseShadowItems, plus an exit-code check that the arm only WARNs.
  *
- * @version 1.0.0
+ * v1.1.0 (2026-11-17, design docs/designs/2026-11-17-template-lifecycle-batch-design.md §4.2/§8
+ *          PR-5, T-20261116-004): zone-override class — in-zone-only deltas go silent,
+ *          out-of-zone drift / common-zone-dirty / nested-markers assertions fire on seeded
+ *          violations; live-tree pins for the co-learning workflows.md conversion.
+ *
+ * @version 1.1.0
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import {
+  CANONICAL_EMPTY_ZONE_CONTENT,
   type ShadowAllowlistEntry,
   classifyShadows,
   collapseShadowItems,
   computeShadowSet,
+  extractZoneContent,
   shadowSha256,
 } from "../../scripts/validate-templates.ts";
 
@@ -105,6 +112,148 @@ describe("collapseShadowItems", () => {
       { variant: "co-a", path: "package.json", frontmatterOnly: false },
     ]);
     expect(items).toEqual(["package.json", "skill s1 (2 copies)"]);
+  });
+});
+
+// ─── zone-override (v1.85.0, design 2026-11-17-template-lifecycle-batch §4.2 / §8 PR-5) ──
+
+const ZONE = "VARIANT-ROLE-BOUNDARY";
+const ZS = `<!-- ${ZONE}-START -->`;
+const ZE = `<!-- ${ZONE}-END -->`;
+// Mirrors CANONICAL_EMPTY_ZONE_CONTENT (the B-A10 placeholder) as an inline literal so a
+// canonical-side edit cannot silently unpin these fixtures.
+const CANONICAL =
+  "<!-- Add project-specific role boundary rules here. Example:\n" +
+  "     | Design implementation approach | `[design specialist]` | `[implementation specialist]` |\n" +
+  "     | Write or modify documentation | `[docs specialist]` | `[design specialist]` | -->";
+
+const tmpZ = mkdtempSync(join(tmpdir(), "vt-zone-"));
+afterAll(() => rmSync(tmpZ, { recursive: true, force: true }));
+
+const commonZ = join(tmpZ, "common");
+const vZdir = join(tmpZ, "co-z");
+const withZone = (zoneContent: string, tail = "after\n"): string => `before\n${ZS}\n${zoneContent}\n${ZE}\n${tail}`;
+
+put(commonZ, "zone-silent.md", withZone(CANONICAL));
+put(commonZ, "zone-out.md", withZone(CANONICAL));
+put(commonZ, "zone-nomarkers.md", "no managed zone\ncommon body\n");
+put(commonZ, "zone-nested.md", withZone(CANONICAL));
+put(commonZ, "plain-divergent.md", "---\nv: 1\n---\nbody\n");
+put(vZdir, "zone-silent.md", withZone(`${CANONICAL}\n\n### Stream Boundaries (delta)\n\n| rows |\n`));
+put(vZdir, "zone-out.md", withZone(CANONICAL, "after\nextra out-of-zone line\n"));
+put(vZdir, "zone-nomarkers.md", "no managed zone\nvariant body\n");
+put(vZdir, "zone-nested.md", withZone(`${CANONICAL}\n${ZS}\n${ZE}`));
+put(vZdir, "plain-divergent.md", "---\nv: 2\n---\nbody\n");
+
+const zoneDirs = { "co-z": vZdir };
+const zoneFiles = ["zone-silent.md", "zone-out.md", "zone-nomarkers.md", "zone-nested.md", "plain-divergent.md"];
+const zoneEntry = (path: string): ShadowAllowlistEntry => ({
+  path,
+  variants: ["co-z"],
+  class: "zone-override",
+  zones: [ZONE],
+});
+
+describe("zone-override classification (v1.85.0)", () => {
+  const set = computeShadowSet(commonZ, zoneDirs, zoneFiles, [
+    zoneEntry("zone-silent.md"),
+    zoneEntry("zone-out.md"),
+    zoneEntry("zone-nomarkers.md"),
+    zoneEntry("zone-nested.md"),
+  ]);
+  const setFor = (path: string): typeof set => set.filter((i) => i.path === path);
+  test("in-zone-only delta registers as a silent instance (design §8 PR-5: goes silent)", () => {
+    const inst = set.find((i) => i.path === "zone-silent.md");
+    expect(inst?.zoneInOnly).toBe(true);
+    expect(inst?.zoneOutOf).toBe(false);
+    const r = classifyShadows(commonZ, setFor("zone-silent.md"), [zoneEntry("zone-silent.md")], zoneDirs);
+    expect(r.undeclared).toEqual([]);
+    expect(r.outOfZone).toEqual([]);
+    expect(r.declaredSilent).toBe(1);
+  });
+  test("OUT-OF-ZONE drift on a zone-override path still reports (design §8 PR-5)", () => {
+    const inst = set.find((i) => i.path === "zone-out.md");
+    expect(inst?.zoneOutOf).toBe(true);
+    const r = classifyShadows(commonZ, set, [zoneEntry("zone-out.md")], zoneDirs);
+    expect(r.outOfZone).toEqual([{ variant: "co-z", path: "zone-out.md", zones: [ZONE] }]);
+    expect(r.declaredSilent).toBe(0); // out-of-zone drift is reported, not silent
+  });
+  test("missing managed markers on a zone-override path fail-closes as out-of-zone drift", () => {
+    const inst = set.find((i) => i.path === "zone-nomarkers.md");
+    expect(inst?.zoneOutOf).toBe(true);
+    const r = classifyShadows(commonZ, set, [zoneEntry("zone-nomarkers.md")], zoneDirs);
+    expect(r.outOfZone.map((o) => o.path)).toEqual(["zone-nomarkers.md"]);
+  });
+  test("nested managed markers inside the variant zone fire the assertion", () => {
+    const r = classifyShadows(commonZ, set, [zoneEntry("zone-nested.md")], zoneDirs);
+    expect(r.zoneNestedMarkers).toEqual([{ variant: "co-z", path: "zone-nested.md", zone: ZONE }]);
+    // the precise nested-marker row suppresses the coarser out-of-zone row for the same instance
+    expect(r.outOfZone).toEqual([]);
+    expect(r.declaredSilent).toBe(0); // a violation is never silent
+  });
+  test("a zone-override path does not change other paths' classification", () => {
+    const r = classifyShadows(commonZ, set, [zoneEntry("zone-silent.md")], zoneDirs);
+    expect(r.undeclared.map((i) => i.path).sort()).toEqual([
+      "plain-divergent.md",
+      "zone-nested.md",
+      "zone-nomarkers.md",
+      "zone-out.md",
+    ]);
+    // a path with no zone-override entry keeps the exact pre-v1.85.0 instance shape
+    expect(r.undeclared.find((i) => i.path === "plain-divergent.md")).toEqual({
+      variant: "co-z",
+      path: "plain-divergent.md",
+      frontmatterOnly: true, // the fixture diverges only in frontmatter
+    });
+  });
+  test("seeded violation: common's zone carrying content fires shadow-common-zone-dirty", () => {
+    // Instance-independent structural assertion: common's workflows-zone analogue carries
+    // non-canonical content → dirty, even with zero instances.
+    put(commonZ, "zone-dirty-common.md", withZone(`${CANONICAL}\nsneaky common-side zone edit\n`));
+    const r = classifyShadows(commonZ, [], [zoneEntry("zone-dirty-common.md")], zoneDirs);
+    expect(r.commonZoneDirty).toEqual([{ path: "zone-dirty-common.md", zone: ZONE }]);
+  });
+  test("common's canonical-placeholder zone is clean", () => {
+    const r = classifyShadows(commonZ, [], [zoneEntry("zone-silent.md")], zoneDirs);
+    expect(r.commonZoneDirty).toEqual([]);
+  });
+});
+
+describe("live tree pins (design 2026-11-17-template-lifecycle-batch §8 PR-5)", () => {
+  const root = resolve(import.meta.dir, "..", "..");
+  const realCommon = join(root, "templates", "common");
+  const realCo = join(root, "templates", "co-learning");
+  const wfRel = "docs/governance/agents/workflows.md";
+  const allow = JSON.parse(readFileSync(join(root, "docs", "templates", "variant-shadow-allowlist.json"), "utf-8")) as {
+    entries: ShadowAllowlistEntry[];
+  };
+  const wfEntry = allow.entries.find((e) => e.path === wfRel && e.class === "zone-override");
+
+  test("allowlist entry is the converted zone-override entry (atomic switch, design §4.3)", () => {
+    expect(wfEntry).toBeDefined();
+    expect(wfEntry?.variants).toEqual(["co-learning"]);
+    expect(wfEntry?.zones).toEqual(["VARIANT-ROLE-BOUNDARY"]);
+    expect(wfEntry?.commonSha256).toBeUndefined(); // dropped — normalization subsumes it
+    expect(wfEntry?.reason).toContain("2026-11-17-template-lifecycle-batch-design.md");
+  });
+
+  test("common's workflows.md zone is the canonical empty placeholder (B-A10 form)", () => {
+    const text = readFileSync(join(realCommon, wfRel), "utf-8").replace(/\r\n/g, "\n");
+    expect(extractZoneContent(text, ZONE)?.trim()).toBe(CANONICAL_EMPTY_ZONE_CONTENT[ZONE].trim());
+  });
+
+  test("co-learning workflows.md is in-zone-only and goes silent; no assertion fires", () => {
+    expect(wfEntry).toBeDefined();
+    const instances = computeShadowSet(realCommon, { "co-learning": realCo }, [wfRel], [wfEntry as ShadowAllowlistEntry]);
+    expect(instances).toHaveLength(1); // still a shadow (raw bytes differ) ...
+    expect(instances[0].zoneInOnly).toBe(true); // ... but only inside the zone
+    expect(instances[0].zoneOutOf).toBe(false);
+    const r = classifyShadows(realCommon, instances, [wfEntry as ShadowAllowlistEntry], { "co-learning": realCo });
+    expect(r.outOfZone).toEqual([]);
+    expect(r.commonZoneDirty).toEqual([]);
+    expect(r.zoneNestedMarkers).toEqual([]);
+    expect(r.stale).toEqual([]);
+    expect(r.declaredSilent).toBe(1);
   });
 });
 

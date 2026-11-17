@@ -13,7 +13,7 @@
     { "path": ".gemini/settings.json", "variants": "*", "class": "variant-owned", "reason": "per-variant platform overlay" },
     { "path": ".claude/settings.json", "variants": "*", "class": "variant-owned", "reason": "per-variant platform overlay" },
     { "path": "docs/phase-definitions.md", "variants": "*", "class": "variant-owned", "reason": "variant-customized phase definitions are the accepted norm (design 2026-10-28-l0-only-governance-doc-cleanup)" },
-    { "path": "docs/governance/agents/workflows.md", "variants": ["co-learning"], "class": "tracked", "commonSha256": "904db8ef08542d56bcc2d833cb63c53ddb9ad14e9e603af93cb88ea6f37cfa74", "reason": "Stream Boundaries insertion in the VARIANT-ROLE-BOUNDARY zone (PR #2032)" },
+    { "path": "docs/governance/agents/workflows.md", "variants": ["co-learning"], "class": "zone-override", "zones": ["VARIANT-ROLE-BOUNDARY"], "reason": "Stream Boundaries insertion inside the VARIANT-ROLE-BOUNDARY zone (DEC-20261007-01 via PR #2032); zone-override per design docs/designs/2026-11-17-template-lifecycle-batch-design.md §4.2 (DEC-20261117-05) — in-zone deltas go silent, out-of-zone drift reports" },
     { "path": ".agents/mcp.json", "variants": ["co-abap"], "class": "variant-owned", "reason": "per-variant agent-platform MCP overlay (ADR-0076 D1 per-host delivery matrix; project-evolved overlay)" },
     { "path": ".agents/skills.json", "variants": ["co-abap"], "class": "variant-owned", "reason": "per-variant agent-platform skill registry overlay (project-evolved overlay)" },
     { "path": ".codex/config.toml", "variants": ["co-abap"], "class": "variant-owned", "reason": "ADR-0076 D4: seed-only, per-project by nature (TOML semantic merge declined, upgrade-policy trade-off)" },
