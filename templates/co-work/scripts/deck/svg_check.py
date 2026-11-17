@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 r"""
-@version 2.1.0
+@version 2.1.1
 @description Deterministic quality gate for canonical SVG deck pages: whitelist
 enforcement, three-severity model, bidirectional content-SSOT text-run diff
 (SVG⊆SSOT errors + unrendered SSOT runs as W-CONTENT-UNRENDERED warnings), XML
 entity decoding in run extraction, and SHA-256 fingerprint reports required for
 PPTX export.
+
+v2.1.1 (2026-11-17): stdout/stderr pinned to UTF-8 at startup — under `python -I` on a
+Windows cp949 pipe, `print(json.dumps(...))` crashed with UnicodeEncodeError on
+`—`, so callers (test_svg_check.py) received empty stdout and failed 0/10.
 
 v2.1.0 (2026-11-07): exec-cut contract support — the reverse diff
 (W-CONTENT-UNRENDERED) becomes active and meaningful for exec-cut contracts,
@@ -71,7 +75,7 @@ from datetime import datetime, timezone
 from functools import cmp_to_key
 from typing import Any, Callable, Optional
 
-VERSION = "2.1.0"
+VERSION = "2.1.1"
 
 # ---------------------------------------------------------------------------
 # Canonical contract (svg-slide-authoring skill, spec §4)
@@ -640,7 +644,18 @@ Options:
 """)
 
 
+def _force_utf8_stdio() -> None:
+    # Windows pipes default to the ANSI code page (cp949 on Korean locales), which
+    # cannot encode '—' / '≠' in messages and report text; `python -I` also ignores
+    # PYTHONIOENCODING, so the script must pin UTF-8 itself.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str]) -> int:
+    _force_utf8_stdio()
     if "--help" in argv or "-h" in argv or len(argv) == 0:
         _help()
         return 0
