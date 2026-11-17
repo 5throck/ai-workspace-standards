@@ -5,8 +5,8 @@
     {
       "id": "ppt-master",
       "repo": "https://github.com/hugohe3/ppt-master",
-      "pin": "v6.8.0",
-      "commit": "5e8856be0da8e6bc85c4aa28acc614478f7b7137",
+      "pin": "v6.9.0",
+      "commit": "ce92fb43e4ade9c701f4c869e286f13fce743c72",
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
       "install_dir": "external/ppt-master",
       "consumer": "deck pipeline (scripts/deck/ppt-master-adapter.ts)",
@@ -41,8 +41,8 @@
     {
       "id": "im-not-ai",
       "repo": "https://github.com/epoko77-ai/im-not-ai",
-      "pin": "v2.4.4",
-      "commit": "333b35c18d99c34b31c7e1ebfef1931c075b649b",
+      "pin": "v2.4.5",
+      "commit": "f37b616c4878b278423ba0f015e7a8f596791fb2",
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
       "install_dir": "external/im-not-ai",
       "consumer": "humanize-monolith agent family + rulebook (scripts/humanize/humanize-adapter.ts)",
