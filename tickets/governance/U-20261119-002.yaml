@@ -1,0 +1,44 @@
+schemaVersion: 1
+id: U-20261119-002
+kind: manual
+title: >-
+  Upstream request from co-quickdl (QuickDL): variant-ization delivery gaps —
+  unfilled context overlay stub, L2 artifact leak, source-variant skill leak,
+  stale pre-standard context.md, variant-generic phase-definitions
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-19T05:20:00.000+09:00'
+history:
+  - at: '2026-11-19T05:20:00.000+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-quickdl
+  variant: co-utility
+  template_version: 0.30.0
+  source: project/co-quickdl
+  trust: untrusted
+  suspected_layer: L1
+  symptom: |-
+    Filed from QuickDL (external repo 5throck/QuickDL, spoke co-quickdl, variant co-utility). Adopted in place via adopt-project.ts under co-develop 0.30.0, then re-based to co-utility. Five variant-ization gaps were fixed by hand (see repro; workaround PR 5throck/QuickDL#48): (1) unfilled variant context overlay stub delivered as-is, (2) L2-only PROMOTION_CHECKLIST.md leaked into the L3 project, (3) source-variant-exclusive skills survived the re-base, (4) stale pre-standard docs/context.md never flagged for alignment, (5) variant-generic phase-definitions.md not instantiated per the adopting variant.
+  affected_paths:
+    - scripts/adopt-project.ts
+    - scripts/upgrade-project.ts
+    - docs/templates/variant-contract.json
+  identity_source: cwd
+  repro: |-
+    1. bun scripts/adopt-project.ts <external-repo> --variant co-develop --platform all --yes (clean tree, grants granted).
+    2. Inspect the delivered tree: docs/co-develop.context.md is the unfilled stub ("[e.g., TypeScript 5+]" placeholders + generic roster); PROMOTION_CHECKLIST.md exists at the project root; co-develop's 4 variant-exclusive skills (code-review, refactoring, swe-solve, test-driven-development) are present in skills/ + 5 mirrors; docs/context.md is untouched when it predates the pipeline-maintained standard (SCAFFOLD_COMMON_OWNED_FILES seeds only when absent); docs/phase-definitions.md carries the co-develop phase model regardless of roster.
+    3. Re-base: bun scripts/upgrade-project.ts <repo> --variant co-utility --yes. The 4 exclusive skills are NOT pruned (manual git rm across skills/ + 5 mirrors needed) and tombstones must be granted manually for co-develop surfaces.
+    Expected: (1) adoption instantiates the variant context overlay from the project's real stack/roster or fails/warns; (2) PROMOTION_CHECKLIST.md joins the L2-only file set; (3) re-base prunes or flags prior-variant exclusive skills; (4) pre-standard context.md detection with an alignment offer; (5) phase-definitions instantiated per the adopting variant.
+  local_workaround_diff: |-
+    Applied project-side in 5throck/QuickDL PR #48: hand-rewrote docs/co-utility.context.md absorbing the legacy constitution + old hand-authored context content; git rm PROMOTION_CHECKLIST.md; git rm the 4 co-develop exclusive skills from skills/ + .agents/.claude/.codex/.gemini/.hermes mirrors; hand-rewrote docs/phase-definitions.md to the utility phase model; replaced docs/context.md with templates/common/docs/context.md (identity substituted); variant.json name co-develop -> co-utility + variant_type utility + hub block removed; template-version.txt + scripts-snapshot.json flipped; tombstones granted via upgrade-project for the co-develop surfaces.
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - 'filing_identity: co-quickdl spoke registered via Projects/co-quickdl worktree (external repo 5throck/QuickDL); upstream MCP v1 identity gate refused the session cwd, so this ticket was filed into the store directly following the U-20261119-001 manual schema'
+  dedupe_key: 6b1f0d8a2c9e4f7a8d3b5c6e1a9f4d2e7b8c0a3d5e6f7a8b9c0d1e2f3a4b5c6d
+  duplicates: []
