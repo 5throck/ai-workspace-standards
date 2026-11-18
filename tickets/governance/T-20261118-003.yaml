@@ -2,31 +2,51 @@ schemaVersion: 1
 id: T-20261118-003
 kind: manual
 title: >-
-  memory union-verify vs dev-sync step 2 deadlock on branch=main sessions:
-  when a session block's branch is `main` (root syncs landing directly on
-  main), the gate's restore-in-working-tree guidance deadlocks — dev-sync
-  step 2's one-block-per-branch-per-day rule re-collapses restored
-  `branch=main` blocks on every re-run, so each /sync attempt re-FATALs at
-  step 3.88. Evidence (2026-11-18, issue #2069 pin-move flow): merges
-  41d725f9 / 71e87cc9 fused the _bgpool session block into the
-  trail-learnings block; the first two /sync attempts FATALed; fixed only by
-  running the sync on a PR branch (step 2 then plain-appends instead of
-  collapsing) with the log restored to HEAD (which already carried all owed
-  blocks) — a workaround, not a fix. Expected: design the interaction —
-  either step 2's replace semantics gains an exception for blocks the gate
-  owes (never collapse a block that satisfies an owed union-verify finding),
-  or the gate's repair guidance routes branch=main sessions to a
-  PR-branch-first recipe explicitly. Needs Design Gate (dev-sync L1 core +
-  memory-union-verify helper both involved). Discovered in the #2069 pin-move
-  landing; follow-up candidates also noted there: same-class
+  memory union-verify vs dev-sync step 2 deadlock on branch=main sessions: when
+  a session block's branch is `main` (root syncs landing directly on main), the
+  gate's restore-in-working-tree guidance deadlocks — dev-sync step 2's
+  one-block-per-branch-per-day rule re-collapses restored `branch=main` blocks
+  on every re-run, so each /sync attempt re-FATALs at step 3.88. Evidence
+  (2026-11-18, issue #2069 pin-move flow): merges 41d725f9 / 71e87cc9 fused the
+  _bgpool session block into the trail-learnings block; the first two /sync
+  attempts FATALed; fixed only by running the sync on a PR branch (step 2 then
+  plain-appends instead of collapsing) with the log restored to HEAD (which
+  already carried all owed blocks) — a workaround, not a fix. Expected: design
+  the interaction — either step 2's replace semantics gains an exception for
+  blocks the gate owes (never collapse a block that satisfies an owed
+  union-verify finding), or the gate's repair guidance routes branch=main
+  sessions to a PR-branch-first recipe explicitly. Needs Design Gate (dev-sync
+  L1 core + memory-union-verify helper both involved). Discovered in the #2069
+  pin-move landing; follow-up candidates also noted there: same-class
   repair-recipe-vs-archival interplay documented in T-20261117-008's fix.
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-18T00:00:00.000+09:00
+created_at: '2026-11-18T00:00:00.000+09:00'
 history:
-  - at: 2026-11-18T00:00:00.000+09:00
+  - at: '2026-11-18T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-18T09:55:35.276+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-18T09:55:35.294+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-18T09:55:35.312+09:00'
+    from: review
+    to: done
+result: >-
+  Implemented per docs/designs/2026-11-18-memory-gate-step2-deadlock-design.md:
+  helper memory-union-verify.ts v1.5.0 owedBlocks() (merge-time debt inventory,
+  worktree-presence-gated, tier-agnostic) + dev-sync.ts v1.52.0 step-2 owed-set
+  sparing (parseBlocks classification, owed segments spared verbatim, first
+  non-owed replaced, strays collapsed, skills keyed on the replaced segment,
+  all-owed falls through to append) + step 3.88 guidance rewrite (file-named,
+  block-shape, re-run /sync). Tests: OW-T1..T4 + DL-T1..T4 (DL-T1 deadlock
+  reproduction RED pre-fix via stash / GREEN post-fix). Landed PR #2094 merge
+  1a2ed11cc, CI 4/4 green. Deviation reported: design §3.1's head-side prose
+  (debt vs current worktree) is self-defeating — a completed restoration zeroes
+  the debt before step 2 runs; corrected to the merged-blob inventory per §0's
+  own droppedBlocks definition, pinned by DL-T1/OW-T2.
 error: null

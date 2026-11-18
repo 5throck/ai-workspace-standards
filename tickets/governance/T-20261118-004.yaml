@@ -4,24 +4,45 @@ kind: manual
 title: >-
   resync-audit RETENTION-PRUNE verdict class: dev-sync's own memory-retention
   prune deletions (memory/<date>.md removed by retention policy, MEMORY.md
-  de-linked in the same tree) currently force manual adjudication every cycle
-  — the audit's KEEP verdict requires a human to confirm each deletion is the
+  de-linked in the same tree) currently force manual adjudication every cycle —
+  the audit's KEEP verdict requires a human to confirm each deletion is the
   retention prune (2026-11-18 co-export/co-price landings: 3 deletions each
-  adjudicated manually; corroborated via MEMORY.md de-linking in the same
-  tree). Expected: a dedicated RETENTION-PRUNE verdict class — corroborated
-  when the working-tree MEMORY.md no longer links the deleted date AND the
-  deletion set matches the retention policy window — so the recurring noise
-  disappears without weakening the KEEP safety net for genuine unknown
-  deletions. Discovered in the 2026-11-18 co-export/co-price fleet landings
-  (fleet-sweep observation; agent report). Design-lite (verdict enum +
-  corroboration rule + tests); resync-audit.ts is workspace-side.
+  adjudicated manually; corroborated via MEMORY.md de-linking in the same tree).
+  Expected: a dedicated RETENTION-PRUNE verdict class — corroborated when the
+  working-tree MEMORY.md no longer links the deleted date AND the deletion set
+  matches the retention policy window — so the recurring noise disappears
+  without weakening the KEEP safety net for genuine unknown deletions.
+  Discovered in the 2026-11-18 co-export/co-price fleet landings (fleet-sweep
+  observation; agent report). Design-lite (verdict enum + corroboration rule +
+  tests); resync-audit.ts is workspace-side.
 priority: low
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-18T00:00:00.000+09:00
+created_at: '2026-11-18T00:00:00.000+09:00'
 history:
-  - at: 2026-11-18T00:00:00.000+09:00
+  - at: '2026-11-18T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-18T15:08:22.412+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-18T15:08:22.431+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-18T15:08:22.449+09:00'
+    from: review
+    to: done
+result: >-
+  PR #2095 merged (e73271a19): resync-audit 1.10.0 -> 1.11.0 RETENTION-PRUNE
+  verdict class — corroborated when the deleted path matches the archive-memory
+  selection shape mirrored from scripts/archive-memory.ts (flat
+  memory/<name>.md, not the index; date logs outside the strict >7-day window;
+  non-date logs via the memory/archive/<name> rename destination) AND the
+  working-tree memory/MEMORY.md no longer links the target; every corroboration
+  failure stays on the bare KEEP safety net. Tests:
+  tests/unit/resync-audit-retention-prune.test.ts (19) + 36 existing green;
+  test:unit, verify-scripts 285/285, audit.ts clean; CI 4/4; live sweep-scenario
+  check RETENTION-PRUNE end-to-end. Spec:
+  docs/designs/2026-11-18-resync-audit-retention-prune-design.md (registered
+  implemented).
 error: null

@@ -8,12 +8,24 @@ title: >-
   discarded; co-game, co-hr and co-news still carry graft+trail in committed
   .agents/mcp.json
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-17T18:11:00.608+09:00'
 history:
   - at: '2026-11-17T18:11:00.608+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-18T04:16:43.337+09:00'
+    from: backlog
+    to: done
+result: >-
+  resync-audit v1.9.0 -> v1.10.0 (PR #2082, merge e1c079905, head 5af314803):
+  merge-delivered files (MERGE_MANAGED incl. DOCS_MERGE / JSON_MERGE /
+  SCHEMA_MERGE via resolveClaim-backed mergeDeliveryPolicy()) route to
+  PRESUME-STALE in all four template-source branches; dirty==HEAD branch
+  deliberately untouched (discarding restores project state); non-merge verdicts
+  unchanged. Incident reproduced in
+  tests/unit/resync-audit-merge-managed.test.ts (11 cases, real
+  templates/common/.agents/mcp.json as source); CI 4/4 green; spec
+  2026-11-18-resync-audit-merge-delivery-routing-design registered.
 error: null

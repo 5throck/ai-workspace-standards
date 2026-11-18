@@ -5,17 +5,18 @@ title: >-
   sync-auto-detection design amendment — upgrade-warning visibility (Option 2,
   owner-approved 2026-11-17): the detection report gains an
   unresolved_template_defects summary block and the conditional sync SKILL step
-  prints a warning-only line (upgrades are NEVER blocked; CONFLICT/PROJECT_EVOLVED
-  preserve semantics are the safety net; motivating evidence T-20261117-007
-  graft->trail re-delivery). State: NOT yet applied. The design artifacts exist
-  as untracked working-tree files restored from backup commit 0748cdcf8 —
-  docs/designs/2026-11-17-sync-auto-detection-design.md (lang: ko patched),
-  docs/decisions/DEC-20261117-06.md, docs/specs/entries/2026-11-17-sync-auto-detection-design.json,
-  plus a docs/specs/registry.json +9-line entry modification (all preserved for
-  this batch's PR-A landing; two architect dispatches to apply the amendment
-  were cancelled). Amendment scope: new §5.8 (owner decision, warning-only
-  invariant explicit), §5.3 schema delta (summary block resolved via state-file
-  dedupe + filed U-ids whose upstream.resolution != fixed), §6 step deltas
+  prints a warning-only line (upgrades are NEVER blocked;
+  CONFLICT/PROJECT_EVOLVED preserve semantics are the safety net; motivating
+  evidence T-20261117-007 graft->trail re-delivery). State: NOT yet applied. The
+  design artifacts exist as untracked working-tree files restored from backup
+  commit 0748cdcf8 — docs/designs/2026-11-17-sync-auto-detection-design.md
+  (lang: ko patched), docs/decisions/DEC-20261117-06.md,
+  docs/specs/entries/2026-11-17-sync-auto-detection-design.json, plus a
+  docs/specs/registry.json +9-line entry modification (all preserved for this
+  batch's PR-A landing; two architect dispatches to apply the amendment were
+  cancelled). Amendment scope: new §5.8 (owner decision, warning-only invariant
+  explicit), §5.3 schema delta (summary block resolved via state-file dedupe +
+  filed U-ids whose upstream.resolution != fixed), §6 step deltas
   (detect-backport.ts + skill step), §11 acceptance addition, and a PLACEMENT
   ruling the architect still owes: sync-time warning vs skill upgrade-guidance
   coverage for the standalone-upgrade-without-sync gap case (minimal options:
@@ -25,12 +26,31 @@ title: >-
   entry). Filed under the 2026-11-18 ticket-filing policy: design-needed,
   deferred work (design approval still pending for the batch itself).
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-18T00:00:00.000+09:00
+created_at: '2026-11-18T00:00:00.000+09:00'
 history:
-  - at: 2026-11-18T00:00:00.000+09:00
+  - at: '2026-11-18T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-18T01:25:13.284+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-18T01:25:13.302+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-18T07:04:48.394+09:00'
+    from: review
+    to: done
+result: >-
+  Batch complete: PR-A design landing (#2078 cdfd970a5, incl. §5.8
+  upgrade-warning amendment Option 2), PR-B detector (#2087 d7b995edf,
+  detect-backport.ts 1.0.0), PR-C gate schema (#2088 2f29e2275, validator 1.86.0
+  + L1 mirrors + contract pin), PR-D skill steps (#2090 175aa2893, sync SKILL
+  1.10.0 x6 mirrors), PR-E triage duty (#2091 f23a89c85, pm-gateway-workflow
+  3.12 sync-detect block), P5 co-deck pilot enablement (co-deck PR #249
+  73b183f3, variant.json syncDetection enabled). Detector verified live: 245 E1
+  markers all already-filed (report-only), 0 fresh candidates, 141 unresolved
+  defects warning-only (not blocking). Next co-deck sync files 0 tickets. Soak:
+  1 week per design 5.7, then user-paced fleet enablement.
 error: null

@@ -12,12 +12,26 @@ title: >-
   once the audit scanner stops scanning external/ (machinery fix in flight) —
   this is source hygiene, not a blocker.
 priority: low
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-17T00:00:00.000+09:00
+created_at: '2026-11-17T00:00:00.000+09:00'
 history:
-  - at: 2026-11-17T00:00:00.000+09:00
+  - at: '2026-11-17T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-18T07:21:10.862+09:00'
+    from: backlog
+    to: done
+result: >-
+  QuickDL upstream BOM-free release v1.0.1 cut (57e4fe78; the strip had already
+  landed via PRs #46/#47 but the tag still pointed at pre-fix bytes — re-cut
+  resolved it; 0 BOMs across all files verified). co-deck pin moved v1.0.0 ->
+  v1.0.1 through the compatibility gate (template v1.1.0 selftest --quickdl-dir
+  at the v1.0.1 clone, exit 0) via co-deck PR #250 (merge 07323a91, CI
+  billing-pattern per standing disposition). external-deps verify: 0 fail / 0
+  warn. Follow-ups (deferred, not tickets yet per DEC-20261118-01 bar): (1)
+  deliver template adapter v1.1.0 to Projects/co-deck — the project adapter copy
+  predates selftest mode and the manifest compatibility_test command is broken
+  project-side until the next upgrade delivers it; (2) co-deck .gitignore:184
+  pin-comment refresh (cosmetic, rides (1)).
 error: null
