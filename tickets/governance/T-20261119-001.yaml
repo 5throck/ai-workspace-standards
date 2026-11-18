@@ -7,12 +7,27 @@ title: >-
   sync-overwrite-policy §6 (port template-side or record adopt-template
   disposition), then re-run wave
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-19T03:24:35.291+09:00'
 history:
   - at: '2026-11-19T03:24:35.291+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-19T06:45:04.212+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-19T06:45:04.233+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-19T06:45:04.252+09:00'
+    from: review
+    to: done
+result: >-
+  adjudicated per sync-overwrite-policy §6 and wave resumed: 12 CONFLICT rows
+  (agents/6 + .claude/agents/6, building_skill MCP dependency removal was
+  project-canonical) ported project->template-side; dry-run clean; wave
+  delivered and merged as co-architect#408 (battery: gitleaks clean, tests 26/3
+  files green; billing-wall exception per predicate 5). PROJECT_AHEAD platform
+  trio (1.1.0 vs root 1.0.x) left as WARN backport candidates — non-blocking.
 error: null

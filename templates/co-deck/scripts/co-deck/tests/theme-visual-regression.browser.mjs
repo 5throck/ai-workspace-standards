@@ -1,4 +1,4 @@
-// @version 0.2.0
+// @version 0.2.1
 // v0.2.0 (2026-10-23): retry-once-on-exceed in compare mode — transient paint
 //           jitter under machine load (observed when the suite runs inside the
 //           dev-sync gate) pushed stable pages over the 0.5% threshold on single
@@ -33,7 +33,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, '../../..');
 const slideDataPath = join(__dirname, 'fixtures', 'theme-deck', 'slide-data.json');
-const smokeProjectDir = join(root, 'presentations', '_smoke_test');
+const smokeProjectDir = join(root, 'deliverables', '_smoke_test');
 const baselinesRoot = join(root, 'docs/html-themes/baselines');
 
 // Read fixture slide data

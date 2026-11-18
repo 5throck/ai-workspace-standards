@@ -80,3 +80,7 @@ Gate authority is `docs/user-guide.md` §4: **Gates 2 and 5 are mandatory**; Gat
 | Gate 5 | Sample PDF Approval | Stage 11 | pdf-export produces; user approves via pm | **Mandatory** |
 
 The machine-readable decision records for the procedure-derived checks live in `decisions/gates.yaml` (DG-DECK-01..06), bound to stages S3, S5, S8, S9, and S10 respectively; DG-DECK-06 (font parity, S10) is verified at the Gate 5 sample review — rule body: html-build SKILL "Font Parity". The H-Stage handbook pipeline has no numbered gates — H-5 (handbook-reviewer validation) and H-7 (PM secret scan + verify) serve that role.
+
+## Frontmatter Phases Policy
+
+**Policy (2026-11-13, DEC-20261113-01, spec 2026-11-13-variant-phases-numbering-design)**: agent frontmatter `phases:` values are **delivery/canonical phases (0–6)** and are **never renumbered locally**. This file is the sole authority mapping canonical delivery phases to 11-Stage pipeline stages — design `[3]` → Stage 4, html-build `[4]` → Stages 5–8, measure `[4]` → Stages 9–10, pdf-export `[4, 5]` → Stage 11 (with prep-pdf prerequisite at phase 4). Template deliveries of canonical `phases:` values are adopted verbatim; do not resolve delivery merges toward stage numbering. This policy was adopted 2026-11-13 so template deliveries stop clobbering agent frontmatter (observed PR #217→#218). The 2026-11-11 stage-numbered local state (PR #218) is reverted by this policy.

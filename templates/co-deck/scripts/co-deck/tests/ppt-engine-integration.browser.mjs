@@ -1,4 +1,4 @@
-// @version 0.2.0
+// @version 0.2.1
 // v0.2.0 (U-20261029-005): videoId slide render-path case — chrome-free
 // (.video-slide, no .slide-card/.slide-content), native data-video marker,
 // caption + stage present, non-video slides keep theme chrome.
@@ -32,7 +32,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, '../../..');
 const slideDataPath = join(__dirname, 'fixtures', 'theme-deck', 'slide-data.json');
-const projectDir = join(root, 'presentations', '_ppt_integration_test');
+const projectDir = join(root, 'deliverables', '_ppt_integration_test');
 
 // Read fixture slide data
 const SLIDE_DATA = JSON.parse(readFileSync(slideDataPath, 'utf-8'));

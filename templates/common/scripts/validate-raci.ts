@@ -20,7 +20,7 @@
  * This script is a validator only — it never mutates files.
  *
  * @usage bun scripts/validate-raci.ts [--variant co-consult|all] [--all] [--root <dir>]
- * @version 1.2.0
+ * @version 1.2.1
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -249,9 +249,18 @@ function validateRACIFile(variant: string, root: string, issues: Issue[]): RACIM
     // DEG-R-04: Every RACI agent key resolves to an agent file or human-role entry
     const allAgents = new Set<string>();
     if (typeof accountable === "string") allAgents.add(accountable);
-    if (Array.isArray(responsible)) responsible.forEach((a: string) => allAgents.add(a));
-    if (Array.isArray(row.consulted)) (row.consulted as string[]).forEach((a) => allAgents.add(a));
-    if (Array.isArray(row.informed)) (row.informed as string[]).forEach((a) => allAgents.add(a));
+    if (Array.isArray(responsible))
+      responsible.forEach((a: string) => {
+        allAgents.add(a);
+      });
+    if (Array.isArray(row.consulted))
+      (row.consulted as string[]).forEach((a) => {
+        allAgents.add(a);
+      });
+    if (Array.isArray(row.informed))
+      (row.informed as string[]).forEach((a) => {
+        allAgents.add(a);
+      });
 
     for (const agent of allAgents) {
       if (!agentFileExists(agent, root) && !humanRoles.has(agent)) {

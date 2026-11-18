@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261119-008
+kind: manual
+title: >-
+  template defect (co-deck): delivered download-videos.ts v1.2.0 removed the
+  selftest mode but the delivered tests still pin it —
+  scripts/co-deck/tests/download-videos.test.ts 'selftest passes/fails' cases
+  fail against the delivered script (Usage output instead of selftest);
+  template-side tests/script mismatch needs reconcile (restore selftest or
+  rewrite tests to the v1.2.0 CLI surface). Also delivered html-to-pdf v1.3.x
+  suite (dual-selector + loud zero-slide, 5 cases) and theme-visual-regression
+  compare fail in the local env — needs Chromium/toolchain review; disclosed
+  battery miss: co-deck#252 merged under wall exception while the local battery
+  exited 1 (grep-pattern miss in the battery harness — fix the harness to check
+  exit codes)
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-19T07:28:24.433+09:00'
+history:
+  - at: '2026-11-19T07:28:24.433+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

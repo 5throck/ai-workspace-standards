@@ -1,7 +1,8 @@
 #!/usr/bin/env bun
 /**
  * Shared Scaffold Delivery Contracts
- * @version 1.10.3
+ * @version 1.10.4
+ * v1.10.4 (2026-11-19, ticket-processing batch): reviewed-gap entry for docs/lifecycle/agents/execution-plan-templates.md — the lifecycle record for the L1-authored execution-plan-templates governance doc (companion to the DEC-20261028-05 forked doc); new-project delivery seeds it from templates/common/docs/lifecycle/agents/, L3 variant-seed drafts do not carry it. Prior:
  * v1.10.3 (2026-11-14, T-20261112-005, country-scoped-agents-registry-and-prune design R1): the
  *          country-scoped agent withholding list is read via loadCountryScopedAgents() (schema pair)
  *          instead of the removed constant.
@@ -393,6 +394,11 @@ export const REVIEWED_DELIVERY_EXCLUSIONS: readonly ReviewedDeliveryExclusion[] 
     path: "docs/governance/agents/execution-plan-templates.md",
     reason:
       "forked as L1-authored hand-maintained (2026-10-28-l0-only-governance-doc-cleanup, DEC-20261028-05) — project-applicable plan-format reference delivered at the same path; L3 drafts are variant seeds and do not carry it; new-project delivers it from templates/common/docs/governance/agents/",
+  },
+  {
+    path: "docs/lifecycle/agents/execution-plan-templates.md",
+    reason:
+      "lifecycle record for the L1-authored execution-plan-templates governance doc (companion to the DEC-20261028-05 fork; record authored 2026-11-19 after a wave seeded an empty record in a project) — new-project delivers it from templates/common/docs/lifecycle/agents/; L3 variant-seed drafts do not carry it",
   },
   {
     path: ".agents/",

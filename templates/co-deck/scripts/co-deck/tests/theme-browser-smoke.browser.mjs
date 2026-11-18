@@ -1,4 +1,4 @@
-// @version 0.1.0
+// @version 0.1.1
 // theme-browser-smoke.browser.mjs — Playwright browser smoke tests for theme×style compatibility matrix.
 //
 // Uses Node.js (not bun) because bun has issues with Playwright subprocess handling
@@ -27,7 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, '../../..');
 const slideDataPath = join(__dirname, 'fixtures', 'theme-deck', 'slide-data.json');
-const smokeProjectDir = join(root, 'presentations', '_smoke_test');
+const smokeProjectDir = join(root, 'deliverables', '_smoke_test');
 
 // Read fixture slide data
 const SLIDE_DATA = JSON.parse(readFileSync(slideDataPath, 'utf-8'));

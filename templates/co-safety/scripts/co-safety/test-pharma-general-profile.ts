@@ -17,7 +17,7 @@
  *   T-09: GMP common schema defines required definitions
  *   T-10: Sample evidence record validates against schema (change-control)
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import * as fs from 'node:fs';
@@ -164,10 +164,10 @@ try {
 
 // ── T-08: GMP skills exist ───────────────────────────────────────────────────
 console.log(`\n${CYAN}[T-08] GMP skills existence${RESET}`);
-const expectedSkills = ['change-control', 'deviation-capa', 'qrm'];
+const expectedSkills = ['gmp-change-control', 'gmp-deviation-capa', 'gmp-qrm'];
 let allSkillsExist = true;
 for (const skill of expectedSkills) {
-    const skillPath = path.join(ROOT, 'skills', 'domains', 'industry', 'gmp', skill, 'SKILL.md');
+    const skillPath = path.join(ROOT, 'skills', skill, 'SKILL.md');
     if (fs.existsSync(skillPath)) {
         console.log(`  ${GREEN}✓${RESET} skill '${skill}' exists`);
     } else {
