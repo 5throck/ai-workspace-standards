@@ -1,4 +1,37 @@
-// @version 1.51.0
+// @version 1.52.0
+// v1.52.0 (2026-11-18, T-20261118-003, spec
+//          docs/designs/2026-11-18-memory-gate-step2-deadlock-design.md §3.2):
+//          step 2's branch-keyed session-block replace gains the OWED-SET
+//          SPARING — closing the T-20261118-003 FATAL loop where the union gate's
+//          restore guidance and this replace path fought over the same
+//          `branch=main` marker namespace on direct-to-main landings (merge
+//          41d725f9 / 71e87cc9 fused the _bgpool session block; every restore was
+//          re-collapsed by the next run's step 2 before step 3.88 could credit
+//          it; the #2069 PR-branch workaround only dodged the marker match).
+//          Mechanism: in the hasMarkerForBranch path only, compute the gate's
+//          current debt inventory via helpers/memory-union-verify.ts v1.5.0
+//          owedBlocks() (same bounded sweep and droppedBlocks match rules step
+//          3.88 tiers on; tier-agnostic — deliberately NO activationIso, which
+//          is declared after step 2 in this top-level-await script and would
+//          TDZ), classify every same-branch segment with parseBlocks (exact
+//          trimmed text, or heading+firstLine — droppedBlocks.matchesHead's
+//          rules), SPARE owed segments verbatim (one DIM line each), give the
+//          fresh template to the FIRST NON-owed segment, collapse further
+//          non-owed strays (the O-4 one-block-per-branch-per-day dedupe is
+//          untouched for its actual target), key the `## Skills Used`
+//          carry-forward on the replaced (non-owed) segment, and fall through
+//          to the append path when every same-branch segment is owed (nothing
+//          destroyed). Normal path (exactly one non-owed same-branch segment) is
+//          bit-identical. Step 3.88's printed repair guidance is sharpened to
+//          name the merge-touched file, prescribe the block shape (separate
+//          '---'-delimited blocks, verbatim) and say re-run /sync — the
+//          previously prescribed "re-commit" had no staged commit to amend at
+//          FATAL time, and the old wording named no file (restorations into the
+//          wrong log satisfy nothing — repairedAtHead reads the merge-touched
+//          path). Arm B guidance unchanged (structural repairs carry no parent
+//          debt). Doubled bounded git-plumbing cost in step 2 accepted (design
+//          R1); non-verbatim restorations escape sparing = no worse than today
+//          (design R2).
 // v1.51.0 (2026-11-18, T-20261117-015, spec
 //          docs/designs/2026-11-18-dev-sync-hunk-staging-design.md §2-§3): two strictly
 //          additive mechanisms for hunk-level adjudicated landings — the 2026-11-17
@@ -551,7 +584,7 @@ import {
 import { localDateISO } from "./lib/local-date.ts";
 import { isAgentMdPath, bumpMechanicalLastUpdated } from "./helpers/agent-mechanical-date-bump.ts";
 import { driftCheck } from "./helpers/ticket-drift.ts";
-import { unionScan, wellFormedScan } from "./helpers/memory-union-verify.ts";
+import { owedBlocks, parseBlocks, unionScan, wellFormedScan } from "./helpers/memory-union-verify.ts";
 import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from "./lib/workspace-hygiene.ts";
 import {
   assertWorkTreeHealthy,
@@ -1038,25 +1071,55 @@ if (fs.existsSync(memoryFile)) {
   }
 }
 
+let sessionBlockReplaced = false;
 if (hasMarkerForBranch) {
-  // Session-evidence section (`## Skills Used`, skill review loop): the section
-  // belongs to the branch/day session, not to a single run — when replacing this
-  // branch's block, carry the old block's section forward VERBATIM (filled or
-  // skeleton) so session evidence filled between runs survives the replace. Only
-  // when the replaced block has none does the skeleton gate below decide (other
-  // tools' sections elsewhere in the file are left alone).
-  const oldSegment = existingMemory.match(
-    new RegExp(
-      `<!-- dev-sync:session branch=${sessionBranch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} -->[\\s\\S]*?(?=\\n---\\n|$)`,
-    ),
-  )!;
-  const oldSkillsMatch = oldSegment[0].match(/\n## Skills Used[\s\S]*$/);
-  const skillsUsedSection = oldSkillsMatch
-    ? oldSkillsMatch[0]
-    : /^## Skills Used\s*$/m.test(existingMemory)
-      ? ""
-      : SKILLS_USED_SKELETON;
-  const blockTemplate = `${sessionMarkerLine}
+  // T-20261118-003 owed-set sparing (dev-sync 1.52.0 — design
+  // docs/designs/2026-11-18-memory-gate-step2-deadlock-design.md §3.2): a
+  // restored gate-owed block carries the SAME branch marker as this session's
+  // stale draft, so the replace below used to re-collapse it before step 3.88
+  // could credit the repair — the restore-then-re-collapse FATAL loop on
+  // branch=main sessions. The replace path therefore consults the gate's
+  // current debt inventory (owedBlocks — the same bounded sweep and
+  // parent-labeled droppedBlocks rules step 3.88 tiers on; computed ONLY here,
+  // the append path never destroys content) and spares owed segments
+  // verbatim; only NON-owed segments are replaced or collapsed. Tier-agnostic
+  // by design (fail-safe failure direction: content preserved), which also
+  // keeps this step free of GATE_3_88_ACTIVATED_AT — declared after step 2 in
+  // this top-level-await script and would TDZ if referenced earlier.
+  const owed = owedBlocks({ sinceDays: 7, maxCommits: 20 });
+  const segmentSource = `<!-- dev-sync:session branch=${sessionBranch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} -->[\\s\\S]*?(?=\\n---\\n|$)`;
+  // A same-branch segment parses to exactly one block (no internal '\n---\n';
+  // the leading marker comment is not a '## ' line). A segment is owed iff it
+  // satisfies droppedBlocks.matchesHead's rules against any owed block:
+  // exact trimmed text, or heading+firstLine for headed blocks.
+  const isOwedSegment = (segment: string): boolean => {
+    const parsed = parseBlocks(segment);
+    if (parsed.length !== 1) return false;
+    const seg = parsed[0]!;
+    return owed.some(
+      (o) =>
+        o.block.text === seg.text ||
+        (o.block.heading !== "" && o.block.heading === seg.heading && o.block.firstLine === seg.firstLine),
+    );
+  };
+  const segments = existingMemory.match(new RegExp(segmentSource, "g")) ?? [];
+  const replaceTarget = segments.find((s) => !isOwedSegment(s));
+  if (replaceTarget !== undefined) {
+    // Session-evidence section (`## Skills Used`, skill review loop): the section
+    // belongs to the branch/day session, not to a single run — when replacing this
+    // branch's block, carry the old block's section forward VERBATIM (filled or
+    // skeleton) so session evidence filled between runs survives the replace.
+    // Keyed on the segment actually being replaced (the first NON-owed segment) —
+    // a spared owed segment's section must not leak into the fresh block. Only
+    // when the replaced block has none does the skeleton gate below decide (other
+    // tools' sections elsewhere in the file are left alone).
+    const oldSkillsMatch = replaceTarget.match(/\n## Skills Used[\s\S]*$/);
+    const skillsUsedSection = oldSkillsMatch
+      ? oldSkillsMatch[0]
+      : /^## Skills Used\s*$/m.test(existingMemory)
+        ? ""
+        : SKILLS_USED_SKELETON;
+    const blockTemplate = `${sessionMarkerLine}
 ## Session Summary
 ${msg}
 
@@ -1069,21 +1132,50 @@ ${fileLines}
 ## Open Issues
 - None
 ${skillsUsedSection}`;
-  // Replace every marker-plus-block segment for this branch (first occurrence gets
-  // the fresh block, any stray duplicates collapse — one block per branch per day).
-  // The segment runs from the marker through the next `\n---\n` separator boundary
-  // or EOF; the separator itself stays in the file, so the replacement carries no
-  // leading separator.
-  const markerBlockRe = new RegExp(
-    `<!-- dev-sync:session branch=${sessionBranch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} -->[\\s\\S]*?(?=\\n---\\n|$)`,
-    "g",
-  );
-  let replaced = 0;
-  const rewritten = existingMemory.replace(markerBlockRe, () => (replaced++ === 0 ? blockTemplate : ""));
-  fs.writeFileSync(memoryFile, rewritten, "utf8");
-  console.log(
-    `${DIM}   session summary: replaced the dev-sync block for branch '${sessionBranch}' (${replaced} prior block(s))${RESET}`,
-  );
+    // Replace every marker-plus-block segment for this branch: OWED segments
+    // return verbatim (spared — the gate still owes them), the FIRST non-owed
+    // segment gets the fresh block, any further non-owed strays collapse — one
+    // fresh block per branch per day (the O-4 dedupe is untouched for its
+    // actual target, stale drafts). The segment runs from the marker through
+    // the next `\n---\n` separator boundary or EOF; the separator itself stays
+    // in the file, so the replacement carries no leading separator.
+    const markerBlockRe = new RegExp(segmentSource, "g");
+    let replaced = 0;
+    let collapsed = 0;
+    let spared = 0;
+    let freshGiven = false;
+    const rewritten = existingMemory.replace(markerBlockRe, (match) => {
+      if (isOwedSegment(match)) {
+        spared++;
+        console.log(
+          `${DIM}   session summary: spared union-gate-owed block for branch '${sessionBranch}' (step 3.88 debt — left verbatim)${RESET}`,
+        );
+        return match;
+      }
+      if (!freshGiven) {
+        freshGiven = true;
+        replaced++;
+        return blockTemplate;
+      }
+      collapsed++;
+      return "";
+    });
+    fs.writeFileSync(memoryFile, rewritten, "utf8");
+    console.log(
+      `${DIM}   session summary: replaced the dev-sync block for branch '${sessionBranch}' (replaced ${replaced} / collapsed ${collapsed} stray(s) / spared ${spared} union-owed)${RESET}`,
+    );
+    sessionBlockReplaced = true;
+  } else {
+    // Every same-branch segment is gate-owed: no replacement target — fall
+    // through to the append path below (fresh block appended; the append
+    // path's `## Skills Used` rule applies). Nothing is destroyed.
+    console.log(
+      `${DIM}   session summary: every same-branch block for '${sessionBranch}' is union-gate-owed — appending a fresh block (nothing replaced)${RESET}`,
+    );
+  }
+}
+if (sessionBlockReplaced) {
+  // The replace path above wrote the rewritten day log — nothing further.
 } else if (alreadyLogged) {
   console.log(`${YELLOW}⚙ Session summary already logged for today — skipping append (idempotent).${RESET}`);
 } else {
@@ -1399,7 +1491,7 @@ if (fs.existsSync(path.join("memory"))) {
       console.error(`   ${r.file} @ merge ${r.commit.slice(0, 12)}:`);
       for (const f of r.findings) console.error(`     [${f.kind}] ${f.detail}`);
       console.error(
-        `   Fix: compare git show ${r.commit}:${r.file} against git show ${r.commit}^1:${r.file} and git show ${r.commit}^2:${r.file}; restore the named block(s) in the working tree and re-commit (history is immutable — the repair lands forward).`,
+        `   Fix: compare git show ${r.commit}:${r.file} against git show ${r.commit}^1:${r.file} and git show ${r.commit}^2:${r.file}; restore the named block(s) INTO ${r.file} in the working tree as separate '---'-delimited block(s), verbatim, then re-run /sync — the repair is committed forward (the session-block replace spares union-owed blocks).`,
       );
     }
     if (import.meta.main) process.exit(1);

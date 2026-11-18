@@ -13,6 +13,7 @@ import {
   unionScan,
   wellFormedScan,
   repairedAtHead,
+  owedBlocks,
 } from '../../scripts/helpers/memory-union-verify.ts';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
@@ -606,5 +607,87 @@ describe('unionScan repaired-at-head tier (T-20261105-002)', () => {
     const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
     expect(results).toHaveLength(1);
     expect(results[0].tier).toBe('repaired-at-head');
+  });
+});
+
+// ── owedBlocks (v1.5.0, T-20261118-003 — design §3.1 §4.1) ───────────────────
+
+describe('owedBlocks (the gate debt inventory behind step-2 sparing, T-20261118-003)', () => {
+  function commitAll(msg: string): void {
+    git(['add', '-A']);
+    git(['commit', '-q', '-m', msg]);
+  }
+  /** Same dropping-merge shape as localDroppingMerge, plus the merge SHA. */
+  function setupOwedFixture(): string {
+    git(['init', '-q', '-b', 'main']);
+    git(['config', 'user.name', 'test']);
+    git(['config', 'user.email', 'test@example.com']);
+    git(['config', 'commit.gpgsign', 'false']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\nSHARED-TAIL\n`);
+    commitAll('base');
+    git(['checkout', '-q', '-b', 'side']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('C', 'gamma')}\n---\nSHARED-TAIL-C\n`);
+    commitAll('side appends C');
+    git(['checkout', '-q', 'main']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n`);
+    commitAll('main appends B');
+    gitAllowConflict(['merge', '--no-commit', '--no-ff', 'side']);
+    // resolution drops C (the OW-T fixture's debt) and the SHARED-TAIL-C marker
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n`);
+    git(['add', '-A']);
+    git(['commit', '-q', '-m', 'merge side (resolution drops C)']);
+    const res = Bun.spawnSync(['git', 'rev-parse', 'HEAD'], { cwd: root, stdout: 'pipe', stderr: 'pipe' });
+    return res.stdout.toString().trim();
+  }
+
+  test('OW-T1: dropping merge + worktree lacking the block → owed, parent- and commit-labeled', () => {
+    const mergeSha = setupOwedFixture();
+    // post-merge worktree = the merged blob (block C absent) — nothing restored yet
+    const owed = owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(owed.length).toBeGreaterThan(0);
+    const owedC = owed.find((o) => o.block.text === block('C', 'gamma'));
+    expect(owedC).toBeDefined();
+    expect(owedC!.parent).toBe('theirs');
+    expect(owedC!.commit).toBe(mergeSha);
+    expect(owedC!.file).toBe('memory/2026-11-04.md');
+    expect(owedC!.block.heading).toBe('Session Summary');
+    expect(owedC!.block.firstLine).toBe('C');
+    // the SHARED-TAIL-C un-headed drop is owed too — same rules as droppedBlocks
+    expect(owed.some((o) => o.block.text === 'SHARED-TAIL-C' && o.parent === 'theirs')).toBe(true);
+  });
+
+  test('OW-T2: worktree carrying the union → the merge-time inventory is UNCHANGED (repaired, not forgiven)', () => {
+    setupOwedFixture();
+    // the restoration satisfies repairedAtHead (unionScan tiers the group
+    // repaired-at-head) but does NOT shrink the debt inventory: the merged
+    // blob is immutable and the gate still "owes" the dropped block until the
+    // merge ages out — that is exactly why DL-T1's sparing keeps working for
+    // an already-restored block (head-side clarification, see helper v1.5.0).
+    writeFileSync(
+      join(memoryDir, '2026-11-04.md'),
+      `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n---\n${block('C', 'gamma')}\n---\nSHARED-TAIL-C\n`,
+    );
+    const owed = owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(owed.some((o) => o.block.text === block('C', 'gamma') && o.parent === 'theirs')).toBe(true);
+  });
+
+  test('OW-T3: merge-touched file absent from the worktree → contributes nothing', () => {
+    setupOwedFixture();
+    rmSync(join(memoryDir, '2026-11-04.md'));
+    // the tier arms (archive fallback, tombstone provenance) own the absent-file
+    // shape — the debt inventory is worktree-scoped by contract (design §3.1)
+    expect(owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root })).toEqual([]);
+  });
+
+  test('OW-T4: no in-window merges → []', () => {
+    git(['init', '-q', '-b', 'main']);
+    git(['config', 'user.name', 'test']);
+    git(['config', 'user.email', 'test@example.com']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n`);
+    commitAll('plain commit, no merges');
+    expect(owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root })).toEqual([]);
+    // zero window/maxCommits also disables the sweep (listMemoryMerges contract)
+    expect(owedBlocks({ sinceDays: 0, maxCommits: 20, cwd: root })).toEqual([]);
+    expect(owedBlocks({ sinceDays: 365, maxCommits: 0, cwd: root })).toEqual([]);
   });
 });
