@@ -1,5 +1,26 @@
 #!/usr/bin/env bun
-// @version 1.110.0
+// @version 1.111.0
+// v1.111.0 (2026-11-19, T-20261118-005 — design
+//          docs/designs/2026-11-18-pin-divergence-symmetry-design.md §5-§6):
+//          pin-divergence symmetry in the EXTERNAL DEPS pass (D3). Arm 2 —
+//          seed-target adoption: the seed parsed once next to the channel
+//          parses (invalid seed → absent, the 2c precedent);
+//          resolveSeedTarget picks the compat-test target with the max-rule
+//          (upstream.newer wins when present; the seed pin becomes the target
+//          when the upstream check failed / found nothing and the seed pin is
+//          a semver tag strictly newer than the project pin — and, when
+//          upstream answered, present among upstream tags). A seed target runs
+//          compatibility_test from the PROJECT root (no gate bypass): pass
+//          moves pin+commit (ADOPT + changed++), fail/hold + WARN +
+//          failures++ — symmetric with the upstream arm; dry-run emits an
+//          UPDATE would-run row and writes nothing. Commit-only / non-semver
+//          seed pins never become targets (report-only; install templates are
+//          tag-only). Arm 1 — SEED_LAG reporting: classifySeedDivergence runs
+//          per dep on the FINAL pin state (after every move/hold verdict
+//          path) and emits report-only rows (SEED_LAG WARN for project-ahead /
+//          non-semver divergence; SKIP WARN for same-pin commit divergence /
+//          repo mismatch; nothing for in-sync / project-behind). Rows never
+//          write, never move a seed, never increment changed/failures.
 // v1.110.0 (2026-11-17, T-20261117-001 — spec
 //          docs/designs/2026-11-17-root-machinery-batch-design.md §3):
 //          EXTERNAL DEPS pass channel 2c — SEED-ID ADOPTION. The pass had three
@@ -1437,6 +1458,8 @@ import {
   migrateManifestV1ToV2,
   preInstallGate,
   evaluateLicensePolicy,
+  classifySeedDivergence,
+  resolveSeedTarget,
   type ExternalDepEntry,
   type ExternalDepsManifest,
 } from "./lib/external-deps.ts";
@@ -3972,7 +3995,64 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
     changed++;
   }
 
-  // 4. Per-dependency upstream check → compat test → pin move / hold (D3).
+  // 4. Per-dependency upstream check → compat test → pin move / hold (D3) —
+  //    with pin-divergence symmetry (v1.111.0, T-20261118-005 — design
+  //    docs/designs/2026-11-18-pin-divergence-symmetry-design.md §5):
+  //    Arm 2 — seed-target adoption: the compat-test target is the max-rule
+  //    selection (resolveSeedTarget); when the upstream arm has no target, a
+  //    strictly-newer semver seed pin becomes the target and compatibility_test
+  //    runs from the PROJECT root (no gate bypass — the project adapter
+  //    environment differs from the template gate). Pass moves pin+commit
+  //    (ADOPT + changed++), fail holds + WARN + failures++ — symmetric with the
+  //    upstream arm. Arm 1 — SEED_LAG reporting: classifySeedDivergence runs on
+  //    the dep's FINAL pin state (after every move/hold verdict path) and emits
+  //    report-only rows (never writes, never moves a seed, never increments
+  //    changed/failures).
+  const seedForPins: ExternalDepsManifest | null = (() => {
+    if (!seedPath) return null;
+    try {
+      return parseExternalDepsManifest(readFileSync(seedPath, "utf8"), "template seed");
+    } catch {
+      return null; // invalid seed → treated as absent (the channel-2c precedent)
+    }
+  })();
+  const seedDepsById = new Map<string, ExternalDepEntry>((seedForPins?.dependencies ?? []).map((d) => [d.id, d]));
+  // Row-text framing (design §5.5): the seed path in its workspace-relative
+  // form — the session reading the row is workspace-side.
+  const seedFile = seedPath ? relative(workspaceRoot, seedPath).replace(/\\/g, "/") : "";
+  const heldState = (dep: ExternalDepEntry): { pin: string; commit?: string } => ({
+    pin: dep.pin,
+    commit: dep.commit,
+  });
+  // Manifest rewrite after a successful pin-move fetch (shared by both arms —
+  // mechanics identical; a rewrite failure leaves the clone refreshed at the
+  // target while the manifest holds, i.e. manual fix required).
+  const rewriteManifestPin = (dep: ExternalDepEntry, target: string, commit?: string): boolean => {
+    try {
+      const doc = JSON.parse(readFileSync(manifestPath, "utf8")) as { dependencies?: Array<Record<string, unknown>> };
+      const row = doc.dependencies?.find((d) => d["id"] === dep.id);
+      if (row) {
+        row["pin"] = target;
+        if (commit) row["commit"] = commit;
+        writeFileSync(manifestPath, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
+      }
+      return true;
+    } catch (err) {
+      console.log(
+        `  ⚠️  ${dep.id}: manifest rewrite failed (${(err as Error).message}) — clone refreshed to ${target}; fix the manifest manually`,
+      );
+      record(
+        MANIFEST_REL,
+        "PROJECT_STATE",
+        "EXTERNAL DEPS",
+        "SKIP",
+        `dep ${dep.id}: manifest rewrite failed after the pin-move fetch (${(err as Error).message}) — manual fix required`,
+        "WARN",
+      );
+      failures++;
+      return false;
+    }
+  };
   for (const dep of manifest!.dependencies) {
     // v1.94.0 — E5 (external-deps standard §5.4): license gate + R3 install-dir
     // convention BEFORE any fetch or pin move. A gated entry is never moved.
@@ -3998,7 +4078,72 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
       record(MANIFEST_REL, "PROJECT_STATE", "EXTERNAL DEPS", "SKIP", `dep ${dep.id}: ${licVerdict.message}`, "WARN");
     }
     const upstream = checkUpstreamTags(dep);
-    if (!upstream.ok) {
+    const seedDep = seedDepsById.get(dep.id);
+    const seedRes = resolveSeedTarget(dep, seedDep, upstream);
+    // The dep's final operative pin state for this run — Arm 1 consumes it
+    // after the move/hold arms below (design §5.1: post-move lag must not
+    // vanish, the T-20261117-012 lesson).
+    let finalState = heldState(dep);
+    if (seedRes.target && seedRes.source === "seed") {
+      // ── Arm 2: seed-target adoption (compat-gated, project-root execution) ──
+      const target = seedRes.target;
+      if (dryRun) {
+        const upstreamNote = upstream.ok ? "" : `, upstream check failed: ${upstream.error}`;
+        console.log(
+          `  UPDATE ${dep.id}: seed pin ${target} is newer than the project pin ${dep.pin} (seed target${upstreamNote}) — compatibility_test would run from the project root (${dep.compatibility_test ?? "<none declared>"}); pin would move to ${target} on pass, hold + WARN on fail`,
+        );
+        record(
+          MANIFEST_REL,
+          "PROJECT_STATE",
+          "EXTERNAL DEPS",
+          "UPDATE",
+          `dep ${dep.id}: seed pin ${target} is newer than the project pin ${dep.pin} (seed target${upstreamNote}) — compatibility_test would run from the project root; pin would move to ${target} on pass, hold + WARN on fail`,
+        );
+      } else {
+        const compat = runCompatibilityTest({ ...dep, pin: target }, projectDir);
+        if (!compat.ok) {
+          console.log(
+            `  ⚠️  ${dep.id}: compatibility test ${compat.ran ? `FAILED (${compat.error})` : `did not run (${compat.error})`} against the seed pin ${target} — pin ${dep.pin} HELD, no changes`,
+          );
+          record(
+            MANIFEST_REL,
+            "PROJECT_STATE",
+            "EXTERNAL DEPS",
+            "SKIP",
+            `dep ${dep.id}: seed pin ${target} REJECTED — compatibility_test ${compat.ran ? `failed (${compat.error})` : `did not run (${compat.error})`}; pin ${dep.pin} held`,
+            "WARN",
+          );
+          failures++;
+        } else {
+          const refreshed = installDependency({ ...dep, pin: target }, projectDir);
+          if (refreshed.status === "failed") {
+            console.log(`  ⚠️  ${dep.id}: seed-pin fetch to ${target} failed — ${refreshed.error}; pin ${dep.pin} HELD`);
+            record(
+              MANIFEST_REL,
+              "PROJECT_STATE",
+              "EXTERNAL DEPS",
+              "SKIP",
+              `dep ${dep.id}: seed pin ${target} REJECTED — pin-move fetch failed (${refreshed.error}); pin ${dep.pin} held`,
+              "WARN",
+            );
+            failures++;
+          } else if (rewriteManifestPin(dep, target, refreshed.commit)) {
+            console.log(
+              `  ✅ ${dep.id}: compatibility test passed — pin ${dep.pin} → ${target} (seed target; commit ${refreshed.commit?.slice(0, 12) ?? "?"})`,
+            );
+            record(
+              MANIFEST_REL,
+              "PROJECT_STATE",
+              "EXTERNAL DEPS",
+              "ADOPT",
+              `dep ${dep.id}: compatibility_test passed — pin ${dep.pin} → ${target} (seed target; commit ${refreshed.commit ?? "unknown"} recorded)`,
+            );
+            changed++;
+            finalState = { pin: target, commit: refreshed.commit ?? dep.commit };
+          }
+        }
+      }
+    } else if (!upstream.ok) {
       console.log(`  ⚠️  ${dep.id}: upstream tag check FAILED — ${upstream.error}; pin ${dep.pin} held`);
       record(
         MANIFEST_REL,
@@ -4009,9 +4154,7 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
         "WARN",
       );
       failures++;
-      continue;
-    }
-    if (!upstream.newer) {
+    } else if (!upstream.newer) {
       const drift = checkPinDrift(dep, projectDir);
       const driftNote =
         drift.checked && drift.drifted
@@ -4028,86 +4171,127 @@ function runExternalDepsPass(ctx: ExternalDepsPassCtx): { changed: number; failu
         `dep ${dep.id}: upstream check — pin ${dep.pin} is current (latest of ${upstream.tags.length} upstream tags) — hold, no-op${driftNote}`,
         drift.checked && drift.drifted ? "WARN" : undefined,
       );
-      continue;
-    }
-    const target = upstream.newer;
-    if (dryRun) {
-      console.log(
-        `  UPDATE ${dep.id}: newer tag ${target} available (pin ${dep.pin}) — compatibility_test would run from the project root (${dep.compatibility_test ?? "<none declared>"}); pin would move on pass, hold + WARN on fail`,
-      );
-      record(
-        MANIFEST_REL,
-        "PROJECT_STATE",
-        "EXTERNAL DEPS",
-        "UPDATE",
-        `dep ${dep.id}: newer tag ${target} — compatibility_test would run from the project root; pin ${dep.pin} would move to ${target} on pass, hold + WARN on fail`,
-      );
-      continue;
-    }
-    const compat = runCompatibilityTest(dep, projectDir);
-    if (!compat.ok) {
-      console.log(
-        `  ⚠️  ${dep.id}: compatibility test ${compat.ran ? `FAILED (${compat.error})` : `did not run (${compat.error})`} — pin ${dep.pin} HELD, no changes`,
-      );
-      record(
-        MANIFEST_REL,
-        "PROJECT_STATE",
-        "EXTERNAL DEPS",
-        "SKIP",
-        `dep ${dep.id}: newer tag ${target} REJECTED — compatibility_test ${compat.ran ? `failed (${compat.error})` : `did not run (${compat.error})`}; pin ${dep.pin} held`,
-        "WARN",
-      );
-      failures++;
-      continue;
-    }
-    const refreshed = installDependency({ ...dep, pin: target }, projectDir);
-    if (refreshed.status === "failed") {
-      console.log(`  ⚠️  ${dep.id}: pin-move fetch to ${target} failed — ${refreshed.error}; pin ${dep.pin} HELD`);
-      record(
-        MANIFEST_REL,
-        "PROJECT_STATE",
-        "EXTERNAL DEPS",
-        "SKIP",
-        `dep ${dep.id}: pin-move fetch to ${target} failed (${refreshed.error}); pin ${dep.pin} held`,
-        "WARN",
-      );
-      failures++;
-      continue;
-    }
-    try {
-      const doc = JSON.parse(readFileSync(manifestPath, "utf8")) as { dependencies?: Array<Record<string, unknown>> };
-      const row = doc.dependencies?.find((d) => d["id"] === dep.id);
-      if (row) {
-        row["pin"] = target;
-        if (refreshed.commit) row["commit"] = refreshed.commit;
-        writeFileSync(manifestPath, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
+      if (seedRes.reason) {
+        // Seed pin newer but absent from upstream tags — the seed is out of
+        // sync with upstream; report-only, never adopted (design §5.1 rule 2).
+        console.log(`  ⚠️  ${dep.id}: ${seedRes.reason}`);
+        record(MANIFEST_REL, "PROJECT_STATE", "EXTERNAL DEPS", "SKIP", `dep ${dep.id}: ${seedRes.reason}`, "WARN");
       }
-    } catch (err) {
-      console.log(
-        `  ⚠️  ${dep.id}: manifest rewrite failed (${(err as Error).message}) — clone refreshed to ${target}; fix the manifest manually`,
-      );
-      record(
-        MANIFEST_REL,
-        "PROJECT_STATE",
-        "EXTERNAL DEPS",
-        "SKIP",
-        `dep ${dep.id}: manifest rewrite failed after the pin-move fetch (${(err as Error).message}) — manual fix required`,
-        "WARN",
-      );
-      failures++;
-      continue;
+    } else {
+      const target = upstream.newer;
+      if (dryRun) {
+        console.log(
+          `  UPDATE ${dep.id}: newer tag ${target} available (pin ${dep.pin}) — compatibility_test would run from the project root (${dep.compatibility_test ?? "<none declared>"}); pin would move on pass, hold + WARN on fail`,
+        );
+        record(
+          MANIFEST_REL,
+          "PROJECT_STATE",
+          "EXTERNAL DEPS",
+          "UPDATE",
+          `dep ${dep.id}: newer tag ${target} — compatibility_test would run from the project root; pin ${dep.pin} would move to ${target} on pass, hold + WARN on fail`,
+        );
+      } else {
+        const compat = runCompatibilityTest(dep, projectDir);
+        if (!compat.ok) {
+          console.log(
+            `  ⚠️  ${dep.id}: compatibility test ${compat.ran ? `FAILED (${compat.error})` : `did not run (${compat.error})`} — pin ${dep.pin} HELD, no changes`,
+          );
+          record(
+            MANIFEST_REL,
+            "PROJECT_STATE",
+            "EXTERNAL DEPS",
+            "SKIP",
+            `dep ${dep.id}: newer tag ${target} REJECTED — compatibility_test ${compat.ran ? `failed (${compat.error})` : `did not run (${compat.error})`}; pin ${dep.pin} held`,
+            "WARN",
+          );
+          failures++;
+        } else {
+          const refreshed = installDependency({ ...dep, pin: target }, projectDir);
+          if (refreshed.status === "failed") {
+            console.log(`  ⚠️  ${dep.id}: pin-move fetch to ${target} failed — ${refreshed.error}; pin ${dep.pin} HELD`);
+            record(
+              MANIFEST_REL,
+              "PROJECT_STATE",
+              "EXTERNAL DEPS",
+              "SKIP",
+              `dep ${dep.id}: pin-move fetch to ${target} failed (${refreshed.error}); pin ${dep.pin} held`,
+              "WARN",
+            );
+            failures++;
+          } else if (rewriteManifestPin(dep, target, refreshed.commit)) {
+            console.log(
+              `  ✅ ${dep.id}: compatibility test passed — pin ${dep.pin} → ${target} (commit ${refreshed.commit?.slice(0, 12) ?? "?"})`,
+            );
+            record(
+              MANIFEST_REL,
+              "PROJECT_STATE",
+              "EXTERNAL DEPS",
+              "ADOPT",
+              `dep ${dep.id}: compatibility_test passed — pin ${dep.pin} → ${target} (commit ${refreshed.commit ?? "unknown"} recorded)`,
+            );
+            changed++;
+            finalState = { pin: target, commit: refreshed.commit ?? dep.commit };
+          }
+        }
+      }
     }
-    console.log(
-      `  ✅ ${dep.id}: compatibility test passed — pin ${dep.pin} → ${target} (commit ${refreshed.commit?.slice(0, 12) ?? "?"})`,
-    );
-    record(
-      MANIFEST_REL,
-      "PROJECT_STATE",
-      "EXTERNAL DEPS",
-      "ADOPT",
-      `dep ${dep.id}: compatibility_test passed — pin ${dep.pin} → ${target} (commit ${refreshed.commit ?? "unknown"} recorded)`,
-    );
-    changed++;
+    // ── Arm 1: SEED_LAG detection on the FINAL pin state (report-only —
+    //    never writes, never moves a seed, never increments changed/failures,
+    //    never affects exit codes; design §5.1 Arm 1 table / §5.5 row texts).
+    if (seedDep) {
+      const cls = classifySeedDivergence(finalState, seedDep, dep.repo);
+      if (cls.kind === "project-ahead") {
+        console.log(
+          `  ⚠️  ${dep.id}: project pin ${finalState.pin} is ahead of the template seed pin ${seedDep.pin} (${seedFile}) — seed lag`,
+        );
+        record(
+          MANIFEST_REL,
+          "PROJECT_STATE",
+          "EXTERNAL DEPS",
+          "SEED_LAG",
+          `dep ${dep.id}: project pin ${finalState.pin} is ahead of the template seed pin ${seedDep.pin} (${seedFile}) — seed lag; new scaffolds inherit the older pin; file a governance ticket to move the seed (compat-gated template PR)`,
+          "WARN",
+        );
+      } else if (cls.kind === "non-semver-divergence") {
+        console.log(
+          `  ⚠️  ${dep.id}: project pin ${finalState.pin} and template seed pin ${seedDep.pin} diverge non-semver — inspect and align manually`,
+        );
+        record(
+          MANIFEST_REL,
+          "PROJECT_STATE",
+          "EXTERNAL DEPS",
+          "SEED_LAG",
+          `dep ${dep.id}: project pin ${finalState.pin} and template seed pin ${seedDep.pin} diverge non-semver (${seedFile}) — not auto-comparable; inspect and align manually`,
+          "WARN",
+        );
+      } else if (cls.kind === "same-pin-commit-divergence") {
+        console.log(
+          `  ⚠️  ${dep.id}: seed and project record different commits for tag ${dep.pin} — tag likely re-cut upstream`,
+        );
+        record(
+          MANIFEST_REL,
+          "PROJECT_STATE",
+          "EXTERNAL DEPS",
+          "SKIP",
+          `dep ${dep.id}: seed records commit ${seedDep.commit} for tag ${dep.pin} while the project records ${finalState.commit} — tag likely re-cut upstream; review the re-cut, then refresh manually: bun scripts/external-deps.ts install --id ${dep.id} (a same-tag refresh runs no compat gate)`,
+          "WARN",
+        );
+      } else if (cls.kind === "repo-mismatch") {
+        console.log(
+          `  ⚠️  ${dep.id}: seed entry repo differs from the project entry (${seedDep.repo} vs ${dep.repo}) — pin comparison skipped`,
+        );
+        record(
+          MANIFEST_REL,
+          "PROJECT_STATE",
+          "EXTERNAL DEPS",
+          "SKIP",
+          `dep ${dep.id}: seed entry repo differs from the project entry (${seedDep.repo} vs ${dep.repo}) — pin comparison skipped`,
+          "WARN",
+        );
+      }
+      // in-sync / project-behind → no row (G4 byte-identical; the behind
+      // direction is Arm 2's).
+    }
   }
   return { changed, failures };
 }

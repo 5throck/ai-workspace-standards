@@ -551,3 +551,43 @@ BEFORE `ensureGitignoreCoverage`, so every adopted `install_dir` receives
 co-deck one-off closes automatically. `bun scripts/external-deps.ts` gains no
 reconcile subcommand: a CLI reconcile would bypass decision-row attribution,
 dry-run semantics, and compat-gate framing (`check-updates` stays report-only).
+
+## Addendum B — Pin-divergence symmetry (2026-11-19)
+
+Spec docs/designs/2026-11-18-pin-divergence-symmetry-design.md (ticket
+T-20261118-005) amends the §5.3 "Pin moves stay in one place" rules: the one
+audited pin-move path now has two target sources, and the project-ahead
+direction gains report-only detection.
+
+**Seed-target arm (compat-gated fallback target).** When the upstream arm has no
+target — the upstream tag check failed or found no newer tag — the template
+seed's pin (`templates/<variant>/external-deps.json` or
+`templates/common/external-deps.json`) becomes the compat-test target when it is
+a semver release tag strictly newer than the project pin and (when upstream
+answered) present among upstream tags. Max-rule: `upstream.newer` wins whenever
+present (when the seed pin is a strictly-newer upstream tag,
+`upstream.newer ≥ seed.pin` by construction, so the maximum of both reduces to
+upstream-first). The seed target is adopted through the exact same gate as an
+upstream target: `compatibility_test` runs from the PROJECT root (no gate bypass
+— the project adapter environment differs from the template gate); pass moves
+pin+commit (ADOPT + changed++), fail holds + WARN + failures++. A seed pin that
+is not a release tag (a commit SHA or any non-semver ref) never becomes a target
+— every install template is tag-only (`--branch <sha>` fails; the refresh path
+fetches `refs/tags/<pin>`) — commit-only seeds stay report-only until a human
+fixes the seed. The seed itself is NEVER moved by the pass.
+
+**SEED_LAG reporting row (project ahead / diverged; report-only).** After every
+move/hold verdict path, the pass classifies the dependency's final pin state
+against the seed entry with the same id
+(`classifySeedDivergence`, lib/external-deps.ts v1.3.0): a project pin strictly
+ahead of the seed pin (or a non-semver divergence) emits a `SEED_LAG` decision
+row (WARN) instructing a governance ticket + compat-gated template PR; a
+same-pin commit divergence or a repo mismatch emits a SKIP WARN row. In-sync and
+project-behind states emit no row. SEED_LAG rows never write, never move a seed,
+never increment `changed`/`failures`, and never affect exit codes — "never
+blocks" holds (a dedicated verdict, structurally outside the pendingBackport
+gate set).
+
+Unchanged by this addendum: the compat gate, the project-root execution site,
+"the CLI never moves a pin", `adoptSeedEntries` (still add-if-missing), and the
+pin-drift tripwire.

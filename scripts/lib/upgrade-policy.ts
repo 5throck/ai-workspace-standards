@@ -1,4 +1,11 @@
-// @version 1.46.0
+// @version 1.47.0
+// v1.47.0 (2026-11-19, T-20261118-005 — design
+//          docs/designs/2026-11-18-pin-divergence-symmetry-design.md §6):
+//          DecisionVerdict gains SEED_LAG (WARN) — the report-only row for a
+//          project pin ahead of / diverged from the template-seed pin in the
+//          EXTERNAL DEPS pass. Structurally not a backport-gate kind:
+//          pendingKindForDecision's default → null (a pin row can never block
+//          an upgrade via the pendingBackport machinery).
 // v1.46.0 (2026-11-16, T-20261114-005 — spec
 //          docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §3):
 //          globToRegExp supports one-level {a,b} alternation (non-capturing group;
@@ -1523,7 +1530,12 @@ export type DecisionVerdict =
   | "MARKER_LOSS"
   // Overwrite-protection design E3 (PR-B): the project file's version is GREATER
   // than the template's — never delivered, recorded for backport (pendingBackport).
-  | "PROJECT_AHEAD";
+  | "PROJECT_AHEAD"
+  // Pin-divergence symmetry design (T-20261118-005 §4/§5.1): a project pin ahead
+  // of / diverged from the template-seed pin — report-only WARN in the EXTERNAL
+  // DEPS pass. Dedicated verdict (option b): structurally cannot block —
+  // pendingKindForDecision's default → null, so no gate kind ever attaches.
+  | "SEED_LAG";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1557,6 +1569,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   EVOLVED_PRESERVE: "WARN",
   MARKER_LOSS: "ERROR",
   PROJECT_AHEAD: "WARN",
+  SEED_LAG: "WARN",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */
