@@ -6,10 +6,10 @@ description: >
   parity certificate on success. Use when: adding or removing translation
   keys, syncing locales/*.json with a master locale, auditing glossary
   coverage, or certifying locale parity before a release.
-version: 1.0.1
+version: 1.0.2
 owner: i18n-specialist
 status: active
-last_reviewed: 2026-08-29
+last_reviewed: 2026-11-19
 scope: common
 metadata:
   type: quality
@@ -35,9 +35,16 @@ say *how* to express content per locale; this skill verifies nothing drifted.
 2. **Parity Check**: compare every other `<lang>.json` against the master key tree.
    Automated projects should run a Vitest/parity harness; otherwise diff the key
    trees directly.
-3. **Glossary Validation**: parse `docs/glossary.md` (if maintained) and confirm each
+3. **Runtime Loader Sync**: verify the runtime's supported-locale registry matches
+   the on-disk locale directory exactly — e.g. a loader module that hardcodes a
+   `SUPPORTED` set (QuickDL's `src/i18n.py`, motivated this step in 2026-11) must
+   declare exactly the locales shipped as `locales/*.json`: a locale file without a
+   registry entry is unreachable, a registry entry without a file is a crash path.
+   The detection chain (env var → OS locale → default fallback) should also be
+   noted where the loader implements one.
+4. **Glossary Validation**: parse `docs/glossary.md` (if maintained) and confirm each
    term is mapped and translated consistently in `glossary.json` / per-locale files.
-4. **Report**: list missing keys, extra keys, and glossary drift with file + key paths.
+5. **Report**: list missing keys, extra keys, and glossary drift with file + key paths.
    If fully synced, issue a **"L10N Parity Certificate"** for the audit date.
 
 ## Variant Specializations

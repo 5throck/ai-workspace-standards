@@ -189,6 +189,7 @@
 | `co-security/spdx-sbom` | variant:co-security | 1.1.0 | co-security/patch-engineer, co-security/report-writer | co-security/phase 3, co-security/phase 5 | — | — | — |
 | `co-security/stride-threat-matrix` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | co-security/finding-reconciliation (follows) | — | — |
 | `co-security/verify-authorization` | variant:co-security | 1.1.0 | co-security/pentester, co-security/red-team-lead | co-security/phase 1, co-security/phase 3 | co-security/stride-threat-matrix (follows) | — | — |
+| `co-utility/post-write-check` | variant:co-utility | 1.0.0 | co-utility/backend, co-utility/frontend, co-utility/qa | co-utility/phase 4 | — | — | — |
 | `co-work/i18n-layout` | variant:co-work | 1.1.2 | — | — | — | — | — |
 | `co-work/pptx-export` | variant:co-work | 2.0.2 | co-work/deck-builder | co-work/phase 3 | — | — | — |
 | `co-work/svg-quality-gate` | variant:co-work | 1.3.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
@@ -198,7 +199,7 @@
 | `common/gateguard` | common | 1.0.2 | common/automation-engineer | — | — | — | — |
 | `common/handbook` | common | 0.6.0 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
 | `common/handbook-sync-audit` | common | 1.0.5 | — | — | — | — | — |
-| `common/i18n-audit` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
+| `common/i18n-audit` | common | 1.0.2 | common/i18n-specialist | — | — | — | — |
 | `common/i18n-formatting` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
 | `common/i18n-layout` | common | 1.1.1 | common/i18n-specialist | — | — | — | — |
 | `common/i18n-locale-config` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
@@ -304,6 +305,7 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`);
 - **co-security/phase 3** (Exploitation & PoC Development): co-security/finding-reconciliation, co-security/sarif-exporter, co-security/spdx-sbom, co-security/verify-authorization
 - **co-security/phase 5** (Reporting & Lifecycle Finalization): co-security/finding-reconciliation, co-security/sarif-exporter, co-security/spdx-sbom
 - **co-security/phase 6** (Quality Assurance & Finalization): co-security/finding-reconciliation
+- **co-utility/phase 4** (QA Verification): co-utility/post-write-check
 - **co-work/phase 3** (Content Creation): co-work/pptx-export, co-work/svg-quality-gate, co-work/svg-slide-authoring
 
 ## Edge Types
@@ -709,6 +711,10 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-security/docs/user-guide_ko.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
 | `doc:co-security/docs/user-guide.md` | doc | `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
 | `doc:co-security/README.md` | doc | `co-security/finding-reconciliation`, `co-security/samm-maturity`, `co-security/sarif-exporter`, `co-security/spdx-sbom`, `co-security/stride-threat-matrix`, `co-security/verify-authorization`, `root/meeting-facilitation` | — | — |
+| `doc:co-utility/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-utility/agents/qa.md` | doc | `co-utility/post-write-check` | — | — |
+| `doc:co-utility/docs/co-utility.context.md` | doc | `co-utility/post-write-check`, `common/i18n-audit`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-utility/README.md` | doc | `co-utility/post-write-check`, `root/meeting-facilitation` | — | — |
 | `doc:co-work/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-work/agents/analyst.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/agents/content-writer.md` | doc | `root/meeting-facilitation` | — | — |
@@ -936,7 +942,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `ux-researcher` | agent | divergence | co-architect@1.1.1 #311537c2; co-design@1.1.2 #dd1ba9a2 |
 | `visual-designer` | agent | divergence | co-architect@1.1.1 #5e7475bc; co-design@1.1.2 #ecae363c |
 | `design-foundation` | skill | divergence | co-design@1.3.0 #5cc8c410; root@1.1.1 #74fdd004 |
-| `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.1 #5485334c |
+| `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.2 #b5259cc8 |
 | `i18n-layout` | skill | divergence | co-work@1.1.2 #55cc9f30; common@1.1.1 #67b31c6f |
 | `meeting-facilitation` | skill | version-drift | co-safety@1.5.0 #690ba21e; root@1.5.0 #f4da9e5e |
 | `pdf-export` | skill | divergence | co-deck@2.2.1 #4250f2a6; co-price@1.1.0 #e11de512 |
@@ -953,7 +959,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | Type | Count | Nodes |
 |------|-------|-------|
 | adr | 57 | (expected until docs `references` edges are mined) |
-| agent | 12 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, co-security/i18n-specialist, root/skill-graph-analyst |
+| agent | 13 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, co-security/i18n-specialist, co-utility/security, root/skill-graph-analyst |
 | decision | 31 | (expected until docs `references` edges are mined) |
 | skill | 1 | root/trail |
 
@@ -990,6 +996,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 | `co-safety/meeting-facilitation` | co-safety/pm (co-safety.governance-audit) |
 | `common/decision-record` | co-architect/storyteller (co-architect.narrative-design); co-architect/technical-writer (co-architect.document-production); co-work/storyteller (co-work.narrative-design); co-work/technical-writer (co-work.document-production) |
 | `common/evidence-ledger` | co-architect/analyst (co-architect.document-production, co-architect.project-intake-analysis); co-work/analyst (co-work.document-production, co-work.project-intake-analysis) |
+| `root/security-scan` | co-abap/pm (co-utility.environment-bootstrap); co-develop/designer (co-utility.feature-implementation) |
 | `root/standup-synthesizer` | co-architect/project-coordinator (co-architect.distribution-integration); co-work/project-coordinator (co-work.distribution-integration) |
 
 ## Skill Usage (E3)
@@ -997,7 +1004,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-19), window 90 days. Skill nodes with usage: 5.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/script-lifecycle-manager, co-safety/sync, root/sync
-- **unused** (0 sessions in 90 days) (241): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 201 more
+- **unused** (0 sessions in 90 days) (242): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 202 more
 
 ## Ambiguous Name Resolutions
 

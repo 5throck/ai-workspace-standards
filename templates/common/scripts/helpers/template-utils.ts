@@ -8,7 +8,7 @@
  *   - new-project.ts (L1→L3 project deployment: context.md)
  *   - create-l3-scaffold.ts (L3 project README stub rendering)
  *
- * @version 1.3.0
+ * @version 1.4.0
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -96,6 +96,11 @@ export function applyContextTemplate(
  *          and the 6-workflow phase table).
  */
 export const DEFAULT_PM_ROLE_DESCRIPTIONS: Record<string, string> = {
+  // co-utility — utility/tool roster (QuickDL doctrine): implementation-heavy
+  // team with security as the high-tier audit voice.
+  "co-utility":
+    "Utility project manager — dispatches the multi-interface implementation team (backend, frontend), engages i18n-specialist on locale work, and runs the security-first quality gates (post-write check, external-input audits) to PR",
+
   "co-abap": "SAP ABAP delivery orchestration, module analysis dispatch, transport and QA gates",
   "co-architect":
     "Architecture workspace orchestration, cross-team dispatch (design, research, engineering), design-delivery quality gates",

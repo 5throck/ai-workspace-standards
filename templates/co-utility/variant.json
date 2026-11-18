@@ -1,0 +1,90 @@
+{
+  "name": "co-utility",
+  "description": "Standalone utility/tool application workflow — multi-interface (web UI + desktop shell + CLI) apps sharing one core service, with runtime-output isolation, locale-matrix i18n, and external-input security audits. Doctrine derived from the QuickDL engagement (2026-11).",
+  "variant_type": "utility",
+  "status": "beta",
+  "version": "0.1.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-11-19T00:00:00.000Z",
+  "lifecycle": {
+    "statusSince": "2026-11-19",
+    "lastTransition": "created from QuickDL doctrine on 2026-11-19",
+    "betaEngagements": []
+  },
+  "agents": [
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
+      "name": "backend",
+      "file": "agents/backend.md"
+    },
+    {
+      "name": "frontend",
+      "file": "agents/frontend.md"
+    },
+    {
+      "name": "i18n-specialist",
+      "file": "agents/i18n-specialist.md"
+    },
+    {
+      "name": "qa",
+      "file": "agents/qa.md"
+    },
+    {
+      "name": "security",
+      "file": "agents/security.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "post-write-check",
+      "file": "skills/post-write-check/SKILL.md"
+    }
+  ],
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "post-write-check",
+        "layer": "workspace",
+        "used_by_agents": [
+          "backend",
+          "frontend",
+          "qa"
+        ],
+        "phases": [
+          4
+        ],
+        "platform_parity": "required"
+      }
+    ]
+  },
+  "agent_manifest": {
+    "variant_agents_dir": "agents",
+    "pipeline_order": [
+      "backend",
+      "frontend",
+      "i18n-specialist",
+      "qa"
+    ],
+    "optional": [],
+    "notes": "Utility roster: backend owns the core service + HTTP API + CLI; frontend owns the web UI (and desktop-shell integration); i18n-specialist is engaged on demand for locale deliverables (common extends-stub); qa runs the test gate; security audits external-input paths and owns ongoing dependency/secret monitoring. Serial writes prevent file-lock contention."
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "deg_conformance": "core",
+  "process_manifest": {
+    "stages_file": null,
+    "raci_file": null,
+    "gates_file": null,
+    "evidence_models_dir": null
+  },
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": [],
+    "default": null
+  },
+  "designLint": {
+    "enabled": false
+  }
+}

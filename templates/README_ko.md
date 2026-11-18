@@ -45,6 +45,7 @@ templates/
 |---------|------|------|
 | [`co-develop`](co-develop/) | ✅ Stable | 7개 에이전트(pm, architect, code-writer, designer, security-monitor, stack-setup, test-runner)를 갖춘 소프트웨어 개발 워크플로우 |
 | [`co-learning`](co-learning/) | ⚠️ Beta | 학습·평가 워크플로 — 2개 에이전트(pm, exam-bank-steward + 공용 i18n-specialist), 편향 감사 문항 은행과 시험 운영 |
+| [`co-utility`](co-utility/) | ⚠️ Beta | 독립 유틸리티/도구 워크플로 — 5개 에이전트(pm, backend, frontend, qa, security + 공용 i18n-specialist), 다중 인터페이스 앱, 런타임 출력 격리, 로케일 매트릭스 i18n, 외부 입력 보안 감사 |
 | [`co-design`](co-design/) | ✅ Stable | 8개 에이전트(design pm, design-lead, prototype-engineer, service-designer 등)를 갖춘 UI/UX 디자인 워크플로우 |
 | [`co-work`](co-work/) | ✅ Stable | 7개 에이전트(pm, analyst, content-writer, ms365-expert 등)를 갖춘 일반 협업 워크플로우 |
 | [`co-security`](co-security/) | ✅ Stable | 6개 에이전트(pm, red-team-lead, pentester, threat-modeler 등)를 갖춘 보안 점검 워크플로우 |
@@ -122,4 +123,4 @@ bun scripts/validate-templates.ts  # 드리프트 없음 확인
 - **Minor** 범프: 신규 에이전트, 신규 variant stable 승격, 구조적 섹션 변경
 - **Patch** 범프: 문서 및 설명 갱신
 
-*Last Updated: 2026-11-02*
+*Last Updated: 2026-11-19*

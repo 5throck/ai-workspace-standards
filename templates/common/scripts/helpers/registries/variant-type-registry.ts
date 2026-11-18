@@ -1,5 +1,8 @@
 // scripts/helpers/registries/variant-type-registry.ts
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-19): register `utility` type — standalone utility/tool apps
+//          (QuickDL-derived doctrine: multi-interface surfaces, runtime-output
+//          isolation, locale-matrix i18n, external-input security audits).
 // SSOT for variant type definitions
 
 /**
@@ -68,6 +71,12 @@ export const VARIANT_TYPE_REGISTRY = {
     description:
       "Learning and assessment workflow — bias-audited question-bank authoring, remediation ledger review, and exam operations",
     canonicalExtensionSource: "templates/co-learning/variant.json",
+  },
+  utility: {
+    name: "utility",
+    description:
+      "Standalone utility/tool applications — multi-interface (web UI + desktop shell + CLI) apps sharing one core service, with runtime-output isolation, locale-matrix i18n, and external-input security audits",
+    canonicalExtensionSource: "templates/co-utility/variant.json",
   },
 } as const;
 

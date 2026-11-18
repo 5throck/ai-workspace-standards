@@ -1,5 +1,5 @@
 ---
-translated_from_hash: add2d95a5d5f4a3f9a00fdbdf5a6a78e801f05eb3cf00788fcd769b489e69c1f
+translated_from_hash: b8bb7cfcc199482da0592c3abe371f081e9560bdcba81bfeab603294dcd4afa3
 sync_version: 4
 lang: ko
 lang_reason: source-material
@@ -285,6 +285,7 @@ C:\git\
 
 - **co-develop**: 소프트웨어 개발 및 검증을 위한 6단계 선형 거버넌스 파이프라인
 - **co-learning**: 학습·평가 워크플로 — 편향 감사 문항 은행 저작, 개선 대장 검수, 시험 운영 (베타; co-develop 파생)
+- **co-utility**: 독립 유틸리티/도구 애플리케이션 워크플로 — 하나의 코어 서비스를 공유하는 다중 인터페이스(웹 UI + 데스크톱 셸 + CLI), 런타임 출력 격리, 로케일 매트릭스 i18n, 외부 입력 보안 감사 (베타; QuickDL 도입에서 도출)
 - **co-design**: 빠른 프로토타이핑과 지속적인 사용자 검증에 초점을 맞춘 5단계 반복형(Iterative) 디자인 네이티브 워크플로
 - **co-work**: 병렬 작성과 지속적인 이해관계자 검토에 초점을 맞춘 6단계 비동기(Asynchronous) 협업 워크플로
 - **co-security**: 레드팀 운영, 위협 모델링, Ansible 기반 패치 자동화를 포함하는 6단계 보안 인게이지먼트 워크플로
@@ -408,4 +409,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-02*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-19*

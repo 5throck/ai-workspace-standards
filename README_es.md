@@ -287,6 +287,7 @@ Cada variante de plantilla en este workspace proporciona un **flujo de trabajo m
 
 - **co-develop**: Un pipeline de gobernanza lineal de 6 fases para el desarrollo y verificación de software.
 - **co-learning**: Flujo de trabajo de aprendizaje y evaluación — redacción de bancos de preguntas auditados contra sesgos, revisión del registro de remediación y operaciones de exámenes (beta; derivado de co-develop).
+- **co-utility**: Flujo de trabajo para aplicaciones utilitarias independientes — apps multi-interfaz (web UI + shell de escritorio + CLI) que comparten un servicio central, con aislamiento de salida en tiempo de ejecución, i18n por matriz de configuraciones regionales y auditorías de seguridad de entradas externas (beta; doctrina derivada del proyecto QuickDL).
 - **co-design**: Un flujo de trabajo nativo de diseño iterativo de 5 fases enfocado en el prototipado rápido y la validación continua del usuario.
 - **co-work**: Un flujo de trabajo de colaboración asíncrona de 6 fases enfocado en la redacción paralela y la revisión continua de los stakeholders.
 - **co-security**: Un flujo de trabajo de compromiso de seguridad de 6 fases que cubre operaciones de Red Team, modelado de amenazas y automatización de parches basada en Ansible.

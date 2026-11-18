@@ -1,0 +1,253 @@
+{
+  "version": 1,
+  "graph_profile": "deg/v1",
+  "nodes": [
+    {
+      "id": "backend",
+      "type": "agent",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "frontend",
+      "type": "agent",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "i18n-audit",
+      "type": "skill",
+      "layer": "common"
+    },
+    {
+      "id": "i18n-specialist",
+      "type": "agent",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "output_type.environment_manifest",
+      "type": "output_type",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "output_type.implementation_commit",
+      "type": "output_type",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "output_type.review_findings",
+      "type": "output_type",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "output_type.security_baseline",
+      "type": "output_type",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "output_type.test_scaffold",
+      "type": "output_type",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "output_type.ui_specification",
+      "type": "output_type",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "pm",
+      "type": "agent",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "post-write-check",
+      "type": "skill",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "procedure.co-utility.environment-bootstrap",
+      "type": "procedure",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "procedure.co-utility.feature-implementation",
+      "type": "procedure",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "qa",
+      "type": "agent",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "security",
+      "type": "agent",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "security-scan",
+      "type": "skill",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "sync",
+      "type": "skill",
+      "layer": "L0"
+    }
+  ],
+  "edges": [
+    {
+      "type": "used_by",
+      "from": "post-write-check",
+      "to": "backend",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "post-write-check",
+      "to": "frontend",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "post-write-check",
+      "to": "i18n-audit",
+      "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "post-write-check",
+      "to": "output_type.test_scaffold",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "post-write-check",
+      "to": "phase4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "post-write-check",
+      "to": "qa",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "post-write-check",
+      "to": "sync",
+      "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "output_type.environment_manifest",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "post-write-check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "procedure.co-utility.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "security-scan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "post-write-check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "post-write-check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "post-write-check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "security-scan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "sync",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "security-scan",
+      "to": "output_type.security_baseline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "security-scan",
+      "to": "output_type.ui_specification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "sync",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    }
+  ]
+}

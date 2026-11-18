@@ -636,6 +636,7 @@
         "templates/co-game/agents/pm.md",
         "templates/co-learning/agents/pm.md",
         "templates/co-security/agents/pm.md",
+        "templates/co-utility/agents/pm.md",
         "templates/co-work/agents/pm.md"
       ]
     },
@@ -1469,7 +1470,8 @@
       "version": "1.1.1",
       "mirrors": [
         "templates/co-develop/agents/i18n-specialist.md",
-        "templates/co-learning/agents/i18n-specialist.md"
+        "templates/co-learning/agents/i18n-specialist.md",
+        "templates/co-utility/agents/i18n-specialist.md"
       ]
     },
     {
@@ -2381,6 +2383,58 @@
       "version": "1.1.2",
       "mirrors": [
         "templates/co-security/agents/threat-modeler.md"
+      ]
+    },
+    {
+      "id": "agent:co-utility/backend",
+      "type": "agent",
+      "layer": "variant:co-utility",
+      "name": "backend",
+      "scope": "co-utility",
+      "capability": "backend",
+      "content_hash": "c179f4153f66e11c",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-utility/agents/backend.md"
+      ]
+    },
+    {
+      "id": "agent:co-utility/frontend",
+      "type": "agent",
+      "layer": "variant:co-utility",
+      "name": "frontend",
+      "scope": "co-utility",
+      "capability": "frontend",
+      "content_hash": "f1898400300590cf",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-utility/agents/frontend.md"
+      ]
+    },
+    {
+      "id": "agent:co-utility/qa",
+      "type": "agent",
+      "layer": "variant:co-utility",
+      "name": "qa",
+      "scope": "co-utility",
+      "capability": "qa",
+      "content_hash": "ae7ff73857c54d70",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-utility/agents/qa.md"
+      ]
+    },
+    {
+      "id": "agent:co-utility/security",
+      "type": "agent",
+      "layer": "variant:co-utility",
+      "name": "security",
+      "scope": "co-utility",
+      "capability": "security",
+      "content_hash": "850ab76c3f423938",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-utility/agents/security.md"
       ]
     },
     {
@@ -4100,6 +4154,26 @@
       "layer": "variant:co-security"
     },
     {
+      "id": "doc:co-utility/AGENTS.md",
+      "type": "doc",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "doc:co-utility/agents/qa.md",
+      "type": "doc",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "doc:co-utility/docs/co-utility.context.md",
+      "type": "doc",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "doc:co-utility/README.md",
+      "type": "doc",
+      "layer": "variant:co-utility"
+    },
+    {
       "id": "doc:co-work/AGENTS.md",
       "type": "doc",
       "layer": "variant:co-work"
@@ -5474,6 +5548,14 @@
       "label": "Quality Assurance & Finalization"
     },
     {
+      "id": "phase:co-utility/4",
+      "type": "phase",
+      "layer": "variant:co-utility",
+      "scope": "co-utility",
+      "ordinal": 4,
+      "label": "QA Verification"
+    },
+    {
       "id": "phase:co-work/3",
       "type": "phase",
       "layer": "variant:co-work",
@@ -5885,6 +5967,16 @@
       "id": "procedure.co-security.threat-model-and-report",
       "type": "procedure",
       "layer": "variant:co-security"
+    },
+    {
+      "id": "procedure.co-utility.environment-bootstrap",
+      "type": "procedure",
+      "layer": "variant:co-utility"
+    },
+    {
+      "id": "procedure.co-utility.feature-implementation",
+      "type": "procedure",
+      "layer": "variant:co-utility"
     },
     {
       "id": "procedure.co-work.distribution-integration",
@@ -8337,6 +8429,19 @@
       ]
     },
     {
+      "id": "skill:co-utility/post-write-check",
+      "type": "skill",
+      "layer": "variant:co-utility",
+      "name": "post-write-check",
+      "scope": "co-utility",
+      "capability": "post-write-check",
+      "content_hash": "222afdb5c36e41c7",
+      "version": "1.0.0",
+      "mirrors": [
+        "templates/co-utility/skills/post-write-check/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-work/i18n-layout",
       "type": "skill",
       "layer": "variant:co-work",
@@ -8460,8 +8565,8 @@
       "name": "i18n-audit",
       "scope": "common",
       "capability": "i18n-audit",
-      "content_hash": "5485334c47dd7ef0",
-      "version": "1.0.1",
+      "content_hash": "b5259cc88ab22d58",
+      "version": "1.0.2",
       "mirrors": [
         "templates/common/skills/i18n-audit/SKILL.md"
       ]
@@ -18158,6 +18263,114 @@
     },
     {
       "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:common/handbook",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:common/handbook-sync-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:common/sync",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/explain-me",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/platform-command-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/platform-skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/security-scan",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/AGENTS.md",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/agents/qa.md",
+      "to": "skill:co-utility/post-write-check",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/docs/co-utility.context.md",
+      "to": "skill:co-utility/post-write-check",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/docs/co-utility.context.md",
+      "to": "skill:common/i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/docs/co-utility.context.md",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/docs/co-utility.context.md",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/README.md",
+      "to": "skill:co-utility/post-write-check",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/README.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
       "to": "skill:common/handbook",
       "source": "workflow-doc"
@@ -22461,6 +22674,81 @@
       "from": "procedure.co-security.threat-model-and-report",
       "to": "stage.co-security.S2",
       "source": "process_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "agent:co-abap/pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "output_type.environment_manifest",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "procedure.co-utility.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "skill:co-utility/post-write-check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "skill:root/security-scan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "agent:co-abap/pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "agent:co-develop/designer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:co-utility/post-write-check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:co-utility/post-write-check",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:common/sync",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:root/security-scan",
+      "source": "procedure_schema"
     },
     {
       "type": "step_by_agent",
@@ -30912,6 +31200,54 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "skill:co-utility/post-write-check",
+      "to": "agent:co-utility/backend",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-utility/post-write-check",
+      "to": "agent:co-utility/frontend",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-utility/post-write-check",
+      "to": "agent:co-utility/qa",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-utility/post-write-check",
+      "to": "output_type.test_scaffold",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-utility/post-write-check",
+      "to": "phase:co-utility/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-utility/post-write-check",
+      "to": "skill:co-develop/test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-utility/post-write-check",
+      "to": "skill:common/i18n-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:co-utility/post-write-check",
+      "to": "skill:common/sync",
+      "source": "prose"
+    },
+    {
       "type": "references",
       "from": "skill:co-work/i18n-layout",
       "to": "skill:co-deck/design",
@@ -33098,6 +33434,12 @@
       }
     },
     {
+      "type": "produces",
+      "from": "skill:common/sync",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
       "type": "composes_with",
       "from": "skill:common/translate",
       "to": "skill:root/documentation-writing",
@@ -33837,6 +34179,18 @@
       "from": "skill:root/script-lifecycle-manager",
       "to": "skill:root/new-project",
       "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/security-scan",
+      "to": "output_type.security_baseline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/security-scan",
+      "to": "output_type.ui_specification",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
