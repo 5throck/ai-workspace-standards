@@ -11,7 +11,7 @@
 | `vsp-audit.ts` | 1.1.0 | ATC rule-pack audit: validates atc-rulepack.json, prints deterministic check selection per change type | L2 |
 | `atc-rulepack.json` | 1.0.0 | ATC check-selection rule pack per change type (abapOpenChecks parity) | L2 |
 | `vsp-task.ts` | 1.0.1 | Create task files from template | L2 |
-| `vsp-publish.ts` | 1.1.0 | Package and publish core framework assets to the plugin repository (project-root source base; verified asset list; missing required asset aborts) | L2 |
+| `vsp-publish.ts` | 1.1.1 | Package and publish core framework assets to the plugin repository (project-root source base; verified asset list; missing required asset aborts) | L2 |
 | `new-requirement.ts` | 1.2.0 | Scaffold deliverables/REQ-NNN-<slug>/ stage docs (01_srs.md, 05_unit_test_plan.md, 06_release_report.md) and register the RTM row; exits non-zero when required templates are missing | L2 |
 | `scratch-cleanup.ts` | 1.1.0 | Scratch workspace hygiene (temp purge, task archival, status; 30-day archive default, validated --days) | L2 |
 | `setup.ts` | 1.1.0 | Project environment setup (uv pip install into .venv, exit-code honesty, opt-in --with-rtk) | L2 |
