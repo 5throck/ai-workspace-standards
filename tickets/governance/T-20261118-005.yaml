@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: T-20261118-005
+kind: manual
+title: >-
+  External-deps pin divergence detection and symmetric resolution between
+  template seed and project manifest. Current state (code-verified 2026-11-18):
+  the upgrade EXTERNAL DEPS pass (D3, upgrade-project.ts:4000+) is
+  upstream-driven only (checkUpstreamTags vs the project pin; seedForMigration
+  appears only in channels 2b/2c, never in pin moves) and the weekly drift
+  scan compares seeds vs upstream latest tags only (project manifests are
+  gitignored, invisible to the scan). Two asymmetry gaps: (1) project pin
+  AHEAD of seed (project moved first — T-20261117-012: co-deck project at
+  v1.0.1 while templates/co-deck seed stayed v1.0.0) is detected by nothing;
+  the seed lag surfaced only by luck (a v1.0.1 tag existed upstream).
+  Expected: the pass emits a seed-lag decision row / report line (report-only),
+  and the running session files an upstream request / ticket so the template
+  seed is moved (review-gated, per DEC-20261118-01 bar this is design-needed
+  deferred work). (2) project pin BEHIND seed (seed moved via a compat-gated
+  template PR — #2093/#2099 class — possibly without a fresh upstream tag
+  being newer than the project pin, e.g. commit-only seed moves) converges
+  today only by coincidence (upstream tag == seed tag). Expected: D3 gains a
+  seed-target arm — when the seed pin is strictly newer than the project pin,
+  the seed pin becomes the compat-test target (compatibility_test still runs
+  from the PROJECT root — the project adapter environment differs from the
+  template gate; no gate bypass); pass moves the project pin to the seed pin,
+  fail holds + WARN. Owner direction 2026-11-18: symmetric divergence model
+  (project ahead -> ticket; project behind -> adopt seed pin, compat-gated).
+  Design needed: external-deps standard amendment + D3 change + detection
+  filing integration; compat-gate-preserving.
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-18T00:00:00.000+09:00
+history:
+  - at: 2026-11-18T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null

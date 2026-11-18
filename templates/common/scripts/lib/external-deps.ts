@@ -1,4 +1,19 @@
-// @version 1.2.0
+// @version 1.3.0
+// v1.3.0 (2026-11-19, T-20261118-005 — design
+//          docs/designs/2026-11-18-pin-divergence-symmetry-design.md): two pure
+//          helpers for pin-divergence symmetry between the template seed and a
+//          project manifest. classifySeedDivergence classifies the divergence
+//          of a project pin against the seed pin (project strictly ahead /
+//          non-semver divergence / same-pin commit divergence / repo mismatch /
+//          project behind / in-sync — Arm 1 rows fire only on the ahead and
+//          diverged classes). resolveSeedTarget applies the max-rule target
+//          selection: upstream.newer wins when present; the seed pin becomes
+//          the compat-gated target only when upstream failed/unreachable (or
+//          confirms it) and the seed pin is a semver tag strictly newer than
+//          the project pin and (when upstream answered) present among upstream
+//          tags. Commit-only / non-semver seed pins are unsupported and
+//          report-only — never targets (install templates are tag-only;
+//          standard §5.2 pin rules).
 // v1.2.0 (2026-11-08, T-20261108-002 — port of co-work #38 / LOCAL-PATCH
 //          U-20261107-002): bounded NON-GIT admission — an `install` template
 //          may invoke an allowlisted deterministic non-git tool
@@ -903,6 +918,95 @@ export function checkUpstreamTags(entry: Pick<ExternalDepEntry, "repo" | "pin">)
     .filter((t) => isNewerTag(t, entry.pin))
     .sort((a, b) => (isNewerTag(a, b) ? 1 : isNewerTag(b, a) ? -1 : 0))[0];
   return { ok: true, tags, newer };
+}
+
+// ── Pin-divergence symmetry (v1.3.0, T-20261118-005, design
+//    docs/designs/2026-11-18-pin-divergence-symmetry-design.md §5.1/§6) ────────
+
+/** Divergence class of a project pin against the template-seed pin for the same id. */
+export type SeedDivergenceKind =
+  | "in-sync"
+  | "project-ahead"
+  | "non-semver-divergence"
+  | "same-pin-commit-divergence"
+  | "repo-mismatch"
+  | "project-behind";
+
+/**
+ * Classify the divergence between a project manifest entry (`dep`) and the
+ * template-seed entry with the same id (`seedDep`). Pure — no I/O, no network.
+ *
+ * Class order (design §5.1 Arm 1 table):
+ *   - `repo-mismatch` — the seed entry's repo differs from the dep's repo
+ *     (id reused across repos): pin comparison is meaningless, skipped.
+ *   - equal pins + both commits present and different →
+ *     `same-pin-commit-divergence` (tag likely re-cut upstream).
+ *   - equal pins (or either commit absent) → `in-sync`.
+ *   - project pin strictly newer than the seed pin (both semver) →
+ *     `project-ahead`.
+ *   - seed pin strictly newer than the project pin (both semver) →
+ *     `project-behind` — no report row; the seed-target arm
+ *     (resolveSeedTarget) owns this direction.
+ *   - pins differ and neither direction is a strictly-newer semver →
+ *     `non-semver-divergence` (a non-semver pin on either side).
+ */
+export function classifySeedDivergence(
+  dep: { pin: string; commit?: string },
+  seedDep: { pin: string; commit?: string; repo: string },
+  depRepo: string,
+): { kind: SeedDivergenceKind } {
+  if (seedDep.repo !== depRepo) return { kind: "repo-mismatch" };
+  if (dep.pin === seedDep.pin) {
+    if (dep.commit && seedDep.commit && dep.commit !== seedDep.commit) return { kind: "same-pin-commit-divergence" };
+    return { kind: "in-sync" };
+  }
+  if (isNewerTag(dep.pin, seedDep.pin)) return { kind: "project-ahead" };
+  if (isNewerTag(seedDep.pin, dep.pin)) return { kind: "project-behind" };
+  return { kind: "non-semver-divergence" };
+}
+
+/** Result of the seed-target max-rule (design §5.1 Arm 2, ruling (e)). */
+export interface SeedTargetResolution {
+  /** The compat-test target pin, when one was selected. */
+  target?: string;
+  /** Which side supplied the target (`upstream` = today's arm; `seed` = the fallback arm). */
+  source: "upstream" | "seed";
+  /** Non-target reason (e.g. the seed pin is out of sync with upstream) — surfaced as its own WARN row. */
+  reason?: string;
+}
+
+/**
+ * Seed-target max-rule selection. Pure — consumes the already-computed
+ * upstream check, no I/O.
+ *
+ *   1. `upstream.ok && upstream.newer` → upstream target (today's behavior,
+ *      unchanged — when the seed pin is a strictly-newer upstream tag,
+ *      `upstream.newer ≥ seed.pin` by construction, so the max of both
+ *      reduces to upstream-first).
+ *   2. else the seed pin is a strictly-newer semver tag than the project pin
+ *      AND (`upstream.ok` implies the seed pin is among upstream tags) → seed
+ *      target. The membership requirement prevents a doomed fetch when the
+ *      seed pin is absent from upstream (renamed/deleted tag) — that state
+ *      returns no target with the out-of-sync `reason` instead.
+ *   3. else → no target (today's hold). Commit-only / non-semver seed pins
+ *      never become targets (install templates are tag-only; report-only).
+ */
+export function resolveSeedTarget(
+  dep: { pin: string },
+  seedDep: { pin: string } | undefined,
+  upstream: UpstreamTagCheck,
+): SeedTargetResolution {
+  if (upstream.ok && upstream.newer) return { target: upstream.newer, source: "upstream" };
+  if (!seedDep) return { source: "upstream" };
+  if (!isNewerTag(seedDep.pin, dep.pin)) return { source: "upstream" };
+  if (!parseSemverTag(seedDep.pin)) return { source: "upstream" };
+  if (upstream.ok && !upstream.tags.includes(seedDep.pin)) {
+    return {
+      source: "seed",
+      reason: `template seed pin ${seedDep.pin} is newer than the project pin but is not among upstream tags — the seed is out of sync with upstream; not adopted`,
+    };
+  }
+  return { target: seedDep.pin, source: "seed" };
 }
 
 /**

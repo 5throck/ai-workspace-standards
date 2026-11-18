@@ -73,7 +73,10 @@ import {
   EXTERNAL_DEP_LICENSE_POLICY,
   type ExternalDepEntry,
   type ExternalDepsManifest,
+  type UpstreamTagCheck,
   classifyInstallArgv0,
+  classifySeedDivergence,
+  resolveSeedTarget,
 } from '../../scripts/lib/external-deps.ts';
 
 // ── fixture helpers ────────────────────────────────────────────────────────────
@@ -898,5 +901,128 @@ describe('non-git admission (T-20261108-002, external-deps v1.2.0)', () => {
     }
     expect(classifyInstallArgv0('git clone x', 't')).toBe('git');
     expect(() => classifyInstallArgv0('python3 x', 't')).toThrow(/allowlisted/);
+  });
+});
+
+// ── v1.2.0 (T-20261118-005 — design docs/designs/2026-11-18-pin-divergence-
+//    symmetry-design.md §7): pure pin-divergence-symmetry helpers. No network,
+//    no fixtures — synthetic objects only.
+describe('classifySeedDivergence (pin-divergence symmetry, Arm 1)', () => {
+  const REPO = 'https://github.com/x/y';
+
+  test('project strictly newer than the seed pin → project-ahead (T-20261117-012 replica: co-deck quickdl v1.0.1 vs seed v1.0.0)', () => {
+    expect(
+      classifySeedDivergence({ pin: 'v1.0.1', commit: 'aaa' }, { pin: 'v1.0.0', commit: 'bbb', repo: REPO }, REPO).kind,
+    ).toBe('project-ahead');
+  });
+
+  test('project strictly behind the seed pin → project-behind (the Arm 2 direction — consumed by resolveSeedTarget, no report row)', () => {
+    expect(
+      classifySeedDivergence({ pin: 'v1.0.0', commit: 'bbb' }, { pin: 'v1.0.1', commit: 'aaa', repo: REPO }, REPO).kind,
+    ).toBe('project-behind');
+  });
+
+  test('equal pins + equal commits → in-sync (the fleet majority — zero rows, G4)', () => {
+    expect(
+      classifySeedDivergence({ pin: 'v1.0.1', commit: 'abc' }, { pin: 'v1.0.1', commit: 'abc', repo: REPO }, REPO).kind,
+    ).toBe('in-sync');
+  });
+
+  test('equal pins + both commits present and different → same-pin-commit-divergence (#2099 replica: 57e4fe78 vs 228044a3)', () => {
+    expect(
+      classifySeedDivergence(
+        { pin: 'v1.0.1', commit: '57e4fe78deadbeefdeadbeefdeadbeefdeadbeef' },
+        { pin: 'v1.0.1', commit: '228044a3deadbeefdeadbeefdeadbeefdeadbeef', repo: REPO },
+        REPO,
+      ).kind,
+    ).toBe('same-pin-commit-divergence');
+  });
+
+  test('equal pins + either commit absent → in-sync (nothing comparable)', () => {
+    expect(classifySeedDivergence({ pin: 'v1.0.1' }, { pin: 'v1.0.1', commit: 'abc', repo: REPO }, REPO).kind).toBe('in-sync');
+    expect(classifySeedDivergence({ pin: 'v1.0.1', commit: 'abc' }, { pin: 'v1.0.1', repo: REPO }, REPO).kind).toBe('in-sync');
+  });
+
+  test('non-semver project pin vs semver seed pin → non-semver-divergence', () => {
+    expect(
+      classifySeedDivergence({ pin: 'main-rc1', commit: 'abc' }, { pin: 'v1.0.0', commit: 'def', repo: REPO }, REPO).kind,
+    ).toBe('non-semver-divergence');
+  });
+
+  test('commit-only seed pin vs semver project pin → non-semver-divergence (unsupported, report-only)', () => {
+    expect(
+      classifySeedDivergence(
+        { pin: 'v1.0.0', commit: 'abc' },
+        { pin: '57e4fe78deadbeefdeadbeefdeadbeefdeadbeef', repo: REPO },
+        REPO,
+      ).kind,
+    ).toBe('non-semver-divergence');
+  });
+
+  test('repo strings differ → repo-mismatch even with equal pins (id reused across repos)', () => {
+    expect(
+      classifySeedDivergence(
+        { pin: 'v1.0.1', commit: 'abc' },
+        { pin: 'v1.0.1', commit: 'abc', repo: 'https://github.com/other/z' },
+        REPO,
+      ).kind,
+    ).toBe('repo-mismatch');
+  });
+});
+
+describe('resolveSeedTarget (pin-divergence symmetry, Arm 2 max-rule)', () => {
+  const REPO = 'https://github.com/x/y';
+
+  function upstreamCheck(partial: Partial<UpstreamTagCheck>): UpstreamTagCheck {
+    return { ok: true, tags: [], ...partial };
+  }
+
+  test('upstream.newer present → upstream wins even when the seed pin is also newer (ruling (e) max case)', () => {
+    const res = resolveSeedTarget({ pin: 'v1.0.0' }, { pin: 'v1.0.1', repo: REPO }, upstreamCheck({ tags: ['v1.0.1', 'v1.2.0'], newer: 'v1.2.0' }));
+    expect(res.target).toBe('v1.2.0');
+    expect(res.source).toBe('upstream');
+    expect(res.reason).toBeUndefined();
+  });
+
+  test('upstream check failed → the strictly-newer semver seed pin becomes the target (source seed)', () => {
+    const res = resolveSeedTarget(
+      { pin: 'v1.0.0' },
+      { pin: 'v1.0.1', repo: REPO },
+      { ok: false, error: 'git ls-remote failed: network unreachable', tags: [] },
+    );
+    expect(res.target).toBe('v1.0.1');
+    expect(res.source).toBe('seed');
+  });
+
+  test('upstream ok with no newer tag + seed pin among upstream tags → seed target (the anomalous-but-sound path)', () => {
+    const res = resolveSeedTarget({ pin: 'v1.0.0' }, { pin: 'v1.0.1', repo: REPO }, upstreamCheck({ tags: ['v1.0.1'], newer: undefined }));
+    expect(res.target).toBe('v1.0.1');
+    expect(res.source).toBe('seed');
+  });
+
+  test('upstream ok, no newer, seed pin NOT among upstream tags → no target + the out-of-sync reason', () => {
+    const res = resolveSeedTarget({ pin: 'v1.0.0' }, { pin: 'v9.9.9', repo: REPO }, upstreamCheck({ tags: ['v1.0.0'], newer: undefined }));
+    expect(res.target).toBeUndefined();
+    expect(res.reason).toMatch(/out of sync with upstream/);
+  });
+
+  test('commit-only seed pin → never a target (install templates are tag-only)', () => {
+    const res = resolveSeedTarget(
+      { pin: 'v1.0.0' },
+      { pin: '57e4fe78deadbeefdeadbeefdeadbeefdeadbeef', repo: REPO },
+      { ok: false, error: 'git ls-remote failed', tags: [] },
+    );
+    expect(res.target).toBeUndefined();
+  });
+
+  test('seed pin not newer than the project pin (equal or older) → no target', () => {
+    expect(resolveSeedTarget({ pin: 'v1.0.1' }, { pin: 'v1.0.1', repo: REPO }, upstreamCheck({})).target).toBeUndefined();
+    expect(resolveSeedTarget({ pin: 'v1.2.0' }, { pin: 'v1.0.1', repo: REPO }, upstreamCheck({})).target).toBeUndefined();
+  });
+
+  test('no seed entry for the id → no target (upstream arm only)', () => {
+    const res = resolveSeedTarget({ pin: 'v1.0.0' }, undefined, { ok: false, error: 'git ls-remote failed', tags: [] });
+    expect(res.target).toBeUndefined();
+    expect(res.source).toBe('upstream');
   });
 });
