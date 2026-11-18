@@ -1,5 +1,9 @@
 // scripts/helpers/registries/validation-policy.ts
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-11-19): utility entry added alongside the variant-type registry
+//          registration (co-utility beta) — no capability registry entries exist
+//          for utility-type validation yet; empty requiredCapabilities so a
+//          future promotion cannot false-block (same posture as safety/learning).
 // v1.2.1: architect-review flag resolved (T-20260910-007) — empty requiredCapabilities
 //         approved, rationale recorded in the entry comment; comment-only, no behavior change.
 // v1.2.0: safety entry added (empty requiredCapabilities — cannot false-block a
@@ -116,6 +120,10 @@ export const VALIDATION_POLICIES = {
   // false-block every run; register safety capabilities when the first safety-type
   // promotion is planned.
   safety: {
+    requiredCapabilities: [],
+    optionalAgentSections: ["## Phase Handoff Protocol"],
+  },
+  utility: {
     requiredCapabilities: [],
     optionalAgentSections: ["## Phase Handoff Protocol"],
   },

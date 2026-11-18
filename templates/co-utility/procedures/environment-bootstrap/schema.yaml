@@ -1,0 +1,40 @@
+# co-utility roster: dev-slot agents are PM-dispatched generic specialists per AGENTS.md §3.5 (no named architect/code-writer/test-runner roster) — steps route through pm.
+schema_version: "1.0"
+procedure_id: co-utility-environment-bootstrap
+variant: co-utility
+version: "1.0.0"
+title: Environment Bootstrap
+phase: 0
+status: active
+owner_agent: pm
+purpose: >
+  Prepare a secure, reproducible development environment before any planning
+  or implementation work.
+inputs: []
+preconditions:
+  - "Project scope agreed and target stack identified."
+steps:
+  - id: 1
+    agent_key: pm
+    skill_key: post-write-check
+    output_type: environment_manifest
+    description: >
+      Provision the toolchain and project skeleton with the test runner in
+      place.
+  - id: 2
+    agent_key: pm
+    skill_key: security-scan
+    output_type: security_baseline
+    description: >
+      Establish the security baseline: dependency sources, secret handling,
+      and scan hooks.
+outputs:
+  - type: environment_manifest
+relations:
+  - type: enables
+    target: procedure.co-utility.feature-implementation
+quality_gates:
+  - "Test runner executes green on the empty skeleton and security hooks are active."
+evidence: []
+failure_modes:
+  - "Toolchain cannot be provisioned reproducibly - halt rather than continuing on a snowflake environment."

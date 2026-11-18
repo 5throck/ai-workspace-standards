@@ -148,11 +148,11 @@ describe('VA-07 collectMirrorVersionMismatches (registry completeness R3)', () =
     );
   }
 
-  test('day-one green: zero findings across all 15 real variants', () => {
+  test('day-one green: zero findings across all 16 real variants', () => {
     const variants = readdirSync(templatesDir)
       .filter(d => d.startsWith('co-') && existsSync(join(templatesDir, d, 'variant.json')))
       .sort();
-    expect(variants.length).toBe(15);
+    expect(variants.length).toBe(16);
     for (const variant of variants) {
       const findings = collectMirrorVersionMismatches(join(templatesDir, variant), variant);
       expect(findings).toEqual([]);
