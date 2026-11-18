@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-19](2026-11-19.md) | chore(templates): move seed pins quickdl v1.0.1 + im-not-ai v2.4.7 (compat-gated, issue #2096) |
 | [2026-11-18](2026-11-18.md) | docs(trail): record co-deck bgpool PNG leak learning |
 | [2026-11-18](2026-11-18.md) | feat(design): sync-embedded detection — opt-in backport marking and upstream filing (DEC-20261117-06, batch PR-A) |
 | [2026-11-17](2026-11-17.md) | chore(housekeeping): land memory archival, README regens, governance tickets T-20261117-001..005 |
@@ -16,7 +17,7 @@
 | [2026-11-13](2026-11-13.md) | chore: workspace sync (0 files) |
 | [2026-11-13](2026-11-13.md) | fix(governance): E2E scaffold validation alignment for upstream triage batch (PR #1991 CI) |
 | [2026-11-12](2026-11-12.md) | test(ci): budget the upgrade-overwrite-protection re-stale loop test - windows 15.03s vs 15s ceiling |
-| [2026-11-11](2026-11-11.md) | fix(hardening): biome compliance for fleet-script-parity v1.2.0 |
+| 2026-11-11 | fix(hardening): biome compliance for fleet-script-parity v1.2.0 |
 | 2026-11-10 | docs(skills): meeting-facilitation v1.5.0 — committee-form alignment |
 | 2026-11-10 | feat(scripts): strict biome/tsconfig profile for delivered scripts — Option A compliance sweep |
 | 2026-11-09 | fix: git-env sanitizer for hook-injected GIT_DIR in hygiene gate and tenant tests |
