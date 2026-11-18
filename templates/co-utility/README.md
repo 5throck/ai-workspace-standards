@@ -1,6 +1,6 @@
 ---
 sync_version: 1
-content_hash: 215c1ac7a9da5ff474000f68717ea2aa87f77c4f3b3e651560c1b7b85084da04
+content_hash: 0ef7639c84d954cc7d70a110a0620571d4f5a4ec81c47b3e0badf9d028661879
 ---
 
 # co-utility
@@ -37,10 +37,11 @@ Your partners consist of specialized agents, each with a distinct role. The **Pr
 
 | Agent | Role | Tier | Model |
 |-------|------|------|-------|
-| **qa** | QA Engineer — writes and maintains tests, validates cross-platform behavior | medium | inherit |
-| **backend** | Backend Developer — implements Flask routes, download logic, and CLI/installer | high | inherit |
+| **pm** | Project Manager — orchestrates the team, runs quality gates, and opens the PR | high | inherit |
+| **backend** | Backend Developer — implements the core service, Flask routes, and CLI/installer | high | inherit |
 | **frontend** | Frontend Developer — implements JS logic, API wiring, and i18n in templates | medium | inherit |
-| **security** | Security Officer — read-only audit of all Python source files | high | inherit |
+| **security** | Security Officer — read-only audit of all external-input surfaces + ongoing dependency/secret monitoring | high | inherit |
+| **qa** | QA Engineer — writes and maintains tests, validates cross-platform behavior | medium | inherit |
 | **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 
 ## Skills

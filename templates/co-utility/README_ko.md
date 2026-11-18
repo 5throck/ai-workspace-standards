@@ -38,10 +38,12 @@ Standalone utility/tool application workflow — multi-interface (web UI + deskt
 
 | 에이전트 | 역할 | 티어 | 모델 |
 |---------|------|------|------|
-| **qa** | QA Engineer — writes and maintains tests, validates cross-platform behavior | medium | inherit |
-| **backend** | Backend Developer — implements Flask routes, download logic, and CLI/installer | high | inherit |
-| **frontend** | Frontend Developer — implements JS logic, API wiring, and i18n in templates | medium | inherit |
-| **security** | Security Officer — read-only audit of all Python source files | high | inherit |
+| **pm** | 프로젝트 매니저 — 팀을 오케스트레이션하고 품질 게이트를 운영하며 PR을 생성 | high | inherit |
+| **backend** | 백엔드 개발자 — 코어 서비스, Flask 라우트, CLI/설치기를 구현 | high | inherit |
+| **frontend** | 프런트엔드 개발자 — JS 로직, API 연동, 템플릿 i18n을 구현 | medium | inherit |
+| **security** | 시큐리티 오퍼서 — 외부 입력 표면 읽기 전용 감사 + 의존성/시크릿 상시 모니터링 | high | inherit |
+| **qa** | QA 엔지니어 — 테스트를 작성·유지하고 크로스플랫폼 동작을 검증 | medium | inherit |
+| **i18n-specialist** | 로케일 설정, 로케일별 포맷팅, 텍스트 레이아웃 가이던스 담당 | medium | inherit |
 | **i18n-specialist** | Owns locale configuration, locale-specific formatting, and text layout guidance | medium | inherit |
 
 ## 스킬
