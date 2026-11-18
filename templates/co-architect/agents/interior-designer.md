@@ -2,7 +2,7 @@
 name: interior-designer
 role: Interior architecture, space planning, and material finish specialist
 status: active
-version: "1.0.1"
+version: "1.0.2"
 team: design
 tier: medium
 color: magenta
@@ -23,7 +23,7 @@ required_skills: [generate-room-elevation]
 lifecycle:
   phase: production
   created: "2026-06-02"
-  last_updated: "2026-11-06"
+  last_updated: 2026-11-07
   governance: docs/lifecycle/agents/interior-designer.md
 ---
 
@@ -92,7 +92,6 @@ This ensures all work flows through the PM Gateway with proper quality gates (se
 ## Dependencies
 
 - **k-law skill**: Legislative database queries for building codes and municipal bylaws
-- **building_skill MCP server**: Compliance checking tools (egress, fire safety, accessibility)
 - **design-lead**: Receives compliance findings and incorporates them into the design direction
 - **structural-engineer**: Coordinates on load paths, framing, and structural implications of zoning compliance
 

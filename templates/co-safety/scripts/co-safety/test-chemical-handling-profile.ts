@@ -19,7 +19,7 @@
  *   T-11: Sample MSDS record has GHS 16 sections + ghs_version
  *   T-12: Reference workflow (chemical-spill-reference) has correct pattern fields
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import * as fs from 'node:fs';
@@ -158,7 +158,7 @@ console.log(`\n${CYAN}[T-09] MSDS skills existence${RESET}`);
 const expectedSkills = ['msds-parser', 'ghs-classifier', 'chemical-risk-assessment'];
 let allSkillsExist = true;
 for (const skill of expectedSkills) {
-    const skillPath = path.join(ROOT, 'skills', 'domains', 'functional', 'msds', skill, 'SKILL.md');
+    const skillPath = path.join(ROOT, 'skills', skill, 'SKILL.md');
     if (fs.existsSync(skillPath)) {
         console.log(`  ${GREEN}✓${RESET} skill '${skill}' exists`);
     } else {

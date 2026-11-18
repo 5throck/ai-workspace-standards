@@ -764,8 +764,8 @@
       "name": "bylaw-expert",
       "scope": "co-architect",
       "capability": "bylaw-expert",
-      "content_hash": "cbaf9b351e902cbd",
-      "version": "1.0.1",
+      "content_hash": "b6202edaf33e1cf8",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-architect/agents/bylaw-expert.md"
       ]
@@ -816,8 +816,8 @@
       "name": "drafting-architect",
       "scope": "co-architect",
       "capability": "drafting-architect",
-      "content_hash": "899d79727276cbc4",
-      "version": "1.0.1",
+      "content_hash": "7860efd3036dda3a",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-architect/agents/drafting-architect.md"
       ]
@@ -829,8 +829,8 @@
       "name": "interior-designer",
       "scope": "co-architect",
       "capability": "interior-designer",
-      "content_hash": "88c328497e664d92",
-      "version": "1.0.1",
+      "content_hash": "9cd9539450f35ebf",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-architect/agents/interior-designer.md"
       ]
@@ -842,8 +842,8 @@
       "name": "mep-engineer",
       "scope": "co-architect",
       "capability": "mep-engineer",
-      "content_hash": "a6b0cb8858aa2a9a",
-      "version": "1.0.1",
+      "content_hash": "e38e2c1874a816f1",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-architect/agents/mep-engineer.md"
       ]
@@ -946,8 +946,8 @@
       "name": "structural-engineer",
       "scope": "co-architect",
       "capability": "structural-engineer",
-      "content_hash": "40f331970f55a6f9",
-      "version": "1.0.1",
+      "content_hash": "496a12a28cfa820f",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-architect/agents/structural-engineer.md"
       ]
@@ -1011,8 +1011,8 @@
       "name": "visualization-expert",
       "scope": "co-architect",
       "capability": "visualization-expert",
-      "content_hash": "df50f142c0c8c7b0",
-      "version": "1.0.1",
+      "content_hash": "3a0eff945648a516",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-architect/agents/visualization-expert.md"
       ]

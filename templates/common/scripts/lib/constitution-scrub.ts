@@ -1,4 +1,4 @@
-// @version 1.3.0
+// @version 1.3.1
 /**
  * constitution-scrub.ts — shared context.md reference scrubber
  *
@@ -235,6 +235,7 @@ export function scrubConstitutionRefs(content: string, filePath?: string, target
 
   // Restore protected self-description comment blocks verbatim.
   if (protectedBlocks.length > 0) {
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: NUL sentinels are the deliberate scrub protocol
     work = work.replace(/\u0000SCRUB-KEEP-(\d+)\u0000/g, (_, i) => protectedBlocks[Number(i)]);
   }
   return work;

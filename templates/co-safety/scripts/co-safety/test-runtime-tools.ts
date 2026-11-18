@@ -32,7 +32,7 @@
  *
  * The sandbox is removed on success and preserved on failure for debugging.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 import * as fs from 'node:fs';
@@ -45,7 +45,7 @@ const CYAN = '\x1b[36m';
 const YELLOW = '\x1b[33m';
 const RESET = '\x1b[0m';
 
-const REPO = path.resolve(import.meta.dir, '..');
+const REPO = path.resolve(import.meta.dir, '..', '..'); // scripts/co-safety/ → project root (e3d1857 moved the script one level deeper)
 const SANDBOX = fs.mkdtempSync(path.join(os.tmpdir(), 'runtime-tools-test-'));
 
 const results: Array<{ test: string; pass: boolean; detail?: string }> = [];

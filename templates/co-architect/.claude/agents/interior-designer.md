@@ -72,7 +72,6 @@ This ensures all work flows through the PM Gateway with proper quality gates (se
 ## Dependencies
 
 - **k-law skill**: Legislative database queries for building codes and municipal bylaws
-- **building_skill MCP server**: Compliance checking tools (egress, fire safety, accessibility)
 - **design-lead**: Receives compliance findings and incorporates them into the design direction
 - **structural-engineer**: Coordinates on load paths, framing, and structural implications of zoning compliance
 

@@ -6,12 +6,29 @@ title: >-
   drift / PROJECT_AHEAD families) — adjudicate per sync-overwrite-policy §6,
   then re-run wave
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-19T03:24:35.362+09:00'
 history:
   - at: '2026-11-19T03:24:35.362+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-19T06:51:14.056+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-19T06:51:14.079+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-19T06:51:14.099+09:00'
+    from: review
+    to: done
+result: >-
+  adjudicated per §6 and wave resumed: dev-sync.ts adopt-template 1.52.0 (core
+  standardization); phase-definitions adopt-template (4-phase workspace
+  standard); 4 test files ported project->template (template copies referenced
+  nonexistent domains/ layout); docs/context.md aligned to current common
+  standard. Delivered and merged co-safety#237 with ALL 9 real CI checks green
+  (no billing wall this time). Memory tombstone provenance repaired (3 union
+  debts cleared; MEMORY.md row fixes ride next landing). PROJECT_AHEAD WARN rows
+  remain backport candidates.
 error: null

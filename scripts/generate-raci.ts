@@ -31,7 +31,7 @@
  *   - Sets schema_version: "1.1" only for variants shipping _human-roles.yaml
  *
  * @usage bun scripts/generate-raci.ts [--variant co-consult|all] [--root <dir>] [--write]
- * @version 1.2.0
+ * @version 1.2.1
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
@@ -332,9 +332,15 @@ function generateMatrix(
       const actorTypes: Record<string, "human" | "agent"> = {};
       const allAgents = new Set<string>();
       allAgents.add(accountable);
-      responsible.forEach((a) => allAgents.add(a));
-      row.consulted?.forEach((a) => allAgents.add(a));
-      row.informed?.forEach((a) => allAgents.add(a));
+      responsible.forEach((a) => {
+        allAgents.add(a);
+      });
+      row.consulted?.forEach((a) => {
+        allAgents.add(a);
+      });
+      row.informed?.forEach((a) => {
+        allAgents.add(a);
+      });
 
       for (const agent of allAgents) {
         const type = resolveActorType(agent, humanRoles, root);

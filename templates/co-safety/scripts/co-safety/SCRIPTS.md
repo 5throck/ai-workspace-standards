@@ -19,11 +19,11 @@
 | `safety-audit.ts` | 4.10.1 | co-safety full compliance audit (legal_basis, schemas, evidence) |
 | `scaffold-industry.ts` | 0.1.1 | Scaffold an industry workflow/skill/evidence set |
 | `start-mcp.ts` | 1.0.1 | Start the co-safety MCP servers — v1.0.1: servers list emptied to a documented scaffold extension point (the mcp/ dir ships empty; the previously spawned mcp/kr-safety-regs entry point never shipped) |
-| `test-chemical-handling-profile.ts` | 1.0.0 | Chemical handling profile test suite |
-| `test-cross-domain-integration.ts` | 1.0.0 | Cross-domain integration test suite |
+| `test-chemical-handling-profile.ts` | 1.0.1 | Chemical handling profile test suite |
+| `test-cross-domain-integration.ts` | 1.0.1 | Cross-domain integration test suite |
 | `test-domain-scenarios.ts` | 1.1.0 | Domain scenario test suite |
-| `test-pharma-general-profile.ts` | 1.0.0 | Pharma general profile test suite |
-| `test-runtime-tools.ts` | 1.0.0 | Runtime tools test suite |
+| `test-pharma-general-profile.ts` | 1.0.1 | Pharma general profile test suite |
+| `test-runtime-tools.ts` | 1.0.1 | Runtime tools test suite |
 | `training-ingest.ts` | 1.0.0 | Training record CSV ingestion → TRAIN-* JSON |
 
 ## Internal Libraries (`lib/`)

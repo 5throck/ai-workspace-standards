@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.2.1
 // v1.2.0 (2026-10-28, design
 //         docs/designs/2026-10-28-instruction-ownership-backport-hardening-design.md
 //         D3/D2): the ADR-0101 skeleton registry widens to ALL FIVE instruction
@@ -233,7 +233,7 @@ function isHeadingLine(trimmed: string): boolean {
 
 /** ATX level of a heading line (1–6), else 0. */
 export function headingLevel(line: string): number {
-  return line.match(/^\s*(#{1,6})\s/)?.[1]!.length ?? 0;
+  return line.match(/^\s*(#{1,6})\s/)?.[1]?.length ?? 0;
 }
 
 /** True when the (trimmed) line is a single-line HTML comment opener. */
