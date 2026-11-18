@@ -216,7 +216,12 @@ describe('runExternalDepsPass channel 2c — pass-level seed-id adoption (design
     };
     expect(manifest.schema_version).toBe(2);
     expect(manifest.dependencies.map((d) => d['id'])).toEqual(['quickdl']);
-    expect(manifest.dependencies[0]['pin']).toBe('v1.0.0');
+    // Assert against the LIVE template seed's pin (not a hard-coded value) so
+    // compat-gated seed pin moves (issue #2096 class) never stale this test.
+    const seedPin = JSON.parse(
+      readFileSync(join(workspaceRoot, 'templates', 'co-deck', 'external-deps.json'), 'utf8'),
+    ).dependencies[0]['pin'];
+    expect(manifest.dependencies[0]['pin']).toBe(seedPin);
     expect(manifest.dependencies[0]['license']).toBe('MIT');
     expect(manifest.dependencies[0]['usage']).toBe('as-is');
     const gitignore = readFileSync(join(tmp, '.gitignore'), 'utf8');

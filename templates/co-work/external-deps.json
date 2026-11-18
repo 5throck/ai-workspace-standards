@@ -41,8 +41,8 @@
     {
       "id": "im-not-ai",
       "repo": "https://github.com/epoko77-ai/im-not-ai",
-      "pin": "v2.4.5",
-      "commit": "f37b616c4878b278423ba0f015e7a8f596791fb2",
+      "pin": "v2.4.7",
+      "commit": "c07df14d9f68da482ff5183591808a7d132d4a71",
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
       "install_dir": "external/im-not-ai",
       "consumer": "humanize-monolith agent family + rulebook (scripts/humanize/humanize-adapter.ts)",

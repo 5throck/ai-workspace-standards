@@ -5,8 +5,8 @@
     {
       "id": "quickdl",
       "repo": "https://github.com/5throck/QuickDL",
-      "pin": "v1.0.0",
-      "commit": "228044a34fbe11b9e89a765fa80bcc8f0d299cbb",
+      "pin": "v1.0.1",
+      "commit": "57e4fe78f1a21b31ebac93b42ae27708f0ad73ed",
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
       "install_dir": "external/quickdl",
       "consumer": "Offline deck video fetch (scripts/co-deck/download-videos.ts → deliverables/assets/videos/yt-<id>.mp4)",
