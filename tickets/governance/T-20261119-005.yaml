@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261119-005
+kind: manual
+title: >-
+  systemic (fleet-wide): delivered SKILL.md versions run ahead of
+  docs/lifecycle/skills records (template-side record maintenance gap) — 12
+  records realigned in co-consult, 3 in co-abap tonight; root-cause the template
+  record update path so SKILL.md version bumps carry their lifecycle-record bump
+  in the same delivery (also surfaced: project spec registries lack the standing
+  fleet-resync spec seeds, forcing E5 on pure sync deliveries; and upgrade
+  enumeration delivers templates/<variant>/scripts/<subdir>/ copies without
+  SCRIPTS.md rows — humanize-adapter needed the deck precedent row in co-work)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-19T03:24:42.746+09:00'
+history:
+  - at: '2026-11-19T03:24:42.746+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

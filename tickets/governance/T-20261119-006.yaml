@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261119-006
+kind: manual
+title: >-
+  decision needed (protected-path policy): 2026-11-19 wave delivery applied
+  .githooks/commit-msg and .github/workflows/ci.yml updates to fleet projects
+  despite LOCKED classification in the same upgrade run — runner discarded both
+  per protected-paths HOLD rule in co-abap/co-consult/co-develop; ruling needed
+  on whether hook/workflow parity delivery is a sanctioned channel (then
+  un-LOCK) or stays human-only (then the LOCK must actually block the apply
+  path)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-19T03:24:42.815+09:00'
+history:
+  - at: '2026-11-19T03:24:42.815+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

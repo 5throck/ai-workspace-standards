@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: T-20261119-003
+kind: manual
+title: >-
+  upgrade blocked (co-safety): dry-run 11 DELIVERY CONFLICT rows (equal-version
+  drift / PROJECT_AHEAD families) — adjudicate per sync-overwrite-policy §6,
+  then re-run wave
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-19T03:24:35.362+09:00'
+history:
+  - at: '2026-11-19T03:24:35.362+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
