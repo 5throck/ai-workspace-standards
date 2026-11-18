@@ -70,7 +70,9 @@ describe('dev-sync hunk-adjudicated staging (T-20261117-015)', () => {
   });
 
   test('T8: version header bumped with the spec reference', () => {
-    expect(src).toMatch(/@version 1\.51\.0/);
+    expect(src).toMatch(/@version 1\.52\.0/);
+    // the v1.51.0 spec reference survives the T-20261118-003 bump alongside it
     expect(src).toMatch(/2026-11-18-dev-sync-hunk-staging-design\.md/);
+    expect(src).toMatch(/2026-11-18-memory-gate-step2-deadlock-design\.md/);
   });
 });

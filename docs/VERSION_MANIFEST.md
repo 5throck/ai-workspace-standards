@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-17T23:37:04.178Z
+**Generated**: 2026-11-18T00:43:22.147Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -130,7 +130,7 @@
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
 | detect-backport.ts | 1.0.0 | scripts/detect-backport.ts | child_process, crypto, fs, path |
-| dev-sync.ts | 1.51.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| dev-sync.ts | 1.52.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |

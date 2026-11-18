@@ -205,6 +205,16 @@ function buildMemoryDriver(block: string): string {
     `const DIM = '\\x1b[2m';`,
     `const RESET = '\\x1b[0m';`,
     `const msg = process.env.DRIVER_MSG || 'test: default subject';`,
+    // T-20261118-003: the step-2 replace path consults the union gate's debt
+    // inventory (owedBlocks) and classifies segments with parseBlocks — both
+    // free variables the verbatim block references. The namespace fallback
+    // keeps the harness EXECUTABLE against pre-1.5.0 helpers (the DL-T1 RED
+    // run slices the pre-fix block, which never calls owedBlocks); post-fix a
+    // wiring regression that drops the export turns DL-T1/T3/T4 red on
+    // content, not on import errors.
+    `import * as __unionVerify from ${JSON.stringify(unionVerifyPath)};`,
+    `const parseBlocks = __unionVerify.parseBlocks;`,
+    `const owedBlocks = (__unionVerify as any).owedBlocks ?? (() => []);`,
     '',
     '// ── verbatim dev-sync step-2 memory block below ──',
     block,
@@ -498,5 +508,197 @@ describe('dev-sync 1.50.0 B2: branch-keyed session-block replace (step-2 memory 
     expect(content).toContain('- skill: sync');
     expect(content).toContain('run two');
     expect(content).not.toContain('run one');
+  });
+});
+
+// ── DL tests: step-2 sparing of union-gate-owed blocks (T-20261118-003) ───────
+//
+// Spec docs/designs/2026-11-18-memory-gate-step2-deadlock-design.md §4.2. The
+// T-20261118-003 deadlock: step 3.88's restore guidance and step 2's
+// branch-keyed replace fought over the same `branch=main` marker namespace —
+// every restored gate-owed block was re-collapsed by the next run's step 2
+// before the gate could credit the repair. Fix: the replace path spares
+// segments the gate still owes (owedBlocks debt inventory), replaces only the
+// first NON-owed segment, collapses further non-owed strays, and falls through
+// to append when every same-branch segment is owed.
+//
+// DL-T1 is the full reproduction (RED against pre-fix code, GREEN post-fix);
+// DL-T2..T4 pin the invariants around the exception.
+
+describe('dev-sync 1.52.0 DL: step-2 sparing of union-gate-owed blocks (step-2 memory block)', () => {
+  const MAIN_MARKER_RE = /<!-- dev-sync:session branch=main -->/g;
+
+  /** Scratch repo pinned to branch `main` (the deadlock's landing branch). */
+  function makeMainRepo(name: string): ScratchRepo {
+    const repo = makeScratchRepo(name);
+    fs.writeFileSync(path.join(repo.root, 'base.txt'), 'x\n');
+    repo.run(['add', '.']);
+    repo.run(['commit', '-qm', 'init']);
+    repo.run(['checkout', '-qb', 'main']);
+    return repo;
+  }
+
+  /** One production-shape session block (marker + the four sections). */
+  function sessionBlock(branch: string, subject: string, skills = ''): string {
+    return [
+      `<!-- dev-sync:session branch=${branch} -->`,
+      '## Session Summary',
+      subject,
+      '',
+      '## Changes',
+      '- N/A',
+      '',
+      '## Decisions',
+      '- None',
+      '',
+      '## Open Issues',
+      '- None',
+      skills,
+    ].join('\n');
+  }
+
+  function dayLogPath(repo: ScratchRepo): string {
+    return path.join(repo.root, 'memory', `${localDate()}.md`);
+  }
+
+  /**
+   * The T-20261118-003 merge shape: `main` commits a branch=main session block
+   * plus a second block; `fix/x` deletes the main block; the --no-ff merge
+   * back takes the deletion (ours unchanged since the base) → the merge blob
+   * drops a block a parent owes. Returns { ours, theirs } blob contents for
+   * the repairedAtHead / unionScan assertions.
+   */
+  function makeDroppingMergeRepo(name: string, owed: string, other: string): { repo: ScratchRepo; ours: string; theirs: string } {
+    const repo = makeMainRepo(name);
+    fs.mkdirSync(path.join(repo.root, 'memory'));
+    fs.writeFileSync(dayLogPath(repo), `${owed}\n---\n${other}\n`);
+    repo.run(['add', '-A']);
+    repo.run(['commit', '-qm', 'base']);
+    repo.run(['checkout', '-qb', 'fix/x']);
+    fs.writeFileSync(dayLogPath(repo), `${other}\n`);
+    repo.run(['add', '-A']);
+    repo.run(['commit', '-qm', 'fix/x deletes the main session block']);
+    repo.run(['checkout', '-q', 'main']);
+    expect(repo.run(['merge', '--no-ff', '-m', 'merge fix/x (drops the main block)', 'fix/x']).exitCode).toBe(0);
+    const blob = (rev: string): string => {
+      const p = Bun.spawnSync(['git', 'show', `${rev}:memory/${localDate()}.md`], {
+        cwd: repo.root,
+        stdout: 'pipe',
+        stderr: 'pipe',
+      });
+      return p.stdout.toString();
+    };
+    const ours = blob('HEAD^1');
+    const theirs = blob('HEAD^2');
+    expect(blob('HEAD').includes(owed)).toBe(false); // the merge really dropped it
+    return { repo, ours, theirs };
+  }
+
+  test('DL-T1: restored gate-owed block survives the replace; repairedAtHead credits it; gate tiers repaired-at-head', async () => {
+    const owed = sessionBlock('main', 'chore: owed main session');
+    const other = sessionBlock('feature/other', 'chore: other branch session');
+    const { repo, ours, theirs } = makeDroppingMergeRepo('dlt1', owed, other);
+    // the guidance-prescribed repair: restore the owed block verbatim as a
+    // separate '---'-delimited block in the working tree, then re-run /sync
+    fs.writeFileSync(dayLogPath(repo), `${other}\n---\n${owed}\n`);
+
+    const result = runMemoryDriver(repo, 'chore: fresh sync run subject');
+    expect(result.exitCode).toBe(0);
+
+    const content = readDayLog(repo);
+    // B_owed still present verbatim — NOT replaced, NOT collapsed
+    expect(content.includes(owed)).toBe(true);
+    // exactly one fresh main block written (restored + fresh = 2 markers)
+    expect((content.match(MAIN_MARKER_RE) ?? []).length).toBe(2);
+    expect(content.split('chore: fresh sync run subject').length - 1).toBe(1);
+    // the single same-branch segment is owed → all-owed fall-through appended
+    // the fresh block (the sparing DIM line itself is DL-T3's pin, where a
+    // spared segment coexists with a replaced draft)
+    expect(result.stdout).toContain("union-gate-owed — appending a fresh block");
+
+    // the full no-deadlock chain, end-to-end: the restored block satisfies the
+    // repair predicate and the gate tiers the group repaired-at-head
+    const { repairedAtHead, unionScan, verifyWellFormed } = await import(unionVerifyPath);
+    expect(verifyWellFormed({ file: 'day.md', content })).toEqual([]);
+    expect(repairedAtHead({ ours, theirs, head: content })).toBe(true);
+    const scan = unionScan({ sinceDays: 365, maxCommits: 20, activationIso: '2000-01-01T00:00:00+00:00', cwd: repo.root });
+    expect(scan).toHaveLength(1);
+    expect(scan[0].tier).toBe('repaired-at-head');
+    expect(scan[0].findings.some((f) => f.kind === 'dropped-block')).toBe(true);
+  });
+
+  test('DL-T2 (invariant pin): two non-owed same-branch segments still collapse to one fresh block', () => {
+    const repo = makeMainRepo('dlt2');
+    fs.mkdirSync(path.join(repo.root, 'memory'));
+    const stale1 = sessionBlock('main', 'chore: stale draft one');
+    const stale2 = sessionBlock('main', 'chore: stale draft two');
+    fs.writeFileSync(dayLogPath(repo), `${stale1}\n---\n${stale2}\n`);
+    // plain commit only — no memory merges → the gate owes nothing
+    repo.run(['add', '-A']);
+    repo.run(['commit', '-qm', 'base']);
+
+    const result = runMemoryDriver(repo, 'chore: fresh sync run subject');
+    expect(result.exitCode).toBe(0);
+
+    const content = readDayLog(repo);
+    expect((content.match(MAIN_MARKER_RE) ?? []).length).toBe(1);
+    expect(countHeadings(content, '## Session Summary')).toBe(1);
+    expect(content).toContain('chore: fresh sync run subject');
+    expect(content).not.toContain('stale draft one');
+    expect(content).not.toContain('stale draft two');
+    expect(result.stdout).toContain('collapsed 1 stray(s)');
+    expect(result.stdout).toContain('spared 0 union-owed');
+  });
+
+  test('DL-T3 (mixed): owed segment spared, stale draft replaced, skills carried from the REPLACED segment', () => {
+    const owed = sessionBlock('main', 'chore: owed main session');
+    const other = sessionBlock('feature/other', 'chore: other branch session');
+    const filled = '\n## Skills Used\n- skill: sync\n  usage: primary\n  outcome: completed\n';
+    const stale = sessionBlock('main', 'chore: stale draft from a failed run', filled);
+    const { repo } = makeDroppingMergeRepo('dlt3', owed, other);
+    // worktree: merge content + owed restored + a stale same-branch draft.
+    // The owed segment comes FIRST in file order — the pre-fix code keyed the
+    // skills carry-forward on the first marker match, so this ordering also
+    // discriminates the carry-forward keying.
+    fs.writeFileSync(dayLogPath(repo), `${other}\n---\n${owed}\n---\n${stale}\n`);
+
+    const result = runMemoryDriver(repo, 'chore: fresh sync run subject');
+    expect(result.exitCode).toBe(0);
+
+    const content = readDayLog(repo);
+    expect(content.includes(owed)).toBe(true); // spared
+    expect(content).not.toContain('chore: stale draft from a failed run'); // replaced
+    expect(content.split('chore: fresh sync run subject').length - 1).toBe(1);
+    expect((content.match(MAIN_MARKER_RE) ?? []).length).toBe(2); // owed + fresh
+    // skills carry-forward taken from the replaced (non-owed) draft
+    expect(content.split('- skill: sync').length - 1).toBe(1);
+    expect(content).toContain('outcome: completed');
+    expect(result.stdout).toContain("spared union-gate-owed block for branch 'main'");
+    expect(result.stdout).toContain('replaced 1 / collapsed 0 stray(s) / spared 1 union-owed');
+  });
+
+  test('DL-T4 (all-owed): every same-branch segment owed → append-path fall-through, nothing destroyed', async () => {
+    const owed = sessionBlock('main', 'chore: owed main session');
+    const other = sessionBlock('feature/other', 'chore: other branch session');
+    const { repo, ours, theirs } = makeDroppingMergeRepo('dlt4', owed, other);
+    fs.writeFileSync(dayLogPath(repo), `${other}\n---\n${owed}\n`);
+
+    const result = runMemoryDriver(repo, 'chore: fresh sync run subject');
+    expect(result.exitCode).toBe(0);
+
+    // the replace path never ran — the fall-through logged the append
+    expect(result.stdout).not.toContain('replaced the dev-sync block');
+    expect(result.stdout).toContain('union-gate-owed — appending a fresh block');
+    const content = readDayLog(repo);
+    expect(content.includes(owed)).toBe(true); // nothing destroyed
+    expect(content.split('chore: fresh sync run subject').length - 1).toBe(1); // fresh appended
+    expect((content.match(MAIN_MARKER_RE) ?? []).length).toBe(2);
+    expect(countHeadings(content, '## Session Summary')).toBe(3); // other + owed + fresh
+    // the append path's `## Skills Used` rule applies: neither prior block
+    // carries the section → the skeleton lands in the fresh block
+    expect(countHeadings(content, '## Skills Used')).toBe(1);
+    // and the gate still credits the untouched restoration
+    const { repairedAtHead } = await import(unionVerifyPath);
+    expect(repairedAtHead({ ours, theirs, head: content })).toBe(true);
   });
 });

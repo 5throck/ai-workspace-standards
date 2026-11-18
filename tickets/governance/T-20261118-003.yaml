@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261118-003
+kind: manual
+title: >-
+  memory union-verify vs dev-sync step 2 deadlock on branch=main sessions:
+  when a session block's branch is `main` (root syncs landing directly on
+  main), the gate's restore-in-working-tree guidance deadlocks — dev-sync
+  step 2's one-block-per-branch-per-day rule re-collapses restored
+  `branch=main` blocks on every re-run, so each /sync attempt re-FATALs at
+  step 3.88. Evidence (2026-11-18, issue #2069 pin-move flow): merges
+  41d725f9 / 71e87cc9 fused the _bgpool session block into the
+  trail-learnings block; the first two /sync attempts FATALed; fixed only by
+  running the sync on a PR branch (step 2 then plain-appends instead of
+  collapsing) with the log restored to HEAD (which already carried all owed
+  blocks) — a workaround, not a fix. Expected: design the interaction —
+  either step 2's replace semantics gains an exception for blocks the gate
+  owes (never collapse a block that satisfies an owed union-verify finding),
+  or the gate's repair guidance routes branch=main sessions to a
+  PR-branch-first recipe explicitly. Needs Design Gate (dev-sync L1 core +
+  memory-union-verify helper both involved). Discovered in the #2069 pin-move
+  landing; follow-up candidates also noted there: same-class
+  repair-recipe-vs-archival interplay documented in T-20261117-008's fix.
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-18T00:00:00.000+09:00
+history:
+  - at: 2026-11-18T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null
