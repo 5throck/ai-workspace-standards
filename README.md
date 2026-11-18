@@ -1,6 +1,6 @@
 ---
 sync_version: 4
-content_hash: add2d95a5d5f4a3f9a00fdbdf5a6a78e801f05eb3cf00788fcd769b489e69c1f
+content_hash: b8bb7cfcc199482da0592c3abe371f081e9560bdcba81bfeab603294dcd4afa3
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -288,6 +288,7 @@ Each template variant in this workspace provides a highly optimized, specialized
 
 - **co-develop**: A 6-phase linear governance pipeline for software development and verification
 - **co-learning**: Learning and assessment workflow — bias-audited question-bank authoring, remediation ledger review, and exam operations (beta; derived from co-develop)
+- **co-utility**: Standalone utility/tool application workflow — multi-interface (web UI + desktop shell + CLI) apps sharing one core service, with runtime-output isolation, locale-matrix i18n, and external-input security audits (beta; doctrine from the QuickDL engagement)
 - **co-design**: A 5-phase iterative design-native workflow focused on rapid prototyping and continuous user validation
 - **co-work**: A 6-phase asynchronous collaboration workflow focused on parallel drafting and continuous stakeholder review
 - **co-security**: A 6-phase security engagement workflow covering Red Team ops, threat modeling, and Ansible-based patch automation
@@ -411,4 +412,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-02*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-19*

@@ -225,3 +225,4 @@ Skills registered in the catalog but without a `skills/<name>/` directory in the
 | `zwcad-ai-drawing` | 1.3.0 | active | zwcad-drafter | 2026-09-09 | — | co-architect only |
 | `security-audit` | 1.1.0 | active | security-expert | 2026-11-07 | — | co-security only |
 | `i18n-layout` | 1.1.2 | active | i18n-specialist | 2026-11-13 | — | co-work only |
+| `post-write-check` | 1.0.0 | active | qa | 2026-11-19 | — | co-utility only |

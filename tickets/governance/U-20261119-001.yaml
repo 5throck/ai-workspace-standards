@@ -1,0 +1,46 @@
+schemaVersion: 1
+id: U-20261119-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-19T02:09:00.962+09:00
+history:
+  - at: 2026-11-19T02:09:00.962+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'dev-sync step 3.8 (archive-memory.ts) moves memory/*.md files older than 7 days into memory/archive/, but the template .gitignore excludes memory/archive/ ("local preservation only"). For a tracked memory file this deletes it from the repository, and any docs/decisions/DEC-*.md whose frontmatter knowledge_refs references the live path then fails validate-decisions (step 3.96b) with "knowledge_refs path ... does not exist" — on every machine and on every future run, because the archive copy is untracked and a fresh clone has neither path. The validator (validate-decisions.ts) already has a special-case resolution for archived governance tickets (tickets/governance/archive/<id>.yaml) but no equivalent for memory files. Observed today on co-newbiz: DEC-20261110-01 and DEC-20261111-02 blocked the pipeline after step 3.8 archived memory/2026-11-11.md and two meeting-*.md files.'
+  affected_paths:
+    - memory/archive
+    - .gitignore
+    - scripts/archive-memory.ts
+    - scripts/validate-decisions.ts
+  identity_source: cwd
+  repro: |-
+    1. In a project scaffolded from the template, accumulate memory files dated more than 7 days ago (e.g. memory/2026-11-11.md) and a docs/decisions/DEC-*.md whose frontmatter knowledge_refs references that memory file.
+    2. Run the dev-sync pipeline (bun scripts/dev-sync.ts). Step 3.8 (archive-memory.ts) moves the memory file from memory/<name>.md to memory/archive/<name>.md.
+    3. memory/archive/ is excluded by the template's .gitignore ("memory/archive/ — local preservation only"), so the move deletes the tracked file from the repository while leaving only an untracked local copy.
+    4. Step 3.96b (validate-decisions.ts) then reports: knowledge_refs path "memory/<name>.md" does not exist — the live path is gone and the validator only resolves the tickets/governance archive pattern, not memory/archive. On a fresh clone both paths are missing, so every future dev-sync run fails at the gate until the DEC reference is hand-edited.
+    5. Same breakage class for DEC records referencing memory/meeting-*.md files once their mtime exceeds 7 days (archive-memory.ts falls back to mtime for non-dated names).
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: memory/archive'
+    - info:in_last_delivery memory/archive=false
+    - info:in_last_delivery .gitignore=false
+    - info:in_last_delivery scripts/archive-memory.ts=false
+    - info:in_last_delivery scripts/validate-decisions.ts=false
+  dedupe_key: 79e3e19d74148a4540b2f4fa3799440f09297249910832635e15481e0582135b
+  duplicates:
+    - project: co-newbiz
+      at: 2026-11-19T02:09:00.962+09:00

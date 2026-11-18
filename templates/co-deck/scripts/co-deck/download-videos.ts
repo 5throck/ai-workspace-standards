@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-19): QuickDL restructured to a src/ layout (src/cli.py +
+// src/locales + src/templates; root keeps requirements.txt/.venv) — resolve and
+// selftest accept BOTH layouts: root cli.py (pin v1.0.x) or src/cli.py (v1.1.0+).
 // v1.1.0 (2026-11-16, spec docs/designs/2026-11-16-quickdl-external-design.md): QuickDL becomes a declared external (templates/co-deck/external-deps.json, id `quickdl`, pin v1.0.0, MIT) and this script is its single adapter — resolution order --quickdl-dir > CDK_QUICKDL_DIR > <project root>/external/quickdl > legacy ~/git/project/QuickDL; python from <dir>/.venv or CDK_QUICKDL_PYTHON; downloads staged in an OS temp dir (the clone is never written to); new `selftest` mode for the manifest compatibility_test.
 // v1.0.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 // download-videos.ts — offline video fetch for lecture decks (U-20261105-007).
@@ -68,7 +71,7 @@ function resolveQuickdlDir(): string {
   if (argValue('--quickdl-dir')) return resolve(workspaceRoot, argValue('--quickdl-dir')!);
   if (process.env.CDK_QUICKDL_DIR) return resolve(process.env.CDK_QUICKDL_DIR);
   const external = join(workspaceRoot, 'external', 'quickdl');
-  if (existsSync(join(external, 'cli.py'))) return external;
+  if (existsSync(join(external, 'cli.py')) || existsSync(join(external, 'src', 'cli.py'))) return external;
   return join(homedir(), 'git', 'project', 'QuickDL');
 }
 function resolveQuickdlPython(dir: string): string {
@@ -80,7 +83,8 @@ function resolveQuickdlPython(dir: string): string {
 if (process.argv[2] === 'selftest') {
   const dir = resolveQuickdlDir();
   const problems: string[] = [];
-  if (!existsSync(join(dir, 'cli.py'))) problems.push('cli.py missing');
+  const cliPath = join(dir, 'src', 'cli.py');
+  if (!existsSync(cliPath) && !existsSync(join(dir, 'cli.py'))) problems.push('cli.py missing (checked root and src/)');
   if (!existsSync(join(dir, 'requirements.txt'))) problems.push('requirements.txt missing');
   const lic = join(dir, 'LICENSE');
   if (!existsSync(lic) || !readFileSync(lic, 'utf-8').startsWith('MIT License')) problems.push('LICENSE is not MIT');
@@ -150,7 +154,9 @@ if (pending.length === 0) {
 // ── QuickDL resolution ────────────────────────────────────────────────────────
 const quickdlDir = resolveQuickdlDir();
 const quickdlPython = resolveQuickdlPython(quickdlDir);
-const quickdlCli = join(quickdlDir, 'cli.py');
+const quickdlCli = existsSync(join(quickdlDir, 'src', 'cli.py'))
+  ? join(quickdlDir, 'src', 'cli.py')
+  : join(quickdlDir, 'cli.py');
 
 if (!existsSync(quickdlPython) || !existsSync(quickdlCli)) {
   console.error(`download-videos: QuickDL not found at ${quickdlDir} (need cli.py + a python with its requirements).`);

@@ -1,5 +1,8 @@
 // scripts/helpers/registries/promotion-policy.ts
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-11-19): utility policy added alongside the variant-type registry
+//          entry (QuickDL-derived co-utility beta) — mirrors learning's
+//          maturity-only posture (2 engagements / 2 beta months).
 // v1.2.1: architect-review flag resolved (T-20260910-007) — safety values approved
 //         as-is, rationale recorded in the entry comment; comment-only, no behavior change.
 // v1.2.0: safety entry added (mirrors abap-development) — d0ddc17f registered the
@@ -73,6 +76,10 @@ export const PROMOTION_POLICIES = {
     minBetaMonths: 2,
   },
   learning: {
+    minEngagements: 2,
+    minBetaMonths: 2,
+  },
+  utility: {
     minEngagements: 2,
     minBetaMonths: 2,
   },

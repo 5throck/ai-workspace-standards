@@ -10,12 +10,26 @@ title: >-
   docs/fleet-membership.json exclusions (DEC-20261107-01 mechanical derivation
   stays authoritative)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-19T03:32:43.752+09:00'
 history:
   - at: '2026-11-19T03:32:43.752+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-19T04:28:15.797+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-19T04:28:15.816+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-19T04:28:25.748+09:00'
+    from: review
+    to: done
+result: >-
+  resolved by deletion: both root-mirror husk dirs (Projects/co-deck-worktrees,
+  co-newbiz-worktrees) removed 2026-11-19 ~04:4x KST — verified empty
+  (rmdir-only removal), fleet-list now derives 16 projects with no worktree
+  entries, so membership exclusions are unnecessary. 83MB .wip-backups snapshots
+  are intentional user data, kept.
 error: null
