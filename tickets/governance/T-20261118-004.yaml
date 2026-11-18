@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261118-004
+kind: manual
+title: >-
+  resync-audit RETENTION-PRUNE verdict class: dev-sync's own memory-retention
+  prune deletions (memory/<date>.md removed by retention policy, MEMORY.md
+  de-linked in the same tree) currently force manual adjudication every cycle
+  — the audit's KEEP verdict requires a human to confirm each deletion is the
+  retention prune (2026-11-18 co-export/co-price landings: 3 deletions each
+  adjudicated manually; corroborated via MEMORY.md de-linking in the same
+  tree). Expected: a dedicated RETENTION-PRUNE verdict class — corroborated
+  when the working-tree MEMORY.md no longer links the deleted date AND the
+  deletion set matches the retention policy window — so the recurring noise
+  disappears without weakening the KEEP safety net for genuine unknown
+  deletions. Discovered in the 2026-11-18 co-export/co-price fleet landings
+  (fleet-sweep observation; agent report). Design-lite (verdict enum +
+  corroboration rule + tests); resync-audit.ts is workspace-side.
+priority: low
+status: backlog
+attempts: 0
+created_at: 2026-11-18T00:00:00.000+09:00
+history:
+  - at: 2026-11-18T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null

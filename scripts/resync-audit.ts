@@ -2,7 +2,33 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.10.0
+ * @version 1.11.0
+ *
+ * v1.11.0 (2026-11-18, T-20261118-004, spec
+ *          docs/designs/2026-11-18-resync-audit-retention-prune-design.md):
+ *          new RETENTION-PRUNE verdict — dev-sync's own memory-retention
+ *          prune (step 3.8 → scripts/archive-memory.ts) moves flat memory
+ *          logs older than 7 days into the gitignored memory/archive/ and
+ *          tombstones their memory/MEMORY.md rows in the same run, so the
+ *          tracked memory/<date>.md surfaces in git status as a DELETION
+ *          with its index row de-linked. That deletion used to land in the
+ *          bare KEEP branch ("deleted in working tree — restore or commit"),
+ *          forcing a human to re-confirm the pipeline's own settled action
+ *          every cycle (the 2026-11-18 co-export/co-price landings: 3+
+ *          adjudications each). classify()'s deleted-file ladder gains a
+ *          corroborated branch: the verdict fires ONLY when (a) the deleted
+ *          path matches the archive-memory selection shape MIRRORED from
+ *          scripts/archive-memory.ts (flat memory/<name>.md, not MEMORY.md;
+ *          date-named logs additionally outside the strict >7-day window —
+ *          non-date logs corroborated by the rename destination
+ *          memory/archive/<name> existing, the only post-deletion observable
+ *          of the mtime rule) AND (b) the working-tree memory/MEMORY.md no
+ *          longer links the deleted target (the in-tree corroboration).
+ *          Every corroboration failure — still-linked index, in-window date,
+ *          unknown shape, unreadable index — stays on the bare KEEP safety
+ *          net, unchanged. archive-memory.ts itself is NOT modified (the
+ *          selection rule is mirrored, not shared; the coupling point is
+ *          documented in the design §5-R3).
  *
  * v1.10.0 (2026-11-18, T-20261117-010): merge-delivered files are never
  *          auto-discarded on content-equality. A file whose upgrade claim is
@@ -178,13 +204,20 @@ import { spawnSync } from "node:child_process";
 import { exclusionNotice, listFleetProjects, listTenantLoopProjects, tenantForProjectPath } from "./lib/fleet.ts";
 import { resolveClaim } from "./lib/upgrade-policy.ts";
 
-const VERSION = "1.10.0";
+const VERSION = "1.11.0";
 
 interface FileRow {
   file: string;
   state: "modified" | "untracked" | "tombstoned";
   mtime: string;
-  verdict: "STALE-RESIDUE" | "PRESUME-STALE" | "LOCAL-WORK" | "KEEP" | "TOMBSTONE-UNCONFIRMED" | "TOMBSTONE-VIOLATION";
+  verdict:
+    | "STALE-RESIDUE"
+    | "PRESUME-STALE"
+    | "LOCAL-WORK"
+    | "KEEP"
+    | "RETENTION-PRUNE"
+    | "TOMBSTONE-UNCONFIRMED"
+    | "TOMBSTONE-VIOLATION";
   basis: string;
 }
 
@@ -564,6 +597,89 @@ export function corroboratedStale(
 }
 
 /**
+ * Retention-prune corroboration (v1.11.0, T-20261118-004 — spec
+ * docs/designs/2026-11-18-resync-audit-retention-prune-design.md).
+ *
+ * dev-sync step 3.8 runs scripts/archive-memory.ts, which MOVES flat memory
+ * logs older than 7 days into the gitignored memory/archive/ and tombstones
+ * their memory/MEMORY.md rows in the same run. In variant projects the move
+ * surfaces in git status as a deletion of the tracked log plus an index
+ * de-link — the pipeline's own settled action, previously forced through
+ * manual KEEP adjudication every cycle.
+ *
+ * The selection rule here is MIRRORED from scripts/archive-memory.ts (NOT
+ * shared — archive-memory is template-delivered and out of scope; the
+ * coupling point is design §5-R3):
+ *   - selection shape: flat single-segment `memory/<name>.md`, `.md` suffix,
+ *     name ≠ MEMORY.md (the prune explicitly skips the index);
+ *   - window: date-named logs (`YYYY-MM-DD.md`) are dated by their filename,
+ *     archived iff (today local midnight − fileDate)/86400000 > 7 — the same
+ *     arithmetic, NaN-safety included; non-date logs key on mtime, which is
+ *     unreadable post-deletion, so the only post-deletion observable of the
+ *     same rule is the rename destination `memory/archive/<name>` existing;
+ *   - corroboration: the working-tree memory/MEMORY.md exists, is readable,
+ *     and no longer links the deleted target (date rows tombstone
+ *     `[date](date.md)` → plain date; other links → `*(archived — local
+ *     only)*`), mirroring tombstoneIndex's exact-flat-target link matching.
+ *
+ * Returns the RETENTION-PRUNE basis string when BOTH conditions hold, null
+ * otherwise (fail-closed on every read failure — the bare KEEP safety net
+ * is unchanged for genuinely unknown deletions). Exported for unit tests.
+ */
+export function retentionPrunePattern(relFile: string): { kind: "date"; date: string } | { kind: "flat" } | null {
+  const m = relFile.match(/^memory\/([^/]+\.md)$/);
+  if (!m) return null; // not a flat memory/ file (subdirs, archive/, other trees)
+  const name = m[1]!;
+  if (name === "MEMORY.md") return null; // the prune explicitly skips the index
+  const dateMatch = name.match(/^(\d{4}-\d{2}-\d{2})\.md$/);
+  if (dateMatch) return { kind: "date", date: dateMatch[1]! };
+  return { kind: "flat" };
+}
+
+/** Mirrors archive-memory.ts's window arithmetic: strict >7 days from local midnight today. */
+export function retentionWindowElapsed(date: string, now: Date = new Date()): boolean {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const fileDate = new Date(date);
+  const diffDays = (today.getTime() - fileDate.getTime()) / (1000 * 3600 * 24);
+  return diffDays > 7; // NaN-safe: an invalid date is never selected (same as archive-memory)
+}
+
+export function retentionPruneCorroborated(
+  projectPath: string,
+  relFile: string,
+  now: Date = new Date(),
+): string | null {
+  const pattern = retentionPrunePattern(relFile);
+  if (!pattern) return null;
+  if (pattern.kind === "date") {
+    if (!retentionWindowElapsed(pattern.date, now)) return null; // inside the retention window
+  } else {
+    // non-date log: mtime keyed the original selection — post-deletion the
+    // only observable of the same rule is the prune's rename destination
+    if (!existsSync(join(projectPath, "memory", "archive", relFile.slice("memory/".length)))) return null;
+  }
+  let index: string;
+  try {
+    index = readFileSync(join(projectPath, "memory", "MEMORY.md"), "utf-8");
+  } catch {
+    return null; // no readable in-tree index → no de-link corroboration → KEEP
+  }
+  const target = relFile.slice("memory/".length);
+  const linkRe = new RegExp(
+    pattern.kind === "date"
+      ? `\\[${pattern.date}\\]\\(${target}\\)`
+      : `\\]\\(${target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\)`,
+  );
+  if (linkRe.test(index)) return null; // still linked → not corroborated → KEEP
+  const what =
+    pattern.kind === "date"
+      ? `date log ${target} outside the 7-day retention window`
+      : `memory log ${target} (archive copy present in memory/archive/)`;
+  return `retention prune corroborated — ${what} and memory/MEMORY.md no longer links it — dev-sync's own settled action (archive-memory step 3.8); discard-safe (commit the deletion)`;
+}
+
+/**
  * Classify one dirty/untracked file. Exported for unit tests (v1.10.0,
  * T-20261117-010 merge-delivery guard pin) — the only impure dependency is
  * the git HEAD read, so tests drive it against a temp repo.
@@ -615,8 +731,17 @@ export function classify(
         row.basis =
           "deleted in working tree but previously delivered (no tombstone) — the next wave re-delivers (TOMBSTONED, ERROR); confirm with --tombstone or restore";
       } else {
-        row.verdict = "KEEP";
-        row.basis = "deleted in working tree — no file content to audit; restore or commit the deletion";
+        // v1.11.0 (T-20261118-004): dev-sync's own retention prune — the
+        // selection shape/window AND the MEMORY.md de-link both corroborated.
+        // Any corroboration failure (null) falls through to the bare KEEP.
+        const prune = retentionPruneCorroborated(projectPath, relFile);
+        if (prune) {
+          row.verdict = "RETENTION-PRUNE";
+          row.basis = prune;
+        } else {
+          row.verdict = "KEEP";
+          row.basis = "deleted in working tree — no file content to audit; restore or commit the deletion";
+        }
       }
       return row;
     }
@@ -761,7 +886,7 @@ function markdownReport(reports: ProjectReport[]): string {
   const lines: string[] = [
     `# resync-audit report — ${new Date().toISOString().slice(0, 10)}`,
     "",
-    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration, or a merge-delivered file whose content equals the template source — union merge, project edits are authoritative between waves) · LOCAL-WORK = commit candidate · KEEP = default-safe · TOMBSTONE-UNCONFIRMED = deleted delivered path without a recorded tombstone (the next wave refuses it, TOMBSTONED ERROR) · TOMBSTONE-VIOLATION = a tombstoned path is present on disk (wave re-delivery or project re-application) — adjudicate intent.`,
+    `Verdicts: STALE-RESIDUE = discard (upgrade re-delivers) · PRESUME-STALE = human confirm before discard (subset match without mtime/order corroboration, or a merge-delivered file whose content equals the template source — union merge, project edits are authoritative between waves) · LOCAL-WORK = commit candidate · KEEP = default-safe · RETENTION-PRUNE = dev-sync's own memory-retention prune, corroborated by the de-linked memory/MEMORY.md index in the same tree (auto-discard-safe: commit the deletion) · TOMBSTONE-UNCONFIRMED = deleted delivered path without a recorded tombstone (the next wave refuses it, TOMBSTONED ERROR) · TOMBSTONE-VIOLATION = a tombstoned path is present on disk (wave re-delivery or project re-application) — adjudicate intent.`,
     "",
   ];
   for (const p of reports) {
