@@ -8,7 +8,7 @@ title: >-
   co-newbiz, co-price, co-safety, co-security) and co-architect context.md
   bindings section
 priority: low
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-12T18:32:25.475+09:00'
 history:
@@ -18,5 +18,29 @@ history:
   - at: '2026-11-14T02:14:52.567+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-18T15:49:08.793+09:00'
+    from: waiting
+    to: done
+result: >-
+  Frozen-project fleet wave COMPLETE (2026-11-18, two agent sessions - first
+  interrupted by usage limit, resumed). A: lifecycle records + common agents for
+  the 5 frozen projects - co-deck (co-deck PR #251 merged), co-abap (skip: all 6
+  common agents already ACL-complete, audit PASS, gate inactive by design),
+  co-hr (co-hr PRs #29/#30 merged), co-safety (co-safety PR #236 merged on FULL
+  GREEN CI - 5 agents delivered incl. i18n-specialist body, roster hand-edited
+  after regenerate-agents-md clobbered custom team sections, pm.md drift
+  repaired), co-newbiz (co-newbiz PR #923 merged, CI 11/11 - was blocked by a
+  live concurrent humanize-polish session, delivered after its PR #921 merged; 4
+  bodies + 4 lifecycle records, 45-entry roster). B: variant.json agents[]
+  registration - co-deck #251, co-newbiz #923 (4-entry, 45 agents), co-price PR
+  #186 (4 agents; i18n-specialist left unregistered, body predates gate),
+  co-safety #236 (5 agents), co-security PR #113 (3 agents; public-data-analyst
+  country-scoped skip). C: co-architect context.md Agent bindings subsection
+  inserted verbatim from template v2.2 (co-architect PR #407 merged; surgical -
+  project copy had diverged project-authored content). All repos: main, clean, 0
+  behind, 0 open PRs (co-newbiz's parallel #922 rebased MERGEABLE belongs to
+  that flow). Follow-ups noted in landing reports: regenerate-agents-md.ts
+  marker-confined mode candidate (clobbered co-safety custom rosters), co-newbiz
+  agents/README.md 41-agent arithmetic docs follow-up, adapter v1.1.0 delivery
+  to Projects/co-deck (T-20261117-012 follow-up).
 error: null

@@ -4,39 +4,52 @@ kind: manual
 title: >-
   memory-union-verify archival tier cannot satisfy block-drop findings for
   merges whose dropped-block files were later archived — every /sync from
-  current main FATALs at step 3.88 until a manual forward repair, and the
-  repair does not persist across fresh worktrees. Evidence (2026-11-17,
-  co-deck PR-5 sync halt): merge 59ad0495695f (PR #2040, 2026-11-15,
-  post-gate-activation) dropped two Session Summary blocks from the ours
-  side of memory/2026-11-08.md and memory/2026-11-09.md; housekeeping
-  c5c57d10b later archived both whole files with MEMORY.md tombstone rows.
-  The helper's repaired-at-head archival tier fires only on the
-  merged===null branch (file absent AT the merge); here the file existed at
-  the merge with a block dropped, so the tombstone is never consulted and
-  the finding stays blocking — reproduced on a pristine detached worktree at
-  origin/main 282b91e54 with zero working-tree changes (same 2 blocking
-  groups via the exact pipeline unionScan). Three syncs today (co-deck PR-2
-  initial run, PR-4, PR-5) each required a manual repair (restore parent-owed
-  blocks / place repaired blobs in local gitignored memory/archive/) —
-  local-only, so every FRESH worktree re-FATALs until merge 59ad0495695f
-  ages out of the sinceDays:7 window (~2026-11-22). The gate's own repair
-  guidance (restore blocks, re-commit) fights step-3.8 archival (9-day-old
-  files would be re-archived). Expected: extend the helper tier (or the
-  archive-provenance policy) so a MEMORY.md tombstone row also satisfies the
-  block-drop branch when the tombstone's archive provenance carries the
-  parent-owed blocks; needs its own Design Gate (machinery design
+  current main FATALs at step 3.88 until a manual forward repair, and the repair
+  does not persist across fresh worktrees. Evidence (2026-11-17, co-deck PR-5
+  sync halt): merge 59ad0495695f (PR #2040, 2026-11-15, post-gate-activation)
+  dropped two Session Summary blocks from the ours side of memory/2026-11-08.md
+  and memory/2026-11-09.md; housekeeping c5c57d10b later archived both whole
+  files with MEMORY.md tombstone rows. The helper's repaired-at-head archival
+  tier fires only on the merged===null branch (file absent AT the merge); here
+  the file existed at the merge with a block dropped, so the tombstone is never
+  consulted and the finding stays blocking — reproduced on a pristine detached
+  worktree at origin/main 282b91e54 with zero working-tree changes (same 2
+  blocking groups via the exact pipeline unionScan). Three syncs today (co-deck
+  PR-2 initial run, PR-4, PR-5) each required a manual repair (restore
+  parent-owed blocks / place repaired blobs in local gitignored memory/archive/)
+  — local-only, so every FRESH worktree re-FATALs until merge 59ad0495695f ages
+  out of the sinceDays:7 window (~2026-11-22). The gate's own repair guidance
+  (restore blocks, re-commit) fights step-3.8 archival (9-day-old files would be
+  re-archived). Expected: extend the helper tier (or the archive-provenance
+  policy) so a MEMORY.md tombstone row also satisfies the block-drop branch when
+  the tombstone's archive provenance carries the parent-owed blocks; needs its
+  own Design Gate (machinery design
   docs/designs/2026-11-17-root-machinery-batch-design.md §6 folded this
   observation as a follow-up candidate; separate design required). Related:
   T-20261117-006 slot collision note — the §6 candidate was described as
-  'T-20261117-006' in the design but that id was consumed by the pitch
-  defect; this ticket is the actual filing.
+  'T-20261117-006' in the design but that id was consumed by the pitch defect;
+  this ticket is the actual filing.
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-17T00:00:00.000+09:00
+created_at: '2026-11-17T00:00:00.000+09:00'
 history:
-  - at: 2026-11-17T00:00:00.000+09:00
+  - at: '2026-11-17T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-18T04:54:03.622+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-18T04:54:03.641+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-18T04:54:03.658+09:00'
+    from: review
+    to: done
+result: >-
+  PR #2085 (merge 233ac25c4): memory-union-verify v1.4.0 — archival tier
+  consults MEMORY.md tombstone provenance when neither worktree nor gitignored
+  archive copy is readable; fresh-worktree T-20261117-008 shape re-tiers
+  blocking→historical (WARN). Spec 2026-11-18-memory-union-archival-tier-design.
+  CI 4/4 green.
 error: null

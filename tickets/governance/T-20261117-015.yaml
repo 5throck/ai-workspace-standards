@@ -11,26 +11,42 @@ title: >-
   dev-sync step 6's path-level git add: commit initially carried the forbidden
   sync-auto-detection hunk as a dangling reference (its entry JSON not in the
   commit); caught at push-time review, repaired via a pipeline re-run with the
-  parallel entry JSON temporarily shelved (b1c7c6a37). Cost today: three
-  manual hunk-edit stagings + one landing incident + a shelved-unshelved
-  dance around untracked parallel files. Expected: dev-sync gains a
-  hunk-adjudicated staging surface — e.g. a staged-index-preserving mode
-  (honor an explicit pre-staged index for designated paths instead of
-  path-level re-add), or an adjudicated-hunks manifest file the staging step
-  consumes. Needs its own Design Gate (dev-sync is L1-owned core-standardized;
-  blast radius covers every variant). Related verification gap: no gate
-  detects a dangling registry reference at commit time (the bad commit passed
-  all pre-commit gates; only push-time review caught it). Design: record in
-  memory/2026-11-17.md (landed via PR #2073) is the primary evidence;
-  upstream_request channel could not carry it (v1 limited to co-* projects,
-  workspace root rejected).
+  parallel entry JSON temporarily shelved (b1c7c6a37). Cost today: three manual
+  hunk-edit stagings + one landing incident + a shelved-unshelved dance around
+  untracked parallel files. Expected: dev-sync gains a hunk-adjudicated staging
+  surface — e.g. a staged-index-preserving mode (honor an explicit pre-staged
+  index for designated paths instead of path-level re-add), or an
+  adjudicated-hunks manifest file the staging step consumes. Needs its own
+  Design Gate (dev-sync is L1-owned core-standardized; blast radius covers every
+  variant). Related verification gap: no gate detects a dangling registry
+  reference at commit time (the bad commit passed all pre-commit gates; only
+  push-time review caught it). Design: record in memory/2026-11-17.md (landed
+  via PR #2073) is the primary evidence; upstream_request channel could not
+  carry it (v1 limited to co-* projects, workspace root rejected).
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-17T00:00:00.000+09:00
+created_at: '2026-11-17T00:00:00.000+09:00'
 history:
-  - at: 2026-11-17T00:00:00.000+09:00
+  - at: '2026-11-17T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-18T05:23:29.730+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-18T05:23:29.749+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-18T05:23:29.766+09:00'
+    from: review
+    to: done
+result: >-
+  dev-sync v1.51.0 landed: honor-staged opt-in (--honor-staged/SYNC_HONOR_STAGED
+  - pre-staged index blob authoritative, step-6.5 sweep never re-adds honored
+  paths; fail-closed ghost opt-in + soak contradiction) + step 6.55
+  spec-registry dangling-reference gate (entry JSON + file target must exist in
+  the resulting commit; malformed staged registry fails closed). Spec
+  2026-11-18-dev-sync-hunk-staging-design; PR #2086 (commit ed3604719, merge
+  3dd75a973), CI 4/4 green; incident shape caught pre-commit in
+  tests/unit/spec-landing-incident-sim.test.ts
 error: null
