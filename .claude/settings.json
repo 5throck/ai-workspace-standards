@@ -1,5 +1,9 @@
 {
   "effortLevel": "high",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Bash(bun scripts/audit.ts *)",
@@ -142,19 +146,6 @@
             "timeout": 120,
             "async": true,
             "statusMessage": "Running QA audit on task completion..."
-          }
-        ]
-      }
-    ],
-    "WorktreeCreate": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "git config core.hooksPath .githooks",
-            "async": true,
-            "statusMessage": "Configuring git hooks in new worktree..."
           }
         ]
       }
