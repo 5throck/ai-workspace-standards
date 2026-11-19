@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261120-001
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-20T01:53:19.662+09:00
+history:
+  - at: 2026-11-20T01:53:19.662+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'scripts/helpers/memory-union-verify.ts (invoked at dev-sync step 3.88) reports a merge-dropped memory session block (owedBlocks, computed from the merged blob) even after the block is restored verbatim, when a same-branch sync pipeline is re-run following a one-side-taken merge. repairedAtHead demands the full parent-union in the worktree, but the merged blob already contains the theirs-side block, so it is never "owed" by step 2''s sparing logic — restoring the demanded block then re-runs the same finding (restore-then-re-collapse loop). Convergence required 3 pipeline iterations with a non-obvious escape: restoring the demanded block WITHOUT its `dev-sync:session` marker line (marker-less blocks are accepted by parseBlocks and are not targeted by step 2''s branch-keyed replace), plus collapsing a doubled separator left by the earlier collapse to pass well-formedness. Expected: step 3.88 should converge in one pass — owedBlocks vs repairedAtHead should use one consistent definition of what the worktree must contain (the parent union), and restored marker-less blocks should not alternate between owed/not-owed across re-runs.'
+  affected_paths:
+    - scripts/helpers/memory-union-verify.ts
+    - scripts/dev-sync.ts
+  identity_source: cwd
+  repro: '1. On a project, land a PR whose merge takes the memory session block from only ONE side (one-side-taken merge), e.g. a phase PR where the branch''s session block differs from main''s. 2. On the SAME branch lineage, run the /sync pipeline again for the next increment (pre-existing pattern: sequential phase PRs from the same feature program). 3. Step 3.88 memory-union-verify first reports a merge-dropped block (owedBlocks from the merged blob) and restores it verbatim as a `---`-delimited block. 4. Re-run persists with the same finding because repairedAtHead demands the full parent union in the worktree, while the merged blob already contains the theirs-side block (never owed) — restore-then-re-collapse loop edge. 5. Workaround that converged after 3 iterations: restore the demanded block WITHOUT its `dev-sync:session` marker line (parseBlocks accepts marker-less blocks; the branch-keyed replace in step 2 only targets markered segments, so it is not re-collapsed), then fix the resulting doubled separator to satisfy well-formedness.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/helpers/memory-union-verify.ts=true
+    - info:in_last_delivery scripts/dev-sync.ts=true
+  dedupe_key: 76161cf96492ee36207a7df673cd55460e52e1d4980054028667f0141631abd9
+  duplicates:
+    - project: co-security
+      at: 2026-11-20T01:53:19.662+09:00

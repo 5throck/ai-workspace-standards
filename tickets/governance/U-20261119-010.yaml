@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261119-010
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-19T23:37:22.137+09:00
+history:
+  - at: 2026-11-19T23:37:22.137+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'For pitch-enhanced + premium-dark decks, the PDF from gen-slides-pdf.ts does not match the built HTML deck. HTML draws every slide inside one rounded .slide frame on a darker page. Standard slides there are a two-column grid: section eyebrow above a left-aligned title, `**bold**` bullet runs in accent color, and a right panel with the image plus its .cdk-caption. The PDF instead draws a header bar with the section in the top-left corner, a separate centered text card, plain white bullets, a full-height visual panel without the caption, a punchline that wraps (no first-line accent, extra quote mark), a contact slide without its image, and footnotes outside the frame. Locally fixed with an opt-in `frame` block in the theme pdf_layout_spec.json plus framed renderers (standard/contact/title/divider, punchline and video tweaks, footnotes, frame mask). Code is marked `LOCAL-PATCH(upstream-request: PENDING-FRAME)`.'
+  affected_paths:
+    - scripts/co-deck/gen-slides-pdf.ts
+    - docs/html-themes/themes/pitch-enhanced/pdf_layout_spec.json
+  identity_source: client_roots
+  repro: Build a pitch-enhanced/premium-dark deck with two-column image slides, a `\n` punchline, and a contact slide with visualImage. Run `bun scripts/co-deck/gen-slides-pdf.ts --project deliverables/<p>` and compare the pages with headless screenshots of the HTML at 1280x720.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=true
+    - info:in_last_delivery docs/html-themes/themes/pitch-enhanced/pdf_layout_spec.json=false
+  dedupe_key: 821f7e2655df437bf0ecccf56b3347e569129ba2043ef38cd66d959256f156fb
+  duplicates:
+    - project: co-deck
+      at: 2026-11-19T23:37:22.137+09:00
