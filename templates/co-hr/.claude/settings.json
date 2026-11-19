@@ -1,5 +1,6 @@
 {
   "effortLevel": "high",
+  "attribution": { "commit": "", "pr": "" },
   "permissions": {
     "deny": [
       "Bash(git push --force*)",
@@ -80,19 +81,6 @@
             "async": true,
             "asyncRewake": true,
             "statusMessage": "Running teammate idle lifecycle check..."
-          }
-        ]
-      }
-    ],
-    "WorktreeCreate": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "git config core.hooksPath .githooks",
-            "async": true,
-            "statusMessage": "Configuring git hooks in new worktree..."
           }
         ]
       }
