@@ -6,12 +6,35 @@ title: >-
   drift / PROJECT_AHEAD families) — adjudicate per sync-overwrite-policy §6,
   then re-run wave
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-19T03:24:35.328+09:00'
 history:
   - at: '2026-11-19T03:24:35.328+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-19T08:56:23.021+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-19T08:56:23.056+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-19T08:56:23.097+09:00'
+    from: review
+    to: done
+result: >-
+  adjudicated per §6 and wave resumed: all 21 CONFLICT rows were stale
+  core/L0-synced scripts — ADOPT-TEMPLATE wholesale per Core Script
+  Standardization (dev-sync 1.37.1->1.52.0, audit 2.64.0->2.70.0, upgrade-policy
+  1.38.0->1.47.0, test-runner 1.11.0->1.17.2, validate-templates 1.75.0->1.86.0,
+  hooks/helpers/validators). Delivered co-newbiz#928; CI initially failed on
+  library-projection drift (3 ref docs) + Biome 12-error class on delivered L0
+  scripts — fixed by projection refresh commit + L0-side Biome conformance (root
+  canonical + L1 mirrors, spec 2026-11-19-l0-biome-conformance-design) +
+  meeting-facilitation procedure_keys LOCAL-PATCH restore
+  (entity-ic-review/group-investment-review dropped by the template delivery).
+  MERGED with 13/13 real CI green. CHANGELOG cross-layer duplicate (deal
+  lifecycle completion x4) also repaired in-run. PROJECT_AHEAD WARN rows (ssrf
+  1.1.2, decision-record 1.1.2, evidence-ledger 1.1.1 + 9) remain backport
+  candidates.
 error: null
