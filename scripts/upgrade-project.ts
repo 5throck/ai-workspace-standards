@@ -1,5 +1,32 @@
 #!/usr/bin/env bun
-// @version 1.111.0
+// @version 1.112.0
+// v1.112.0 (2026-11-19, T-20261119-005 residual + T-20261119-009 — design
+//          docs/designs/2026-11-19-delivery-riding-records-design.md):
+//          DELIVERY-RIDING RECORDS AND REGISTRY ROWS. R1: a delivered
+//          skills/<name>/SKILL.md (NEW/UPDATE arm, version-gated or hash-based,
+//          common or variant pass) reconciles the project's
+//          docs/lifecycle/skills/<name>.md in the same pass — generated-marker
+//          records refresh to the template bytes (the marker's own contract),
+//          hand-authored records get surgical Version/Owner line alignment
+//          (the alignSkillRegistryRowsWithFrontmatter precedent; the record is
+//          otherwise never rewritten), an absent record stays with the
+//          WORKSPACE seeding channel. Decisions land as RECORD_BUMP (INFO).
+//          R2: reconcileScriptRegistry consults the variant sub-registry
+//          (templates/<variant>/scripts/<variant>/SCRIPTS.md, unique
+//          bare-basename match — the deck/ppt-master-adapter precedent row)
+//          after L0 and L1 common, synthesizing the 8-column main-registry row
+//          in-pass (SCRIPT_ROW_SYNTHESIZED, INFO); a delivered script governed
+//          by the MAIN registry with no row in any upstream registry FAILS
+//          LOUD — the copy is skipped (fail-closed) with an UNREGISTERED_SCRIPT
+//          (ERROR) row and remediation text, so an upgrade can no longer ship
+//          the "Unregistered script" audit failure it used to deliver. Paths
+//          under scripts/<variant>/ stay governed by the sub-registry that
+//          ships alongside them (verify-scripts walkScripts rule) — no
+//          per-file reconcile, silent no-op preserved. Spec-registry standing
+//          seeds were evaluated and DROPPED: E5 (sync-only) is
+//          acceptable-by-design for pure sync deliveries — the relevance gate
+//          is recency-based (7d), so no static seed can satisfy it durably
+//          (design §2 R3).
 // v1.111.0 (2026-11-19, T-20261118-005 — design
 //          docs/designs/2026-11-18-pin-divergence-symmetry-design.md §5-§6):
 //          pin-divergence symmetry in the EXTERNAL DEPS pass (D3). Arm 2 —
@@ -1383,6 +1410,19 @@ import {
   reconcileSkillRegistry,
   alignSkillRegistryRowsWithFrontmatter,
 } from "./helpers/skills-registry.ts";
+// Delivery-riding helpers (v1.112.0, T-20261119-009 — spec
+// docs/designs/2026-11-19-delivery-riding-records-design.md): SKILL.md deliveries
+// carry their lifecycle-record bump (R1) and script deliveries carry their
+// SCRIPTS.md row (R2) in the same pass. Pure decisions live in the helper; this
+// module only touches the filesystem.
+import {
+  buildMainRegistryRow,
+  isSubRegistryGoverned,
+  loadSkillOwnerMap,
+  recordBumpPlan,
+  variantSubRegistryRowFor,
+} from "./helpers/delivery-riding.ts";
+import { parseSkillFrontmatter } from "./generate-skill-lifecycle-records.ts";
 import {
   splitIntoSections,
   splitContextFileSections,
@@ -2515,6 +2555,100 @@ function fileHash(filePath: string): string {
 }
 
 /**
+ * Upstream row resolution for one delivered script (v1.112.0, delivery-riding
+ * design R2): L0 registry first, then the L1 common-template registry (the
+ * variant-prefixed-name fallback that makes the handbook/ suite reconcile),
+ * then the variant sub-registry (templates/<variant>/scripts/<variant>/SCRIPTS.md,
+ * unique bare-basename match — the deck/ppt-master-adapter precedent). Paths
+ * under scripts/<variant>/ are sub-registry governed (verify-scripts walkScripts
+ * skips a co-* directory holding its own SCRIPTS.md), so their rows ride inside
+ * the delivered sub-registry file and per-file reconciliation is out of scope.
+ */
+type ScriptRowResolution =
+  | { kind: "registry"; sourceRow: string; sourceVersion: string }
+  | { kind: "sub-registry"; subRow: string; subVersion: string; description: string }
+  | { kind: "ambiguous"; rows: string[] }
+  | { kind: "absent" };
+
+function resolveUpstreamScriptRow(scriptRelPath: string): ScriptRowResolution {
+  // Registry rows key scripts by path relative to scripts/ (no "scripts/" prefix).
+  const name = scriptRelPath.replace(/^scripts\//, "");
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const rowLookupRe = new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*\\r?$`, "m");
+
+  // Row source: L0 (workspace root) registry first, then the L1 common-template
+  // registry. Scripts delivered from templates/common but registered upstream
+  // under a variant-prefixed name (e.g. `co-deck/handbook/check-links.ts` at L0
+  // vs plain `handbook/check-links.ts` in the project) only match the common
+  // registry, so the fallback is what makes the handbook/ suite reconcile.
+  for (const registryFile of [scriptsMd, join(commonDir, "scripts", "SCRIPTS.md")]) {
+    if (!existsSync(registryFile)) continue;
+    const match = readFileSync(registryFile, "utf8").match(rowLookupRe);
+    if (match) return { kind: "registry", sourceRow: match[0], sourceVersion: match[1].trim() };
+  }
+
+  // Variant sub-registry fallback (v1.112.0): scripts delivered from
+  // templates/<variant>/scripts/<subdir>/ are registered under a bare basename
+  // in the variant's own sub-registry — match by exact basename, unique only.
+  if (!isSubRegistryGoverned(scriptRelPath, variant)) {
+    const subRegistryPath = join(templatesDir, "scripts", variant, "SCRIPTS.md");
+    if (existsSync(subRegistryPath)) {
+      const lookup = variantSubRegistryRowFor(readFileSync(subRegistryPath, "utf8"), basename(scriptRelPath));
+      if (lookup.kind === "unique")
+        return {
+          kind: "sub-registry",
+          subRow: lookup.row,
+          subVersion: lookup.version,
+          description: subRowDescription(lookup.row),
+        };
+      if (lookup.kind === "ambiguous") return { kind: "ambiguous", rows: lookup.rows };
+    }
+    return { kind: "absent" };
+  }
+  return { kind: "absent" };
+}
+
+/** The variant sub-registry's description cell (4th column onward in the 5-column
+ *  shape; heuristically the longest cell after the name) for the synthesized row's
+ *  provenance text. */
+function subRowDescription(subRow: string): string {
+  const cells = subRow
+    .replace(/^\|/, "")
+    .split("|")
+    .map((c) => c.trim());
+  let best = "";
+  for (const c of cells.slice(1)) {
+    if (/^\d+\.\d+\.\d+$/.test(c) || c === "active" || c === "deprecated" || c === "—") continue;
+    if (c.length > best.length) best = c;
+  }
+  return best;
+}
+
+/**
+ * Fail-loud pre-copy gate (v1.112.0, delivery-riding design R2): a delivered
+ * MAIN-registry-governed script must resolve to an upstream row (L0, L1 common,
+ * or a unique variant sub-registry row) BEFORE the copy — otherwise the delivery
+ * is skipped fail-closed with an UNREGISTERED_SCRIPT (ERROR) row and remediation
+ * text, so an upgrade can no longer ship the "Unregistered script" audit failure.
+ * Sub-registry-governed paths always pass (their rows ride the sub-registry file).
+ */
+function scriptRowGate(scriptRelPath: string): boolean {
+  if (isSubRegistryGoverned(scriptRelPath, variant)) return true;
+  const res = resolveUpstreamScriptRow(scriptRelPath);
+  if (res.kind === "registry" || res.kind === "sub-registry") return true;
+  const detail =
+    res.kind === "ambiguous"
+      ? `ambiguous variant sub-registry rows for \`${basename(scriptRelPath)}\` (${res.rows.length} bare-basename matches) — delivery skipped fail-closed (delivery-riding design R2); disambiguate the rows template-side`
+      : `no SCRIPTS.md row in L0 scripts/SCRIPTS.md, templates/common/scripts/SCRIPTS.md, or templates/${variant}/scripts/${variant}/SCRIPTS.md — delivery skipped fail-closed (delivery-riding design R2)`;
+  console.log(`  ⛔ UNREGISTERED SCRIPT ${scriptRelPath} — copy SKIPPED: ${detail}`);
+  console.log(
+    `      remediation: register the script row template-side (L0 scripts/SCRIPTS.md, templates/common/scripts/SCRIPTS.md, or templates/${variant}/scripts/${variant}/SCRIPTS.md), then re-run the upgrade`,
+  );
+  recordDecision(scriptRelPath, "SYNC", "SYNC_IF_NEWER: scripts/", "UNREGISTERED_SCRIPT", detail);
+  return false;
+}
+
+/**
  * Reconcile the project's local scripts/SCRIPTS.md registry after SYNC_IF_NEWER
  * copies an updated (or brand-new) script file into the project.
  *
@@ -2529,6 +2663,13 @@ function fileHash(filePath: string): string {
  * row exists yet, the L0 registry's row is copied in verbatim (same shape, since the
  * project's registry format is itself derived from L0) and appended after the last
  * script row in the table.
+ *
+ * v1.112.0 (delivery-riding design R2): when L0/L1 carry no row, a MAIN-registry-
+ * governed script resolves through the variant sub-registry (unique bare-basename
+ * match) and its 8-column main-registry row is SYNTHESIZED in-pass
+ * (SCRIPT_ROW_SYNTHESIZED, INFO — the deck-precedent shape). Absent/ambiguous
+ * upstream rows land an UNREGISTERED_SCRIPT (ERROR) row here as defense-in-depth:
+ * the pre-copy scriptRowGate should already have skipped the delivery.
  */
 function reconcileScriptRegistry(scriptRelPath: string): void {
   const registryPath = join(projectDir, "scripts", "SCRIPTS.md");
@@ -2538,31 +2679,84 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const rowLookupRe = new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*\\r?$`, "m");
 
-  // Row source: L0 (workspace root) registry first, then the L1 common-template
-  // registry. Scripts delivered from templates/common but registered upstream
-  // under a variant-prefixed name (e.g. `co-deck/handbook/check-links.ts` at L0
-  // vs plain `handbook/check-links.ts` in the project) only match the common
-  // registry, so the fallback is what makes the handbook/ suite reconcile.
-  let sourceRow: string | null = null;
-  let sourceVersion = "";
-  for (const registryFile of [scriptsMd, join(commonDir, "scripts", "SCRIPTS.md")]) {
-    if (!existsSync(registryFile)) continue;
-    const match = readFileSync(registryFile, "utf8").match(rowLookupRe);
-    if (match) {
-      sourceRow = match[0];
-      sourceVersion = match[1].trim();
-      break;
-    }
+  const resolution = resolveUpstreamScriptRow(scriptRelPath);
+  if (resolution.kind === "absent") {
+    if (isSubRegistryGoverned(scriptRelPath, variant)) return; // sub-registry governed — its rows ride the delivered sub-registry file
+    // Defense-in-depth (design R2): the pre-copy gate should have skipped this.
+    console.log(
+      `    ⛔ scripts/SCRIPTS.md: ${name} has no upstream registry row — row not reconciled (UNREGISTERED_SCRIPT)`,
+    );
+    recordDecision(
+      scriptRelPath,
+      "SYNC",
+      "SYNC_IF_NEWER: scripts/",
+      "UNREGISTERED_SCRIPT",
+      "delivered without any upstream SCRIPTS.md row (gate bypassed?) — register template-side and re-run",
+    );
+    return;
   }
-  if (!sourceRow) return; // not in any upstream registry (e.g. a variant-local script) — nothing to reconcile
+  if (resolution.kind === "ambiguous") {
+    console.log(
+      `    ⛔ scripts/SCRIPTS.md: ${name} matches ${resolution.rows.length} variant sub-registry rows — row not synthesized (ambiguous)`,
+    );
+    recordDecision(
+      scriptRelPath,
+      "SYNC",
+      "SYNC_IF_NEWER: scripts/",
+      "UNREGISTERED_SCRIPT",
+      `ambiguous bare-basename matches in templates/${variant}/scripts/${variant}/SCRIPTS.md — disambiguate template-side`,
+    );
+    return;
+  }
+  if (resolution.kind === "sub-registry") {
+    // Synthesize the 8-column main-registry row (deck-precedent shape). An
+    // existing project row (prior synth or hand-add) only gets its version cell
+    // updated — never duplicated.
+    const tplFile = resolveTemplate(scriptRelPath);
+    const fileVersion = tplFile && existsSync(tplFile) ? extractScriptVersion(tplFile) : "";
+    const targetVersion = fileVersion || resolution.subVersion;
+    const content = readFileSync(registryPath, "utf8");
+    const rowRe = new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*\\r?(?:\\n|$)`, "gm");
+    let seen = 0;
+    const deduped = content.replace(rowRe, (matched, ver) => {
+      seen++;
+      return seen > 1 ? "" : matched.replace(`| ${ver.trim()} |`, `| ${targetVersion} |`);
+    });
+    if (seen > 0) {
+      if (deduped !== content) {
+        writeFileSync(registryPath, deduped, "utf8");
+        console.log(`    📝 scripts/SCRIPTS.md: ${name} → v${targetVersion}`);
+      }
+      return;
+    }
+    const row = buildMainRegistryRow({
+      script: name,
+      version: targetVersion,
+      variant,
+      subRowDescription: resolution.description,
+    });
+    if (appendRegistryRows(registryPath, [row])) {
+      console.log(`    📝 scripts/SCRIPTS.md: registered ${name} (v${targetVersion}, variant sub-registry)`);
+      recordDecision(
+        scriptRelPath,
+        "SYNC",
+        "SYNC_IF_NEWER: scripts/",
+        "SCRIPT_ROW_SYNTHESIZED",
+        `main-registry row synthesized from templates/${variant}/scripts/${variant}/SCRIPTS.md (unique bare-basename match; deck-precedent shape)`,
+      );
+    }
+    return;
+  }
 
-  // Prefer the version of the file actually being delivered (the resolved
-  // template copy) over the registry-lookup version: L0's row can be newer
-  // than the L1 snapshot the project receives, and writing L0's number would
-  // trip lifecycle-sync-audit Check A (@version vs registry row).
-  const tplFile = resolveTemplate(scriptRelPath);
-  const fileVersion = tplFile && existsSync(tplFile) ? extractScriptVersion(tplFile) : "";
-  const targetVersion = fileVersion || sourceVersion;
+  const targetVersion = (() => {
+    // Prefer the version of the file actually being delivered (the resolved
+    // template copy) over the registry-lookup version: L0's row can be newer
+    // than the L1 snapshot the project receives, and writing L0's number would
+    // trip lifecycle-sync-audit Check A (@version vs registry row).
+    const tplFile = resolveTemplate(scriptRelPath);
+    const fileVersion = tplFile && existsSync(tplFile) ? extractScriptVersion(tplFile) : "";
+    return fileVersion || resolution.sourceVersion;
+  })();
 
   const content = readFileSync(registryPath, "utf8");
   // Consume the trailing newline on removal matches so dropped duplicate rows
@@ -2598,7 +2792,7 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
   // Rows marked layer `L0`/`L0-only` are invisible to verify-scripts at project
   // context (L0_ONLY_LAYERS skip) while the file itself ships on disk, which
   // reads as "Unregistered script" — rewrite the layer cell to `L3` on append.
-  const appendedRow = sourceRow.replace(
+  const appendedRow = resolution.sourceRow.replace(
     /^(\| `[^`]+` \| [^|]*\| [^|]*\| [^|]*\| [^|]*\| [^|]*\| )([^|]+)(\|)/,
     (_m, head, layer, tail) => (/^L0(-only)?$/.test(layer.trim()) ? `${head}L3${tail}` : _m),
   );
@@ -2608,6 +2802,77 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
     lines.splice(insertAt, 0, appendedRow);
     writeFileSync(registryPath, lines.join("\n"), "utf8");
     console.log(`    📝 scripts/SCRIPTS.md: registered ${name} (v${targetVersion})`);
+  }
+}
+
+// ── Delivery-riding lifecycle records (v1.112.0, design R1) ──────────────────
+/**
+ * Reconcile the project's docs/lifecycle/skills/<name>.md in the SAME pass that
+ * delivered skills/<name>/SKILL.md (T-20261119-005 residual + T-20261119-009).
+ * Three arms (pure decision in helpers/delivery-riding.ts recordBumpPlan):
+ *   1. record absent      → nothing (the TEMPLATE TREE SYNC WORKSPACE claim owns
+ *                           seeding; this never duplicates that channel);
+ *   2. generated record   → refresh to the current template projection when one
+ *                           resolves (the marker's own contract: hand edits are
+ *                           overwritten at the next publish); no template record
+ *                           → re-derive from the delivered frontmatter;
+ *   3. hand-authored      → surgical Version/Owner line alignment ONLY — the
+ *                           record is never rewritten wholesale (the
+ *                           alignSkillRegistryRowsWithFrontmatter precedent).
+ * Called after every copyWholeSkillDir() in the common and variant skills passes
+ * (apply mode only — the call sites are inside !dryRun blocks). Derivation
+ * failure (unresolvable owner) is a WARN with remediation; the delivery itself
+ * is not rolled back.
+ */
+function reconcileSkillLifecycleRecord(skillName: string, tplSkillFile: string, passLabel: string): void {
+  const recordRel = `docs/lifecycle/skills/${skillName}.md`;
+  const projRecordPath = join(projectDir, recordRel);
+  const existingRecord = existsSync(projRecordPath) ? readFileSync(projRecordPath, "utf8") : null;
+  if (existingRecord === null) return; // arm 1: WORKSPACE seeding owns the first copy
+  const tplRecordPath = resolveTemplate(recordRel);
+  const templateRecord = tplRecordPath && existsSync(tplRecordPath) ? readFileSync(tplRecordPath, "utf8") : null;
+  const fm = parseSkillFrontmatter(readFileSync(tplSkillFile, "utf8"));
+  const plan = recordBumpPlan({
+    existingRecord,
+    templateRecord,
+    frontmatter: fm,
+    skill: skillName,
+    variant,
+    ownerMap: loadSkillOwnerMap(workspaceRoot),
+  });
+  switch (plan.action) {
+    case "noop":
+      return;
+    case "refresh-template":
+    case "derive":
+    case "metadata-align": {
+      writeFileSync(projRecordPath, plan.content, "utf8");
+      const detail =
+        plan.action === "metadata-align"
+          ? `hand-authored record metadata aligned to the delivered SKILL.md: ${plan.notes.join("; ")}`
+          : plan.action === "refresh-template"
+            ? "generated record refreshed to the current template projection (marker contract)"
+            : "generated record re-derived from the delivered SKILL.md frontmatter (no template record)";
+      console.log(`    📝 ${recordRel}: record bumped in-pass (${plan.action})`);
+      recordDecision(recordRel, "SYNC", passLabel, "RECORD_BUMP", detail);
+      return;
+    }
+    case "derive-failed": {
+      console.log(`    ⚠️  ${recordRel}: record bump FAILED — ${plan.reason}`);
+      console.log(
+        "        remediation: resolve the owner template-side (SKILL.md frontmatter owner or scripts/data/skill-owner-map.json); the project record stays untouched",
+      );
+      recordDecision(
+        recordRel,
+        "SYNC",
+        passLabel,
+        "RECORD_BUMP",
+        `derivation failed: ${plan.reason} — record left untouched`,
+        undefined,
+        "WARN",
+      );
+      return;
+    }
   }
 }
 
@@ -5026,6 +5291,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
   }
   const projVer = extractScriptVersion(projFile);
   if (!existsSync(projFile)) {
+    if (!scriptRowGate(relPath)) continue; // delivery-riding R2 fail-loud: no upstream registry row
     console.log(`  NEW   ${relPath}  (none) → ${tplVer}`);
     if (!dryRun) {
       mkdirSync(dirname(projFile), { recursive: true });
@@ -5037,6 +5303,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     console.log(`  ${dryTag}COPIED: ${relPath}`);
     syncChanged++;
   } else if (semverGt(tplVer, projVer)) {
+    if (!scriptRowGate(relPath)) continue; // delivery-riding R2 fail-loud: no upstream registry row
     // D2 matrix: a version-gated whole-content overwrite escalates committed
     // project evolution (PROJECT_EVOLVED vs the delivered baseline + template
     // changed) to a CONFLICT (ERROR) disposition — default SKIP.
@@ -5090,6 +5357,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     console.log(`  ${dryTag}COPIED: ${relPath}`);
     syncChanged++;
   } else if (tplVer === projVer && fileHash(tplFile) !== fileHash(projFile)) {
+    if (!scriptRowGate(relPath)) continue; // delivery-riding R2 fail-loud: no upstream registry row
     // v1.17.2 drift reconciliation: equal version but content differs means a
     // locally forked core script that upgrades could never see (version-gated
     // sync skipped it forever — found across Projects/co-* on 2026-08-29 with
@@ -5128,6 +5396,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     console.log(`  ${dryTag}COPIED: ${rel}`);
     syncChanged++;
   } else if (CORE_LOCKED_SCRIPTS.includes(relPath) && projVer !== tplVer) {
+    if (!scriptRowGate(relPath)) continue; // delivery-riding R2 fail-loud: no upstream registry row
     // T-20260921-010 (review H-4): a version-bumped fork of a locked core script
     // (project @version != template @version in either direction) matched no
     // restore branch above and printed OK forever — the fork survived every
@@ -6106,6 +6375,7 @@ if (existsSync(tplSkillsDir)) {
           "NEW",
           `whole skill directory delivered (none) → ${tplVer}${contractCommonDelivery ? " (contract common_skill bypassed the allowlist)" : ""}`,
         );
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
@@ -6168,6 +6438,7 @@ if (existsSync(tplSkillsDir)) {
           );
         }
         copyWholeSkillDir();
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
@@ -6248,6 +6519,7 @@ if (existsSync(tplSkillsDir)) {
           "NEW",
           "whole skill directory delivered (hash-based, project copy absent)",
         );
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
@@ -6292,6 +6564,7 @@ if (existsSync(tplSkillsDir)) {
           priorBaselines[skillRel],
         );
         copyWholeSkillDir();
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
         syncChanged++;
@@ -6382,6 +6655,7 @@ if (existsSync(variantSkillsSrc)) {
           "NEW",
           `variant skill directory delivered (none) → ${tplVer}`,
         );
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
@@ -6432,6 +6706,7 @@ if (existsSync(variantSkillsSrc)) {
           );
         }
         if (!dryRun) copySkillDir();
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
@@ -6492,6 +6767,7 @@ if (existsSync(variantSkillsSrc)) {
           "NEW",
           "variant skill directory delivered (hash-based, project copy absent)",
         );
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
@@ -6527,6 +6803,7 @@ if (existsSync(variantSkillsSrc)) {
           priorBaselines[skillRel],
         );
         if (!dryRun) copySkillDir();
+        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
         noteDelivered(`skills/${skillName}`);
         console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
         syncChanged++;
