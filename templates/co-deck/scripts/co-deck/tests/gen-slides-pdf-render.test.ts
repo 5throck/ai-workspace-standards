@@ -1,3 +1,13 @@
+// @version 1.8.0 — batch-2 PR-A1 pins (U-20261119-007, design
+//   2026-11-20-co-deck-pipeline-batch-2 R1a): premium-dark bgDrawn ink derives
+//   from the actual card fill — cover title/punchline/contact/profile ink ≠
+//   card fill (title white via readableTextOn, sub/meta/statement muted ops),
+//   C_DARK fallback source pin; two-column geometry — hasRight card rect left
+//   of the visual panel + no text op crossing it (legacy panel-after-text
+//   z-order kept), single-column card stays page-centered; the v1.15.0
+//   statement-ink pins (sub_bold, contact primary) updated to the
+//   readableTextOn contract ([31,42,68] on white-bubble — the hardcoded
+//   C_DARK [11,15,25] was the premium-dark defect).
 // @version 1.7.1 — bgprec pool image moved into the per-test project dir so
 //   aborted runs no longer leak deliverables/_bgpool_*.png into the template.
 // @version 1.7.0 — PR-5 reference pins (design 2026-11-17-co-deck-pdf-followups
@@ -1001,11 +1011,14 @@ describe('v1.15.0 U-008(4) PDF side: contact bullets fallback', () => {
     expect(flat).not.toContain('Contact bullet seven');
   });
 
-  test.skipIf(!haveFonts)('the first fallback line renders bold in the card ink (C_DARK), the rest stay C_BODY', () => {
+  test.skipIf(!haveFonts)('the first fallback line renders bold in the card ink (readableTextOn), the rest stay C_BODY', () => {
     const runs = textRunOps(run.page);
     expect(runs.length).toBeGreaterThan(0);
-    // Thanks hero (C_DARK) + primary bullet (C_DARK) + 4 C_BODY bullets.
-    expect(runs.filter((r) => r.rg === C_DARK_OP).length).toBeGreaterThanOrEqual(2);
+    // v1.16.0 (U-20261119-007): thanks hero + primary bullet render in
+    // readableTextOn(colors.C_CARD) — on white-bubble (C_CARD = white) that is
+    // [31,42,68], the hardcoded C_DARK [11,15,25] was invisible on premium-dark.
+    const CARD_INK_WHITE_BUBBLE = `${31 / 255} ${42 / 255} ${68 / 255} rg`;
+    expect(runs.filter((r) => r.rg === CARD_INK_WHITE_BUBBLE).length).toBeGreaterThanOrEqual(2);
     expect(runs.filter((r) => r.rg === C_BODY_OP).length).toBe(4);
   });
 
@@ -1111,10 +1124,18 @@ describe('v1.15.0 U-011: punchline_sub_bold opt-in', () => {
   ]);
   const plainPage = makeSubProject(`${Date.now()}_off`, []);
 
-  test.skipIf(!haveFonts)('punchline_sub_bold: true renders the sub bold in the statement ink (C_DARK)', () => {
+  // v1.16.0 (U-20261119-007): the STATEMENT INK itself changed — bgDrawn bubble
+  // ink derives from readableTextOn(colors.C_CARD) instead of hardcoded C_DARK
+  // (premium-dark card fill == C_DARK fallback = invisible). On white-bubble
+  // (C_CARD = white) readableTextOn returns [31,42,68], the HTML
+  // .slide-content ink the hardcode approximated. The contract under test is
+  // unchanged: bold sub renders in the statement ink.
+  const STMT_INK_WHITE_BUBBLE = `${31 / 255} ${42 / 255} ${68 / 255} rg`;
+
+  test.skipIf(!haveFonts)('punchline_sub_bold: true renders the sub bold in the statement ink (readableTextOn on the bubble)', () => {
     const subRuns = textRunOps(boldPage.page).filter((r) => r.size === 34.5);
     expect(subRuns.length).toBeGreaterThan(0);
-    for (const r of subRuns) expect(r.rg).toBe(C_DARK_OP);
+    for (const r of subRuns) expect(r.rg).toBe(STMT_INK_WHITE_BUBBLE);
   });
 
   test.skipIf(!haveFonts)('absent key keeps today\u2019s output: regular weight, C_BODY ink', () => {
@@ -1210,5 +1231,211 @@ describe('v1.15.0 Amendment A: punch_tag_px decoupled from the sub size', () => 
       readFileSync(join(ROOT, 'docs/html-themes/themes/zen/pdf_layout_spec.json'), 'utf-8'),
     );
     expect(zen.fonts.punch_tag_px).toBeUndefined();
+  });
+});
+
+// ── v1.16.0 batch-2 PR-A1 pins (U-20261119-007, design
+//    2026-11-20-co-deck-pipeline-batch-2 R1a) ─────────────────────────────────
+//
+// Two defects on premium-dark decks (Gate-5 LOCAL-PATCH reference, verified at
+// origin/main d62ec06e2):
+//   (1) invisible cover title — drawBubbleBehind fills the bgDrawn bubble with
+//       colors.C_CARD (premium-dark card_dark = [11,15,25]) while the ink was
+//       hardcoded C_DARK/C_BODY; C_DARK falls back to the SAME [11,15,25] (no
+//       `dark` key in the spec) → title rendered at 1:1 contrast. All bgDrawn
+//       bubble/card ink now derives via readableTextOn/readableMutedOn(C_CARD)
+//       (divider-branch pattern): title slide, punchline statement, contact
+//       thanks + primary fallback line, profile name/bio.
+//   (2) two-column overflow — the hasRight hug card was page-centered
+//       (cardW0 from titleW) while bullets anchored at contentR.x + shiftX and
+//       the right visual panel painted AFTER the text, covering the card's
+//       right portion. hasRight decks now anchor the card inside
+//       [contentR.x, visR.x] and wrap to the column inner width.
+//
+// Observability: textRunOps (per-run ink + Tm origin), CARD_RECTS_OUT (card
+// rect as page fractions), and the C_VIS_BG panel rect parsed from the content
+// stream (drawRectangle emits `x y w h re` right after its `rg`).
+const PD_CARD_FILL = C_DARK_OP;                                   // card_dark [11,15,25] == C_DARK fallback
+const PD_TEXT_INK  = '1 1 1 rg';                                  // readableTextOn(dark navy)
+const PD_MUTED_INK = `${203 / 255} ${213 / 255} ${225 / 255} rg`; // readableMutedOn(dark navy)
+
+describe('v1.16.0 U-20261119-007: premium-dark bgDrawn ink derives from the actual card fill', () => {
+  function makePremiumDeck(tag: string, slide: Record<string, any>) {
+    const name = `_pdark_${tag}`;
+    const { dir, rel } = renderFixture(name, BG_PROFILE, [slide], 'zen', 'premium-dark');
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return {
+      pdfPath,
+      page: decompressedStreams(pdfPath).find((s) => s.includes('Tj') && s.includes('BT'))!,
+    };
+  }
+
+  const titleRun = makePremiumDeck(`t_${Date.now()}`, {
+    isTitleSlide: true, section: 'Opening',
+    title: 'Cover Title Pin', subtitle: 'Cover subtitle pin', meta: 'Meta pin 2026',
+    backgroundImage: 'images/test.png',
+  });
+  const punchRun = makePremiumDeck(`p_${Date.now()}`, {
+    isPunchlineSlide: true, title: 'Punch Head', text: 'Premium statement pin',
+    backgroundImage: 'images/test.png',
+  });
+  const contactRun = makePremiumDeck(`c_${Date.now()}`, {
+    isContactSlide: true, title: '감사합니다', contactEmail: 'a@b.c', contactNote: 'CTA pin',
+    backgroundImage: 'images/test.png',
+  });
+  const profileRun = makePremiumDeck(`pr_${Date.now()}`, {
+    isProfileSlide: true, title: 'Profile Pin', speakerName: 'Test Speaker',
+    speakerBio: 'bio line one\nbio line two',
+    backgroundImage: 'images/test.png',
+  });
+
+  test.skipIf(!haveFonts)('cover title: no ink equals the card fill; title renders white on the dark bubble', () => {
+    const runs = textRunOps(titleRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    // The defect: title (C_DARK) and sub/meta (C_BODY→light, but title itself)
+    // carried the card-fill color on premium-dark — ink == fill, 1:1 contrast.
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    // Title = the largest runs on the page; readableTextOn(dark navy) = white.
+    const maxSz = Math.max(...runs.map((r) => r.size));
+    const titleRuns = runs.filter((r) => r.size === maxSz);
+    expect(titleRuns.length).toBeGreaterThan(0);
+    for (const r of titleRuns) expect(r.rg).toBe(PD_TEXT_INK);
+    // Sub/meta derive from readableMutedOn(C_CARD) = light slate on the dark fill.
+    expect(runs.some((r) => r.rg === PD_MUTED_INK)).toBe(true);
+    const txt = extractText(titleRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('Cover Title Pin');
+  });
+
+  test.skipIf(!haveFonts)('punchline statement: ink is readableTextOn on the bubble, never the card fill', () => {
+    const runs = textRunOps(punchRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    // zen punch statement = 64px × 0.75 = 48pt — the only 48pt runs on the page.
+    const stmtRuns = runs.filter((r) => r.size === 48);
+    expect(stmtRuns.length).toBeGreaterThan(0);
+    for (const r of stmtRuns) expect(r.rg).toBe(PD_TEXT_INK);
+    const txt = extractText(punchRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('Premium statement pin');
+  });
+
+  test.skipIf(!haveFonts)('contact thanks: ink is readableTextOn on the bubble, never the card fill', () => {
+    const runs = textRunOps(contactRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    expect(runs.some((r) => r.rg === PD_TEXT_INK)).toBe(true);
+    const txt = extractText(contactRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('a@b.c');
+  });
+
+  test.skipIf(!haveFonts)('profile name/bio: ink derives from the card fill, never the card fill itself', () => {
+    const runs = textRunOps(profileRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    expect(runs.some((r) => r.rg === PD_TEXT_INK)).toBe(true);
+    expect(runs.some((r) => r.rg === PD_MUTED_INK)).toBe(true);
+    const txt = extractText(profileRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('Test Speaker');
+  });
+
+  test('source pins: C_DARK fallback still exists in buildColors; bgDrawn ink sites resolve via readableTextOn/MutedOn', () => {
+    const src = readFileSync(TOOL, 'utf-8');
+    // The fallback stays (bare photos / legacy paths still consume C_DARK).
+    expect(src).toMatch(/c\.dark\s*\?\?/);
+    // Every former `bgDrawn ? C_DARK/C_BODY` bubble-ink site now derives from
+    // the actual card fill (title sub+meta, punchline stmtInk, contact thanks +
+    // primary, profile name+bio — plus the two pre-existing card-ink sites).
+    const uses = src.match(/readable(?:Text|Muted)On\(colors\.C_CARD\)/g) ?? [];
+    expect(uses.length).toBeGreaterThanOrEqual(9);
+    expect(src).not.toMatch(/bgDrawn \? colors\.C_DARK/);
+    expect(src).not.toMatch(/bgDrawn \? colors\.C_BODY/);
+  });
+});
+
+describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column', () => {
+  const PW_PT_EXACT = 338.7 * (72 / 25.4);   // pitch-enhanced page width in pt
+
+  /** Parse the C_VIS_BG panel left edge (pt) from the page stream. pdf-lib
+   *  draws the rectangle as a translated path: `rg` then `1 0 0 1 tx ty cm`
+   *  then the path outline — the panel's left edge is the translation tx. */
+  function panelLeftPt(page: string): number | null {
+    const lines = page.split('\n').map((l) => l.trim());
+    const visBg = `${20 / 255} ${28 / 255} ${42 / 255} rg`;   // C_VIS_BG default [20,28,42]
+    const i = lines.findIndex((l) => l === visBg);
+    if (i < 0) return null;
+    for (let k = i + 1; k < Math.min(i + 8, lines.length); k++) {
+      const m = lines[k].match(/^1 0 0 1 (-?[\d.]+) (-?[\d.]+) cm$/);
+      if (m) return parseFloat(m[1]);
+    }
+    return null;
+  }
+
+  function makePitchDeck(tag: string, slide: Record<string, any>) {
+    const name = `_twocol_${tag}`;
+    const { dir, rel } = renderFixture(name, [], [slide], 'pitch-enhanced', 'premium-dark');
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const cardsPath = join(dir, 'cards.json');
+    const res = spawnSync('bun', [TOOL, '--project', rel, '--font-dir', FONT_DIR],
+      { cwd: ROOT, encoding: 'utf-8', timeout: 120000,
+        env: { ...process.env, CARD_RECTS_OUT: cardsPath } });
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    const cards = existsSync(cardsPath) ? JSON.parse(readFileSync(cardsPath, 'utf-8')) : [];
+    const page = decompressedStreams(pdfPath).find((s) => s.includes('Tj') && s.includes('BT'))!;
+    return { cards, page };
+  }
+
+  // The U-007 repro shape: pitch-enhanced two-column slide (content column
+  // [6%..58%], visual panel [52.8%..94.8%]) with a right visual image.
+  const twoCol = makePitchDeck(`v_${Date.now()}`, {
+    section: 'S1', title: 'Two Column Pin',
+    bullets: ['alpha bullet line for the geometry pin', 'beta bullet line for the geometry pin'],
+    visualImage: 'images/test.png',
+  });
+  // Same theme, no visual: hasRight=false keeps the legacy page-centered card.
+  const singleCol = makePitchDeck(`s_${Date.now()}`, {
+    section: 'S1', title: 'Single Column Pin',
+    bullets: ['alpha bullet line for the legacy pin', 'beta bullet line for the legacy pin'],
+  });
+
+  test.skipIf(!haveFonts)('hasRight: the card rect stays left of the visual panel and no text op crosses it', () => {
+    expect(twoCol.cards.length).toBe(1);
+    const panelX = panelLeftPt(twoCol.page);
+    expect(panelX).not.toBeNull();
+    const card = twoCol.cards[0];
+    const cardRightPt = (card.x + card.w) * PW_PT_EXACT;
+    // The defect: the page-centered card ran THROUGH visR.x and the panel
+    // (painted after the text) covered its right portion.
+    expect(cardRightPt).toBeLessThanOrEqual(panelX! + 0.5);
+    // No text op may start at or beyond the panel's left edge.
+    const runs = textRunOps(twoCol.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.x).toBeLessThan(panelX! + 0.5);
+    // Panel still paints after the text (legacy z-order kept) — safe now
+    // because nothing extends under it.
+    const ls = twoCol.page.split('\n').map((l) => l.trim());
+    const lastTextIdx = ls.map((l) => l.endsWith('Tj')).lastIndexOf(true);
+    const panelIdx = ls.findIndex((l) => l === `${20 / 255} ${28 / 255} ${42 / 255} rg`);
+    expect(panelIdx).toBeGreaterThan(lastTextIdx);
+  });
+
+  test.skipIf(!haveFonts)('single-column: the legacy page-centered card geometry is unchanged', () => {
+    expect(singleCol.cards.length).toBe(1);
+    const card = singleCol.cards[0];
+    // cardX = CX + (CW - cardW0)/2 — horizontally centered in the printable
+    // area (the pre-v1.16.0 geometry, kept byte-for-byte for !hasRight decks).
+    expect(Math.abs(card.x + card.w / 2 - 0.5)).toBeLessThan(0.02);
+    const panel = panelLeftPt(singleCol.page);
+    expect(panel).toBeNull();                       // no visual panel on this slide
   });
 });
