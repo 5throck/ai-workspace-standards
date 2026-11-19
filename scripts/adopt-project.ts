@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-11-20, T-20261120-001 — design
+//          docs/designs/2026-11-20-adoption-gaps-batch-design.md): four adoption-gap
+//          fixes (U-20261119-002): (1) context-overlay stack substitution — new
+//          --stack key=value flag + interactive prompts fill the six tech-stack rows,
+//          post-substitution WARN names unfilled stub markers; (2) report-only hygiene
+//          pass flags L2-only root artifacts (PROMOTION_CHECKLIST.md, variant.json
+//          leftover) after delivery; (3) no adopt-project change — the re-base residue
+//          prune consumes the decisions file via helpers/adoption-provenance.ts;
+//          (4) pre-standard docs/context.md detection (footer below the canonical
+//          standard version or missing) with WARN + --refresh-context regeneration
+//          (explicit consent only — the file is DOCS_PRESERVE).
 // v1.6.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
 //          §6.3, DEC-20261107-01): fleet membership SSOT B2 guard — a target
 //          name carrying an exclusion record in docs/fleet-membership.json
@@ -58,15 +69,21 @@ import { basename, dirname, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
+  applyStackSubstitutions,
+  assessContextStandardVersion,
   buildAdoptionPlan,
+  detectContextOverlayStubs,
   detectHookManagerConflicts,
   findSecretShapedFiles,
+  parseStackArg,
+  scanHygieneRootArtifacts,
+  STACK_ROW_LABELS,
   type AdoptionPlan,
 } from "./helpers/adopt-plan.ts";
 import { resolveAgentExtendsStub, stripL1BMetadata } from "./helpers/resolve-pm-stub.ts";
 import { isCanonicalPmStubBody } from "./helpers/scaffold-markers.ts";
 import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from "./helpers/template-utils.ts";
-import { substituteFiles } from "./helpers/substitute-placeholders.ts";
+import { applySubstitutions, substituteFiles } from "./helpers/substitute-placeholders.ts";
 import { blankL0Refs } from "./helpers/l0-ref-policy.ts";
 import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, parsePlatformList, type PlatformProfile } from "./lib/platforms.ts";
 import { exclusionForName } from "./lib/fleet.ts";
@@ -116,8 +133,9 @@ function getArg(flag: string): string | undefined {
   }
   return undefined;
 }
-const VALUE_FLAGS = new Set(["--variant", "--platform", "--project"]);
+const VALUE_FLAGS = new Set(["--variant", "--platform", "--project", "--stack"]);
 const DRY_RUN = args.includes("--dry-run");
+const REFRESH_CONTEXT = args.includes("--refresh-context");
 const YES = args.includes("--yes") || args.includes("-y") || process.env.CI === "true" || process.env.CI === "1";
 let platform = getArg("--platform") ?? "all";
 let selectedProfiles: PlatformProfile[] = [...PLATFORM_PROFILES];
@@ -129,7 +147,7 @@ const projectArg = getArg("--project") ?? positional;
 
 if (!projectArg) {
   console.error(
-    "Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--dry-run] [--yes]",
+    "Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--stack language=…,framework=…,…] [--refresh-context] [--dry-run] [--yes]",
   );
   process.exit(1);
 }
@@ -141,6 +159,20 @@ try {
 } catch (e) {
   fail(`Invalid --platform: ${(e as Error).message}`);
 }
+
+// v1.7.0 (gap 1): tech-stack values for the docs/<variant>.context.md overlay. The
+// substitution is label-anchored (helpers/adopt-plan.ts applyStackSubstitutions) —
+// unknown keys are reported here but never guessed into the file.
+const stackValues: Record<string, string> = (() => {
+  const raw = getArg("--stack");
+  if (raw === undefined) return {};
+  const parsed = parseStackArg(raw);
+  const knownKeys = new Set(STACK_ROW_LABELS.map((r) => r.key));
+  for (const key of Object.keys(parsed)) {
+    if (!knownKeys.has(key)) console.warn(`WARN: --stack: unknown key '${key}' (known: ${[...knownKeys].join(", ")})`);
+  }
+  return parsed;
+})();
 
 const projectDir = resolve(projectArg);
 
@@ -391,8 +423,46 @@ if (!YES) {
     const answer = (prompt("Target jurisdiction [region-neutral]: ") ?? "").trim();
     if (answer) selectedCountry = answer;
   }
+
+  // v1.7.0 (gap 1): fill the context-overlay tech-stack rows from the project's real
+  // stack. Empty input leaves the template placeholder (the post-substitution WARN
+  // names it); unknown/unprovided rows are never guessed.
+  if (Object.keys(stackValues).length === 0) {
+    console.log(
+      `\n${CYAN}Tech stack${RESET} — fills docs/${variant}.context.md § Tech Stack (empty = leave placeholder):`,
+    );
+    for (const { key, label } of STACK_ROW_LABELS) {
+      const answer = (prompt(`  ${label}: `) ?? "").trim();
+      if (answer) stackValues[key] = answer;
+    }
+  }
+  const unfilledRows = STACK_ROW_LABELS.filter(({ key }) => !stackValues[key]);
+  if (unfilledRows.length > 0) {
+    console.log(
+      `${YELLOW}⚠️  ${unfilledRows.length} tech-stack row(s) unfilled (${unfilledRows.map((r) => r.label).join(", ")}) — ` +
+        `docs/${variant}.context.md will ship placeholder cells; fill them after adoption (or re-run with --stack).${RESET}`,
+    );
+    const ack = prompt("Proceed with unfilled tech-stack rows? [y/N] ") ?? "";
+    if (!["y", "Y"].includes(ack)) {
+      console.log("Aborted.");
+      process.exit(0);
+    }
+  }
 } else {
   console.log(`${YELLOW}--yes/CI: accepting plan defaults (full roster, region-neutral country).${RESET}`);
+  if (Object.keys(stackValues).length > 0) {
+    console.log(
+      `  --stack: ${STACK_ROW_LABELS.filter(({ key }) => stackValues[key])
+        .map(({ key }) => `${key}=${stackValues[key]}`)
+        .join(", ")}`,
+    );
+  }
+  const unfilledRows = STACK_ROW_LABELS.filter(({ key }) => !stackValues[key]);
+  if (unfilledRows.length === STACK_ROW_LABELS.length) {
+    console.log(
+      `${YELLOW}⚠️  --yes/CI without --stack: docs/${variant}.context.md will ship placeholder tech-stack cells (fill after adoption).${RESET}`,
+    );
+  }
 }
 
 function readCountryConfig(vDir: string): { profilesDir: string; countries: string[] } {
@@ -538,6 +608,11 @@ if (DRY_RUN) {
   console.log(`  resolve agents/pm.md extends-stub + strip L1-B metadata`);
   console.log(`  seed memory/MEMORY.md, docs/README pair, CHANGELOG.md (add-if-missing)`);
   console.log(`  generate docs/${variant}.context.md + Template Provenance footer (if absent)`);
+  console.log(`  fill provided --stack rows into the overlay; WARN on unfilled stub markers`);
+  console.log(
+    `  assess docs/context.md standard version (WARN; regenerate only with --refresh-context/prompt consent)`,
+  );
+  console.log(`  hygiene pass: WARN on L2-only root artifacts (report-only, no deletion)`);
   console.log(`  blankL0Refs sweep + placeholder substitution scoped to delivered files`);
   console.log(`  package.json create-or-merge + bun install + graft build + hooksPath re-assert`);
   console.log(`  gitleaks scan (tree + history) and audit smoke (report-only)`);
@@ -574,6 +649,15 @@ const report = {
   substituted: [] as string[],
   platformRemoved: [] as string[],
   country: selectedCountry || "region-neutral",
+  stackApplied: [] as string[],
+  overlayStubs: [] as string[],
+  hygieneFindings: [] as Array<{ file: string; reason: string }>,
+  contextRefresh: null as {
+    triggered: "flag" | "prompt";
+    verdict: string;
+    from: string | null;
+    to: string | null;
+  } | null,
   env: { hooksPath: false, bunInstall: false, graft: false, gitleaksFindings: -1, auditSmoke: "not-run" },
 };
 
@@ -703,6 +787,7 @@ if (existsSync(projPmMd)) {
 // 5. docs/<variant>.context.md + Template Provenance footer.
 const ctxVariantPath = join(projectDir, "docs", `${variant}.context.md`);
 const version = readFileSync(join(TEMPLATES_DIR, "VERSION"), "utf8").trim();
+let overlayTemplateFresh = false;
 if (!existsSync(ctxVariantPath) && existsSync(join(COMMON_DIR, "docs", "variant.context.template.md"))) {
   applyContextTemplate(join(COMMON_DIR, "docs", "variant.context.template.md"), ctxVariantPath, {
     variantName: variant,
@@ -710,6 +795,25 @@ if (!existsSync(ctxVariantPath) && existsSync(join(COMMON_DIR, "docs", "variant.
     pmRoleDescription: DEFAULT_PM_ROLE_DESCRIPTIONS[variant] ?? "Workflow management, dispatch, quality gates",
   });
   console.log(`  ✅ docs/${variant}.context.md generated from the canonical template`);
+  overlayTemplateFresh = true;
+}
+// v1.7.0 (gap 1): fill the provided tech-stack rows into the overlay. The engine
+// NORMALLY delivers templates/<variant>/docs/<variant>.context.md itself (the
+// generation above is the fallback), so template-fresh provenance is "delivered by
+// this run's manifest OR generated above" — an operator-authored overlay (repair
+// path: present but not delivered this run) is never touched.
+if (
+  existsSync(ctxVariantPath) &&
+  (overlayTemplateFresh || deliveredSet.has(`docs/${variant}.context.md`)) &&
+  Object.keys(stackValues).length > 0
+) {
+  const content = readFileSync(ctxVariantPath, "utf8");
+  const updated = applyStackSubstitutions(content, stackValues);
+  if (updated !== content) {
+    writeFileSync(ctxVariantPath, updated);
+    report.stackApplied = STACK_ROW_LABELS.filter(({ key }) => stackValues[key]).map(({ label }) => label);
+    console.log(`  🔤 tech-stack rows filled: ${report.stackApplied.join(", ")}`);
+  }
 }
 if (existsSync(ctxVariantPath) && !readFileSync(ctxVariantPath, "utf8").includes("Template-Version:")) {
   const jurisdiction = selectedCountry
@@ -720,6 +824,92 @@ if (existsSync(ctxVariantPath) && !readFileSync(ctxVariantPath, "utf8").includes
     `\n## Template Provenance\n\n- **Template-Version**: ${version}\n- **Template-Variant**: ${variant}\n${jurisdiction}`,
   );
   console.log(`  ✅ Template Provenance footer appended to docs/${variant}.context.md`);
+}
+
+// 5b. Unfilled-overlay stub WARN (v1.7.0 gap 1) — runs on both the generated and the
+// repair path; --yes/CI is the acknowledgment (same contract as the other --yes warns).
+if (existsSync(ctxVariantPath)) {
+  const stubs = detectContextOverlayStubs(readFileSync(ctxVariantPath, "utf8"));
+  for (const s of stubs) {
+    console.log(
+      `${YELLOW}  ⚠️  docs/${variant}.context.md § ${s.section}: unfilled stub (${s.marker}) — ${s.remediation}${RESET}`,
+    );
+  }
+  report.overlayStubs = stubs.map((s) => `${s.section}: ${s.marker}`);
+  if (stubs.length > 0) {
+    console.log(
+      `${YELLOW}  ⚠️  ${stubs.length} unfilled overlay section(s) recorded — proceed only with review (fill or acknowledge).${RESET}`,
+    );
+  }
+}
+
+// 5c. Pre-standard docs/context.md assessment (v1.7.0 gap 4). docs/context.md is
+// SCAFFOLD_COMMON_OWNED + DOCS_PRESERVE: a foreign file predating the standard is never
+// touched by delivery, so adoption is the one moment that can flag (and, with explicit
+// consent, refresh) it. A file delivered this run is canonical by construction — skipped.
+{
+  const projCtxPath = join(projectDir, "docs", "context.md");
+  const canonicalCtx = join(COMMON_DIR, "docs", "context.md");
+  if (existsSync(projCtxPath) && existsSync(canonicalCtx) && !deliveredSet.has("docs/context.md")) {
+    const assessment = assessContextStandardVersion(
+      readFileSync(projCtxPath, "utf8"),
+      readFileSync(canonicalCtx, "utf8"),
+    );
+    if (assessment.verdict === "fresh") {
+      console.log(
+        `  ✅ docs/context.md standard version ${assessment.projectVersion} (canonical ${assessment.canonicalVersion ?? "unknown"})`,
+      );
+    } else {
+      const detail =
+        assessment.verdict === "no-footer"
+          ? "missing the standard version footer (pre-standard file)"
+          : `footer ${assessment.projectVersion} is older than the canonical standard ${assessment.canonicalVersion}`;
+      console.log(
+        `${YELLOW}  ⚠️  docs/context.md: ${detail} — regenerate with --refresh-context or align by hand (the file is DOCS_PRESERVE; adoption never overwrites it without explicit consent).${RESET}`,
+      );
+      const promptYes =
+        !REFRESH_CONTEXT && !YES
+          ? Boolean((prompt("Regenerate docs/context.md from the canonical template now? [y/N] ") ?? "").match(/^[yY]/))
+          : false;
+      const wantsRefresh = REFRESH_CONTEXT || promptYes;
+      if (wantsRefresh) {
+        const refreshed = applySubstitutions(readFileSync(canonicalCtx, "utf8"), {
+          projectName,
+          description: "An adopted project",
+          characteristics: "",
+          variantName: variant,
+          countryDisplayName: selectedCountry || "",
+        });
+        writeFileSync(projCtxPath, refreshed);
+        report.contextRefresh = {
+          triggered: REFRESH_CONTEXT ? "flag" : "prompt",
+          verdict: assessment.verdict,
+          from: assessment.projectVersion,
+          to: assessment.canonicalVersion,
+        };
+        console.log(
+          `  🔁 docs/context.md regenerated from templates/common/docs/context.md (identity substituted) — review the diff before committing`,
+        );
+      }
+    }
+  }
+}
+
+// 5d. Adoption hygiene pass — L2-only root artifacts (v1.7.0 gap 2). Report-only WARN
+// rows naming the files (adoption is L2→L3 promotion; the artifacts are template-side
+// promotion machinery — validate-variant-readiness B1 — that must not survive into an
+// L3 tree; audit.ts allowlists PROMOTION_CHECKLIST.md, so nothing else flags it).
+{
+  const rootFiles = readdirSync(projectDir, { withFileTypes: true })
+    .filter((e) => e.isFile())
+    .map((e) => e.name);
+  const findings = scanHygieneRootArtifacts(rootFiles);
+  for (const f of findings) {
+    console.log(
+      `${YELLOW}  ⚠️  hygiene: ${f.file} at the project root — ${f.reason} — remove (git rm) or justify.${RESET}`,
+    );
+  }
+  report.hygieneFindings = findings;
 }
 
 // 6-8. Add-if-missing seeds: memory index, docs README pair, CHANGELOG.
@@ -957,6 +1147,7 @@ writeFileSync(
       plan,
       declinedAgents,
       selectedCountry: selectedCountry || null,
+      stackValues,
       report,
     },
     null,
@@ -982,6 +1173,12 @@ console.log(`Archived to _legacy  : ${report.restoredToLegacy.length}`);
 console.log(`Registered scripts   : ${report.registeredScripts.length}`);
 console.log(`Seeds (add-if-missing): ${report.seeds.length}`);
 console.log(`Country              : ${report.country}`);
+if (report.overlayStubs.length > 0)
+  console.log(`Overlay stubs (WARN) : ${report.overlayStubs.length} — fill docs/${variant}.context.md`);
+if (report.hygieneFindings.length > 0)
+  console.log(`Hygiene (WARN)       : ${report.hygieneFindings.map((f) => f.file).join(", ")} — remove or justify`);
+if (report.contextRefresh)
+  console.log(`context.md refreshed : ${report.contextRefresh.verdict} — regenerated from canonical`);
 console.log(
   `Env                  : bun-install=${report.env.bunInstall ? "ok" : "failed"} hooksPath=${report.env.hooksPath ? "ok" : "unset"} graft=${report.env.graft ? "ok" : "skipped"} audit-smoke=${report.env.auditSmoke}`,
 );

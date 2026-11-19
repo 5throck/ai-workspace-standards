@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-20, T-20261120-001 — design
+//          docs/designs/2026-11-20-adoption-gaps-batch-design.md): settling helpers for
+//          the four verified adoption gaps — context-overlay stack substitution
+//          (applyStackSubstitutions + parseStackArg), unfilled-stub detection
+//          (detectContextOverlayStubs), report-only L2-root-artifact hygiene scan
+//          (ADOPTION_HYGIENE_ROOT_ARTIFACTS + scanHygieneRootArtifacts), and
+//          pre-standard docs/context.md assessment (assessContextStandardVersion).
 // v1.0.0 (2026-09-23, adopt-project conversion — spec 2026-09-23-adopt-project-conversion):
 //          pure scan/plan logic for the adopt-project conversion flow (external project →
 //          workspace standard, in place). No filesystem writes, no subprocesses — every
@@ -253,6 +260,179 @@ export function listForeignSkills(projectDir: string, commonDir: string, variant
     }
   }
   return [...foreign].sort();
+}
+
+// ============================================================================
+// SETTLING HELPERS — context overlay + hygiene (v1.1.0, T-20261120-001)
+// ============================================================================
+
+/** The six tech-stack rows of templates/common/docs/variant.context.template.md, keyed by the --stack key. */
+export const STACK_ROW_LABELS: ReadonlyArray<{ key: string; label: string }> = [
+  { key: "language", label: "Language" },
+  { key: "framework", label: "Framework" },
+  { key: "database", label: "Database" },
+  { key: "libraries", label: "Key Libraries" },
+  { key: "package-manager", label: "Package Manager" },
+  { key: "testing", label: "Testing" },
+];
+
+/**
+ * Parse a --stack value ("language=Python 3.11+, framework=FastAPI") into the
+ * substitution map. Keys are matched against STACK_ROW_LABELS (unknown keys are kept
+ * verbatim — the caller warns); values are trimmed and never empty. Pure.
+ */
+export function parseStackArg(raw: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const part of raw.split(",")) {
+    const idx = part.indexOf("=");
+    if (idx <= 0) continue; // no '=' or empty key — skip silently (caller may warn on unknown keys)
+    const key = part.slice(0, idx).trim();
+    const value = part.slice(idx + 1).trim();
+    if (key && value) out[key] = value;
+  }
+  return out;
+}
+
+/**
+ * Fill the six tech-stack cells of a generated variant.context.md overlay. Label-anchored
+ * (matches `| **<Label>** | <cell> |`), so the template's example text may evolve freely;
+ * only keys present in `stack` (with a known row label) are replaced. Pure — returns the
+ * content; the caller writes when it changed.
+ */
+export function applyStackSubstitutions(content: string, stack: Readonly<Record<string, string>>): string {
+  let modified = content;
+  for (const { key, label } of STACK_ROW_LABELS) {
+    const value = stack[key]?.trim();
+    if (!value) continue;
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const rowRe = new RegExp(`(\\| \\*\\*${escaped}\\*\\* \\| )([^|]*)(\\|)`, "m");
+    if (!rowRe.test(modified)) continue;
+    // "$" doubling keeps replacement-string semantics literal ($&, $1 in values);
+    // the trailing space is normalized (template cells are "| value |" shaped).
+    modified = modified.replace(rowRe, `$1${value.replace(/\$/g, "$$$$")} $3`);
+  }
+  return modified;
+}
+
+/** Stub-marker classes the variant.context.template.md ships unfilled (T-20261120-001 gap 1). */
+export interface OverlayStubFinding {
+  marker: string;
+  section: string;
+  remediation: string;
+}
+
+const OVERLAY_STUB_CHECKS: ReadonlyArray<{ marker: string; test: RegExp; section: string; remediation: string }> = [
+  {
+    marker: "tech-stack placeholder cells",
+    test: /\[e\.g\.,/,
+    section: "Tech Stack",
+    remediation:
+      'fill the six stack rows (re-run adoption with --stack "language=…,…" or edit docs/<variant>.context.md)',
+  },
+  {
+    marker: "[Domain] heading",
+    test: /^#{1,3} \[Domain\] Guidelines$/m,
+    section: "Guidelines",
+    remediation: 'rename the section to the variant\'s domain (e.g. "## Coding Guidelines")',
+  },
+  {
+    marker: "guidelines INSTRUCTION marker",
+    test: /<!-- INSTRUCTION:/,
+    section: "Guidelines",
+    remediation: "replace the instruction comment with variant-specific guideline content",
+  },
+  {
+    marker: "guidelines placeholder body",
+    test: /Replace this placeholder with variant-specific guidelines/,
+    section: "Guidelines",
+    remediation: "write the variant's guidelines body (audit.ts flags an empty REQUIRED section)",
+  },
+];
+
+/**
+ * Detect unfilled stub markers in a generated/existing variant.context.md overlay.
+ * Returns one finding per marker class present (order: template order). Pure.
+ */
+export function detectContextOverlayStubs(content: string): OverlayStubFinding[] {
+  return OVERLAY_STUB_CHECKS.filter((c) => c.test.test(content)).map(({ marker, section, remediation }) => ({
+    marker,
+    section,
+    remediation,
+  }));
+}
+
+// ============================================================================
+// ADOPTION HYGIENE — L2-only root artifacts (v1.1.0, T-20261120-001 gap 2)
+// ============================================================================
+
+/**
+ * Root files the effective L2 template tree can deliver that an L3 project must not
+ * keep, with the reason each is L2-only. Report-only: the settling pass WARNs naming
+ * the files, it never deletes. PROMOTION_CHECKLIST.md is the variant promotion gate
+ * (validate-variant-readiness.ts B1 — template-side requirement); variant.json is the
+ * L2 identity manifest that scaffold parity removes post-delivery, so a leftover means
+ * the settling removal did not run.
+ */
+export const ADOPTION_HYGIENE_ROOT_ARTIFACTS: Readonly<Record<string, string>> = {
+  "PROMOTION_CHECKLIST.md":
+    "L2 promotion-gate artifact (validate-variant-readiness B1 — template-side); an L3 project has nothing left to promote",
+  "variant.json":
+    "L2 variant-template identity manifest — scaffold parity removes it after delivery; a leftover means the settling removal did not run",
+};
+
+/** Members of the hygiene list found among the supplied root-file names. Pure. */
+export function scanHygieneRootArtifacts(rootFiles: ReadonlyArray<string>): Array<{ file: string; reason: string }> {
+  return rootFiles
+    .filter((f) => Object.hasOwn(ADOPTION_HYGIENE_ROOT_ARTIFACTS, f))
+    .sort()
+    .map((file) => ({ file, reason: ADOPTION_HYGIENE_ROOT_ARTIFACTS[file] }));
+}
+
+// ============================================================================
+// PRE-STANDARD docs/context.md ASSESSMENT (v1.1.0, T-20261120-001 gap 4)
+// ============================================================================
+
+export type ContextStandardVerdict = "fresh" | "stale" | "no-footer";
+
+export interface ContextStandardAssessment {
+  /** major.minor parsed from the project footer, or null when absent/unparsable. */
+  projectVersion: string | null;
+  /** major.minor parsed from the canonical template footer, or null. */
+  canonicalVersion: string | null;
+  verdict: ContextStandardVerdict;
+}
+
+const CONTEXT_VERSION_FOOTER_RE = /context\.md version:\s*(\d+)\.(\d+)/;
+
+function parseContextFooterVersion(content: string): string | null {
+  const m = content.match(CONTEXT_VERSION_FOOTER_RE);
+  return m ? `${m[1]}.${m[2]}` : null;
+}
+
+/**
+ * Assess a project's docs/context.md against the canonical standard
+ * (templates/common/docs/context.md). The footer carries the context.md STANDARD
+ * version ("*context.md version: 2.16 — …"), independent of templates/VERSION.
+ * Verdicts: "stale" (project footer older than canonical or missing) and "fresh"
+ * (equal, or project ahead) are exhaustive. Pure.
+ */
+export function assessContextStandardVersion(
+  projectContent: string,
+  canonicalContent: string,
+): ContextStandardAssessment {
+  const projectVersion = parseContextFooterVersion(projectContent);
+  const canonicalVersion = parseContextFooterVersion(canonicalContent);
+  if (projectVersion === null) {
+    return { projectVersion, canonicalVersion, verdict: "no-footer" };
+  }
+  if (canonicalVersion !== null) {
+    const [pMaj, pMin] = projectVersion.split(".").map(Number);
+    const [cMaj, cMin] = canonicalVersion.split(".").map(Number);
+    if (pMaj < cMaj || (pMaj === cMaj && pMin < cMin)) {
+      return { projectVersion, canonicalVersion, verdict: "stale" };
+    }
+  }
+  return { projectVersion, canonicalVersion, verdict: "fresh" };
 }
 
 // ============================================================================

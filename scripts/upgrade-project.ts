@@ -1,5 +1,24 @@
 #!/usr/bin/env bun
-// @version 1.112.0
+// @version 1.113.0
+// v1.113.0 (2026-11-20, T-20261120-001 — design
+//          docs/designs/2026-11-20-adoption-gaps-batch-design.md): VARIANT-SCOPE
+//          SKILL PRUNE gains a leading source-variant adoption-residue arm
+//          (U-20261119-002 gap 3). An adopted project re-based to a different
+//          variant keeps the ADOPTION variant's own skills — the registry-driven
+//          arm covers only variant_scoped_skills entries, and the manifest-seeded
+//          KEEP protects exactly the skills the adoption seeded. The new arm
+//          reads the adoption provenance (.claude/adopt-project-decisions.json,
+//          written by every adopt-project run) and, when the project's variant.json
+//          identity has been FLIPPED away from the adoption variant, prunes
+//          proven source-variant-seeded skills — a candidate must be
+//          simultaneously: declared by the source variant template, present in
+//          the project, NOT in the current project manifest (PROJECT_STATE wins),
+//          NOT a recorded foreign skill, NOT declared by the target variant, NOT
+//          common-owned. Pure selection logic in
+//          scripts/helpers/adoption-provenance.ts (unit-tested); any missing or
+//          malformed input skips the arm (fail-safe, never guesses). Identity NOT
+//          flipped → loud INFO only; the manifest-seeded KEEP stays the
+//          documented adoption-protection behavior.
 // v1.112.0 (2026-11-19, T-20261119-005 residual + T-20261119-009 — design
 //          docs/designs/2026-11-19-delivery-riding-records-design.md):
 //          DELIVERY-RIDING RECORDS AND REGISTRY ROWS. R1: a delivered
@@ -1371,6 +1390,13 @@ import {
   scaffoldChangelogEntry,
 } from "./helpers/upgrade-versions.ts";
 import { scanLocalPatches } from "./helpers/local-patch-scan.ts";
+import {
+  declaredSkillNames,
+  isAdoptionIdentityFlipped,
+  listSkillDirNames,
+  loadAdoptionProvenance,
+  selectSourceVariantPruneCandidates,
+} from "./helpers/adoption-provenance.ts";
 import {
   agentsToPrune,
   agentPrunePaths,
@@ -8320,6 +8346,121 @@ console.log("");
 //       Manifest-seeded skills keep the v1.43.0 KEEP behavior (now with a decision row).
 const VARIANT_SCOPE_PRUNE_PASS = "VARIANT-SCOPE SKILL PRUNE";
 console.log("--- VARIANT-SCOPE SKILL PRUNE ---");
+// ── source-variant adoption-residue arm (v1.113.0, T-20261120-001 — design
+//    docs/designs/2026-11-20-adoption-gaps-batch-design.md; U-20261119-002 gap 3).
+// Runs BEFORE the registry-driven loop below: an adoption-residue prune removes
+// exactly the skills the registry arm's cross-variant protection would SKIP loudly
+// (manifest-seeded / unregistered project-adopted), so running it first keeps the
+// decision log contradiction-free. Fail-safe: the arm fires only on the full proof
+// chain (adoption provenance present + source template exists + variant.json
+// identity flipped away from the adoption variant + target differs); every skill
+// additionally passes the six-way conjunction in selectSourceVariantPruneCandidates.
+{
+  const provenance = loadAdoptionProvenance(projectDir);
+  const projectVariantName = (() => {
+    try {
+      const vj = JSON.parse(readFileSync(join(projectDir, "variant.json"), "utf-8")) as { name?: unknown };
+      return typeof vj?.name === "string" && vj.name ? vj.name : null;
+    } catch {
+      return null;
+    }
+  })();
+  // NOTE: templatesDir is templates/<variant> (the TARGET) in this engine — the
+  // SOURCE variant root must be rebuilt from the templates root.
+  const templatesRoot = join(workspaceRoot, "templates");
+  const sourceDir = provenance ? join(templatesRoot, provenance.sourceVariant) : null;
+  const armArmed =
+    provenance !== null &&
+    sourceDir !== null &&
+    existsSync(sourceDir) &&
+    isAdoptionIdentityFlipped(projectVariantName, provenance.sourceVariant) === true &&
+    variant !== provenance.sourceVariant;
+  if (!armArmed) {
+    if (
+      provenance &&
+      variant !== provenance.sourceVariant &&
+      isAdoptionIdentityFlipped(projectVariantName, provenance.sourceVariant) === false
+    ) {
+      console.log(
+        `  ℹ️  adoption provenance: variant.json still self-declares the adoption variant '${provenance.sourceVariant}' while upgrading to '${variant}' — manifest-seeded skills keep their KEEP; flip the identity to enable source-variant residue pruning`,
+      );
+      recordDecision(
+        "skills/ (adoption residue)",
+        "VARIANT_SCOPE_PRUNE",
+        VARIANT_SCOPE_PRUNE_PASS,
+        "SKIP",
+        `identity not flipped — variant.json still self-declares the adoption variant '${provenance.sourceVariant}'; source-variant residue pruning requires the flip (fail-safe, never guesses)`,
+      );
+    }
+  } else {
+    const sourceJsonPath = join(sourceDir!, "variant.json");
+    const sourceDeclared = new Set(
+      existsSync(sourceJsonPath) ? declaredSkillNames(readFileSync(sourceJsonPath, "utf-8")) : [],
+    );
+    const targetJsonPath = join(templatesDir, "variant.json");
+    const targetDeclared = new Set(
+      existsSync(targetJsonPath) ? declaredSkillNames(readFileSync(targetJsonPath, "utf-8")) : [],
+    );
+    const commonSkills = new Set(listSkillDirNames(join(commonDir, "skills")));
+    const presentSkills = new Set<string>();
+    for (const base of PLATFORM_SKILL_BASES) {
+      for (const name of listSkillDirNames(join(projectDir, base))) presentSkills.add(name);
+    }
+    const selection = selectSourceVariantPruneCandidates({
+      provenance,
+      projectVariantName,
+      targetVariant: variant,
+      projectManifestSkills,
+      presentSkills,
+      sourceDeclaredSkills: sourceDeclared,
+      targetDeclaredSkills: targetDeclared,
+      commonSkills,
+    });
+    for (const { skill, reason } of selection.keep) {
+      console.log(`  ⚠️  RESIDUE KEEP ${skill}/  (adoption variant: ${provenance.sourceVariant})  — ${reason}`);
+      recordDecision(
+        `skills/${skill}`,
+        "VARIANT_SCOPE_PRUNE",
+        VARIANT_SCOPE_PRUNE_PASS,
+        "SKIP",
+        `source-variant adoption residue kept — ${reason} (adoption variant: ${provenance.sourceVariant})`,
+      );
+    }
+    let residuePruned = 0;
+    for (const skill of selection.prune) {
+      for (const dir of PLATFORM_SKILL_BASES) {
+        const target = join(projectDir, dir, skill);
+        if (!existsSync(target)) continue;
+        // E2 (DEC-20261111-01 D4): a prune never silently deletes LOCAL-PATCH markers.
+        if (deletionMarkerLossBlocks(`${dir}/${skill}`, "VARIANT_SCOPE_PRUNE", VARIANT_SCOPE_PRUNE_PASS, target))
+          continue;
+        console.log(
+          `  ${dryTag}PRUNE  ${dir}/${skill}/  (adoption variant: ${provenance.sourceVariant} — residue after identity flip)`,
+        );
+        recordDecision(
+          `${dir}/${skill}`,
+          "VARIANT_SCOPE_PRUNE",
+          VARIANT_SCOPE_PRUNE_PASS,
+          "DELETE",
+          `source-variant adoption residue pruned (adoption variant: ${provenance.sourceVariant}; variant.json identity flipped to '${projectVariantName}'; proven source-variant-seeded and undeclared by the project manifest, the target variant, and common — T-20261120-001 residue arm, decision-logged per the T-20261101-001 adjudication: DELETE verdicts are never silent)`,
+        );
+        if (!dryRun) {
+          const gitRm = spawnSync("git", ["-C", projectDir, "rm", "-rf", "--quiet", `${dir}/${skill}`], {
+            encoding: "utf8",
+          });
+          if (gitRm.status !== 0) rmSync(target, { recursive: true, force: true });
+        }
+        residuePruned++;
+      }
+    }
+    if (selection.prune.length === 0) console.log(`  (no source-variant adoption residue — proven set clean)`);
+    else
+      console.log(
+        `  residue pruned: ${residuePruned} path(s) across ${selection.prune.length} source-variant skill(s)`,
+      );
+    syncChanged += residuePruned;
+  }
+}
 {
   const schemaPath = join(workspaceRoot, "docs", "workspace-schema.json");
   const ownedByOther: Array<{ skill: string; owner: string }> = [];

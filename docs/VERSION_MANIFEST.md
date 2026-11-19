@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-19T15:29:20.935Z
+**Generated**: 2026-11-19T16:30:58.969Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -105,7 +105,7 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| adopt-project.ts | 1.6.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
+| adopt-project.ts | 1.7.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
 | agent-create.ts | 1.0.2 | scripts/agent-create.ts | fs, path |
 | agent-delete.ts | 1.0.2 | scripts/agent-delete.ts | fs, path |
 | agent-lifecycle-audit.ts | 1.9.1 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
@@ -213,7 +213,7 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.112.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.113.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.2.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |
