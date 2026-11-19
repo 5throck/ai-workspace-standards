@@ -43,7 +43,7 @@
  *          sync-variant-settings --check (MANAGED_SUBSTRINGS now includes
  *          agent-model-gate).
  *
- * @version 1.3.0
+ * @version 1.4.0
  *
  * v1.1.0 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
  *           R2.4 arm (a), U-20261031-009): dropMissingPathHookEntries() — the
@@ -172,6 +172,58 @@ export function dedupeClaudeSettingsHooks(settings: unknown): DedupeResult {
       kept.push(entry);
     }
     nextHooks[event] = kept;
+  }
+  return { settings: { ...settings, hooks: nextHooks }, removed };
+}
+
+/**
+ * Retired hook commands, keyed by event. The upgrade JSON merge only adds entries, so a
+ * hook the templates stopped shipping would otherwise live on in deployed projects.
+ * WorktreeCreate + `git config core.hooksPath .githooks` prints no worktree path, so Claude
+ * Code worktree creation fails with "WorktreeCreate hook failed". The same command under
+ * SessionStart is legitimate and must stay.
+ */
+export const RETIRED_HOOK_COMMANDS: ReadonlyArray<{ event: string; command: string }> = [
+  { event: "WorktreeCreate", command: "git config core.hooksPath .githooks" },
+];
+
+/**
+ * Remove retired hook commands from a parsed `.claude/settings.json` (pure; no input mutation).
+ * Matches event + exact command; an inner hook is removed, an entry left with no hooks is
+ * removed, and an event left with no entries is removed. Other commands are untouched.
+ */
+export function removeRetiredHookCommands(
+  settings: unknown,
+  retired: ReadonlyArray<{ event: string; command: string }> = RETIRED_HOOK_COMMANDS,
+): DedupeResult {
+  const removed: HookRef[] = [];
+  if (!isPlainObject(settings) || !isPlainObject(settings.hooks)) {
+    return { settings: isPlainObject(settings) ? settings : {}, removed };
+  }
+  const nextHooks: Record<string, unknown> = { ...settings.hooks };
+  for (const [event, eventValue] of Object.entries(settings.hooks)) {
+    const retiredHere = retired.filter((r) => r.event === event).map((r) => r.command);
+    if (retiredHere.length === 0 || !Array.isArray(eventValue)) continue;
+    const keptEntries: unknown[] = [];
+    for (const entry of eventValue) {
+      if (!isPlainObject(entry) || !Array.isArray(entry.hooks)) {
+        keptEntries.push(entry);
+        continue;
+      }
+      const matcher = typeof entry.matcher === "string" ? entry.matcher : "";
+      const keptInner = entry.hooks.filter((h) => {
+        const command = isPlainObject(h) && typeof h.command === "string" ? h.command : null;
+        if (command !== null && retiredHere.includes(command)) {
+          removed.push({ event, matcher, command });
+          return false;
+        }
+        return true;
+      });
+      if (keptInner.length === entry.hooks.length) keptEntries.push(entry);
+      else if (keptInner.length > 0) keptEntries.push({ ...entry, hooks: keptInner });
+    }
+    if (keptEntries.length > 0) nextHooks[event] = keptEntries;
+    else delete nextHooks[event];
   }
   return { settings: { ...settings, hooks: nextHooks }, removed };
 }
