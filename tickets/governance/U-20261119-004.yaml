@@ -1,0 +1,58 @@
+schemaVersion: 1
+id: U-20261119-004
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-19T17:48:31.583+09:00'
+history:
+  - at: '2026-11-19T17:48:31.583+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-20T02:05:30.264+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    download-videos.ts cannot find QuickDL after a standard external-deps
+    install. Its default QuickDL directory is ~/git/project/QuickDL, not the
+    manifest install_dir external/quickdl. Also, `external-deps install` clones
+    the repo but does not create the .venv the adapter requires
+    (.venv/bin/python + cli.py), so the video download fails ("QuickDL not
+    found") and decks fall back to YouTube-only (no offline playback). Expected:
+    adapter defaults to external/quickdl from external-deps.json, and install
+    (or the adapter) provisions the venv or prints an actionable setup command.
+  affected_paths:
+    - scripts/co-deck/download-videos.ts
+    - external-deps.json
+    - scripts/external-deps.ts
+  identity_source: self_declared
+  repro: >-
+    In co-deck: `bun scripts/co-deck/download-videos.ts --project
+    deliverables/<deck-with-video>` → "QuickDL not found at
+    ~/git/project/QuickDL". external/quickdl exists (v1.0.1) but has no .venv.
+    Workaround: `python3.13 -m venv external/quickdl/.venv &&
+    external/quickdl/.venv/bin/pip install -r
+    external/quickdl/requirements.txt`, then `--quickdl-dir external/quickdl`.
+    (python3.12 venv failed at ensurepip on this machine.)
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - info:in_last_delivery scripts/co-deck/download-videos.ts=false
+    - info:in_last_delivery external-deps.json=false
+    - info:in_last_delivery scripts/external-deps.ts=false
+  dedupe_key: 3bd2b7931696694288bf910426aad087573bda90ae041e015e781e248197fed6
+  duplicates:
+    - project: co-deck
+      at: '2026-11-19T17:48:31.583+09:00'

@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: U-20261119-007
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-19T22:00:42.019+09:00
+history:
+  - at: 2026-11-19T22:00:42.019+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'gen-slides-pdf.ts renders two defects on premium-dark decks: (1) two-column overflow — on slides with a right visual panel (hasRight), the hug content card is page-centered and the visual panel is painted AFTER the text, covering the card''s right portion, clipping title/bullet ink mid-glyph; (2) invisible cover title — the bgDrawn title-slide path hardcodes light-bubble ink (C_DARK/C_BODY), so on premium-dark (dark navy card) the S1 title vanishes.'
+  affected_paths:
+    - scripts/co-deck/gen-slides-pdf.ts
+    - scripts/co-deck/lib/pdf-font-patch.ts
+  identity_source: cwd
+  local_workaround_diff: 'Two LOCAL-PATCH (Gate 5, 2026-11-19) fixes in scripts/co-deck/gen-slides-pdf.ts: (1) anchor the content card inside the text column [contentR.x, visR.x] and wrap title/bullets/visual-text to the card inner width (single-column slides unchanged); (2) derive title ink via readableTextOn/readableMutedOn(colors.C_CARD) instead of hardcoded C_DARK/C_BODY, applied also to the profile-slide branch defensively.'
+  repro: 'Build a deck with a right visual panel (e.g., deliverables/2026-11-field-problem-innovation, pitch-enhanced × premium-dark) and export via gen-slides-pdf.ts: on S2/S3/S5 the text card is page-centered and the panel is painted after the text, so title/bullet ink is clipped mid-glyph. On the cover (title slide with full-bleed bg), the title renders in C_DARK/C_BODY ink tuned for a light bubble, invisible on premium-dark''s dark navy card.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=true
+    - info:in_last_delivery scripts/co-deck/lib/pdf-font-patch.ts=false
+  dedupe_key: ba0a1fb407a67bfaa898281f97806a378c57c53b5fdf7df1bc4ecb1e13dbc0bb
+  duplicates:
+    - project: co-deck
+      at: 2026-11-19T22:00:42.019+09:00
