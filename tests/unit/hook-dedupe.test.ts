@@ -16,6 +16,7 @@ import { describe, test, expect } from 'bun:test';
 import {
     dedupeClaudeSettingsHooks,
     analyzeClaudeHookDrift,
+    removeRetiredHookCommands,
 } from '../../scripts/lib/hook-dedupe.ts';
 
 const GIT_CONFIG = 'git config core.hooksPath .githooks';
@@ -151,5 +152,50 @@ describe('analyzeClaudeHookDrift (U-20261031-008 arm 2 — lifecycle-sync-audit 
         const empty = { duplicates: [], overCount: [], missing: [], matcherMismatch: [] };
         expect(analyzeClaudeHookDrift(null, templateSettings())).toEqual(empty);
         expect(analyzeClaudeHookDrift({ hooks: 'nope' }, templateSettings())).toEqual(empty);
+    });
+});
+
+describe('removeRetiredHookCommands', () => {
+    test('removes the retired WorktreeCreate command and drops the emptied event', () => {
+        const input = {
+            permissions: { allow: ['x'] },
+            hooks: {
+                SessionStart: [entry('', GIT_CONFIG)],
+                WorktreeCreate: [entry('', GIT_CONFIG)],
+            },
+        };
+        const { settings, removed } = removeRetiredHookCommands(input);
+        expect(removed).toEqual([{ event: 'WorktreeCreate', matcher: '', command: GIT_CONFIG }]);
+        expect((settings as any).hooks.WorktreeCreate).toBeUndefined();
+        expect((settings as any).hooks.SessionStart).toEqual(input.hooks.SessionStart);
+        expect((settings as any).permissions).toEqual({ allow: ['x'] });
+        expect(input.hooks.WorktreeCreate).toHaveLength(1); // input not mutated
+    });
+
+    test('keeps other hooks in the same WorktreeCreate entry and other entries', () => {
+        const input = {
+            hooks: {
+                WorktreeCreate: [entry('', GIT_CONFIG, PM_BOOTSTRAP), entry('m', PM_BOOTSTRAP)],
+            },
+        };
+        const { settings } = removeRetiredHookCommands(input);
+        expect((settings as any).hooks.WorktreeCreate).toEqual([entry('', PM_BOOTSTRAP), entry('m', PM_BOOTSTRAP)]);
+    });
+
+    test('does not touch the same command under other events, or a different WorktreeCreate command', () => {
+        const input = {
+            hooks: {
+                SessionStart: [entry('', GIT_CONFIG)],
+                WorktreeCreate: [entry('', 'bun scripts/hooks/custom-worktree.ts')],
+            },
+        };
+        const { settings, removed } = removeRetiredHookCommands(input);
+        expect(removed).toEqual([]);
+        expect(settings).toEqual(input);
+    });
+
+    test('is a no-op on settings without hooks and tolerates junk input', () => {
+        expect(removeRetiredHookCommands({ a: 1 }).settings).toEqual({ a: 1 });
+        expect(removeRetiredHookCommands(null).settings).toEqual({});
     });
 });

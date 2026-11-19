@@ -4,9 +4,9 @@
 
 - **Script**: hook-dedupe (scripts/lib/hook-dedupe.ts)
 - **Status**: active
-- **Version**: 1.3.0
+- **Version**: 1.4.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-16
+- **Last Updated**: 2026-11-19
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-31 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -19,9 +19,11 @@ Hook-entry dedupe + drift analysis for .claude/settings.json (U-20261031-008): d
 
 ## Phase History
 
+- **1.4.0** (2026-11-19): RETIRED_HOOK_COMMANDS + removeRetiredHookCommands remove the retired WorktreeCreate git-config hook on upgrade.
 - **1.3.0** (v1.3.0 (2026-11-16, T-20261114-004/-009): v1.2.0 added dropMissingPathCommandEntries (command-bearing top-level key guard for the upgrade JSON_MERGE pass); v1.3.0 added the governance-hook presence arm (missing + matcherMismatch derived from the template side) consumed by lifecycle-sync-audit Check I at error level.)
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
 | 2026-10-31 | production | production | v1.1.0 (design docs/designs/2026-10-31-graft-trail-migration-design.md R2.4 arm (a), U-20261031-009): dropMissingPathHookEntries(template, exists) — the trail-migration JSON_MERGE guard; drops template hook entries whose command references a repo-relative path the exists predicate reports missing (shell-token path extraction: script/config extensions only, `${CLAUDE_PROJECT_DIR:-.}/` interpolation stripped, absolute/`..` tokens ignored, extensionless tokens never candidates); pure, injectable exists for fixture tests. tests/unit/graft-trail-migration.test.ts. | automation-engineer |
 | 2026-10-31 | production | production | v1.0.0 created (spec docs/designs/2026-10-31-template-security-hardening-design.md R2.6, U-20261031-008): both arms of the hook-dedupe/drift design — the upgrade JSON_MERGE normalization (variant graft installs had accumulated exact-duplicate hook entries; co-consult/co-deck carried 5 SessionStart entries vs the template's 2) and the audit drift check. tests/unit/hook-dedupe.test.ts. | automation-engineer |
+| 2026-11-19 | production | production | v1.4.0: removeRetiredHookCommands (retired WorktreeCreate hook removal in upgrade JSON_MERGE) | automation-engineer |

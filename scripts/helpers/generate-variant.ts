@@ -1465,6 +1465,7 @@ function generateClaudeSettings(variantPath: string): string {
   const settingsPath = join(variantPath, ".claude", "settings.json");
   const settings = {
     effortLevel: "high",
+    attribution: { commit: "", pr: "" },
     permissions: {
       deny: ["Bash(git push --force*)", "Bash(git push --force-with-lease*)", "Bash(*--no-verify*)", "Bash(rm -rf *)"],
     },
@@ -1513,19 +1514,6 @@ function generateClaudeSettings(variantPath: string): string {
             },
           ],
           timeout: 60,
-        },
-      ],
-      WorktreeCreate: [
-        {
-          matcher: "",
-          hooks: [
-            {
-              type: "command",
-              command: "git config core.hooksPath .githooks",
-              async: true,
-              statusMessage: "Configuring git hooks in new worktree...",
-            },
-          ],
         },
       ],
       TaskCompleted: [
