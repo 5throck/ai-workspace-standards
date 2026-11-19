@@ -1,7 +1,7 @@
 {
   "version": 1,
   "_comment": "Protected-paths SSOT for the unified 03:00 batch runner's merge predicate (ADR-0105, meeting 2026-11-12). A PR touching any pattern in protectedPaths is hold-for-human-merge: the runner must never merge it, regardless of gate status. Patterns are gitignore-style globs evaluated from the repository root. L0-only - never propagated to templates/ or scaffolded projects. Consumers: the runner prompt's merge predicate (cited by reference) and human PR review. Machine-readable counterpart of ADR-0105 Decision 2.",
-  "note": "Decision of record: docs/adr/0105-unified-batch-runner.md (Decision 2, protected paths hold-for-human-merge). Changes to this file are themselves protected and merge only via human review. See also docs/designs/2026-11-12-unified-batch-runner-design.md (AC-3).",
+  "note": "Decision of record: docs/adr/0105-unified-batch-runner.md (Decision 2, protected paths hold-for-human-merge). Changes to this file are themselves protected and merge only via human review. See also docs/designs/2026-11-12-unified-batch-runner-design.md (AC-3). | v2026-11-20 (meeting 2026-11-20, security-expert finding): this file now lists ITSELF plus the runner-executed gate scripts (upgrade-project, ticket, run-manifest, stop-gate, battery, verify-delivered-versions, contained-run) — previously the list protected the docs it named but not the code the runner executes nor the list itself, so a CLEAN-mergeable PR could delete an entry and widen the next night's merges.",
   "protectedPaths": [
     "docs/adr/**",
     "AGENTS.md",
@@ -17,7 +17,15 @@
     "scripts/hooks/**",
     "CODEOWNERS",
     "Projects/*/external-deps.json",
-    "prompts.manifest.json"
+    "prompts.manifest.json",
+    "docs/protected-paths.json",
+    "scripts/upgrade-project.ts",
+    "scripts/ticket.ts",
+    "scripts/run-manifest.ts",
+    "scripts/stop-gate.ts",
+    "scripts/battery.ts",
+    "scripts/verify-delivered-versions.ts",
+    "scripts/contained-run.ts"
   ],
   "outOfRepoProtected": [
     {

@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261120-004
+kind: manual
+title: >-
+  records integrity (meeting 2026-11-20, auditor):
+  memory/meeting-2026-11-12-unified-batch-runner.md DOES NOT EXIST, yet ADR-0105
+  and the v3/v4 automation prompts both cite it as the hardening authority
+  record for the runner. Two nights of 'was this dissent closed?' questions were
+  answered from ADR-0105's excerpt alone. Decide: (a) reconstruct the transcript
+  from available artifacts with an explicit provenance header stating it is a
+  reconstruction, or (b) amend ADR-0105 and the prompt header to cite ADR-0105's
+  PRESERVED DISSENT block as the authority and drop the dead path.
+  Governance-class, human merge. Second scope item: the runner writes its own
+  reports, its own ledger and its own ticket states — a report claim is evidence
+  only once origin carries it (v4 prompt now requires this check; this ticket
+  covers the backfill audit of the 2026-11-19/20 reports against origin).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-20T07:50:07.995+09:00'
+history:
+  - at: '2026-11-20T07:50:07.995+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
