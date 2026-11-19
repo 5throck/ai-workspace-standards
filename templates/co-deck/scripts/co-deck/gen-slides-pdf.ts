@@ -1,3 +1,25 @@
+// @version 1.16.0 — LOCAL-PATCH(U-20261119-007, design
+//   2026-11-20-co-deck-pipeline-batch-2-design R1a): premium-dark ink contrast +
+//   two-column anchoring. ①bgDrawn ink contrast — the title-slide bubble
+//   (drawBubbleBehind fills colors.C_CARD) drew its title/sub/meta in hardcoded
+//   C_DARK/C_BODY tuned for the light bubble; on premium-dark C_CARD resolves to
+//   dark navy [11,15,25] and C_DARK falls back to the same value (no `dark` key
+//   in the spec), so the cover title rendered at 1:1 contrast — invisible. All
+//   bgDrawn bubble/card ink sites now derive from the actual fill via the
+//   existing readableTextOn/readableMutedOn(colors.C_CARD) helpers (divider-
+//   branch pattern): title slide (title/sub/meta), punchline statement ink,
+//   contact thanks + bullets-fallback primary line, profile name/bio
+//   (defensively). ②two-column anchoring — on standard slides with a right
+//   visual panel (hasRight), the hug content card was page-centered
+//   (cardX = CX + (CW - cardW0)/2, cardW0 from titleW) while bullets anchored
+//   at contentR.x + shiftX and the panel painted AFTER the text, covering the
+//   card's right portion and clipping ink mid-glyph. hasRight decks now anchor
+//   the card inside the text column [contentR.x, visR.x] (cardX = contentR.x,
+//   cardW = colW) and wrap title/bullets to the card inner width
+//   (colW - padX*2 / colW - padX*2 - 6 - px2mm(24)) so no line crosses visR.x;
+//   single-column decks (!hasRight) keep the legacy widths and page-centering
+//   byte-for-byte (identical geometry expressions, shiftX removed as an
+//   identity). lib/pdf-font-patch.ts unaffected (byte-identical project copy).
 // @version 1.15.0 — LOCAL-PATCH(U-20261116-008/-010/-011, design
 //   2026-11-16-co-deck-pdf-html-backport-design PR-1): ①U-010 — the private
 //   frontmatter/override parsers are REPLACED by the shared lib
@@ -1260,14 +1282,18 @@ async function renderTitleSlide(ctx: RenderCtx) {
       r.setFont(true, T_TS_EYEBROW); r.setColor(C_ACCENT);
       r.multiCell(metaR.w, LH_TS_META, eyebrow.toUpperCase(), metaR.x, metaR.y, 'C');
     }
-    r.setFont(true, T_TS_TITLE); r.setColor(bgDrawn ? colors.C_DARK : C_WHITE);
+    // LOCAL-PATCH(upstream-request: U-20261119-007) (Gate 5, 2026-11-19): the bgDrawn ink was hardcoded to C_DARK/C_BODY,
+    // which assumed the zen×white-bubble light card. On dark styles
+    // (premium-dark: C_CARD is dark navy) the title vanished into the bubble.
+    // Derive ink from the actual card color instead.
+    r.setFont(true, T_TS_TITLE); r.setColor(bgDrawn ? readableTextOn(colors.C_CARD) : C_WHITE);
     r.multiCell(titleR.w, LH_TS_TITLE, strip(data.title), titleR.x, titleR.y, 'C');
-    r.setFont(false, T_TS_SUB); r.setColor(bgDrawn ? colors.C_BODY : C_MUTED);
+    r.setFont(false, T_TS_SUB); r.setColor(bgDrawn ? readableMutedOn(colors.C_CARD) : C_MUTED);
     r.multiCell(subR.w, LH_TS_SUB, strip(data.subtitle), subR.x, subR.y, 'C');
     const meta = strip(data.meta);
     if (meta) {
       const metaY = subR.y + LH_TS_SUB + GAP_TS_SUB_META;
-      r.setFont(false, T_TS_META); r.setColor(bgDrawn ? colors.C_BODY : C_META);
+      r.setFont(false, T_TS_META); r.setColor(bgDrawn ? readableMutedOn(colors.C_CARD) : C_META);
       r.multiCell(subR.w, LH_TS_META, meta, subR.x, metaY, 'C');
     }
   }
@@ -1496,7 +1522,11 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   // punch-text — the statement (data.text, fallback title), wrapped at the
   // HTML max-width (textBand), centered on the same axis as the tag/mark/sub above.
   r.setFont(true, T_PUNCH_TEXT);
-  const stmtInk = ctx.bgDrawn === true ? colors.C_DARK : C_WHITE;
+  // LOCAL-PATCH(upstream-request: U-20261119-007) (Gate 5, 2026-11-19): the
+  // statement ink assumed the white-bubble card; on premium-dark (C_CARD dark
+  // navy) it vanished into the bubble. Derive ink from the actual bubble
+  // color (same pattern as the divider branch).
+  const stmtInk = ctx.bgDrawn === true ? readableTextOn(colors.C_CARD) : C_WHITE;
   let sy = y;
   for (const ln of stmtLines) {
     let lx = textX + (textBand - richWidth(r, ln.map(x => ({ ...x, b: true })), T_PUNCH_TEXT)) / 2;
@@ -1577,7 +1607,9 @@ function renderProfileSlide(ctx: RenderCtx) {
 
   // v1.14.6 — name in ink on the drawn white card (C_WHITE was invisible);
   // legacy decks keep white. Bio is body ink (C_BODY); affiliation keeps accent.
-  r.setFont(true,  T_PROF_NAME); r.setColor(bgDrawn ? colors.C_DARK : C_WHITE);
+  // LOCAL-PATCH(upstream-request: U-20261119-007) (Gate 5, 2026-11-19): ink from
+  // the actual card color, defensively (premium-dark C_CARD is dark navy).
+  r.setFont(true,  T_PROF_NAME); r.setColor(bgDrawn ? readableTextOn(colors.C_CARD) : C_WHITE);
   r.cell(bandW, LH_PROF_NAME, nameTxt, bandX, y, 'C');
   y += LH_PROF_NAME + GAP_PROF_NAME_AFFIL;
 
@@ -1585,7 +1617,7 @@ function renderProfileSlide(ctx: RenderCtx) {
   r.cell(bandW, LH_PROF_AFFIL, affilTxt, bandX, y, 'C');
   y += LH_PROF_AFFIL + GAP_PROF_AFFIL_BIO;
 
-  r.setFont(false, T_PROF_BIO); r.setColor(bgDrawn ? colors.C_BODY : C_MUTED);
+  r.setFont(false, T_PROF_BIO); r.setColor(bgDrawn ? readableMutedOn(colors.C_CARD) : C_MUTED);
   for (const line of bioLines) {
     r.cell(bandW, LH_PROF_BIO, line, bandX, y, 'C');
     y += LH_PROF_BIO;
@@ -1664,7 +1696,10 @@ function renderContactSlide(ctx: RenderCtx) {
   // keep C_BODY (already legible ink-muted), note keeps C_ACCENT. Without a
   // drawn background, legacy white on the dark flat surface unchanged.
   r.setFont(true, T_CONT_THANKS);
-  r.setColor(bgDrawn ? colors.C_DARK : C_WHITE);
+  // LOCAL-PATCH(upstream-request: U-20261119-007) (Gate 5, 2026-11-19): thanks
+  // ink from the actual bubble color — premium-dark C_CARD is dark navy, so
+  // the hardcoded C_DARK vanished (same pattern as the divider branch).
+  r.setColor(bgDrawn ? readableTextOn(colors.C_CARD) : C_WHITE);
   r.cell(bandW, LH_CONT_THANKS, thanks, bandX, y, 'C');
   y += LH_CONT_THANKS + GAP_CONT_THANKS_LINE;
 
@@ -1675,7 +1710,7 @@ function renderContactSlide(ctx: RenderCtx) {
   for (let i = 0; i < cLines.length; i++) {
     const primary = primaryFirst && i === 0;
     r.setFont(primary, T_CONT_LINE);
-    r.setColor(primary ? (bgDrawn ? colors.C_DARK : C_WHITE) : C_BODY);
+    r.setColor(primary ? (bgDrawn ? readableTextOn(colors.C_CARD) : C_WHITE) : C_BODY);
     r.cell(bandW, LH_CONT_LINE, cLines[i], bandX, y, 'C');
     y += LH_CONT_LINE;
   }
@@ -1900,8 +1935,19 @@ async function renderStandardSlide(ctx: RenderCtx) {
       }
     }
   } else if (!data.videoId) {
-    const titleH   = r.estimateTextHeight(strip(data.title), hasRight ? titleW : bulTxtW, T_TITLE, LH_TITLE, true);
-    const totalBh  = r.estimateBulletHeight(bullets, bulTxtW - 6, T_BUL, LH_BULLET, LH_BULLET_GAP);
+    // LOCAL-PATCH(upstream-request: U-20261119-007) (Gate 5, 2026-11-19; pitch-enhanced two-column overflow): the
+    // page-centered hug card ran from contentR.x through visR.x, and the right
+    // visual panel (painted AFTER the text) covered the card's right portion —
+    // title/bullet ink clipped mid-glyph. Anchor the card inside the text
+    // column [contentR.x, visR.x] and wrap title/bullets to the card inner
+    // width so no line crosses visR.x. Single-column decks keep legacy widths.
+    const padXCol  = coords.px2mm(40);
+    const colW     = hasRight ? (visR!.x - contentR.x) : coords.CW - coords.px2mm(8);
+    const drawTitleW = hasRight ? Math.max(20, colW - padXCol * 2) : titleW;
+    const drawBulW   = hasRight ? Math.max(20, colW - padXCol * 2 - 6 - coords.px2mm(24))
+                                : bulTxtW - 6;
+    const titleH   = r.estimateTextHeight(strip(data.title), drawTitleW, T_TITLE, LH_TITLE, true);
+    const totalBh  = r.estimateBulletHeight(bullets, drawBulW, T_BUL, LH_BULLET, LH_BULLET_GAP);
     const blockGap = bullets.length > 0 ? coords.px2mm(24) : 0;
 
     const cardMaxH = (coords.PH ?? 0) * 0.90;
@@ -1949,8 +1995,8 @@ async function renderStandardSlide(ctx: RenderCtx) {
     const visTxtOn    = !!(visTitleTxt || visBodyTxt);
     const visTxtGap   = coords.px2mm(28);   // same spacing as the diagram embed
     const visInnerGap = (visTitleTxt && visBodyTxt) ? 5 : 0;
-    const hVt = visTitleTxt ? r.estimateTextHeight(visTitleTxt, bulTxtW - 6, T_VIS_T, LH_VIS_TITLE, true) : 0;
-    const hVb = visBodyTxt  ? r.estimateTextHeight(visBodyTxt,  bulTxtW - 6, T_VIS_B, LH_VIS_BODY, false) : 0;
+    const hVt = visTitleTxt ? r.estimateTextHeight(visTitleTxt, drawBulW, T_VIS_T, LH_VIS_TITLE, true) : 0;
+    const hVb = visBodyTxt  ? r.estimateTextHeight(visBodyTxt,  drawBulW, T_VIS_B, LH_VIS_BODY, false) : 0;
     const visTxtH = visTxtOn ? hVt + visInnerGap + hVb : 0;
 
     const blockH   = titleH + blockGap + totalBh + (diagramImg ? diaGap + diaH : 0) + (visTxtH > 0 ? visTxtGap + visTxtH : 0);
@@ -1968,11 +2014,14 @@ async function renderStandardSlide(ctx: RenderCtx) {
     // clamped to stay inside the printable card area.
     const padX   = coords.px2mm(40);
     const padY   = coords.px2mm(28);
-    const cardW0 = Math.min((hasRight ? titleW : bulTxtW) + padX * 2, coords.CW - coords.px2mm(8));
+    const cardW0 = hasRight
+      ? colW
+      : Math.min(titleW + padX * 2, coords.CW - coords.px2mm(8));
     // LOCAL-PATCH(upstream-request: U-20261105-005) v1.14.1 — card centered horizontally (HTML parity)
-    const cardX  = coords.CX + (coords.CW - cardW0) / 2;
+    // Gate 5 patch (see above): two-column slides anchor the card at the text
+    // column instead of page-centering it under the right visual panel.
+    const cardX  = hasRight ? contentR.x : coords.CX + (coords.CW - cardW0) / 2;
     const cardW  = cardW0;
-    const shiftX = cardX + padX - contentR.x;
     const cardY  = Math.max(cardMinY, blockY - padY);
     const cardH  = Math.min(blockH + padY * 2, cardMaxY - cardY);
     logCard(ctx, cardX, cardY, cardW, cardH);
@@ -1988,9 +2037,9 @@ async function renderStandardSlide(ctx: RenderCtx) {
       const txt = strip(b);
       if (!txt) continue;
       if (by > cardBottom) break;
-      r.drawEllipse(contentR.x + shiftX, by + LH_BULLET * 0.28, 3.2, C_ACCENT);
+      r.drawEllipse(cardX + padX, by + LH_BULLET * 0.28, 3.2, C_ACCENT);
       r.setFont(false, T_BUL); r.setColor(onCardMuted);
-      const afterBul = r.multiCell(bulTxtW - 6, LH_BULLET, txt, contentR.x + shiftX + 6, by, 'L');
+      const afterBul = r.multiCell(drawBulW, LH_BULLET, txt, cardX + padX + 6, by, 'L');
       by = afterBul + LH_BULLET_GAP;
     }
 
@@ -2009,11 +2058,11 @@ async function renderStandardSlide(ctx: RenderCtx) {
       let vy = Math.min(by + visTxtGap, cardY + cardH - padY - visTxtH);
       if (visTitleTxt) {
         r.setFont(true,  T_VIS_T); r.setColor(C_ACCENT);
-        vy = r.multiCell(bulTxtW - 6, LH_VIS_TITLE, visTitleTxt, contentR.x + shiftX, vy, 'L') + visInnerGap;
+        vy = r.multiCell(drawBulW, LH_VIS_TITLE, visTitleTxt, cardX + padX, vy, 'L') + visInnerGap;
       }
       if (visBodyTxt) {
         r.setFont(false, T_VIS_B); r.setColor(onCardText);
-        r.multiCell(bulTxtW - 6, LH_VIS_BODY, visBodyTxt, contentR.x + shiftX, vy, 'L');
+        r.multiCell(drawBulW, LH_VIS_BODY, visBodyTxt, cardX + padX, vy, 'L');
       }
     }
   }
