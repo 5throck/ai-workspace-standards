@@ -1,0 +1,57 @@
+schemaVersion: 1
+id: U-20261119-006
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-19T17:48:31.766+09:00'
+history:
+  - at: '2026-11-19T17:48:31.766+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-20T02:05:30.305+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Storyline output puts internal verification/meta wording on audience-facing
+    slides and scripts: bullet prefixes like "사실 —", "가능성 —", "해석 —"; captions
+    with "(강연자 해석)", "(확정된 사실은 아님)"; script lines like "근거는 없습니다", "독립적인 검증을 거친
+    것은 아니라는 점". The user had to request removal repeatedly. Expected:
+    verification status stays in storyline.md / source_notes only; slide text
+    and narration use natural audience language (attribution like "행정안전부는 …라고
+    밝혔다" is fine). Suggest: (a) storyline agent/skill rule forbidding epistemic
+    labels in bullets/captions/scripts, (b) a lint in the layout gate
+    (estimate-layout --lint or a new check) that fails on bullet prefixes
+    matching ^(사실|가능성|해석|추정|전망)\s*[—:-] and parenthetical meta like (강연자
+    해석)/(확정된 사실은 아님)/(확인 필요).
+  affected_paths:
+    - agents/storyline.md
+    - skills/storyline/SKILL.md
+    - scripts/co-deck/estimate-layout.ts
+  identity_source: self_declared
+  repro: >-
+    Storyline run for deliverables/2026-11-field-problem-innovation with a
+    source base containing unverified items: S11/S15/S17/S18/S20 received meta
+    labels and verification sentences in bullets, captions and scripts.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - info:in_last_delivery agents/storyline.md=false
+    - info:in_last_delivery skills/storyline/SKILL.md=true
+    - info:in_last_delivery scripts/co-deck/estimate-layout.ts=false
+  dedupe_key: 1ee3c3851d1a6644a7af8264e1c2c3d23734a5833a221e8dd720f7d4c5d01524
+  duplicates:
+    - project: co-deck
+      at: '2026-11-19T17:48:31.766+09:00'
