@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261119-009
+kind: manual
+title: >-
+  engine (upgrade-project): three automation gaps from the 2026-11-19 wave
+  adjudications — (a) lifecycle records do not ride SKILL.md version deliveries
+  (records aligned by hand in 15+ instances tonight; the delivery should carry
+  the record bump in the same pass), (b) project spec registries lack
+  standing-spec seeds forcing E5 on pure sync deliveries (seed the standing
+  fleet specs at scaffold and on upgrade), (c)
+  templates/<variant>/scripts/<subdir>/ file copies deliver without SCRIPTS.md
+  rows (humanize-adapter needed the deck/ppt-master precedent row). Needs Design
+  Gate (engine change); evidence in T-20261119-005 (closed)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-19T08:56:41.743+09:00'
+history:
+  - at: '2026-11-19T08:56:41.743+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

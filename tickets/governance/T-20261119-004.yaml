@@ -6,12 +6,32 @@ title: >-
   drift / PROJECT_AHEAD families) — adjudicate per sync-overwrite-policy §6,
   then re-run wave
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-19T03:24:35.395+09:00'
 history:
   - at: '2026-11-19T03:24:35.395+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-19T08:56:23.127+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-19T08:56:23.162+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-19T08:56:23.192+09:00'
+    from: review
+    to: done
+result: >-
+  adjudicated per §6 and wave resumed: 45 rows ADOPT-TEMPLATE (template side
+  carried the recent deliberate co-deck evolution #2053/#2055/#2060/#2061 —
+  agents 11, baselines/styles 15, scripts 17, L0 core 2, html-build 1.8.1);
+  docs/phase-definitions.md PORT project->template (project held the
+  authoritative DEC-20261113-01 Frontmatter Phases Policy); 3 browser.mjs tests
+  PORT (template had retired presentations/ paths). Delivered co-deck#252;
+  merged under billing-wall exception (CI never-started intermittently) with
+  DISCLOSED battery miss — post-hoc triage: 1 pre-existing env failure
+  (gen-slides-pdf font shaping) + 7 template-inherited defects filed as
+  T-20261119-008 (download-videos selftest-vs-script mismatch, html-to-pdf
+  v1.3.x/visual-regression env cases).
 error: null

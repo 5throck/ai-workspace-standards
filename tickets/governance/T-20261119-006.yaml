@@ -10,12 +10,18 @@ title: >-
   un-LOCK) or stays human-only (then the LOCK must actually block the apply
   path)
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-11-19T03:24:42.815+09:00'
 history:
   - at: '2026-11-19T03:24:42.815+09:00'
     from: null
     to: backlog
+  - at: '2026-11-19T08:57:00.603+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-19T08:57:00.623+09:00'
+    from: waiting
+    to: review
 result: null
 error: null

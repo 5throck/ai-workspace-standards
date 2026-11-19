@@ -11,12 +11,32 @@ title: >-
   enumeration delivers templates/<variant>/scripts/<subdir>/ copies without
   SCRIPTS.md rows — humanize-adapter needed the deck precedent row in co-work)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-19T03:24:42.746+09:00'
 history:
   - at: '2026-11-19T03:24:42.746+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-19T08:56:41.649+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-19T08:56:41.670+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-19T08:56:41.688+09:00'
+    from: review
+    to: done
+result: >-
+  concrete instances healed tonight across the fleet: (1) lifecycle-record gaps
+  realigned in co-abap(3)/co-consult(12) during waves + template-side
+  SKILL.md/record pairs now align (vsp-publish 1.1.1 + execution-plan-templates
+  record authored BOTH sides — the empty-seed instance fixed at source); (2)
+  SCRIPTS.md row gaps fixed (co-work humanize-adapter via deck precedent;
+  co-abap vsp 1.1.1; co-deck 8 rows; co-safety 4 rows; root 4 rows); (3)
+  spec-seed gap worked around via E5 on pure sync deliveries with the class
+  documented. ENGINE RESIDUAL split to T-20261119-009 (upgrade-project
+  automation: record-alignment riding deliveries, standing-spec seeding into
+  project registries, subdir SCRIPTS.md rows) — design-gated, not processable
+  in-run.
 error: null
