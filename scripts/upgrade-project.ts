@@ -1387,6 +1387,7 @@ import { selectIgnoredToolingArtifacts } from "./helpers/ignored-tooling.ts";
 import { mergeGitleaksToml } from "./helpers/gitleaks-merge.ts";
 import {
   dedupeClaudeSettingsHooks,
+  removeRetiredHookCommands,
   dropMissingPathCommandEntries,
   dropMissingPathHookEntries,
 } from "./lib/hook-dedupe.ts";
@@ -7322,7 +7323,13 @@ console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) -
           // the merge itself is a no-op so already-accumulated files heal on their next
           // upgrade visit.
           const deduped = dedupeClaudeSettingsHooks(mergedData);
-          const merged = `${JSON.stringify(deduped.settings, null, 2)}\n`;
+          // Retired hooks (e.g. the broken WorktreeCreate git-config hook) are removed so
+          // already-deployed projects stop carrying them; the merge alone only adds entries.
+          const retiredRemoved = removeRetiredHookCommands(deduped.settings);
+          for (const r of retiredRemoved.removed) {
+            console.log(`  RETIRE ${rel}  (removed retired ${r.event} hook: ${r.command})`);
+          }
+          const merged = `${JSON.stringify(retiredRemoved.settings, null, 2)}\n`;
           const changed = merged !== readFileSync(dest, "utf8");
           if (!changed) {
             console.log(`  OK     ${rel}  (json merge — in sync)`);
