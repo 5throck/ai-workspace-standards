@@ -1,8 +1,18 @@
 #!/usr/bin/env bun
 /**
  * Decision Record Chain Validator (ADR-0061)
- * @version 1.1.0
+ * @version 1.2.0
  */
+// v1.2.0 (2026-11-20, upstream U-20261119-001): knowledge_refs to a memory
+//           file archived by archive-memory.ts (dev-sync step 3.8, 7-day
+//           retention) resolve through the local archive (memory/archive/) —
+//           the archival move deletes the tracked live path, which would
+//           otherwise dangle every DEC reference to the archived log. The
+//           archive stays gitignored by design (local preservation only —
+//           docs/designs/2026-11-13-memory-index-link-validator-design.md);
+//           a fresh clone without the local copy fails visible, the accepted
+//           fresh-clone degradation (docs/designs/2026-11-18-memory-union-archival-tier-design.md
+//           R1/R2).
 // v1.1.0 (2026-10-04, spec docs/designs/2026-10-04-ticket-archive-design.md):
 //           knowledge_refs to an archived governance ticket resolve through the
 //           archive directory (tickets/governance/archive/) — the 2026-10-04
@@ -47,11 +57,15 @@ const LEDGER_PATH = join(ROOT, "docs", "evidence", "ledger.md");
 /** True when `ref` points at a governance ticket that now lives in the archive
  * directory instead of the live store (done tickets move to
  * tickets/governance/archive/ after their dwell — spec
- * docs/designs/2026-10-04-ticket-archive-design.md). Existing archive paths
- * need no help: they resolve through the plain existsSync check. */
+ * docs/designs/2026-10-04-ticket-archive-design.md), or at a memory file that
+ * archive-memory.ts has moved to the local-only archive (memory/archive/ —
+ * dev-sync step 3.8, 7-day retention; upstream U-20261119-001). Existing
+ * archive paths need no help: they resolve through the plain existsSync check. */
 function knowledgeRefArchived(root: string, ref: string): boolean {
-  const match = /^tickets\/governance\/([TU]-\d{8}-\d{3,4}\.yaml)$/.exec(ref);
-  return match !== null && existsSync(join(root, "tickets", "governance", "archive", match[1]));
+  const ticket = /^tickets\/governance\/([TU]-\d{8}-\d{3,4}\.yaml)$/.exec(ref);
+  if (ticket !== null) return existsSync(join(root, "tickets", "governance", "archive", ticket[1]));
+  const memory = /^memory\/([^/]+\.md)$/.exec(ref);
+  return memory !== null && existsSync(join(root, "memory", "archive", memory[1]));
 }
 
 const REQUIRED_FIELDS = ["id", "date", "agent", "decision", "alternatives", "status"];
