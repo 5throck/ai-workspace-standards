@@ -1,4 +1,10 @@
-// @version 1.47.0
+// @version 1.48.0
+// v1.48.0 (2026-11-19, T-20261119-009 — design
+//          docs/designs/2026-11-19-delivery-riding-records-design.md): DecisionVerdict
+//          gains RECORD_BUMP (INFO), SCRIPT_ROW_SYNTHESIZED (INFO) and
+//          UNREGISTERED_SCRIPT (ERROR) — the delivery-riding verdicts. All three
+//          fall to pendingKindForDecision's default → null, so no backport gate
+//          kind ever attaches.
 // v1.47.0 (2026-11-19, T-20261118-005 — design
 //          docs/designs/2026-11-18-pin-divergence-symmetry-design.md §6):
 //          DecisionVerdict gains SEED_LAG (WARN) — the report-only row for a
@@ -1535,7 +1541,20 @@ export type DecisionVerdict =
   // of / diverged from the template-seed pin — report-only WARN in the EXTERNAL
   // DEPS pass. Dedicated verdict (option b): structurally cannot block —
   // pendingKindForDecision's default → null, so no gate kind ever attaches.
-  | "SEED_LAG";
+  | "SEED_LAG"
+  // Delivery-riding design (2026-11-19-delivery-riding-records-design R1): the
+  // project's docs/lifecycle/skills/<name>.md was reconciled in the same pass that
+  // delivered the SKILL.md (marker-record refresh or hand-authored metadata align).
+  | "RECORD_BUMP"
+  // Delivery-riding design R2: a delivered main-registry-governed script's
+  // SCRIPTS.md row was synthesized in-pass from the variant sub-registry
+  // (unique bare-basename match; deck-precedent row shape).
+  | "SCRIPT_ROW_SYNTHESIZED"
+  // Delivery-riding design R2 fail-loud arm: a delivered main-registry-governed
+  // script has no row in L0, L1 common, or the variant sub-registry — the copy is
+  // SKIPPED (fail-closed) so a delivery can no longer ship an "Unregistered
+  // script" audit failure. pendingKindForDecision default → null (no gate kind).
+  | "UNREGISTERED_SCRIPT";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1570,6 +1589,9 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   MARKER_LOSS: "ERROR",
   PROJECT_AHEAD: "WARN",
   SEED_LAG: "WARN",
+  RECORD_BUMP: "INFO",
+  SCRIPT_ROW_SYNTHESIZED: "INFO",
+  UNREGISTERED_SCRIPT: "ERROR",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */
