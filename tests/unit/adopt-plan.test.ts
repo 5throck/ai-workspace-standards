@@ -8,15 +8,21 @@
  * skills/, docs/, root), and the refusal-grade scans (secrets, hook managers) must
  * fire on the shapes the security review named.
  *
+ * @version 1.1.0 — T-20261120-001 settling helpers (stack substitution, stub
+ *          detection, hygiene artifacts, context standard assessment).
  * @version 1.0.0
  */
 import { describe, test, expect, afterEach } from 'bun:test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
-  buildAdoptionPlan, deriveDeliveredPaths, detectHookManagerConflicts,
-  findSecretShapedFiles, listForeignSkills, scanCollisions, scanRetainedForeignScripts,
-  scanWorkflowTraces,
+  applyStackSubstitutions, assessContextStandardVersion,
+  ADOPTION_HYGIENE_ROOT_ARTIFACTS,
+  buildAdoptionPlan, deriveDeliveredPaths, detectContextOverlayStubs,
+  detectHookManagerConflicts,
+  findSecretShapedFiles, listForeignSkills, parseStackArg, scanCollisions,
+  scanHygieneRootArtifacts, scanRetainedForeignScripts,
+  scanWorkflowTraces, STACK_ROW_LABELS,
 } from '../../scripts/helpers/adopt-plan.ts';
 
 const scratchRoot = path.resolve(import.meta.dir, '..', '.temp', 'adopt-plan-test');
@@ -204,5 +210,131 @@ describe('buildAdoptionPlan', () => {
     expect(plan.roster).toContain('reviewer');
     expect(plan.deliveredThenRemoved).toContain('variant.json');
     expect(plan.deliveredPathCount).toBeGreaterThan(100); // real templates/common tree
+  });
+});
+
+// ============================================================================
+// T-20261120-001 settling helpers (v1.1.0)
+// ============================================================================
+
+const OVERLAY_SNIPPET = `# Acme — co-unit Configuration
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Language** | [e.g., TypeScript 5+ / Python 3.11+] |
+| **Framework** | [e.g., Next.js / FastAPI / none] |
+| **Database** | [e.g., PostgreSQL + Prisma / SQLite / none] |
+| **Key Libraries** | [e.g., react-query, zod, httpx] |
+| **Package Manager** | [e.g., pnpm / npm / uv] |
+| **Testing** | [e.g., Vitest + Playwright / pytest] |
+
+<!-- VARIANT-INJECT: guidelines [REQUIRED] -->
+<!-- INSTRUCTION: Replace [Domain] with your variant's domain name. -->
+## [Domain] Guidelines
+
+> Replace this placeholder with variant-specific guidelines.
+`;
+
+describe('parseStackArg', () => {
+  test('parses key=value pairs, trims, drops empties and malformed parts', () => {
+    expect(parseStackArg('language=Python 3.11+, framework=FastAPI, testing=pytest')).toEqual({
+      language: 'Python 3.11+',
+      framework: 'FastAPI',
+      testing: 'pytest',
+    });
+    expect(parseStackArg('language=, =x, broken, framework=none')).toEqual({ framework: 'none' });
+    expect(parseStackArg('  ')).toEqual({});
+  });
+  test('values may contain = and spaces', () => {
+    expect(parseStackArg('database=PostgreSQL + Prisma (v6)')).toEqual({ database: 'PostgreSQL + Prisma (v6)' });
+  });
+});
+
+describe('applyStackSubstitutions', () => {
+  test('replaces only the provided label-anchored cells', () => {
+    const out = applyStackSubstitutions(OVERLAY_SNIPPET, { language: 'Python 3.11+', testing: 'pytest' });
+    expect(out).toContain('| **Language** | Python 3.11+ |');
+    expect(out).toContain('| **Testing** | pytest |');
+    expect(out).toContain('| **Framework** | [e.g., Next.js / FastAPI / none] |'); // untouched
+    expect(out).toContain('| **Database** | [e.g., PostgreSQL + Prisma / SQLite / none] |');
+  });
+  test('replaces all six rows when all keys are provided', () => {
+    const stack = Object.fromEntries(STACK_ROW_LABELS.map(({ key }) => [key, `${key}-value`]));
+    const out = applyStackSubstitutions(OVERLAY_SNIPPET, stack);
+    for (const { key, label } of STACK_ROW_LABELS) expect(out).toContain(`| **${label}** | ${key}-value |`);
+    expect(out).not.toContain('[e.g.,');
+  });
+  test('no value change → content unchanged; unknown keys are no-ops; $ in values is literal', () => {
+    expect(applyStackSubstitutions(OVERLAY_SNIPPET, {})).toBe(OVERLAY_SNIPPET);
+    expect(applyStackSubstitutions(OVERLAY_SNIPPET, { nosuchrow: 'x' })).toBe(OVERLAY_SNIPPET);
+    expect(applyStackSubstitutions('| **Language** | [e.g.] |', { language: '$& odd $1 value' })).toBe(
+      '| **Language** | $& odd $1 value |',
+    );
+  });
+  test('values are trimmed into the canonical "| value |" cell shape', () => {
+    expect(applyStackSubstitutions('| **Language** | [e.g.] |', { language: '  Python  ' })).toBe(
+      '| **Language** | Python |',
+    );
+  });
+});
+
+describe('detectContextOverlayStubs', () => {
+  test('flags every marker class on the shipped stub', () => {
+    const markers = detectContextOverlayStubs(OVERLAY_SNIPPET).map((f) => f.marker);
+    expect(markers).toContain('tech-stack placeholder cells');
+    expect(markers).toContain('[Domain] heading');
+    expect(markers).toContain('guidelines INSTRUCTION marker');
+    expect(markers).toContain('guidelines placeholder body');
+  });
+  test('a filled overlay is clean; the section/remediation fields are populated', () => {
+    const stack = Object.fromEntries(STACK_ROW_LABELS.map(({ key }) => [key, 'x']));
+    const filled = applyStackSubstitutions(OVERLAY_SNIPPET, stack)
+      .replace('## [Domain] Guidelines', '## Coding Guidelines')
+      .replace('<!-- INSTRUCTION: Replace [Domain] with your variant\'s domain name. -->\n', '')
+      .replace(/<!-- VARIANT-INJECT: guidelines \[REQUIRED\] -->\n/, '')
+      .replace('> Replace this placeholder with variant-specific guidelines.\n', '')
+      .replace(/<!-- rename[\s\S]*?-->\n/, '');
+    expect(detectContextOverlayStubs(filled)).toEqual([]);
+    const partial = detectContextOverlayStubs(OVERLAY_SNIPPET);
+    for (const f of partial) {
+      expect(f.section.length).toBeGreaterThan(0);
+      expect(f.remediation.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('scanHygieneRootArtifacts (T-20261120-001 gap 2)', () => {
+  test('flags the L2-only root artifacts with reasons; report-only list has no dirs or paths', () => {
+    const hits = scanHygieneRootArtifacts(['README.md', 'PROMOTION_CHECKLIST.md', 'variant.json', 'docs']);
+    expect(hits.map((h) => h.file)).toEqual(['PROMOTION_CHECKLIST.md', 'variant.json']);
+    for (const h of hits) expect(h.reason).toMatch(/L2|scaffold parity/);
+    expect(Object.keys(ADOPTION_HYGIENE_ROOT_ARTIFACTS)).not.toContain('README.md');
+    expect(Object.keys(ADOPTION_HYGIENE_ROOT_ARTIFACTS)).not.toContain('AGENTS.md');
+  });
+  test('clean root → no findings', () => {
+    expect(scanHygieneRootArtifacts(['README.md', 'AGENTS.md', 'package.json'])).toEqual([]);
+    expect(scanHygieneRootArtifacts([])).toEqual([]);
+  });
+});
+
+describe('assessContextStandardVersion (T-20261120-001 gap 4)', () => {
+  const canonical = 'x\n\n*context.md version: 2.16 — Standard Root Files*\n';
+  test('stale: project footer older than canonical', () => {
+    const a = assessContextStandardVersion('*context.md version: 2.9 — old*\n', canonical);
+    expect(a).toEqual({ projectVersion: '2.9', canonicalVersion: '2.16', verdict: 'stale' });
+  });
+  test('no-footer: pre-standard project file', () => {
+    expect(assessContextStandardVersion('# my legacy context, no footer\n', canonical).verdict).toBe('no-footer');
+    expect(assessContextStandardVersion('# my legacy context, no footer\n', canonical).projectVersion).toBeNull();
+  });
+  test('fresh: equal version and project-ahead both stay untouched', () => {
+    expect(assessContextStandardVersion(canonical, canonical).verdict).toBe('fresh');
+    expect(assessContextStandardVersion('*context.md version: 2.17 — project ahead*\n', canonical).verdict).toBe('fresh');
+  });
+  test('major dominates minor; malformed canonical footer does not flip stale to fresh', () => {
+    expect(assessContextStandardVersion('*context.md version: 3.0 — x*\n', canonical).verdict).toBe('fresh');
+    expect(assessContextStandardVersion('*context.md version: 2.15 — x*\n', 'no footer here').verdict).toBe('fresh');
   });
 });
