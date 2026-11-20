@@ -1,14 +1,14 @@
 {
   "$schema": "internal-note://ai-workspace.prompts-manifest — no formal JSON schema; shape is {generatedAt, entries[{id,title,sha256}], doc} and consumers are the prompt-integrity verifier (T-20261112-003) and human governance review; see doc for the update invariant",
-  "generatedAt": "2026-11-20T09:30:00+09:00",
+  "generatedAt": "2026-11-20T15:40:00+09:00",
   "entries": [
     {
       "id": "automation-dfba3ff1-a1df-42e3-b358-7c641f974648",
       "title": "매일 오전 3시 통합 배치 — 티켓·리뷰·리싱크·업그레이드 (meeting-hardened)",
-      "sha256": "e50d661f80ee76b23cec10bda215bff7d6567b6c2b778fa79e81e88914517192",
-      "snapshot": "docs/governance/automation-prompts/runner-v4.snapshot.txt"
+      "sha256": "c91eeb1cad1e9ce1603d4f7c4429646aa91843bbfd15b1c72fdedbe8c586d37c",
+      "snapshot": "docs/governance/automation-prompts/runner-v5.snapshot.txt"
     }
   ],
-  "doc": "Expected SHA256 of each authority-bearing automation prompt. Any change to an automation prompt MUST update this manifest in the same governance change set; drift is detected daily at 06:00 KST by the prompt-integrity verifier (T-20261112-003, ADR-0105 §Prompt-Integrity). Provenance of the initial hashes: the automation records were read out-of-band from the ZCode session log of the dispatching session on 2026-11-12 (CronList/CronCreate are not callable from a dispatched subagent session — the verifier automation itself must be created by the user from a fresh chat; its creation prompt ships in PR #1990's body). The verifier, once created, hashes the live automation 'prompt' fields byte-exact (temp file + shasum -a 256) and compares against this manifest; its own id joins entries at creation time via the same-PR rule.",
-  "coverage": "manifest-only wave: the unified 03:00 batch runner (v4, meeting 2026-11-20). The 06:00 prompt-integrity verifier (T-20261112-003) is STILL NOT CREATED — detection remains zero, so this invariant must not be described as enforced. The sha256 above covers the snapshot file named in `snapshot`; the verifier must hash the LIVE prompt and reconcile against it (drift = alert), which is tracked by T-20261120-004."
+  "doc": "Expected SHA256 of each authority-bearing automation prompt. Any change to an automation prompt MUST update this manifest in the same governance change set; drift is detected daily at 06:00 KST by the prompt-integrity verifier — the verifier OF RECORD is scripts/verify-prompt-integrity.ts scheduled OUT-OF-PROCESS by the host launchd job ai.workspace.prompt-integrity-verify.plist (DEC-20261120-04), not a ZCode automation; a ZCode automation running the same script daily 06:00 remains the documented fallback. The verifier reads the live automation 'prompt' fields byte-exact via bun:sqlite (never the sqlite3 CLI — its read path is not byte-faithful, measured 2026-11-20) and compares against this manifest. Provenance of the initial v4 hashes: the automation records were read out-of-band from the ZCode session log of the dispatching session on 2026-11-12 (CronList/CronCreate are not callable from a dispatched subagent session).",
+  "coverage": "v5 ratification wave (2026-11-20, reconciliation per DEC-20261120-04 / design §T-20261120-002): the unified 03:00 batch runner — the LIVE store text is RATIFIED as v5 (byte-copy snapshot; the live edits match meeting-agreed controls: gitleaks --redact + deleted-blob scan, ledger repair rows, freshness semantics in the STEP I header, and the phantom memory/meeting-2026-11-12-unified-batch-runner.md citation dropped per DEC-20261120-02). The prompt-integrity verifier script is NOT yet landed — detection remains zero until it lands and the launchd plist is installed (T-20261120-002, PR 2), so this invariant must not be described as enforced. The sha256 above covers the snapshot file named in `snapshot`; the verifier must hash the LIVE prompt and reconcile against it (drift = alert)."
 }
