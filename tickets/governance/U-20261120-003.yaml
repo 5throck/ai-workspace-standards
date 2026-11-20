@@ -1,0 +1,84 @@
+schemaVersion: 1
+id: U-20261120-003
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-20T15:28:35.938+09:00'
+history:
+  - at: '2026-11-20T15:28:35.938+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-21T02:52:30.055+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T02:52:30.055+09:00'
+    from: review
+    to: done
+result: >-
+  Verified fixed at source on origin/main (4fbd5f4d). Evidence: (1)
+  workspace-root .claude/settings.json has no WorktreeCreate hook (hooks keys:
+  PreToolUse/PostToolUse/SessionStart/TeammateIdle/TaskCompleted); (2) all 17
+  templates/*/.claude/settings.json (common + co-abap..co-work) contain zero
+  WorktreeCreate occurrences. Fixed by PR #2107 (03bb31cb4 fix: disable
+  co-author attribution and remove broken WorktreeCreate hook), PR #2108
+  (83814fcd7 chore(templates): attribution empty + drop WorktreeCreate hook), PR
+  #2111 (a1350a7e8 fix(upgrade): retire broken WorktreeCreate hook on upgrade;
+  stop generator emitting it — hook-dedupe.ts v1.4.0 RETIRED_HOOK_COMMANDS
+  removes the hook from deployed projects at next upgrade). Note: local
+  Projects/co-deck and Projects/co-design settings.json still carry the stale
+  hook (co-newbiz clean); designed removal path is the next project upgrade per
+  #2111 — not a source defect.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: unsure
+  symptom: >-
+    Starting a Claude Code session in a new git worktree fails with
+    "WorktreeCreate hook failed". In `.claude/settings.json` (around L233),
+    `hooks.WorktreeCreate` runs only `git config core.hooksPath .githooks`, with
+    async: true. In Claude Code, a WorktreeCreate hook replaces the built-in
+    worktree creation: it must create the worktree and print its path. This hook
+    does neither, so no worktree session can start. Expected: worktree sessions
+    start normally. The command is also redundant: core.hooksPath is
+    repository-wide config that every worktree shares, and the SessionStart hook
+    already sets it. Suggested fix: remove the WorktreeCreate block from the
+    template settings.
+  affected_paths:
+    - .claude/settings.json
+  identity_source: client_roots
+  repro: >-
+    1. In a project scaffolded from the template, start a new Claude Code
+    session that uses its own worktree (for example from the desktop app, with a
+    new task in a worktree). 2. The session fails to start with "WorktreeCreate
+    hook failed".
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery .claude/settings.json=true
+  dedupe_key: bec0971a46323694387b8b48b9ce4c735bc450d4a3f4baa8f19ab3f24c051af7
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-20T15:28:35.938+09:00'
+  resolution:
+    outcome: fixed
+    template_version: 0.30.0
+    summary: >-
+      Verified fixed at source on origin/main (4fbd5f4d). Evidence: (1)
+      workspace-root .claude/settings.json has no WorktreeCreate hook (hooks
+      keys: PreToolUse/PostToolUse/SessionStart/TeammateIdle/TaskCompleted); (2)
+      all 17 templates/*/.claude/settings.json (common + co-abap..co-work)
+      contain zero WorktreeCreate occurrences. Fixed by PR #2107 (03bb31cb4 fix:
+      disable co-author attribution and remove broken WorktreeCreate hook), PR
+      #2108 (83814fcd7 chore(templates): attribution empty + drop WorktreeCreate
+      hook), PR #2111 (a1350a7e8 fix(upgrade): retire broken WorktreeCreate hook
+      on upgrade; stop generator emitting it — hook-dedupe.ts v1.4.0
+      RETIRED_HOOK_COMMANDS removes the hook from deployed projects at next
+      upgrade). Note: local Projects/co-deck and Projects/co-design
+      settings.json still carry the stale hook (co-newbiz clean); designed
+      removal path is the next project upgrade per #2111 — not a source defect.

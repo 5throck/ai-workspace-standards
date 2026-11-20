@@ -3,33 +3,46 @@ id: T-20261119-010
 kind: manual
 title: >-
   Unified batch runner: gate STEP I (upgrade waves) on STEP E review passage
-  (owner decision 2026-11-18, option 2 — review-gated upgrades). Owner directive:
-  per-project reviews must run BEFORE Projects/co-* upgrades (ai-workspace root
-  review first, then per-project), and reviews must GATE upgrades. Problem
-  (2026-11-19 run evidence): STEP E degraded to battery-only under budget, yet
-  STEP I delivered 14 projects anyway — systemic findings (T-20261119-005
-  SKILL.md-vs-lifecycle divergence, T-20261119-006 LOCKED-file delivery) surfaced
-  only AFTER the wave landed. The runner design (2026-11-12-unified-batch-runner,
-  R1/AC-1) fixes the ORDER (E before I) but makes neither E's full-scope passage
-  nor its findings a precondition of I. Expected: STEP I gate — proceeds only
-  when (a) STEP E ran at FULL scope (scoped per-project reviews for every
-  project with landings; battery-only degradation defers STEP I waves to the
-  next night with a manifest row naming the degradation — the design already
-  carries carried-wave-first semantics from the 2026-11-18 contention report)
-  AND (b) no open Critical/High STEP C/E finding remains unresolved
-  (ticketed-with-plan findings may pass at PM discretion, recorded in the run
-  log); canary (co-abap full gate cycle) stays required. Amended acceptance:
-  T-20261119-005/-009 root-cause fixes must land before the next gated wave so
-  the gate's first exercise has a clean baseline. Needs Design Gate (ADR-0105 +
-  2026-11-12-unified-batch-runner-design amendment; deadline-table interaction
-  AC-2 — a gated deferral must not breach R5).
+  (owner decision 2026-11-18, option 2 — review-gated upgrades). Owner
+  directive: per-project reviews must run BEFORE Projects/co-* upgrades
+  (ai-workspace root review first, then per-project), and reviews must GATE
+  upgrades. Problem (2026-11-19 run evidence): STEP E degraded to battery-only
+  under budget, yet STEP I delivered 14 projects anyway — systemic findings
+  (T-20261119-005 SKILL.md-vs-lifecycle divergence, T-20261119-006 LOCKED-file
+  delivery) surfaced only AFTER the wave landed. The runner design
+  (2026-11-12-unified-batch-runner, R1/AC-1) fixes the ORDER (E before I) but
+  makes neither E's full-scope passage nor its findings a precondition of I.
+  Expected: STEP I gate — proceeds only when (a) STEP E ran at FULL scope
+  (scoped per-project reviews for every project with landings; battery-only
+  degradation defers STEP I waves to the next night with a manifest row naming
+  the degradation — the design already carries carried-wave-first semantics from
+  the 2026-11-18 contention report) AND (b) no open Critical/High STEP C/E
+  finding remains unresolved (ticketed-with-plan findings may pass at PM
+  discretion, recorded in the run log); canary (co-abap full gate cycle) stays
+  required. Amended acceptance: T-20261119-005/-009 root-cause fixes must land
+  before the next gated wave so the gate's first exercise has a clean baseline.
+  Needs Design Gate (ADR-0105 + 2026-11-12-unified-batch-runner-design
+  amendment; deadline-table interaction AC-2 — a gated deferral must not breach
+  R5).
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-19T00:00:00.000+09:00
+created_at: '2026-11-19T00:00:00.000+09:00'
 history:
-  - at: 2026-11-19T00:00:00.000+09:00
+  - at: '2026-11-19T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-20T22:03:49.140+09:00'
+    from: backlog
+    to: done
+result: >-
+  Fixed by run-manifest.ts v1.1.0 gate-step-i subcommand (runner-hardening PR-3,
+  5throck/ai-workspace-standards PR #2124, merge fe9b1d19a): evaluates
+  projectReviews[] freshness per DEC-20261120-03 (pass + same HEAD, or within 2
+  nights with no unresolved Critical/High), writes gateChecks[] row per project
+  BEFORE any dry-run (a gate that does not fire still writes a row),
+  battery-only STEP E yields zero fresh rows → waves defer per-project via
+  carried-wave-first. 8 unit tests (a-g + b2 freshness arm). Non-blocking
+  invariant preserved: the gate reads only the ledger, never blocks
+  sync/PR/auto-merge.
 error: null

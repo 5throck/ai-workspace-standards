@@ -3,14 +3,35 @@ id: U-20261119-010
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-19T23:37:22.137+09:00
+created_at: '2026-11-19T23:37:22.137+09:00'
 history:
-  - at: 2026-11-19T23:37:22.137+09:00
+  - at: '2026-11-19T23:37:22.137+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-21T00:38:28.872+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T00:39:19.468+09:00'
+    from: review
+    to: done
+  - at: '2026-11-21T00:41:03.104+09:00'
+    from: done
+    to: done
+result: >-
+  Fixed by gen-slides-pdf.ts v1.17.0 (batch-2 PR-A2,
+  5throck/ai-workspace-standards PR #2128, merge 81742f9d0): opt-in frame gate
+  in pitch-enhanced pdf_layout_spec.json (shipped byte-identical to the
+  Projects/co-deck LOCAL-PATCH reference) + framed renderers ported per design
+  §U-010 — rounded .slide frame on darker page,
+  standard/title/divider/contact-with-visual, punchline tracked eyebrow +
+  first-line accent + no quote mark, video frame-centred play + caption chip, bg
+  images/thumbnails/cover fill the frame, in-frame footnotes, maskOutsideFrame
+  post-pass. No-frame decks byte-identical (zen + pitch fixture
+  decompressed-stream identity verified); +10 pins (v1.9.0); U-007 geometry pins
+  repointed to the pitch no-frame sibling. Design:
+  docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md §U-010.
 error: null
 upstream:
   project: co-deck
@@ -19,18 +40,66 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'For pitch-enhanced + premium-dark decks, the PDF from gen-slides-pdf.ts does not match the built HTML deck. HTML draws every slide inside one rounded .slide frame on a darker page. Standard slides there are a two-column grid: section eyebrow above a left-aligned title, `**bold**` bullet runs in accent color, and a right panel with the image plus its .cdk-caption. The PDF instead draws a header bar with the section in the top-left corner, a separate centered text card, plain white bullets, a full-height visual panel without the caption, a punchline that wraps (no first-line accent, extra quote mark), a contact slide without its image, and footnotes outside the frame. Locally fixed with an opt-in `frame` block in the theme pdf_layout_spec.json plus framed renderers (standard/contact/title/divider, punchline and video tweaks, footnotes, frame mask). Code is marked `LOCAL-PATCH(upstream-request: PENDING-FRAME)`.'
+  symptom: >-
+    For pitch-enhanced + premium-dark decks, the PDF from gen-slides-pdf.ts does
+    not match the built HTML deck. HTML draws every slide inside one rounded
+    .slide frame on a darker page. Standard slides there are a two-column grid:
+    section eyebrow above a left-aligned title, `**bold**` bullet runs in accent
+    color, and a right panel with the image plus its .cdk-caption. The PDF
+    instead draws a header bar with the section in the top-left corner, a
+    separate centered text card, plain white bullets, a full-height visual panel
+    without the caption, a punchline that wraps (no first-line accent, extra
+    quote mark), a contact slide without its image, and footnotes outside the
+    frame. Locally fixed with an opt-in `frame` block in the theme
+    pdf_layout_spec.json plus framed renderers (standard/contact/title/divider,
+    punchline and video tweaks, footnotes, frame mask). Code is marked
+    `LOCAL-PATCH(upstream-request: PENDING-FRAME)`.
   affected_paths:
     - scripts/co-deck/gen-slides-pdf.ts
     - docs/html-themes/themes/pitch-enhanced/pdf_layout_spec.json
   identity_source: client_roots
-  repro: Build a pitch-enhanced/premium-dark deck with two-column image slides, a `\n` punchline, and a contact slide with visualImage. Run `bun scripts/co-deck/gen-slides-pdf.ts --project deliverables/<p>` and compare the pages with headless screenshots of the HTML at 1280x720.
+  repro: >-
+    Build a pitch-enhanced/premium-dark deck with two-column image slides, a
+    `\n` punchline, and a contact slide with visualImage. Run `bun
+    scripts/co-deck/gen-slides-pdf.ts --project deliverables/<p>` and compare
+    the pages with headless screenshots of the HTML at 1280x720.
   triage: ready
   flagged: false
   triage_reasons:
     - info:in_last_delivery scripts/co-deck/gen-slides-pdf.ts=true
-    - info:in_last_delivery docs/html-themes/themes/pitch-enhanced/pdf_layout_spec.json=false
+    - >-
+      info:in_last_delivery
+      docs/html-themes/themes/pitch-enhanced/pdf_layout_spec.json=false
   dedupe_key: 821f7e2655df437bf0ecccf56b3347e569129ba2043ef38cd66d959256f156fb
   duplicates:
     - project: co-deck
-      at: 2026-11-19T23:37:22.137+09:00
+      at: '2026-11-19T23:37:22.137+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2128
+    template_version: 0.30.0
+    summary: >-
+      Landed: PR #2128 merged as 81742f9d0 (branch pr/20261119-batch2-pra2;
+      commit aa96efa48, merge 81742f9d0; CI 4/4 green — ubuntu/macos/windows
+      test + gitleaks). gen-slides-pdf.ts 1.16.0 → 1.17.0: the pitch-enhanced
+      pdf_layout_spec.json ships the opt-in `frame` block (project-measured
+      1280×720 geometry verbatim + provenance _comment) and the framed renderers
+      route standard/title/divider (contact-with-visualImage too) when
+      spec.frame is present — rounded .slide frame on the darker page,
+      two-column grid (tracked eyebrow, **bold** accent bullet runs, right panel
+      with image + visualCaption), punchline tracked eyebrow / no ” mark /
+      first-line accent, framed video caption chip, bg images + thumbnails +
+      cover backgrounds fill the frame, footnotes in-frame, and the
+      maskOutsideFrame post-pass clips every layer to the HTML .slide. No-frame
+      decks keep 1.16.0 rendering (decompressed content streams identical
+      old→new; only inherent pdf-lib ModDate differs — raw byte-compare invalid,
+      font embedding nondeterministic old-vs-old). Tests
+      gen-slides-pdf-render.test.ts v1.9.0 (+10 pins: spec gates, source gates,
+      9-op mask signature, pixel probes, in-frame footnotes, punchline
+      first-line accent, video chip, zen quote-mark contrast); U-007 geometry
+      pins repointed to pitch (no-frame sibling). Battery: co-deck per-file
+      parity vs pristine origin/main (identical failure set: U-005 gids family +
+      tall-card ladder + fontpath/Chrome-gated), test:unit green, verify-scripts
+      293/293, audit all-pass. Design 2026-11-20-co-deck-pipeline-batch-2-design
+      §R1b. Ported from the Projects/co-deck LOCAL-PATCH reference (Gate 5,
+      2026-11-19).
