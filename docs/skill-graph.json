@@ -3014,6 +3014,26 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261120-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261120-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261120-03",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261120-04",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -12676,6 +12696,30 @@
     {
       "type": "cites_skill",
       "from": "dec:DEC-20261118-01",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-01",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-02",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-03",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-04",
       "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
     },
