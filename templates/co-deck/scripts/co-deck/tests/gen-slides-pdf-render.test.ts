@@ -1,3 +1,20 @@
+// @version 1.9.0 — batch-2 PR-A2 pins (U-20261119-010, design
+//   2026-11-20-co-deck-pipeline-batch-2-design R1b): opt-in framed PDF↔HTML
+//   parity — spec gates (pitch-enhanced ships the measured `frame` block, no
+//   other theme does), source gates (every frame consumption site checks
+//   spec.frame/layoutSpec.frame presence), framed render pins (post-pass mask
+//   paints the outside-frame margin page_rgb, background covers the frame not
+//   the page, footnotes move inside the frame, visualCaption renders on
+//   standard slides, punchline drops the `”` mark and accents the first
+//   statement line, framed contact two-column with the visual, framed video
+//   caption chip sits bottom-left, no header-bar counter), and legacy-path
+//   contrast pins (the no-frame pitch sibling keeps the header counter and the
+//   legacy two-column card geometry; zen keeps the punchline `”` mark). The
+//   v1.16.0 U-007 geometry pins move to `pitch` — the no-frame sibling of
+//   pitch-enhanced with the identical legacy standard renderer — because the
+//   frame block now routes every pitch-enhanced standard slide to the framed
+//   renderer (the block IS the compat gate, so the legacy path stays exercised
+//   only by no-frame themes).
 // @version 1.8.0 — batch-2 PR-A1 pins (U-20261119-007, design
 //   2026-11-20-co-deck-pipeline-batch-2 R1a): premium-dark bgDrawn ink derives
 //   from the actual card fill — cover title/punchline/contact/profile ink ≠
@@ -1361,7 +1378,13 @@ describe('v1.16.0 U-20261119-007: premium-dark bgDrawn ink derives from the actu
 });
 
 describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column', () => {
-  const PW_PT_EXACT = 338.7 * (72 / 25.4);   // pitch-enhanced page width in pt
+  // v1.9.0 (PR-A2): the frame block now routes EVERY pitch-enhanced standard
+  // slide to the framed renderer (the block is the compat gate), so these
+  // legacy-anchoring pins moved to `pitch` — the no-frame sibling theme with
+  // the same legacy standard renderer (header/title/content/visual/meta
+  // regions). The assertions are relationships, not absolute geometry, so the
+  // theme swap keeps them valid.
+  const PW_PT_EXACT = 338.7 * (72 / 25.4);   // pitch page width in pt
 
   /** Parse the C_VIS_BG panel left edge (pt) from the page stream. pdf-lib
    *  draws the rectangle as a translated path: `rg` then `1 0 0 1 tx ty cm`
@@ -1380,7 +1403,7 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
 
   function makePitchDeck(tag: string, slide: Record<string, any>) {
     const name = `_twocol_${tag}`;
-    const { dir, rel } = renderFixture(name, [], [slide], 'pitch-enhanced', 'premium-dark');
+    const { dir, rel } = renderFixture(name, [], [slide], 'pitch', 'premium-dark');
     mkdirSync(join(dir, 'images'), { recursive: true });
     writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
     const cardsPath = join(dir, 'cards.json');
@@ -1395,8 +1418,8 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
     return { cards, page };
   }
 
-  // The U-007 repro shape: pitch-enhanced two-column slide (content column
-  // [6%..58%], visual panel [52.8%..94.8%]) with a right visual image.
+  // The U-007 repro shape: two-column slide (content column [6%..58%],
+  // visual panel [58.4%..95.7%] on pitch) with a right visual image.
   const twoCol = makePitchDeck(`v_${Date.now()}`, {
     section: 'S1', title: 'Two Column Pin',
     bullets: ['alpha bullet line for the geometry pin', 'beta bullet line for the geometry pin'],
@@ -1437,5 +1460,211 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
     expect(Math.abs(card.x + card.w / 2 - 0.5)).toBeLessThan(0.02);
     const panel = panelLeftPt(singleCol.page);
     expect(panel).toBeNull();                       // no visual panel on this slide
+  });
+});
+
+// ── v1.17.0 U-20261119-010: opt-in framed pitch-enhanced parity ───────────────
+//
+// The frame block IS the compat gate: when the theme's pdf_layout_spec.json
+// declares `frame`, standard/title/divider/contact(with visualImage) slides
+// route to the framed renderers, punchline drops the `”` mark and accents the
+// first statement line, video slides get a bottom-left caption chip, bg
+// images / video thumbnails fill the FRAME, footnotes render inside the frame,
+// and a post-pass mask paints everything outside the rounded frame with
+// frame.page_rgb. Decks whose spec has no `frame` key keep the 1.16.0
+// rendering byte-for-byte (verified at PR time: all decompressed content
+// streams of zen + pitch fixtures are identical old→new; only the embedded
+// ModDate metadata string differs, which is inherent pdf-lib behavior).
+
+const THEMES_ROOT = join(ROOT, 'docs/html-themes/themes');
+const FRAME_PAGE_OP   = C_DARK_OP;                                    // frame.page_rgb [11,15,25]
+const FRAME_ACCENT_OP = `${232 / 255} ${169 / 255} ${62 / 255} rg`;   // frame.accent_rgb [232,169,62]
+const FRAME_VIDEO_CAPTION_OP = '0.92 0.93 0.95 rg';                   // rgb(0.92, 0.93, 0.95)
+// 1280×720 reference viewport maps onto the 338.7×190.5mm page
+// (k = 0.264609375 mm/px); MM_TO_PT = 2.835.
+const FRAME_PX_TO_PT   = (338.7 / 1280) * 2.835;
+const FRAME_BOTTOM_PT  = (720 - 86 - 548) * FRAME_PX_TO_PT;  // frame bottom edge above page bottom (≈64.5pt)
+const FRAME_TEXT_PT    = 12 * FRAME_PX_TO_PT;                // eyebrow/caption/footnote px size (≈9.0pt)
+const FRAME_VIDEO_CAP_PT = 13.6 * FRAME_PX_TO_PT;            // .video-caption chip (≈10.2pt)
+
+/** Real page content streams. Embedded font binaries also contain the byte
+ *  sequences "Tj"/"BT", so require an actual `Tf` operator line too. */
+function pageStreams(pdfPath: string): string[] {
+  return decompressedStreams(pdfPath).filter((s) => s.includes('BT') && s.includes('ET') && /\n\/\S+ [\d.]+ Tf\n/.test(s));
+}
+
+describe('v1.17.0 U-20261119-010: opt-in frame block gates', () => {
+  const spec = JSON.parse(readFileSync(join(THEMES_ROOT, 'pitch-enhanced/pdf_layout_spec.json'), 'utf-8'));
+
+  test('pitch-enhanced ships the frame block with the measured 1280×720 geometry', () => {
+    const f = spec.frame;
+    expect(f).toBeDefined();
+    expect(f.ref_w_px).toBe(1280);
+    // The shipped geometry must stay the measured .slide values (1280×720).
+    expect(f.x_px).toBe(51); expect(f.y_px).toBe(86);
+    expect(f.w_px).toBe(1178); expect(f.h_px).toBe(548); expect(f.radius_px).toBe(20);
+    expect(f.page_rgb).toEqual([11, 15, 25]);    // #0B0F19 darker page
+    expect(f.frame_rgb).toEqual([17, 24, 39]);   // #111827 .slide fill
+    expect(f.panel_rgba).toEqual([255, 255, 255, 0.03]);
+    // Renderer-required FrameSpec keys.
+    for (const k of ['col_x_px', 'col_y_px', 'col_w_px', 'col_h_px', 'panel_x_px', 'panel_w_px',
+      'text_rgb', 'body_rgb', 'accent_rgb', 'muted_rgb',
+      'eyebrow_px', 'eyebrow_lh_px', 'eyebrow_gap_px', 'title_px', 'title_lh_px', 'title_gap_px',
+      'bullet_px', 'bullet_lh_px', 'bullet_gap_px', 'bullet_indent_px',
+      'caption_px', 'caption_lh_px', 'caption_gap_px',
+      'footnote_px', 'footnote_lh_px', 'footnote_bottom_px']) {
+      expect(f[k]).toBeDefined();
+    }
+  });
+
+  test('no other shipped theme declares a frame block (compat gate)', () => {
+    for (const t of ['zen', 'pitch', 'outline', 'vertical', 'outlook']) {
+      const s = JSON.parse(readFileSync(join(THEMES_ROOT, t, 'pdf_layout_spec.json'), 'utf-8'));
+      expect(s.frame).toBeUndefined();
+    }
+  });
+
+  test('source: every frame consumption site is gated on frame presence', () => {
+    const src = readFileSync(TOOL, 'utf-8');
+    // Renderer routing gates.
+    expect(src).toContain('if (ctx.spec.frame && !ctx.data.videoId) return renderFramedStandard(ctx);');
+    expect(src).toContain("if (layoutSpec.frame && type === 'contact' && data.visualImage)");
+    expect(src).toContain("else if (layoutSpec.frame && type === 'title')   renderFramedTitle(ctx);");
+    expect(src).toContain("else if (layoutSpec.frame && type === 'divider')   await renderFramedDivider(ctx);");
+    // Post-pass mask + in-frame footnotes + frame-cover bg/thumbnail gates.
+    expect(src).toMatch(/if \(layoutSpec\.frame\) \{\n\s*const g = frameGeom\(layoutSpec, coords\);\n\s*renderer\.maskOutsideFrame/);
+    expect(src).toMatch(/if \(fns\.length > 0 && layoutSpec\.frame\)/);
+    expect(src.match(/const fg = layoutSpec\.frame \? frameGeom\(layoutSpec, coords\) : null;/g)?.length).toBe(2);
+    // Punchline gates: tracked eyebrow framed-only, `”` mark framed-skipped,
+    // first statement line accent.
+    expect(src).toContain('if (sec && framed)');
+    expect(src).toContain('if (!cardMode && !framed)');
+    expect(src).toContain('const lineInk = framed && li === 0 ? toRGB(spec.frame!.accent_rgb) : stmtInk;');
+    // Video gates: frame-centred play button + bottom-left caption chip.
+    expect(src).toContain('const vg = spec.frame ? frameGeom(spec, coords) : null;');
+    expect(src).toContain('if (pillText && spec.frame)');
+  });
+});
+
+describe.skipIf(!haveFonts)('v1.17.0 U-20261119-010: framed pitch-enhanced render pins', () => {
+  // One 3-slide deck exercising every framed surface: standard (two-column,
+  // caption, in-frame footnotes, per-slide background), two-sentence punchline,
+  // contact-with-visual. BG_PROFILE activates the per-slide background so the
+  // frame-cover pin (photo fills the FRAME, mask repaints the outside-frame
+  // margin) is live on slide 1.
+  function makeFramedDeck(tag: string, slides: Record<string, any>[], profile = BG_PROFILE) {
+    const name = `_framed_${tag}`;
+    const { dir, rel } = renderFixture(name, profile, slides, 'pitch-enhanced', 'premium-dark');
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { dir, pdfPath, pages: pageStreams(pdfPath) };
+  }
+
+  const framed = makeFramedDeck(`m_${Date.now()}`, [
+    { section: 'S1', title: 'Framed Standard Pin', bullets: ['plain alpha bullet', 'bold **accent** bullet'], visualImage: 'images/test.png', visualCaption: 'Caption pin text', footnotes: ['SMR: Small Modular Reactor'], backgroundImage: 'images/test.png' },
+    { isPunchlineSlide: true, section: 'PART 01', title: 'Punch Head', text: 'First sentence lands here\nSecond sentence follows', sub: 'support sub' },
+    { isContactSlide: true, title: '감사합니다', contactEmail: 'a@b.c', contactLinkedIn: 'in/d-pinning', visualImage: 'images/test.png' },
+  ]);
+
+  test('every framed page carries the 9-op page_rgb mask signature', () => {
+    expect(framed.pages.length).toBeGreaterThanOrEqual(3);
+    // Composition per page: the generic C_DARK page fill (1) + the post-pass
+    // mask (4 margin rects + 4 rounded-corner paths = 8). The legacy path has
+    // no mask, so 9 ops is the framed fingerprint.
+    for (const p of framed.pages.slice(0, 3)) {
+      const n = p.split('\n').map((l) => l.trim()).filter((l) => l === FRAME_PAGE_OP).length;
+      expect(n).toBe(9);
+    }
+  });
+
+  test.skipIf(!havePdftoppm)('mask paints the outside-frame margin page_rgb; the frame interior keeps its own surface', () => {
+    const PAGE_RGB = [11, 15, 25], FRAME_BG = [17, 24, 39];
+    // Slide 1: the per-slide background photo covers the FRAME — the
+    // outside-frame margin strip is repainted page_rgb by the mask.
+    const corner = pagePixel(framed.pdfPath, 1, framed.dir, 0.01, 0.01);
+    expect(corner).not.toBeNull();
+    for (let i = 0; i < 3; i++) expect(Math.abs(corner![i] - PAGE_RGB[i])).toBeLessThanOrEqual(2);
+    const margin = pagePixel(framed.pdfPath, 1, framed.dir, 0.01, 0.5);
+    for (let i = 0; i < 3; i++) expect(Math.abs(margin![i] - PAGE_RGB[i])).toBeLessThanOrEqual(2);
+    // Slide 2 (punchline, no background): the frame interior stays flat C_BG
+    // [17,24,39] — the mask only ever paints OUTSIDE the frame.
+    const inner = pagePixel(framed.pdfPath, 2, framed.dir, 0.30, 0.30);
+    for (let i = 0; i < 3; i++) expect(Math.abs(inner![i] - FRAME_BG[i])).toBeLessThanOrEqual(2);
+  });
+
+  test('text layer: caption, in-frame footnotes, contact two-column, two-sentence punchline, no quote mark, no header counter', () => {
+    const txt = extractText(framed.pdfPath);
+    if (txt === null) return; // pdftotext unavailable — structural pins suffice
+    expect(txt).toContain('Caption pin text');                 // visualCaption renders (HTML .cdk-caption parity)
+    expect(txt).toContain('SMR: Small Modular Reactor');       // footnotes drawn INSIDE the frame
+    expect(txt).toContain('a@b.c');                            // framed contact email line
+    expect(txt).toContain('in/d-pinning');                     // framed contact linkedIn line
+    expect(txt).toContain('First sentence lands here');
+    expect(txt).toContain('Second sentence follows');
+    expect(txt).not.toContain('”');                            // the decorative mark is framed-skipped
+    expect(txt).not.toMatch(/\d \/ \d/);                       // no header bar / slide counter on framed pages
+  });
+
+  test('eyebrow/caption/footnote-size runs all sit ABOVE the frame bottom edge (in-frame placement)', () => {
+    // The legacy footnote ladder anchors below the frame (≈41pt baseline);
+    // the framed branch draws at the frame bottom (≈83pt baseline) and the
+    // post-pass mask would erase anything left outside the frame band.
+    const runs = textRunOps(framed.pages[0]).filter((r) => r.size !== null && Math.abs(r.size - FRAME_TEXT_PT) < 0.2);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.y).toBeGreaterThan(FRAME_BOTTOM_PT);
+  });
+
+  test('punchline: first statement line renders in frame accent, the rest in statement ink', () => {
+    const runs = textRunOps(framed.pages[1]);
+    const maxSz = Math.max(...runs.map((r) => r.size));
+    const stmt = runs.filter((r) => r.size === maxSz);
+    expect(stmt.length).toBeGreaterThan(0);
+    const topY = Math.max(...stmt.map((r) => r.y));
+    const bottomY = Math.min(...stmt.map((r) => r.y));
+    expect(topY).toBeGreaterThan(bottomY);                     // two sentence rows
+    // HTML `.slide-title::first-line { color: accent }` parity.
+    for (const r of stmt.filter((r) => r.y === topY)) expect(r.rg).toBe(FRAME_ACCENT_OP);
+    for (const r of stmt.filter((r) => r.y === bottomY)) expect(r.rg).toBe('1 1 1 rg');   // statement ink (bgDrawn=false)
+  });
+
+  // The no-frame side of the punchline gate: zen declares `punchline` and has
+  // no frame block, so the decorative `”` mark MUST still render there.
+  const zenPunch = (() => {
+    const name = `_framed_zenpunch_${Date.now()}`;
+    const { dir, rel } = renderFixture(name, [], [
+      { isPunchlineSlide: true, title: 'Punch Head', text: 'First sentence lands here\nSecond sentence follows', sub: 'support sub' },
+    ], 'zen', 'white-bubble');
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    return { pdfPath: join(dir, `${rel.split(/[\\/]/).pop()}.pdf`) };
+  })();
+
+  test('legacy contrast: a no-frame punchline keeps the decorative quote mark', () => {
+    const txt = extractText(zenPunch.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('”');
+  });
+
+  // Framed video slides keep the legacy standard renderer (play button + full
+  // page link) but the title pill becomes a bottom-left .video-caption chip.
+  const videoRun = (() => {
+    const run = makeFramedDeck(`v_${Date.now()}`, [
+      { section: 'S4', title: 'Video Caption Pin', videoId: 'dQw4w9WgXcQ', videoThumbnail: 'images/test.png' },
+    ], []);
+    return { pdfPath: run.pdfPath, pages: run.pages };
+  })();
+
+  test('framed video slide: title renders as the bottom-left .video-caption chip, not the top pill', () => {
+    expect(videoRun.pages.length).toBeGreaterThanOrEqual(1);
+    const runs = textRunOps(videoRun.pages[0]).filter((r) => r.rg === FRAME_VIDEO_CAPTION_OP);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) {
+      expect(r.size).toBeCloseTo(FRAME_VIDEO_CAP_PT, 1);
+      expect(r.y).toBeLessThan(150);   // legacy pill baseline ≈505pt (page top); framed chip ≈84pt (frame bottom-left)
+    }
   });
 });
