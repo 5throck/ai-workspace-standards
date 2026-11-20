@@ -1,7 +1,7 @@
 ---
 name: handbook
 scope: common
-version: 0.6.0
+version: 0.6.1
 description: >-
   Document Production Workflow — generates searchable, themed handbooks as
   static sites (GitHub Pages). Three modes: standalone handbook, lecture
@@ -42,6 +42,8 @@ Supports three modes:
 - **Standalone**: Topic-based handbook built from scratch
 - **Companion**: Reads cached slide-pipeline outputs (co-deck integration) (Research Package, Images, References, Diagrams, Versions) without re-executing the 11-Stage pipeline
 - **Course site**: Full course with Course Overview + Instructor Guide + chapters
+
+Japanese pages (`<html lang="ja">`) default to Meiryo via a `:root:lang(ja)` `--font-family` override in `handbook-variables.css` (Latin fonts first, then Meiryo, Hiragino Kaku Gothic ProN, Noto Sans JP); templates use `var(--font-family)`, and inline SVG text inherits it.
 
 Dark mode is automatic (3-layer: `:root` light → `@media prefers-color-scheme: dark` auto-detect → `.dark` class manual toggle). Multi-language support via separate HTML files per language (`chapter.html` / `chapter_ko.html` / `chapter_en.html`).
 

@@ -197,7 +197,7 @@
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
 | `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
 | `common/gateguard` | common | 1.0.2 | common/automation-engineer | — | — | — | — |
-| `common/handbook` | common | 0.6.0 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
+| `common/handbook` | common | 0.6.1 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
 | `common/handbook-sync-audit` | common | 1.0.5 | — | — | — | — | — |
 | `common/i18n-audit` | common | 1.0.2 | common/i18n-specialist | — | — | — | — |
 | `common/i18n-formatting` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
