@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-19T22:53:16.061Z
+**Generated**: 2026-11-20T03:49:17.580Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -217,7 +217,7 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.113.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.114.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.2.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |

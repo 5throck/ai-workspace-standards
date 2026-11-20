@@ -1,5 +1,40 @@
 #!/usr/bin/env bun
-// @version 1.113.0
+// @version 1.114.0
+// v1.114.0 (2026-11-20, T-20261120-003 — design
+//          docs/designs/2026-11-20-upgrade-adopt-row-truthfulness-design.md):
+//          VARIANT-SCRIPTS WALK-ABORT FIX — DECISION ROWS NOW COVER EVERY OWNED
+//          PATH. The nested `syncVariantScripts` walk aborted on the FIRST
+//          evolvedDeliveryGuard conflict-skip: `if (!proceeded) return;` (the
+//          versioned arm and the unversioned arm alike) returned out of the
+//          recursive walk function, so every scripts/<variant>/ file visited
+//          after the first skip got NO decision row, NO CONFLICT/SKIP line, and
+//          NO copy from the variant channel — the 2026-11-19 co-deck 0.30.0
+//          wave's persisted manifest carried VARIANT SCRIPTS rows for exactly
+//          one walked file (auto-calibrate.ts, the alphabetically-first
+//          conflict-skip) while the pass owns ~34, and the .mjs/.json surfaces
+//          the common scripts pass never collects (collectScriptFiles is .ts
+//          only) lost both channels at once. An adopt-template grant is parsed
+//          and honored up to that abort, so granted paths after the first skip
+//          were silently dropped on the variant channel — the grant accepted,
+//          the row (via the common channel or a dry run) reading resolved, the
+//          copy never happening. Both arms now use the overlay arm's
+//          `if (proceeded) { ... }` shape: a guard-skip skips ONE file, the
+//          walk continues, and every owned path gets exactly one truthful row
+//          (no double-count — the 2026-11-18 audit 2.69.0 sole-increment
+//          precedent). Also made truthful in the same family: the VARIANT
+//          OVERLAY arm's syncChanged++ no longer counts conflict-skipped files
+//          (moved inside `if (proceeded)`); the common scripts pass's
+//          equal-version and CORE-LOCKED restore arms print the delivered
+//          project path (`scripts/...`) instead of the variant-root-relative
+//          key in their DRIFT/FORK/COPIED lines and pass relPath to
+//          reconcileScriptRegistry. Verified-not-a-bug (row-vs-copy audit, no
+//          change): evolvedDeliveryGuard's PROJECT_EVOLVED arm and
+//          equalVersionRestore both run markerLossBlocks BEFORE recordDecision;
+//          the NO_BASELINE arm's every deliver=true outcome reaches its copy
+//          (a granted marker loss records the override ADOPT row and proceeds);
+//          PROJECT_AHEAD under a grant stays PROJECT_AHEAD (adoption would
+//          downgrade the project copy — the WARN row already states it).
+//          Unit-pinned by tests/unit/upgrade-variant-scripts-walk.test.ts.
 // v1.113.0 (2026-11-20, T-20261120-001 — design
 //          docs/designs/2026-11-20-adoption-gaps-batch-design.md): VARIANT-SCOPE
 //          SKILL PRUNE gains a leading source-variant adoption-residue arm
@@ -5398,7 +5433,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
       if (markerLossBlocks(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projFile, readFileSync(tplFile, "utf8")))
         continue;
       console.log(
-        `  ⚠️  DRIFT (restored to canonical) ${rel}  ${projVer} (content differs from L1 at same version — ADR-0085 D3)`,
+        `  ⚠️  DRIFT (restored to canonical) ${relPath}  ${projVer} (content differs from L1 at same version — ADR-0085 D3)`,
       );
       // D3 decision log: the canonical restore is sanctioned (ADR-0085 D3) but
       // always worth reading — DRIFT_RESTORED (WARN).
@@ -5417,10 +5452,10 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     }
     if (!dryRun) {
       copyFileSync(tplFile, projFile);
-      reconcileScriptRegistry(rel);
+      reconcileScriptRegistry(relPath);
       noteDelivered(relPath);
     }
-    console.log(`  ${dryTag}COPIED: ${rel}`);
+    console.log(`  ${dryTag}COPIED: ${relPath}`);
     syncChanged++;
   } else if (CORE_LOCKED_SCRIPTS.includes(relPath) && projVer !== tplVer) {
     if (!scriptRowGate(relPath)) continue; // delivery-riding R2 fail-loud: no upstream registry row
@@ -5433,7 +5468,7 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     // (ERROR) instead of being erased — surfaces the project's own gate.
     if (markerLossBlocks(relPath, "SYNC", "SYNC_IF_NEWER: scripts/", projFile, readFileSync(tplFile, "utf8"))) continue;
     console.log(
-      `  ⚠️  CORE-SCRIPT FORK ${rel}  project ${projVer} vs template ${tplVer} — locked core script must not be modified; restored to canonical`,
+      `  ⚠️  CORE-SCRIPT FORK ${relPath}  project ${projVer} vs template ${tplVer} — locked core script must not be modified; restored to canonical`,
     );
     recordDecision(
       relPath,
@@ -5445,10 +5480,10 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     );
     if (!dryRun) {
       copyFileSync(tplFile, projFile);
-      reconcileScriptRegistry(rel);
+      reconcileScriptRegistry(relPath);
       noteDelivered(relPath);
     }
-    console.log(`  ${dryTag}COPIED: ${rel}`);
+    console.log(`  ${dryTag}COPIED: ${relPath}`);
     syncChanged++;
   } else if (semverGt(projVer, tplVer)) {
     // E3 (PR-B): project-ahead — never delivered, recorded for backport. Locked core scripts
@@ -5521,38 +5556,47 @@ if (existsSync(variantScriptsSrc)) {
                 );
               },
             });
-            if (!proceeded) return;
-            if (isLocallyModified(projFile)) {
-              console.log(
-                `  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
-              );
-              recordDecision(
-                rel2,
-                "SYNC",
-                "VARIANT SCRIPTS",
-                "CONFLICT",
-                `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`,
-                priorBaselines[rel2],
-                "WARN",
-              );
-            } else {
-              console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
-              recordDecision(
-                rel2,
-                "SYNC",
-                "VARIANT SCRIPTS",
-                "ADOPT",
-                `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`,
-                priorBaselines[rel2],
-              );
+            // v1.114.0 (T-20261120-003): the guard-skip used to `return` out of the
+            // recursive walk, aborting every remaining scripts/<variant>/ file in this
+            // directory frame — no decision row, no copy, no CONFLICT/SKIP line for any
+            // of them (the 2026-11-19 co-deck wave: only auto-calibrate.ts carried a
+            // VARIANT SCRIPTS row; the .mjs/.json walk-only surfaces lost both channels).
+            // A conflict-skip skips ONE file, not the walk — the overlay arm's
+            // `if (proceeded)` shape, so the walk continues and every owned path gets
+            // exactly one truthful row.
+            if (proceeded) {
+              if (isLocallyModified(projFile)) {
+                console.log(
+                  `  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
+                );
+                recordDecision(
+                  rel2,
+                  "SYNC",
+                  "VARIANT SCRIPTS",
+                  "CONFLICT",
+                  `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`,
+                  priorBaselines[rel2],
+                  "WARN",
+                );
+              } else {
+                console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
+                recordDecision(
+                  rel2,
+                  "SYNC",
+                  "VARIANT SCRIPTS",
+                  "ADOPT",
+                  `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`,
+                  priorBaselines[rel2],
+                );
+              }
+              if (!dryRun) {
+                copyFileSync(abs, projFile);
+                reconcileScriptRegistry(rel2);
+                noteDelivered(rel2);
+              }
+              console.log(`  ${dryTag}COPIED: ${rel2}`);
+              syncChanged++;
             }
-            if (!dryRun) {
-              copyFileSync(abs, projFile);
-              reconcileScriptRegistry(rel2);
-              noteDelivered(rel2);
-            }
-            console.log(`  ${dryTag}COPIED: ${rel2}`);
-            syncChanged++;
           } else if (projVer === tplVer && fileHash(abs) !== fileHash(projFile)) {
             // E3 (PR-B): equal-version fork — restore only on baseline / vintage provenance.
             if (equalVersionRestore(rel2, "SYNC", "VARIANT SCRIPTS", projFile, readFileSync(abs, "utf8"), projVer)) {
@@ -5599,33 +5643,38 @@ if (existsSync(variantScriptsSrc)) {
                 );
               },
             });
-            if (!proceeded) return;
-            if (isLocallyModified(projFile)) {
-              console.log(`  ⚠️  CONFLICT ${rel2}  (unversioned, local modifications exist — template will overwrite)`);
-              recordDecision(
-                rel2,
-                "SYNC",
-                "VARIANT SCRIPTS",
-                "CONFLICT",
-                "unversioned hash change over uncommitted local modifications (pre-upgrade stash covers rollback)",
-                priorBaselines[rel2],
-                "WARN",
-              );
-            } else {
-              console.log(`  UPDATE ${rel2}  (hash changed)`);
-              recordDecision(
-                rel2,
-                "SYNC",
-                "VARIANT SCRIPTS",
-                "ADOPT",
-                "unversioned hash-gated delivery over the delivered baseline",
-                priorBaselines[rel2],
-              );
+            // v1.114.0 (T-20261120-003): same walk-abort fix as the versioned arm —
+            // a guard-skip here also used to kill the whole recursive walk.
+            if (proceeded) {
+              if (isLocallyModified(projFile)) {
+                console.log(
+                  `  ⚠️  CONFLICT ${rel2}  (unversioned, local modifications exist — template will overwrite)`,
+                );
+                recordDecision(
+                  rel2,
+                  "SYNC",
+                  "VARIANT SCRIPTS",
+                  "CONFLICT",
+                  "unversioned hash change over uncommitted local modifications (pre-upgrade stash covers rollback)",
+                  priorBaselines[rel2],
+                  "WARN",
+                );
+              } else {
+                console.log(`  UPDATE ${rel2}  (hash changed)`);
+                recordDecision(
+                  rel2,
+                  "SYNC",
+                  "VARIANT SCRIPTS",
+                  "ADOPT",
+                  "unversioned hash-gated delivery over the delivered baseline",
+                  priorBaselines[rel2],
+                );
+              }
+              if (!dryRun) copyFileSync(abs, projFile);
+              noteDelivered(rel2);
+              console.log(`  ${dryTag}COPIED: ${rel2}`);
+              syncChanged++;
             }
-            if (!dryRun) copyFileSync(abs, projFile);
-            noteDelivered(rel2);
-            console.log(`  ${dryTag}COPIED: ${rel2}`);
-            syncChanged++;
           } else {
             console.log(`  OK     ${rel2}  (hash match)`);
             noteParity(rel2); // A2
@@ -5737,8 +5786,11 @@ if (existsSync(variantScriptsSrc)) {
           if (!dryRun) copyFileSync(src, projFile);
           noteDelivered(rel2);
           console.log(`  ${dryTag}COPIED: ${rel2}`);
+          // v1.114.0 (T-20261120-003): moved inside `if (proceeded)` — a
+          // conflict-skipped overlay script never changed anything, so counting it
+          // inflated the pass's changed-files summary.
+          syncChanged++;
         }
-        syncChanged++;
       } else if (semverGt(projVer, tplVer)) {
         recordProjectAhead(rel2, "SYNC", "VARIANT SCRIPTS", projVer, tplVer, readFileSync(src, "utf8"));
       } else {

@@ -7,6 +7,18 @@
       "reason": "Claude Code plugin distribution project (plugin.json + commands/), not a template-derived variant project: no variant.json, no template sync obligation; last template sync (2026-10-03, template 0.10.0) is historical residue, not an open obligation. Architecture map depicts the L3 fleet as 16 projects without it.",
       "decided": "2026-11-07",
       "decision_ref": "DEC-20261107-01"
+    },
+    {
+      "id": "co-deck-worktrees",
+      "reason": "Git-worktree husk of the ROOT workspace repo (shared ../../.git, remote ai-workspace-standards), not a variant project: the Projects/co-* glob admits it whenever the directory exists, and its 'dirty status' was root leakage via upward git walk. Upgrades run against root-mirror content produce meaningless deliveries (T-20261119-007). Removed empty 2026-11-19 and recreated empty 2026-11-20 00:05 KST by tooling — the exclusion is defensive so a recreated husk can never rejoin the fleet. Mechanical derivation (DEC-20261107-01) stays authoritative; this row only pins the known non-members.",
+      "decided": "2026-11-19",
+      "decision_ref": "DEC-20261107-01"
+    },
+    {
+      "id": "co-newbiz-worktrees",
+      "reason": "Git-worktree husk of the ROOT workspace repo (same shape as co-deck-worktrees): root-mirror content, no variant.json, no template sync obligation. Directory currently absent (removed 2026-11-19, verified empty rmdir-only); excluded defensively so a recreation can never rejoin the fleet (T-20261119-007).",
+      "decided": "2026-11-19",
+      "decision_ref": "DEC-20261107-01"
     }
   ]
 }

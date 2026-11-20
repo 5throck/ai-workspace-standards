@@ -13,7 +13,8 @@
  * workspace templates; every spawn-bearing test carries a 60s per-test budget
  * (file joins test-runner FILE_TIME_BUDGETS, suite 300s / test 60s).
  *
- * @version 1.0.0
+ * @version 1.1.0 (T-20261120-003: the arm's FORK line now prints the delivered
+ * project path — `scripts/dev-sync.ts`, not the bare `rel` key; assertions follow)
  */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -96,7 +97,7 @@ describe('core-locked fork arm — version-bumped forks of dev-sync.ts / audit.t
   const apply = run(applyProject);
 
   test('unmarked bumped dev-sync.ts fork: CORE-SCRIPT FORK warning, DRIFT_RESTORED (WARN), canonical restored', () => {
-    expect(apply.out).toContain(`CORE-SCRIPT FORK dev-sync.ts  project ${BUMPED}`);
+    expect(apply.out).toContain(`CORE-SCRIPT FORK scripts/dev-sync.ts  project ${BUMPED}`);
     expect(verdicts(applyProject, FORK_UNMARKED)).toContain('DRIFT_RESTORED');
     const row = decisions(applyProject).find((d) => d.path === FORK_UNMARKED && d.verdict === 'DRIFT_RESTORED');
     expect(row?.severity).toBe('WARN');
@@ -119,7 +120,7 @@ describe('core-locked fork arm — version-bumped forks of dev-sync.ts / audit.t
   }, 60000);
 
   test('dry-run parity: same CORE-SCRIPT FORK / MARKER_LOSS lines, zero writes', () => {
-    expect(dry.out).toContain(`CORE-SCRIPT FORK dev-sync.ts  project ${BUMPED}`);
+    expect(dry.out).toContain(`CORE-SCRIPT FORK scripts/dev-sync.ts  project ${BUMPED}`);
     expect(dry.out).toContain(`MARKER_LOSS (SKIP): ${FORK_MARKED}`);
     expect(read(dryProject, FORK_UNMARKED)).toContain('// unmarked local fork');
     expect(read(dryProject, FORK_MARKED)).toContain('LOCAL-PATCH(project-local)');
