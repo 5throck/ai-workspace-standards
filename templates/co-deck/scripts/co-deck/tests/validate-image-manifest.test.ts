@@ -1,4 +1,13 @@
-// @version 1.3.1
+// @version 1.4.0
+// v1.4.0 (validator v1.6.0 — U-20261119-008 deck-scoped asset paths, batch-2
+// PR-C1, spec docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md §R4):
+// deck-local spellings ./assets/… and deliverables/<deck>/assets/… (own deck
+// only) pass + are tagged deck-local in the report + stay excluded from the
+// pool-wide duplicate scan (same bytes as a pool file does not pool-collide);
+// another deck's assets tree still ERRORs; rule-3 deck dedupe covers
+// deck-local entries (both spellings, same file); missing deck-local file
+// still ERRORs; missing image-manifest.json pinned as a hard ERROR
+// (pool-path gate unchanged — the §R4 auto-degrade is a separate sub-change).
 // v1.3.0 (validator v1.4.0 LOCAL-PATCH — deck-wide photo background doctrine):
 // Rule A amended — scope all/divider-cover with a REGISTERED global background
 // (background_image.path + matching slides[] entry at slide_index -1) passes;
@@ -42,12 +51,20 @@
 //  18. Scope all + global path with NO matching -1 registration entry still
 //      ERRORs (family reuse, unregistered).
 //  19. Registered global background whose file is missing still ERRORs.
+// Covers (U-20261119-008 — deck-scoped asset paths, v1.4.0):
+//  20. Deck-local ./assets/images/… passes, is tagged deck-local, and does not
+//      pool-collide with a same-bytes pool file (pool-wide scan exclusion).
+//  21. Deck-local deliverables/<deck>/assets/images/… (own deck) passes.
+//  22. Another deck's assets tree (deliverables/other-deck/assets/…) ERRORs.
+//  23. Deck-local duplicate content across two slides still ERRORs (rule 3).
+//  24. Deck-local path with a missing file still ERRORs.
+//  25. Missing image-manifest.json stays a hard ERROR (pool gate unchanged).
 //
 // Run via:
 //   bun test scripts/co-deck/tests/validate-image-manifest.test.ts
 
 import { afterAll, describe, expect, test } from 'bun:test';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -511,5 +528,100 @@ describe('validate-image-manifest chapter backdrop groups (v1.5.0, U-20261114-01
     const res = run(dir);
     expect(res.status).toBe(0);
     expect(res.stderr).toContain('no slides[] entry uses that slug');
+  });
+});
+
+// ── Deck-scoped asset paths (v1.6.0, U-20261119-008) ──────────────────────────
+// Deck-private images stay inside the deck's own directory: ./assets/… and
+// deliverables/<this-deck>/assets/… spellings are accepted, tagged deck-local,
+// and excluded from the pool consolidation scope. The pool path policy itself
+// is unchanged (pool entries, missing-manifest hard error).
+
+describe('validate-image-manifest deck-scoped asset paths (v1.6.0, U-20261119-008)', () => {
+  test('deck-local ./assets/… passes, is tagged deck-local, and does not pool-collide', () => {
+    const dir = workspace(null, [{ slide_index: 0, image_role: 'illustrative', slide_title: 'press' }]);
+    // Deck-private press image inside the deck's own assets/ tree, same bytes
+    // as an independent pool file — deck-local must NOT trip the pool-wide
+    // duplicate scan (the file never enters the pool).
+    mkdirSync(join(dir, 'assets', 'images'), { recursive: true });
+    writePng(dir, 'assets/images/press.png', [77, 88, 99]);
+    writePng(join(dir, '..', '..'), 'deliverables/assets/images/pool-copy.png', [77, 88, 99]);
+    const mpath = join(dir, 'image-manifest.json');
+    const m = JSON.parse(readFileSync(mpath, 'utf-8'));
+    m.slides[0].path = './assets/images/press.png';
+    writeFileSync(mpath, JSON.stringify(m, null, 2));
+    const res = run(dir);
+    expect(res.status).toBe(0);
+    expect(res.stderr).not.toContain('shared-pool convention');
+    expect(res.stderr).not.toContain('duplicate image content in the shared pool');
+    expect(res.stdout).toContain('deck-local: 1 image(s)');
+    expect(res.stdout).toContain('excluded from the shared pool and the pool-wide duplicate scan');
+    expect(res.stdout).toContain('./assets/images/press.png');
+    expect(res.stdout).toContain('validate-image-manifest PASSED');
+  });
+
+  test('deck-local deliverables/<deck>/assets/… (own deck) passes and is tagged deck-local', () => {
+    const dir = workspace(null, [{ slide_index: 0, image_role: 'illustrative', slide_title: 'press' }]);
+    mkdirSync(join(dir, 'assets', 'images'), { recursive: true });
+    writePng(dir, 'assets/images/press.png', [11, 12, 13]);
+    const mpath = join(dir, 'image-manifest.json');
+    const m = JSON.parse(readFileSync(mpath, 'utf-8'));
+    m.slides[0].path = 'deliverables/proj/assets/images/press.png';
+    writeFileSync(mpath, JSON.stringify(m, null, 2));
+    const res = run(dir);
+    expect(res.status).toBe(0);
+    expect(res.stdout).toContain('deck-local');
+    expect(res.stdout).toContain('deliverables/proj/assets/images/press.png');
+    expect(res.stdout).toContain('validate-image-manifest PASSED');
+  });
+
+  test("another deck's assets tree is still a path-style ERROR", () => {
+    const dir = workspace(null, [{ slide_index: 0, image_role: 'illustrative', slide_title: 'cross' }]);
+    const mpath = join(dir, 'image-manifest.json');
+    const m = JSON.parse(readFileSync(mpath, 'utf-8'));
+    m.slides[0].path = 'deliverables/other-deck/assets/images/x.png';
+    writeFileSync(mpath, JSON.stringify(m, null, 2));
+    const res = run(dir);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('shared-pool convention');
+    expect(res.stderr).toContain('deliverables/other-deck/assets/images/x.png');
+  });
+
+  test('deck-local duplicate content across two slides still ERRORs (rule 3 intact)', () => {
+    const dir = workspace(null, [
+      { slide_index: 0, image_role: 'illustrative', slide_title: 'a' },
+      { slide_index: 1, image_role: 'illustrative', slide_title: 'b' },
+    ]);
+    mkdirSync(join(dir, 'assets', 'images'), { recursive: true });
+    writePng(dir, 'assets/images/press.png', [5, 6, 7]);
+    const mpath = join(dir, 'image-manifest.json');
+    const m = JSON.parse(readFileSync(mpath, 'utf-8'));
+    m.slides[0].path = './assets/images/press.png';
+    m.slides[1].path = 'deliverables/proj/assets/images/press.png';
+    writeFileSync(mpath, JSON.stringify(m, null, 2));
+    const res = run(dir);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('duplicate image across slides 0, 1');
+  });
+
+  test('deck-local path with a missing file still ERRORs', () => {
+    const dir = workspace(null, [{ slide_index: 0, image_role: 'illustrative', slide_title: 'ghost' }]);
+    const mpath = join(dir, 'image-manifest.json');
+    const m = JSON.parse(readFileSync(mpath, 'utf-8'));
+    m.slides[0].path = './assets/images/ghost.png';
+    writeFileSync(mpath, JSON.stringify(m, null, 2));
+    const res = run(dir);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('image file missing');
+    expect(res.stderr).toContain('./assets/images/ghost.png');
+  });
+
+  test('missing image-manifest.json stays a hard ERROR (pool-path gate unchanged)', () => {
+    const dir = workspace(null, []);
+    rmSync(join(dir, 'image-manifest.json'));
+    const res = run(dir);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toContain('image-manifest.json not found');
+    expect(res.stderr).toContain('validate-image-manifest FAILED (no manifest)');
   });
 });

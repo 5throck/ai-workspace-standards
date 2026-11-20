@@ -1,4 +1,21 @@
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-11-21, U-20261119-008 — spec
+// docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md §R4, owner
+// decision D1 / Option A): deck-scoped asset paths — user-cleared deck-private
+// images no longer have to enter the shared pool. Two new accepted spellings:
+// "./assets/{images,fonts,videos}/…" (deck-relative) and
+// "deliverables/<this-deck>/assets/{images,fonts,videos}/…" (repo-root-relative,
+// accepted ONLY for the deck's own directory — another deck's assets tree
+// stays a path-style ERROR). Deck-scoped entries pass the same per-image
+// checks (existence, content hash, dimensions, aspect, rule-3 deck dedupe)
+// but are tagged "deck-local" in the report and are OUTSIDE the pool
+// consolidation scope: the pool-wide duplicate scan (2d) still walks
+// deliverables/assets/images/ only. Rationale: the old deck-local rejection
+// existed for pool consolidation, not privacy — forcing user-cleared press
+// images into the pool exposed them cross-deck as a side effect. Missing
+// image-manifest.json remains a hard ERROR (Gate 3.5 wiring unchanged); the
+// diagram-only-stage auto-degrade is a separate §R4 sub-change, not landed
+// here.
 // v1.5.0 (2026-11-16, U-20261114-011 — spec docs/designs/2026-11-16-governance-batch-design.md §R7):
 //   background_image.chapters[] — chapter/section-scoped background groups are a
 //   first-class manifest concept. Each entry {chapter, slug} declares that the
@@ -56,7 +73,11 @@
 // referenced in deliverables/<project>/image-manifest.json, then checks:
 //   1. ERROR — path-style violation: an image path outside the shared pool
 //      convention (deliverables/assets/{images,fonts,videos}/… repo-root-relative
-//      or ../assets/{images,fonts,videos}/… deck-relative).
+//      or ../assets/{images,fonts,videos}/… deck-relative). Deck-scoped
+//      spellings (./assets/{images,fonts,videos}/… deck-relative and
+//      deliverables/<this-deck>/assets/{images,fonts,videos}/… repo-root-relative)
+//      are VALID since v1.6.0 — deck-private, tagged deck-local, excluded from
+//      the pool-wide scan (U-20261119-008).
 //   2. ERROR — any image file missing or unreadable.
 //   3. ERROR — two or more slides sharing the same content hash (duplicate image
 //      across the deck). This is the hard block at Gate 3.5: re-curate one of them
@@ -84,7 +105,8 @@
 //   9. ERROR — the same image content (sha256) filed under two or more different
 //      files in the shared pool deliverables/assets/images/ — consolidate pool
 //      copies before the handoff (blocking since v1.3.0, consolidation Follow-up 3;
-//      deck-scoped duplicates remain rule 3 ERRORs).
+//      deck-scoped duplicates remain rule 3 ERRORs; deck-scoped entries live
+//      outside the pool directory and are excluded from this scan — v1.6.0).
 //
 // Dimensions are read with inline zero-dependency parsers for PNG (IHDR),
 // JPEG (SOF marker), and SVG (viewBox / width / height). No external image library.
@@ -98,7 +120,7 @@
 // Exit codes: 0 = pass, 1 = validation errors found (warnings never fail).
 
 import { existsSync, readdirSync, readFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { join, relative, resolve } from 'path';
 import { createHash } from 'crypto';
 
 const args = process.argv.slice(2);
@@ -214,7 +236,7 @@ function aspectTarget(theme: string | null, role: string | undefined): number | 
   return null; // portrait, data-viz, none, unknown → skip
 }
 
-// ── Pool path convention (U-20261114-005) ─────────────────────────────────────
+// ── Path conventions (U-20261114-005 pool; U-20261119-008 deck-scoped) ────────
 
 // Shared-pool bindings come in exactly two shapes:
 //   - repo-root-relative: deliverables/assets/{images,fonts,videos}/… (resolved
@@ -223,16 +245,60 @@ function aspectTarget(theme: string | null, role: string | undefined): number | 
 //     workspace dir — the deck HTML sits in deliverables/<project>/)
 const POOL_STYLE = /^(deliverables|\.\.)\/assets\/(images|fonts|videos)\//;
 
-function resolveAssetPath(relPath: string): string {
-  return relPath.startsWith('../')
-    ? resolve(workspaceDir, relPath)
-    : resolve(instanceRoot, relPath);
+// Deck-scoped bindings (U-20261119-008, batch-2 PR-C1 — owner decision D1 /
+// Option A, design docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md
+// §R4): a user-cleared deck-private image may stay inside the deck's OWN
+// directory:
+//   - deck-relative: ./assets/{images,fonts,videos}/… (resolved against the
+//     workspace dir)
+//   - repo-root-relative: deliverables/<this-deck>/assets/{images,fonts,videos}/…
+//     (resolved against --root; accepted only when <this-deck> IS this
+//     workspace's own directory under deliverables/ — another deck's tree is
+//     neither pool nor this deck's scope and stays an ERROR)
+// Valid but DECK-PRIVATE: deck-local files are never consolidated into the
+// shared pool and are excluded from the pool-wide duplicate scan (2d) — the
+// pool's cross-deck visibility is exactly what the owner declined for these
+// files (the U-008 privacy exposure was a side effect of forced pool
+// consolidation, not a path-style objection). Rule 3 (duplicate content across
+// THIS deck's slides) still applies to deck-local entries; only the
+// pool-side consolidation scope is unchanged.
+const DECK_LOCAL_STYLE = /^\.\/assets\/(images|fonts|videos)\//;
+const DECK_LOCAL_TAIL = /^(images|fonts|videos)\//;
+
+type PathClass = 'pool' | 'deck-local';
+
+// `deliverables/<this-deck>/assets/…` is deck-scoped ONLY when <this-deck> is
+// this workspace's own directory under deliverables/. Returns null when the
+// workspace does not sit at deliverables/<name> (then only the ./ spelling is
+// deck-scoped).
+function deckScopedPrefix(): string | null {
+  const deckRel = relative(instanceRoot, workspaceDir).replaceAll('\\', '/');
+  const m = deckRel.match(/^deliverables\/([^/]+)$/);
+  return m ? `deliverables/${m[1]}/assets/` : null;
 }
 
-function checkPoolPathStyle(label: string, relPath: string): boolean {
-  if (POOL_STYLE.test(relPath)) return true;
-  err(`${label}: path violates the shared-pool convention — must be repo-root-relative "deliverables/assets/{images,fonts,videos}/…" or deck-relative "../assets/{images,fonts,videos}/…" (migrate legacy deck-local or arbitrary paths: move the file into the pool at deliverables/assets/ and rebind) → ${relPath}`);
-  return false;
+function classifyAssetPath(relPath: string): PathClass | null {
+  if (POOL_STYLE.test(relPath)) return 'pool';
+  if (DECK_LOCAL_STYLE.test(relPath)) return 'deck-local';
+  const prefix = deckScopedPrefix();
+  if (prefix !== null && relPath.startsWith(prefix) && DECK_LOCAL_TAIL.test(relPath.slice(prefix.length))) {
+    return 'deck-local';
+  }
+  return null;
+}
+
+function resolveAssetPath(relPath: string): string {
+  if (relPath.startsWith('../') || relPath.startsWith('./')) {
+    return resolve(workspaceDir, relPath);
+  }
+  return resolve(instanceRoot, relPath);
+}
+
+function checkAssetPathStyle(label: string, relPath: string): PathClass | null {
+  const cls = classifyAssetPath(relPath);
+  if (cls) return cls;
+  err(`${label}: path violates the shared-pool convention — must be repo-root-relative "deliverables/assets/{images,fonts,videos}/…", deck-relative "../assets/{images,fonts,videos}/…", or deck-scoped "./assets/{images,fonts,videos}/…" / "deliverables/<this-deck>/assets/{images,fonts,videos}/…" (migrate legacy deck-local or arbitrary paths: move the file into the pool at deliverables/assets/ and rebind — or, for deck-private images the owner declines to pool, rebind under the deck's own assets/) → ${relPath}`);
+  return null;
 }
 
 // ── 0. Args + manifest load ────────────────────────────────────────────────────
@@ -293,6 +359,7 @@ const theme = detectTheme(workspaceDir);
 const hashToSlides = new Map<string, number[]>();
 let imageCount = 0;
 let missingFieldEntries = 0;
+const deckLocalEntries: string[] = [];
 
 for (const slide of slides) {
   const idx = slide.slide_index;
@@ -302,7 +369,9 @@ for (const slide of slides) {
 
   imageCount++;
   idxPath.set(idx, relPath);
-  if (!checkPoolPathStyle(`slide ${idx} (${slide.slide_title ?? '?'})`, relPath)) continue;
+  const pathClass = checkAssetPathStyle(`slide ${idx} (${slide.slide_title ?? '?'})`, relPath);
+  if (!pathClass) continue;
+  if (pathClass === 'deck-local') deckLocalEntries.push(relPath);
   const absPath = resolveAssetPath(relPath);
   if (!existsSync(absPath)) {
     err(`slide ${idx} (${slide.slide_title ?? '?'}): image file missing → ${relPath}`);
@@ -403,9 +472,11 @@ const bgEnabled = !!(bg && bg.enabled);
 const bgScope: string | null = bg ? (bg.scope ?? 'divider-cover') : null;
 const bgCountsScope = bgEnabled && (bgScope === 'all' || bgScope === 'divider-cover');
 
-// Path-style rule applies to background_image.path wherever it is declared.
+// Path-style rule applies to background_image.path wherever it is declared
+// (pool and deck-scoped spellings are both valid; the class is informational
+// here — per-image checks below handle the file itself).
 if (bg && typeof bg.path === 'string' && bg.path) {
-  checkPoolPathStyle('background_image.path', bg.path);
+  checkAssetPathStyle('background_image.path', bg.path);
 }
 
 if (bgEnabled && bgScope === 'individual' && bg.path) {
@@ -445,8 +516,8 @@ if (bgCountsScope) {
         console.log(`  global background registered (slides[] slide_index -1${globalEntry.slug ? ` "${globalEntry.slug}"` : ''}) — scope "${bgScope}" binds it across ${scoped.length} in-scope slide(s) (approved deck-wide backdrop design, v1.4.0 LOCAL-PATCH)`);
       }
       // Rule B3 — the global path never passes through the slides[] loop, so
-      // its file must be checked here.
-      if (POOL_STYLE.test(bg.path)) {
+      // its file must be checked here (pool and deck-scoped spellings alike).
+      if (classifyAssetPath(bg.path)) {
         const bgAbs = resolveAssetPath(bg.path);
         if (!existsSync(bgAbs)) {
           err(`background_image.path file missing → ${bg.path}`);
@@ -502,6 +573,15 @@ if (existsSync(diagManifestPath)) {
 // files in the shared pool deliverables/assets/images/ is consolidation debt
 // that must not ship — consolidate pool copies before the image-curator →
 // html-build handoff. The hard duplicate ERROR (rule 3) stays deck-scoped.
+//
+// Policy split (U-20261119-008, v1.6.0): this scan remains POOL-ONLY — it
+// walks deliverables/assets/images/ and never reaches deck-scoped trees
+// (./assets/…, deliverables/<deck>/assets/…). Deck-scoped entries are valid
+// bindings but deck-PRIVATE by design: user-cleared images stay out of the
+// shared pool because pooling them would expose them cross-deck (the privacy
+// exposure was a side effect of forced pool consolidation — the old
+// deck-local rejection existed for consolidation, not privacy). Deck-local
+// duplicates inside one deck are still caught by rule 3.
 
 const poolDir = join(instanceRoot, 'deliverables/assets/images');
 if (existsSync(poolDir)) {
@@ -534,6 +614,10 @@ if (existsSync(poolDir)) {
 // ── 3. Report ──────────────────────────────────────────────────────────────────
 
 console.log(`\nvalidate-image-manifest: slides=${slides.length} images=${imageCount} theme=${theme ?? '(unknown)'}`);
+if (deckLocalEntries.length > 0) {
+  console.log(`  deck-local: ${deckLocalEntries.length} image(s) — deck-scoped paths (U-20261119-008): deck-private, excluded from the shared pool and the pool-wide duplicate scan`);
+  for (const p of deckLocalEntries) console.log(`    deck-local → ${p}`);
+}
 if (errors > 0 || warnings > 0) {
   console.log(`  ${errors} error(s), ${warnings} warning(s)`);
 }
