@@ -1,7 +1,7 @@
 ---
 name: storyline
-version: "1.1.3"
-last_updated: 2026-11-15
+version: "1.1.4"
+last_updated: 2026-11-21
 role: Storyline architect and slide deck planner for lecture content
 status: active
 tier: medium
@@ -20,7 +20,7 @@ required_skills: [storyline, version]
 lifecycle:
   phase: production
   created: "2026-05-29"
-  last_updated: "2026-06-20"
+  last_updated: "2026-11-21"
   governance: docs/lifecycle/agents/storyline.md
 ---
 
@@ -246,6 +246,7 @@ Only generate language-specific fields for languages listed in `narration.langua
 - Every slide MUST have a `script` field with speaker narration text (for TTS auto-play)
 - If `lecture-profile.md` has `narration.languages`, generate `scriptEn`/`scriptJa` as needed
 - `image_query` must be in English — even for Korean-language lectures
+- **Audience-language gate (U-20261116-003 / U-20261119-006):** no internal verification/meta wording in any slide-visible field — no epistemic bullet prefixes (`사실 —`, `가능성 —`, `해석 —`), no parenthetical asides (`(강연자 해석)`, `(확정된 사실은 아님)`, `(확인 필요)`), no narration disclaimers (`근거는 없습니다`, `독립적인 검증을 거친 것은 아니라는 점`) on slides. Of the three, ONLY the disclaimers may live in the spoken `script` field (owner decision D3 — the presenter speaks the caveat; TTS still reads prefixes/parentheticals aloud, so those stay out of scripts too). Verification status stays in storyline.md / source_notes; narration uses natural attribution. Full ban table, regex, and allowed replacements: `skills/storyline/SKILL.md` Step 3.5 R1 (single source of truth). Enforced by `bun scripts/co-deck/estimate-layout.ts --lint` (meta-wording gate).
 - Always call Version Agent before editing either file
 
 ### ⚠️ Diagram/Chart Slide Mandatory Rule
