@@ -13,7 +13,7 @@ Curated registry for the co-deck variant-exclusive skills (T-20260924-009). One 
 | `presenter-mode` | 1.0.3 | active | html-build | 2026-11-15 | — | co-deck only — dual-window presenter state sync (BroadcastChannel) |
 | `research` | 1.2.3 | active | research | 2026-11-15 | — | co-deck only — web research and source collection for lecture topics |
 | `slide-layout-gate` | 1.0.3 | active | pdf-export | 2026-11-16 | — | co-deck only — slide-content conformance gate (estimate-layout.ts --lint) |
-| `storyline` | 1.5.0 | active | storyline | 2026-11-17 | — | co-deck only — lecture storyline and slide deck composition |
+| `storyline` | 1.6.0 | active | storyline | 2026-11-21 | — | co-deck only — lecture storyline and slide deck composition |
 | `theme-authoring` | 1.0.1 | active | pm | 2026-06-21 | — | co-deck only — theme/style authoring pipeline (template.html + theme.json) |
 | `version` | 1.3.2 | active | version | 2026-11-15 | — | co-deck only — version snapshots before every file modification |
 

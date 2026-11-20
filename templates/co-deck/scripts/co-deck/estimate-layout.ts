@@ -1,4 +1,17 @@
-// @version 1.5.1 — boolean-flag slide schema + shared override parser:
+// @version 1.6.0 — meta-wording gate (U-20261119-006, batch-2 PR-E1):
+//   • --lint gains the audience-language wording check on top of the
+//     content_constraints counts. Three banned pattern families (SKILL
+//     storyline Step 3.5 R1): epistemic bullet prefixes
+//     (사실/가능성/해석/추정/전망 + —/:/-), parenthetical meta asides
+//     ((강연자 해석)/(확정된 사실은 아님)/(확인 필요)), and narration epistemic
+//     disclaimers (근거는 없습니다 / 독립적인 검증을 거친 것은 아니라는 점).
+//   • Slide-visible fields (title, subtitle, text, bullets, visualTitle,
+//     visualDisplay, visualCaption, notes, footnotes) fail on ALL three
+//     families. Script fields (script/scriptEn/scriptJa) fail on bullet
+//     prefixes and parentheticals only — owner decision D3: narration
+//     disclaimers are banned on slides but ALLOWED in the spoken script.
+//   • The wording check applies to every declared-type slide, independent of
+//     content_constraints (a divider caption can carry the defect too).
 // v1.5.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
 //   • lintSlideContent resolves the slide type via lib/slide-type.ts
 //     slideTypeOf() — recognizes the boolean-flag schema current decks emit
@@ -252,6 +265,14 @@ interface SlideDataItem extends SlideSchemaItem {
   text?: string;
   videoId?: string;
   bullets?: (string | { text?: string })[];
+  visualTitle?: string;
+  visualDisplay?: string;
+  visualCaption?: string;
+  notes?: string[];
+  footnotes?: string[];
+  script?: string;
+  scriptEn?: string;
+  scriptJa?: string;
 }
 
 /**
@@ -320,6 +341,97 @@ function effectiveMinimums(
   return { minBullets, minBodyChars };
 }
 
+// ── Meta-wording gate (U-20261119-006, batch-2 PR-E1) ────────────────────────
+// Audience-language gate: internal verification/meta wording must never reach
+// the audience. Three banned pattern families (skills/storyline/SKILL.md
+// Step 3.5 R1):
+//   1. Epistemic bullet prefixes — `사실 —`, `가능성 —`, `해석 —`, `추정 —`,
+//      `전망 —` (label-BEFORE-dash; the pre-existing R1 row covers the
+//      label-AFTER-dash aside headers like `— 해석 주의`).
+//   2. Parenthetical meta asides — `(강연자 해석)`, `(확정된 사실은 아님)`,
+//      `(확인 필요)`.
+//   3. Narration epistemic disclaimers — `근거는 없습니다`,
+//      `독립적인 검증을 거친 것은 아니라는 점`.
+// Slide-visible fields fail on ALL three families. Script fields fail on
+// families 1+2 only — owner decision D3: the caveat-to-script migration row
+// is narrowed so narration disclaimers stay ALLOWED in the spoken script (the
+// presenter speaks them; natural attribution like `행정안전부는 …라고 밝혔다`
+// remains the preferred narration form). Verification status itself stays in
+// storyline.md / source_notes, never on a slide.
+const META_BULLET_PREFIX_RE = /^\s*(사실|가능성|해석|추정|전망)\s*[—:-]/m;
+const META_PAREN_RE = /\(\s*(강연자\s*해석|확정된\s*사실은\s*아님|확인\s*필요)\s*\)/;
+const META_DISCLAIMER_RES: RegExp[] = [
+  /근거는\s*없습니다/,
+  /독립적인\s*검증을\s*거친\s*것은\s*아니라는\s*점/,
+];
+
+interface WordingRule { kind: 'bullet prefix' | 'paren aside' | 'disclaimer'; re: RegExp; }
+const SLIDE_WORDING_RULES: WordingRule[] = [
+  { kind: 'bullet prefix', re: META_BULLET_PREFIX_RE },
+  { kind: 'paren aside', re: META_PAREN_RE },
+  ...META_DISCLAIMER_RES.map(re => ({ kind: 'disclaimer' as const, re })),
+];
+// D3 narrowing: scripts keep the written-form artifact bans (prefixes and
+// parentheticals are not speakable wording) but allow bare disclaimers.
+const SCRIPT_WORDING_RULES: WordingRule[] = SLIDE_WORDING_RULES.filter(r => r.kind !== 'disclaimer');
+
+interface WordingHit { field: string; kind: WordingRule['kind']; snippet: string; }
+
+function scanWording(texts: Array<[string, string]>, rules: WordingRule[]): WordingHit[] {
+  const hits: WordingHit[] = [];
+  for (const [field, text] of texts) {
+    for (const rule of rules) {
+      const m = rule.re.exec(text);
+      if (!m) continue;
+      const start = Math.max(0, m.index - 8);
+      const end = Math.min(text.length, m.index + m[0].length + 12);
+      let snippet = text.slice(start, end).replace(/\s+/g, ' ').trim();
+      if (snippet.length > 48) snippet = `${snippet.slice(0, 45)}…`;
+      hits.push({ field, kind: rule.kind, snippet });
+    }
+  }
+  return hits;
+}
+
+/** Slide-visible text fields (SKILL Step 3.5 R1 scope) as [field, text] pairs. */
+function slideVisibleTexts(s: SlideDataItem): Array<[string, string]> {
+  const out: Array<[string, string]> = [];
+  const push = (field: string, v: unknown) => {
+    if (typeof v === 'string' && v.trim()) out.push([field, v]);
+  };
+  push('title', s.title);
+  push('subtitle', s.subtitle ?? s.sub);
+  push('text', s.text);
+  push('visualTitle', s.visualTitle);
+  push('visualDisplay', s.visualDisplay);
+  push('visualCaption', s.visualCaption);
+  if (Array.isArray(s.bullets)) {
+    s.bullets.forEach((b, i) => {
+      const t = typeof b === 'string' ? b : (b?.text ?? '');
+      if (t.trim()) out.push([`bullets[${i}]`, t]);
+    });
+  }
+  for (const key of ['notes', 'footnotes'] as const) {
+    const arr = s[key];
+    if (Array.isArray(arr)) {
+      arr.forEach((v, i) => {
+        if (typeof v === 'string' && v.trim()) out.push([`${key}[${i}]`, v]);
+      });
+    }
+  }
+  return out;
+}
+
+/** Speaker-script fields (TTS narration) as [field, text] pairs. */
+function scriptTexts(s: SlideDataItem): Array<[string, string]> {
+  const out: Array<[string, string]> = [];
+  for (const key of ['script', 'scriptEn', 'scriptJa'] as const) {
+    const v = s[key];
+    if (typeof v === 'string' && v.trim()) out.push([key, v]);
+  }
+  return out;
+}
+
 function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: string): void {
   const constraints = merged.content_constraints ?? {};
   const slideTypes = merged.slide_types ?? {};
@@ -328,6 +440,7 @@ function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: st
   let passCount = 0;
   let failCount = 0;
   let warnSlides = 0;
+  let wordingFailCount = 0;
 
   slides.forEach((s, i) => {
     const num = i + 1;
@@ -340,6 +453,20 @@ function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: st
       failCount++;
       return;
     }
+
+    // Meta-wording gate (U-20261119-006): runs on every declared-type slide,
+    // independent of content_constraints — a divider caption or a title can
+    // carry the defect just as well as a standard bullet.
+    const wordingHits = [
+      ...scanWording(slideVisibleTexts(s), SLIDE_WORDING_RULES),
+      ...scanWording(scriptTexts(s), SCRIPT_WORDING_RULES),
+    ];
+    for (const h of wordingHits) {
+      rows.push(`| ${num} | ${type} | meta wording: ${h.kind} (${h.field}) | ${h.snippet.replace(/\|/g, '∥')} | ban | FAIL |`);
+      failCount++;
+      wordingFailCount++;
+    }
+
     const c = constraints[type];
     if (!c || Object.keys(c).length === 0) {
       rows.push(`| ${num} | ${type} | no content_constraints declared | — | — | WARN |`);
@@ -379,7 +506,7 @@ function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: st
     }
   });
 
-  console.log(`\n🚧 Layout Gate — content_constraints lint (${slides.length} slides, theme=${theme}):`);
+  console.log(`\n🚧 Layout Gate — content_constraints + meta-wording lint (${slides.length} slides, theme=${theme}):`);
   console.log(`   | # | Type | Check | Actual | Limit | Verdict |`);
   console.log(`   |---|------|-------|--------|-------|---------|`);
   for (const r of rows) console.log(`   ${r}`);
@@ -389,11 +516,15 @@ function lintSlideContent(slides: SlideDataItem[], merged: LayoutSpec, theme: st
   if (failCount > 0) {
     console.error(`\n❌ Layout gate FAILED (${failCount} violation${failCount > 1 ? 's' : ''}) — PDF export is blocked.`);
     console.error(`   Remediation ladder (see skills/slide-layout-gate/SKILL.md):`);
+    console.error(`   0. Rewrite meta wording — strip epistemic labels/asides from slide fields (skills/storyline/SKILL.md Step 3.5 R1); caveat disclaimers move to the speaker script, never the slide (owner decision D3)`);
     console.error(`   1. Cut content — trim title/subtitle, tighten or merge bullets (over-bound rows)`);
     console.error(`   1b. Densify content — merge thin slides or add substance (under-bound "min" rows)`);
     console.error(`   2. Split the slide into two standard slides`);
     console.error(`   3. Reclassify the slide type (Uniform Layout Principle)`);
     console.error(`   4. Record a justified layout_overrides entry in lecture-profile.md (last resort)`);
+    if (wordingFailCount > 0) {
+      console.error(`   Meta wording (${wordingFailCount} row${wordingFailCount > 1 ? 's' : ''}): verification/meta wording is audience-facing — keep the information as natural attribution (e.g. 행정안전부는 …라고 밝혔다) or move it to storyline.md/source_notes; script fields allow spoken disclaimers only (D3).`);
+    }
     process.exit(1);
   }
   console.log(`✅ Layout gate passed.`);

@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-21](2026-11-21.md) | chore(templates): workspace sync (15 files) |
 | [2026-11-20](2026-11-20.md) | fix(validate-decisions): memory/archive resolves DEC memory references (U-20261119-001) |
 | [2026-11-19](2026-11-19.md) | chore(templates): move seed pins quickdl v1.0.1 + im-not-ai v2.4.7 (compat-gated, issue #2096) |
 | [2026-11-18](2026-11-18.md) | docs(trail): record co-deck bgpool PNG leak learning |
@@ -15,8 +16,8 @@
 | [2026-11-16](2026-11-16.md) | chore(templates): workspace sync (61 files) |
 | [2026-11-15](2026-11-15.md) | feat(co-deck): backport project script improvements into templates/co-deck (U-20261114-006/-008/-009, T-20261109-003 batch) |
 | [2026-11-14](2026-11-14.md) | feat(upgrade): country-scoped agents registry relocation (schema pair) + pre-delivery country guard (v1.105.0) — T-20261112-004/-005; orphan mirror removal (T-20261112-006) + SLR fix-text refresh (T-20261112-007); spec 2026-11-14-country-scoped-agents-registry-and-prune-design |
-| [2026-11-13](2026-11-13.md) | chore: workspace sync (0 files) |
-| [2026-11-13](2026-11-13.md) | fix(governance): E2E scaffold validation alignment for upstream triage batch (PR #1991 CI) |
+| 2026-11-13 | chore: workspace sync (0 files) |
+| 2026-11-13 | fix(governance): E2E scaffold validation alignment for upstream triage batch (PR #1991 CI) |
 | 2026-11-12 | test(ci): budget the upgrade-overwrite-protection re-stale loop test - windows 15.03s vs 15s ceiling |
 | 2026-11-11 | fix(hardening): biome compliance for fleet-script-parity v1.2.0 |
 | 2026-11-10 | docs(skills): meeting-facilitation v1.5.0 — committee-form alignment |
