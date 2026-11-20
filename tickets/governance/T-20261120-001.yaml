@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261120-001
+kind: manual
+title: >-
+  design (human merge): amend ADR-0105 Decision 2 + add AC-13 to the registered
+  design spec 2026-11-12-unified-batch-runner-design, per meeting 2026-11-20
+  agreement A. Conditions 7 (ledger write before merge, verify --require-merged
+  at run end) and 8 (delivery completeness via verify-delivered-versions) are
+  TWO FACETS OF ONE INVARIANT and land as a single numbered item in Decision 2 —
+  the architect's ruling: a prompt-only condition would be exactly the prose
+  authority ADR-0105 rejected. AC-13 asserts: every manifest-required field is
+  present BEFORE the merge SHA is written, and a missing field fails the merge
+  rather than logging a gap. Also record in the ADR: (a) the billing-wall
+  exception is SUSPENDED pending owner re-authorization (it was 11 of 15 merges
+  on 2026-11-19); (b) the residual-risk register from the meeting — pre-review
+  containment does NOT close filesystem reads, egress, or a project-authored
+  audit verdict; (c) cap 16 vs cap 3 re-examination is DUE (one week elapsed,
+  never held). PROTECTED PATHS: docs/adr + design spec — human merge required,
+  runner must not merge it.
+priority: high
+status: waiting
+attempts: 0
+created_at: '2026-11-20T07:50:02.939+09:00'
+history:
+  - at: '2026-11-20T07:50:02.939+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-20T13:42:26.000+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null

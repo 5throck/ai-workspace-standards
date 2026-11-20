@@ -1,0 +1,59 @@
+schemaVersion: 1
+id: U-20261119-005
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-19T17:48:31.678+09:00'
+history:
+  - at: '2026-11-19T17:48:31.678+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-20T02:05:30.287+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    pitch-enhanced theme renders defects that need deck-level post-build
+    patches: (1) `.slide-bullets li { display:flex }` makes every inline
+    <strong> a separate flex item, so bold words split into their own column and
+    break sentences on all bullet slides; (2) slidedata `visualCaption` is never
+    rendered, so diagram captions and photo source credits are missing in HTML;
+    (3) contact slide ignores bullets (builder misused
+    contactEmail/contactLinkedIn); (4) punchline renders one h1, so two-line
+    punchlines cannot differ in size; (5) references slide shows an empty visual
+    panel (hidden via fragile #slide-N selector). Post-build patches are lost on
+    any rebuild.
+  affected_paths:
+    - templates/themes/pitch-enhanced
+    - scripts/co-deck/build-theme-deck.ts
+  identity_source: self_declared
+  repro: >-
+    Build deliverables/2026-11-field-problem-innovation (pitch-enhanced ×
+    premium-dark) with build-theme-deck.ts; at 1280×720 any bullet containing
+    **bold** splits into columns; no captions under right-panel images. Local
+    fix: `.slide-bullets
+    li{display:block;position:relative;padding-left:1.4rem}` +
+    `li::before{position:absolute;left:0;top:.1em}` plus a caption-injection
+    script in <style id="deck-overrides"> / <script id="deck-captions-js">.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - 'path_not_template_managed: templates/themes/pitch-enhanced'
+    - info:in_last_delivery templates/themes/pitch-enhanced=false
+    - info:in_last_delivery scripts/co-deck/build-theme-deck.ts=false
+  dedupe_key: ba35eed887ef9191ce26b522fd17ef0fb4a1e562d38c12d7bd45b77c64f1816c
+  duplicates:
+    - project: co-deck
+      at: '2026-11-19T17:48:31.678+09:00'

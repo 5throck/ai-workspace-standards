@@ -60,7 +60,10 @@ fleet membership SSOT (`fleet-membership.json` — L0-only registry,
 DEC-20261107-01), the unified-runner protected-path SSOT
 (`protected-paths.json` — L0-only registry, merge-predicate floor,
 ADR-0105), the unified runner's sanctioned-repairs list
-(`expected-gate-failures.json` — L0-only registry, ADR-0105), and the
+(`expected-gate-failures.json` — L0-only registry, ADR-0105), the unified
+runner's execution-surface allowlist (`runner-exec-allowlist.json` — L0-only
+registry consumed by `scripts/verify-prompt-integrity.ts --exec-closure`,
+design 2026-11-20-runner-hardening-integrity, T-20261120-002), and the
 variant planning pair (`variant-roadmap-2026-q3-q4.md`,
 `variant-benchmark-backlog.md`) — indexed in `index.md`. How-to guides live in
 `guides/`; dated reviews live in `reports/` (2026-10-04 consolidation folded

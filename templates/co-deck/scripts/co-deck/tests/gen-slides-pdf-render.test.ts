@@ -1,3 +1,30 @@
+// @version 1.9.0 — batch-2 PR-A2 pins (U-20261119-010, design
+//   2026-11-20-co-deck-pipeline-batch-2-design R1b): opt-in framed PDF↔HTML
+//   parity — spec gates (pitch-enhanced ships the measured `frame` block, no
+//   other theme does), source gates (every frame consumption site checks
+//   spec.frame/layoutSpec.frame presence), framed render pins (post-pass mask
+//   paints the outside-frame margin page_rgb, background covers the frame not
+//   the page, footnotes move inside the frame, visualCaption renders on
+//   standard slides, punchline drops the `”` mark and accents the first
+//   statement line, framed contact two-column with the visual, framed video
+//   caption chip sits bottom-left, no header-bar counter), and legacy-path
+//   contrast pins (the no-frame pitch sibling keeps the header counter and the
+//   legacy two-column card geometry; zen keeps the punchline `”` mark). The
+//   v1.16.0 U-007 geometry pins move to `pitch` — the no-frame sibling of
+//   pitch-enhanced with the identical legacy standard renderer — because the
+//   frame block now routes every pitch-enhanced standard slide to the framed
+//   renderer (the block IS the compat gate, so the legacy path stays exercised
+//   only by no-frame themes).
+// @version 1.8.0 — batch-2 PR-A1 pins (U-20261119-007, design
+//   2026-11-20-co-deck-pipeline-batch-2 R1a): premium-dark bgDrawn ink derives
+//   from the actual card fill — cover title/punchline/contact/profile ink ≠
+//   card fill (title white via readableTextOn, sub/meta/statement muted ops),
+//   C_DARK fallback source pin; two-column geometry — hasRight card rect left
+//   of the visual panel + no text op crossing it (legacy panel-after-text
+//   z-order kept), single-column card stays page-centered; the v1.15.0
+//   statement-ink pins (sub_bold, contact primary) updated to the
+//   readableTextOn contract ([31,42,68] on white-bubble — the hardcoded
+//   C_DARK [11,15,25] was the premium-dark defect).
 // @version 1.7.1 — bgprec pool image moved into the per-test project dir so
 //   aborted runs no longer leak deliverables/_bgpool_*.png into the template.
 // @version 1.7.0 — PR-5 reference pins (design 2026-11-17-co-deck-pdf-followups
@@ -1001,11 +1028,14 @@ describe('v1.15.0 U-008(4) PDF side: contact bullets fallback', () => {
     expect(flat).not.toContain('Contact bullet seven');
   });
 
-  test.skipIf(!haveFonts)('the first fallback line renders bold in the card ink (C_DARK), the rest stay C_BODY', () => {
+  test.skipIf(!haveFonts)('the first fallback line renders bold in the card ink (readableTextOn), the rest stay C_BODY', () => {
     const runs = textRunOps(run.page);
     expect(runs.length).toBeGreaterThan(0);
-    // Thanks hero (C_DARK) + primary bullet (C_DARK) + 4 C_BODY bullets.
-    expect(runs.filter((r) => r.rg === C_DARK_OP).length).toBeGreaterThanOrEqual(2);
+    // v1.16.0 (U-20261119-007): thanks hero + primary bullet render in
+    // readableTextOn(colors.C_CARD) — on white-bubble (C_CARD = white) that is
+    // [31,42,68], the hardcoded C_DARK [11,15,25] was invisible on premium-dark.
+    const CARD_INK_WHITE_BUBBLE = `${31 / 255} ${42 / 255} ${68 / 255} rg`;
+    expect(runs.filter((r) => r.rg === CARD_INK_WHITE_BUBBLE).length).toBeGreaterThanOrEqual(2);
     expect(runs.filter((r) => r.rg === C_BODY_OP).length).toBe(4);
   });
 
@@ -1111,10 +1141,18 @@ describe('v1.15.0 U-011: punchline_sub_bold opt-in', () => {
   ]);
   const plainPage = makeSubProject(`${Date.now()}_off`, []);
 
-  test.skipIf(!haveFonts)('punchline_sub_bold: true renders the sub bold in the statement ink (C_DARK)', () => {
+  // v1.16.0 (U-20261119-007): the STATEMENT INK itself changed — bgDrawn bubble
+  // ink derives from readableTextOn(colors.C_CARD) instead of hardcoded C_DARK
+  // (premium-dark card fill == C_DARK fallback = invisible). On white-bubble
+  // (C_CARD = white) readableTextOn returns [31,42,68], the HTML
+  // .slide-content ink the hardcode approximated. The contract under test is
+  // unchanged: bold sub renders in the statement ink.
+  const STMT_INK_WHITE_BUBBLE = `${31 / 255} ${42 / 255} ${68 / 255} rg`;
+
+  test.skipIf(!haveFonts)('punchline_sub_bold: true renders the sub bold in the statement ink (readableTextOn on the bubble)', () => {
     const subRuns = textRunOps(boldPage.page).filter((r) => r.size === 34.5);
     expect(subRuns.length).toBeGreaterThan(0);
-    for (const r of subRuns) expect(r.rg).toBe(C_DARK_OP);
+    for (const r of subRuns) expect(r.rg).toBe(STMT_INK_WHITE_BUBBLE);
   });
 
   test.skipIf(!haveFonts)('absent key keeps today\u2019s output: regular weight, C_BODY ink', () => {
@@ -1210,5 +1248,423 @@ describe('v1.15.0 Amendment A: punch_tag_px decoupled from the sub size', () => 
       readFileSync(join(ROOT, 'docs/html-themes/themes/zen/pdf_layout_spec.json'), 'utf-8'),
     );
     expect(zen.fonts.punch_tag_px).toBeUndefined();
+  });
+});
+
+// ── v1.16.0 batch-2 PR-A1 pins (U-20261119-007, design
+//    2026-11-20-co-deck-pipeline-batch-2 R1a) ─────────────────────────────────
+//
+// Two defects on premium-dark decks (Gate-5 LOCAL-PATCH reference, verified at
+// origin/main d62ec06e2):
+//   (1) invisible cover title — drawBubbleBehind fills the bgDrawn bubble with
+//       colors.C_CARD (premium-dark card_dark = [11,15,25]) while the ink was
+//       hardcoded C_DARK/C_BODY; C_DARK falls back to the SAME [11,15,25] (no
+//       `dark` key in the spec) → title rendered at 1:1 contrast. All bgDrawn
+//       bubble/card ink now derives via readableTextOn/readableMutedOn(C_CARD)
+//       (divider-branch pattern): title slide, punchline statement, contact
+//       thanks + primary fallback line, profile name/bio.
+//   (2) two-column overflow — the hasRight hug card was page-centered
+//       (cardW0 from titleW) while bullets anchored at contentR.x + shiftX and
+//       the right visual panel painted AFTER the text, covering the card's
+//       right portion. hasRight decks now anchor the card inside
+//       [contentR.x, visR.x] and wrap to the column inner width.
+//
+// Observability: textRunOps (per-run ink + Tm origin), CARD_RECTS_OUT (card
+// rect as page fractions), and the C_VIS_BG panel rect parsed from the content
+// stream (drawRectangle emits `x y w h re` right after its `rg`).
+const PD_CARD_FILL = C_DARK_OP;                                   // card_dark [11,15,25] == C_DARK fallback
+const PD_TEXT_INK  = '1 1 1 rg';                                  // readableTextOn(dark navy)
+const PD_MUTED_INK = `${203 / 255} ${213 / 255} ${225 / 255} rg`; // readableMutedOn(dark navy)
+
+describe('v1.16.0 U-20261119-007: premium-dark bgDrawn ink derives from the actual card fill', () => {
+  function makePremiumDeck(tag: string, slide: Record<string, any>) {
+    const name = `_pdark_${tag}`;
+    const { dir, rel } = renderFixture(name, BG_PROFILE, [slide], 'zen', 'premium-dark');
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return {
+      pdfPath,
+      page: decompressedStreams(pdfPath).find((s) => s.includes('Tj') && s.includes('BT'))!,
+    };
+  }
+
+  const titleRun = makePremiumDeck(`t_${Date.now()}`, {
+    isTitleSlide: true, section: 'Opening',
+    title: 'Cover Title Pin', subtitle: 'Cover subtitle pin', meta: 'Meta pin 2026',
+    backgroundImage: 'images/test.png',
+  });
+  const punchRun = makePremiumDeck(`p_${Date.now()}`, {
+    isPunchlineSlide: true, title: 'Punch Head', text: 'Premium statement pin',
+    backgroundImage: 'images/test.png',
+  });
+  const contactRun = makePremiumDeck(`c_${Date.now()}`, {
+    isContactSlide: true, title: '감사합니다', contactEmail: 'a@b.c', contactNote: 'CTA pin',
+    backgroundImage: 'images/test.png',
+  });
+  const profileRun = makePremiumDeck(`pr_${Date.now()}`, {
+    isProfileSlide: true, title: 'Profile Pin', speakerName: 'Test Speaker',
+    speakerBio: 'bio line one\nbio line two',
+    backgroundImage: 'images/test.png',
+  });
+
+  test.skipIf(!haveFonts)('cover title: no ink equals the card fill; title renders white on the dark bubble', () => {
+    const runs = textRunOps(titleRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    // The defect: title (C_DARK) and sub/meta (C_BODY→light, but title itself)
+    // carried the card-fill color on premium-dark — ink == fill, 1:1 contrast.
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    // Title = the largest runs on the page; readableTextOn(dark navy) = white.
+    const maxSz = Math.max(...runs.map((r) => r.size));
+    const titleRuns = runs.filter((r) => r.size === maxSz);
+    expect(titleRuns.length).toBeGreaterThan(0);
+    for (const r of titleRuns) expect(r.rg).toBe(PD_TEXT_INK);
+    // Sub/meta derive from readableMutedOn(C_CARD) = light slate on the dark fill.
+    expect(runs.some((r) => r.rg === PD_MUTED_INK)).toBe(true);
+    const txt = extractText(titleRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('Cover Title Pin');
+  });
+
+  test.skipIf(!haveFonts)('punchline statement: ink is readableTextOn on the bubble, never the card fill', () => {
+    const runs = textRunOps(punchRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    // zen punch statement = 64px × 0.75 = 48pt — the only 48pt runs on the page.
+    const stmtRuns = runs.filter((r) => r.size === 48);
+    expect(stmtRuns.length).toBeGreaterThan(0);
+    for (const r of stmtRuns) expect(r.rg).toBe(PD_TEXT_INK);
+    const txt = extractText(punchRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('Premium statement pin');
+  });
+
+  test.skipIf(!haveFonts)('contact thanks: ink is readableTextOn on the bubble, never the card fill', () => {
+    const runs = textRunOps(contactRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    expect(runs.some((r) => r.rg === PD_TEXT_INK)).toBe(true);
+    const txt = extractText(contactRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('a@b.c');
+  });
+
+  test.skipIf(!haveFonts)('profile name/bio: ink derives from the card fill, never the card fill itself', () => {
+    const runs = textRunOps(profileRun.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.rg).not.toBe(PD_CARD_FILL);
+    expect(runs.some((r) => r.rg === PD_TEXT_INK)).toBe(true);
+    expect(runs.some((r) => r.rg === PD_MUTED_INK)).toBe(true);
+    const txt = extractText(profileRun.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('Test Speaker');
+  });
+
+  test('source pins: C_DARK fallback still exists in buildColors; bgDrawn ink sites resolve via readableTextOn/MutedOn', () => {
+    const src = readFileSync(TOOL, 'utf-8');
+    // The fallback stays (bare photos / legacy paths still consume C_DARK).
+    expect(src).toMatch(/c\.dark\s*\?\?/);
+    // Every former `bgDrawn ? C_DARK/C_BODY` bubble-ink site now derives from
+    // the actual card fill (title sub+meta, punchline stmtInk, contact thanks +
+    // primary, profile name+bio — plus the two pre-existing card-ink sites).
+    const uses = src.match(/readable(?:Text|Muted)On\(colors\.C_CARD\)/g) ?? [];
+    expect(uses.length).toBeGreaterThanOrEqual(9);
+    expect(src).not.toMatch(/bgDrawn \? colors\.C_DARK/);
+    expect(src).not.toMatch(/bgDrawn \? colors\.C_BODY/);
+  });
+});
+
+describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column', () => {
+  // v1.9.0 (PR-A2): the frame block now routes EVERY pitch-enhanced standard
+  // slide to the framed renderer (the block is the compat gate), so these
+  // legacy-anchoring pins moved to `pitch` — the no-frame sibling theme with
+  // the same legacy standard renderer (header/title/content/visual/meta
+  // regions). The assertions are relationships, not absolute geometry, so the
+  // theme swap keeps them valid.
+  const PW_PT_EXACT = 338.7 * (72 / 25.4);   // pitch page width in pt
+
+  /** Parse the C_VIS_BG panel left edge (pt) from the page stream. pdf-lib
+   *  draws the rectangle as a translated path: `rg` then `1 0 0 1 tx ty cm`
+   *  then the path outline — the panel's left edge is the translation tx. */
+  function panelLeftPt(page: string): number | null {
+    const lines = page.split('\n').map((l) => l.trim());
+    const visBg = `${20 / 255} ${28 / 255} ${42 / 255} rg`;   // C_VIS_BG default [20,28,42]
+    const i = lines.findIndex((l) => l === visBg);
+    if (i < 0) return null;
+    for (let k = i + 1; k < Math.min(i + 8, lines.length); k++) {
+      const m = lines[k].match(/^1 0 0 1 (-?[\d.]+) (-?[\d.]+) cm$/);
+      if (m) return parseFloat(m[1]);
+    }
+    return null;
+  }
+
+  function makePitchDeck(tag: string, slide: Record<string, any>) {
+    const name = `_twocol_${tag}`;
+    const { dir, rel } = renderFixture(name, [], [slide], 'pitch', 'premium-dark');
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const cardsPath = join(dir, 'cards.json');
+    const res = spawnSync('bun', [TOOL, '--project', rel, '--font-dir', FONT_DIR],
+      { cwd: ROOT, encoding: 'utf-8', timeout: 120000,
+        env: { ...process.env, CARD_RECTS_OUT: cardsPath } });
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    const cards = existsSync(cardsPath) ? JSON.parse(readFileSync(cardsPath, 'utf-8')) : [];
+    const page = decompressedStreams(pdfPath).find((s) => s.includes('Tj') && s.includes('BT'))!;
+    return { cards, page };
+  }
+
+  // The U-007 repro shape: two-column slide (content column [6%..58%],
+  // visual panel [58.4%..95.7%] on pitch) with a right visual image.
+  const twoCol = makePitchDeck(`v_${Date.now()}`, {
+    section: 'S1', title: 'Two Column Pin',
+    bullets: ['alpha bullet line for the geometry pin', 'beta bullet line for the geometry pin'],
+    visualImage: 'images/test.png',
+  });
+  // Same theme, no visual: hasRight=false keeps the legacy page-centered card.
+  const singleCol = makePitchDeck(`s_${Date.now()}`, {
+    section: 'S1', title: 'Single Column Pin',
+    bullets: ['alpha bullet line for the legacy pin', 'beta bullet line for the legacy pin'],
+  });
+
+  test.skipIf(!haveFonts)('hasRight: the card rect stays left of the visual panel and no text op crosses it', () => {
+    expect(twoCol.cards.length).toBe(1);
+    const panelX = panelLeftPt(twoCol.page);
+    expect(panelX).not.toBeNull();
+    const card = twoCol.cards[0];
+    const cardRightPt = (card.x + card.w) * PW_PT_EXACT;
+    // The defect: the page-centered card ran THROUGH visR.x and the panel
+    // (painted after the text) covered its right portion.
+    expect(cardRightPt).toBeLessThanOrEqual(panelX! + 0.5);
+    // No text op may start at or beyond the panel's left edge.
+    const runs = textRunOps(twoCol.page);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.x).toBeLessThan(panelX! + 0.5);
+    // Panel still paints after the text (legacy z-order kept) — safe now
+    // because nothing extends under it.
+    const ls = twoCol.page.split('\n').map((l) => l.trim());
+    const lastTextIdx = ls.map((l) => l.endsWith('Tj')).lastIndexOf(true);
+    const panelIdx = ls.findIndex((l) => l === `${20 / 255} ${28 / 255} ${42 / 255} rg`);
+    expect(panelIdx).toBeGreaterThan(lastTextIdx);
+  });
+
+  test.skipIf(!haveFonts)('single-column: the legacy page-centered card geometry is unchanged', () => {
+    expect(singleCol.cards.length).toBe(1);
+    const card = singleCol.cards[0];
+    // cardX = CX + (CW - cardW0)/2 — horizontally centered in the printable
+    // area (the pre-v1.16.0 geometry, kept byte-for-byte for !hasRight decks).
+    expect(Math.abs(card.x + card.w / 2 - 0.5)).toBeLessThan(0.02);
+    const panel = panelLeftPt(singleCol.page);
+    expect(panel).toBeNull();                       // no visual panel on this slide
+  });
+});
+
+// ── v1.17.0 U-20261119-010: opt-in framed pitch-enhanced parity ───────────────
+//
+// The frame block IS the compat gate: when the theme's pdf_layout_spec.json
+// declares `frame`, standard/title/divider/contact(with visualImage) slides
+// route to the framed renderers, punchline drops the `”` mark and accents the
+// first statement line, video slides get a bottom-left caption chip, bg
+// images / video thumbnails fill the FRAME, footnotes render inside the frame,
+// and a post-pass mask paints everything outside the rounded frame with
+// frame.page_rgb. Decks whose spec has no `frame` key keep the 1.16.0
+// rendering byte-for-byte (verified at PR time: all decompressed content
+// streams of zen + pitch fixtures are identical old→new; only the embedded
+// ModDate metadata string differs, which is inherent pdf-lib behavior).
+
+const THEMES_ROOT = join(ROOT, 'docs/html-themes/themes');
+const FRAME_PAGE_OP   = C_DARK_OP;                                    // frame.page_rgb [11,15,25]
+const FRAME_ACCENT_OP = `${232 / 255} ${169 / 255} ${62 / 255} rg`;   // frame.accent_rgb [232,169,62]
+const FRAME_VIDEO_CAPTION_OP = '0.92 0.93 0.95 rg';                   // rgb(0.92, 0.93, 0.95)
+// 1280×720 reference viewport maps onto the 338.7×190.5mm page
+// (k = 0.264609375 mm/px); MM_TO_PT = 2.835.
+const FRAME_PX_TO_PT   = (338.7 / 1280) * 2.835;
+const FRAME_BOTTOM_PT  = (720 - 86 - 548) * FRAME_PX_TO_PT;  // frame bottom edge above page bottom (≈64.5pt)
+const FRAME_TEXT_PT    = 12 * FRAME_PX_TO_PT;                // eyebrow/caption/footnote px size (≈9.0pt)
+const FRAME_VIDEO_CAP_PT = 13.6 * FRAME_PX_TO_PT;            // .video-caption chip (≈10.2pt)
+
+/** Real page content streams. Embedded font binaries also contain the byte
+ *  sequences "Tj"/"BT", so require an actual `Tf` operator line too. */
+function pageStreams(pdfPath: string): string[] {
+  return decompressedStreams(pdfPath).filter((s) => s.includes('BT') && s.includes('ET') && /\n\/\S+ [\d.]+ Tf\n/.test(s));
+}
+
+describe('v1.17.0 U-20261119-010: opt-in frame block gates', () => {
+  const spec = JSON.parse(readFileSync(join(THEMES_ROOT, 'pitch-enhanced/pdf_layout_spec.json'), 'utf-8'));
+
+  test('pitch-enhanced ships the frame block with the measured 1280×720 geometry', () => {
+    const f = spec.frame;
+    expect(f).toBeDefined();
+    expect(f.ref_w_px).toBe(1280);
+    // The shipped geometry must stay the measured .slide values (1280×720).
+    expect(f.x_px).toBe(51); expect(f.y_px).toBe(86);
+    expect(f.w_px).toBe(1178); expect(f.h_px).toBe(548); expect(f.radius_px).toBe(20);
+    expect(f.page_rgb).toEqual([11, 15, 25]);    // #0B0F19 darker page
+    expect(f.frame_rgb).toEqual([17, 24, 39]);   // #111827 .slide fill
+    expect(f.panel_rgba).toEqual([255, 255, 255, 0.03]);
+    // Renderer-required FrameSpec keys.
+    for (const k of ['col_x_px', 'col_y_px', 'col_w_px', 'col_h_px', 'panel_x_px', 'panel_w_px',
+      'text_rgb', 'body_rgb', 'accent_rgb', 'muted_rgb',
+      'eyebrow_px', 'eyebrow_lh_px', 'eyebrow_gap_px', 'title_px', 'title_lh_px', 'title_gap_px',
+      'bullet_px', 'bullet_lh_px', 'bullet_gap_px', 'bullet_indent_px',
+      'caption_px', 'caption_lh_px', 'caption_gap_px',
+      'footnote_px', 'footnote_lh_px', 'footnote_bottom_px']) {
+      expect(f[k]).toBeDefined();
+    }
+  });
+
+  test('no other shipped theme declares a frame block (compat gate)', () => {
+    for (const t of ['zen', 'pitch', 'outline', 'vertical', 'outlook']) {
+      const s = JSON.parse(readFileSync(join(THEMES_ROOT, t, 'pdf_layout_spec.json'), 'utf-8'));
+      expect(s.frame).toBeUndefined();
+    }
+  });
+
+  test('source: every frame consumption site is gated on frame presence', () => {
+    const src = readFileSync(TOOL, 'utf-8');
+    // Renderer routing gates.
+    expect(src).toContain('if (ctx.spec.frame && !ctx.data.videoId) return renderFramedStandard(ctx);');
+    expect(src).toContain("if (layoutSpec.frame && type === 'contact' && data.visualImage)");
+    expect(src).toContain("else if (layoutSpec.frame && type === 'title')   renderFramedTitle(ctx);");
+    expect(src).toContain("else if (layoutSpec.frame && type === 'divider')   await renderFramedDivider(ctx);");
+    // Post-pass mask + in-frame footnotes + frame-cover bg/thumbnail gates.
+    expect(src).toMatch(/if \(layoutSpec\.frame\) \{\n\s*const g = frameGeom\(layoutSpec, coords\);\n\s*renderer\.maskOutsideFrame/);
+    expect(src).toMatch(/if \(fns\.length > 0 && layoutSpec\.frame\)/);
+    expect(src.match(/const fg = layoutSpec\.frame \? frameGeom\(layoutSpec, coords\) : null;/g)?.length).toBe(2);
+    // Punchline gates: tracked eyebrow framed-only, `”` mark framed-skipped,
+    // first statement line accent.
+    expect(src).toContain('if (sec && framed)');
+    expect(src).toContain('if (!cardMode && !framed)');
+    expect(src).toContain('const lineInk = framed && li === 0 ? toRGB(spec.frame!.accent_rgb) : stmtInk;');
+    // Video gates: frame-centred play button + bottom-left caption chip.
+    expect(src).toContain('const vg = spec.frame ? frameGeom(spec, coords) : null;');
+    expect(src).toContain('if (pillText && spec.frame)');
+  });
+});
+
+describe.skipIf(!haveFonts)('v1.17.0 U-20261119-010: framed pitch-enhanced render pins', () => {
+  // One 3-slide deck exercising every framed surface: standard (two-column,
+  // caption, in-frame footnotes, per-slide background), two-sentence punchline,
+  // contact-with-visual. BG_PROFILE activates the per-slide background so the
+  // frame-cover pin (photo fills the FRAME, mask repaints the outside-frame
+  // margin) is live on slide 1.
+  function makeFramedDeck(tag: string, slides: Record<string, any>[], profile = BG_PROFILE) {
+    const name = `_framed_${tag}`;
+    const { dir, rel } = renderFixture(name, profile, slides, 'pitch-enhanced', 'premium-dark');
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    return { dir, pdfPath, pages: pageStreams(pdfPath) };
+  }
+
+  const framed = makeFramedDeck(`m_${Date.now()}`, [
+    { section: 'S1', title: 'Framed Standard Pin', bullets: ['plain alpha bullet', 'bold **accent** bullet'], visualImage: 'images/test.png', visualCaption: 'Caption pin text', footnotes: ['SMR: Small Modular Reactor'], backgroundImage: 'images/test.png' },
+    { isPunchlineSlide: true, section: 'PART 01', title: 'Punch Head', text: 'First sentence lands here\nSecond sentence follows', sub: 'support sub' },
+    { isContactSlide: true, title: '감사합니다', contactEmail: 'a@b.c', contactLinkedIn: 'in/d-pinning', visualImage: 'images/test.png' },
+  ]);
+
+  test('every framed page carries the 9-op page_rgb mask signature', () => {
+    expect(framed.pages.length).toBeGreaterThanOrEqual(3);
+    // Composition per page: the generic C_DARK page fill (1) + the post-pass
+    // mask (4 margin rects + 4 rounded-corner paths = 8). The legacy path has
+    // no mask, so 9 ops is the framed fingerprint.
+    for (const p of framed.pages.slice(0, 3)) {
+      const n = p.split('\n').map((l) => l.trim()).filter((l) => l === FRAME_PAGE_OP).length;
+      expect(n).toBe(9);
+    }
+  });
+
+  test.skipIf(!havePdftoppm)('mask paints the outside-frame margin page_rgb; the frame interior keeps its own surface', () => {
+    const PAGE_RGB = [11, 15, 25], FRAME_BG = [17, 24, 39];
+    // Slide 1: the per-slide background photo covers the FRAME — the
+    // outside-frame margin strip is repainted page_rgb by the mask.
+    const corner = pagePixel(framed.pdfPath, 1, framed.dir, 0.01, 0.01);
+    expect(corner).not.toBeNull();
+    for (let i = 0; i < 3; i++) expect(Math.abs(corner![i] - PAGE_RGB[i])).toBeLessThanOrEqual(2);
+    const margin = pagePixel(framed.pdfPath, 1, framed.dir, 0.01, 0.5);
+    for (let i = 0; i < 3; i++) expect(Math.abs(margin![i] - PAGE_RGB[i])).toBeLessThanOrEqual(2);
+    // Slide 2 (punchline, no background): the frame interior stays flat C_BG
+    // [17,24,39] — the mask only ever paints OUTSIDE the frame.
+    const inner = pagePixel(framed.pdfPath, 2, framed.dir, 0.30, 0.30);
+    for (let i = 0; i < 3; i++) expect(Math.abs(inner![i] - FRAME_BG[i])).toBeLessThanOrEqual(2);
+  });
+
+  test('text layer: caption, in-frame footnotes, contact two-column, two-sentence punchline, no quote mark, no header counter', () => {
+    const txt = extractText(framed.pdfPath);
+    if (txt === null) return; // pdftotext unavailable — structural pins suffice
+    expect(txt).toContain('Caption pin text');                 // visualCaption renders (HTML .cdk-caption parity)
+    expect(txt).toContain('SMR: Small Modular Reactor');       // footnotes drawn INSIDE the frame
+    expect(txt).toContain('a@b.c');                            // framed contact email line
+    expect(txt).toContain('in/d-pinning');                     // framed contact linkedIn line
+    expect(txt).toContain('First sentence lands here');
+    expect(txt).toContain('Second sentence follows');
+    expect(txt).not.toContain('”');                            // the decorative mark is framed-skipped
+    expect(txt).not.toMatch(/\d \/ \d/);                       // no header bar / slide counter on framed pages
+  });
+
+  test('eyebrow/caption/footnote-size runs all sit ABOVE the frame bottom edge (in-frame placement)', () => {
+    // The legacy footnote ladder anchors below the frame (≈41pt baseline);
+    // the framed branch draws at the frame bottom (≈83pt baseline) and the
+    // post-pass mask would erase anything left outside the frame band.
+    const runs = textRunOps(framed.pages[0]).filter((r) => r.size !== null && Math.abs(r.size - FRAME_TEXT_PT) < 0.2);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) expect(r.y).toBeGreaterThan(FRAME_BOTTOM_PT);
+  });
+
+  test('punchline: first statement line renders in frame accent, the rest in statement ink', () => {
+    const runs = textRunOps(framed.pages[1]);
+    const maxSz = Math.max(...runs.map((r) => r.size));
+    const stmt = runs.filter((r) => r.size === maxSz);
+    expect(stmt.length).toBeGreaterThan(0);
+    const topY = Math.max(...stmt.map((r) => r.y));
+    const bottomY = Math.min(...stmt.map((r) => r.y));
+    expect(topY).toBeGreaterThan(bottomY);                     // two sentence rows
+    // HTML `.slide-title::first-line { color: accent }` parity.
+    for (const r of stmt.filter((r) => r.y === topY)) expect(r.rg).toBe(FRAME_ACCENT_OP);
+    for (const r of stmt.filter((r) => r.y === bottomY)) expect(r.rg).toBe('1 1 1 rg');   // statement ink (bgDrawn=false)
+  });
+
+  // The no-frame side of the punchline gate: zen declares `punchline` and has
+  // no frame block, so the decorative `”` mark MUST still render there.
+  const zenPunch = (() => {
+    const name = `_framed_zenpunch_${Date.now()}`;
+    const { dir, rel } = renderFixture(name, [], [
+      { isPunchlineSlide: true, title: 'Punch Head', text: 'First sentence lands here\nSecond sentence follows', sub: 'support sub' },
+    ], 'zen', 'white-bubble');
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    return { pdfPath: join(dir, `${rel.split(/[\\/]/).pop()}.pdf`) };
+  })();
+
+  test('legacy contrast: a no-frame punchline keeps the decorative quote mark', () => {
+    const txt = extractText(zenPunch.pdfPath);
+    if (txt === null) return;
+    expect(txt).toContain('”');
+  });
+
+  // Framed video slides keep the legacy standard renderer (play button + full
+  // page link) but the title pill becomes a bottom-left .video-caption chip.
+  const videoRun = (() => {
+    const run = makeFramedDeck(`v_${Date.now()}`, [
+      { section: 'S4', title: 'Video Caption Pin', videoId: 'dQw4w9WgXcQ', videoThumbnail: 'images/test.png' },
+    ], []);
+    return { pdfPath: run.pdfPath, pages: run.pages };
+  })();
+
+  test('framed video slide: title renders as the bottom-left .video-caption chip, not the top pill', () => {
+    expect(videoRun.pages.length).toBeGreaterThanOrEqual(1);
+    const runs = textRunOps(videoRun.pages[0]).filter((r) => r.rg === FRAME_VIDEO_CAPTION_OP);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const r of runs) {
+      expect(r.size).toBeCloseTo(FRAME_VIDEO_CAP_PT, 1);
+      expect(r.y).toBeLessThan(150);   // legacy pill baseline ≈505pt (page top); framed chip ≈84pt (frame bottom-left)
+    }
   });
 });

@@ -22,10 +22,15 @@ longer exist, and §9.8 of the operations workflow still documents them.
 The restructure also dropped enforcement rails the retired fleet runner had: the
 ADR-0089 degraded mode, the 04:45 wall (replaced by a 13:00 wall with no per-step
 budgets), and the per-boundary secrets gate. A same-day multi-agent review meeting
-(`memory/meeting-2026-11-12-unified-batch-runner.md`; participants automation-engineer,
-security-expert, architect, auditor with the designated dissent seat; two rounds,
-PM-facilitated) hardened the granted authority before first fire. Its findings shaped
-every term below:
+(participants automation-engineer, security-expert, architect, auditor with the
+designated dissent seat; two rounds, PM-facilitated) hardened the granted authority
+before first fire. Per DEC-20261120-02 the transcript once cited for that session
+(`memory/meeting-2026-11-12-unified-batch-runner.md`) was never landed and is NOT
+reconstructed; the verbatim dissent blocks in §Preserved dissent below — the record
+those rounds were actually answered from — plus the surviving same-day artifacts
+(the registered design doc, T-20261112-001/-002/-003,
+`docs/reports/2026-11-12-revert-drill.md`) are the authority for that session's
+contested questions. Its findings shaped every term below:
 
 - The billing wall is **ACTIVE** (onset 2026-11-03; 13 private repos fail CI with the
   account-level annotation; public repos succeed on the same runner pool —
@@ -84,9 +89,27 @@ every term below:
      authority-bearing automation prompt, checked daily at 06:00 KST by the
      prompt-integrity verifier (T-20261112-003, §Prompt-Integrity); any prompt
      change updates the manifest in the same governance change set.
-3. **Billing-wall exception — nine authentication conditions.** While the
-   account-level GitHub Actions billing wall makes real CI impossible, merges may
-   proceed only when ALL nine hold:
+   - **Ledger-and-delivery integrity (ONE invariant; meeting 2026-11-20,
+     T-20261120-001 — consolidates the v4 prompt predicate items 7 and 8)**: a
+     merge is recorded with `run-manifest.ts merge` BEFORE the merge command; at
+     run end `run-manifest.ts verify --require-merged` must exit 0; a wave
+     delivery PR is recorded as a success only when `verify-delivered-versions.ts`
+     exited 0 for that project before the merge. A missing required field fails
+     the merge rather than logging a gap.
+   - **STEP I admission — freshness gate (DEC-20261120-03)**: admission requires
+     a fresh ledger review pass per project — a review row with `outcome: pass`
+     whose basis HEAD is fresh (the wave's dry-run tree HEAD, or a pass recorded
+     within the last 2 nights with no unresolved Critical/High finding since). A
+     same-run STEP E pass is expressly NOT required — this supersedes the
+     2026-11-18 option-2 phrasing, which remains on record in T-20261119-010.
+     Machine-checkable as the ledger's `gateChecks[]` freshness rows (registered
+     design AC-14).
+3. **Billing-wall exception — nine authentication conditions.** **SUSPENDED at
+   meeting 2026-11-20 pending explicit owner re-authorization (it was 11 of 15
+   merges on 2026-11-19). The nine conditions remain the standing terms if
+   re-authorized; the mechanical expiry (condition 9 / predicate (vii)) is
+   unchanged.** While the account-level GitHub Actions billing wall makes real CI
+   impossible, merges may proceed only when ALL nine hold:
    1. **Evidence class**: a startup_failure-class failure event recorded for the
       PR's head SHA (job annotation "recent account payments have failed or your
       spending limit needs to be increased", runner_id 0, zero steps). "No checks
@@ -158,7 +181,14 @@ every term below:
    drill is required before first fire — an untested runbook is documentation, not a
    control.
 
-## Preserved dissent (verbatim, meeting transcript)
+## Residual-risk register (meeting 2026-11-20, security-expert)
+
+- Pre-review containment (`scripts/contained-run.ts` v1) does NOT close unrestricted
+  filesystem reads (`~/.ssh`, `../..`), arbitrary egress, or a project-authored
+  `scripts/audit.ts` deciding its own verdict; full sandbox/tmp-mirror containment
+  is deferred to v2.
+
+## Preserved dissent (verbatim; per DEC-20261120-02 the session transcript was never landed — these blocks are the authority of record)
 
 > **S2 (residual, ISSUE 2):** "in-repo self-amendment vector closed by mechanical
 > protected paths + never-claim; out-of-repo prompt self-edit vector remains open —
@@ -184,6 +214,15 @@ the watchdog stop-file is mandatory and lands before first fire (T-20261112-002)
 the launcher hash-manifest gate is T-20261112-003; cap 16 vs cap 3 re-examines after
 one week of observed runs.
 
+Supersession note (2026-11-20, DEC-20261120-02): the meeting transcript this section
+was once said to quote (`memory/meeting-2026-11-12-unified-batch-runner.md`) NEVER
+existed in the git record; no reconstruction is made. These verbatim blocks ARE the
+authority of record for the session's contested questions, together with the
+registered design doc and the action-item tickets T-20261112-001/-002/-003 (plus
+`docs/reports/2026-11-12-revert-drill.md`). The v5 prompt ratification (2026-11-20)
+carries this corrected citation into the runner's authority prompt; the surviving
+artifacts of the T-20261112 action-item era are the honest map of what exists.
+
 ## Governance
 
 - The merge predicate and the nine billing-wall conditions are decision-of-record
@@ -197,6 +236,9 @@ one week of observed runs.
 - The watchdog (`scripts/watchdog-automation-stop.ts` + the host 13:00 cron entry)
   is operator-managed; its crontab entry is host state, recorded in the drill/report
   evidence, not in the repo.
+- The cap 16 vs cap 3 re-examination (Preserved dissent) is DUE — one week of
+  observed runs elapsed (2026-11-20) without the review being held; it is scheduled
+  with the next runner review (meeting 2026-11-20).
 
 ## Consequences
 
@@ -222,8 +264,10 @@ no UI (ADR-0065/0070 posture; runner and watchdog output remains plain text).
 
 ## References
 
-- Meeting transcript: `memory/meeting-2026-11-12-unified-batch-runner.md` (issue
-  list, round-2 converged outcomes, preserved dissent, action items)
+- Hardening session record: the transcript file once cited here
+  (`memory/meeting-2026-11-12-unified-batch-runner.md`) was never landed; per
+  DEC-20261120-02 the authority of record is this ADR's §Preserved-dissent plus the
+  registered design doc and T-20261112-001/-002/-003
 - Restructure record: `memory/2026-11-12.md` (automation-dfba3ff1 creation; deletions
   automation-a440106a, automation-3c442369)
 - Supersedes (merge prohibition, this runner only): ADR-0082

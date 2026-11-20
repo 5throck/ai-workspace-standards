@@ -1,7 +1,7 @@
 ---
 name: diagram-specialist
-version: "1.3.3"
-last_updated: 2026-11-16
+version: "1.4.0"
+last_updated: 2026-11-21
 role: Concept diagram and data chart generator for lecture slide decks
 status: active
 tier: medium
@@ -21,7 +21,7 @@ required_skills: [version]
 lifecycle:
   phase: production
   created: "2026-05-29"
-  last_updated: "2026-06-25"
+  last_updated: "2026-11-21"
   governance: docs/lifecycle/agents/diagram-specialist.md
 ---
 
@@ -233,10 +233,41 @@ Geometry and legibility rules (checked at review, enforced in the generators):
 - All shapes and text stay inside the viewBox (no negative coordinates, no x/w beyond
   the canvas).
 - Chart tick labels are rounded (no float noise such as `1.2000000000000002`).
-- Diagram canvases are about 960px wide with labels of 18px or larger and sub-labels of
-  15px or larger — zen renders visuals at `min(760px, 72vw)`, so 12–14px labels on an
+- Diagram canvases are about 960px wide with labels of 22px or larger and sub-labels of
+  17px or larger (raised from 18px/15px by the layout safety contract, U-20261119-009)
+  — zen renders visuals at `min(760px, 72vw)`, so 12–14px labels on an
   1100px canvas display at roughly 8–9px.
 - `comparison` columns have a visible gap; sub text never sits on the divider line.
+
+## Layout Safety Contract (U-20261119-009)
+
+Layout math lives in each deck's `diagram-defs.ts`; the rules below are the
+authoring contract every generator must satisfy. The lintable subset is
+enforced at generation time — `gen-visual-images.ts` runs
+`svgLayoutSafetyIssues()` (diagram-helpers v1.4.0) on every generated SVG and
+WARNs on negative-length segments and elements outside the viewBox. WARNs are
+non-fatal, but regenerate rather than ship.
+
+1. **Inter-node gap floor ≥ 24px** (≥ 30px on ≥ 5-node layouts). The gap is
+   computed as leftover space minus node sizes and must never fall below the
+   floor. When the diagram type does not fit at the floor, switch to the
+   compact variant (smaller nodes, tighter padding, fewer decorations) — never
+   let the gap collapse. A collapsed gap also produces negative-length
+   connector lines (the endpoint computed before the start), which the audit
+   flags.
+2. **Draw order — connectors after nodes.** Connector lines and arrowheads are
+   emitted AFTER the node rects in SVG document order, so an enlarged node can
+   never paint over an arrowhead.
+3. **Hard overflow guard.** Every coordinate stays inside the viewBox — no
+   negative coordinates, no x/y beyond the canvas. The audit flags
+   negative-length segments (zero-length runs, axis-aligned lines pointing
+   backward) and out-of-viewBox elements.
+4. **Layout-variety mandate.** Each diagram type gets a distinct layout —
+   timeline / columns / merge / cycle / stairs / funnel / chevrons / fan — and
+   one generation run must not reuse a single vertical stack across the deck's
+   diagrams.
+5. **Legibility minimums.** Labels ≥ 22px, sub-labels ≥ 17px, accent (gold)
+   connectors ≥ 3px stroke with visible arrowheads.
 
 ## Workflow
 

@@ -1,5 +1,8 @@
-// @version 3.3.2
-// v3.3.2 (2026-11-16, U-20261116-002): SVG legibility
+// @version 3.4.0
+// v3.4.0 (2026-11-21, U-20261119-009 / design docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md §R3):
+// layout-safety WARN — svgLayoutSafetyIssues() runs on every generated SVG
+// (negative-length segments, elements outside the viewBox), non-fatal, same
+// channel as the font-size WARN. — v3.3.2 (2026-11-16, U-20261116-002): SVG legibility
 // WARN — svgMinFontSize under 16 in a 960-wide canvas renders under ~11px at the
 // white-bubble bubble width; regenerate rather than ship 8px labels. — U-20261105-006: stripDiagramFooterText() runs on every generated SVG
 // v3.3.1 (2026-11-15, spec docs/designs/2026-11-15-co-deck-deliverables-migration-design.md): doc-only — usage comments and path constants follow the fleet's deliverables/ consolidation (presentations/ → deliverables/); no logic change.
@@ -16,7 +19,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
-import { svgToPng, fontPath, stripDiagramFooterText, svgTextDuplicatesSlide, svgMinFontSize } from './diagram-helpers.ts';
+import { svgToPng, fontPath, stripDiagramFooterText, svgTextDuplicatesSlide, svgMinFontSize, svgLayoutSafetyIssues } from './diagram-helpers.ts';
 
 const args    = process.argv.slice(2);
 const getArg  = (flag: string) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : undefined; };
@@ -106,6 +109,16 @@ for (const { slide: slideIdx, data } of targets) {
     const minFs = svgMinFontSize(svg);
     if (minFs !== null && minFs < 16) {
       console.warn(`   ⚠️  Slide ${slideIdx}: SVG min font-size ${minFs} renders under ~11px at bubble width — regenerate with larger base fonts or a tighter layout`);
+    }
+    // U-20261119-009: layout-safety audit — negative-length segments and
+    // elements outside the viewBox WARN through the same non-fatal channel;
+    // inter-node gap floors stay contract-only (agents/diagram-specialist.md).
+    const layoutIssues = svgLayoutSafetyIssues(svg);
+    for (const iss of layoutIssues.slice(0, 5)) {
+      console.warn(`   ⚠️  Slide ${slideIdx}: layout-safety ${iss.kind} — ${iss.detail} (check gap math / viewBox fit — diagram-specialist layout contract)`);
+    }
+    if (layoutIssues.length > 5) {
+      console.warn(`   ⚠️  Slide ${slideIdx}: +${layoutIssues.length - 5} more layout-safety issues`);
     }
 
     // Update slidedata visualImage path to shared pool SVG reference (HTML primary delivery format)

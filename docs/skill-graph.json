@@ -1180,8 +1180,8 @@
       "name": "diagram-specialist",
       "scope": "co-deck",
       "capability": "diagram-specialist",
-      "content_hash": "5f275ef42b31e2c5",
-      "version": "1.3.3",
+      "content_hash": "177d8cf40f759128",
+      "version": "1.4.0",
       "mirrors": [
         "templates/co-deck/agents/diagram-specialist.md"
       ]
@@ -1297,8 +1297,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "c34b2aa2cbe02bb4",
-      "version": "1.1.3",
+      "content_hash": "58771a37bba1cc6d",
+      "version": "1.1.4",
       "mirrors": [
         "templates/co-deck/agents/storyline.md"
       ]
@@ -3010,6 +3010,26 @@
     },
     {
       "id": "dec:DEC-20261118-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261120-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261120-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261120-03",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261120-04",
       "type": "decision",
       "layer": "L0"
     },
@@ -6621,8 +6641,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "b21048cac1f960cc",
-      "version": "1.5.0",
+      "content_hash": "98d6e63174952270",
+      "version": "1.6.0",
       "mirrors": [
         "templates/co-deck/skills/storyline/SKILL.md"
       ],
@@ -8242,8 +8262,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-20"
+        "sessions": 6,
+        "last_used": "2026-11-21"
       }
     },
     {
@@ -8701,8 +8721,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-20"
+        "sessions": 6,
+        "last_used": "2026-11-21"
       }
     },
     {
@@ -9120,8 +9140,8 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "6296d77566fc68ca",
-      "version": "1.9.0",
+      "content_hash": "99f685c0bb136726",
+      "version": "1.10.0",
       "mirrors": [
         "skills/project-resync/SKILL.md",
         ".claude/skills/project-resync/SKILL.md",
@@ -9396,8 +9416,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-20"
+        "sessions": 6,
+        "last_used": "2026-11-21"
       }
     },
     {
@@ -12676,6 +12696,30 @@
     {
       "type": "cites_skill",
       "from": "dec:DEC-20261118-01",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-01",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-02",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-03",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261120-04",
       "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
     },

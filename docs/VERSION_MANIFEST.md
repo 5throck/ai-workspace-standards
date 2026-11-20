@@ -1,6 +1,7 @@
 # VERSION_MANIFEST.md
 
 **Generated**: 2026-11-20T06:03:07.043Z
+**Generated**: 2026-11-20T17:27:30.335Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -10,7 +11,7 @@
 
 - **Agents**: 9
 - **Skills**: 60
-- **Scripts**: 138 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
+- **Scripts**: 144 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
 
 ---
@@ -71,7 +72,7 @@
 | new-project | 1.0.0 | active | skills/new-project/SKILL.md | workspace | new project, create project, scaffold project, project from template, start a new engagement | scaffolding-expert |
 | platform-command-lifecycle-manager | 1.0.3 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
 | platform-skill-lifecycle-manager | 1.0.3 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
-| project-resync | 1.9.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
+| project-resync | 1.10.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
 | project-review | 1.3.2 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.0 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |
 | promote-variant | 1.4.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
@@ -117,6 +118,7 @@
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
 | backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
+| battery.ts | 1.0.0 | scripts/battery.ts | crypto, fs, path |
 | bootstrap-stages.ts | 1.1.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | changelog-normalize.ts | 1.0.0 | scripts/changelog-normalize.ts | fs |
 | check-handbook-archmap-drift.ts | 1.0.0 | scripts/check-handbook-archmap-drift.ts | crypto, fs, path |
@@ -125,6 +127,7 @@
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | fs, path |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | fs |
 | compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | fs, path |
+| contained-run.ts | 1.0.0 | scripts/contained-run.ts | child_process, fs, os, path |
 | create-l3-scaffold.ts | 1.21.0 | scripts/create-l3-scaffold.ts | child_process, fs, path, url |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
@@ -183,6 +186,7 @@
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | path |
 | review-baseline.ts | 1.6.0 | scripts/review-baseline.ts | N/A |
 | route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | fs, path |
+| run-manifest.ts | 1.1.0 | scripts/run-manifest.ts | child_process, fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
 | skill-graph-fleet-report.ts | 2.4.0 | scripts/skill-graph-fleet-report.ts | fs, path |
@@ -191,6 +195,7 @@
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | fs, path |
 | spec-register.ts | 1.6.0 | scripts/spec-register.ts | fs, path |
+| stop-gate.ts | 1.0.0 | scripts/stop-gate.ts | fs, path |
 | sync-agent-mirrors.ts | 1.3.0 | scripts/sync-agent-mirrors.ts | fs, js-yaml, path, url |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
 | sync-model-registry.ts | 1.3.0 | scripts/sync-model-registry.ts | fs, path |
@@ -213,10 +218,10 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.113.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.114.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.2.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
-| validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |
+| validate-doc-folder.ts | 1.5.1 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.2 | scripts/validate-md-language.ts | child_process, fs, path |
 | validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | fs, path, url |
@@ -234,15 +239,17 @@
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | crypto, fs, path, url |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-country-prune.ts | 1.2.0 | scripts/verify-country-prune.ts | child_process, fs, os, path, url |
+| verify-delivered-versions.ts | 1.0.0 | scripts/verify-delivered-versions.ts | fs, path |
 | verify-memory.ts | 1.3.0 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | fs |
 | verify-platform-lifecycle.ts | 1.6.1 | scripts/verify-platform-lifecycle.ts | fs, path |
+| verify-prompt-integrity.ts | 1.1.0 | scripts/verify-prompt-integrity.ts | bun:sqlite, crypto, fs, os, path, url |
 | verify-readme-sync.ts | 1.5.0 | scripts/verify-readme-sync.ts | bun, crypto, fs, path |
 | verify-scripts.ts | 1.15.0 | scripts/verify-scripts.ts | crypto, fs, path |
 | verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | fs, path, url |
 | verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | fs, path |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |
-| watchdog-automation-stop.ts | 1.0.0 | scripts/watchdog-automation-stop.ts | fs, path, url |
+| watchdog-automation-stop.ts | 1.1.0 | scripts/watchdog-automation-stop.ts | fs, os, path, url |
 
 ---
 

@@ -1,0 +1,68 @@
+schemaVersion: 1
+id: T-20261120-003
+kind: manual
+title: >-
+  engine defect (upgrade-project): an ADOPT-grant row reads 'resolved' while the
+  copy never happens — the automation-engineer's round-2 self-correction of the
+  2026-11-19 finding. Evidence: co-deck's .claude/last-upgrade-delivery.json
+  files[] lists 208 paths but only 12 of its scripts/co-deck/*; the dry-run DID
+  emit CONFLICT rows for the swallowed paths (40 in the on-disk log) and
+  download-font.ts carried both UNBASELINED_OVERWRITE and ADOPT — so the grant
+  is accepted, recorded as a decision, and then dropped on the variant-scripts
+  channel. Six scripts + the tests that expect them shipped; the tests then fail
+  (html-to-pdf 16 fails). Impact: any wave run with per-file adopt-template
+  grants under-delivers silently, and the run log reads clean. Fix direction:
+  make the variant-scripts pass honour the grant (or emit a hard ERROR when a
+  granted path is not copied); do NOT key the fix on decisions[] (it carries no
+  version fields — enrichPending enriches pendingBackport only). Workaround
+  landed 2026-11-20: direct file copy, co-deck#257. Detection landed:
+  scripts/verify-delivered-versions.ts (T-20261120-003 candidate for wiring into
+  STEP I (5)). Needs Design Gate.
+priority: high
+status: done
+attempts: 0
+created_at: '2026-11-20T07:50:07.957+09:00'
+history:
+  - at: '2026-11-20T07:50:07.957+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-20T13:02:39.561+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-20T13:02:39.579+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-20T13:02:39.596+09:00'
+    from: review
+    to: done
+result: >-
+  engine fix landed via PR #2118 (merge 03b7cc640, CI 4/4 green). ROOT CAUSE
+  (engine, proven by manifest forensics + sandbox replay): the VARIANT SCRIPTS
+  nested walk aborted on the FIRST evolvedDeliveryGuard conflict-skip — if
+  (!proceeded) return; in BOTH the versioned and unversioned arms of
+  syncVariantScripts returned out of the recursive walk function — so every
+  scripts/<variant>/ file visited after the first skip (alphabetically
+  auto-calibrate.ts, the wave's abort point) got NO decision row, NO
+  CONFLICT/SKIP line and NO copy from the variant channel; the .mjs/.json
+  surfaces the common scripts pass never collects (.ts only) lost BOTH channels
+  at once. The adopt-template grant was honored right up to that abort —
+  accepted, then dropped on the variant channel (the reported 'ADOPT-grant row
+  reads resolved while the copy never happens'). Row-vs-copy audit verified the
+  guards truthful (marker-loss precedes the ADOPT row in every arm;
+  PROJECT_AHEAD under a grant stays PROJECT_AHEAD). INVOCATION-SIDE residual
+  (reported, not engine-fixable): the wave's resumed apply ran WITHOUT the
+  adjudicated --disposition flags — the engine cannot lose parsed grants (arg
+  loop + dispositionAdopts audited; final manifest zero grant rows only
+  producible grant-less); runner-side grant carry-through noted for the v4
+  owners. FIX: upgrade-project v1.113.0 -> v1.114.0 — both arms use the overlay
+  arm's if(proceeded) shape (skip ONE file, walk continues, every owned path
+  gets exactly one truthful row, sole-increment kept); overlay syncChanged++
+  moved inside the gate; common-pass equal-version/CORE-LOCKED DRIFT/FORK/COPIED
+  lines print the delivered project path (report-only). Spec
+  docs/designs/2026-11-20-upgrade-adopt-row-truthfulness-design.md registered
+  (manual/implemented); CHANGELOG + SCRIPTS.md + lifecycle record synced. Tests:
+  new tests/unit/upgrade-variant-scripts-walk.test.ts (5 assertions, negative
+  control verified — 3 of 5 fail pre-fix); full unit battery 4813 pass/0 fail;
+  typecheck 0 errors; validate-templates 0 errors. Detection wiring
+  (verify-delivered-versions.ts into STEP I (5)) remains the tracked follow-up.
+error: null

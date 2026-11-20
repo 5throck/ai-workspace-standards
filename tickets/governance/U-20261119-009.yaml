@@ -1,0 +1,59 @@
+schemaVersion: 1
+id: U-20261119-009
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-19T22:00:49.827+09:00'
+history:
+  - at: '2026-11-19T22:00:49.827+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-20T02:05:30.323+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    The diagram generation pipeline lacks layout safety rules that had to be
+    rediscovered deck-by-deck: (1) no floor on inter-node gap — enlarging type
+    made gaps collapse (1.5–7.5px) and produced negative-length connector lines;
+    (2) connectors drawn before node rects get painted over when nodes enlarge;
+    (3) no hard overflow guard against the viewBox; (4) all diagrams from one
+    run tend to reuse the same vertical-stack layout (user complained about
+    monotony) — the agent contract should require distinct layouts per diagram
+    type (timeline/columns/merge/cycle/stairs/funnel/chevrons/fan) with
+    legibility minimums (label ≥22px, sub ≥17px, gold connectors ≥3px, visible
+    arrowheads).
+  affected_paths:
+    - scripts/co-deck/diagram-helpers.ts
+    - agents/diagram-specialist.md
+    - skills
+  identity_source: cwd
+  repro: >-
+    Regenerate the 8 diagrams of deliverables/2026-11-field-problem-innovation
+    with larger type: v2 grew nodes but computed inter-node gaps as leftover
+    space (collapsed to 1.5–7.5px on 5-node/6-element layouts, negative-length
+    arrows) and drew merge arrows before node rects (nodes painted over
+    arrowheads). Fixes applied in a v3 generator: compact variant when type
+    doesn't fit, gap floor ≥24–30px visible connector run, connectors drawn
+    after nodes, hard overflow guard on the 560×560 canvas.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: skills'
+    - info:in_last_delivery scripts/co-deck/diagram-helpers.ts=false
+    - info:in_last_delivery agents/diagram-specialist.md=false
+    - info:in_last_delivery skills=false
+  dedupe_key: 230cd395576f2f185d5debe2163d781b7171fe63b7075fe750ce603af85f283b
+  duplicates:
+    - project: co-deck
+      at: '2026-11-19T22:00:49.827+09:00'

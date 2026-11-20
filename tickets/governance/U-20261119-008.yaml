@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261119-008
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-19T22:00:46.048+09:00
+history:
+  - at: 2026-11-19T22:00:46.048+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'validate-image-manifest.ts has two workflow gaps: (1) it REJECTS deck-local image paths (./assets/...), forcing deck-local user-cleared press images to be copied into the shared pool (deliverables/assets/images/), which exposes them to other projects beyond the owner''s intent; (2) it refuses to run at all when image-manifest.json doesn''t exist yet, so the diagram-manifest can''t be validated during the diagram-only stage (workaround: temp workspace with empty manifest).'
+  affected_paths:
+    - scripts/co-deck/validate-image-manifest.ts
+    - scripts/co-deck/download-videos.ts
+  identity_source: cwd
+  repro: '1. Put a deck image at <deck>/assets/x.jpg and reference ./assets/x.jpg → validator errors. 2. Run the validator before any image-manifest.json exists (diagram-only stage) → refusal; workaround is a temp workspace with an empty manifest. 3. `bun scripts/co-deck/download-videos.ts --project …` fails with "QuickDL not found at ~/git/project/QuickDL" even though external-deps install populated external/quickdl (no venv) — workaround: manual venv + --quickdl-dir external/quickdl (also U-20261119-004).'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/co-deck/validate-image-manifest.ts=false
+    - info:in_last_delivery scripts/co-deck/download-videos.ts=false
+  dedupe_key: 9c2149c4d9228f17c08b44ccce5b268a62c5ecf95acad51bf44b69fb9e1c0abc
+  duplicates:
+    - project: co-deck
+      at: 2026-11-19T22:00:46.048+09:00

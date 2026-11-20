@@ -1,7 +1,7 @@
 ---
 name: storyline
 scope: co-deck
-version: 1.5.0
+version: 1.6.0
 lang: ko
 lang_reason: proper-noun (Step 3.5 quotes verbatim Korean defect strings and replacement wording from the affected deck)
 description: >
@@ -12,7 +12,7 @@ description: >
   of the lecture workflow.
 status: active
 owner: storyline
-last_reviewed: "2026-11-17"
+last_reviewed: "2026-11-21"
 prerequisites: research
 relates_to:
   - skill: design
@@ -193,8 +193,11 @@ Ban list (matched against slide-visible fields of `slide_deck.md`):
 | Bare meta-words standing alone as an aside (not inside a sentence) | `Unverified`, `근사치` as a lone bullet tail |
 | Internal production wording (U-20261116-003): verification state and instructions | `Stage 1.5 권장`, `[프레임: …]`, `v1 검증 문구 이식`, `원문 미확인`, `직접 비교 금지`, `확장 서술 금지`, `보조 표본은 내레이션으로` |
 | Verification-tag glyphs riding research_notes tags into slide text | `⚠️` attached to a source note, `명시적 미커버` as audience text |
+| Epistemic bullet prefixes, label-BEFORE-dash (U-20261119-006): `^(사실\|가능성\|해석\|추정\|전망)\s*[—:-]` | `사실 — 재해 복구 비용은 추산과 다르다`, `가능성 — 확산 가능`, `해석: 수급 공백이 원인` |
+| Parenthetical interpretation/confirmation asides (U-20261119-006): `\((강연자 해석\|확정된 사실은 아님\|확인 필요)\)` | `(강연자 해석)`, `(확정된 사실은 아님)` |
+| Narration epistemic disclaimers in slide-visible fields (U-20261119-006, owner decision D3): `근거는 없습니다`, `독립적인 검증을 거친 것은 아니라는 점` | a `notes`/bullet line reading `근거는 없습니다`, `독립적인 검증을 거친 것은 아니라는 점` |
 
-Regex sketch: `⚠|※|—\s*(해석 주의|배제 검토|검토 필요|추후 확인)|\((⚠️|근사치|단일 소스|Unverified|미검증)[^)]*\)`
+Regex sketch: `⚠|※|—\s*(해석 주의|배제 검토|검토 필요|추후 확인)|\((⚠️|근사치|단일 소스|Unverified|미검증)[^)]*\)|^(사실|가능성|해석|추정|전망)\s*[—:-]|\((강연자 해석|확정된 사실은 아님|확인 필요)\)|근거는 없습니다|독립적인 검증을 거친 것은 아니라는 점`
 
 Allowed replacements (the information is preserved, the artifact is not):
 
@@ -202,9 +205,11 @@ Allowed replacements (the information is preserved, the artifact is not):
 |-----------|---------|
 | In-sentence plain-language qualifier | `약 16.3억 달러` (`≈`/`⚠️ 근사치` → `약`), `추정치 기준`, `미검증 집계`, `언론 보도 기준` |
 | Plain-language footnote (field `footnote:`) | `라면 수출 수치는 농식품부 계열 집계 기준. 관세청 HS 기준과는 집계 차이가 있음.` |
-| Migration into Script (narration) for verbal delivery | per the ※-cleanup pattern |
+| Migration into Script (narration) — NARROWED by owner decision D3 (U-20261119-006): caveats route to the script ONLY, never the slide; spoken narration may carry the bare disclaimers (`근거는 없습니다`-style) but slides never show them; prefer natural attribution (`행정안전부는 …라고 밝혔다`) over the bare disclaimer | per the ※-cleanup pattern |
 
 The distinction that matters: a **qualifier woven into the claim** (`약`, `~기준`, `추정치`) is audience content and is correct; a **glyph/aside addressed at the analyst** (`⚠️`, `※`, `— 해석 주의`) is internal process and is banned.
+
+**Narration disclaimers — the D3 split (U-20261119-006).** The three new pattern classes above are banned on EVERY slide-visible field: epistemic bullet prefixes (`사실 —`/`가능성 —`/`해석 —`…), parenthetical asides (`(강연자 해석)`, `(확정된 사실은 아님)`, `(확인 필요)`), and epistemic disclaimers (`근거는 없습니다`, `독립적인 검증을 거친 것은 아니라는 점`). Of the three, ONLY the disclaimers may live in the speaker **script** — the presenter speaks the caveat, the slide never shows it. Bullet prefixes and parenthetical asides are written-form artifacts and stay out of the script too (TTS reads them aloud verbatim). Verification status itself stays in storyline.md / source_notes; narration carries natural attribution instead. The split is enforced by the layout lint: `estimate-layout.ts --lint` FAILs on all three families in slide-visible fields (title, subtitle, text, bullets, visualTitle/visualDisplay/visualCaption, notes, footnotes) and on prefixes/parentheticals in `script`/`scriptEn`/`scriptJa` fields.
 
 **R2 — Internal terms and codes require prior definition.** A coined term or internal framework label may appear on a slide only **on or after** the slide that introduces its definition. Dividers, part descriptions, and early-chapter slides MUST use plain language. This includes internal citation codes — they never appear outside the references slide (R3).
 
@@ -273,6 +278,7 @@ Self-review after writing both files:
 - If multi-language narration is requested, do translated script fields exist?
 - **Uniform Layout check**: Do ALL content slides (between cover and closing) use `type: standard`? If any content slide uses `punchline` or another non-standard type, convert it to `standard`.
 - No `⚠️`/`※`/`— 해석 주의`-style internal annotations in any slide-visible field
+- No epistemic bullet prefixes (`사실 —`/`가능성 —`/`해석 —`…), parenthetical asides (`(강연자 해석)`/`(확정된 사실은 아님)`…), or narration disclaimers (`근거는 없습니다`…) in any slide-visible field; disclaimers live in the spoken script only, never on a slide (U-20261119-006, owner decision D3)
 - No coined term or internal code used before its defining slide (dividers use plain language)
 - No `[Source: R#]` footers; references slide present before the punchline (if research_notes.md exists)
 
@@ -286,9 +292,12 @@ bun scripts/co-deck/estimate-layout.ts --project deliverables/<deck> --lint
 
 min/max bullet counts and title length are BLOCKING (content edits silently
 broke a 3-bullet minimum in one deck — caught only by the end user). The
-body-chars bound is calibrated at the theme level (zen ships 600, DEC-
-20261114-04) and is advisory; real violations (bullet-count min, title length)
-must not drown in bound-noise.
+meta-wording gate (U-20261119-006) is BLOCKING too: the lint FAILs on the
+Step 3.5 R1 epistemic bullet prefixes / parenthetical asides / narration
+disclaimers in slide-visible fields, and on bullet prefixes/parentheticals in
+`script` fields (D3 split). The body-chars bound is calibrated at the theme
+level (zen ships 600, DEC-20261114-04) and is advisory; real violations
+(bullet-count min, title length, meta wording) must not drown in bound-noise.
 
 ### Step 3.7: Gate 2 Audience-Fit Checklist (U-20261116-006)
 

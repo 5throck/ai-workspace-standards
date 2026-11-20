@@ -691,3 +691,157 @@ describe('owedBlocks (the gate debt inventory behind step-2 sparing, T-20261118-
     expect(owedBlocks({ sinceDays: 365, maxCommits: 0, cwd: root })).toEqual([]);
   });
 });
+
+// ── v1.6.0 absentOk (U-20261120-001 — design docs/designs/2026-11-20-runner-
+//    hardening-integrity-design.md §3.5 + §8 PR-4 tests a-d) ──────────────────
+
+describe('absentOk exit-128 classification (v1.6.0, U-20261120-001)', () => {
+  function commitAll(msg: string): void {
+    git(['add', '-A']);
+    git(['commit', '-q', '-m', msg]);
+  }
+  /** One-side-taken merge: memory/2026-11-05.md is ADDED on the side branch
+   * only — the ours-side parent blob read is the absent-path shape (exit 128)
+   * that produced the 20+ anonymous WARN storm per scan. */
+  function setupOneSideTakenMerge(): string {
+    git(['init', '-q', '-b', 'main']);
+    git(['config', 'user.name', 'test']);
+    git(['config', 'user.email', 'test@example.com']);
+    git(['config', 'commit.gpgsign', 'false']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n`);
+    commitAll('base');
+    git(['checkout', '-q', '-b', 'side']);
+    writeFileSync(join(memoryDir, '2026-11-05.md'), `${block('S', 'side-only')}\n`);
+    commitAll('side adds a new log');
+    git(['checkout', '-q', 'main']);
+    git(['merge', '--no-ff', '-q', '-m', 'merge side (one-side-taken)', 'side']);
+    const res = Bun.spawnSync(['git', 'rev-parse', 'HEAD'], { cwd: root, stdout: 'pipe', stderr: 'pipe' });
+    return res.stdout.toString().trim();
+  }
+
+  /** Capture the module's stderr WARN / stdout INFO channels for one sweep. */
+  function captureChannels(): { warns: string[]; infos: string[] } {
+    const warns: string[] = [];
+    const infos: string[] = [];
+    const origWarn = console.warn;
+    const origInfo = console.info;
+    console.warn = (m: unknown) => warns.push(String(m));
+    console.info = (m: unknown) => infos.push(String(m));
+    return {
+      warns,
+      infos,
+      restore: () => {
+        console.warn = origWarn;
+        console.info = origInfo;
+      },
+    };
+  }
+
+  test('(a) absent-side read emits NO warn (the 20+-row storm is gone)', () => {
+    const mergeSha = setupOneSideTakenMerge();
+    const cap = captureChannels();
+    try {
+      const results = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+      // the merge is a clean union (blocks only exist on one side) → no findings
+      expect(results).toEqual([]);
+      expect(listMemoryMerges({ sinceDays: 365, maxCommits: 20, cwd: root })).toHaveLength(1);
+      expect(mergeSha.length).toBe(40);
+      expect(cap.warns.filter((w) => w.includes('failed (exit'))).toEqual([]);
+    } finally {
+      cap.restore();
+    }
+  });
+
+  test('(b) sweep ends with exactly ONE INFO naming the absent ref', () => {
+    setupOneSideTakenMerge();
+    // the absent read is the OURS-side parent blob (the file does not exist on
+    // main's parent) — the INFO must name that exact <sha>:<file> ref
+    const p1 = Bun.spawnSync(['git', 'rev-parse', 'HEAD^'], { cwd: root, stdout: 'pipe', stderr: 'pipe' })
+      .stdout.toString()
+      .trim();
+    const cap = captureChannels();
+    try {
+      unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+      expect(cap.infos).toHaveLength(1);
+      expect(cap.infos[0]).toContain('1 absent-side blob reads');
+      expect(cap.infos[0]).toContain('documented no-data — file added/deleted between sides');
+      expect(cap.infos[0]).toContain(`${p1}:memory/2026-11-05.md`);
+    } finally {
+      cap.restore();
+    }
+  });
+
+  test('(c) genuine failure (non-log-sourced sweep in a non-repo) still warns with the failing ref named', () => {
+    const plain = mkdtempSync(join(tmpdir(), 'muv-strict-warn-'));
+    const cap = captureChannels();
+    try {
+      // listMemoryMerges' strict `git log` (args[1] = --merges) is NOT
+      // absentOk — a genuine 128 here must WARN, now naming the ref (v1.6.0
+      // item 4), instead of the old anonymous message.
+      expect(listMemoryMerges({ sinceDays: 365, maxCommits: 20, cwd: plain })).toEqual([]);
+      expect(cap.warns.some((w) => w.includes('git log failed (exit') && w.includes('on --merges'))).toBe(true);
+      expect(cap.infos).toEqual([]); // strict failures never enter the absent collector
+    } finally {
+      cap.restore();
+      rmSync(plain, { recursive: true, force: true });
+    }
+  });
+
+  test('(d) loop-regression pin: one-side-taken merge + same-branch re-run converges in one 3.88 pass (U-20261120-001, v1.5.0 spare semantics hold)', () => {
+    // The earlier same-id report: a merge resolution that took ONE side
+    // (dropping the other side's blocks), the guidance-following restore, and
+    // the next /sync on the same branch re-collapsing the restored block
+    // because step 2 did not spare it. Convergence contract (v1.5.0 + v1.6.0):
+    // owedBlocks keeps the MERGE-TIME debt (step 2 spares the restored
+    // segment) while unionScan tiers the group repaired-at-head (the gate
+    // PASSES — no FATAL, no re-collapse), and both stay true on the re-run.
+    git(['init', '-q', '-b', 'main']);
+    git(['config', 'user.name', 'test']);
+    git(['config', 'user.email', 'test@example.com']);
+    git(['config', 'commit.gpgsign', 'false']);
+    const a = block('A', 'alpha');
+    const b = block('B', 'beta');
+    const c = block('C', 'gamma');
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${a}\n---\nSHARED-TAIL\n`);
+    commitAll('base');
+    git(['checkout', '-q', '-b', 'side']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${a}\n---\n${c}\n---\nSHARED-TAIL-C\n`);
+    commitAll('side appends C');
+    git(['checkout', '-q', 'main']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${a}\n---\n${b}\n---\nSHARED-TAIL-B\n`);
+    commitAll('main appends B');
+    gitAllowConflict(['merge', '--no-commit', '--no-ff', 'side']);
+    // the one-side-taken resolution: C (and its marker) silently dropped
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${a}\n---\n${b}\n---\nSHARED-TAIL-B\n`);
+    git(['add', '-A']);
+    git(['commit', '-q', '-m', 'merge side (resolution drops C)']);
+    const res = Bun.spawnSync(['git', 'rev-parse', 'HEAD'], { cwd: root, stdout: 'pipe', stderr: 'pipe' });
+    const mergeSha = res.stdout.toString().trim();
+
+    const cap = captureChannels();
+    try {
+      // run 1 (the sync that FATALs pre-v1.5.0): the debt is inventoried for
+      // step-2 sparing AND the gate still flags the unrepaired worktree
+      const owed1 = owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root });
+      expect(owed1.some((o) => o.commit === mergeSha && o.block.text === c && o.parent === 'theirs')).toBe(true);
+      const scan1 = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+      expect(scan1).toHaveLength(1);
+      expect(scan1[0].tier).toBe('blocking'); // the FATAL the repair answers
+      // the guidance-following restore into the working tree
+      writeFileSync(
+        join(memoryDir, '2026-11-04.md'),
+        `${a}\n---\n${b}\n---\nSHARED-TAIL-B\n---\n${c}\n---\nSHARED-TAIL-C\n`,
+      );
+      // run 2 (same-branch re-run): convergence — the gate passes (no
+      // re-collapse FATAL) and the merge-time debt still spares the segment
+      const scan2 = unionScan({ sinceDays: 365, maxCommits: 20, cwd: root });
+      expect(scan2).toHaveLength(1);
+      expect(scan2[0].tier).toBe('repaired-at-head');
+      const owed2 = owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root });
+      expect(owed2.some((o) => o.block.text === c && o.parent === 'theirs')).toBe(true);
+      expect(cap.warns.filter((w) => w.includes('failed (exit'))).toEqual([]); // no storm, ever
+    } finally {
+      cap.restore();
+    }
+  });
+});
