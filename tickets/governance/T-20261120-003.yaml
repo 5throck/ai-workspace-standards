@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261120-003
+kind: manual
+title: >-
+  engine defect (upgrade-project): an ADOPT-grant row reads 'resolved' while the
+  copy never happens — the automation-engineer's round-2 self-correction of the
+  2026-11-19 finding. Evidence: co-deck's .claude/last-upgrade-delivery.json
+  files[] lists 208 paths but only 12 of its scripts/co-deck/*; the dry-run DID
+  emit CONFLICT rows for the swallowed paths (40 in the on-disk log) and
+  download-font.ts carried both UNBASELINED_OVERWRITE and ADOPT — so the grant
+  is accepted, recorded as a decision, and then dropped on the variant-scripts
+  channel. Six scripts + the tests that expect them shipped; the tests then fail
+  (html-to-pdf 16 fails). Impact: any wave run with per-file adopt-template
+  grants under-delivers silently, and the run log reads clean. Fix direction:
+  make the variant-scripts pass honour the grant (or emit a hard ERROR when a
+  granted path is not copied); do NOT key the fix on decisions[] (it carries no
+  version fields — enrichPending enriches pendingBackport only). Workaround
+  landed 2026-11-20: direct file copy, co-deck#257. Detection landed:
+  scripts/verify-delivered-versions.ts (T-20261120-003 candidate for wiring into
+  STEP I (5)). Needs Design Gate.
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-20T07:50:07.957+09:00'
+history:
+  - at: '2026-11-20T07:50:07.957+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

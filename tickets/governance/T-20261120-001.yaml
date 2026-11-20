@@ -2,77 +2,28 @@ schemaVersion: 1
 id: T-20261120-001
 kind: manual
 title: >-
-  co-quickdl adoption/re-base variant-ization pipeline gaps — verified batch
-  from U-20261119-002 (triage 2026-11-20, evidence code-verified; all five
-  hand-fixed project-side in Projects/co-utility per PR #48, template-side fixes
-  remain): (1) adoption delivers docs/<variant>.context.md as an unfilled stub —
-  templates/common/docs/variant.context.template.md:17-22 ships '[e.g.,
-  TypeScript 5+]' placeholder rows and :128/:137 instruction markers,
-  adopt-project.ts:706-712 substitutes only
-  variantName/version/pmRoleDescription and the step-10 substitution map
-  (adopt-project.ts:764-778) has no stack fields, with no warn/fail on unfilled
-  sections; expected: adoption instantiates the overlay from the project's real
-  stack/roster (or warns + requires acknowledgment). (2) no adoption hygiene
-  pass for L2-only root artifacts — PROMOTION_CHECKLIST.md (L2-only per
-  validate-variant-readiness.ts:150-152 B1) was found at the adopted project
-  root; no script delivers it (leak path not reproduced — plausibly pre-existing
-  external-repo content) and no pass detects/flags L2-only artifacts in adopted
-  trees; expected: adoption detects + flags L2-only root artifacts with an offer
-  to remove. (3) variant re-base does not prune prior-variant exclusive skills —
-  adoption seeds project variant.json from the source variant template
-  (templates/co-develop/variant.json skill_manifest.variant_specific declares
-  code-review/refactoring/swe-solve/test-driven-development) plus the
-  adopt-project.ts:459-474 foreign-skill seed; on re-base the VARIANT-SCOPE
-  SKILL PRUNE (upgrade-project.ts:8300-8390) keeps manifest-seeded skills (:8358
-  KEEP) and docs/workspace-schema.json variant_scoped_skills registers only
-  swe-solve for co-develop, so all 4 exclusive skills survived and needed manual
-  git rm across skills/ + 5 platform mirrors, and the project variant.json
-  identity itself was hand-flipped (upgrade self-declared-identity path
-  :2143-2152 syncs by variant.json name); expected: re-base re-evaluates the
-  project manifest / prior-variant exclusives and re-instantiates variant
-  identity surfaces. (4) stale pre-standard docs/context.md never flagged —
-  docs/context.md is SCAFFOLD_COMMON_OWNED_FILES
-  (scripts/lib/upgrade-policy.ts:678) with add-if-missing seeding and
-  DOCS_PRESERVE on upgrade (upgrade-project.ts:8490); adopt-project step 5
-  handles only the overlay, so a pre-standard context.md (no version footer /
-  older than templates/VERSION) is never detected or offered alignment. (5)
-  docs/phase-definitions.md delivered variant-generic —
-  templates/common/docs/phase-definitions.md is the explicit default (no roster
-  instantiation) and adopt-project has no phase-definitions step; QuickDL
-  hand-rewrote it to the co-utility roster. Scope: design-lite batch on
-  scripts/adopt-project.ts + scripts/upgrade-project.ts (+ optional L2-only file
-  set in docs/templates/variant-contract.json); fixes ship as PRs citing
-  U-20261119-002; resolve that ticket only after this batch lands.
-priority: normal
-status: done
+  design (human merge): amend ADR-0105 Decision 2 + add AC-13 to the registered
+  design spec 2026-11-12-unified-batch-runner-design, per meeting 2026-11-20
+  agreement A. Conditions 7 (ledger write before merge, verify --require-merged
+  at run end) and 8 (delivery completeness via verify-delivered-versions) are
+  TWO FACETS OF ONE INVARIANT and land as a single numbered item in Decision 2 —
+  the architect's ruling: a prompt-only condition would be exactly the prose
+  authority ADR-0105 rejected. AC-13 asserts: every manifest-required field is
+  present BEFORE the merge SHA is written, and a missing field fails the merge
+  rather than logging a gap. Also record in the ADR: (a) the billing-wall
+  exception is SUSPENDED pending owner re-authorization (it was 11 of 15 merges
+  on 2026-11-19); (b) the residual-risk register from the meeting — pre-review
+  containment does NOT close filesystem reads, egress, or a project-authored
+  audit verdict; (c) cap 16 vs cap 3 re-examination is DUE (one week elapsed,
+  never held). PROTECTED PATHS: docs/adr + design spec — human merge required,
+  runner must not merge it.
+priority: high
+status: backlog
 attempts: 0
-created_at: '2026-11-20T00:15:00.407+09:00'
+created_at: '2026-11-20T07:50:02.939+09:00'
 history:
-  - at: '2026-11-20T00:15:00.407+09:00'
+  - at: '2026-11-20T07:50:02.939+09:00'
     from: null
     to: backlog
-  - at: '2026-11-20T01:43:34.235+09:00'
-    from: backlog
-    to: waiting
-  - at: '2026-11-20T01:43:34.254+09:00'
-    from: waiting
-    to: review
-  - at: '2026-11-20T01:43:34.271+09:00'
-    from: review
-    to: done
-result: >-
-  Landed via PR #2113 (merge d62ec06e2, CI 4/4 green). Design
-  docs/designs/2026-11-20-adoption-gaps-batch-design.md registered implemented.
-  All 4 in-scope gaps fixed template-side: (1) --stack flag + prompts fill the
-  context-overlay tech-stack rows + unfilled-stub WARNs (adopt-project 1.7.0,
-  adopt-plan 1.1.0); (2) report-only hygiene pass on L2-only root artifacts
-  (PROMOTION_CHECKLIST.md, leftover variant.json); (3) source-variant
-  adoption-residue prune arm in upgrade-project 1.113.0 VARIANT-SCOPE SKILL
-  PRUNE (provenance = .claude/adopt-project-decisions.json, six-way fail-safe
-  conjunction, decision-logged DELETE rows, rehearsal-pruned 24 paths across 4
-  co-develop skills); (4) pre-standard docs/context.md detection +
-  --refresh-context consent regeneration. U-20261119-002 resolved fixed. Gap 5
-  (phase-definitions) out of scope — separate batch. Battery: test:unit 334
-  files, verify-scripts 287, audit, validate-templates, spec-check all green;
-  scratch rehearsal covered the full adopt→flip→re-base cycle.
+result: null
 error: null

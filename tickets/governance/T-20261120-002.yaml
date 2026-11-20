@@ -2,23 +2,29 @@ schemaVersion: 1
 id: T-20261120-002
 kind: manual
 title: >-
-  structural finding (Friday FULL review): templates/co-newbiz/ does not exist —
-  not on disk, not in any branch's git history (verified: git log --all --
-  templates/co-newbiz/ empty). Projects/co-newbiz is a 17-member fleet project
-  whose variant definition lives ONLY project-side
-  (Projects/co-newbiz/variant.json); validate-variant-readiness fails it
-  (variant-json-missing) while all 16 other variants pass. All co-newbiz upgrade
-  waves to date have been common-only deliveries (no variant deltas ever
-  applied). Decision needed (design class): (a) author templates/co-newbiz
-  (project-local variant bits promoted), (b) declare co-newbiz a common-only
-  fleet project with a readiness-rule carve-out, or (c) another disposition.
-  Filed from the 2026-11-20 runner FULL review.
-priority: normal
+  security (needs implementation): prompt-integrity verifier is ABSENT while
+  T-20261112-003 is status done — a false closure. Confirmed by meeting
+  2026-11-20 (security-expert: 'Not live'; auditor: 'Committed != ratified').
+  The v4 prompt + prompts.manifest.json sha256 (snapshot
+  .pipeline-state/logs/runner-prompt-v4-snapshot.txt) are committed, but nothing
+  hashes the LIVE prompt: detection is zero. Required:
+  scripts/verify-prompt-integrity.ts that (1) hashes the live automation prompt
+  from the store, (2) reconciles against prompts.manifest.json (and the snapshot
+  when the live hash differs), (3) exits non-zero + files an urgent alert on
+  drift, and a pre-fire wrapper the launcher can call before 03:00. Reopen
+  T-20261112-003 until it exists. Second item: stop-file run-id scoping is only
+  half-closed — stop-gate.ts scopes by timestamp, but the WATCHDOG still appends
+  the unconditional 13:00 event daily, so automation-stop.history.jsonl grows
+  one row per day forever; make the watchdog write run-id + only when a run is
+  active. Third: scripts/*.ts beyond the 8 protected entries (skills/**,
+  review-baseline.ts, automation-lock.ts) remain an unprotected execution
+  surface — decide the allow-read set.
+priority: high
 status: backlog
 attempts: 0
-created_at: '2026-11-20T03:28:51.188+09:00'
+created_at: '2026-11-20T07:50:02.975+09:00'
 history:
-  - at: '2026-11-20T03:28:51.188+09:00'
+  - at: '2026-11-20T07:50:02.975+09:00'
     from: null
     to: backlog
 result: null
