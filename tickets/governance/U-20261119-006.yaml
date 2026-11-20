@@ -3,7 +3,7 @@ id: U-20261119-006
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-19T17:48:31.766+09:00'
 history:
@@ -13,7 +13,23 @@ history:
   - at: '2026-11-20T02:05:30.305+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-21T02:46:52.375+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T02:47:06.961+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed upstream by batch-2 PR-E1 (design 2026-11-20-co-deck-pipeline-batch-2
+  §R5, owner decision D3): estimate-layout.ts 1.6.0 --lint meta-wording gate
+  FAILs the three uncovered pattern families (epistemic bullet prefixes
+  사실/가능성/해석/추정/전망 + —/:/-, parenthetical asides (강연자 해석)/(확정된 사실은 아님)/(확인 필요),
+  narration disclaimers 근거는 없습니다 / 독립적인 검증을 거친 것은 아니라는 점) on slide-visible
+  fields; script fields keep the D3 split (spoken disclaimers allowed,
+  written-form artifacts banned); storyline SKILL 1.6.0 ban table + regex +
+  narrowed caveat-to-script routing (6 mirrors), agents/storyline.md 1.1.4
+  pointer line; lint test 1.1.0 +8 pins; cleaned pilot deck
+  (2026-11-field-problem-innovation) passes --lint
 error: null
 upstream:
   project: co-deck
@@ -55,3 +71,19 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-19T17:48:31.766+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2131
+    template_version: unreleased
+    summary: >-
+      Fixed upstream by batch-2 PR-E1 (design
+      2026-11-20-co-deck-pipeline-batch-2 §R5, owner decision D3):
+      estimate-layout.ts 1.6.0 --lint meta-wording gate FAILs the three
+      uncovered pattern families (epistemic bullet prefixes 사실/가능성/해석/추정/전망 +
+      —/:/-, parenthetical asides (강연자 해석)/(확정된 사실은 아님)/(확인 필요), narration
+      disclaimers 근거는 없습니다 / 독립적인 검증을 거친 것은 아니라는 점) on slide-visible fields;
+      script fields keep the D3 split (spoken disclaimers allowed, written-form
+      artifacts banned); storyline SKILL 1.6.0 ban table + regex + narrowed
+      caveat-to-script routing (6 mirrors), agents/storyline.md 1.1.4 pointer
+      line; lint test 1.1.0 +8 pins; cleaned pilot deck
+      (2026-11-field-problem-innovation) passes --lint

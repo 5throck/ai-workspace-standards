@@ -1,0 +1,87 @@
+schemaVersion: 1
+id: U-20261120-002
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-20T12:53:17.928+09:00'
+history:
+  - at: '2026-11-20T12:53:17.928+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-21T07:13:30.095+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-21T07:13:49.964+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T07:14:00.932+09:00'
+    from: review
+    to: done
+result: >-
+  Project-side mechanical fix landed: root tsconfig.json (hono/jsx JSX
+  resolution for cwd-based bun test) + cwd-independent PDF FONT_PATH; root bun
+  test 333/0, service 242/0. co-security PR #131 merged at 97b465f. Root cause
+  verified empirically at d7703752 (116/22 with no root tsconfig; bun 1.4.4
+  resolves JSX config from cwd); ticket claim numbers approximate (22 failing
+  tests, service suite now 242/0).
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    Root-level `bun test` in a project with a bundled service subproject
+    (services/assessment-service, hono/jsx server-rendered UI) fails ~20/127
+    test files with `Cannot find module 'react/jsx-dev-runtime'`: bun applies
+    the root tsconfig (react JSX defaults) to the service's .tsx files, which
+    actually use jsxImportSource "hono/jsx" with no react dependency. The
+    service's own directory invocation passes fully (198/0), so the suite is
+    green but the root-level entry point misleads (CI or contributors running
+    bun test at root see mass failures).
+  affected_paths:
+    - package.json
+    - tsconfig.json
+    - services/assessment-service/package.json
+    - services/assessment-service/tsconfig.json
+  identity_source: cwd
+  repro: >-
+    From the workspace-project repo root (co-security), run `bun test` without
+    cd-ing into services/assessment-service. 20 of 127 test files fail because
+    bun applies the ROOT tsconfig to the service's .tsx test/page files: `Cannot
+    find module 'react/jsx-dev-runtime'` — while the service's own
+    tsconfig/package.json use `jsxImportSource: "hono/jsx"` and have no react
+    dependency. The canonical suite must instead be run from
+    services/assessment-service (`bun test` → 198 pass / 0 fail). Expected:
+    root-level test invocation either excludes services/ subprojects from the
+    root tsconfig JSX resolution or delegates to the service's own config, so a
+    root-level `bun test` does not produce 20 false failures.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: tsconfig.json'
+    - 'path_not_template_managed: services/assessment-service/package.json'
+    - 'path_not_template_managed: services/assessment-service/tsconfig.json'
+    - info:in_last_delivery package.json=false
+    - info:in_last_delivery tsconfig.json=false
+    - info:in_last_delivery services/assessment-service/package.json=false
+    - info:in_last_delivery services/assessment-service/tsconfig.json=false
+  dedupe_key: 61dc832ba7037cb9a180f2b1417047e7d52d9c4a63d63fafb13b4b5e3802f01c
+  duplicates:
+    - project: co-security
+      at: '2026-11-20T12:53:17.928+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/co-security/pull/131
+    template_version: 0.30.0
+    summary: >-
+      Project-side mechanical fix landed: root tsconfig.json (hono/jsx JSX
+      resolution for cwd-based bun test) + cwd-independent PDF FONT_PATH; root
+      bun test 333/0, service 242/0. co-security PR #131 merged at 97b465f. Root
+      cause verified empirically at d7703752 (116/22 with no root tsconfig; bun
+      1.4.4 resolves JSX config from cwd); ticket claim numbers approximate (22
+      failing tests, service suite now 242/0).

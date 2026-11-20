@@ -1,0 +1,54 @@
+schemaVersion: 1
+id: U-20261121-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-21T00:41:21.396+09:00'
+history:
+  - at: '2026-11-21T00:41:21.396+09:00'
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The common meeting-facilitation skill specifies a round-based meeting (every
+    participant speaks each round, issue by issue) and a single transcript file.
+    Observed in practice (co-newbiz live measurements, 2026-11-20): round
+    meetings make every seat speak in fixed order, mostly "add my domain's
+    condition", so transcripts read like parallel evaluations rather than a
+    meeting; long meetings give no progress signal; and the minutes carry no
+    dialogue. Expected: a turn-based (dialogue) meeting as the default — the
+    facilitator picks 3-5 relevant participants per issue (dissent/veto seat
+    always included; non-participants recorded as not participating, never
+    counted as agreement), speakers alternate with ask/answer/rebut turns and
+    address peers by display name, repeated amendment lists are limited,
+    per-issue consensus is proposed by the chair and voted only by participants,
+    progress is reported as "issue i/n, speaker, turns used", and the minutes
+    are a short body with verbatim key exchanges plus an appendix holding the
+    full turn transcript (and an "interrupted attempts" appendix when a meeting
+    was resumed). Governance rules 1-3 (dissent seat, PROPOSAL never decision,
+    dissent verbatim) stay unchanged.
+  affected_paths:
+    - skills/meeting-facilitation/SKILL.md
+  identity_source: client_roots
+  repro: >-
+    Run the skill on any multi-agent topic: every agent speaks each round
+    regardless of relevance; the transcript has no per-issue participant
+    selection, no verbatim-excerpt minutes body, and no progress reporting.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery skills/meeting-facilitation/SKILL.md=true
+  dedupe_key: c8d61c2cc039397474109122c237a30162f9335f3958484945ef687f04116fed
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-21T00:41:21.396+09:00'

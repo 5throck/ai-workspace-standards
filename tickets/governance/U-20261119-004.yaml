@@ -3,7 +3,7 @@ id: U-20261119-004
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-19T17:48:31.583+09:00'
 history:
@@ -13,7 +13,28 @@ history:
   - at: '2026-11-20T02:05:30.264+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-21T02:55:31.859+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T02:55:31.859+09:00'
+    from: review
+    to: done
+result: >-
+  Delivered template adapter download-videos.ts v1.2.0 to Projects/co-deck
+  (merged via co-deck PR #257, merge SHA 917aa907; delivered file on co-deck
+  main verified byte-identical to
+  templates/co-deck/scripts/co-deck/download-videos.ts @ origin/main 51f6cab06).
+  Fixes both reported symptoms: (1) resolution order is now --quickdl-dir >
+  CDK_QUICKDL_DIR > <project root>/external/quickdl (manifest install_dir,
+  accepts root cli.py OR src/cli.py layouts) > legacy ~/git/project/QuickDL; (2)
+  missing QuickDL now prints an actionable setup command (external-deps install
+  --id quickdl + venv setup + --quickdl-dir/CDK_QUICKDL_DIR/CDK_QUICKDL_PYTHON
+  pointers) instead of a bare path. Verification in Projects/co-deck:  exit 0
+  (QuickDL v1.0.1 clone at external/quickdl, .venv present); pinned suite
+  scripts/co-deck/tests/download-videos.test.ts 8/8 pass. U-20261120-003 handled
+  separately. Note: external-deps install does not provision the .venv itself —
+  the v1.2.0 header/selftest print the exact one-line setup command; venv
+  provisioning remains a manual step by design (actionable-error remedy).
 error: null
 upstream:
   project: co-deck
@@ -56,3 +77,25 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-19T17:48:31.583+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/co-deck/pull/257
+    template_version: 0.30.0
+    summary: >-
+      Delivered template adapter download-videos.ts v1.2.0 to Projects/co-deck
+      (merged via co-deck PR #257, merge SHA 917aa907; delivered file on co-deck
+      main verified byte-identical to
+      templates/co-deck/scripts/co-deck/download-videos.ts @ origin/main
+      51f6cab06). Fixes both reported symptoms: (1) resolution order is now
+      --quickdl-dir > CDK_QUICKDL_DIR > <project root>/external/quickdl
+      (manifest install_dir, accepts root cli.py OR src/cli.py layouts) > legacy
+      ~/git/project/QuickDL; (2) missing QuickDL now prints an actionable setup
+      command (external-deps install --id quickdl + venv setup +
+      --quickdl-dir/CDK_QUICKDL_DIR/CDK_QUICKDL_PYTHON pointers) instead of a
+      bare path. Verification in Projects/co-deck:  exit 0 (QuickDL v1.0.1 clone
+      at external/quickdl, .venv present); pinned suite
+      scripts/co-deck/tests/download-videos.test.ts 8/8 pass. U-20261120-003
+      handled separately. Note: external-deps install does not provision the
+      .venv itself — the v1.2.0 header/selftest print the exact one-line setup
+      command; venv provisioning remains a manual step by design
+      (actionable-error remedy).

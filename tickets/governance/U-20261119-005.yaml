@@ -3,7 +3,7 @@ id: U-20261119-005
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-19T17:48:31.678+09:00'
 history:
@@ -13,7 +13,36 @@ history:
   - at: '2026-11-20T02:05:30.287+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-20T22:53:04.159+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-20T22:53:22.992+09:00'
+    from: review
+    to: done
+result: >-
+  Landed: PR #2127 merged as 40041c05a (branch pr/20261119-batch2-prb1; commits
+  408277184+66e31c09b, merge 40041c05a; CI 4/4 green — ubuntu/macos/windows test
+  + gitleaks). All 5 design §R2 sub-defects fixed theme-side (design
+  2026-11-20-co-deck-pipeline-batch-2-design registered implemented; doc+spec
+  entry+registry row landed in this PR after the /tmp-backup recovery): (1)
+  .slide-bullets li block-flow + absolute ::before marker — flex/strong column
+  split gone; (2) visualCaption wired theme-side (.cdk-caption under right-panel
+  content, .cdk-caption-cover overlay on covers; divider full-bleed cover photo
+  hosts none, matching the deck-proven workaround); (3) contact bullets fallback
+  (max 5, first .contact-primary; contactName in the gate = gen-slides-pdf
+  v1.15.0 parity); (4) punchline newline per-line split (.punch-line +
+  .punch-line.sub); (5) panel-less standard slides (no .right-panel without
+  visualImage/non-empty visualDisplay + 1fr grid collapse — the fragile #slide-N
+  hide made theme-level and type-agnostic). Pins:
+  tests/ppt-engine-integration.test.ts v1.4.0 Part H (9 rendered-DOM pins,
+  headless Chrome); pitch-enhanced previews + 5 baseline PNG pairs regenerated
+  via the governed test:visual:update flow and eyeball-diffed; pre-existing
+  visual-regression failure set 14 -> 12 pairs (both pitch-enhanced pairs now
+  green), all remaining on untouched themes; full co-deck tree + test:unit +
+  verify-scripts 293/293 + audit all green. Follow-up per the design dependency
+  order: PR-A2's framed PDF consumes this PR's caption/punchline semantics; the
+  deck-level deck-overrides / deck-captions-js / #slide-21 patches in
+  Projects/co-deck deliverables are redundant on next rebuild.
 error: null
 upstream:
   project: co-deck
@@ -57,3 +86,33 @@ upstream:
   duplicates:
     - project: co-deck
       at: '2026-11-19T17:48:31.678+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2127
+    template_version: 0.30.0
+    summary: >-
+      Landed: PR #2127 merged as 40041c05a (branch pr/20261119-batch2-prb1;
+      commits 408277184+66e31c09b, merge 40041c05a; CI 4/4 green —
+      ubuntu/macos/windows test + gitleaks). All 5 design §R2 sub-defects fixed
+      theme-side (design 2026-11-20-co-deck-pipeline-batch-2-design registered
+      implemented; doc+spec entry+registry row landed in this PR after the
+      /tmp-backup recovery): (1) .slide-bullets li block-flow + absolute
+      ::before marker — flex/strong column split gone; (2) visualCaption wired
+      theme-side (.cdk-caption under right-panel content, .cdk-caption-cover
+      overlay on covers; divider full-bleed cover photo hosts none, matching the
+      deck-proven workaround); (3) contact bullets fallback (max 5, first
+      .contact-primary; contactName in the gate = gen-slides-pdf v1.15.0
+      parity); (4) punchline newline per-line split (.punch-line +
+      .punch-line.sub); (5) panel-less standard slides (no .right-panel without
+      visualImage/non-empty visualDisplay + 1fr grid collapse — the fragile
+      #slide-N hide made theme-level and type-agnostic). Pins:
+      tests/ppt-engine-integration.test.ts v1.4.0 Part H (9 rendered-DOM pins,
+      headless Chrome); pitch-enhanced previews + 5 baseline PNG pairs
+      regenerated via the governed test:visual:update flow and eyeball-diffed;
+      pre-existing visual-regression failure set 14 -> 12 pairs (both
+      pitch-enhanced pairs now green), all remaining on untouched themes; full
+      co-deck tree + test:unit + verify-scripts 293/293 + audit all green.
+      Follow-up per the design dependency order: PR-A2's framed PDF consumes
+      this PR's caption/punchline semantics; the deck-level deck-overrides /
+      deck-captions-js / #slide-21 patches in Projects/co-deck deliverables are
+      redundant on next rebuild.

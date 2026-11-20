@@ -14,7 +14,7 @@ title: >-
   exited 1 (grep-pattern miss in the battery harness — fix the harness to check
   exit codes)
 priority: high
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-19T07:28:24.433+09:00'
 history:
@@ -24,5 +24,24 @@ history:
   - at: '2026-11-20T07:20:54.924+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-21T02:56:33.261+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T02:56:41.512+09:00'
+    from: review
+    to: done
+result: >-
+  Selftest pin mismatch NOT present in current template: download-videos.ts
+  v1.2.0 RETAINS selftest (templates/co-deck/scripts/co-deck/download-videos.ts
+  L83-98; restored in 51f6cab06 co-deck src-layout adapter); delivered test file
+  byte-identical to template copy; pin strings match adapter output exactly
+  (stdout 'selftest: OK'; stderr 'LICENSE is not MIT' + 'cli.py missing' —
+  adapter emits 'cli.py missing (checked root and src/)', superset). Verified in
+  Projects/co-deck after v1.2.0 delivery via co-deck PR #257 (merged 917aa907):
+  pinned suite 8/8 pass, adapter selftest exit 0 against external/quickdl v1.0.1
+  + .venv. Template-side test updates NOT needed. RESIDUAL (not fixed here,
+  needs separate toolchain ticket): (a) html-to-pdf v1.3.x dual-selector + loud
+  zero-slide cases and theme-visual-regression compare fail in local env —
+  Chromium/toolchain review; (b) battery harness grep-pattern miss (check exit
+  codes; ref co-deck#252 wall-exception landing).
 error: null

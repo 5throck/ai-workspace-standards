@@ -18,7 +18,7 @@ title: >-
   never held). PROTECTED PATHS: docs/adr + design spec — human merge required,
   runner must not merge it.
 priority: high
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-20T07:50:02.939+09:00'
 history:
@@ -28,5 +28,17 @@ history:
   - at: '2026-11-20T13:42:26.000+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-20T22:03:49.158+09:00'
+    from: waiting
+    to: done
+result: >-
+  Fixed by ADR-0105 amendment (runner-hardening PR-1,
+  5throck/ai-workspace-standards PR #2119, merge 0e65d1a1d): Decision 2 gains
+  ONE numbered item consolidating Conditions 7+8 (ledger write before merge +
+  verify-delivered-versions --require-merged exit 0 + delivery completeness —
+  missing field FAILS the merge); billing-wall suspension recorded;
+  residual-risk register added; Governance cap 16-vs-3 re-exam recorded DUE;
+  AC-13 landed in the 11-12 design; DEC-20261120-01/-02 accepted (owner
+  delegation). Design:
+  docs/designs/2026-11-20-runner-hardening-integrity-design.md §T-20261120-001.
 error: null
