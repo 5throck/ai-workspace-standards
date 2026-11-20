@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // watchdog-automation-stop.ts — the out-of-process degraded-mode kill-switch for
 // the unified 03:00 batch runner (T-20261112-002; ADR-0105 Decision 4; design
 // docs/designs/2026-11-12-unified-batch-runner-design.md §4.5, AC-6).
@@ -13,11 +13,31 @@
 // mode: no further merges; in-flight atomic units finish; the watchdog on the
 // host (crontab 13:00 KST) and the runner's own stop conditions both write it.
 //
+// v1.1.0 (2026-11-20, RUN-ID SCOPING — T-20261120-002 second scope item; design
+//   docs/designs/2026-11-20-runner-hardening-integrity-design.md §T-20261120-002 3c):
+//   v1.0.0 appended an unconditional event on EVERY invocation, so the daily
+//   13:00 heartbeat made the stop file present at 03:00 every day (6-event
+//   growth observed) and automation-stop.history.jsonl grew one heartbeat row
+//   per day forever. Now the watchdog reads the automation lock
+//   (.pipeline-state/automation-unified-automation.lock, LockRecord
+//   name/pid/hostname from automation-lock.ts): a LIVE same-host holder
+//   (name === "unified-automation", pid alive) → append the stop event tagged
+//   `run: "unified-automation"` as before; NO live run → NO stop-file write and
+//   NO history row (an idle-night wall is not evidence of anything) — one
+//   stdout line for the launchd capture instead. Stop events[] cap and the
+//   atomic-write contract are unchanged; stop-gate.ts semantics are unchanged
+//   (a pre-run stale record still acknowledges; a live tag still aborts).
+//   Effect: the stop file is ABSENT at 03:00 by default and the history file
+//   stops its daily growth. Degraded-mode kill-switch intent preserved: a run
+//   that ignores deadlines past 13:00 keeps its lock live, so the wall still
+//   fires against it (ADR-0105 Decision 4).
+//
 // Usage:
 //   bun scripts/watchdog-automation-stop.ts <reason>
 //   bun scripts/watchdog-automation-stop.ts --state-dir <dir> <reason>   (tests/ops redirect)
 //
-// Exit codes: 0 (stop-file written or updated), 1 (usage error — missing/empty
+// Exit codes: 0 (stop-file written/updated on a live run, OR idle-night skip —
+// both are success outcomes for launchd), 1 (usage error — missing/empty
 // reason), 2 (unrecoverable write error).
 //
 // Safety contract (design R11 / AC-6):
@@ -34,27 +54,35 @@
 //   silently destroyed — it is renamed aside (automation-stop.corrupt-<ts>)
 //   before the fresh record is written, so the bytes stay available for the
 //   run report.
+// - RUN-SCOPED (v1.1.0): writes only when the unified-automation lock is live
+//   on this host; every written event carries `run: "unified-automation"`.
 //
 // Non-goals: the script never kills a process and never clears the stop-file —
 // killing past deadline + 15 minutes and stamping the automation lock dead are
 // operator/watchdog-loop duties (design R11); clearing the stop-file is the
 // runner's STEP-0 acknowledgment. No cross-host signaling — single-operator
-// workspace, same rationale as automation-lock.ts D4.
+// workspace, same rationale as automation-lock.ts D4 (a foreign-host lock
+// record is treated as not-live here, matching that ruling).
 
 import { mkdirSync, readFileSync, renameSync, writeFileSync, existsSync, statSync } from "node:fs";
+import { hostname } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ErrorPhase, withSyncErrorHandling } from "./lib/error-handling.ts";
+import { pidAlive, readLock, type LockRecord } from "./automation-lock.ts";
 
 const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_STATE_DIR = join(WORKSPACE_ROOT, ".pipeline-state");
 const STOP_FILE_NAME = "automation-stop";
 const MAX_EVENTS = 50;
+const RUNNER_LOCK_NAME = "unified-automation";
 
 export interface StopEvent {
   reason: string;
   timestamp: string;
   pid: number;
+  /** v1.1.0 run tag: the lock name of the live run this event was scoped to. */
+  run?: string;
 }
 
 export interface StopFile {
@@ -84,12 +112,15 @@ function isStopEvent(value: unknown): value is StopEvent {
  * - stateDir override exists for tests and operator redirects; defaults to
  *   <workspace>/.pipeline-state.
  * - now/pid overrides exist for tests; default to the live clock and pid.
+ * - run (v1.1.0) tags the event with the live run's lock name; callers that
+ *   resolved the run via isLiveAutomationRun pass RUNNER_LOCK_NAME here.
  */
 export function writeAutomationStop(options: {
   reason: string;
   stateDir?: string;
   now?: Date;
   pid?: number;
+  run?: string;
 }): StopWriteResult {
   const { reason } = options;
   if (typeof reason !== "string" || reason.trim().length === 0) {
@@ -103,7 +134,9 @@ export function writeAutomationStop(options: {
 
   mkdirSync(stateDir, { recursive: true });
 
-  const record: StopFile = { reason, timestamp, pid, events: [{ reason, timestamp, pid }] };
+  const seedEvent: StopEvent = { reason, timestamp, pid };
+  if (options.run !== undefined) seedEvent.run = options.run;
+  const record: StopFile = { reason, timestamp, pid, events: [seedEvent] };
 
   let corruptArchived = false;
   if (existsSync(stopPath)) {
@@ -115,11 +148,17 @@ export function writeAutomationStop(options: {
         if (typeof parsed === "object" && parsed !== null && Array.isArray(asRecord?.events)) {
           // Full-record shape: concatenate the prior event history.
           for (const ev of asRecord.events as unknown[]) {
-            if (isStopEvent(ev)) record.events.push({ reason: ev.reason, timestamp: ev.timestamp, pid: ev.pid });
+            if (isStopEvent(ev)) {
+              const carried: StopEvent = { reason: ev.reason, timestamp: ev.timestamp, pid: ev.pid };
+              if (ev.run !== undefined) carried.run = ev.run;
+              record.events.push(carried);
+            }
           }
         } else if (isStopEvent(parsed)) {
           // Legacy/flat shape (first-generation stop-file): carry it as the seed event.
-          record.events.push({ reason: parsed.reason, timestamp: parsed.timestamp, pid: parsed.pid });
+          const carried: StopEvent = { reason: parsed.reason, timestamp: parsed.timestamp, pid: parsed.pid };
+          if (parsed.run !== undefined) carried.run = parsed.run;
+          record.events.push(carried);
         }
         // Any other parseable-but-unrecognized shape: history is dropped, but the
         // file was valid JSON — not the corrupt-archive path.
@@ -183,6 +222,74 @@ export function stopFilePresent(stateDir?: string): boolean {
   }
 }
 
+export interface LiveRunProbe {
+  live: boolean;
+  holder?: LockRecord;
+  detail: string;
+}
+
+/**
+ * v1.1.0 run-scoping probe (design §T-20261120-002 3c): is a unified-automation
+ * run LIVE on this host right now? A live holder = lock record present with
+ * name "unified-automation", matching hostname, and an alive pid. Absent,
+ * corrupt, foreign-host, and dead-pid records all read as NOT live — an
+ * idle-night wall must not manufacture evidence.
+ */
+export function isLiveAutomationRun(opts?: { stateDir?: string; hostname?: string; lockName?: string }): LiveRunProbe {
+  const lockName = opts?.lockName ?? RUNNER_LOCK_NAME;
+  const holder = readLock(lockName, { stateDir: opts?.stateDir });
+  if (holder === null) return { live: false, detail: `no '${lockName}' lock record — idle night` };
+  if (holder.name !== lockName) {
+    return { live: false, holder, detail: `lock record names '${holder.name}', not '${lockName}'` };
+  }
+  const host = opts?.hostname ?? hostname();
+  if (holder.hostname !== host) {
+    return { live: false, holder, detail: `lock held on foreign host ${holder.hostname} (not-live per D4)` };
+  }
+  if (!pidAlive(holder.pid)) {
+    return { live: false, holder, detail: `lock holder pid ${holder.pid} is dead — stale record` };
+  }
+  return { live: true, holder, detail: `live run: pid ${holder.pid} since ${holder.acquiredAt}` };
+}
+
+export interface ScopedStopResult {
+  wrote: boolean;
+  result?: StopWriteResult;
+  detail: string;
+}
+
+/**
+ * v1.1.0 entrypoint: scope the stop write to a live run, then write with the
+ * run tag. No live run → NO stop-file write, NO history row, one stdout line
+ * for the launchd capture. Everything else is v1.0.0 behavior (atomic, capped,
+ * evidence-preserving), with `run: "unified-automation"` on the new event.
+ */
+export function writeScopedAutomationStop(options: {
+  reason: string;
+  stateDir?: string;
+  now?: Date;
+  pid?: number;
+  hostname?: string;
+  lockName?: string;
+}): ScopedStopResult {
+  const probe = isLiveAutomationRun({
+    stateDir: options.stateDir,
+    hostname: options.hostname,
+    lockName: options.lockName,
+  });
+  if (!probe.live) {
+    return { wrote: false, detail: `idle night — no stop-file write (${probe.detail})` };
+  }
+  const result = writeAutomationStop({
+    reason: options.reason,
+    stateDir: options.stateDir,
+    now: options.now,
+    pid: options.pid,
+    run: options.lockName ?? RUNNER_LOCK_NAME,
+  });
+  return { wrote: true, result, detail: result.message };
+}
+
 const main = (): number => {
   const args = process.argv.slice(2).filter((a) => a !== "--");
   let stateDir: string | undefined;
@@ -201,11 +308,17 @@ const main = (): number => {
     process.stderr.write("usage: bun scripts/watchdog-automation-stop.ts [--state-dir <dir>] <reason>\n");
     return 1;
   }
-  const result = withSyncErrorHandling(ErrorPhase.FILE_IO, () => writeAutomationStop({ reason, stateDir }), {
+  const scoped = withSyncErrorHandling(ErrorPhase.FILE_IO, () => writeScopedAutomationStop({ reason, stateDir }), {
     script: "watchdog-automation-stop",
   });
+  if (!scoped.wrote) {
+    // Idle night: one stdout line for the launchd capture, nothing else.
+    process.stdout.write(`🔕 automation-stop (v1.1.0 run-scoped): ${scoped.detail}\n`);
+    return 0;
+  }
+  const result = scoped.result!;
   process.stdout.write(
-    `🛑 automation-stop: ${result.message}\n   reason: ${result.record.reason}\n   at: ${result.record.timestamp}\n`,
+    `🛑 automation-stop: ${result.message}\n   reason: ${result.record.reason}\n   at: ${result.record.timestamp}\n   run: ${RUNNER_LOCK_NAME}\n`,
   );
   return 0;
 };

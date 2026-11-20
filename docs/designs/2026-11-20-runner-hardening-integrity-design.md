@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-11-20-runner-hardening-integrity-design`
 - **Date**: 2026-11-20
-- **Status**: proposed (Design Gate — awaiting owner review; implementation dispatches after approval)
+- **Status**: implemented (owner-approved via the standing delegation of defaults, meeting 2026-11-20; PR-1 landed #2119, PR-2 this change set, remaining rows per §10 sequence)
 - **Author**: architect dispatch (PM Row 0, RUNNER HARDENING + INTEGRITY cluster)
 - **Source**: tickets T-20261119-010, T-20261120-001, T-20261120-002, T-20261120-004, U-20261120-001, T-20261119-006; meeting 2026-11-20 (`memory/meeting-2026-11-20-batch-runner-hardening.md`, agreements A–D)
 - **Related**: ADR-0105, design `2026-11-12-unified-batch-runner-design`, `prompts.manifest.json`, `docs/protected-paths.json`, T-20261112-003 (false closure), T-20261116-002 (commit-msg defect), T-20261120-003 (upgrade walk fix, v1.114.0)
