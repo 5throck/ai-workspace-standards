@@ -10,7 +10,7 @@
  * memory-log line, urgent-ticket filing, --no-ticket / --gate suppression,
  * exit codes).
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, test, expect, afterAll, beforeEach } from 'bun:test';
 import { Database } from 'bun:sqlite';
@@ -30,6 +30,8 @@ import {
   globToRegExp,
   pathCoveredByPatterns,
   execClosureCheck,
+  parityClosureCheck,
+  loadCarveOutPaths,
   alertJsonPath,
   type ManifestEntry,
   type TicketFiler,
@@ -415,6 +417,158 @@ describe('runVerification — alert file, memory line, ticket, exit-code contrac
     expect(bad.exitCode).toBe(1);
     expect(bad.execClosure?.violations.map((v) => v.ref)).toEqual(['scripts/rogue.ts']);
     expect(bad.tickets.map((t) => t.title)).toEqual(['prompt-integrity exec-closure violation (scripts/rogue.ts)']);
+  });
+});
+
+describe('parity closure (§3.6.4 fleet-parity carve-out vs engine classification, v1.1.0)', () => {
+  let filerCalls: string[] = [];
+  const recordingFiler: TicketFiler = (title) => {
+    filerCalls.push(title);
+    return { filed: true, alreadyFiled: false, detail: 'created' } satisfies TicketFileResult;
+  };
+  beforeEach(() => {
+    filerCalls = [];
+  });
+
+  // DEC-20261120-01's landed enumeration (PR #2119): the exact 6-path carve-out.
+  const REAL_CARVE_OUT = [
+    '.githooks/commit-msg',
+    '.githooks/pre-commit',
+    '.githooks/pre-push',
+    '.githooks/post-checkout',
+    '.githooks/pre-rebase',
+    '.github/workflows/ci.yml',
+  ];
+
+  test('parityClosureCheck: the landed carve-out passes — 5 LOCKED (.githooks/) + 1 MERGE_MANAGED (ci.yml)', () => {
+    const v = parityClosureCheck(REAL_CARVE_OUT);
+    expect(v.ok).toBe(true);
+    expect(v.violations).toEqual([]);
+    expect(v.paths).toEqual(REAL_CARVE_OUT);
+    for (const p of REAL_CARVE_OUT.slice(0, 5)) expect(v.policies[p]).toBe('LOCKED');
+    expect(v.policies['.github/workflows/ci.yml']).toBe('MERGE_MANAGED');
+  });
+
+  test('parityClosureCheck: a non-governed carve-out path is a violation naming the resolved policy', () => {
+    // docs/phase-definitions.md resolves OVERWRITE, README.md resolves PRESERVE —
+    // neither is a runner-governed delivery claim, so listing them in the
+    // carve-out is protected-list/engine drift (fails visible per §3.6.4).
+    const v = parityClosureCheck([...REAL_CARVE_OUT, 'docs/phase-definitions.md', 'README.md']);
+    expect(v.ok).toBe(false);
+    expect(v.violations.map((x) => x.path)).toEqual(['docs/phase-definitions.md', 'README.md']);
+    expect(v.violations.map((x) => x.policy)).toEqual(['OVERWRITE', 'PRESERVE']);
+  });
+
+  test('parityClosureCheck: an empty carve-out is trivially ok', () => {
+    expect(parityClosureCheck([]).ok).toBe(true);
+  });
+
+  test('loadCarveOutPaths: absent key reads as [] — removal is a legitimate human governance action', () => {
+    const p = join(root, 'carve-out-absent.json');
+    writeFileSync(p, JSON.stringify({ protectedPaths: ['.githooks/**'] }), 'utf8');
+    expect(loadCarveOutPaths(p)).toEqual([]);
+  });
+
+  test('loadCarveOutPaths: malformed shape throws (cannot-verify is never a pass)', () => {
+    const bad = join(root, 'carve-out-malformed.json');
+    writeFileSync(bad, JSON.stringify({ fleetParityCarveOut: { paths: 'not-an-array' } }), 'utf8');
+    expect(() => loadCarveOutPaths(bad)).toThrow(/fleetParityCarveOut\.paths/);
+    const badEntry = join(root, 'carve-out-nonstring.json');
+    writeFileSync(badEntry, JSON.stringify({ fleetParityCarveOut: { paths: ['.githooks/commit-msg', 42] } }), 'utf8');
+    expect(() => loadCarveOutPaths(badEntry)).toThrow(/non-string/);
+  });
+
+  test('runVerification --parity-closure: clean fixture + real carve-out adds the ok contract line', () => {
+    const fx = makeFixture({ manifestEntries: [{ id: RUNNER_ID, sha256: sha256Text(LIVE_PROMPT) }] });
+    mkdirSync(join(fx.workspace, 'docs'), { recursive: true });
+    writeFileSync(
+      join(fx.workspace, 'docs', 'protected-paths.json'),
+      JSON.stringify({ protectedPaths: ['.githooks/**'], fleetParityCarveOut: { paths: REAL_CARVE_OUT } }),
+      'utf8',
+    );
+    const report = runVerification({
+      manifestPath: fx.manifestPath,
+      storePath: fx.storePath,
+      stateDir: fx.stateDir,
+      memoryDir: fx.memoryDir,
+      workspaceRoot: fx.workspace,
+      parityClosure: true,
+      noTicket: true,
+      now: new Date('2026-11-21T12:00:00Z'),
+    });
+    expect(report.exitCode).toBe(0);
+    expect(report.parityClosure?.ok).toBe(true);
+    expect(report.parityClosure?.paths.length).toBe(6);
+    expect(report.memoryLines.join('\n')).toContain('(parity-closure ok: 6 carve-out paths)');
+  });
+
+  test('runVerification --parity-closure: drift fires exit 1 + the parity-closure ticket title', () => {
+    const fx = makeFixture({ manifestEntries: [{ id: RUNNER_ID, sha256: sha256Text(LIVE_PROMPT) }] });
+    mkdirSync(join(fx.workspace, 'docs'), { recursive: true });
+    writeFileSync(
+      join(fx.workspace, 'docs', 'protected-paths.json'),
+      JSON.stringify({
+        protectedPaths: ['.githooks/**'],
+        fleetParityCarveOut: { paths: ['.githooks/commit-msg', 'docs/phase-definitions.md'] },
+      }),
+      'utf8',
+    );
+    const report = runVerification({
+      manifestPath: fx.manifestPath,
+      storePath: fx.storePath,
+      stateDir: fx.stateDir,
+      memoryDir: fx.memoryDir,
+      workspaceRoot: fx.workspace,
+      parityClosure: true,
+      ticketFiler: recordingFiler,
+      now: new Date('2026-11-21T12:00:00Z'),
+    });
+    expect(report.exitCode).toBe(1);
+    expect(report.clean).toBe(false);
+    expect(report.parityClosure?.violations.map((v) => v.path)).toEqual(['docs/phase-definitions.md']);
+    const mem = readFileSync(join(fx.memoryDir, '2026-11-21.md'), 'utf8');
+    expect(mem).toContain('prompt-integrity ALERT: parity-closure');
+    expect(filerCalls).toEqual(['prompt-integrity parity-closure violation (docs/phase-definitions.md (OVERWRITE))']);
+  });
+
+  test('runVerification --parity-closure: absent carve-out key is ok with 0 paths; malformed shape alerts cannot-verify', () => {
+    const absent = makeFixture({ manifestEntries: [{ id: RUNNER_ID, sha256: sha256Text(LIVE_PROMPT) }] });
+    mkdirSync(join(absent.workspace, 'docs'), { recursive: true });
+    writeFileSync(join(absent.workspace, 'docs', 'protected-paths.json'), JSON.stringify({ protectedPaths: ['.githooks/**'] }), 'utf8');
+    const okReport = runVerification({
+      manifestPath: absent.manifestPath,
+      storePath: absent.storePath,
+      stateDir: absent.stateDir,
+      memoryDir: absent.memoryDir,
+      workspaceRoot: absent.workspace,
+      parityClosure: true,
+      noTicket: true,
+      now: new Date('2026-11-21T12:00:00Z'),
+    });
+    expect(okReport.exitCode).toBe(0);
+    expect(okReport.parityClosure?.paths).toEqual([]);
+    expect(okReport.memoryLines.join('\n')).toContain('(parity-closure ok: 0 carve-out paths)');
+
+    const malformed = makeFixture({ manifestEntries: [{ id: RUNNER_ID, sha256: sha256Text(LIVE_PROMPT) }] });
+    mkdirSync(join(malformed.workspace, 'docs'), { recursive: true });
+    writeFileSync(
+      join(malformed.workspace, 'docs', 'protected-paths.json'),
+      JSON.stringify({ fleetParityCarveOut: { paths: 7 } }),
+      'utf8',
+    );
+    const badReport = runVerification({
+      manifestPath: malformed.manifestPath,
+      storePath: malformed.storePath,
+      stateDir: malformed.stateDir,
+      memoryDir: malformed.memoryDir,
+      workspaceRoot: malformed.workspace,
+      parityClosure: true,
+      ticketFiler: recordingFiler,
+      now: new Date('2026-11-21T12:00:00Z'),
+    });
+    expect(badReport.exitCode).toBe(1);
+    expect(badReport.parityClosure).toBeUndefined();
+    expect(badReport.memoryLines.join('\n')).toContain('fleetParityCarveOut unreadable/malformed — cannot-verify');
   });
 });
 

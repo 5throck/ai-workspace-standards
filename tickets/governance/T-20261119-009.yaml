@@ -12,12 +12,22 @@ title: >-
   rows (humanize-adapter needed the deck/ppt-master precedent row). Needs Design
   Gate (engine change); evidence in T-20261119-005 (closed)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-19T08:56:41.743+09:00'
 history:
   - at: '2026-11-19T08:56:41.743+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-20T11:53:39.416+09:00'
+    from: backlog
+    to: done
+result: >-
+  Re-apply of lost move: the engine automation-gaps fix landed via PR #2110
+  (delivery-riding records + SCRIPTS.md row requirement + spec-registry
+  E5-by-design ruling) but the done-move YAML edit was lost in the 2026-11-18/19
+  multi-session convergence races (stale landing reverted the local state;
+  origin/main never carried the move). Root cause chain documented in
+  T-20261118-005 (hunk-granular staging) + T-20261119-010 (convergence
+  discipline). Result stands: fixed by PR #2110.
 error: null

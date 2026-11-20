@@ -10,7 +10,7 @@ title: >-
   un-LOCK) or stays human-only (then the LOCK must actually block the apply
   path)
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-19T03:24:42.815+09:00'
 history:
@@ -23,5 +23,19 @@ history:
   - at: '2026-11-19T08:57:00.623+09:00'
     from: waiting
     to: review
-result: null
+  - at: '2026-11-20T21:34:15.469+09:00'
+    from: review
+    to: done
+result: >-
+  Closed per DEC-20261120-01 (owner ruling, human decision per NEW enforcement
+  surface): option (a) fleet-parity carve-out — root .githooks/** and
+  .github/workflows/** stay protected/human-merged forever; fleet repos get a
+  guarded parity channel via docs/protected-paths.json fleetParityCarveOut
+  (exact 6-path enumeration: 5 hook files + ci.yml, no globs — a NEW hook file
+  entering the template tree cannot self-sanction; adding a path is a human
+  decision, after which parity flows unattended). Ruling landed via PR #2119
+  (merge 0e65d1a1d, runner-hardening PR-1); the §3.6.4 mechanical guard
+  (--parity-closure carve-out-vs-engine check) lands in runner-hardening PR-5;
+  the three discarded 2026-11-19 deliveries (co-abap/co-consult/co-develop
+  commit-msg fix) re-deliver via the next gated wave per design §3.6.
 error: null

@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.9.0
+version: 1.10.0
 description: >
   Full bidirectional sync cycle for fleet member projects (Projects/co-*
   minus the docs/fleet-membership.json exclusions): provenance-audit
@@ -15,7 +15,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_updated: 2026-11-18
+last_updated: 2026-11-20
 last_reviewed: 2026-11-08
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
@@ -78,6 +78,11 @@ Review the per-project verdict tables:
 | PRESUME-STALE | subset of a source without mtime/order corroboration — possible deliberate reordering or legitimate deletion; **or a merge-delivered file whose content equals the template source** (the equality can be the wave's own union output, not stale residue) | human confirm before discard; routes to commit-side review like LOCAL-WORK |
 | LOCAL-WORK | diverges from HEAD and every source; or non-template file | commit candidate (Step 1); feeds backport review (Step 2) |
 | KEEP | unresolvable | human review; default to commit on a side branch if risky |
+| RETENTION-PRUNE | dev-sync's own memory-retention prune (step 3.8 → archive-memory): a flat `memory/<name>.md` deletion corroborated by the de-linked `memory/MEMORY.md` index row in the same tree (resync-audit 1.11.0; every corroboration failure stays KEEP) | auto-discard-safe: commit the deletion |
+| TOMBSTONE-UNCONFIRMED | a delivered-baseline path deleted WITHOUT a recorded tombstone — the next wave re-delivers it (TOMBSTONED ERROR) | record a tombstone (`--tombstone`) or restore the path |
+| TOMBSTONE-VIOLATION | a tombstoned path is PRESENT on disk (wave re-delivery or project re-application) — caught deterministically even when tracked-clean | adjudicate intent: delete and keep the tombstone, or un-tombstone if the re-application is legitimate |
+
+The verdict set mirrors `scripts/resync-audit.ts`'s report legend (v1.11.0); the script's output is authoritative when wording diverges.
 
 Apply verdicts only after reading the MIXED-group per-file details.
 

@@ -15,12 +15,7 @@ title: >-
   only once origin carries it (v4 prompt now requires this check; this ticket
   covers the backfill audit of the 2026-11-19/20 reports against origin).
 priority: normal
-# 2026-11-20 PR-1 (runner-hardening): DEC-20261120-02 (explicit supersession, no
-# reconstruction) is accepted and the citation corrections (ADR-0105 References,
-# §Preserved-dissent supersession note, 2026-11-12 design doc Source line, v5
-# ratification) land in PR-1; the second scope item (2026-11-19/20 report backfill
-# audit, design §3.4.4) rides the backfill PR — ticket resolves there.
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-20T07:50:07.995+09:00'
 history:
@@ -30,5 +25,24 @@ history:
   - at: '2026-11-20T13:42:26.000+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-20T21:34:30.254+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-20T21:34:30.272+09:00'
+    from: review
+    to: done
+result: >-
+  Both scope items closed. (1) Phantom-transcript ruling: DEC-20261120-02
+  (explicit supersession, NO reconstruction) accepted; citation corrections
+  (ADR-0105 References, 2026-11-12 design doc Source line, revert-drill report,
+  v5 ratification) landed via PR #2119 (PR-1). (2) 2026-11-19/20 report backfill
+  audit (design §3.4.4) landed via runner-hardening PR-5 — corrections table +
+  in-place corrections in
+  docs/reports/2026-11-20-runner-report-backfill-audit.md: K1 wave-count 14→12
+  projects (11-19), K2 U-20261119-001/-002 fix attribution + already-on-main
+  (11-20), K3/K4 DEFERRED landings superseded by PRs #2116/#2115; the 13→11
+  wall-exception correction verified as already carried at origin;
+  convergence-race ticket-YAML survey landed 6 verified-genuine re-applies
+  (T-20261119-007/-009, U-20261119-001/-002/-003, T-20261120-003) and discarded
+  4 stale copies.
 error: null

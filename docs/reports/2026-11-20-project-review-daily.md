@@ -1,7 +1,7 @@
 # Project Review Daily — 2026-11-20 (unified 03:00 runner, Friday FULL)
 
 ## Root battery
-- 8/10 green. Two fails, BOTH foreign batch-2 WIP debts (the overnight session's uncommitted in-flight state blocks root gates): (1) lifecycle-sync Check V — templates/co-deck gen-slides-pdf.ts 1.16.0 (uncommitted WIP) vs co-deck/SCRIPTS.md 1.15.0; (2) Language validation — docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md (undeclared Korean content). Root landings are deferred until the batch-2 session concludes (third documented deferral class).
+- 8/10 green. Two fails, BOTH foreign batch-2 WIP debts (the overnight session's uncommitted in-flight state blocks root gates): (1) lifecycle-sync Check V — templates/co-deck gen-slides-pdf.ts 1.16.0 (uncommitted WIP) vs co-deck/SCRIPTS.md 1.15.0; (2) Language validation — docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md (undeclared Korean content). Root landings are deferred until the batch-2 session concludes (third documented deferral class — superseded 2026-11-20 ~07:15 KST backfill-audit note: PR #2115, d4124c300, landed gen-slides-pdf 1.16.0 with its SCRIPTS.md 1.16.0/1.8.0 rows and the batch-2 design doc, clearing both debts the same morning).
 - D8 design-gate coverage: warn (24h window rows — overnight mega-landings, E-class adjudication belongs to the owning sessions).
 
 ## Friday FULL reviews
