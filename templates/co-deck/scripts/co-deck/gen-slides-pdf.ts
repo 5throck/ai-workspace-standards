@@ -1,3 +1,26 @@
+// @version 1.17.0 — LOCAL-PATCH(U-20261119-010, design
+//   2026-11-20-co-deck-pipeline-batch-2-design R1b): opt-in framed PDF↔HTML
+//   parity for pitch-enhanced (+ premium-dark style) decks. HTML draws every
+//   slide inside one rounded `.slide` frame on a darker page (two-column grid:
+//   section eyebrow above a left-aligned title, `**bold**` accent bullet runs,
+//   right panel with the image + its caption); the PDF drew a header bar, a
+//   separate page-centered text card, a captionless full-height visual panel, a
+//   decorative `”` punchline quote mark the HTML never renders, a contact slide
+//   without its image, and footnotes in a band outside the frame. When the
+//   theme's pdf_layout_spec.json declares the opt-in `frame` block (geometry in
+//   HTML px of a `ref_w_px`-wide 1280×720 viewport, measured from a rendered
+//   pitch-enhanced deck — shipped verbatim in the pitch-enhanced theme spec),
+//   standard / title / divider / contact (with visualImage) slides route to
+//   framed variants; punchline gains a tracked eyebrow, drops the `”` mark and
+//   accents the first statement line; video slides center the play button on
+//   the frame with a bottom-left caption chip; background images, video
+//   thumbnails and cover backgrounds fill the FRAME instead of the page;
+//   footnotes render inside the frame bottom-left; a post-pass mask paints
+//   everything outside the rounded frame with frame.page_rgb so every layer is
+//   clipped to the HTML `.slide`. Decks whose spec has NO `frame` key keep the
+//   1.16.0 rendering byte-for-byte — the block is the compat gate (frame
+//   geometry is renderer-generic; no other theme ships a frame block in this
+//   batch). Reference: Projects/co-deck LOCAL-PATCH (Gate 5, 2026-11-19).
 // @version 1.16.0 — LOCAL-PATCH(U-20261119-007, design
 //   2026-11-20-co-deck-pipeline-batch-2-design R1a): premium-dark ink contrast +
 //   two-column anchoring. ①bgDrawn ink contrast — the title-slide bubble
@@ -762,6 +785,33 @@ class Renderer {
     });
   }
 
+  // LOCAL-PATCH(upstream-request: U-20261119-010) — framed-layout helpers.
+  // Draw an SVG path (pt units, y-down) anchored at the mm top-left point.
+  drawPathAt(path: string, xMm: number, yMm: number, color: RGB, opacity = 1) {
+    this.page.drawSvgPath(path, { x: this.pt(xMm), y: this.fy(yMm), color, opacity, borderWidth: 0 });
+  }
+  // Small right-pointing triangle bullet marker (HTML `▸`), centred on (cx, cy).
+  drawTriangle(cxMm: number, cyMm: number, sizeMm: number, color: RGB) {
+    const s = this.pt(sizeMm);
+    this.drawPathAt(`M 0 0 L ${s} ${s / 2} L 0 ${s} Z`, cxMm - sizeMm / 2, cyMm - sizeMm / 2, color);
+  }
+  // Paint everything OUTSIDE a rounded frame with `color` (post-pass mask), so
+  // full-bleed layers drawn earlier end up clipped to the HTML `.slide` frame.
+  maskOutsideFrame(xMm: number, yMm: number, wMm: number, hMm: number, rMm: number, color: RGB) {
+    this.fillRect(0, 0, this.pageW / MM_TO_PT, yMm, color);
+    this.fillRect(0, yMm + hMm, this.pageW / MM_TO_PT, this.pageH / MM_TO_PT - yMm - hMm, color);
+    this.fillRect(0, yMm, xMm, hMm, color);
+    this.fillRect(xMm + wMm, yMm, this.pageW / MM_TO_PT - xMm - wMm, hMm, color);
+    const W = this.pt(wMm), H = this.pt(hMm), R = this.pt(rMm);
+    const corners = [
+      `M 0 0 L ${R} 0 A ${R} ${R} 0 0 0 0 ${R} Z`,
+      `M ${W} 0 L ${W} ${R} A ${R} ${R} 0 0 0 ${W - R} 0 Z`,
+      `M ${W} ${H} L ${W - R} ${H} A ${R} ${R} 0 0 0 ${W} ${H - R} Z`,
+      `M 0 ${H} L 0 ${H - R} A ${R} ${R} 0 0 0 ${R} ${H} Z`,
+    ];
+    for (const c of corners) this.drawPathAt(c, xMm, yMm, color);
+  }
+
   async placeImageCover(doc: PDFDocument, img: string | Buffer, xMm: number, yMm: number, wMm: number, hMm: number) {
     try {
       const embedded = await this.embedImg(doc, img);
@@ -955,6 +1005,10 @@ interface Region {
 
 interface LayoutSpec {
   version?:     string;
+  /** LOCAL-PATCH(upstream-request: U-20261119-010) — optional HTML `.slide`
+   *  rounded-frame layout (pitch-enhanced). Geometry in HTML px of a
+   *  `ref_px`-wide (default 1280×720) viewport. */
+  frame?: FrameSpec;
   page?: {
     width_mm?:  number;
     height_mm?: number;
@@ -1461,7 +1515,11 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   const cardMode = ctx.bgDrawn === true;
   const padXp = coords.px2mm(44), padYp = coords.px2mm(32);
   const capW  = cardCapMm(coords);
-  const textBand = cardMode ? 0.85 * (capW - padXp * 2) : Math.min(bandW, coords.px2mm(607));
+  // LOCAL-PATCH(upstream-request: U-20261119-010) — framed decks wrap at the
+  // frame inner width (HTML .slide-title has no 32ch cap there).
+  const framed = !!spec.frame;
+  const textBand = cardMode ? 0.85 * (capW - padXp * 2)
+    : framed ? Math.min(bandW, frameGeom(spec, coords).fw * 0.9) : Math.min(bandW, coords.px2mm(607));
   const textX    = box.x + (bandW - textBand) / 2;
   const stmtLines = punchSentences.flatMap((s) => richLines(r, s, textBand, T_PUNCH_TEXT, true));
   const nTextLines = stmtLines.length || 1;
@@ -1472,6 +1530,7 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   const subPre = strip(data.sub) || strip(data.subtitle) || strip((data.bullets ?? [])[0]);
   const blockH = cardMode
     ? textLineH + (subPre ? GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB : 0)
+    : framed ? LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK + textLineH + (subPre ? GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB : 0)
     : LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK + LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT + textLineH + GAP_PUNCH_TEXT_SUB + LH_PUNCH_SUB;
   let y = cardMode
     ? Math.min(coords.PH * 0.95 - padYp - blockH, Math.max(coords.PH * 0.05 + padYp, (coords.PH - blockH) / 2))
@@ -1501,14 +1560,25 @@ function renderPunchlineSlide(ctx: RenderCtx) {
 
   // part-tag (gold, uppercase) — e.g. “PART 01 · 패러다임 전환”
   const sec = cardMode ? '' : strip(data.section);
-  if (sec) {
+  if (sec && framed) {
+    // LOCAL-PATCH(upstream-request: U-20261119-010) — Framed: HTML .slide-eyebrow
+    // — bold, 0.2em tracked, centred.
+    r.setFont(true, T_PUNCH_TAG); r.setColor(C_ACCENT);
+    const up = sec.toUpperCase();
+    const tw = Array.from(up).reduce((a, ch) => a + r.stringWidth(ch), 0) + (T_PUNCH_TAG / MM_TO_PT) * 0.2 * (Array.from(up).length - 1);
+    drawTracked(r, up, box.x + (bandW - tw) / 2, y, LH_PUNCH_TAG, T_PUNCH_TAG, 0.2);
+    y += LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK;
+  } else if (sec) {
     r.setFont(false, T_PUNCH_TAG); r.setColor(C_ACCENT);
     r.cell(bandW, LH_PUNCH_TAG, sec.toUpperCase(), box.x, y, 'C');
     y += LH_PUNCH_TAG + GAP_PUNCH_TAG_MARK;
   }
 
   // decorative gold quote mark (“) above the statement
-  if (!cardMode) {
+  // LOCAL-PATCH(upstream-request: U-20261119-010) — framed decks skip it: the
+  // pitch-enhanced HTML punchline branch (template.html) draws eyebrow + h1
+  // only, never the mark.
+  if (!cardMode && !framed) {
     r.setFont(false, T_PUNCH_MARK); r.setColor(C_ACCENT);
     r.cell(bandW, LH_PUNCH_MARK, '”', box.x, y, 'C');
     y += LH_PUNCH_MARK + GAP_PUNCH_MARK_TEXT;
@@ -1528,15 +1598,19 @@ function renderPunchlineSlide(ctx: RenderCtx) {
   // color (same pattern as the divider branch).
   const stmtInk = ctx.bgDrawn === true ? readableTextOn(colors.C_CARD) : C_WHITE;
   let sy = y;
-  for (const ln of stmtLines) {
+  // LOCAL-PATCH(upstream-request: U-20261119-010) — Framed: HTML
+  // `.slide-title::first-line { color: accent }` — the first rendered line is
+  // accent, the rest statement ink.
+  stmtLines.forEach((ln, li) => {
+    const lineInk = framed && li === 0 ? toRGB(spec.frame!.accent_rgb) : stmtInk;
     let lx = textX + (textBand - richWidth(r, ln.map(x => ({ ...x, b: true })), T_PUNCH_TEXT)) / 2;
     for (const run of ln) {
-      r.setFont(true, T_PUNCH_TEXT); r.setColor(run.b ? C_ACCENT : stmtInk);
+      r.setFont(true, T_PUNCH_TEXT); r.setColor(run.b ? C_ACCENT : lineInk);
       if (run.t) r.cell(1, LH_PUNCH_TEXT, run.t, lx, sy, 'L');
       lx += richRunW(r, run, T_PUNCH_TEXT, true);
     }
     sy += LH_PUNCH_TEXT;
-  }
+  });
   y = sy + GAP_PUNCH_TEXT_SUB;
 
   // punch-sub (slate) — support line (data.sub, fallback subtitle/bullets)
@@ -1721,7 +1795,202 @@ function renderContactSlide(ctx: RenderCtx) {
   r.multiCell(bandW, LH_CONT_NOTE, note, bandX, y, 'C');
 }
 
+// ── LOCAL-PATCH(upstream-request: U-20261119-010) — framed layout ─────────────
+// HTML pitch-enhanced draws every slide inside one rounded `.slide` frame on a
+// darker page; standard slides are a two-column grid (.slide-left text column
+// with the section eyebrow ABOVE the title, rich `**accent**` bullets, and a
+// .right-panel holding the image + .cdk-caption). The legacy PDF path drew a
+// header bar, a separate text card and a full-height visual panel instead.
+// When the theme spec declares `frame`, standard/contact slides use this
+// renderer and every page is masked to the frame (HTML parity, Gate 5 2026-11-19).
+interface FrameSpec {
+  ref_w_px?: number;                       // reference viewport width (1280)
+  x_px: number; y_px: number; w_px: number; h_px: number; radius_px: number;
+  col_x_px: number; col_y_px: number; col_w_px: number; col_h_px: number;
+  panel_x_px: number; panel_w_px: number; panel_radius_px?: number; panel_pad_px?: number;
+  panel_rgba?: number[];                   // [r,g,b,a] panel tint
+  page_rgb: number[]; frame_rgb: number[];
+  text_rgb: number[]; body_rgb: number[]; accent_rgb: number[]; muted_rgb: number[];
+  eyebrow_px: number; eyebrow_lh_px: number; eyebrow_gap_px: number; eyebrow_tracking_em?: number;
+  title_px: number; title_lh_px: number; title_gap_px: number;
+  bullet_px: number; bullet_lh_px: number; bullet_gap_px: number; bullet_indent_px: number;
+  caption_px: number; caption_lh_px: number; caption_gap_px: number;
+  footnote_px: number; footnote_lh_px: number; footnote_bottom_px: number;
+}
+function frameGeom(spec: LayoutSpec, coords: ReturnType<typeof buildCoords>) {
+  const f = spec.frame!;
+  const k = coords.PW / (f.ref_w_px ?? 1280);            // HTML px → mm
+  const px = (v: number) => v * k;
+  const pt = (v: number) => v * k * MM_TO_PT;            // HTML px → font pt
+  const fx = px(f.x_px), fy = px(f.y_px), fw = px(f.w_px), fh = px(f.h_px);
+  return { f, k, px, pt, fx, fy, fw, fh, rad: px(f.radius_px) };
+}
+// Letter-spaced single-line text (CSS letter-spacing) — HTML eyebrows use 0.2em.
+function drawTracked(r: Renderer, text: string, xMm: number, yMm: number, hMm: number, sizePt: number, trackEm: number) {
+  const track = (sizePt / MM_TO_PT) * trackEm;
+  let x = xMm;
+  for (const ch of Array.from(text)) {
+    r.cell(1, hMm, ch, x, yMm, 'L');
+    x += r.stringWidth(ch) + track;
+  }
+}
+async function renderFramedStandard(ctx: RenderCtx, opts: { lines?: string[] } = {}) {
+  const { r, doc, data, imgDir, spec, coords } = ctx;
+  const { f, px, pt, fx, fy } = frameGeom(spec, coords);
+  const C = (a: number[]) => toRGB(a);
+  const cText = C(f.text_rgb), cBody = C(f.body_rgb), cAcc = C(f.accent_rgb), cMuted = C(f.muted_rgb);
+
+  // Visual: raster (photo/png) or rasterized SVG diagram.
+  const visRaster = data.visualImage
+    ? resolveVisualRaster(data.visualImage, imgDir ?? '', ctx.fontDir ?? imgDir ?? '') : null;
+  let visImg: any = null;
+  if (visRaster) {
+    try { visImg = await r.embedImg(doc, visRaster); }
+    catch (e: any) { console.warn(`  framed visual err (slide ${ctx.n}): ${e.message}`); }
+  }
+  const twoCol = !!visImg;
+  const colX = fx + px(f.col_x_px), colY = fy + px(f.col_y_px), colH = px(f.col_h_px);
+  const colW = twoCol ? px(f.col_w_px) : px(f.w_px - 2 * f.col_x_px);
+
+  // ── Left column: eyebrow → title → bullets, vertically centred ──
+  const eyebrow = strip(data.section).toUpperCase();
+  const titleTxt = strip(data.title);
+  const T_E = pt(f.eyebrow_px), T_T = pt(f.title_px), T_B = pt(f.bullet_px);
+  const LH_E = px(f.eyebrow_lh_px), LH_T = px(f.title_lh_px), LH_B = px(f.bullet_lh_px);
+  const indent = px(f.bullet_indent_px);
+  const plain = !!opts.lines;
+  const items = (opts.lines ?? data.bullets ?? []).filter((b: string) => strip(b));
+  r.setFont(true, T_T);
+  const tLines = r.wrapText(titleTxt, colW);
+  const bTextW = plain ? colW : colW - indent;
+  const bLines = items.map((b: string) => richLines(r, b, bTextW, T_B));
+  const titleH = tLines.length * LH_T;
+  const bulH = bLines.reduce((a: number, l: RichRun[][]) => a + l.length * LH_B, 0)
+    + px(f.bullet_gap_px) * Math.max(0, bLines.length - 1);
+  const eyeH = eyebrow ? LH_E + px(f.eyebrow_gap_px) : 0;
+  const blockH = eyeH + titleH + (items.length ? px(f.title_gap_px) + bulH : 0);
+  let y = colY + Math.max(0, (colH - blockH) / 2);
+
+  if (eyebrow) {
+    r.setFont(true, T_E); r.setColor(cAcc);
+    drawTracked(r, eyebrow, colX, y, LH_E, T_E, f.eyebrow_tracking_em ?? 0.2);
+    y += eyeH;
+  }
+  r.setFont(true, T_T); r.setColor(cText);
+  for (const ln of tLines) { r.cell(colW, LH_T, ln, colX, y, 'L'); y += LH_T; }
+  if (items.length) y += px(f.title_gap_px);
+  bLines.forEach((lines: RichRun[][], bi: number) => {
+    if (!plain) r.drawTriangle(colX + px(5), y + LH_B / 2, px(7), cAcc);
+    for (const ln of lines) {
+      let bx = colX + (plain ? 0 : indent);
+      for (const run of ln) {
+        r.setFont(run.b, T_B); r.setColor(run.b ? cAcc : cBody);
+        if (run.t) r.cell(1, LH_B, run.t, bx, y, 'L');
+        bx += richRunW(r, run, T_B);
+      }
+      y += LH_B;
+    }
+    if (bi < bLines.length - 1) y += px(f.bullet_gap_px);
+  });
+
+  // ── Right panel: tinted rounded box, image (contain) + caption, centred ──
+  if (twoCol) {
+    const pX = fx + px(f.panel_x_px), pY = colY, pW = px(f.panel_w_px), pH = colH;
+    const tint = f.panel_rgba ?? [255, 255, 255, 0.03];
+    r.drawRoundedRect(pX, pY, pW, pH, px(f.panel_radius_px ?? 12), C(tint.slice(0, 3)), tint[3] ?? 0.03);
+    const pad = px(f.panel_pad_px ?? 12);
+    const cap = strip(data.visualCaption);
+    const T_C = pt(f.caption_px), LH_C = px(f.caption_lh_px);
+    r.setFont(false, T_C);
+    const capLines = cap ? r.wrapText(cap, pW - pad * 2) : [];
+    const capH = capLines.length ? px(f.caption_gap_px) + capLines.length * LH_C : 0;
+    const boxW = pW - pad * 2, boxH = pH - pad * 2 - capH;
+    const asp = visImg.width / visImg.height;
+    let iw = boxW, ih = iw / asp;
+    if (ih > boxH) { ih = boxH; iw = ih * asp; }
+    const groupY = pY + pad + (pH - pad * 2 - (ih + capH)) / 2;
+    r.drawEmbeddedImage(visImg, pX + (pW - iw) / 2, groupY, iw, ih);
+    let cy = groupY + ih + (capLines.length ? px(f.caption_gap_px) : 0);
+    r.setFont(false, T_C); r.setColor(cMuted);
+    for (const ln of capLines) { r.cell(pW - pad * 2, LH_C, ln, pX + pad, cy, 'C'); cy += LH_C; }
+  }
+}
+
+// Framed cover (HTML .slide[data-type="title"]): centred eyebrow → title →
+// subtitle → meta stack on the scrimmed photo, cover caption bottom-right.
+// Sizes/gaps are the measured HTML px (1280×720) of the pitch-enhanced cover.
+function renderFramedTitle(ctx: RenderCtx) {
+  const { r, data, spec, coords, colors } = ctx;
+  const { f, px, pt, fx, fy, fw, fh } = frameGeom(spec, coords);
+  const innerW = px(722);
+  const x0 = fx + (fw - innerW) / 2;
+  const eyebrow = strip(data.section).toUpperCase();
+  const title = strip(data.title), sub = strip(data.subtitle), meta = strip(data.meta);
+  // PDF glyph advances run slightly wider than the browser's; wrap the title
+  // at the frame inner width so a one-line HTML title stays one line.
+  const titleW = fw - px(112);
+  r.setFont(true, pt(52));  const tL = r.wrapText(title, titleW);
+  r.setFont(false, pt(22)); const sL = sub ? r.wrapText(sub, px(560)) : [];
+  r.setFont(false, pt(14)); const mL = meta ? r.wrapText(meta, innerW) : [];
+  const h = (eyebrow ? px(15 + 24) : 0) + tL.length * px(62)
+    + (sL.length ? px(25) + sL.length * px(35) : 0) + (mL.length ? px(24) + mL.length * px(17) : 0);
+  let y = fy + (fh - h) / 2;
+  if (eyebrow) {
+    r.setFont(true, pt(12.8)); r.setColor(colors.C_ACCENT);
+    const tw = Array.from(eyebrow).reduce((a, ch) => a + r.stringWidth(ch), 0) + (pt(12.8) / MM_TO_PT) * 0.2 * (Array.from(eyebrow).length - 1);
+    drawTracked(r, eyebrow, fx + (fw - tw) / 2, y, px(15), pt(12.8), 0.2);
+    y += px(15 + 24);
+  }
+  r.setFont(true, pt(52)); r.setColor(toRGB(f.text_rgb));
+  for (const l of tL) { r.cell(titleW, px(62), l, fx + px(56), y, 'C'); y += px(62); }
+  if (sL.length) {
+    y += px(25); r.setFont(false, pt(22)); r.setColor(toRGB(f.body_rgb));
+    for (const l of sL) { r.cell(innerW, px(35), l, x0, y, 'C'); y += px(35); }
+  }
+  if (mL.length) {
+    y += px(24); r.setFont(false, pt(14)); r.setColor(toRGB(f.muted_rgb));
+    for (const l of mL) { r.cell(innerW, px(17), l, x0, y, 'C'); y += px(17); }
+  }
+  const cap = strip(data.visualCaption);
+  if (cap) {
+    r.setFont(false, pt(11)); r.setColor(toRGB(f.muted_rgb));
+    r.cell(px(400), px(15), cap, fx + fw - px(20) - px(400), fy + fh - px(15) - px(14.4), 'R');
+  }
+}
+
+// Framed divider (HTML .divider-left / .divider-right halves of the frame).
+async function renderFramedDivider(ctx: RenderCtx) {
+  const { r, doc, data, imgDir, spec, coords, colors } = ctx;
+  const { f, px, pt, fx, fy, fw, fh } = frameGeom(spec, coords);
+  const half = fw / 2;
+  const ip = imgPath(data.visualImage, imgDir ?? '');
+  if (ip) await r.placeImageCover(doc, ip, fx + half, fy, half, fh);
+  r.fillRectOverlay(fx, fy, half, fh, rgb(0, 0, 0), 0.2);
+  const tx = fx + px(64), tw = px(477);
+  const part = strip(data.partNum || data.section).toUpperCase();
+  const title = strip(data.title), desc = strip(data.desc ?? '');
+  r.setFont(true, pt(44.8)); const tL = r.wrapText(title, tw);
+  r.setFont(false, pt(16));  const dL = desc ? r.wrapText(desc, tw) : [];
+  const h = (part ? px(14 + 16) : 0) + tL.length * px(54) + (dL.length ? px(24) + dL.length * px(26) : 0);
+  let y = fy + (fh - h) / 2;
+  if (part) {
+    r.setFont(true, pt(12)); r.setColor(colors.C_ACCENT);
+    drawTracked(r, part, tx, y, px(14), pt(12), 0.2);
+    y += px(14 + 16);
+  }
+  r.setFont(true, pt(44.8)); r.setColor(toRGB(f.text_rgb));
+  for (const l of tL) { r.cell(tw, px(54), l, tx, y, 'L'); y += px(54); }
+  if (dL.length) {
+    y += px(24); r.setFont(false, pt(16)); r.setColor(toRGB(f.body_rgb));
+    for (const l of dL) { r.cell(tw, px(26), l, tx, y, 'L'); y += px(26); }
+  }
+}
+
 async function renderStandardSlide(ctx: RenderCtx) {
+  // LOCAL-PATCH(upstream-request: U-20261119-010) — framed decks route here
+  // (video slides fall through to the legacy path for the play button, with
+  // framed geometry tweaks below).
+  if (ctx.spec.frame && !ctx.data.videoId) return renderFramedStandard(ctx);
   const { r, doc, data, n, total, imgDir, spec, coords, colors, sizes, declared, region } = ctx;
   const { C_DARK, C_ACCENT, C_MUTED, C_BORDER, C_WHITE, C_BODY, C_VIS_BG } = colors;
   const {
@@ -2113,14 +2382,23 @@ async function renderStandardSlide(ctx: RenderCtx) {
   // inline local player, not a lesser fallback. Do not add a local-file code
   // path here even if `data.videoLocal` or similar becomes available.
   if (data.videoId) {
-    const diam = Math.min(coords.CW, coords.CH) * 0.22;
-    const cx = coords.CX + coords.CW / 2;
-    const cy = coords.CY + coords.CH / 2;
+    // LOCAL-PATCH(upstream-request: U-20261119-010) — framed decks center the
+    // play button on the frame, not the page.
+    const vg = spec.frame ? frameGeom(spec, coords) : null;
+    const diam = vg ? Math.min(vg.fw, vg.fh) * 0.22 : Math.min(coords.CW, coords.CH) * 0.22;
+    const cx = vg ? vg.fx + vg.fw / 2 : coords.CX + coords.CW / 2;
+    const cy = vg ? vg.fy + vg.fh / 2 : coords.CY + coords.CH / 2;
     // Title pill — HTML video slides show the title in a dark translucent chip
     // at the top center of the thumbnail; reproduce that chip (rounded rect,
     // white text) so the PDF page identifies the video it links to.
     const pillText = strip(data.title);
-    if (pillText) {
+    if (pillText && spec.frame) {
+      // LOCAL-PATCH(upstream-request: U-20261119-010) — Framed: HTML
+      // .video-caption — bottom-left line, white 85%, 13.6px.
+      const g = frameGeom(spec, coords);
+      r.setFont(false, g.pt(13.6)); r.setColor(rgb(0.92, 0.93, 0.95));
+      r.cell(g.fw - g.px(46), g.px(20), pillText, g.fx + g.px(23), g.fy + g.fh - g.px(40), 'L');
+    } else if (pillText) {
       r.setFont(false, T_BUL);
       const pillPadX  = coords.px2mm(16);
       const pillMaxW  = coords.CW * 0.86;
@@ -2885,13 +3163,17 @@ async function main() {
       if (bgPath) {
         try {
           // Draw full-bleed background image (cover-crop to entire page)
-          const pageWmm = PW;  // page width in mm (same as PW from coords)
-          const pageHmm = PH;  // page height in mm
-          await renderer.placeImageCover(pdfDoc, bgPath, 0, 0, pageWmm, pageHmm);
+          // LOCAL-PATCH(upstream-request: U-20261119-010) — framed decks cover
+          // the frame, not the page.
+          const fg = layoutSpec.frame ? frameGeom(layoutSpec, coords) : null;
+          const bx = fg ? fg.fx : 0, by = fg ? fg.fy : 0;
+          const pageWmm = fg ? fg.fw : PW;  // page width in mm (same as PW from coords)
+          const pageHmm = fg ? fg.fh : PH;  // page height in mm
+          await renderer.placeImageCover(pdfDoc, bgPath, bx, by, pageWmm, pageHmm);
           // Draw semi-transparent overlay for text readability
           if (bgImageConfig.overlay.opacity > 0) {
             const [or, og, ob] = bgImageConfig.overlay.color;
-            renderer.fillRectOverlay(0, 0, pageWmm, pageHmm, rgb(or / 255, og / 255, ob / 255), bgImageConfig.overlay.opacity);
+            renderer.fillRectOverlay(bx, by, pageWmm, pageHmm, rgb(or / 255, og / 255, ob / 255), bgImageConfig.overlay.opacity);
           }
           bgDrawn = true;
         } catch (e: any) {
@@ -2915,7 +3197,11 @@ async function main() {
       const thumbPath = [thumbRaw, resolve(imgDir, thumbRaw), resolve(workspaceRoot, thumbRaw)]
         .find(p => existsSync(p));
       if (thumbPath) {
-        await renderer.placeImageCover(pdfDoc, thumbPath, 0, 0, PW, PH);
+        // LOCAL-PATCH(upstream-request: U-20261119-010) — framed decks cover the
+        // frame, not the page.
+        const fg = layoutSpec.frame ? frameGeom(layoutSpec, coords) : null;
+        if (fg) await renderer.placeImageCover(pdfDoc, thumbPath, fg.fx, fg.fy, fg.fw, fg.fh);
+        else await renderer.placeImageCover(pdfDoc, thumbPath, 0, 0, PW, PH);
       } else {
         console.warn(`  video thumbnail not found (slide ${idx + 1}): ${thumbRaw}`);
       }
@@ -2948,10 +3234,18 @@ async function main() {
     const ctx: RenderCtx = {
       r: renderer, doc: pdfDoc, data, n, total: TOTAL, imgDir,
       fontDir, spec: layoutSpec, coords, colors, sizes, declared, region,
-      bgDrawn,
+      // LOCAL-PATCH(upstream-request: U-20261119-010) — Framed cover: HTML shows
+      // the text straight on the scrimmed photo (no card).
+      bgDrawn: layoutSpec.frame && type === 'title' ? false : bgDrawn,
     };
 
-    if (type === 'title')          await renderTitleSlide(ctx);
+    // LOCAL-PATCH(upstream-request: U-20261119-010) — framed contact slide with a
+    // visual = HTML two-column (plain lines left, image right).
+    if (layoutSpec.frame && type === 'contact' && data.visualImage) {
+      await renderFramedStandard(ctx, { lines: [data.contactEmail, data.contactLinkedIn].filter(Boolean) as string[] });
+    } else if (layoutSpec.frame && type === 'title')   renderFramedTitle(ctx);
+    else if (layoutSpec.frame && type === 'divider')   await renderFramedDivider(ctx);
+    else if (type === 'title')          await renderTitleSlide(ctx);
     else if (type === 'divider')   await renderDividerSlide(ctx);
     else if (type === 'punchline') renderPunchlineSlide(ctx);
     else if (type === 'profile')   renderProfileSlide(ctx);
@@ -2988,7 +3282,17 @@ async function main() {
     // first, then `footnotes` (abbreviation definitions), one joined band
     // through the existing ladder below — zero drops, zero new placement logic.
     const fns = [...(data.notes ?? []), ...(data.footnotes ?? [])].map(s => strip(s)).filter(Boolean);
-    if (fns.length > 0) {
+    // LOCAL-PATCH(upstream-request: U-20261119-010) — framed decks: HTML puts the
+    // footnote inside the frame, bottom-left under the text column, muted.
+    if (fns.length > 0 && layoutSpec.frame) {
+      const g = frameGeom(layoutSpec, coords);
+      const fx0 = g.fx + g.px(g.f.col_x_px), fw0 = g.px(g.f.w_px - 2 * g.f.col_x_px);
+      const lh = g.px(g.f.footnote_lh_px);
+      renderer.setFont(false, g.pt(g.f.footnote_px)); renderer.setColor(toRGB(g.f.muted_rgb));
+      const lines = renderer.wrapText(fns.join('  ·  '), fw0);
+      let yy = g.fy + g.fh - g.px(g.f.footnote_bottom_px) - lines.length * lh;
+      for (const line of lines) { renderer.cell(fw0, lh, line, fx0, yy, 'L'); yy += lh; }
+    } else if (fns.length > 0) {
       const footR = region('content');
       const footText = fns.join('  ·  ');
       const cardEntry = CARD_LOG
@@ -3063,6 +3367,12 @@ async function main() {
         }
         console.log(`  footnotes (slide ${idx + 1}): ${plan.lines.length} line(s) @${plan.sizePt.toFixed(2)}pt ${plan.where}, band [${plan.top.toFixed(1)}..${(plan.top + plan.lines.length * plan.lh).toFixed(1)}]mm${bgDrawn ? ' + scrim' : ''}`);
       }
+    }
+
+    // LOCAL-PATCH(upstream-request: U-20261119-010) — clip every layer to the frame.
+    if (layoutSpec.frame) {
+      const g = frameGeom(layoutSpec, coords);
+      renderer.maskOutsideFrame(g.fx, g.fy, g.fw, g.fh, g.rad, toRGB(g.f.page_rgb));
     }
 
     if ((idx + 1) % 10 === 0 || idx + 1 === TOTAL) {
