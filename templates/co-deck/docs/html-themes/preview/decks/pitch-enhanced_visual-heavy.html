@@ -229,7 +229,9 @@
     - ThumbnailNav: thumbnail-panel sidebar for supported themes
     - FullscreenManager: browser Fullscreen API toggle via F key or button
     - NarrationEngine v2.4: Web Speech API TTS narration with auto-advance
-    - FootnoteBuilder: abbreviation footnotes from slideData[i].footnotes
+    - FootnoteBuilder: slide-level bands — slideData[i].notes (sources, in-card)
+      and slideData[i].footnotes (abbreviations, outside-card pill)
+    - VideoSlide: chrome-free video slides from slideData[i].videoId (U-20261029-005)
     - Keyboard shortcuts, showSlide, changeSlide, initPPT, toggleTOC, closeTOC
 
   ─── Shared Runtime Contract ─────────────────────────────────────────────
@@ -1302,14 +1304,25 @@ function closeTOC() {
   if (btn) btn.classList.remove('active');
 }
 
-// ── FootnoteBuilder (abbreviation footnotes) ─────────────────────────────
-// Renders slideData[i].footnotes (array of "ABBR: definition" strings) as a
-// small wrap-enabled line at the bottom-left of each slide that declares it.
-// Authoring convention (from the 2026-10 abbreviation-footnote rollout):
-// define an abbreviation at its FIRST appearance within each PART; skip
-// divider/video slides and widely known terms (AI, company/model names).
-// Styling lives in ppt-engine.css (.slide-footnote); themes and styles can
-// override via the --footnote-color / --footnote-bg CSS variables.
+// ── FootnoteBuilder (slide-level notes + abbreviation footnotes) ────────
+// Two distinct slide-level text bands (U-20261116-009 item 2, design
+// 2026-11-16-co-deck-pdf-html-backport §2 — the deck-proven split):
+//   slideData[i].notes     sources / caveat lines — rendered INSIDE the card,
+//                          a static muted line at the end of the .slide-content
+//                          flow (.slide-footnote.slide-notes; skipped when the
+//                          slide has no .slide-content, e.g. video slides).
+//   slideData[i].footnotes abbreviation definitions ("ABBR = definition") —
+//                          rendered OUTSIDE the card, a small wrap-enabled
+//                          line at the bottom-left of the slide host
+//                          (legacy pill, unchanged).
+// Each field renders independently and both render when only one is present
+// (backward compat: pre-split decks carry footnotes only and render exactly
+// as before). Authoring convention (from the 2026-10 abbreviation-footnote
+// rollout): define an abbreviation at its FIRST appearance within each PART;
+// skip video slides and widely known terms (AI, company/model names).
+// Styling lives in ppt-engine.css (.slide-footnote / .slide-footnote.slide-notes);
+// themes and styles can override via the --footnote-color / --footnote-bg
+// CSS variables.
 
 var FootnoteBuilder = {
   render: function() {
@@ -1320,13 +1333,116 @@ var FootnoteBuilder = {
     var slides = document.querySelectorAll('.slide');
     for (var i = 0; i < data.length; i++) {
       var d = data[i];
-      if (!d || !d.footnotes || !d.footnotes.length) continue;
+      if (!d) continue;
       var host = slides[i];
-      if (!host || host.querySelector('.slide-footnote')) continue;
-      var box = el('div', 'slide-footnote');
-      box.textContent = d.footnotes.join('  ·  ');
-      host.appendChild(box);
+      if (!host) continue;
+      // notes: sources/caveats — in-card, end of the .slide-content flow.
+      // Guard: skip when .slide-content is absent (video-style slides without
+      // a card) and on re-run (idempotent, like the pill branch below).
+      if (d.notes && d.notes.length && !host.querySelector('.slide-notes')) {
+        var content = host.querySelector('.slide-content');
+        if (content) {
+          var srcBox = el('div', 'slide-footnote slide-notes');
+          srcBox.textContent = d.notes.join('  ·  ');
+          content.appendChild(srcBox);
+        }
+      }
+      // footnotes: abbreviations — slide host, outside the card (legacy pill).
+      // The :not(.slide-notes) guard keeps the two bands independent even
+      // though .slide-notes also carries the .slide-footnote class.
+      if (d.footnotes && d.footnotes.length && !host.querySelector('.slide-footnote:not(.slide-notes)')) {
+        var box = el('div', 'slide-footnote');
+        box.textContent = d.footnotes.join('  ·  ');
+        host.appendChild(box);
+      }
     }
+  }
+};
+
+// ── VideoSlide (chrome-free video slides) ────────────────────────────────
+// slideData[i].videoId renders a chrome-free video slide: full-bleed dark
+// stage + play affordance + plain caption — no .slide-card / .slide-content
+// bubble (U-20261029-005). Themes call VideoSlide.render(slide, data) as the
+// FIRST branch of buildSlideChildren(); the per-project injector
+// (inject-video-players.ts) skips slides marked data-video="1", so the
+// documented re-run-after-rebuild procedure cannot double-stage.
+// Play-mode contract follows ADR-0002 / inject-video-players.ts (triple
+// fallback): local mp4 (videoLocal) → inline YouTube iframe (http/s + origin)
+// → new-tab watch URL (file:// dodges YouTube embed error 153), with a
+// client-side error fall-through from the local attempt to the embed.
+// Stop-on-slide-change: one shared MutationObserver removes playing frames
+// when the slide loses .active (the v4 stale-index defect class) — kept out
+// of showSlide so the shared navigation path is untouched.
+// Styling lives in ppt-engine.css (.video-slide / .video-caption /
+// .video-stage / .video-frame); themes and styles can override via cascade.
+
+var VideoSlide = {
+  _watching: false,
+  render: function (slide, data) {
+    slide.classList.add('video-slide');
+    slide.dataset.video = '1';
+    var caption = el('div', 'video-caption');
+    appendInline(caption, data.title || data.headline || '');
+    slide.appendChild(caption);
+    var stage = el('button', 'video-stage');
+    stage.setAttribute('aria-label', 'Play video');
+    stage.appendChild(el('span', 'video-play-glyph', '▶'));
+    stage.appendChild(el('span', 'video-play-label', 'Play video'));
+    var self = this;
+    stage.addEventListener('click', function () { self.play(slide, data); });
+    slide.appendChild(stage);
+    this._watch();
+    return slide;
+  },
+  play: function (slide, data) {
+    var self = this;
+    function embed() {
+      var src = 'https://www.youtube.com/embed/' + data.videoId + '?autoplay=1&rel=0&playsinline=1';
+      if (location.protocol === 'http:' || location.protocol === 'https:') {
+        src += '&origin=' + location.origin;
+        var f = document.createElement('iframe');
+        f.className = 'video-frame';
+        f.src = src;
+        f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        f.allowFullscreen = true;
+        f.setAttribute('allowfullscreen', '');
+        slide.appendChild(f);
+        slide.classList.add('playing');
+      } else {
+        window.open('https://www.youtube.com/watch?v=' + data.videoId, '_blank');
+      }
+    }
+    if (data.videoLocal) {
+      var v = document.createElement('video');
+      v.className = 'video-frame';
+      v.controls = true;
+      v.autoplay = true;
+      v.setAttribute('playsinline', '');
+      v.src = data.videoLocal;
+      v.addEventListener('error', function () { v.remove(); embed(); });
+      slide.appendChild(v);
+      slide.classList.add('playing');
+      v.play().catch(function () {});
+      return;
+    }
+    embed();
+  },
+  _watch: function () {
+    if (this._watching) return;
+    var target = document.getElementById('presentation') || document.body;
+    if (!target) return;
+    this._watching = true;
+    new MutationObserver(function () {
+      document.querySelectorAll('.video-slide.playing').forEach(function (s) {
+        if (!s.classList.contains('active')) {
+          var f = s.querySelector('iframe.video-frame');
+          if (f) f.remove();
+          var v = s.querySelector('video.video-frame');
+          if (v) { try { v.pause(); } catch (e) {} v.removeAttribute('src'); v.load(); v.remove(); }
+          s.classList.remove('playing');
+        }
+      });
+    }).observe(target, { attributes: true, attributeFilter: ['class'], subtree: true });
   }
 };
 
@@ -1547,9 +1663,24 @@ function initPPT(options) {
       var section = data.section || '';
       var title = data.title || data.headline || '';
 
+      // Video slide (chrome-free, U-20261029-005): no card/bubble DOM.
+      if (data.videoId) { VideoSlide.render(slide, data); return; }
+
       if (type === 'punchline') {
         slide.appendChild(el('div', 'slide-eyebrow', section));
-        slide.appendChild(el('h1', 'slide-title', title));
+        // U-20261119-005 item 4 (design 2026-11-20-co-deck-pipeline-batch-2-design §R2):
+        // split the statement on \n into per-line elements so a two-line punchline
+        // can size its lines differently (first line .punch-line at the full title
+        // size, subsequent lines .punch-line.sub). appendInline keeps the **bold**
+        // run handling per line, mirroring the PDF renderer's per-sentence groups.
+        var punchTitle = el('h1', 'slide-title');
+        var punchLines = String(title == null ? '' : title).split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+        for (var pi = 0; pi < punchLines.length; pi++) {
+          var punchLine = el('div', 'punch-line' + (pi > 0 ? ' sub' : ''));
+          appendInline(punchLine, punchLines[pi]);
+          punchTitle.appendChild(punchLine);
+        }
+        slide.appendChild(punchTitle);
         return;
       }
       if (type === 'title') {
@@ -1568,6 +1699,10 @@ function initPPT(options) {
           titleContent.appendChild(titleRight);
         }
         slide.appendChild(titleContent);
+        // U-20261119-005 item 2 (design §R2): a title-slide visualCaption renders
+        // as a bottom-right overlay credit (.cdk-caption-cover) — the cover image
+        // is full-bleed, so there is no under-image line (deck-proven shape).
+        if (data.visualCaption) slide.appendChild(el('div', 'cdk-caption cdk-caption-cover', data.visualCaption));
         return;
       }
       if (type === 'divider') {
@@ -1606,6 +1741,21 @@ function initPPT(options) {
         if (data.contactEmail) info.appendChild(el('div', 'contact-item', data.contactEmail));
         if (data.contactLinkedIn) info.appendChild(el('div', 'contact-item', data.contactLinkedIn));
         if (data.contactPhone) info.appendChild(el('div', 'contact-item', data.contactPhone));
+        // U-20261119-005 item 3 (design 2026-11-20-co-deck-pipeline-batch-2-design §R2):
+        // bullets-only contact slides ignored `bullets` entirely. When no contact*
+        // line resolves, render up to 5 bullets as .contact-item lines with the
+        // first as .contact-primary (bold primary ink) — mirrors the PDF renderer's
+        // contact*-first contract (gen-slides-pdf v1.15.0, U-20261116-008 item 4,
+        // known list includes contactName) and the zen template's deck-proven shape.
+        var hasContactLine = !!(data.contactName || data.contactEmail || data.contactLinkedIn || data.contactPhone);
+        if (!hasContactLine && Array.isArray(data.bullets) && data.bullets.length) {
+          var contactBullets = data.bullets.slice(0, 5);
+          for (var ci = 0; ci < contactBullets.length; ci++) {
+            var contactLine = el('div', 'contact-item' + (ci === 0 ? ' contact-primary' : ''));
+            appendInline(contactLine, contactBullets[ci]);
+            info.appendChild(contactLine);
+          }
+        }
         contactLeft.appendChild(info);
         contactContent.appendChild(contactLeft);
         if (data.visualImage) {
@@ -1613,6 +1763,8 @@ function initPPT(options) {
           var cImg = imgEl(data.visualImage, escapeText(title));
           if (data.visualImage.indexOf('/diagrams/') !== -1) cImg.classList.add('img-diagram');
           contactRight.appendChild(cImg);
+          // U-20261119-005 item 2 (design §R2): caption under the contact image.
+          if (data.visualCaption) contactRight.appendChild(el('div', 'cdk-caption', data.visualCaption));
           contactContent.appendChild(contactRight);
         }
         slide.appendChild(contactContent);
@@ -1626,20 +1778,34 @@ function initPPT(options) {
       buildBullets_pitchEnhanced(left, data.bullets);
       content.appendChild(left);
 
-      var right = el('div', 'right-panel');
-      if (data.visualImage) {
-        var img = imgEl(data.visualImage, escapeText(data.visualTitle || title));
-        if (data.visualImage.indexOf('/diagrams/') !== -1) img.classList.add('img-diagram');
-        right.appendChild(img);
-      } else {
-        var visual = el('div', 'slide-visual');
-        visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
-        var display = el('div', 'visual-display');
-        renderVisualDisplay(display, data.visualDisplay);
-        visual.appendChild(display);
-        right.appendChild(visual);
+      // U-20261119-005 item 5 (design 2026-11-20-co-deck-pipeline-batch-2-design §R2):
+      // references slides fall through to this branch with neither visualImage
+      // nor a non-empty visualDisplay and used to render an empty .slide-visual
+      // box (decks hid it via fragile #slide-N CSS). Skip the right panel
+      // entirely when there is nothing to show; theme.css collapses the grid to
+      // one column for panel-less standard slides.
+      var hasVisualDisplay = data.visualDisplay != null && String(data.visualDisplay).trim() !== '';
+      if (data.visualImage || hasVisualDisplay) {
+        var right = el('div', 'right-panel');
+        if (data.visualImage) {
+          var img = imgEl(data.visualImage, escapeText(data.visualTitle || title));
+          if (data.visualImage.indexOf('/diagrams/') !== -1) img.classList.add('img-diagram');
+          right.appendChild(img);
+        } else {
+          var visual = el('div', 'slide-visual');
+          visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
+          var display = el('div', 'visual-display');
+          renderVisualDisplay(display, data.visualDisplay);
+          visual.appendChild(display);
+          right.appendChild(visual);
+        }
+        // U-20261119-005 item 2 (design §R2): caption under the right-panel
+        // content (.cdk-caption) — diagram captions / photo source credits were
+        // PDF-only before (gen-slides-pdf.ts); mirrors the deck-level
+        // deck-captions-js workaround naming and DOM.
+        if (data.visualCaption) right.appendChild(el('div', 'cdk-caption', data.visualCaption));
+        content.appendChild(right);
       }
-      content.appendChild(right);
       slide.appendChild(content);
     }
 
