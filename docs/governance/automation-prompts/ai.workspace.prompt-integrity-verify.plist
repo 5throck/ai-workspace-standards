@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!--
+  ai.workspace.prompt-integrity-verify.plist — the out-of-process prompt-integrity
+  verifier schedule (DEC-20261120-04; T-20261120-002; design
+  docs/designs/2026-11-20-runner-hardening-integrity-design.md §T-20261120-002 3b;
+  ADR-0105 §Prompt-Integrity; AC-15).
+
+  Fires daily at 06:00 KST (local time) and runs
+  `bun scripts/verify-prompt-integrity.ts --exec-closure` in the workspace root:
+  hashes the LIVE automation prompt bytes out of ~/.zcode/v2/tasks-index.sqlite
+  (bun:sqlite, read-only) against prompts.manifest.json, and checks the prompt's
+  `bun scripts/...` execution surface against protectedPaths ∪ runner-exec-allowlist.
+  Any drift exits 1, writes .pipeline-state/prompt-integrity-alert-<date>.json,
+  appends a prompt-integrity ALERT line to memory/<today>.md, and files an urgent
+  governance ticket the same day. Clean runs append
+  `prompt integrity verify: N/N match` to the day's memory log.
+
+  Rationale (design 3b, S5 principle): enforcement the runner session controls is
+  not enforcement — a host launchd job survives a compromised runner session and
+  matches the existing ai.workspace.watchdog-automation-stop.plist pattern. This
+  file is a TRACKED COPY for review and reinstall; the live job lives in
+  ~/Library/LaunchAgents/ and is OPERATOR-MANAGED host state recorded in the
+  change set's evidence — a workspace repo cannot install host launchd jobs.
+  Install steps: docs/governance/automation-prompts/prompt-integrity-verify-install.md.
+-->
+<dict>
+  <key>Label</key>
+  <string>ai.workspace.prompt-integrity-verify</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/techcross/.bun/bin/bun</string>
+    <string>scripts/verify-prompt-integrity.ts</string>
+    <string>--exec-closure</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/techcross/git/ai_workspace</string>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>6</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/techcross/git/ai_workspace/.pipeline-state/prompt-integrity-verify.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/techcross/git/ai_workspace/.pipeline-state/prompt-integrity-verify.log</string>
+</dict>
+</plist>

@@ -1,0 +1,38 @@
+{
+  "version": "2026-11-20",
+  "_comment": "Runner execution-surface allowlist (T-20261120-002 third scope item; design docs/designs/2026-11-20-runner-hardening-integrity-design.md §T-20261120-002, §T-20261119-006 adjacency). scripts/*.ts paths that the authority prompt (docs/governance/automation-prompts/runner-v5.snapshot.txt) names as executed commands (`bun scripts/...`) and that are NOT already covered by docs/protected-paths.json protectedPaths[] — the verifier's --exec-closure check requires every prompt-referenced script to sit inside the protectedPaths ∪ this-list union, so a NEW execution surface entering the authority prompt without a governance change set alerts (exit 1 + urgent ticket). Seeded 2026-11-20 from the live v5 prompt's referenced set (17 scripts; 9 already protected). Entries are gitignore-style patterns (exact path or glob). PROTECTION NOTE: this file is checked in and governance-gated by the same-PR rule, but its own docs/protected-paths.json protectedPaths[] entry is a HUMAN-merge follow-up (editing docs/protected-paths.json is itself protected; PR-2 is runner-mergeable per design §10 row 2 and must not touch protected files). Membership changes are governance decisions — update this list only in the same change set that updates the prompt.",
+  "allowedScripts": [
+    {
+      "path": "scripts/automation-lock.ts",
+      "reason": "STEP 0 lock acquisition (`acquire unified-automation`) — exclusivity gate (design 2026-09-26-runner-lock-retry-enforcement D1)"
+    },
+    {
+      "path": "scripts/external-deps.ts",
+      "reason": "fleet external-dependency verification in the upgrade steps"
+    },
+    {
+      "path": "scripts/fleet-list.ts",
+      "reason": "fleet roster derivation for the wave steps (DEC-20261107-01)"
+    },
+    {
+      "path": "scripts/review-baseline.ts",
+      "reason": "STEP E review battery (recorded-exit-code compensation battery runner)"
+    },
+    {
+      "path": "scripts/skill-graph-fleet-report.ts",
+      "reason": "weekly skill-graph consolidation report referenced by the runner's reporting duties"
+    },
+    {
+      "path": "scripts/validate-templates.ts",
+      "reason": "template-contract validation cited in the dry-run resolution duties"
+    },
+    {
+      "path": "scripts/validate-variant-claims.ts",
+      "reason": "variant contract-truth validation cited in the dry-run resolution duties"
+    },
+    {
+      "path": "scripts/verify-scripts.ts",
+      "reason": "script-registry verification cited in the dry-run resolution duties"
+    }
+  ]
+}
