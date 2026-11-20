@@ -72,7 +72,7 @@
 import { createHash } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { hostname } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Database } from "bun:sqlite";
 
@@ -252,7 +252,10 @@ export function summarizeHunks(liveText: string, snapshotText: string): string {
 
 function snapshotText(entry: ManifestEntry, workspaceRoot: string): { present: boolean; hash?: string; text?: string } {
   if (!entry.snapshot) return { present: false };
-  const abs = entry.snapshot.startsWith("/") ? entry.snapshot : join(workspaceRoot, entry.snapshot);
+  // isAbsolute (not a leading-slash check): manifest snapshot fields are
+  // repo-relative, but tests and operator overrides may pass platform-native
+  // absolute paths — "C:\..." must not be joined onto the workspace root.
+  const abs = isAbsolute(entry.snapshot) ? entry.snapshot : join(workspaceRoot, entry.snapshot);
   if (!existsSync(abs)) return { present: false };
   const bytes = readFileSync(abs);
   return { present: true, hash: createHash("sha256").update(bytes).digest("hex"), text: bytes.toString("utf8") };
