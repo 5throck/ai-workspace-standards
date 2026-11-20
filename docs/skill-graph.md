@@ -226,7 +226,7 @@
 | `root/explain-me` | L0 | 1.0.1 | — | — | — | — | — |
 | `root/finishing-a-development-branch` | L0 | 1.0.2 | — | — | — | — | — |
 | `root/gateguard` | L0 | 1.0.2 | — | — | root/sync | — | — |
-| `root/meeting-facilitation` | L0 | 1.5.0 | — | — | — | — | — |
+| `root/meeting-facilitation` | L0 | 1.6.0 | — | — | — | — | — |
 | `root/migrate-project` | L0 | 1.0.0 | — | — | root/adopt-project (composes_with), root/upgrade-project (follows) | — | — |
 | `root/model-migration` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/new-project` | L0 | 1.0.0 | — | — | root/adopt-project, root/upgrade-project (follows) | — | — |
@@ -948,7 +948,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `design-foundation` | skill | divergence | co-design@1.3.0 #5cc8c410; root@1.1.1 #74fdd004 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.2 #b5259cc8 |
 | `i18n-layout` | skill | divergence | co-work@1.1.2 #55cc9f30; common@1.1.1 #67b31c6f |
-| `meeting-facilitation` | skill | version-drift | co-safety@1.5.0 #690ba21e; root@1.5.0 #f4da9e5e |
+| `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.6.0 #815b03b3 |
 | `pdf-export` | skill | divergence | co-deck@2.2.1 #4250f2a6; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
