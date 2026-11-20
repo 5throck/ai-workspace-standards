@@ -20,12 +20,37 @@ title: >-
   review-baseline.ts, automation-lock.ts) remain an unprotected execution
   surface — decide the allow-read set.
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-20T07:50:02.975+09:00'
 history:
   - at: '2026-11-20T07:50:02.975+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-20T20:08:23.706+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-20T20:08:23.727+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-20T20:08:23.747+09:00'
+    from: review
+    to: done
+result: >-
+  PR #2122 merged at 17dd5e2a7 (CI 4/4 green: ubuntu/macos/windows test +
+  gitleaks). Delivered per design 2026-11-20-runner-hardening-integrity §10 row
+  2: (1) scripts/verify-prompt-integrity.ts v1.0.0 — live prompt hashed via
+  bun:sqlite READ-ONLY (never the sqlite3 CLI; V3 mangling regression-pinned), 5
+  verdict classes + cannot-verify, alert JSON + memory ALERT line + urgent
+  ticket on drift, AC-15 N/N contract line on clean runs, --exec-closure vs
+  protectedPaths ∪ new docs/runner-exec-allowlist.json, --gate STEP 0 wrapper
+  (implies --no-ticket). First armed run vs live store: prompt integrity verify:
+  1/1 match (exec-closure ok: 17 scripts). (2) launchd
+  ai.workspace.prompt-integrity-verify.plist tracked copy + operator install
+  notes under docs/governance/automation-prompts/ (DEC-20261120-04; host install
+  is an operator step). (3) watchdog-automation-stop v1.1.0 run-scoping: writes
+  only when the unified-automation lock is live (run-tagged event); idle night =
+  no write, no history row. Windows-CI path fix c86c1f777. Known follow-ups
+  (reported, not in §10 row 2): allowlist's own protectedPaths[] entry is a
+  human merge; --parity-closure sibling check not in the PR-2 row.
 error: null
