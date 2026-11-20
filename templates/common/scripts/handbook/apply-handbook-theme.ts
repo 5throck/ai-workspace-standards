@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // scripts/handbook/apply-handbook-theme.ts
 // CSS theme applicator for handbooks.
 // Built-in themes define :root (light) + .dark (manual toggle via dark-mode-toggle.js).
@@ -730,6 +730,9 @@ const ALIASES = {
   "--accent6": "var(--accent-dark)",
 };
 
+const JA_FONT_FAMILY =
+  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Meiryo, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif";
+
 function generateCss(theme: ThemePalette): string {
   let css = `/* handbook-variables.css — ${theme.name} theme */\n`;
   css += `/* ${theme.desc} */\n`;
@@ -756,6 +759,14 @@ function generateCss(theme: ThemePalette): string {
   for (const [key, value] of Object.entries(ALIASES)) {
     css += `  ${key}: ${value};\n`;
   }
+  css += `}\n`;
+
+  // Japanese override (Meiryo default); must come after :root/.dark so it wins on equal specificity
+  css += `\n/* Japanese: Latin fonts first so Latin glyphs avoid Meiryo's wide Verdana-based forms; Meiryo then covers Japanese glyphs. */\n`;
+  css += `:root:lang(ja) {\n`;
+  css += `  --font-family: ${JA_FONT_FAMILY};\n`;
+  css += `  --line-height-body: 1.55;\n`;
+  css += `  --line-height-compact: 1.5;\n`;
   css += `}\n`;
 
   return css;

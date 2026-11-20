@@ -45,7 +45,7 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
 | `decision-record` | 1.1.0 | active | pm | 2026-08-25 | — | Decision record format for gate-moment rulings (Design Gate Row 0) captured as docs/decisions/DEC-YYYYMMDD-NN.md files |
 | `evidence-ledger` | 1.1.0 | active | pm | 2026-08-25 | — | Fixed-column evidence ledger tracing every claim a decision depends on to a source, reference, and verification state |
-| `handbook` | 0.6.0 | active | pm | 2026-09-20 | — | Document Production Workflow — searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and course modes |
+| `handbook` | 0.6.1 | active | pm | 2026-09-20 | — | Document Production Workflow — searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and course modes |
 | `handbook-sync-audit` | 1.0.5 | active | pm | 2026-08-29 | — | Verifies generated handbooks stay aligned with their sources: upstream content reflection, structural linkage, freshness |
 | `i18n-audit` | 1.0.2 | active | i18n-specialist | 2026-11-19 | — | Locale parity and glossary audit across locale files, with drift reporting and a parity certificate on success |
 | `i18n-formatting` | 1.0.1 | active | i18n-specialist | 2026-08-24 | — | Locale-specific date/time, number, and currency formatting, units of measure, Korean-scale numerals, print paper sizes |

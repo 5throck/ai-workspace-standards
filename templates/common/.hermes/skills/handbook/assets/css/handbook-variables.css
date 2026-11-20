@@ -186,3 +186,10 @@
   --shadow-sm:    0 1px 2px rgba(0,0,0,.3);
   --shadow-md:    0 4px 14px rgba(0,0,0,.3);
 }
+
+/* Japanese: Latin fonts first so Latin glyphs avoid Meiryo's wide Verdana-based forms; Meiryo then covers Japanese glyphs. Meiryo has tall metrics, so line-height is slightly reduced. */
+:root:lang(ja) {
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Meiryo, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  --line-height-body: 1.55;
+  --line-height-compact: 1.5;
+}

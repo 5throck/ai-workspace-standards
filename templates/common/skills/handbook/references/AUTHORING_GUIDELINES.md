@@ -194,6 +194,7 @@ Exception: Reference/procedure documents such as glossaries, FAQs, and installat
 - **Consistent wrapper style** — all SVG containers use the same wrapper:
   `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin:20px 0 28px;">`
 - **Text size** — use 11–13px (`font-size`) for text inside SVG; make labels bold.
+- **Fonts** — inline SVG text inherits the page font (`font-family: inherit`, the default), so Japanese pages get Meiryo via `--font-family`. Standalone `.svg` files used via `<img>` cannot inherit: set `font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Meiryo, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif"` on the root `<svg>`. Meiryo glyphs are wider; leave generous text-box slack in Japanese diagrams.
 - **Color palette** (maintain consistency):
 
   | Purpose | Color |

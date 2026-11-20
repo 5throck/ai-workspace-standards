@@ -53,7 +53,7 @@
 | `co-deck/presenter-mode` | variant:co-deck | 1.0.3 | co-deck/html-build | co-deck/phase 4 | — | — | — |
 | `co-deck/research` | variant:co-deck | 1.2.3 | co-deck/research | co-deck/phase 1 | co-deck/storyline (follows) | — | research-notes |
 | `co-deck/slide-layout-gate` | variant:co-deck | 1.0.3 | co-deck/pdf-export | co-deck/phase 4 | co-deck/pdf-export (composes_with), co-deck/pdf-export (follows) | slide-html | layout-gate-status |
-| `co-deck/storyline` | variant:co-deck | 1.5.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
+| `co-deck/storyline` | variant:co-deck | 1.6.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
 | `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | — | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.2 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
 | `co-design/design-foundation` | variant:co-design | 1.3.0 | — | — | co-design/token-usage-lint (composes_with), root/accessibility-audit (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
@@ -197,7 +197,7 @@
 | `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
 | `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
 | `common/gateguard` | common | 1.0.2 | common/automation-engineer | — | — | — | — |
-| `common/handbook` | common | 0.6.0 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
+| `common/handbook` | common | 0.6.1 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
 | `common/handbook-sync-audit` | common | 1.0.5 | — | — | — | — | — |
 | `common/i18n-audit` | common | 1.0.2 | common/i18n-specialist | — | — | — | — |
 | `common/i18n-formatting` | common | 1.0.1 | common/i18n-specialist | — | — | — | — |
