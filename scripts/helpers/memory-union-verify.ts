@@ -1,5 +1,33 @@
 #!/usr/bin/env bun
-// @version 1.5.0
+// @version 1.6.0
+// v1.6.0 (2026-11-20, U-20261120-001 — design
+//          docs/designs/2026-11-20-runner-hardening-integrity-design.md §3.5):
+//          the exit-128 noise closure. `git()` gains an `absentOk` option: when
+//          set and the exit code is 128 — the DOCUMENTED absent-path signal of
+//          `git show <commit>:<path>` ("null when the path is absent in that
+//          commit — file added or deleted relative to that side") — the failing
+//          ref is pushed onto a module-level collector and null is returned
+//          SILENTLY, instead of the anonymous incomplete-sweep WARN that made
+//          every merge-touched one-side-taken file emit up to 3 WARN rows per
+//          sweep (20+ per 14-day scan in Projects/co-security). showBlob is the
+//          ONLY absentOk caller; every other git() call (log, diff-tree,
+//          show -s) keeps the strict WARN — which now also NAMES its failing
+//          ref (`git <cmd> failed (exit <code>) on <args[1] ?? args.join(" ")>`)
+//          so genuine failures stop being anonymous. Justification for treating
+//          ALL showBlob 128s as absent-path (design item 2): the commit SHAs
+//          come from the same repo's `git log --merges` moments earlier, so an
+//          unknown-SHA 128 is not a real shape here; corrupt-object pathologies
+//          surface through the remaining strict calls. `unionScan` and
+//          `owedBlocks` each end with ONE INFO line naming the collected refs
+//          (`N absent-side blob reads (documented no-data — file added/deleted
+//          between sides): ref1, ref2, ref3 [+k more]`), then drain — two INFO
+//          lines per dev-sync pipeline worst case, each naming refs, vs 20+
+//          anonymous WARNs. The earlier same-id report (restore-then-re-collapse
+//          loop, v1.5.0 spare semantics) is regression-pinned by the loop test
+//          in tests/unit/memory-union-verify.test.ts (one-side-taken merge +
+//          worktree repair converges: owedBlocks keeps the merge-time debt for
+//          step-2 sparing while unionScan tiers the group repaired-at-head —
+//          one 3.88 pass, no FATAL loop).
 // v1.5.0 (2026-11-18, T-20261118-003 — design
 //          docs/designs/2026-11-18-memory-gate-step2-deadlock-design.md §3.1):
 //          new exported aggregate owedBlocks() — the gate's debt inventory as a
@@ -379,6 +407,7 @@ export function owedBlocks(opts: { sinceDays: number; maxCommits: number; cwd?: 
       }
     }
   }
+  reportAbsentRefs(); // v1.6.0: ONE INFO naming the absent-side reads, then drain
   return owed;
 }
 
@@ -460,15 +489,44 @@ export interface MergeScanResult {
   tier: "blocking" | "historical" | "repaired-at-head";
 }
 
+/** Module-level collector for absent-path (exit-128) refs gathered under
+ * `absentOk` (v1.6.0, U-20261120-001). Sweeps report + drain at their end
+ * (one INFO line each via reportAbsentRefs), so the collector is empty between
+ * sweeps; a direct showBlob call outside a sweep stays silent until the next
+ * sweep end — the documented trade of the pure exit-code classification. */
+const absentRefs: string[] = [];
+
+/** Emit ONE INFO line when the collector holds absent-side refs, then drain.
+ * Design §3.5 item 3: `N absent-side blob reads (documented no-data — file
+ * added/deleted between sides): ref1, ref2, ref3 [+k more]`. */
+function reportAbsentRefs(): void {
+  if (absentRefs.length === 0) return;
+  const refs = absentRefs.splice(0, absentRefs.length);
+  const head = refs.slice(0, 3).join(", ");
+  const more = refs.length > 3 ? ` [+${refs.length - 3} more]` : "";
+  console.info(
+    `memory-union-verify: ${refs.length} absent-side blob reads (documented no-data — file added/deleted between sides): ${head}${more}`,
+  );
+}
+
 /** Git plumbing failures are no longer silent (T-20261106-005 item 2): a
  *  failed call WARNs to stderr so an incomplete sweep is observable instead
  *  of indistinguishable from an empty window. Return contract unchanged:
- *  null = "no data" (fail-open at the caller). */
-function git(args: string[], cwd: string): string | null {
+ *  null = "no data" (fail-open at the caller).
+ *  v1.6.0 (U-20261120-001): `opts.absentOk` + exit 128 is the DOCUMENTED
+ *  absent-path signal of `git show <commit>:<path>` — the ref goes to the
+ *  collector and null returns SILENTLY (the sweep's closing INFO line names
+ *  it); the strict WARN below keeps every non-showBlob call observable, and
+ *  now names its failing ref instead of staying anonymous. */
+function git(args: string[], cwd: string, opts?: { absentOk?: boolean }): string | null {
   const res = Bun.spawnSync(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
   if (res.exitCode !== 0) {
+    if (opts?.absentOk && res.exitCode === 128) {
+      absentRefs.push(args[1] ?? args.join(" "));
+      return null;
+    }
     console.warn(
-      `⚠️  memory-union-verify: git ${args[0]} failed (exit ${res.exitCode}) — sweep results may be incomplete`,
+      `⚠️  memory-union-verify: git ${args[0]} failed (exit ${res.exitCode}) on ${args[1] ?? args.join(" ")} — sweep results may be incomplete`,
     );
     return null;
   }
@@ -530,9 +588,11 @@ export function listMemoryMerges(opts: { sinceDays: number; maxCommits: number; 
 }
 
 /** `git show <commit>:<path>` — null when the path is absent in that commit
- * (file added or deleted relative to that side). */
+ * (file added or deleted relative to that side). v1.6.0: the ONLY absentOk
+ * caller — exit 128 (the documented absent-path signal) is collected for the
+ * sweep's closing INFO line instead of WARNing per read (U-20261120-001). */
 export function showBlob(commit: string, file: string, cwd?: string): string | null {
-  return git(["show", `${commit}:${file}`], cwd ?? process.cwd());
+  return git(["show", `${commit}:${file}`], cwd ?? process.cwd(), { absentOk: true });
 }
 
 /** MEMORY.md tombstone-row check for one flat memory log — the sanctioned-
@@ -657,6 +717,7 @@ export function unionScan(opts: {
       }
     }
   }
+  reportAbsentRefs(); // v1.6.0: ONE INFO naming the absent-side reads, then drain
   return results;
 }
 
