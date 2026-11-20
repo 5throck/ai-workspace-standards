@@ -1180,8 +1180,8 @@
       "name": "diagram-specialist",
       "scope": "co-deck",
       "capability": "diagram-specialist",
-      "content_hash": "5f275ef42b31e2c5",
-      "version": "1.3.3",
+      "content_hash": "177d8cf40f759128",
+      "version": "1.4.0",
       "mirrors": [
         "templates/co-deck/agents/diagram-specialist.md"
       ]
