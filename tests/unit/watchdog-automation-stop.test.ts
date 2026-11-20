@@ -6,13 +6,25 @@
  * readers never see a truncated file), and existing content survives the write
  * (valid records merge; unparseable bytes are archived aside, never destroyed).
  *
- * @version 1.0.0
+ * v1.1.0 (2026-11-20, T-20261120-002 second scope item; design
+ * docs/designs/2026-11-20-runner-hardening-integrity-design.md §T-20261120-002 3c):
+ * pins the run-scoping contract — the watchdog writes ONLY when the
+ * unified-automation lock is live (idle-night no-write), and every write on a
+ * live run carries the `run` tag.
+ *
+ * @version 1.1.0
  */
 import { describe, test, expect, afterAll } from 'bun:test';
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { writeAutomationStop, readAutomationStop, stopFilePresent } from '../../scripts/watchdog-automation-stop.ts';
+import { tmpdir, hostname } from 'node:os';
+import {
+  writeAutomationStop,
+  readAutomationStop,
+  stopFilePresent,
+  isLiveAutomationRun,
+  writeScopedAutomationStop,
+} from '../../scripts/watchdog-automation-stop.ts';
 
 const dir = mkdtempSync(join(tmpdir(), 'watchdog-stop-test-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -116,5 +128,104 @@ describe('writeAutomationStop — preserves existing content', () => {
     const record = readAutomationStop(capDir);
     expect(record?.events.length).toBe(50);
     expect(record?.events[0]?.reason).toBe('event 54');
+  });
+
+  test('a run-tagged event is carried intact across subsequent writes', () => {
+    const tagDir = join(dir, 'run-tag');
+    mkdirSync(tagDir, { recursive: true });
+    writeAutomationStop({ reason: 'first tagged stop', stateDir: tagDir, run: 'unified-automation' });
+    writeAutomationStop({ reason: 'second tagged stop', stateDir: tagDir });
+    const record = readAutomationStop(tagDir);
+    expect(record?.events.map((e) => e.run)).toEqual([undefined, 'unified-automation']);
+  });
+});
+
+// ── v1.1.0 run-scoping (T-20261120-002; design §T-20261120-002 3c) ──────────
+
+const LOCK_NAME = 'unified-automation';
+
+function writeLock(stateDir: string, record: { name?: string; pid?: number; hostname?: string } | string): void {
+  mkdirSync(stateDir, { recursive: true });
+  const body =
+    typeof record === 'string'
+      ? record
+      : JSON.stringify({
+          name: record.name ?? LOCK_NAME,
+          pid: record.pid ?? process.pid,
+          hostname: record.hostname ?? hostname(),
+          acquiredAt: new Date().toISOString(),
+        });
+  writeFileSync(join(stateDir, `automation-${LOCK_NAME}.lock`), body + '\n', 'utf8');
+}
+
+describe('isLiveAutomationRun — the lock-live probe', () => {
+  test('no lock file → not live (idle night)', () => {
+    const probe = isLiveAutomationRun({ stateDir: join(dir, 'probe-empty') });
+    expect(probe.live).toBe(false);
+    expect(probe.detail).toContain('idle night');
+  });
+
+  test('live same-host pid → live', () => {
+    const stateDir = join(dir, 'probe-live');
+    writeLock(stateDir, {});
+    const probe = isLiveAutomationRun({ stateDir });
+    expect(probe.live).toBe(true);
+    expect(probe.holder?.pid).toBe(process.pid);
+  });
+
+  test('dead pid → not live (stale record)', () => {
+    const stateDir = join(dir, 'probe-dead');
+    writeLock(stateDir, { pid: 999999999 });
+    expect(isLiveAutomationRun({ stateDir }).live).toBe(false);
+  });
+
+  test('foreign hostname → not live (D4 ruling)', () => {
+    const stateDir = join(dir, 'probe-foreign');
+    writeLock(stateDir, { hostname: 'some-other-host' });
+    const probe = isLiveAutomationRun({ stateDir });
+    expect(probe.live).toBe(false);
+    expect(probe.detail).toContain('foreign host');
+  });
+
+  test('corrupt lock record → not live', () => {
+    const stateDir = join(dir, 'probe-corrupt');
+    writeLock(stateDir, '{"name": "unified-automation", "pid": torn');
+    expect(isLiveAutomationRun({ stateDir }).live).toBe(false);
+  });
+
+  test('a lock naming a different automation → not live', () => {
+    const stateDir = join(dir, 'probe-name');
+    writeLock(stateDir, { name: 'some-other-automation' });
+    expect(isLiveAutomationRun({ stateDir }).live).toBe(false);
+  });
+});
+
+describe('writeScopedAutomationStop — write only on a live run', () => {
+  test('IDLE NIGHT: no lock → NO stop-file write, NO history row, one stdout detail', () => {
+    const stateDir = join(dir, 'scoped-idle');
+    const r = writeScopedAutomationStop({ reason: '13:00 KST wall reached', stateDir });
+    expect(r.wrote).toBe(false);
+    expect(r.detail).toContain('idle night');
+    expect(existsSync(join(stateDir, 'automation-stop'))).toBe(false);
+    expect(existsSync(join(stateDir, 'automation-stop.history.jsonl'))).toBe(false);
+  });
+
+  test('LIVE RUN: lock present with an alive pid → writes with the run tag', () => {
+    const stateDir = join(dir, 'scoped-live');
+    writeLock(stateDir, {});
+    const r = writeScopedAutomationStop({ reason: '13:00 KST wall reached', stateDir });
+    expect(r.wrote).toBe(true);
+    expect(r.result?.ok).toBe(true);
+    const record = readAutomationStop(stateDir);
+    expect(record?.events[0]?.reason).toBe('13:00 KST wall reached');
+    expect(record?.events[0]?.run).toBe('unified-automation');
+  });
+
+  test('DEAD LOCK: stale pid record → idle-night no-write (an idle-night wall is not evidence)', () => {
+    const stateDir = join(dir, 'scoped-dead');
+    writeLock(stateDir, { pid: 999999999 });
+    const r = writeScopedAutomationStop({ reason: '13:00 KST wall reached', stateDir });
+    expect(r.wrote).toBe(false);
+    expect(existsSync(join(stateDir, 'automation-stop'))).toBe(false);
   });
 });

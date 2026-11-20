@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.5.0
+ * @version 1.5.1
+ * v1.5.1 (2026-11-20, T-20261120-002 / runner-hardening PR-2): allowlist gains
+ *           `runner-exec-allowlist.json` — the runner execution-surface allowlist
+ *           consumed by verify-prompt-integrity.ts --exec-closure (design
+ *           docs/designs/2026-11-20-runner-hardening-integrity-design.md
+ *           §T-20261120-002; docs/README.md §2 row is the contract).
  * v1.5.0 (2026-11-12, T-20261112-002): allowlist gains
  *           `expected-gate-failures.json` — the unified runner's checked-in
  *           sanctioned-repairs list (ADR-0105 Decision 8; docs/README.md §2 row
@@ -93,6 +98,7 @@ const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   "fleet-membership.json",
   "protected-paths.json",
   "expected-gate-failures.json",
+  "runner-exec-allowlist.json",
 ]);
 
 interface WorkspaceFinding {
