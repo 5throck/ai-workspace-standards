@@ -1,7 +1,31 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // run-manifest.ts — run ledger for the unified batch runner (meeting 2026-11-20, issue A)
 //
+// v1.1.0 (2026-11-20, T-20261119-010 — DEC-20261120-03; spec
+//   docs/designs/2026-11-20-runner-hardening-integrity-design.md §3.1): new
+//   `gate-step-i` subcommand — the STEP I review-admission gate as a ledger
+//   verdict. Freshness semantics govern (the owner directive supersedes the
+//   2026-11-18 option-2 same-run STEP E coupling; that coupling permanently
+//   starved STEP I under STEP E's hard 2 h budget — meeting Issue D
+//   arithmetic). Admission per project from `projectReviews[]`: a fresh pass
+//   row is one whose `basis` HEAD equals the submitted dry-run basis, OR whose
+//   `at` timestamp falls within `--window-days` (default 2, i.e. the last 2
+//   nights). The no-unresolved-Critical/High condition of the freshness
+//   definition is carried by `outcome: pass` itself — the ledger row is the
+//   record that the review completed with nothing Critical/High left open
+//   (the gate reads the ledger, per DEC-03 alternative B: a skill-text or
+//   side-channel gate cannot see the run-wide ledger). One `gateChecks[]` row
+//   `{gate: "STEP_I_PRE_REVIEW", project, verdict, detail, at}` is written per
+//   submitted project BEFORE any dry-run — a gate that does not fire still
+//   writes a row (meeting rule). Zero submitted projects → one explicit
+//   not-applicable row, exit 0. Any project failing → exit 1; the runner then
+//   SKIPs those projects (`skip --step STEP_I`) and the waves defer
+//   per-project under the carried-wave-first rule (R7) — a battery-only
+//   STEP E night yields zero fresh rows and exactly that deferral, preserving
+//   option 2's degradation outcome without the starvation coupling.
+//   `gateChecks` joins REQUIRED_ARRAYS (schema verify exit 2 when absent) and
+//   the verify summary line.
 // v1.0.0 (2026-11-20, meeting-2026-11-20-batch-runner-hardening): the runner's
 //   manifest was a pre-run HEAD census (`prerunHeads` only) while the REVERT rule
 //   claimed reversibility "from the run manifest" and AC-4 claimed auditable merge
@@ -19,6 +43,8 @@
 //   bun scripts/run-manifest.ts skip   --step <NAME> --reason <text>
 //   bun scripts/run-manifest.ts repair --file <path> --reason <text>
 //   bun scripts/run-manifest.ts review --project <name> --tier <baseline-only|scoped|full> --outcome <pass|fail> [--basis <head>]
+//   bun scripts/run-manifest.ts gate-step-i --project <p> --basis <head> [--window-days 2] ...
+//                                      (repeatable --project/--basis pairs, one pair per wave project)
 //   bun scripts/run-manifest.ts verify [--require-merged]
 //
 // Exit codes: 0 ok · 1 usage/IO · 2 schema verify failed · 3 no merges recorded while --require-merged
@@ -34,7 +60,11 @@ const REQUIRED_ARRAYS = [
   "skippedBudget",
   "steps",
   "projectReviews",
+  "gateChecks",
 ] as const;
+
+/** Gate id stamped on every gate-step-i row (one required array per DEC-20261120-03). */
+const STEP_I_GATE = "STEP_I_PRE_REVIEW";
 
 type Manifest = Record<string, unknown> & {
   run: string;
@@ -46,6 +76,7 @@ type Manifest = Record<string, unknown> & {
   skippedBudget: unknown[];
   steps: unknown[];
   projectReviews: unknown[];
+  gateChecks: unknown[];
 };
 
 function die(msg: string, code = 1): never {
@@ -135,6 +166,7 @@ switch (cmd) {
       skippedBudget: [],
       steps: [],
       projectReviews: [],
+      gateChecks: [],
     };
     if (existsSync(path)) die(`manifest already exists at ${path} — refusing to overwrite a live ledger`);
     writeManifest(path, m);
@@ -218,6 +250,102 @@ switch (cmd) {
     break;
   }
 
+  case "gate-step-i": {
+    const m = readManifest(path);
+    const projects = flags.project ?? [];
+    const bases = flags.basis ?? [];
+    if (projects.length !== bases.length) {
+      die("gate-step-i requires PAIRED --project <p> --basis <head> flags (one pair per wave project)");
+    }
+    const windowRaw = one(flags, "window-days") ?? "2";
+    const windowDays = Number(windowRaw);
+    if (!Number.isFinite(windowDays) || windowDays < 0) die(`bad --window-days '${windowRaw}'`);
+    const windowMs = windowDays * 24 * 60 * 60 * 1000;
+    const nowMs = Date.now();
+
+    if (projects.length === 0) {
+      // Zero projects: the gate ran and found nothing to admit — still one
+      // explicit row (a gate that does not fire still writes a row), exit 0.
+      m.gateChecks.push({
+        gate: STEP_I_GATE,
+        project: "(none)",
+        verdict: "pass",
+        detail: `not-applicable — no projects submitted (window ${windowDays}d); gate evaluated, nothing to admit`,
+        at: new Date().toISOString(),
+      });
+      writeManifest(path, m);
+      console.log("✓ gate-step-i: no projects submitted — not-applicable gateChecks row written (exit 0)");
+      break;
+    }
+
+    let failed = 0;
+    for (let i = 0; i < projects.length; i++) {
+      const project = projects[i];
+      const basis = (bases[i] ?? "").trim().toLowerCase();
+      const reviews = m.projectReviews.filter((r) => (r as { project?: unknown }).project === project) as Array<{
+        outcome?: unknown;
+        basis?: unknown;
+        at?: unknown;
+      }>;
+      const latest = reviews[reviews.length - 1];
+      let verdict: "pass" | "fail";
+      let detail: string;
+      if (!latest) {
+        verdict = "fail";
+        detail = "no projectReviews row for this project — STEP E never recorded a review pass";
+      } else if (latest.outcome !== "pass") {
+        verdict = "fail";
+        detail = `latest review outcome '${String(latest.outcome)}' is not 'pass' (unresolved findings block admission)`;
+      } else {
+        const rowBasis = typeof latest.basis === "string" ? latest.basis.trim().toLowerCase() : "";
+        const basisMatch = rowBasis !== "" && rowBasis === basis;
+        const ageMs =
+          typeof latest.at === "string" && Number.isFinite(Date.parse(latest.at)) ? nowMs - Date.parse(latest.at) : NaN;
+        if (basisMatch) {
+          // Same HEAD the review passed on — fresh regardless of row age
+          // (test (b): a 2-night-old pass on the same HEAD admits).
+          verdict = "pass";
+          detail = `fresh pass: basis matches ledger review HEAD ${rowBasis.slice(0, 10) || "(recorded)"}`;
+        } else if (Number.isNaN(ageMs)) {
+          verdict = "fail";
+          detail = "latest pass row carries no parsable timestamp — freshness cannot be proven";
+        } else {
+          const ageDays = Math.max(ageMs, 0) / (24 * 60 * 60 * 1000); // negative skew clamps to "just now"
+          if (ageMs <= windowMs) {
+            verdict = "pass";
+            detail =
+              `fresh pass: review ${ageDays.toFixed(1)}d old, within window ${windowDays}d; ` +
+              `basis differs (ledger ${rowBasis.slice(0, 10) || "(none)"} vs submitted ${basis.slice(0, 10)})`;
+          } else {
+            verdict = "fail";
+            detail =
+              `stale: basis mismatch (ledger ${rowBasis.slice(0, 10) || "(none)"} vs submitted ${basis.slice(0, 10)}) ` +
+              `and review ${ageDays.toFixed(1)}d old exceeds window ${windowDays}d`;
+          }
+        }
+      }
+      m.gateChecks.push({
+        gate: STEP_I_GATE,
+        project,
+        verdict,
+        detail,
+        at: new Date().toISOString(),
+      });
+      if (verdict === "fail") failed++;
+      console.log(`${verdict === "pass" ? "✓" : "✗"} gate-step-i ${project}: ${verdict} — ${detail}`);
+    }
+    writeManifest(path, m);
+    if (failed > 0) {
+      console.error(
+        `✗ gate-step-i: ${failed}/${projects.length} project(s) lack a fresh review pass — ` +
+          `SKIP those projects tonight (skip --step STEP_I), waves defer per carried-wave-first (R7)`,
+      );
+      process.exit(1);
+    }
+    console.log(`✓ gate-step-i: ${projects.length}/${projects.length} project(s) admitted on fresh review passes`);
+    break;
+  }
+
   case "verify": {
     const m = readManifest(path);
     const problems: string[] = [];
@@ -238,11 +366,12 @@ switch (cmd) {
     }
     console.log(
       `✓ manifest verify passed: ${m.mergedPRs.length} merge(s), ${m.skippedBudget.length} skip(s), ` +
-        `${m.sanctionedRepairs.length} repair(s), ${m.projectReviews.length} review(s)`,
+        `${m.sanctionedRepairs.length} repair(s), ${m.projectReviews.length} review(s), ` +
+        `${m.gateChecks.length} gate check(s)`,
     );
     break;
   }
 
   default:
-    die(`unknown command '${cmd}' (init|step|merge|skip|repair|review|verify)`);
+    die(`unknown command '${cmd}' (init|step|merge|skip|repair|review|gate-step-i|verify)`);
 }
