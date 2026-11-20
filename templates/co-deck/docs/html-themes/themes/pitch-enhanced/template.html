@@ -149,7 +149,19 @@
 
       if (type === 'punchline') {
         slide.appendChild(el('div', 'slide-eyebrow', section));
-        slide.appendChild(el('h1', 'slide-title', title));
+        // U-20261119-005 item 4 (design 2026-11-20-co-deck-pipeline-batch-2-design §R2):
+        // split the statement on \n into per-line elements so a two-line punchline
+        // can size its lines differently (first line .punch-line at the full title
+        // size, subsequent lines .punch-line.sub). appendInline keeps the **bold**
+        // run handling per line, mirroring the PDF renderer's per-sentence groups.
+        var punchTitle = el('h1', 'slide-title');
+        var punchLines = String(title == null ? '' : title).split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+        for (var pi = 0; pi < punchLines.length; pi++) {
+          var punchLine = el('div', 'punch-line' + (pi > 0 ? ' sub' : ''));
+          appendInline(punchLine, punchLines[pi]);
+          punchTitle.appendChild(punchLine);
+        }
+        slide.appendChild(punchTitle);
         return;
       }
       if (type === 'title') {
@@ -168,6 +180,10 @@
           titleContent.appendChild(titleRight);
         }
         slide.appendChild(titleContent);
+        // U-20261119-005 item 2 (design §R2): a title-slide visualCaption renders
+        // as a bottom-right overlay credit (.cdk-caption-cover) — the cover image
+        // is full-bleed, so there is no under-image line (deck-proven shape).
+        if (data.visualCaption) slide.appendChild(el('div', 'cdk-caption cdk-caption-cover', data.visualCaption));
         return;
       }
       if (type === 'divider') {
@@ -206,6 +222,21 @@
         if (data.contactEmail) info.appendChild(el('div', 'contact-item', data.contactEmail));
         if (data.contactLinkedIn) info.appendChild(el('div', 'contact-item', data.contactLinkedIn));
         if (data.contactPhone) info.appendChild(el('div', 'contact-item', data.contactPhone));
+        // U-20261119-005 item 3 (design 2026-11-20-co-deck-pipeline-batch-2-design §R2):
+        // bullets-only contact slides ignored `bullets` entirely. When no contact*
+        // line resolves, render up to 5 bullets as .contact-item lines with the
+        // first as .contact-primary (bold primary ink) — mirrors the PDF renderer's
+        // contact*-first contract (gen-slides-pdf v1.15.0, U-20261116-008 item 4,
+        // known list includes contactName) and the zen template's deck-proven shape.
+        var hasContactLine = !!(data.contactName || data.contactEmail || data.contactLinkedIn || data.contactPhone);
+        if (!hasContactLine && Array.isArray(data.bullets) && data.bullets.length) {
+          var contactBullets = data.bullets.slice(0, 5);
+          for (var ci = 0; ci < contactBullets.length; ci++) {
+            var contactLine = el('div', 'contact-item' + (ci === 0 ? ' contact-primary' : ''));
+            appendInline(contactLine, contactBullets[ci]);
+            info.appendChild(contactLine);
+          }
+        }
         contactLeft.appendChild(info);
         contactContent.appendChild(contactLeft);
         if (data.visualImage) {
@@ -213,6 +244,8 @@
           var cImg = imgEl(data.visualImage, escapeText(title));
           if (data.visualImage.indexOf('/diagrams/') !== -1) cImg.classList.add('img-diagram');
           contactRight.appendChild(cImg);
+          // U-20261119-005 item 2 (design §R2): caption under the contact image.
+          if (data.visualCaption) contactRight.appendChild(el('div', 'cdk-caption', data.visualCaption));
           contactContent.appendChild(contactRight);
         }
         slide.appendChild(contactContent);
@@ -226,20 +259,34 @@
       buildBullets_pitchEnhanced(left, data.bullets);
       content.appendChild(left);
 
-      var right = el('div', 'right-panel');
-      if (data.visualImage) {
-        var img = imgEl(data.visualImage, escapeText(data.visualTitle || title));
-        if (data.visualImage.indexOf('/diagrams/') !== -1) img.classList.add('img-diagram');
-        right.appendChild(img);
-      } else {
-        var visual = el('div', 'slide-visual');
-        visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
-        var display = el('div', 'visual-display');
-        renderVisualDisplay(display, data.visualDisplay);
-        visual.appendChild(display);
-        right.appendChild(visual);
+      // U-20261119-005 item 5 (design 2026-11-20-co-deck-pipeline-batch-2-design §R2):
+      // references slides fall through to this branch with neither visualImage
+      // nor a non-empty visualDisplay and used to render an empty .slide-visual
+      // box (decks hid it via fragile #slide-N CSS). Skip the right panel
+      // entirely when there is nothing to show; theme.css collapses the grid to
+      // one column for panel-less standard slides.
+      var hasVisualDisplay = data.visualDisplay != null && String(data.visualDisplay).trim() !== '';
+      if (data.visualImage || hasVisualDisplay) {
+        var right = el('div', 'right-panel');
+        if (data.visualImage) {
+          var img = imgEl(data.visualImage, escapeText(data.visualTitle || title));
+          if (data.visualImage.indexOf('/diagrams/') !== -1) img.classList.add('img-diagram');
+          right.appendChild(img);
+        } else {
+          var visual = el('div', 'slide-visual');
+          visual.appendChild(el('div', 'visual-title', data.visualTitle || ''));
+          var display = el('div', 'visual-display');
+          renderVisualDisplay(display, data.visualDisplay);
+          visual.appendChild(display);
+          right.appendChild(visual);
+        }
+        // U-20261119-005 item 2 (design §R2): caption under the right-panel
+        // content (.cdk-caption) — diagram captions / photo source credits were
+        // PDF-only before (gen-slides-pdf.ts); mirrors the deck-level
+        // deck-captions-js workaround naming and DOM.
+        if (data.visualCaption) right.appendChild(el('div', 'cdk-caption', data.visualCaption));
+        content.appendChild(right);
       }
-      content.appendChild(right);
       slide.appendChild(content);
     }
 

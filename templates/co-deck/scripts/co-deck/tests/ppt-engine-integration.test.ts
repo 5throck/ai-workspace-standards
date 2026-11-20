@@ -1,4 +1,15 @@
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (design 2026-11-20-co-deck-pipeline-batch-2-design §R2 / batch-2 PR-B1,
+//   U-20261119-005): pitch-enhanced rendered-DOM pins — (1) .slide-bullets li
+//   block-flow contract (display block + relative + 1.4rem padding, ::before
+//   absolute, no flex item splitting for inline **strong** runs); (2)
+//   visualCaption wiring (.cdk-caption under the right-panel content, cover
+//   slides get the .cdk-caption-cover overlay); (3) contact bullets fallback
+//   (first line .contact-primary, contact*-first ignores bullets — PDF
+//   v1.15.0 parity); (4) punchline \n per-line split (.punch-line + .punch-line
+//   .sub); (5) panel-less standard slides (no .right-panel when neither
+//   visualImage nor a non-empty visualDisplay). Self-skips without Chrome,
+//   mirroring the Part G convention.
 // v1.3.0 (design 2026-11-17-co-deck-pdf-followups PR-5, T-20261117-005,
 //   owner decision O-5 default Option A): zen contactName DOM pins —
 //   contactName renders as the FIRST plain .contact-item (regular weight,
@@ -643,6 +654,244 @@ describe.skipIf(!chromePath)('notes/footnotes split — rendered DOM (Chrome)', 
     expect(r.texts[0]).toContain('Order Name');
     expect(r.texts[1]).toContain('order@deck.test');
     expect(r.primaries).toEqual([false, false]);
+  });
+});
+
+// ── Part H: pitch-enhanced U-005 rendered-DOM pins (Chrome; self-skips) ──
+//
+// Executes a built pitch-enhanced deck in headless Chrome and pins the five
+// batch-2 PR-B1 theme contracts on real DOM output (design
+// 2026-11-20-co-deck-pipeline-batch-2-design §R2, ticket U-20261119-005):
+//   1. .slide-bullets li block-flow — display:block + position:relative +
+//      1.4rem padding-left, ::before absolutely positioned at left:0, so
+//      appendInline's inline <strong> runs flow inside the sentence instead
+//      of becoming anonymous flex items in a column-splitting row.
+//   2. visualCaption wiring — .cdk-caption under the right-panel content on
+//      standard slides; title slides render the .cdk-caption-cover overlay.
+//   3. Contact bullets fallback — bullets-only contact slides render up to 5
+//      .contact-item lines with the first as .contact-primary; a contact*
+//      -first slide ignores bullets (PDF v1.15.0 / U-20261116-008 item 4
+//      parity; zen Part G pins mirror the same contract).
+//   4. Punchline \n split — per-line .punch-line elements, lines after the
+//      first carrying the .sub size class.
+//   5. Panel-less standard slides — no .right-panel when the slide has
+//      neither visualImage nor a non-empty visualDisplay (references decks).
+
+const PE_SLIDE_DATA = [
+  { section: 'H1', title: 'Bold Bullet Flow',
+    bullets: ['Field problem drove **innovation** here', 'plain second line'] },
+  { section: 'H1', title: 'Caption Under Image',
+    bullets: ['supporting point'],
+    visualImage: 'assets/images/caption-contract.png',
+    visualCaption: 'Source: Co-deck Caption Contract 2026' },
+  { isTitleSlide: true, title: 'Cover Caption Deck',
+    visualImage: 'assets/images/cover-contract.png',
+    visualCaption: 'Photo: Cover Credit Contract' },
+  { isPunchlineSlide: true, title: '첫 문장은 크게\n둘째 문장은 작게' },
+  { isPunchlineSlide: true, title: '한 줄뿐인 마무리 문장' },
+  { isContactSlide: true, title: '문의하기',
+    bullets: ['김데크 연구원 · 총괄', 'deck@example.com', '+82-10-1234-5678',
+              'linkedin.com/in/deck', 'newsletter.example.com', 'sixth line must be dropped'] },
+  { isContactSlide: true, title: 'Reach Out',
+    contactEmail: 'keep@existing.deck',
+    bullets: ['Fallback bullet that must stay hidden'] },
+  { section: 'H2', title: '참고자료',
+    bullets: ['**정부** 정책브리핑 2023-05-02', 'internal measurement notes'] },
+  { section: 'H2', title: 'Title Only Panel',
+    bullets: ['supporting point'],
+    visualTitle: 'Stale Visual Title',
+    visualDisplay: '   ' },
+];
+
+const peDomDeck = (() => {
+  const result = buildThemeDeck(makeOpts({
+    theme: 'pitch-enhanced',
+    style: 'classic',
+    slideData: PE_SLIDE_DATA,
+    outputPath: join(ROOT, 'scripts', 'co-deck', 'tests', 'tmp', 'pitch-enhanced-u005-dom.html'),
+  }));
+  expect(result.errors).toHaveLength(0);
+  return result.html;
+})();
+
+describe.skipIf(!chromePath)('pitch-enhanced U-005 contracts — rendered DOM (Chrome)', () => {
+  let browser: import('puppeteer-core').Browser | null = null;
+  let page: import('puppeteer-core').Page | null = null;
+
+  beforeAll(async () => {
+    browser = await puppeteer.launch({
+      executablePath: chromePath,
+      headless: true,
+      args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+    });
+    page = await browser.newPage();
+    await page.setContent(peDomDeck, { waitUntil: 'load' });
+    // The built deck links theme CSS relatively (../../docs/html-themes/...),
+    // which resolves for deliverables/<deck>/ depth but NOT for tests/tmp/ —
+    // inject the real chain here so the computed-style pins (item 1) assert
+    // against the actual theme.css, not the UA defaults.
+    for (const css of [
+      join(ROOT, 'docs', 'html-themes', 'styles', 'base.css'),
+      join(ROOT, 'docs', 'html-themes', 'themes', '_shared', 'ppt-engine.css'),
+      join(ROOT, 'docs', 'html-themes', 'themes', 'pitch-enhanced', 'theme.css'),
+      join(ROOT, 'docs', 'html-themes', 'styles', 'classic', 'style.css'),
+    ]) {
+      await page.addStyleTag({ path: css });
+    }
+    await page.waitForSelector('.slide');
+    await page.waitForFunction(() => document.querySelectorAll('.slide').length >= 9);
+  }, 60000);
+
+  afterAll(async () => { if (browser) await browser.close(); });
+
+  test('item 1 — bullet li renders block-flow with absolute ::before (no flex item split)', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[0];
+      const li = slide.querySelector('.slide-bullets li') as HTMLElement;
+      const liStyle = getComputedStyle(li);
+      const before = getComputedStyle(li, '::before');
+      const strong = li.querySelector('strong');
+      return {
+        display: liStyle.display,
+        position: liStyle.position,
+        paddingLeft: liStyle.paddingLeft,
+        beforePosition: before.position,
+        beforeLeft: before.left,
+        strongInline: strong ? getComputedStyle(strong).display === 'inline' : null,
+        strongText: strong ? strong.textContent : null,
+      };
+    });
+    // the defect mechanism was display:flex (every child an anonymous flex
+    // item in one non-wrapping row) — the fix contract is block + relative
+    // + 1.4rem padding with the marker absolutely positioned (design §R2.1)
+    expect(r.display).toBe('block');
+    expect(r.position).toBe('relative');
+    expect(parseFloat(r.paddingLeft)).toBeCloseTo(22.4, 0); // 1.4rem @ 16px root
+    expect(r.beforePosition).toBe('absolute');
+    expect(parseFloat(r.beforeLeft)).toBe(0);
+    expect(r.strongInline).toBe(true);
+    expect(r.strongText).toBe('innovation');
+  });
+
+  test('item 2 — standard slide renders .cdk-caption under the right-panel image', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[1];
+      const panel = slide.querySelector('.right-panel');
+      const caption = slide.querySelector('.right-panel > .cdk-caption') as HTMLElement | null;
+      return {
+        hasPanel: !!panel,
+        hasImage: !!panel?.querySelector('img'),
+        captionText: caption?.textContent ?? null,
+        captionInsidePanel: caption ? caption.parentElement === panel : false,
+      };
+    });
+    expect(r.hasPanel).toBe(true);
+    expect(r.hasImage).toBe(true);
+    expect(r.captionText).toBe('Source: Co-deck Caption Contract 2026');
+    expect(r.captionInsidePanel).toBe(true);
+  });
+
+  test('item 2 — title slide renders the .cdk-caption-cover overlay credit', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[2];
+      const caption = slide.querySelector(':scope > .cdk-caption.cdk-caption-cover') as HTMLElement | null;
+      return { captionText: caption?.textContent ?? null };
+    });
+    expect(r.captionText).toBe('Photo: Cover Credit Contract');
+  });
+
+  test('item 4 — a two-line punchline splits into .punch-line + .punch-line.sub', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[3];
+      const lines = Array.from(slide.querySelectorAll('.slide-title .punch-line')) as HTMLElement[];
+      return {
+        lineCount: lines.length,
+        classes: lines.map((el) => el.className),
+        texts: lines.map((el) => el.textContent),
+      };
+    });
+    expect(r.lineCount).toBe(2);
+    expect(r.classes[0]).toBe('punch-line');
+    expect(r.classes[1]).toBe('punch-line sub');
+    expect(r.texts[0]).toBe('첫 문장은 크게');
+    expect(r.texts[1]).toBe('둘째 문장은 작게');
+  });
+
+  test('item 4 — a single-line punchline renders one .punch-line without .sub', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[4];
+      const lines = Array.from(slide.querySelectorAll('.slide-title .punch-line')) as HTMLElement[];
+      return {
+        lineCount: lines.length,
+        classes: lines.map((el) => el.className),
+        text: lines[0]?.textContent ?? null,
+      };
+    });
+    expect(r.lineCount).toBe(1);
+    expect(r.classes[0]).toBe('punch-line');
+    expect(r.text).toBe('한 줄뿐인 마무리 문장');
+  });
+
+  test('item 3 — bullets-only contact slide renders 5 .contact-item lines, first as .contact-primary', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[5];
+      const items = Array.from(slide.querySelectorAll('.contact-item')) as HTMLElement[];
+      return {
+        itemCount: items.length,
+        firstIsPrimary: items[0]?.classList.contains('contact-primary') ?? false,
+        restPlain: items.slice(1).every((el) => !el.classList.contains('contact-primary')),
+        primaryText: items[0]?.textContent ?? null,
+        lastText: items[items.length - 1]?.textContent ?? null,
+      };
+    });
+    expect(r.itemCount).toBe(5);          // max 5 — the 6th line is dropped
+    expect(r.firstIsPrimary).toBe(true);
+    expect(r.restPlain).toBe(true);
+    expect(r.primaryText).toContain('김데크 연구원');
+    expect(r.lastText).toContain('newsletter.example.com');
+    expect(r.lastText).not.toContain('sixth line');
+  });
+
+  test('item 3 — a contact*-first slide ignores bullets (PDF contact*-first parity)', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[6];
+      const items = Array.from(slide.querySelectorAll('.contact-item')) as HTMLElement[];
+      return {
+        itemCount: items.length,
+        texts: items.map((el) => el.textContent),
+        hasPrimary: items.some((el) => el.classList.contains('contact-primary')),
+      };
+    });
+    expect(r.itemCount).toBe(1);
+    expect(r.texts[0]).toContain('keep@existing.deck');
+    expect(r.hasPrimary).toBe(false);
+    expect(r.texts.join(' ')).not.toContain('Fallback bullet that must stay hidden');
+  });
+
+  test('item 5 — a references slide (no visual fields) renders no right panel', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[7];
+      return {
+        hasPanel: !!slide.querySelector('.right-panel'),
+        hasVisual: !!slide.querySelector('.slide-visual'),
+        bulletCount: slide.querySelectorAll('.slide-bullets li').length,
+      };
+    });
+    expect(r.hasPanel).toBe(false);
+    expect(r.hasVisual).toBe(false);
+    expect(r.bulletCount).toBe(2);
+  });
+
+  test('item 5 — visualTitle with a blank visualDisplay still renders no empty panel', async () => {
+    const r = await page!.evaluate(() => {
+      const slide = document.querySelectorAll('.slide')[8];
+      return {
+        hasPanel: !!slide.querySelector('.right-panel'),
+        slideText: (slide.querySelector('.slide-content') as HTMLElement | null)?.textContent ?? '',
+      };
+    });
+    expect(r.hasPanel).toBe(false);
+    expect(r.slideText).not.toContain('Stale Visual Title');
   });
 });
 
