@@ -8559,8 +8559,8 @@
       "name": "handbook",
       "scope": "common",
       "capability": "handbook",
-      "content_hash": "6c8ec8ace0d85fce",
-      "version": "0.6.1",
+      "content_hash": "a4891293c4fc4ba5",
+      "version": "0.6.2",
       "mirrors": [
         "templates/common/skills/handbook/SKILL.md"
       ]

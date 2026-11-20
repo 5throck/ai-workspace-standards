@@ -66,7 +66,7 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
       // sub-files removed — the exact shape the 2026-09-20 fleet incident produced.
       mkdirSync(join(tmp, 'skills', 'handbook'), { recursive: true });
       const tplSkill = readFileSync(join(tplHandbook, 'SKILL.md'), 'utf-8');
-      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.1$/m, 'version: 0.5.9'));
+      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.2$/m, 'version: 0.5.9'));
       commitAll(tmp, 'chore: seed stale handbook');
 
       const { status, out } = runUpgrade(tmp, false);
@@ -76,7 +76,7 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
 
       // SKILL.md bumped AND sub-files delivered in the same run.
       const projSkill = readFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), 'utf-8');
-      expect(projSkill).toContain('version: 0.6.1');
+      expect(projSkill).toContain('version: 0.6.2');
       expect(existsSync(join(tmp, 'skills', 'handbook', 'references', 'KOREAN_LANGUAGE.md'))).toBe(true);
       expect(existsSync(join(tmp, 'skills', 'handbook', 'references', 'MAINTENANCE_PLAYBOOK.md'))).toBe(true);
       expect(
@@ -129,11 +129,11 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
       // rollout failures, 2026-09-21).
       mkdirSync(join(tmp, 'skills', 'handbook'), { recursive: true });
       const tplSkill = readFileSync(join(tplHandbook, 'SKILL.md'), 'utf-8');
-      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.1$/m, 'version: 0.5.9'));
+      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.2$/m, 'version: 0.5.9'));
       mkdirSync(join(tmp, 'skills'), { recursive: true });
       writeFileSync(
         join(tmp, 'skills', 'SKILLS.md'),
-        `# Skills\n\n### Workspace Skills\n\n| skill | version | status | owner | last_reviewed | removal-date | notes | layer |\n|---|---|---|---|---|---|---|---|\n| \`handbook\` | 0.6.1 | active | pm | 2026-09-20 | — | — |\n`
+        `# Skills\n\n### Workspace Skills\n\n| skill | version | status | owner | last_reviewed | removal-date | notes | layer |\n|---|---|---|---|---|---|---|---|\n| \`handbook\` | 0.6.2 | active | pm | 2026-09-20 | — | — |\n`
       );
       commitAll(tmp, 'chore: seed stale handbook with current row');
 
@@ -141,7 +141,7 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
       expect(status).toBe(0);
       const rowLine = readFileSync(join(tmp, 'skills', 'SKILLS.md'), 'utf-8')
         .split('\n').find(l => l.includes('`handbook`'));
-      expect(rowLine).toContain('0.6.1');
+      expect(rowLine).toContain('0.6.2');
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
@@ -152,7 +152,7 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
     try {
       mkdirSync(join(tmp, 'skills', 'handbook'), { recursive: true });
       const tplSkill = readFileSync(join(tplHandbook, 'SKILL.md'), 'utf-8');
-      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.1$/m, 'version: 0.5.9'));
+      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.2$/m, 'version: 0.5.9'));
       commitAll(tmp, 'chore: seed stale handbook');
 
       const { status } = runUpgrade(tmp, false);
@@ -172,7 +172,7 @@ describe('upgrade-project.ts common-skills sub-file delivery', () => {
     try {
       mkdirSync(join(tmp, 'skills', 'handbook'), { recursive: true });
       const tplSkill = readFileSync(join(tplHandbook, 'SKILL.md'), 'utf-8');
-      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.1$/m, 'version: 0.5.9'));
+      writeFileSync(join(tmp, 'skills', 'handbook', 'SKILL.md'), tplSkill.replace(/^version: 0\.6\.2$/m, 'version: 0.5.9'));
       commitAll(tmp, 'chore: seed stale handbook');
 
       const { status, out } = runUpgrade(tmp, true);

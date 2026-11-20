@@ -131,6 +131,7 @@ bun run check-a11y --docs-dir docs        # L2 — missing alt, heading hierarch
 bun run check-spell --docs-dir docs       # L3 — common English misspellings
 bun run check-lint --docs-dir docs        # L4 — inline styles (allowlist), event handlers, deprecated tags, IDs
 bun run check-external-links --docs-dir docs  # L5 — external URL reachability
+bun run check-generated-content --docs-dir docs  # L3 — duplicated cells, raw backticks, stray Hanja (ko pages), garbled quizzes
 
 # Legacy single-purpose tools (still available)
 bun run handbook-doctor --project .       # 12 static analysis checks
@@ -208,7 +209,7 @@ bun run build-search-index --docs-dir docs
 Handbooks that inline `copyCode()` per page can extract the shared implementation into `docs/assets/copy-code.js`:
 
 ```bash
-bun run extract-copycode --docs-dir docs
+bun run extract-copycode   # positional docs root: bun scripts/extract-copycode.ts docs
 ```
 
 This replaces inline `copyCode()` definitions with a `<script src="assets/copy-code.js">` reference, keeping one canonical implementation across the site.

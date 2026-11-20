@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.2.0
+// @version 1.3.1
 // scripts/handbook/scaffold-handbook.ts
 // Generates handbook project scaffold from skill templates + assets.
 // Copies template HTML, CSS, JS, scripts, and examples into a new project.
@@ -67,6 +67,7 @@ const SCRIPT_FILES: { src: string; dest: string }[] = [
   { src: "check-symmetry.ts", dest: "check-symmetry.ts" },
   { src: "check-labels.ts", dest: "check-labels.ts" },
   { src: "check-tables.ts", dest: "check-tables.ts" },
+  { src: "check-generated-content.ts", dest: "check-generated-content.ts" },
   { src: "extract-copycode.ts", dest: "extract-copycode.ts" },
   { src: "update-footers.ts", dest: "update-footers.ts" },
   { src: "nav-utils.ts", dest: "nav-utils.ts" },
@@ -141,9 +142,10 @@ const packageJson = {
     "check-lint": `bun run scripts/check-lint.ts --docs-dir docs`,
     "check-external-links": `bun run scripts/check-external-links.ts --docs-dir docs`,
     "build-search-index": `bun run scripts/build-search-index.ts --docs-dir docs`,
-    "extract-copycode": `bun run scripts/extract-copycode.ts --docs-dir docs`,
+    "extract-copycode": `bun run scripts/extract-copycode.ts docs`,
     "check-structure": `bun run scripts/check-structure.ts --docs-dir docs`,
     "check-tables": `bun run scripts/check-tables.ts --docs-dir docs`,
+    "check-generated-content": `bun run scripts/check-generated-content.ts --docs-dir docs`,
     "update-footers": `bun run scripts/update-footers.ts --docs-dir docs`,
     "check-authoring": `bun run scripts/check-authoring.ts --project . --lang ${lang}`,
     "check-i18n": `bun run scripts/check-i18n-parity.ts --docs-dir docs`,

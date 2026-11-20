@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.4.0
 // v1.3.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
 //          §5.5, T-20261107-005): Check 11 allowlist is extended at run time
 //          with the GitHub owner/name of every external-deps.json entry that
@@ -277,7 +277,47 @@ function checkLanguagePairs(htmlFiles: string[], baseDir: string): AuthoringIssu
 /** Check 11: private-repository references (git clone / links) */
 // Known-public repositories a handbook is allowed to point readers at without
 // further verification. Extend this list only for repos confirmed public.
-const PUBLIC_REPO_ALLOWLIST = new Set(["5throck/ai-workspace-standards"]);
+const PUBLIC_REPO_ALLOWLIST = new Set([
+  "5throck/ai-workspace-standards",
+  // Verified public with `gh repo view`: the handbooks' own setup repo and the
+  // ppt-master pipeline they cite.
+  "5throck/setup",
+  "hugohe3/ppt-master",
+]);
+
+/**
+ * First path segments on github.com that are site features, not account names
+ * (e.g. github.com/login/device). A `github.com/<reserved>/<x>` URL is never a
+ * repository reference.
+ */
+const RESERVED_GITHUB_PATHS = new Set([
+  "login",
+  "logout",
+  "settings",
+  "orgs",
+  "apps",
+  "marketplace",
+  "features",
+  "topics",
+  "sponsors",
+  "organizations",
+  "notifications",
+  "pulls",
+  "issues",
+  "explore",
+  "search",
+  "join",
+  "signup",
+  "sessions",
+  "enterprise",
+  "pricing",
+  "about",
+  "collections",
+  "trending",
+  "events",
+  "codespaces",
+  "packages",
+]);
 
 /**
  * Manifest-fed allowlist extension (external-deps standard §5.5,
@@ -333,10 +373,15 @@ function checkNoPrivateRepoRefs(
     m = cloneRe.exec(html);
   }
 
-  const linkRe = /github\.com\/([^\/\s"'<)]+)\/([^\/\s"'<).]+)/gi;
+  // The lookbehind rejects subdomains such as cli.github.com/packages/...
+  const linkRe = /(?<![\w.-])github\.com\/([^\/\s"'<)]+)\/([^\/\s"'<).]+)/gi;
   m = linkRe.exec(html);
   while (m !== null) {
     const repo = `${m[1]}/${m[2]}`;
+    if (RESERVED_GITHUB_PATHS.has(m[1].toLowerCase())) {
+      m = linkRe.exec(html);
+      continue;
+    }
     if (!PUBLIC_REPO_ALLOWLIST.has(repo) && !extraPublic.has(repo) && !seen.has(repo)) {
       seen.add(repo);
       issues.push({

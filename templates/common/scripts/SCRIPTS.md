@@ -210,8 +210,9 @@ Their absence from the table is policy-consistent, not an oversight.
 | `handbook/apply-handbook-theme.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `handbook/build-search-index.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/check-a11y.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `handbook/check-authoring.ts` | L0 | 1.3.0 | active | — | — | common | — |
-| `handbook/check-external-links.ts` | L0 | 1.2.0 | active | — | — | common | — |
+| `handbook/check-authoring.ts` | L0 | 1.4.0 | active | — | — | common | — |
+| `handbook/check-external-links.ts` | L0 | 1.3.0 | active | — | — | common | — |
+| `handbook/check-generated-content.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/check-i18n-parity.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/check-labels.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/check-links.ts` | L0 | 1.0.0 | active | — | — | common | — |
@@ -226,8 +227,8 @@ Their absence from the table is policy-consistent, not an oversight.
 | `handbook/handbook-doctor.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/handbook-sync-audit.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `handbook/nav-utils.ts` | L0 | 1.0.0 | active | — | — | common | — |
-| `handbook/scaffold-handbook.ts` | L0 | 1.2.0 | active | — | — | common | — |
-| `handbook/update-footers.ts` | L0 | 1.0.0 | active | — | — | common | — |
+| `handbook/scaffold-handbook.ts` | L0 | 1.3.1 | active | — | — | common | — |
+| `handbook/update-footers.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `handbook/validate-handbook.ts` | L0 | 1.1.0 | active | — | — | common | — |
 | `handbook/validate-nav.ts` | L0 | 1.0.0 | active | — | — | common | — |
 | `tests/apply-handbook-theme.test.ts` | L0 | 1.0.1 | active | — | — | common | — |
