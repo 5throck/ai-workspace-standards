@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // verify-prompt-integrity.ts — the prompt-integrity verifier of record for the
 // unified 03:00 batch runner (T-20261120-002; T-20261112-003 reopen; design
 // docs/designs/2026-11-20-runner-hardening-integrity-design.md §T-20261120-002;
@@ -9,6 +9,19 @@
 // reconciles them against prompts.manifest.json. Closes the T-20261112-003 false
 // closure: until this script existed, committed != ratified drift (the live store
 // text ran 5 hunks ahead of the ratified v4 snapshot for 8 days) was undetectable.
+//
+// v1.1.0 (2026-11-20, runner-hardening PR-5): --parity-closure, the §3.6.4
+//   sibling check that PR-2 deferred (residual 2). The fleet-parity carve-out
+//   (docs/protected-paths.json fleetParityCarveOut, DEC-20261120-01 / PR #2119)
+//   lets the runner merge a governed path list in FLEET repos only; this guard
+//   keeps the protected-list and the ENGINE honest against each other: every
+//   carve-out paths[] entry must resolve to LOCKED or MERGE_MANAGED in
+//   scripts/lib/upgrade-policy.ts resolveClaim() — the engine SSOT itself, not
+//   a copied enumeration — so engine/protected-list drift fails visible.
+//   A MISSING fleetParityCarveOut key is NOT an alert (removing the carve-out
+//   is a legitimate human governance action on a protected file — zero paths,
+//   nothing to guard); a MALFORMED one (paths[] not an array of strings) is a
+//   cannot-verify alert.
 //
 // v1.0.0 (2026-11-20, runner-hardening PR-2):
 //   - READ path is bun:sqlite ONLY. The sqlite3 CLI pipe is NOT byte-faithful:
@@ -50,12 +63,14 @@
 // Usage:
 //   bun scripts/verify-prompt-integrity.ts                     # manifest verify
 //   bun scripts/verify-prompt-integrity.ts --exec-closure      # + exec closure
+//   bun scripts/verify-prompt-integrity.ts --parity-closure    # + fleet-parity carve-out guard (§3.6.4)
 //   bun scripts/verify-prompt-integrity.ts --gate              # runner STEP 0
 //   bun scripts/verify-prompt-integrity.ts --store <path>      # store override (tests)
 //   bun scripts/verify-prompt-integrity.ts --no-ticket         # alert without filing
 //
-// Exit codes: 0 (all entries match, exec closure green when run) · 1 (any alert:
-// drift / missing / cannot-verify / exec-closure violation) · 2 (usage error).
+// Exit codes: 0 (all entries match, exec/parity closure green when run) · 1 (any
+// alert: drift / missing / cannot-verify / exec-closure violation /
+// parity-closure violation) · 2 (usage error).
 //
 // Scheduling (DEC-20261120-04): the control run is OUT-OF-PROCESS — the host
 // launchd job ai.workspace.prompt-integrity-verify.plist fires daily 06:00 KST
@@ -75,6 +90,7 @@ import { hostname } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Database } from "bun:sqlite";
+import { resolveClaim } from "./lib/upgrade-policy.ts";
 
 const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_STORE_PATH = join(process.env.HOME ?? "", ".zcode", "v2", "tasks-index.sqlite");
@@ -421,6 +437,55 @@ function loadJsonStringArray(path: string, key: string): string[] {
   return out;
 }
 
+/**
+ * Reads docs/protected-paths.json fleetParityCarveOut.paths[] (DEC-20261120-01).
+ * Absent key → [] (removing the carve-out is a legitimate human governance
+ * action — zero paths, nothing to guard). Malformed shape throws (caller turns
+ * that into a cannot-verify alert — malformed is never a pass).
+ */
+export function loadCarveOutPaths(protectedPathsFile: string): string[] {
+  const parsed = JSON.parse(readFileSync(protectedPathsFile, "utf8")) as Record<string, unknown>;
+  const carveOut = parsed.fleetParityCarveOut as { paths?: unknown } | undefined;
+  if (carveOut === undefined) return [];
+  if (!carveOut || !Array.isArray(carveOut.paths)) {
+    throw new Error(`malformed ${protectedPathsFile}: fleetParityCarveOut.paths[] missing`);
+  }
+  const out: string[] = [];
+  for (const v of carveOut.paths) {
+    if (typeof v !== "string")
+      throw new Error(`malformed ${protectedPathsFile}: fleetParityCarveOut.paths[] non-string entry`);
+    out.push(v);
+  }
+  return out;
+}
+
+export interface ParityClosureVerdict {
+  ok: boolean;
+  paths: string[];
+  policies: Record<string, string>;
+  violations: { path: string; policy: string }[];
+}
+
+/**
+ * §3.6.4 parity guard (v1.1.0): every fleetParityCarveOut paths[] entry must
+ * resolve to LOCKED or MERGE_MANAGED in the engine SSOT (resolveClaim) — the
+ * carve-out may only enumerate surfaces the engine already classifies as
+ * runner-governed delivery claims. Engine/protected-list drift fails visible.
+ */
+export function parityClosureCheck(carveOutPaths: string[]): ParityClosureVerdict {
+  const policies: Record<string, string> = {};
+  const violations: { path: string; policy: string }[] = [];
+  for (const p of carveOutPaths) {
+    const claim = resolveClaim(p, "");
+    const policy = claim.policy;
+    policies[p] = policy;
+    if (policy !== "LOCKED" && policy !== "MERGE_MANAGED") {
+      violations.push({ path: p, policy });
+    }
+  }
+  return { ok: violations.length === 0, paths: carveOutPaths, policies, violations };
+}
+
 // ── Alert side effects ──────────────────────────────────────────────────────
 
 export function localDateString(now: Date): string {
@@ -442,6 +507,7 @@ export function writeAlertJson(
     alerts: EntryVerdict[];
     sideAlerts?: { kind: string; detail: string; refs?: string[] }[];
     execClosure?: ExecClosureVerdict;
+    parityClosure?: ParityClosureVerdict;
     generatedAt: string;
   },
 ): string {
@@ -492,6 +558,7 @@ export interface VerifyOptions {
   noTicket?: boolean;
   gate?: boolean;
   execClosure?: boolean;
+  parityClosure?: boolean;
   now?: Date;
   ticketFiler?: TicketFiler;
 }
@@ -503,15 +570,16 @@ export interface VerifyReport {
   matchCount: number;
   entries: EntryVerdict[];
   execClosure?: ExecClosureVerdict;
+  parityClosure?: ParityClosureVerdict;
   alertJson?: string;
   memoryLines: string[];
   tickets: { title: string; result: TicketFileResult }[];
   manifestError?: string;
 }
 
-/** Non-entry alert kinds: unreadable manifest, exec-closure violation. */
+/** Non-entry alert kinds: unreadable manifest, exec/parity-closure violation. */
 interface SideAlert {
-  kind: "manifest" | "exec-closure";
+  kind: "manifest" | "exec-closure" | "parity-closure";
   detail: string;
   refs?: string[];
 }
@@ -563,10 +631,10 @@ export function runVerification(opts: VerifyOptions = {}): VerifyReport {
   }
 
   let closure: ExecClosureVerdict | undefined;
+  let parity: ParityClosureVerdict | undefined;
+  const protectedFile = join(workspaceRoot, "docs/protected-paths.json");
   if (opts.execClosure) {
-    const protectedPatterns = existsSync(join(workspaceRoot, "docs/protected-paths.json"))
-      ? loadJsonStringArray(join(workspaceRoot, "docs/protected-paths.json"), "protectedPaths")
-      : [];
+    const protectedPatterns = existsSync(protectedFile) ? loadJsonStringArray(protectedFile, "protectedPaths") : [];
     const allowlistPatterns = existsSync(join(workspaceRoot, "docs/runner-exec-allowlist.json"))
       ? loadJsonStringArray(join(workspaceRoot, "docs/runner-exec-allowlist.json"), "allowedScripts")
       : [];
@@ -580,6 +648,28 @@ export function runVerification(opts: VerifyOptions = {}): VerifyReport {
       });
     }
   }
+  if (opts.parityClosure) {
+    // §3.6.4 (v1.1.0): carve-out paths[] ⊆ engine LOCKED ∪ MERGE_MANAGED. A
+    // missing protected-paths.json or a malformed carve-out is a cannot-verify
+    // alert; an absent fleetParityCarveOut key is [] (nothing to guard, ok).
+    try {
+      const carveOutPaths = existsSync(protectedFile) ? loadCarveOutPaths(protectedFile) : [];
+      parity = parityClosureCheck(carveOutPaths);
+      report.parityClosure = parity;
+      if (!parity.ok) {
+        sideAlerts.push({
+          kind: "parity-closure",
+          detail: `${parity.violations.length} fleetParityCarveOut path(s) outside the engine LOCKED ∪ MERGE_MANAGED classification — protected-list/engine drift (design §3.6.4)`,
+          refs: parity.violations.map((v) => `${v.path} (${v.policy})`),
+        });
+      }
+    } catch (err) {
+      sideAlerts.push({
+        kind: "parity-closure",
+        detail: `fleetParityCarveOut unreadable/malformed — cannot-verify: ${(err as Error).message}`,
+      });
+    }
+  }
 
   const entryAlerts = report.entries.filter((e) => e.isAlert);
   if (entryAlerts.length > 0 || sideAlerts.length > 0) {
@@ -589,7 +679,8 @@ export function runVerification(opts: VerifyOptions = {}): VerifyReport {
   // All-match run: the ADR-0105 §Prompt-Integrity / AC-15 contract line.
   const line =
     `prompt integrity verify: ${report.matchCount}/${report.total} match` +
-    (closure?.ok ? ` (exec-closure ok: ${closure.refs.length} scripts)` : "");
+    (closure?.ok ? ` (exec-closure ok: ${closure.refs.length} scripts)` : "") +
+    (parity?.ok ? ` (parity-closure ok: ${parity.paths.length} carve-out paths)` : "");
   memoryLines.push(line);
   appendMemoryLine(memoryDir, date, line);
   report.exitCode = 0;
@@ -611,6 +702,7 @@ function finishWithAlerts(
     alerts: entryAlerts,
     sideAlerts,
     execClosure: report.execClosure,
+    parityClosure: report.parityClosure,
     generatedAt: now.toISOString(),
   });
   report.alertJson = alertPath;
@@ -637,7 +729,13 @@ function finishWithAlerts(
     for (const s of sideAlerts) {
       const refs =
         s.refs && s.refs.length > 0 ? ` (${s.refs.slice(0, 3).join(", ")}${s.refs.length > 3 ? ", ..." : ""})` : "";
-      const title = `prompt-integrity ${s.kind === "manifest" ? "manifest cannot-verify" : "exec-closure violation"}${refs}`;
+      const kindTitle =
+        s.kind === "manifest"
+          ? "manifest cannot-verify"
+          : s.kind === "parity-closure"
+            ? "parity-closure violation"
+            : "exec-closure violation";
+      const title = `prompt-integrity ${kindTitle}${refs}`;
       report.tickets.push({ title, result: filer(title) });
     }
   }
@@ -648,15 +746,17 @@ function finishWithAlerts(
 
 // ── CLI ─────────────────────────────────────────────────────────────────────
 
-const USAGE = `usage: bun scripts/verify-prompt-integrity.ts [--store <path>] [--exec-closure] [--gate] [--no-ticket]
+const USAGE = `usage: bun scripts/verify-prompt-integrity.ts [--store <path>] [--exec-closure] [--parity-closure] [--gate] [--no-ticket]
   Verifies the live automation prompt bytes against prompts.manifest.json (bun:sqlite read-only — never the sqlite3 CLI).
-  Exit 0 all match · 1 any alert (drift / missing / cannot-verify / exec-closure) · 2 usage error.`;
+  --parity-closure guards the fleet-parity carve-out against the engine LOCKED/MERGE_MANAGED classification (design §3.6.4).
+  Exit 0 all match · 1 any alert (drift / missing / cannot-verify / exec-closure / parity-closure) · 2 usage error.`;
 
 const main = (): number => {
   const args = process.argv.slice(2);
   const flags = {
     store: undefined as string | undefined,
     execClosure: false,
+    parityClosure: false,
     gate: false,
     noTicket: false,
   };
@@ -665,6 +765,7 @@ const main = (): number => {
     if (a === "--store") flags.store = args[++i];
     else if (a?.startsWith("--store=")) flags.store = a.slice("--store=".length);
     else if (a === "--exec-closure") flags.execClosure = true;
+    else if (a === "--parity-closure") flags.parityClosure = true;
     else if (a === "--gate") flags.gate = true;
     else if (a === "--no-ticket") flags.noTicket = true;
     else if (a === "--help" || a === "-h") {
@@ -679,6 +780,7 @@ const main = (): number => {
   const report = runVerification({
     storePath: flags.store,
     execClosure: flags.execClosure,
+    parityClosure: flags.parityClosure,
     gate: flags.gate,
     noTicket: flags.noTicket,
   });
@@ -694,6 +796,13 @@ const main = (): number => {
       report.execClosure.ok
         ? `✓ exec-closure: ${report.execClosure.refs.length} prompt-referenced script(s) inside protectedPaths ∪ runner-exec-allowlist\n`
         : `✗ exec-closure: ${report.execClosure.violations.length} script(s) outside the sanctioned set:\n${report.execClosure.violations.map((v) => `   - ${v.ref}`).join("\n")}\n`,
+    );
+  }
+  if (report.parityClosure) {
+    process.stdout.write(
+      report.parityClosure.ok
+        ? `✓ parity-closure: ${report.parityClosure.paths.length} fleetParityCarveOut path(s) inside engine LOCKED ∪ MERGE_MANAGED\n`
+        : `✗ parity-closure: ${report.parityClosure.violations.length} carve-out path(s) outside the engine classification:\n${report.parityClosure.violations.map((v) => `   - ${v.path} (resolved ${v.policy})`).join("\n")}\n`,
     );
   }
   if (report.tickets.length > 0) {

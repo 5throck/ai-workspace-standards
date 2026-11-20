@@ -9140,8 +9140,8 @@
       "name": "project-resync",
       "scope": "root",
       "capability": "project-resync",
-      "content_hash": "6296d77566fc68ca",
-      "version": "1.9.0",
+      "content_hash": "99f685c0bb136726",
+      "version": "1.10.0",
       "mirrors": [
         "skills/project-resync/SKILL.md",
         ".claude/skills/project-resync/SKILL.md",

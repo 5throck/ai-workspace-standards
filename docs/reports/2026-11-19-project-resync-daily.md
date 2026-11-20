@@ -12,7 +12,7 @@
 4. Protected-path HOLD: the delivery applied .githooks/commit-msg (root parity fix) despite LOCKED classification — discarded per protected-paths rule; decision ticket T-20261119-006.
 
 **Wave results (18 fleet entries):**
-- DELIVERED + MERGED (14 projects): co-abap (2 PRs), co-consult, co-develop, co-export, co-game, co-hr, co-learning, co-news, co-price, co-security, co-work, co-design. All merges CLEAN per predicate with billing-wall exception (see below).
+- DELIVERED + MERGED (14 projects — corrected 2026-11-20 backfill audit: 12 projects; the original 14 conflated the night's PR/repo totals — 15 PRs across 14 merged-into repos, incl. root and the separately disclosed co-deck#252 — with the wave's project count; the list below is the authoritative 12): co-abap (2 PRs), co-consult, co-develop, co-export, co-game, co-hr, co-learning, co-news, co-price, co-security, co-work, co-design. All merges CLEAN per predicate with billing-wall exception (see below).
 - SKIPPED + ticketed (4): co-architect (12 CONFLICT rows), co-newbiz (27), co-safety (11), co-deck (13) — adjudication-class families (sync-overwrite-policy §6), T-20261119-001..004. NEVER --disposition used.
 - SKIPPED (2): co-deck-worktrees, co-newbiz-worktrees — root-mirror worktrees, not projects (T-20261119-007 membership hygiene).
 - co-design rejoined mid-wave (its 11-17 branch PR #87 had merged; checkout restored).

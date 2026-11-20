@@ -4,7 +4,7 @@
 
 - **Script**: verify-prompt-integrity (scripts/verify-prompt-integrity.ts)
 - **Status**: active
-- **Version**: 1.0.0
+- **Version**: 1.1.0
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-20
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-11-20 with the current entry; full version detail lives in the SCRIPTS.md registry row.

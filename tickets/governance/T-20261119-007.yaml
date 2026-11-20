@@ -26,10 +26,17 @@ history:
   - at: '2026-11-19T04:28:25.748+09:00'
     from: review
     to: done
+  - at: '2026-11-20T13:02:55.264+09:00'
+    from: done
+    to: done
 result: >-
-  resolved by deletion: both root-mirror husk dirs (Projects/co-deck-worktrees,
-  co-newbiz-worktrees) removed 2026-11-19 ~04:4x KST — verified empty
-  (rmdir-only removal), fleet-list now derives 16 projects with no worktree
-  entries, so membership exclusions are unnecessary. 83MB .wip-backups snapshots
-  are intentional user data, kept.
+  UPDATE 2026-11-20 (PR #2118, merge 03b7cc640, CI 4/4 green): the membership
+  exclusions landed after all — co-deck-worktrees was RECREATED empty 2026-11-20
+  00:05 KST by tooling (proving the deletion-only resolution was not durable),
+  so docs/fleet-membership.json excluded[] now pins both co-deck-worktrees and
+  co-newbiz-worktrees under the authoritative DEC-20261107-01 derivation (ticket
+  ref carried in the reason text; the file schema requires DEC-YYYYMMDD-NN
+  refs). Verified over the live Projects tree: both ids excluded, fleet-list
+  derives 17 real members (this ticket's 16 + co-utility, which joined the fleet
+  2026-11-19 after this ticket's census).
 error: null
