@@ -1,19 +1,23 @@
 /**
- * diagram-helpers.ts caption/source dedup pins (U-20261105-006).
+ * diagram-helpers.ts pins (U-20261105-006 caption/source dedup + U-20261119-009
+ * layout-safety audit).
  *
  * SVGs must not embed caption/takeaway/source lines — slidedata
  * visualCaption / visualSource own that text (html-build + PDF render it).
  * Pins: stripDiagramFooterText removes footer-band caption/source lines and
  * re-fits the viewBox, is idempotent, and keeps content labels;
- * svgTextDuplicatesSlide flags echoes of the slide's caption/source/bullets.
+ * svgTextDuplicatesSlide flags echoes of the slide's caption/source/bullets;
+ * svgLayoutSafetyIssues flags negative-length segments (zero-length runs,
+ * axis-aligned lines pointing backward) and elements outside the viewBox.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { describe, expect, test } from 'bun:test';
 import {
   normalizeDiagramText,
   stripDiagramFooterText,
   svgTextDuplicatesSlide,
+  svgLayoutSafetyIssues,
 } from '../diagram-helpers.ts';
 
 function svgWith(texts: Array<{ x: number; y: number; s: string; fs?: number }>, h = 520, w = 380): string {
@@ -113,5 +117,102 @@ describe('svgTextDuplicatesSlide (U-20261105-006)', () => {
 
   test('[Source ...] markers are ignored by normalization', () => {
     expect(normalizeDiagramText('[Source: 한국IDC]** 굵게 `코드`')).toBe('굵게코드');
+  });
+});
+
+describe('svgLayoutSafetyIssues (U-20261119-009)', () => {
+  const svgOf = (inner: string, w = 560, h = 560): string =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${inner}</svg>`;
+
+  test('clean SVG produces no issues', () => {
+    const svg = svgOf(`
+      <rect x="20" y="20" width="120" height="48" rx="8"/>
+      <line x1="140" y1="44" x2="240" y2="44" stroke="#FCD34D" stroke-width="3"/>
+      <circle cx="300" cy="300" r="60"/>
+      <text x="30" y="500" font-size="22">라벨</text>
+      <path d="M 40 100 L 140 100 L 140 160"/>
+    `);
+    expect(svgLayoutSafetyIssues(svg)).toEqual([]);
+  });
+
+  test('flags an axis-aligned line whose endpoint precedes its start', () => {
+    // The collapsed-gap artifact: vertical connector pointing backward.
+    const svg = svgOf('<line x1="100" y1="200" x2="100" y2="175"/>');
+    const issues = svgLayoutSafetyIssues(svg);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].kind).toBe('negative-segment');
+    expect(issues[0].el).toBe('line');
+    expect(issues[0].detail).toContain('backward');
+  });
+
+  test('flags a horizontal backward line and a zero-length line', () => {
+    const svg = svgOf('<line x1="200" y1="50" x2="150" y2="50"/><line x1="80" y1="80" x2="80" y2="80"/>');
+    const issues = svgLayoutSafetyIssues(svg);
+    expect(issues.filter((i) => i.kind === 'negative-segment')).toHaveLength(2);
+  });
+
+  test('does NOT flag diagonals or free directions (fan/cycle layouts)', () => {
+    const svg = svgOf('<line x1="280" y1="280" x2="100" y2="100"/><line x1="280" y1="280" x2="400" y2="120"/>');
+    expect(svgLayoutSafetyIssues(svg)).toEqual([]);
+  });
+
+  test('flags zero-length path segments', () => {
+    const svg = svgOf('<path d="M 40 100 L 40 100 L 140 100"/>');
+    const issues = svgLayoutSafetyIssues(svg);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].kind).toBe('negative-segment');
+    expect(issues[0].el).toBe('path');
+  });
+
+  test('parses relative path commands and repeat groups', () => {
+    const svg = svgOf('<path d="M 40 100 l 60 0 60 40 z"/>');
+    expect(svgLayoutSafetyIssues(svg)).toEqual([]);
+    // Relative endpoint (40+60+60, 100+40) = (160,140) stays inside.
+    const out = svgOf('<path d="M 500 500 l 100 0"/>');
+    const issues = svgLayoutSafetyIssues(out);
+    expect(issues).toHaveLength(1);
+    expect(issues[0].kind).toBe('outside-viewbox');
+  });
+
+  test('flags elements extending outside the viewBox', () => {
+    const svg = svgOf(`
+      <rect x="520" y="20" width="120" height="48"/>
+      <circle cx="550" cy="300" r="20"/>
+      <ellipse cx="20" cy="20" rx="40" ry="10"/>
+      <line x1="100" y1="100" x2="600" y2="100"/>
+      <text x="300" y="600" font-size="22">넘침</text>
+      <path d="M 0 0 L 700 0"/>
+    `);
+    const issues = svgLayoutSafetyIssues(svg);
+    expect(issues.filter((i) => i.kind === 'outside-viewbox')).toHaveLength(6);
+    expect(new Set(issues.map((i) => i.el))).toEqual(new Set(['rect', 'circle', 'ellipse', 'line', 'text', 'path']));
+  });
+
+  test('tolerates coordinates exactly on the viewBox edge and float noise', () => {
+    const svg = svgOf(`
+      <rect x="0" y="0" width="560" height="560"/>
+      <line x1="0" y1="0" x2="560.000000000004" y2="280"/>
+      <text x="560" y="560" font-size="22">edge</text>
+    `);
+    expect(svgLayoutSafetyIssues(svg)).toEqual([]);
+  });
+
+  test('flags negative rect/shape extents as negative-segment', () => {
+    const svg = svgOf('<rect x="50" y="50" width="-40" height="30"/><circle cx="100" cy="100" r="-5"/>');
+    const issues = svgLayoutSafetyIssues(svg);
+    expect(issues.filter((i) => i.kind === 'negative-segment')).toHaveLength(2);
+  });
+
+  test('skips bounds checks when the viewBox is missing', () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg"><line x1="-100" y1="0" x2="900" y2="0"/></svg>';
+    expect(svgLayoutSafetyIssues(svg)).toEqual([]);
+  });
+
+  test('horizontal forward lines and free vertical direction stay clean', () => {
+    // Vertical line pointing "up" is legitimate in bottom-up layouts when the
+    // y positions are equal-x but upward arrows come from paths, not lines —
+    // only axis-aligned backward lines flag; this one is forward-downward.
+    const svg = svgOf('<line x1="100" y1="100" x2="100" y2="200"/><line x1="100" y1="100" x2="300" y2="100"/>');
+    expect(svgLayoutSafetyIssues(svg)).toEqual([]);
   });
 });

@@ -1,4 +1,11 @@
-// @version 1.3.2
+// @version 1.4.0
+// v1.4.0 (2026-11-21, U-20261119-009 / design docs/designs/2026-11-20-co-deck-pipeline-batch-2-design.md §R3):
+// svgLayoutSafetyIssues() — static layout-safety audit alongside svgMinFontSize:
+// WARNs on negative-length segments (degenerate zero-length lines; axis-aligned
+// lines whose endpoint precedes their start — the collapsed-gap artifact) and
+// elements extending outside the viewBox (line/path/rect/circle/ellipse/text).
+// Inter-node gap floors stay contract-only (agents/diagram-specialist.md) — node
+// rects are generator-specific. Consumed by gen-visual-images' non-fatal WARN.
 // v1.3.2 (2026-11-16, U-20261116-002): svgMinFontSize() —
 // smallest declared font-size in an SVG, consumed by gen-visual-images'
 // legibility WARN (labels rendering under ~11px at 1280x720 bubble widths). — U-20261105-006: stripDiagramFooterText() + svgTextDuplicatesSlide()
@@ -260,4 +267,176 @@ export function svgMinFontSize(svg: string): number | null {
     if (Number.isFinite(v) && (min === null || v < min)) min = v;
   }
   return min;
+}
+
+// ── Layout-safety audit (U-20261119-009) ──────────────────────────────────────
+// The deck defect this guards: a generator computed inter-node gaps as leftover
+// space, gaps collapsed to 1.5–7.5px, and connector lines were emitted with the
+// endpoint BEFORE the start along the flow axis (negative-length arrows) plus
+// nodes pushed outside the viewBox. Static, lintable proxies below — no node
+// geometry knowledge required (gap floors themselves stay contract-only, see
+// agents/diagram-specialist.md — node rects are generator-specific).
+
+export interface DiagramLayoutIssue {
+  kind: 'negative-segment' | 'outside-viewbox';
+  el: string;
+  detail: string;
+}
+
+// Tolerance for float noise in emitted coordinates (e.g. 380.000000000004).
+const LAYOUT_EPS = 0.01;
+
+interface Bounds {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+function parseViewBox(svg: string): Bounds | null {
+  const m = svg.match(/viewBox="\s*([-\d.eE+]+)[\s,]+([-\d.eE+]+)[\s,]+([\d.eE+]+)[\s,]+([\d.eE+]+)\s*"/);
+  if (!m) return null;
+  const [minX, minY, w, h] = [parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3]), parseFloat(m[4])];
+  if (![minX, minY, w, h].every(Number.isFinite) || w <= 0 || h <= 0) return null;
+  return { minX, minY, maxX: minX + w, maxY: minY + h };
+}
+
+function attrNum(attrs: string, name: string): number {
+  const m = attrs.match(new RegExp(`${name}="\\s*([-\\d.eE+]+)`));
+  return m ? parseFloat(m[1]) : NaN;
+}
+
+function fmt(n: number): string {
+  return String(Math.round(n * 100) / 100);
+}
+
+/** Parse an SVG path `d` into drawn segments (straight segment endpoints per
+ * command; curves contribute their endpoints only — control points are not
+ * bounds-checked to keep false positives low on decorative curves). */
+function pathPoints(d: string): Array<{ x: number; y: number; drawn: boolean }> {
+  const tokens = d.match(/[MmLlHhVvCcSsQqTtAaZz]|[-\d.eE+]+/g) ?? [];
+  const pts: Array<{ x: number; y: number; drawn: boolean }> = [];
+  const isCmd = (t: string) => /^[MmLlHhVvCcSsQqTtAaZz]$/.test(t);
+  let cx = NaN, cy = NaN, cmd = '';
+  let i = 0;
+  const num = () => parseFloat(tokens[i++]);
+  while (i < tokens.length) {
+    const t = tokens[i];
+    if (isCmd(t)) {
+      cmd = t; i++;
+      if (cmd === 'Z' || cmd === 'z') continue;
+    } else if (cmd === '') {
+      i++; // stray number before any command — skip
+      continue;
+    }
+    const rel = cmd === cmd.toLowerCase();
+    const U = cmd.toUpperCase();
+    // Parameter count per command (A: rx ry rot laf sf x y).
+    const count: Record<string, number> = { M: 2, L: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, T: 2, A: 7 }[U] ?? 0;
+    if (count === 0) { i++; continue; }
+    // Repeat-group support: trailing numbers repeat the last command.
+    const args: number[] = [];
+    for (let k = 0; k < count && i < tokens.length && !isCmd(tokens[i]); k++) args.push(num());
+    if (args.length < count) break;
+    let px = cx, py = cy, dx = 0, dy = 0, drawn = true;
+    if (U === 'H') { dx = args[0]; py = cy; }
+    else if (U === 'V') { px = cx; dy = args[0]; }
+    else { dx = args[args.length - 2]; dy = args[args.length - 1]; }
+    px = (Number.isFinite(px) && rel ? px + dx : dx);
+    py = (Number.isFinite(py) && rel ? py + dy : dy);
+    if (U === 'M') drawn = false; // moveto: no segment drawn to this point
+    pts.push({ x: px, y: py, drawn });
+    cx = px; cy = py;
+    if (U === 'M') cmd = rel ? 'l' : 'L'; // implicit lineto after moveto
+  }
+  return pts;
+}
+
+/**
+ * Static layout-safety audit for a generated diagram SVG (U-20261119-009).
+ * Returns one issue per finding; the caller (gen-visual-images.ts) reports
+ * them as non-fatal WARNs — the diagram agent regenerates rather than ships.
+ *
+ * Flags:
+ *   1. negative-segment — degenerate zero-length segments, axis-aligned
+ *      `<line>` connectors whose endpoint precedes their start along the
+ *      drawing axis, and rects/circles/ellipses with negative radius/extent.
+ *   2. outside-viewbox — any coordinate of a line/path/rect/circle/ellipse/
+ *      text element outside the viewBox.
+ *
+ * Known limits (documented, WARN-only): element transforms are not resolved —
+ * generators in this pipeline emit absolute coordinates; curve control points
+ * are not bounds-checked; the axis-aligned backward check applies to `<line>`
+ * only (shape outlines legitimately travel both directions along an edge).
+ */
+export function svgLayoutSafetyIssues(svg: string): DiagramLayoutIssue[] {
+  const issues: DiagramLayoutIssue[] = [];
+  const vb = parseViewBox(svg);
+  const outOf = (x: number, y: number): boolean =>
+    vb !== null && (x < vb.minX - LAYOUT_EPS || x > vb.maxX + LAYOUT_EPS || y < vb.minY - LAYOUT_EPS || y > vb.maxY + LAYOUT_EPS);
+  const vbLabel = vb ? `viewBox [${fmt(vb.minX)},${fmt(vb.maxX)}]×[${fmt(vb.minY)},${fmt(vb.maxY)}]` : 'viewBox';
+
+  const elRe = /<(line|path|rect|circle|ellipse|text)\b([^>]*)>/g;
+  let m: RegExpExecArray | null;
+  while ((m = elRe.exec(svg)) !== null) {
+    const el = m[1];
+    const attrs = m[2];
+
+    if (el === 'line') {
+      const [x1, y1, x2, y2] = [attrNum(attrs, 'x1'), attrNum(attrs, 'y1'), attrNum(attrs, 'x2'), attrNum(attrs, 'y2')];
+      if (![x1, y1, x2, y2].every(Number.isFinite)) continue;
+      const dx = x2 - x1, dy = y2 - y1;
+      if (dx === 0 && dy === 0) {
+        issues.push({ kind: 'negative-segment', el, detail: `line (${fmt(x1)},${fmt(y1)})→(${fmt(x2)},${fmt(y2)}): zero-length segment — gap math collapsed` });
+      } else if ((dx === 0 && dy < 0) || (dy === 0 && dx < 0)) {
+        issues.push({ kind: 'negative-segment', el, detail: `line (${fmt(x1)},${fmt(y1)})→(${fmt(x2)},${fmt(y2)}): axis-aligned segment points backward — endpoint before start` });
+      }
+      if (outOf(x1, y1) || outOf(x2, y2)) {
+        issues.push({ kind: 'outside-viewbox', el, detail: `line (${fmt(x1)},${fmt(y1)})→(${fmt(x2)},${fmt(y2)}) outside ${vbLabel}` });
+      }
+    } else if (el === 'path') {
+      const dM = attrs.match(/ d="([^"]*)"/);
+      if (!dM) continue;
+      const pts = pathPoints(dM[1]);
+      let prev: { x: number; y: number } | null = null;
+      let outside = false;
+      for (const p of pts) {
+        if (outOf(p.x, p.y)) outside = true;
+        if (prev !== null && p.drawn && p.x === prev.x && p.y === prev.y) {
+          issues.push({ kind: 'negative-segment', el, detail: `path zero-length segment at (${fmt(p.x)},${fmt(p.y)}) — gap math collapsed` });
+        }
+        prev = { x: p.x, y: p.y };
+      }
+      if (outside) {
+        issues.push({ kind: 'outside-viewbox', el, detail: `path d="${dM[1].slice(0, 60)}…" has points outside ${vbLabel}` });
+      }
+    } else if (el === 'rect') {
+      const x = attrNum(attrs, 'x'), y = attrNum(attrs, 'y');
+      const w = attrNum(attrs, 'width'), h = attrNum(attrs, 'height');
+      if (!Number.isFinite(w) || !Number.isFinite(h)) continue;
+      const rx = Number.isFinite(x) ? x : 0, ry = Number.isFinite(y) ? y : 0;
+      if (w < 0 || h < 0) {
+        issues.push({ kind: 'negative-segment', el, detail: `rect ${fmt(w)}×${fmt(h)} at (${fmt(rx)},${fmt(ry)}): negative extent` });
+      } else if (vb && (rx < vb.minX - LAYOUT_EPS || ry < vb.minY - LAYOUT_EPS || rx + w > vb.maxX + LAYOUT_EPS || ry + h > vb.maxY + LAYOUT_EPS)) {
+        issues.push({ kind: 'outside-viewbox', el, detail: `rect (${fmt(rx)},${fmt(ry)}) ${fmt(w)}×${fmt(h)} outside ${vbLabel}` });
+      }
+    } else if (el === 'circle' || el === 'ellipse') {
+      const cx = attrNum(attrs, 'cx'), cy = attrNum(attrs, 'cy');
+      const rxE = el === 'circle' ? attrNum(attrs, 'r') : attrNum(attrs, 'rx');
+      const ryE = el === 'circle' ? attrNum(attrs, 'r') : attrNum(attrs, 'ry');
+      if (![cx, cy, rxE, ryE].every(Number.isFinite)) continue;
+      if (rxE < 0 || ryE < 0) {
+        issues.push({ kind: 'negative-segment', el, detail: `${el} radius ${fmt(rxE)}×${fmt(ryE)} at (${fmt(cx)},${fmt(cy)}): negative radius` });
+      } else if (vb && (cx - rxE < vb.minX - LAYOUT_EPS || cy - ryE < vb.minY - LAYOUT_EPS || cx + rxE > vb.maxX + LAYOUT_EPS || cy + ryE > vb.maxY + LAYOUT_EPS)) {
+        issues.push({ kind: 'outside-viewbox', el, detail: `${el} (${fmt(cx)},${fmt(cy)}) r ${fmt(rxE)}×${fmt(ryE)} outside ${vbLabel}` });
+      }
+    } else if (el === 'text') {
+      const x = attrNum(attrs, 'x'), y = attrNum(attrs, 'y');
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      if (outOf(x, y)) {
+        issues.push({ kind: 'outside-viewbox', el, detail: `text at (${fmt(x)},${fmt(y)}) outside ${vbLabel}` });
+      }
+    }
+  }
+  return issues;
 }
