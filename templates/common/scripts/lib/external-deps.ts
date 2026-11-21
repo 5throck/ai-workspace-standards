@@ -1,4 +1,17 @@
-// @version 1.3.0
+// @version 1.4.0
+// v1.4.0 (2026-11-21, T-20261121-001 — design
+//          docs/designs/2026-11-21-external-deps-market-scope-design.md):
+//          advisory `market_scope?: string[]` on schema-v2 entries — PHASE 1
+//          METADATA ONLY, nothing gates on it (standard Addendum C; behavioral
+//          gating via country_config is explicitly out of scope). Parse:
+//          optional; when present a non-empty array of non-empty strings
+//          (non-array / non-string member / empty string rejected with
+//          precise errors); unknown VALUES are accepted (new-market
+//          flexibility). KNOWN_MARKET_SCOPES = ["KR", "ko-language"] is the
+//          documented set; verify check V10 WARNs on values outside it
+//          (absent → no row; all-known → PASS row). Deliberately NOT in
+//          V2_CONTRACT_FIELDS — the advisory field spreads via channel-2c
+//          verbatim adoption, not v1→v2 migration.
 // v1.3.0 (2026-11-19, T-20261118-005 — design
 //          docs/designs/2026-11-18-pin-divergence-symmetry-design.md): two pure
 //          helpers for pin-divergence symmetry between the template seed and a
@@ -93,6 +106,15 @@ export type ExternalDepPropagation = (typeof PROPAGATION_VALUES)[number];
 export const USAGE_VALUES = ["as-is"] as const;
 export type ExternalDepUsage = (typeof USAGE_VALUES)[number];
 
+/**
+ * Documented `market_scope` values (T-20261121-001, standard Addendum C).
+ * ADVISORY registry — unknown values are LEGAL at parse (new-market
+ * flexibility); verify check V10 WARNs on them so the standard's value
+ * registry catches up. Behavioral gating on these values is OUT OF SCOPE
+ * (phase 1 metadata only).
+ */
+export const KNOWN_MARKET_SCOPES = ["KR", "ko-language"] as const;
+
 /** A deliberately excluded part of the upstream repo (standard §5.2). */
 export interface ExcludedComponent {
   name: string;
@@ -132,6 +154,12 @@ export interface ExternalDepEntry {
   excluded_components?: ExcludedComponent[];
   /** DEC-YYYYMMDD-NN or ADR-NNNN; required for review / review-standalone classes. */
   license_decision?: string;
+  /** Advisory market-scope tags (T-20261121-001, standard Addendum C) — WHY
+   *  this entry is here: "KR" = Korea market (the HWP-adapter class),
+   *  "ko-language" = Korean-language dependency. PHASE 1 METADATA ONLY:
+   *  nothing gates on it. Unknown values are legal (new-market flexibility)
+   *  and WARN via verify V10. */
+  market_scope?: string[];
 }
 
 export interface ExternalDepsManifest {
@@ -172,10 +200,13 @@ export const ENTRY_FIELDS_V2 = [
   "adapter",
   "excluded_components",
   "license_decision",
+  "market_scope",
 ] as const;
 /** The CURRENT (writer) schema's field set. */
 export const ENTRY_FIELDS = ENTRY_FIELDS_V2;
-/** v2 fields a v1 → v2 migration takes from the template seed (standard §5.6). */
+/** v2 fields a v1 → v2 migration takes from the template seed (standard §5.6).
+ *  `market_scope` is deliberately NOT here (T-20261121-001): it is advisory
+ *  metadata that spreads via channel-2c verbatim adoption, not migration. */
 export const V2_CONTRACT_FIELDS = ["license", "usage", "adapter", "excluded_components", "license_decision"] as const;
 const REQUIRED_ENTRY_FIELDS: ReadonlyArray<string> = ["id", "repo", "pin", "install", "install_dir", "propagation"];
 const REQUIRED_ENTRY_FIELDS_V2_EXTRA: ReadonlyArray<string> = ["license", "usage", "adapter"];
@@ -540,6 +571,31 @@ export function parseExternalDepsManifest(
           );
         }
         entry.license_decision = rawEntry.license_decision;
+      }
+      // market_scope (T-20261121-001, standard Addendum C): advisory metadata,
+      // nothing gates on it. Shape-only validation here — unknown VALUES are
+      // accepted (new-market flexibility) and WARNed by verify check V10.
+      if (rawEntry.market_scope !== undefined) {
+        const ms = rawEntry.market_scope;
+        if (!Array.isArray(ms)) {
+          throw typeErr(
+            origin,
+            `${at}: market_scope must be an array of market-scope strings (got: ${JSON.stringify(ms)})`,
+          );
+        }
+        if (ms.length === 0) {
+          throw typeErr(
+            origin,
+            `${at}: market_scope must be a non-empty array — omit the field for a market-neutral entry`,
+          );
+        }
+        for (let m = 0; m < ms.length; m++) {
+          const v = ms[m];
+          if (typeof v !== "string" || v.trim().length === 0) {
+            throw typeErr(origin, `${at}: market_scope[${m}] must be a non-empty string (got: ${JSON.stringify(v)})`);
+          }
+        }
+        entry.market_scope = ms as string[];
       }
     }
     return entry;
@@ -1212,10 +1268,10 @@ export function fetchProjectExternalDeps(
   return result;
 }
 
-// ── Verify (standard §5.3 — V1-V9; backs scripts/external-deps.ts verify) ─────
+// ── Verify (standard §5.3 — V1-V10; backs scripts/external-deps.ts verify) ────
 
 export interface VerifyFinding {
-  check: "V1" | "V2" | "V3" | "V3a" | "V4" | "V5" | "V6" | "V7" | "V8" | "V9";
+  check: "V1" | "V2" | "V3" | "V3a" | "V4" | "V5" | "V6" | "V7" | "V8" | "V9" | "V10";
   id: string | null;
   severity: GateSeverity;
   message: string;
@@ -1348,8 +1404,8 @@ export function scanExcludedComponents(
 
 /**
  * Run the standard §5.3 verify checks over a project. `manifestOnly` limits
- * the run to the offline manifest checks (V1-V5 + V3a) — the commit-time and
- * CI legs (E3/E4). Never touches the network.
+ * the run to the offline manifest checks (V1-V5 + V3a + V10) — the commit-time
+ * and CI legs (E3/E4). Never touches the network.
  */
 export function verifyProjectExternalDeps(
   projectDir: string,
@@ -1433,6 +1489,29 @@ export function verifyProjectExternalDeps(
               id: dep.id,
               severity: "fail",
               message: `${dep.id}: excluded component(s) named on a project install surface (heuristic name match): ${hits.map((h) => `${h.component} in ${h.file}`).join(", ")}`,
+            },
+      );
+    }
+    // V10 (T-20261121-001, standard Addendum C): advisory market_scope
+    // registry. Absent → no row (existing verify output stays byte-stable);
+    // all values in KNOWN_MARKET_SCOPES → PASS; any unknown value → WARN
+    // (legal — new-market flexibility; the registry documents the set).
+    // Advisory by definition: V10 never FAILs and never gates.
+    if (dep.market_scope !== undefined) {
+      const unknown = dep.market_scope.filter((v) => !(KNOWN_MARKET_SCOPES as readonly string[]).includes(v));
+      findings.push(
+        unknown.length === 0
+          ? {
+              check: "V10",
+              id: dep.id,
+              severity: "pass",
+              message: `${dep.id}: market_scope [${dep.market_scope.join(", ")}] (advisory metadata — nothing gates on it)`,
+            }
+          : {
+              check: "V10",
+              id: dep.id,
+              severity: "warn",
+              message: `${dep.id}: market_scope value(s) ${unknown.map((v) => `'${v}'`).join(", ")} not in the documented set [${KNOWN_MARKET_SCOPES.join(", ")}] — allowed (new-market flexibility); document the value in the standard's Addendum C on its next revision`,
             },
       );
     }
