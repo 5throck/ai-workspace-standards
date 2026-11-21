@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * generate-scripts-mirror.ts — L1 SCRIPTS.md registry-table generator (L0-only)
- * @version 1.1.0
+ * @version 1.1.1
+ * v1.1.1 (2026-11-22, U-20261121-002): EOL-insensitive comparison. The span is
+ *         extracted from the on-disk mirror with its raw line endings while the
+ *         synthesized rows are emitted with "\n", so a CRLF checkout (Windows +
+ *         core.autocrlf, both files CRLF) reported drift on an unchanged
+ *         registry. extractRegistrySpan/parseRegistryTable now normalize EOL
+ *         first; LF and CRLF checkouts produce the same span.
  * v1.1.0 (2026-11-06, DEC-20261106-03): L0+L2 (variant-scoped, e.g. co-abap sap-*) root rows are
  *         NOT mirrored into templates/common — only L0 was excluded before.
  *
@@ -52,6 +58,7 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, type Dirent } from "node:fs";
 import { join, relative, dirname } from "node:path";
+import { normalizeLineEndings } from "./lib/encoding-utils.ts";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -93,7 +100,9 @@ export interface RegistryTable {
  * Pure: no filesystem access.
  */
 export function extractRegistrySpan(content: string): string | null {
-  const lines = content.split("\n");
+  // EOL-insensitive (v1.1.1, U-20261121-002): the synthesized span is "\n"-joined,
+  // so raw \r here made a CRLF checkout look drifted.
+  const lines = normalizeLineEndings(content).split("\n");
   const start = lines.findIndex((l) => l.startsWith("| script |"));
   if (start === -1) return null;
   let end = start; // inclusive index of the last table row
@@ -112,7 +121,7 @@ export function extractRegistrySpan(content: string): string | null {
  * Pure: no filesystem access.
  */
 export function parseRegistryTable(content: string): RegistryTable | null {
-  const lines = content.split("\n");
+  const lines = normalizeLineEndings(content).split("\n");
   const start = lines.findIndex((l) => l.startsWith("| script |"));
   if (start === -1) return null;
 

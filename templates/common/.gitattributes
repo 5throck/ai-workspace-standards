@@ -22,14 +22,29 @@
 # Declare files that will always have LF line endings on checkout.
 *.sh text eol=lf
 
-# Enforce LF line endings for all text-based web and doc files.
+# Enforce LF line endings for all text-based source, data and doc files.
 # Prevents CRLF smudge on Windows checkouts, which breaks LF-expecting
-# pipeline gates (e.g. the VERSION_MANIFEST drift check).
+# pipeline gates (e.g. the VERSION_MANIFEST drift check and the generated
+# projection drift gates).
+#
+# U-20261121-002 (2026-11-22): *.yaml/*.yml and *.ts/*.tsx were missing from
+# this set, so `* text=auto` smudged checklists/, procedures/ and scripts/ to
+# CRLF on a Windows checkout. A generator that embeds source bytes then
+# produced a different projection than the LF checkout and its drift gate
+# reported git-clean files as stale. These now match the workspace-root
+# .gitattributes, which already enforced LF for them.
 *.html text eol=lf
 *.css text eol=lf
 *.js text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+*.toml text eol=lf
+*.mjs text eol=lf
 
 # Union merge for append-only pipeline files — auto-combines both sides on merge
 # instead of raising conflicts. dev-sync.ts touches these shared files on every commit
