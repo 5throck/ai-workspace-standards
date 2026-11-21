@@ -9,7 +9,10 @@
  * warned permanently before). Remaining drift is a FAILURE, and the fix hint
  * must never recommend an action that clobbers the intentional state.
  *
- * @version 1.5.5
+ * @version 1.5.6
+ * v1.5.6 (2026-11-21): new-project record pin 1.46.0 → 1.47.0 (remote-collision guard;
+ *          design docs/designs/2026-11-21-new-project-remote-collision-guard-design.md,
+ *          T-20261121-004).
  * v1.5.5 (2026-11-21): upgrade-project skill record pin 1.6.2 → 1.6.3 (adoption-role
  *          documentation backfill — the Curated path section; design
  *          docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md).
@@ -181,7 +184,7 @@ describe('lifecycle-sync-audit Check H (script record version gate, T-20260915-0
   test('the three known script records carry a Version field matching SCRIPTS.md', () => {
     const cases: Array<[string, string]> = [
       ['error-handling', '1.4.0'],
-      ['new-project', '1.46.0'],
+      ['new-project', '1.47.0'],
       ['validate-pm-extends', '0.3.1'],
     ];
     for (const [record, version] of cases) {

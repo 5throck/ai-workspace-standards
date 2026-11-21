@@ -98,6 +98,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "generator-manifest.test.ts",
   "mcp-upstream-tenant-identity.test.ts",
   "project-target-guards.test.ts",
+  "remote-collision.test.ts",
   "repo-integrity.test.ts",
   "template-vintage.test.ts",
   "upgrade-decision-log.test.ts",
