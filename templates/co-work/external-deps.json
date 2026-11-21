@@ -1,5 +1,5 @@
 {
-  "$comment": "co-work variant seed (schema v2) — extends templates/common/external-deps.json (merge on id). ppt-master is the first consumer of the external-dependency standard (design docs/designs/2026-11-07-external-deps-standard-design.md; origin docs/designs/2026-11-06-deck-emitter-ppt-master-rebase-design.md D2 + DEC-20261106-04 — MIT adoption, consumed as-is behind the single adapter scripts/deck/ppt-master-adapter.ts; their files are never modified). The AGPL PyMuPDF/fitz exclusion is a MANIFEST fact (excluded_components) checked by `bun scripts/external-deps.ts verify` (V5 — never named on a project install surface), not only adapter prose; the upstream requirements.txt still lists PyMuPDF, so never run the upstream install list. Their LLM/agent authoring stages are never wired. Humanize entries (spec docs/designs/2026-11-16-humanize-external-design.md): `humanize` (5throck/Humanize, Korean AI-tell lint server) and `im-not-ai` (epoko77-ai/im-not-ai, humanize-monolith agent family + rulebook) are both consumed as-is behind the single adapter scripts/humanize/humanize-adapter.ts. the humanize pin v1.0.0 was tagged upstream on 2026-11-16 (commit 4860b0e). market_scope (advisory metadata only — nothing gates on it; T-20261121-001, docs/designs/2026-11-21-external-deps-market-scope-design.md, standard Addendum C): the humanize-family entries are Korean-language dependencies (\"ko-language\"); ppt-master is market-neutral.",
+  "$comment": "co-work variant seed (schema v2) — extends templates/common/external-deps.json (merge on id). ppt-master is the first consumer of the external-dependency standard (design docs/designs/2026-11-07-external-deps-standard-design.md; origin docs/designs/2026-11-06-deck-emitter-ppt-master-rebase-design.md D2 + DEC-20261106-04 — MIT adoption, consumed as-is behind the single adapter scripts/deck/ppt-master-adapter.ts; their files are never modified). The AGPL PyMuPDF/fitz exclusion is a MANIFEST fact (excluded_components) checked by `bun scripts/external-deps.ts verify` (V5 — never named on a project install surface), not only adapter prose; the upstream requirements.txt still lists PyMuPDF, so never run the upstream install list. Their LLM/agent authoring stages are never wired. Humanize entry (spec docs/designs/2026-11-16-humanize-external-design.md; 2026-11-21 owner ruling per docs/designs/2026-11-21-cowork-imnotai-retirement-design.md — the former im-not-ai dependency is retired, its rulebook/prompt already ported inside Humanize itself): `humanize` (5throck/Humanize, Korean AI-tell lint server) is consumed as-is behind the single adapter scripts/humanize/humanize-adapter.ts. the humanize pin v1.0.0 was tagged upstream on 2026-11-16 (commit 4860b0e). market_scope (advisory metadata only — nothing gates on it; T-20261121-001, docs/designs/2026-11-21-external-deps-market-scope-design.md, standard Addendum C): the humanize entry is a Korean-language dependency (\"ko-language\"); ppt-master is market-neutral.",
   "schema_version": 2,
   "dependencies": [
     {
@@ -32,21 +32,6 @@
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
       "install_dir": "external/humanize",
       "consumer": "Korean AI-tell lint (scripts/humanize/humanize-adapter.ts)",
-      "compatibility_test": "bun scripts/humanize/humanize-adapter.ts selftest",
-      "propagation": "never",
-      "license": "MIT",
-      "usage": "as-is",
-      "adapter": "scripts/humanize/humanize-adapter.ts",
-      "market_scope": ["ko-language"]
-    },
-    {
-      "id": "im-not-ai",
-      "repo": "https://github.com/epoko77-ai/im-not-ai",
-      "pin": "v2.4.7",
-      "commit": "c07df14d9f68da482ff5183591808a7d132d4a71",
-      "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
-      "install_dir": "external/im-not-ai",
-      "consumer": "humanize-monolith agent family + rulebook (scripts/humanize/humanize-adapter.ts)",
       "compatibility_test": "bun scripts/humanize/humanize-adapter.ts selftest",
       "propagation": "never",
       "license": "MIT",

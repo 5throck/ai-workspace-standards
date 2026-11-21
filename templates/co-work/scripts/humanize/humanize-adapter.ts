@@ -1,13 +1,23 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-21, T-20261121-003, spec docs/designs/2026-11-21-imnotai-retirement-design.md):
+//          im-not-ai arms retired per the 2026-11-21 owner ruling — epoko77-ai/im-not-ai is
+//          NEVER installed as a project dependency (its rulebook and prompt are already
+//          ported inside Humanize's rules.js/prompt.js), so the adapter couples to
+//          external/humanize only. Dropped: IM_NOT_AI_DIR, the unused REFS constant, and the
+//          4 im-not-ai KEY_FILES rows (pure existence checks on files this adapter never
+//          read — no coverage lost; the real interface contract is serve.ts + rules.js,
+//          still checked by the Humanize-only selftest). paths/selftest derive from
+//          KEY_FILES and need no further change. v1.0.0: initial dual-clone adapter
+//          (spec docs/designs/2026-11-16-humanize-external-design.md).
 /**
  * humanize-adapter.ts — the ONLY coupling point between this project and the
- * two Korean AI-tell clones (spec docs/designs/2026-11-16-humanize-external-design.md).
+ * Korean AI-tell clone (spec docs/designs/2026-11-16-humanize-external-design.md;
+ * 2026-11-21 owner ruling per docs/designs/2026-11-21-imnotai-retirement-design.md).
  *
- * Clones (project-local, gitignored, delivered by the external-deps machinery):
+ * Clone (project-local, gitignored, delivered by the external-deps machinery):
  *   external/humanize/   — https://github.com/5throck/Humanize (MIT) lint server + rules.js
- *   external/im-not-ai/  — https://github.com/epoko77-ai/im-not-ai (MIT) agent family + rulebook
- * Both are consumed AS-IS; agents call this adapter and never touch clone files.
+ * Consumed AS-IS; agents call this adapter and never touch clone files.
  *
  * Usage:
  *   bun scripts/humanize/humanize-adapter.ts paths [--json]
@@ -26,21 +36,11 @@ import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 export const HUMANIZE_DIR = "external/humanize";
-export const IM_NOT_AI_DIR = "external/im-not-ai";
 
-const REFS = "skills/humanize-korean/references";
-
-/** Key files the adapter relies on, relative to the project root. The
- *  im-not-ai agent file is a path INSIDE the clone (not a project agent), so it
- *  is joined from segments — keeps the project agent-reference lint from
- *  mistaking it for one of our own agents. */
+/** Key files the adapter relies on, relative to the project root. */
 export const KEY_FILES: ReadonlyArray<{ clone: string; path: string }> = [
   { clone: "humanize", path: `${HUMANIZE_DIR}/serve.ts` },
   { clone: "humanize", path: `${HUMANIZE_DIR}/rules.js` },
-  { clone: "im-not-ai", path: [IM_NOT_AI_DIR, "agents", "humanize-monolith.md"].join("/") },
-  { clone: "im-not-ai", path: `${IM_NOT_AI_DIR}/${REFS}/ai-tell-taxonomy.md` },
-  { clone: "im-not-ai", path: `${IM_NOT_AI_DIR}/${REFS}/quick-rules.header.md` },
-  { clone: "im-not-ai", path: `${IM_NOT_AI_DIR}/${REFS}/quick-rules.footer.md` },
 ];
 
 export const DEFAULT_PORT = 8765;
