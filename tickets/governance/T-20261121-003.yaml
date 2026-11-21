@@ -15,14 +15,51 @@ title: >-
   depend on the clone (external/im-not-ai agents/humanize-monolith.md +
   references/ai-tell-taxonomy.md + quick-rules header/footer).
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-21T00:00:00.000+09:00
+created_at: '2026-11-21T00:00:00.000+09:00'
 history:
   - at: '2026-11-21T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-21T21:38:22.389+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-21T21:38:22.408+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T21:38:22.426+09:00'
+    from: review
+    to: done
+result: >-
+  Owner ruling 2026-11-21 implemented: im-not-ai retired from co-work — the
+  adapter is the sole Humanize coupling surface. L3: co-work PR #53 merged at
+  2e378c634532e4602d323a461169f0209b26b516 (merge via ADR-0105 billing-block
+  arm: all 5 checks startup_failure — runner_id 0, steps 0, payments annotation
+  verbatim; local gates green: selftest ok (2 key files present), live
+  serve+analyze S1 finding returned, advisory arm exit 0, external-deps manifest
+  gate 0 fail): humanize-adapter.ts v1.0.0→v1.1.0 drops IM_NOT_AI_DIR + unused
+  REFS + the 4 im-not-ai KEY_FILES existence rows (files the adapter never read
+  — zero coverage port needed; the real contract serve.ts + rules.js stays in
+  the Humanize-only selftest), external-deps.json entry removed, SCRIPTS.md rows
+  v1.1.0 single-clone, VERSION_MANIFEST regenerated, project design
+  2026-11-21-imnotai-retirement-design registered. L2: workspace PR #2140 merged
+  at 44d00027b272f02d37fe9a4575c06c0d81c703af (CI 4/4 green: ubuntu 2m0s / macos
+  2m36s / windows 7m11s / gitleaks 12s): templates/co-work seed entry removed +
+  $comment single-clone posture, template adapter byte-identical v1.1.0
+  (mandated companion; CV-02 gate forced co-work.context.md footer 1.5→1.6),
+  SCRIPTS.md row parity, workspace design
+  2026-11-21-cowork-imnotai-retirement-design registered in-worktree on
+  post-#2139 registry. D4 variant bump (flagged strikable) STRUCK: version
+  pinned 1.2.0 at tests/unit/validate-templates-market-scope-country.test.ts:134
+  — bump would require a test edit for no behavioral gain. Part 1: zero
+  consumers of im-not-ai beyond the adapter; arms were pure existence checks.
+  Filing bar U-20261120-002 found already done (co-security PR #131 @ 97b465f).
+  Left for PM: foreign uncommitted owner-correction edit on
+  docs/designs/2026-11-16-humanize-external-design.md + 3 ticket YAML moves in
+  the shared tree; worktree-placement caveat (DEC knowledge_refs ../../
+  resolution fails from 3-deep worktrees — use 2-level paths under
+  ai_workspace/).
 error: null
 scope: >-
   Per the design's out-of-scope ruling (§3 N2 / §9.1): removing the entry is a

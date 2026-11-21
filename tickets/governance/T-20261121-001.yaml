@@ -19,21 +19,39 @@ title: >-
   templates/co-work/external-deps.json (kordoc/rhwp KR; humanize/im-not-ai
   ko-language), templates/co-deck/external-deps.json (humanize/im-not-ai
   ko-language). Projects/* manifests adopt via channel 2c verbatim propagation
-  at next upgrade — verify co-work's diverged manifest needs no manual edit.
-  (4) Drift scan surface: weekly workflow reports seed-vs-project market_scope
+  at next upgrade — verify co-work's diverged manifest needs no manual edit. (4)
+  Drift scan surface: weekly workflow reports seed-vs-project market_scope
   divergence (optional/minimal). Explicitly OUT OF SCOPE: behavioral gating
-  (country_config-based fetch/install filtering — large blast radius in the
-  L1 core fetch path, separate design if ever needed); co-newbiz humanize
-  id/repo mixup (separate ticket). Rationale for advisory-first: ADR-0057/0058
+  (country_config-based fetch/install filtering — large blast radius in the L1
+  core fetch path, separate design if ever needed); co-newbiz humanize id/repo
+  mixup (separate ticket). Rationale for advisory-first: ADR-0057/0058
   country-scoped agents precedent (metadata before gating), DEC-20261118-01
   in-session-fixability bar (schema+docs+annotations are in-session work).
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-21T00:00:00.000+09:00
+created_at: '2026-11-21T00:00:00.000+09:00'
 history:
-  - at: 2026-11-21T00:00:00.000+09:00
+  - at: '2026-11-21T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-21T12:07:09.337+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-21T12:07:09.355+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T12:07:09.373+09:00'
+    from: review
+    to: done
+result: >-
+  advisory market_scope field landed at L1 (spec
+  2026-11-21-external-deps-market-scope-design, standard Addendum C):
+  lib/external-deps.ts v1.4.0 (ExternalDepEntry + ENTRY_FIELDS_V2 +
+  KNOWN_MARKET_SCOPES [KR, ko-language]; shape-only parse validation, unknown
+  values legal with verify V10 WARN); seed annotations co-work
+  humanize+im-not-ai=[ko-language]; co-deck/kordoc-rhwp scope corrections ruled
+  in spec (kordoc/rhwp are Projects/co-work-local; co-deck seed never carried
+  humanize); drift divergence row deferred (spec §5.5); PR #2136 CI 4/4 green,
+  merge b90370267
 error: null
