@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2390" width="2600" height="2390" lang="ja" font-family="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',Helvetica,Arial,sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2600 2390" width="2600" height="2390" lang="ja" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Meiryo,'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">
 <title>ai_workspace 統合アーキテクチャ — ハブ・スポーク型サービストポロジを含む</title>
 <desc>L0 workspace rootからL1 templates/common、L2 templates/co-*バリアント、L3 Projects/co-*インスタンスへ続く配布とアップグレードの流れ、バックポート・昇格・upstream要求の逆方向の流れ、チケットの状態遷移、co-workspaceのプロビジョニングパイプライン、ガバナンス制御面を一枚にまとめたアーキテクチャ図。 サービストポロジバンドは、co-develop・co-design・co-security・co-workの4ハブとL2/L3スポーク集合のハブ・スポーク位相と、委任チケット経路（ADR-0103）を示す。</desc>
 <defs><marker id="mb" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1f6feb"/></marker><marker id="mg" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#1a7f37"/></marker><marker id="mo" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#bc4c00"/></marker><marker id="mp" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#8250df"/></marker><marker id="mt" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#0a7f7f"/></marker><marker id="my" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#57606a"/></marker><marker id="mr" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#cf222e"/></marker></defs>
 <rect width="2600" height="2390" fill="#fafafa"/>
 <text x="40" y="46" font-size="30" fill="#1f2328" font-weight="700">ai_workspace 統合アーキテクチャ — L0→L1→L2→L3 · バックポート · チケット · co-workspace</text>
-<text x="40" y="78" font-size="16" fill="#424a53">基準: 2026-11-07 · templates/VERSION 0.28.0 · 根拠: CONSTITUTION, ADR-0031/0092/0097, docs/designs/*, ADR-0103, 2026-11-01-hub-consolidation-design</text>
+<text x="40" y="78" font-size="16" fill="#424a53">基準: 2026-11-21 · templates/VERSION 0.30.0 · 根拠: CONSTITUTION, ADR-0031/0092/0097/0103/0104/0105, docs/designs/*, 2026-11-01-hub-consolidation-design</text>
 <rect x="40" y="100" width="1560" height="200" rx="14" fill="#f1f3f5" stroke="#57606a" stroke-width="2.5"/>
 <text x="62" y="130" font-size="21" fill="#424a53" font-weight="700">ガバナンス制御面</text>
 <text x="256" y="130" font-size="14" fill="#424a53">L0専用 · PM Gateway</text>
@@ -96,8 +96,8 @@
 <rect x="902" y="524" width="133" height="28" rx="14" fill="#ffffff" stroke="#cf222e" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="911" y="543" font-size="14" fill="#1f2328">L0専門家は非伝播</text>
 <rect x="1400" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
-<text x="1418" y="444" font-size="21" fill="#0550ae" font-weight="700">L2 · templates/co-* (15)</text>
-<text x="1418" y="468" font-size="14" fill="#424a53">stable 8(実線)· beta 7(破線)</text>
+<text x="1418" y="444" font-size="21" fill="#0550ae" font-weight="700">L2 · templates/co-* (16)</text>
+<text x="1418" y="468" font-size="14" fill="#424a53">stable 8(実線)· beta 8(破線)</text>
 <rect x="1418" y="488" width="74" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
 <text x="1427" y="507" font-size="14" fill="#1f2328">co-abap</text>
 <rect x="1500" y="488" width="95" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
@@ -114,23 +114,25 @@
 <text x="1616" y="539" font-size="14" fill="#1f2328">co-security</text>
 <rect x="1718" y="520" width="78" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
 <text x="1727" y="539" font-size="14" fill="#1f2328">co-work</text>
-<rect x="1418" y="552" width="115" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<rect  x="1418" y="552" width="115" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1427" y="571" font-size="14" fill="#1f2328">co-architect</text>
-<rect x="1541" y="552" width="90" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<rect  x="1541" y="552" width="90" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1550" y="571" font-size="14" fill="#1f2328">co-export</text>
-<rect x="1639" y="552" width="61" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<rect  x="1639" y="552" width="61" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1648" y="571" font-size="14" fill="#1f2328">co-hr</text>
-<rect x="1708" y="552" width="111" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<rect  x="1708" y="552" width="111" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1717" y="571" font-size="14" fill="#1f2328">co-learning</text>
-<rect x="1418" y="584" width="87" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<rect  x="1418" y="584" width="87" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1427" y="603" font-size="14" fill="#1f2328">co-news</text>
-<rect x="1513" y="584" width="79" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<rect  x="1513" y="584" width="79" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1522" y="603" font-size="14" fill="#1f2328">co-price</text>
-<rect x="1600" y="584" width="90" height="28" rx="14" fill="#d6e8ff" stroke="#57606a" stroke-width="1.6"/>
+<rect  x="1600" y="584" width="90" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
 <text x="1609" y="603" font-size="14" fill="#1f2328">co-safety</text>
+<rect x="1698" y="584" width="88" height="28" rx="14" fill="#fff0d1" stroke="#8a5a00" stroke-width="1.6" stroke-dasharray="6 3"/>
+<text x="1707" y="603" font-size="14" fill="#1f2328">co-utility</text>
 <rect x="2070" y="410" width="470" height="260" rx="14" fill="#eaf3ff" stroke="#1f6feb" stroke-width="3"/>
-<text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* (16)</text>
-<text x="2088" y="468" font-size="14" fill="#424a53">templates/VERSION 0.28.0 準拠</text>
+<text x="2088" y="444" font-size="21" fill="#0550ae" font-weight="700">L3 · Projects/co-* (10)</text>
+<text x="2088" y="468" font-size="14" fill="#424a53">templates/VERSION 0.30.0 準拠 · フリートSSOT (10)</text>
 <rect x="2088" y="488" width="74" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
 <text x="2097" y="507" font-size="14" fill="#1f2328">co-abap</text>
 <rect x="2170" y="488" width="115" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
@@ -145,26 +147,16 @@
 <text x="2274" y="539" font-size="14" fill="#1f2328">co-develop</text>
 <rect x="2368" y="520" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
 <text x="2377" y="539" font-size="14" fill="#1f2328">co-export</text>
-<rect x="2088" y="552" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2097" y="571" font-size="14" fill="#1f2328">co-game</text>
-<rect x="2174" y="552" width="61" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2183" y="571" font-size="14" fill="#1f2328">co-hr</text>
-<rect x="2243" y="552" width="111" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2252" y="571" font-size="14" fill="#1f2328">co-learning</text>
-<rect x="2088" y="584" width="211" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2097" y="603" font-size="14" fill="#1f2328">co-newbiz</text>
-<rect x="2191" y="587" width="97" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
-<text x="2195" y="603" font-size="14" fill="#a40e26" font-weight="700">テンプレなし</text>
-<rect x="2307" y="584" width="87" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2316" y="603" font-size="14" fill="#1f2328">co-news</text>
-<rect x="2402" y="584" width="79" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2411" y="603" font-size="14" fill="#1f2328">co-price</text>
-<rect x="2088" y="616" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2097" y="635" font-size="14" fill="#1f2328">co-safety</text>
-<rect x="2186" y="616" width="103" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2195" y="635" font-size="14" fill="#1f2328">co-security</text>
-<rect x="2297" y="616" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
-<text x="2306" y="635" font-size="14" fill="#1f2328">co-work</text>
+<rect x="2088" y="552" width="211" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="571" font-size="14" fill="#1f2328">co-newbiz</text>
+<rect x="2191" y="555" width="97" height="22" rx="6" fill="#ffffff" stroke="#cf222e" stroke-width="1.5"/>
+<text x="2195" y="571" font-size="14" fill="#a40e26" font-weight="700">テンプレなし</text>
+<rect x="2088" y="584" width="90" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2097" y="603" font-size="14" fill="#1f2328">co-safety</text>
+<rect x="2186" y="584" width="103" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2195" y="603" font-size="14" fill="#1f2328">co-security</text>
+<rect x="2297" y="584" width="78" height="28" rx="14" fill="#d8f3df" stroke="#57606a" stroke-width="1.6"/>
+<text x="2306" y="603" font-size="14" fill="#1f2328">co-work</text>
 <circle cx="2526" cy="414" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="2526" y="420" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
 <circle cx="1856" cy="414" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
@@ -270,7 +262,7 @@
 <text x="508" y="1087" font-size="14" fill="#1f2328">codex</text>
 <text x="700" y="1088" font-size="14" fill="#424a53">← 破線: 隔離なし(運用者ログイン)</text>
 <rect x="62" y="1128" width="1206" height="46" rx="10" fill="#fff0f0" stroke="#cf222e" stroke-width="3"/>
-<text x="80" y="1157" font-size="15" fill="#a40e26" font-weight="700">⚠ tenant(Projects/gw-*)はbackport · upgrade · upstreamのループ外 — アップグレード経路は未確認</text>
+<text x="80" y="1147" font-size="15" fill="#a40e26" font-weight="700">tenant(gw-*)は登録制(admin承認・enrollment)でbackport · upgrade · upstreamループに参加 — Projects/gw-*ではなくgateway storageに<tspan x="80" dy="18">保存 · アップグレードはデフォルトでdry-run＋スナップショットバックアップ(tenant-backup/&lt;ts&gt;) — スコープ: upgrade · upstreamファイル · backportレビュー</tspan></text>
 <rect x="1320" y="745" width="1240" height="135" rx="12" fill="#fff3e8" stroke="#bc4c00" stroke-width="2" stroke-dasharray="9 5"/>
 <text x="1340" y="773" font-size="16" fill="#1f2328" font-weight="700">A · バックポート — project-resync(人による確認必須)</text>
 <rect x="1340" y="790" width="150" height="68" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="2.2"/>
@@ -363,7 +355,7 @@
 <text x="910" y="1324" font-size="14" fill="#424a53" text-anchor="middle">tickets/governance/ · git追跡 · U-*を含む</text>
 <text x="1240" y="1277" font-size="15" fill="#0b5d5d" font-weight="700">実行主体</text>
 <rect x="1240" y="1291" width="143" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
-<text x="1249" y="1310" font-size="14" fill="#1f2328">ローカル05:30 KST</text>
+<text x="1249" y="1310" font-size="14" fill="#1f2328">ローカル03:00 KST</text>
 <rect x="1391" y="1291" width="221" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
 <text x="1400" y="1310" font-size="14" fill="#1f2328">セッション開始時 list --ready</text>
 <rect x="1620" y="1291" width="144" height="28" rx="14" fill="#ffffff" stroke="#0a7f7f" stroke-width="1.6"/>
@@ -465,15 +457,15 @@
 <rect x="60" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="94" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="94" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">5</text>
-<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">バージョン3軸 · 基準 templates/VERSION 0.28.0</text>
+<text x="126" y="1822" font-size="17" fill="#1f2328" font-weight="700">バージョン3軸 · 基準 templates/VERSION 0.30.0</text>
 <rect x="682" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="716" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="716" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">6</text>
-<text x="748" y="1822" font-size="17" fill="#1f2328" font-weight="700">対のないバリアント・PJ 4件</text>
+<text x="748" y="1822" font-size="17" fill="#1f2328" font-weight="700">プロジェクトのないバリアント7 · テンプレのないPJ 1</text>
 <rect x="1304" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="1338" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1338" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">7</text>
-<text x="1370" y="1822" font-size="17" fill="#1f2328" font-weight="700">自動化: 05:30 · 金曜 · 月1回</text>
+<text x="1370" y="1822" font-size="17" fill="#1f2328" font-weight="700">自動化: 03:00 統合 · 金曜 · 月1回</text>
 <rect x="1926" y="1781" width="600" height="68" rx="12" fill="#ffffff" stroke="#57606a" stroke-width="1.8"/>
 <circle cx="1960" cy="1815" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1960" y="1821" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">8</text>
@@ -509,7 +501,7 @@
 <text x="680" y="1982" font-size="14" fill="#a40e26" font-weight="700">なし</text>
 <text x="756" y="1982" font-size="14" fill="#1f2328">= 対のない項目</text>
 <rect x="887.8199999999999" y="1964" width="40" height="24" rx="6" fill="#fff0f0" stroke="#cf222e" stroke-width="2.5"/>
-<text x="940" y="1982" font-size="14" fill="#1f2328">⚠ ループ外 · 非伝播</text>
+<text x="940" y="1982" font-size="14" fill="#1f2328">テナントループ · 登録制</text>
 <circle cx="1123.4199999999998" cy="1976" r="16" fill="#24292f" stroke="#ffffff" stroke-width="2.5"/>
 <text x="1123" y="1982" font-size="16" fill="#ffffff" font-weight="700" text-anchor="middle">n</text>
 <text x="1149" y="1982" font-size="14" fill="#1f2328">= 下の番号説明と対応</text>
