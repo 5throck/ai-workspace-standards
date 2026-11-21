@@ -591,3 +591,31 @@ gate set).
 Unchanged by this addendum: the compat gate, the project-root execution site,
 "the CLI never moves a pin", `adoptSeedEntries` (still add-if-missing), and the
 pin-drift tripwire.
+
+## Addendum C — Advisory `market_scope` field (2026-11-21)
+
+Spec docs/designs/2026-11-21-external-deps-market-scope-design.md (ticket
+T-20261121-001, owner-approved plan mode 2026-11-21) adds ONE optional schema-v2
+entry field. **Phase 1 is metadata only — nothing gates on it.** Behavioral
+gating (country_config-based fetch/install filtering) is explicitly out of
+scope: it would sit in the L1 core fetch path with a large blast radius, and is
+a separate design if ever needed (precedent: ADR-0057/ADR-0058 — country-scoped
+agents shipped metadata before any gating).
+
+**Field rules** (extends the §5.2 field table; loader v1.4.0):
+
+| Field | Rule |
+|---|---|
+| `market_scope` | OPTIONAL `string[]` — non-empty array of non-empty strings; members stored verbatim; `ENTRY_FIELDS_V2` member; a v1 document carrying it stays an unknown-field error. Advisory: WHY the entry is here. Unknown values are LEGAL at parse (new-market flexibility); verify check **V10** WARNs on values outside the documented set (absent → no row; all-known → PASS row; never FAILs, never gates). Deliberately NOT in `V2_CONTRACT_FIELDS` — the field spreads via channel-2c verbatim adoption (add-if-missing), not v1→v2 migration. |
+
+**Documented values** (`KNOWN_MARKET_SCOPES` in scripts/lib/external-deps.ts —
+the value registry; a new value lands here by a reviewed template PR):
+
+| Value | Meaning | Application record |
+|---|---|---|
+| `"KR"` | Korea market — the entry exists because the project targets Korea (the HWP-adapter class) | `kordoc` v4.24.53, `rhwp` v0.9.1 in `Projects/co-work/external-deps.json` (project-local entries — they were never in any L1 seed; Projects/co-work annotates them in its own repo flow, per DEC-20261107-01's co-work hub role for HWP work) |
+| `"ko-language"` | Korean-language dependency — consumed for Korean-language processing | `humanize` (5throck/Humanize v1.0.0, Korean AI-tell lint) and `im-not-ai` (epoko77-ai/im-not-ai v2.4.7) in `templates/co-work/external-deps.json` — annotated in this addendum's landing PR. co-deck's seed carries neither (its storyline consumes them via the co-work hub role); co-newbiz annotates its own corrected `humanize` entry in its own repo (its PR #949, 2026-11-21) |
+
+Seed annotations are advisory facts, not gates: a scaffold still receives every
+seeded entry regardless of market until behavioral gating is designed (and
+unless it is, this field stays the portable record of intent).

@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: T-20261121-001
+kind: manual
+title: >-
+  External-deps schema: advisory market_scope field (v1 — metadata only, no
+  behavioral gating). Owner observation 2026-11-21: co-work carries HWP-adapter
+  deps (kordoc v4.24.53, rhwp v0.9.1 — "the HWP adapter") while its country
+  profile is empty (supported: []), and Korean-language deps (humanize/im-not-ai
+  "Korean AI-tell lint") ship in templates/co-deck and templates/co-work with
+  country [] — a Korea-market dependency lands in every new scaffold regardless
+  of market. Approved design 2026-11-21 (plan mode, user-approved): phase 1 =
+  ADVISORY metadata only — (1) scripts/lib/external-deps.ts ENTRY_FIELDS_V2
+  gains optional market_scope?: string[] (advisory, no behavioral gating; known
+  values documented e.g. ["KR"], ["ko-language"]; unknown values allowed with
+  WARN — new-market flexibility); version bump. (2) Standard Addendum C in
+  docs/designs/2026-11-07-external-deps-standard-design.md (field definition +
+  the Korea-market application record: kordoc/rhwp = KR per DEC-20261107-01's
+  co-work hub role; humanize/im-not-ai = ko-language). (3) Seed annotations:
+  templates/co-work/external-deps.json (kordoc/rhwp KR; humanize/im-not-ai
+  ko-language), templates/co-deck/external-deps.json (humanize/im-not-ai
+  ko-language). Projects/* manifests adopt via channel 2c verbatim propagation
+  at next upgrade — verify co-work's diverged manifest needs no manual edit.
+  (4) Drift scan surface: weekly workflow reports seed-vs-project market_scope
+  divergence (optional/minimal). Explicitly OUT OF SCOPE: behavioral gating
+  (country_config-based fetch/install filtering — large blast radius in the
+  L1 core fetch path, separate design if ever needed); co-newbiz humanize
+  id/repo mixup (separate ticket). Rationale for advisory-first: ADR-0057/0058
+  country-scoped agents precedent (metadata before gating), DEC-20261118-01
+  in-session-fixability bar (schema+docs+annotations are in-session work).
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-21T00:00:00.000+09:00
+history:
+  - at: 2026-11-21T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null
