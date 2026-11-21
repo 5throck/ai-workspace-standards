@@ -42,6 +42,7 @@ import {
   githubOwnerFromOrigin,
   normalizeRemoteUrl,
   originPointsAt,
+  classifyGhProbeResult,
   probeGithubRepo,
   workspaceGithubOwner,
 } from '../../scripts/lib/remote-collision.ts';
@@ -285,7 +286,39 @@ describe('checkRemoteCollision — the four decision branches (design §6 pins 1
   });
 });
 
-describe('probeGithubRepo classification (fake gh on PATH — no network)', () => {
+describe('classifyGhProbeResult — probe classification matrix (pure, every platform)', () => {
+  test('spawn error (gh missing / ENOENT) → unavailable', () => {
+    expect(classifyGhProbeResult({ status: null, stderr: "", error: new Error("ENOENT") })).toBe('unavailable');
+  });
+
+  test('exit 0 → exists', () => {
+    expect(classifyGhProbeResult({ status: 0, stderr: "" })).toBe('exists');
+  });
+
+  test('exit 1 + "not found" stderr → absent (GitHub 404)', () => {
+    expect(classifyGhProbeResult({ status: 1, stderr: 'gh: Not found (HTTP 404)\n' })).toBe('absent');
+  });
+
+  test('exit 1 + auth-prompt stderr → unavailable (case c, never "absent")', () => {
+    expect(
+      classifyGhProbeResult({ status: 1, stderr: 'gh: To get started with GitHub CLI, please run: gh auth login\n' }),
+    ).toBe('unavailable');
+  });
+
+  test('a Buffer stderr classifies identically to a string stderr', () => {
+    expect(classifyGhProbeResult({ status: 1, stderr: Buffer.from('gh: Not found\n', 'utf8') })).toBe('absent');
+  });
+
+  test('null/absent stderr on a non-zero exit → unavailable (not absent)', () => {
+    expect(classifyGhProbeResult({ status: 1, stderr: null })).toBe('unavailable');
+    expect(classifyGhProbeResult({ status: 1 })).toBe('unavailable');
+  });
+});
+
+// The real-spawn wiring is POSIX-guarded: a `.cmd` stub cannot be spawned without a
+// shell on Windows, so the matrix above (pure) carries the cross-platform guarantee and
+// this block pins the actual gh invocation on the POSIX runners.
+describe('probeGithubRepo real-spawn wiring (fake gh on PATH — no network)', () => {
   const fakeBin = path.join(scratchRoot, 'fakebin');
   const realPath = process.env.PATH;
 
@@ -294,7 +327,7 @@ describe('probeGithubRepo classification (fake gh on PATH — no network)', () =
     const p = path.join(fakeBin, 'gh');
     fs.writeFileSync(p, script);
     fs.chmodSync(p, 0o755);
-    process.env.PATH = `${fakeBin}:${realPath}`;
+    process.env.PATH = `${fakeBin}${path.delimiter}${realPath}`;
   }
 
   beforeEach(() => {
@@ -307,17 +340,17 @@ describe('probeGithubRepo classification (fake gh on PATH — no network)', () =
     fs.rmSync(scratchRoot, { recursive: true, force: true });
   });
 
-  test('exit 0 → exists', () => {
+  test.skipIf(process.platform === 'win32')('exit 0 → exists', () => {
     writeFakeGh('#!/bin/sh\nexit 0\n');
     expect(probeGithubRepo('5throck/co-work')).toBe('exists');
   });
 
-  test('exit 1 + "not found" stderr → absent (GitHub 404)', () => {
+  test.skipIf(process.platform === 'win32')('exit 1 + "not found" stderr → absent (GitHub 404)', () => {
     writeFakeGh('#!/bin/sh\necho "gh: Not found" >&2\nexit 1\n');
     expect(probeGithubRepo('5throck/co-work')).toBe('absent');
   });
 
-  test('exit 1 + auth-prompt stderr → unavailable (case c, never "absent")', () => {
+  test.skipIf(process.platform === 'win32')('exit 1 + auth-prompt stderr → unavailable (case c)', () => {
     writeFakeGh('#!/bin/sh\necho "gh: To get started with GitHub CLI, please run: gh auth login" >&2\nexit 1\n');
     expect(probeGithubRepo('5throck/co-work')).toBe('unavailable');
   });

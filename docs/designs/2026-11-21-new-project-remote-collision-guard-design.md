@@ -119,6 +119,7 @@ No conflicts: every earlier guard refuses before the network call; the guard nev
 5. Owner derivation: https / `git@` / `ssh://` forms; absent origin; non-GitHub URL → skip.
 6. Normalization: `.git` suffix, trailing slash, host case, scheme/user differences → equal.
 7. Exact message text for refuse/warn/skip (pins the design §3 strings).
+8. Probe classification matrix, split for cross-platform reach: `classifyGhProbeResult` (pure — status/stderr/error in, verdict out) is pinned on every platform including Windows, while the real `gh` spawn wiring is POSIX-guarded (`test.skipIf(win32)`) because a `.cmd` stub cannot be spawned without a shell. CI covers both halves (windows + ubuntu/macos runners).
 
 ## 7. Platform Impact (MANDATORY)
 

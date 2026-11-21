@@ -153,9 +153,28 @@ export function originPointsAt(projectDir: string, owner: string, leafName: stri
 // ── gh probe (default) ─────────────────────────────────────────────────────────
 
 /**
- * Default probe: `gh repo view <owner>/<name>`. exit 0 → exists; non-zero
- * with stderr matching /not found/i → GitHub 404 → absent; anything else
- * (ENOENT, auth prompt, rate limit, network) → unavailable (case c).
+ * Pure classification of one `gh repo view` result (split out so the matrix is
+ * pinnable on Windows too — a `.cmd` stub cannot be spawned without a shell, so
+ * the spawn wiring itself is POSIX-pinned while this logic is pinned everywhere):
+ * spawn error → unavailable; exit 0 → exists; stderr matching /not found/i →
+ * GitHub 404 → absent; anything else (auth prompt, rate limit, network) → unavailable.
+ */
+export function classifyGhProbeResult(r: {
+  status?: number | null;
+  stderr?: string | Buffer | null;
+  error?: Error;
+}): RemoteProbeResult {
+  if (r.error) return "unavailable";
+  if (r.status === 0) return "exists";
+  // spawnSync's stderr type is `string | Buffer` even under encoding: "utf8".
+  const stderr = typeof r.stderr === "string" ? r.stderr : (r.stderr?.toString("utf8") ?? "");
+  if (/not found/i.test(stderr)) return "absent";
+  return "unavailable";
+}
+
+/**
+ * Default probe: `gh repo view <owner>/<name>`, classified by classifyGhProbeResult.
+ * exit 0 → exists; GitHub 404 → absent; anything else → unavailable (case c).
  */
 export function probeGithubRepo(repoSlug: string): RemoteProbeResult {
   let r: ReturnType<typeof spawnSync>;
@@ -165,12 +184,7 @@ export function probeGithubRepo(repoSlug: string): RemoteProbeResult {
     void err;
     return "unavailable";
   }
-  if (r.error) return "unavailable";
-  if (r.status === 0) return "exists";
-  // spawnSync's stderr type is `string | Buffer` even under encoding: "utf8".
-  const stderr = typeof r.stderr === "string" ? r.stderr : (r.stderr?.toString("utf8") ?? "");
-  if (/not found/i.test(stderr)) return "absent";
-  return "unavailable";
+  return classifyGhProbeResult(r as { status?: number | null; stderr?: string | Buffer | null; error?: Error });
 }
 
 // ── Decision primitive ─────────────────────────────────────────────────────────
