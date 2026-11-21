@@ -1,7 +1,7 @@
 ---
 name: handbook
 scope: common
-version: 0.6.1
+version: 0.6.2
 description: >-
   Document Production Workflow — generates searchable, themed handbooks as
   static sites (GitHub Pages). Three modes: standalone handbook, lecture
@@ -112,7 +112,8 @@ Dispatch the `handbook-writer` agent (co-deck; in other variants, dispatch docs-
 Dispatch the `handbook-reviewer` agent (co-deck; in other variants, dispatch docs-writer or the PM's review specialist) to run:
 1. `bun run ci` — the exact CI check chain in one command: validate-handbook (① structure, ② nav 4 checks, ③ tables), check-symmetry, check-links, check-labels, check-authoring, handbook-doctor, check-a11y, check-spell, check-lint, check-external-links, check-search. Prevents the doctor-green-but-CI-red failure mode.
 2. `bun run check-i18n` — cross-language content parity (heading/code-block counts, wrong-language links); for multilingual handbooks follow I18N_PARITY_PLAYBOOK.md (canonical-first regeneration workflow)
-3. Apply fixes for any issues found
+3. `bun run check-generated-content --docs-dir docs` — catches LLM-generation defects (duplicated table cells, raw backticks, stray Hanja on `lang="ko"` pages, garbled quiz lists)
+4. Apply fixes for any issues found
 
 ### H-6: Apply Theme
 
@@ -205,7 +206,7 @@ handbook/
 │   ├── check-structure.ts / check-symmetry.ts / check-links.ts / check-labels.ts / check-search.ts
 │   ├── check-i18n-parity.ts                # Cross-language parity gate (Check 13 of doctor)
 │   ├── check-authoring.ts
-│   ├── check-a11y.ts / check-spell.ts / check-lint.ts / check-external-links.ts
+│   ├── check-a11y.ts / check-spell.ts / check-lint.ts / check-external-links.ts / check-generated-content.ts
 │   ├── apply-handbook-theme.ts
 │   ├── update-footers.ts                   # FOOTERS constant = per-language site footer SSOT
 │   └── handbook-doctor.ts
@@ -215,9 +216,10 @@ handbook/
 ```
 
 > **Toolkit vendoring**: `scripts/nav-utils.ts` and the check scripts are a vendored
-> toolkit shared by the fielded handbooks — fix bugs in the canonical copy
-> (`Handbooks/multi-agent-harness-handbook/scripts/`) and re-vendor, never patch one
-> copy only.
+> toolkit shared by the fielded handbooks. The canonical source is
+> `templates/common/scripts/handbook/` (L1); fielded handbooks re-vendor from the
+> template. Handbook-local fixes must be backported to the template first — never
+> patch one copy only.
 
 ## Related Skills
 

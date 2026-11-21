@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // scripts/handbook/check-external-links.ts
 // L4 — External link validation for handbook HTML files.
-// @version 1.2.0
+// @version 1.3.0
 // Extends the internal-only check-links.ts by testing external URLs:
 //   1. Extracts all <a href="http..."> links from HTML files
 //   2. Performs HTTP HEAD requests with redirect following (max 5 hops)
@@ -39,6 +39,15 @@ const SKIP_DOMAINS = new Set([
   // TLS-fingerprint (JA3) blocking: sites verified healthy via curl but 403 any Node.js client regardless of headers
   "whatismyipaddress.com",
   "platform.deepseek.com",
+  // Korean FSS DART portal: ignores non-browser TLS clients (Node HEAD/GET times out; site is
+  // healthy via browser/curl) — same JA3-style behavior as the entries above
+  "opendart.fss.or.kr",
+  // Korean public open-data portals (.go.kr family): intermittently 403/timeout Node clients from
+  // overseas CI runners (geo/bot filtering) — flaky CI failures even though the sites are healthy
+  "open.law.go.kr",
+  "www.law.go.kr",
+  "kosis.kr",
+  "www.data.go.kr",
 ]);
 
 // ---------------------------------------------------------------------------

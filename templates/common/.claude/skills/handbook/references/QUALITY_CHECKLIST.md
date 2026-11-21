@@ -88,7 +88,11 @@ Scans English handbook HTML for 197 hardcoded common misspellings. Strips `<scri
 
 ### check-external-links (L5 — external link checker)
 
-Performs HTTP HEAD requests on all external `<a href>` targets with a 5s timeout and 5-request concurrency. Skips known-safe domains (creativecommons.org, github.com, claude.ai, anthropic.com) to avoid rate-limit flakes.
+Performs HTTP HEAD requests on all external `<a href>` targets with a 5s timeout and 5-request concurrency. Skips known-safe domains (creativecommons.org, github.com, claude.ai, anthropic.com) and Korean public hosts that block Node clients (opendart.fss.or.kr, open.law.go.kr, www.law.go.kr, kosis.kr, www.data.go.kr) to avoid rate-limit flakes.
+
+### check-generated-content (L3 — LLM-generation defects)
+
+Flags four recurring defects per HTML page: duplicated `<td>` pairs, raw backticks outside `<pre>`/`<code>`, stray Hanja on Korean pages (language read from `<html lang>`; `ja`/`zh` pages are exempt), and garbled quiz `<ol>` lists. Run: `bun run check-generated-content --docs-dir docs`.
 
 ### validate-handbook (unified entry point)
 
