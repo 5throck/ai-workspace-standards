@@ -12,12 +12,29 @@ title: >-
   repo view <org>/<name>) plus non-empty Projects/<name> probe, each blocking
   the scaffold unless an explicit override flag is passed
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-21T10:48:39.793+09:00'
 history:
   - at: '2026-11-21T10:48:39.793+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-22T00:00:20.835+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-22T00:00:20.859+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-22T00:00:24.419+09:00'
+    from: review
+    to: done
+result: >-
+  PR #2145 merged (merge SHA 5c4c8c4d5aed08a9b7dc27c2b5903ad2ab6aa2f6, CI 4/4
+  green). new-project.ts v1.47.0 + new lib/remote-collision.ts v1.0.0:
+  pre-flight guard refuses (exit 1, no override) the incident shape where
+  github.com/5throck/<name> exists and the target has no origin pointing at it;
+  WARN+proceed when origin already matches; WARN/INFO+proceed on probe or
+  owner-derivation failure. Tests: 26 pins incl. incident-shape fixture
+  reproduction; suite/E2E/unit/audit/validate-templates green. Design:
+  docs/designs/2026-11-21-new-project-remote-collision-guard-design.md
 error: null

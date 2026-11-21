@@ -29,7 +29,7 @@ title: >-
   scripts/humanize/humanize-adapter.ts), country profile changes on two
   variants, and the market_scope↔country_config consistency ruling.
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-21T00:00:00.000+09:00'
 history:
@@ -39,5 +39,24 @@ history:
   - at: '2026-11-21T13:23:43.870+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-21T13:41:22.540+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-21T13:41:28.020+09:00'
+    from: review
+    to: done
+result: >-
+  co-deck humanize seed+adapter + co-deck/co-work KR country profiles + B-10
+  market_scope<->country_config consistency check landed (spec
+  2026-11-21-humanize-seed-country-profiles-design):
+  templates/co-deck/external-deps.json humanize entry (5throck/Humanize v1.0.0,
+  ko-language, NO im-not-ai per owner correction) + NEW
+  scripts/co-deck/humanize-adapter.ts v1.0.0 (spawn/probe/shutdown lifecycle,
+  advisory posture, HTTP-contract selftest); storyline SKILL 1.6.0->1.7.0;
+  co-deck 0.2.3->0.3.0 + co-work 1.1.0->1.2.0 declare country_config.supported
+  [KR] with docs/countries/KR.md each (same last_verified 2026-11-21);
+  validate-templates 1.86.0->1.87.0 B-10 WARN check (ko-language categorically
+  exempt, doctrine unit pin) with 12 pins + clean-tree row; T-20261121-003 filed
+  (co-work im-not-ai disposition, backlog); PR #2138 CI 4/4 green, merge
+  f99122a7f
 error: null

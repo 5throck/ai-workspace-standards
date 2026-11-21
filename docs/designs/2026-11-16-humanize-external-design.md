@@ -1,5 +1,13 @@
 # Humanize as a declared co-work external — Korean AI-tell and translationese detection and polishing — design
 
+> **CORRECTED (2026-11-21, owner decision)** — the `im-not-ai` entry (§2.2) must **not**
+> be installed: the owner ruled that the external dependency is 5throck/Humanize only,
+> and `epoko77-ai/im-not-ai` is never installed as a project dependency (its rulebook and
+> prompt are already ported inside Humanize's `rules.js`/`prompt.js`). The pin `v1.0.0`
+> noted in §2.1 as "does not exist yet" now exists (tag `v1.0.0`, commit `4860b0ec45a68d1be031f120e6d3fd5219569bc9`).
+> Reference: Projects/co-newbiz `docs/designs/2026-11-21-humanize-server-migration-design.md`
+> (the first production migration onto the Humanize server interface).
+
 - **Spec ID**: 2026-11-16-humanize-external-design
 - **Status**: Approved (PM, 2026-11-16) — implementation in templates/co-work only
 - **Date**: 2026-11-16
