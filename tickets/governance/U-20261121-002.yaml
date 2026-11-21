@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261121-002
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-21T10:53:21.065+09:00
+history:
+  - at: 2026-11-21T10:53:21.065+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: unsure
+  symptom: 'The Generated projection drift gate (v1.10.0) in co-newbiz''s project-local `scripts/co-newbiz/audit-variant.ts` false-positives on Windows CRLF working copies: 283 git-clean tracked source files carried CRLF bytes on disk; the gate regenerates `app/web-next/lib/library.generated.ts` from them without EOL normalization and reports it stale, blocking dev-sync. Observed 2026-11-21 in Projects/co-newbiz during a sync (dev-sync step for chore-workspace-sync-29-files); recovered by force-rewriting the 283 files from the index (LF), after which the gate passed. The script is project-local (L3 — no templates/co-newbiz delivery twin exists), but the runDriftGate family pattern it follows lives in workspace helpers, so the same EOL-assumption may affect sibling gates. Layer marked unsure because the defect locus is a local script while the pattern may be shared.'
+  affected_paths:
+    - scripts/co-newbiz/audit-variant.ts
+    - app/web-next/lib/library.generated.ts
+  identity_source: self_declared
+  repro: 'On Windows with core.autocrlf=true: run `bun scripts/dev-sync.ts` in a co-newbiz clone whose 283 tracked source files carry CRLF on disk (git-clean). The Generated projection drift gate (audit-variant v1.10.0) regenerates library.generated.ts from those files and reports it stale because embedded bytes differ only by CRLF. Recovery applied 2026-11-21: rm + `git checkout --` on the 283 files (checkout writes LF under local core.eol=lf); gate then passed. Fix direction: normalize EOL (or compare content EOL-normalized) when embedding/reading sources into generated projections.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - 'path_not_template_managed: scripts/co-newbiz/audit-variant.ts'
+    - 'path_not_template_managed: app/web-next/lib/library.generated.ts'
+    - info:in_last_delivery scripts/co-newbiz/audit-variant.ts=false
+    - info:in_last_delivery app/web-next/lib/library.generated.ts=false
+  dedupe_key: b9551dff8b81d94f1ed2b3eefb017870e75678b8a647bca948889e17bd27b6d9
+  duplicates:
+    - project: co-newbiz
+      at: 2026-11-21T10:53:21.065+09:00
