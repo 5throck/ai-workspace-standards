@@ -1,7 +1,7 @@
 # Co-Deck Promotion Checklist
 
 **Variant:** co-deck
-**Current Status:** stable (v0.2.3)
+**Current Status:** stable (v0.3.0)
 **Beta Since:** 2026-06-17 (per the beta-era checklist record — pre-dates the beta-lifecycle machinery shipped 2026-07-11)
 **Stable Since:** 2026-08-30
 **Phase A Complete:** true
@@ -30,7 +30,7 @@
 | 4 | **Documentation completeness** | Done | README.md, docs/co-deck.context.md, AGENTS.md, and variant.json present and maintained. The 2026-10-05 scoped review logged descriptive-claim drift; remediation is tracked via T-20261005-006..018. |
 | 5 | **Audit pass rate** | Done | Machine baseline 7/7 green as of 2026-10-07 (`bun scripts/review-baseline.ts --template co-deck`, incl. `validate-variant-claims.ts` — the 7th baseline entry added 2026-10-05 — with 0 findings). Deprecated script (measure-layout) documented and excluded from the active pipeline. |
 | 6 | **Real engagements** | N/A per ADR-0099 — migration fast-track | `variant.json` → `lifecycle.betaEngagements` is empty — engagement logs are not separately maintained; under the ratified admission the beta-engagement attestation is waived rather than simulated. The PM-approved promotion (root lifecycle record 2026-08-30) remains the governing record. |
-| 7 | **README accuracy** | Done | README.md / README_ko.md carry the ✅ Stable v0.2.3 badge and current inventories (14 agents, 10 skills, 6 themes / 6 styles); beta-era status blocks removed 2026-10-05 (T-20261005-009). |
+| 7 | **README accuracy** | Done | README.md / README_ko.md carry the ✅ Stable v0.3.0 badge and current inventories (14 agents, 10 skills, 6 themes / 6 styles); beta-era status blocks removed 2026-10-05 (T-20261005-009). |
 | 8 | **Minimum beta duration** | N/A per ADR-0099 — migration fast-track | Beta window 2026-06-17 → 2026-08-30 = 74 days, below the 3-month criterion (the beta-era checklist had estimated 2026-09-17). The recorded promotion decision governs; the shortfall is waived per ADR-0099, not claimed as met. |
 | 9 | **Zero unresolved bugs** | Done | No open bug reports recorded at promotion; per-engagement/bug detail lived in gitignored local lifecycle state. |
 | 10 | **User feedback** | N/A per ADR-0099 — migration fast-track | Not separately logged; under the ratified admission no beta-user feedback record exists to claim. The PM-approved promotion decision (root lifecycle record 2026-08-30) is the governing evidence. |

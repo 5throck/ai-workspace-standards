@@ -14,6 +14,12 @@
  * upstream check may SKIP, which never un-does the adoption or the gitignore
  * coverage write).
  *
+ * v1.1.0 (2026-11-21, design docs/designs/2026-11-21-humanize-seed-country-profiles-design.md #1,
+ *          T-20261121-002): the co-deck seed gains the `humanize` entry (Korean AI-tell lint,
+ *          market_scope ["ko-language"]) — the channel-2c block-slice pins (C-T7/C-T7b/C-T9)
+ *          follow the seed as changed: adopted-id lists include humanize, gitignore coverage
+ *          includes external/humanize/, and C-T9's no-op fixture manifest covers BOTH live
+ *          seed ids (the fleet-majority no-op intent is unchanged).
  * @version 1.0.0
  */
 import { describe, test, expect, afterAll } from 'bun:test';
@@ -202,20 +208,22 @@ function runPass(projectDir: string, extraArgs: string[] = []): PassRun {
 }
 
 describe('runExternalDepsPass channel 2c — pass-level seed-id adoption (design §3)', () => {
-  test('C-T7: valid v2 empty-deps project + co-deck seed → quickdl adopted, gitignore covered on arrival, decision rows', () => {
+  test('C-T7: valid v2 empty-deps project + co-deck seed → quickdl+humanize adopted, gitignore covered on arrival, decision rows', () => {
     const tmp = makeCoDeckProject('{"schema_version":2,"dependencies":[]}');
     const run = runPass(tmp);
-    // Adoption row + one row per id (single seed id here).
+    // Adoption row + one row per id (the live co-deck seed carries quickdl + humanize).
     expect(run.stdout).toContain('ADOPT');
     expect(run.stdout).toContain('seed-id adoption: dep `quickdl` adopted from the template seed verbatim (no project entry existed)');
-    // D5 coverage ran AFTER adoption — the adopted install_dir is covered on arrival.
+    expect(run.stdout).toContain('seed-id adoption: dep `humanize` adopted from the template seed verbatim (no project entry existed)');
+    // D5 coverage ran AFTER adoption — the adopted install_dirs are covered on arrival
+    // (the pass emits ONE combined coverage row listing every appended dir).
     expect(run.stdout).toContain('appended coverage for: external/quickdl');
     const manifest = JSON.parse(readFileSync(join(tmp, 'external-deps.json'), 'utf8')) as {
       schema_version: number;
       dependencies: Array<Record<string, unknown>>;
     };
     expect(manifest.schema_version).toBe(2);
-    expect(manifest.dependencies.map((d) => d['id'])).toEqual(['quickdl']);
+    expect(manifest.dependencies.map((d) => d['id'])).toEqual(['quickdl', 'humanize']);
     // Assert against the LIVE template seed's pin (not a hard-coded value) so
     // compat-gated seed pin moves (issue #2096 class) never stale this test.
     const seedPin = JSON.parse(
@@ -224,8 +232,14 @@ describe('runExternalDepsPass channel 2c — pass-level seed-id adoption (design
     expect(manifest.dependencies[0]['pin']).toBe(seedPin);
     expect(manifest.dependencies[0]['license']).toBe('MIT');
     expect(manifest.dependencies[0]['usage']).toBe('as-is');
+    // humanize: adopted verbatim — the ko-language scope rides along (advisory metadata).
+    const seed = JSON.parse(
+      readFileSync(join(workspaceRoot, 'templates', 'co-deck', 'external-deps.json'), 'utf8'),
+    );
+    expect(manifest.dependencies[1]).toEqual(seed.dependencies.find((d: Record<string, unknown>) => d['id'] === 'humanize'));
     const gitignore = readFileSync(join(tmp, '.gitignore'), 'utf8');
     expect(gitignore).toContain('external/quickdl/');
+    expect(gitignore).toContain('external/humanize/');
 
     // Idempotency: the second run adopts nothing and writes nothing.
     const afterFirst = readFileSync(join(tmp, 'external-deps.json'), 'utf8');
@@ -254,11 +268,12 @@ describe('runExternalDepsPass channel 2c — pass-level seed-id adoption (design
       dependencies: Array<Record<string, unknown>>;
     };
     // Project entry first, in place, untouched; adopted id appended after.
-    expect(manifest.dependencies.map((d) => d['id'])).toEqual(['local-tool', 'quickdl']);
+    expect(manifest.dependencies.map((d) => d['id'])).toEqual(['local-tool', 'quickdl', 'humanize']);
     expect(manifest.dependencies[0]['pin']).toBe('v2.0.0');
     const gitignore = readFileSync(join(tmp, '.gitignore'), 'utf8');
     expect(gitignore).toContain('external/local-tool/');
     expect(gitignore).toContain('external/quickdl/');
+    expect(gitignore).toContain('external/humanize/');
   });
 
   test('C-T8: --dry-run → adoption rows printed, files untouched', () => {
@@ -271,6 +286,8 @@ describe('runExternalDepsPass channel 2c — pass-level seed-id adoption (design
   });
 
   test('C-T9: project manifest already covering the seed ids → byte-identical pass (fleet-majority no-op)', () => {
+    // Fixture covers BOTH live co-deck seed ids (quickdl + humanize) so the pass
+    // stays a fleet-majority no-op; a seed growing a new id updates this fixture.
     const original = JSON.stringify({
       schema_version: 2,
       dependencies: [
@@ -284,6 +301,18 @@ describe('runExternalDepsPass channel 2c — pass-level seed-id adoption (design
           license: 'MIT',
           usage: 'as-is',
           adapter: 'scripts/co-deck/download-videos.ts',
+        },
+        {
+          id: 'humanize',
+          repo: 'https://github.com/5throck/Humanize',
+          pin: 'v1.0.0',
+          install: 'git clone --depth 1 --branch {pin} {repo} {dir}',
+          install_dir: 'external/humanize',
+          propagation: 'never',
+          license: 'MIT',
+          usage: 'as-is',
+          adapter: 'scripts/co-deck/humanize-adapter.ts',
+          market_scope: ['ko-language'],
         },
       ],
     });

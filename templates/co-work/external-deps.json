@@ -31,7 +31,7 @@
       "commit": "4860b0ec45a68d1be031f120e6d3fd5219569bc9",
       "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
       "install_dir": "external/humanize",
-      "consumer": "Korean AI-tell lint (scripts/humanize/humanize-adapter.ts; co-deck storyline Step 1.6)",
+      "consumer": "Korean AI-tell lint (scripts/humanize/humanize-adapter.ts)",
       "compatibility_test": "bun scripts/humanize/humanize-adapter.ts selftest",
       "propagation": "never",
       "license": "MIT",
