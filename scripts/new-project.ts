@@ -1,5 +1,18 @@
 #!/usr/bin/env bun
-// @version 1.46.0
+// @version 1.47.0
+// v1.47.0 (2026-11-21, spec docs/designs/2026-11-21-new-project-remote-collision-guard-design.md,
+//          T-20261121-004): remote-collision guard — the 2026-11-20 co-work incident shape
+//          (scaffold into Projects/<name> while github.com/5throck/<name> was live with 52 PRs;
+//          the scaffold sets no origin, so the histories diverged silently) is now refused
+//          pre-flight, before any write. The GitHub owner derives in-repo from the workspace
+//          origin URL (no new config surface). Ruling (design §2): (a) remote exists AND no
+//          conforming origin → HARD REFUSE, NO override flag (fleet-membership B1 refusal
+//          precedent, DEC-20261107-01); (b) remote exists AND origin already points at it →
+//          WARN + proceed (deliberate checkout shape); (c) probe failure (gh missing/
+//          unauthenticated/offline) or owner derivation failure → WARN/INFO + proceed — a
+//          network probe never blocks an offline scaffold. Primitives live in
+//          lib/remote-collision.ts v1.0.0 (probe injectable; L0-only, same classification as
+//          lib/agent-override-merge.ts) so the unit suite pins all four branches.
 // v1.46.0 (2026-11-21, spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md
 //          §2.2/§5.4): adoption-only consumption filter — getValidVariants() excludes variants
 //          whose variant.json declares "consumption": "adoption-only" (both the filesystem scan
@@ -298,6 +311,7 @@ import { localDateISO } from "./lib/local-date.ts";
 import { rollbackPartialProject } from "./helpers/rollback-partial-project.ts";
 import { blankL0Refs } from "./helpers/l0-ref-policy.ts";
 import { exclusionForName } from "./lib/fleet.ts";
+import { checkRemoteCollision } from "./lib/remote-collision.ts";
 import { mergePackageJson } from "./lib/package-merge.ts";
 import { resolveProvenanceVersion } from "./helpers/template-version.ts";
 import {
@@ -551,6 +565,39 @@ if (scaffoldExclusion) {
   );
   if (import.meta.main) {
     process.exit(1);
+  }
+}
+
+// ── Remote-collision guard (v1.47.0, T-20261121-004 — design
+//    docs/designs/2026-11-21-new-project-remote-collision-guard-design.md) ──────
+// The 2026-11-20 co-work incident: this script initialized Projects/co-work with
+// NO origin remote (§7 below still only runs git init) while github.com/5throck/
+// co-work was live with 52 PRs — the histories diverged silently until the
+// 2026-11-21 backup-tag realignment. Before ANY write, the same-name remote is
+// probed (owner derived from the workspace origin — every project pushes to
+// 5throck/<name>) and the incident shape is HARD REFUSED, no override flag
+// (fleet-membership B1 refusal precedent). Probe/derivation failures WARN or
+// INFO + proceed — an offline scaffold is never blocked by a network probe.
+// Placement is deliberately the earliest post-local-guard slot: a refusal here
+// happens before provenance, tag extraction, gates, and mkdirSync — nothing to
+// roll back. When the target directory already exists, the pre-existing
+// directory-exists refusal below still dominates; the guard's case (b) exists
+// so the classification stays correct (never a misleading collision message on
+// a deliberate checkout), not to weaken that refusal.
+{
+  const collisionDecision = checkRemoteCollision({ projectName, projectDir, workspaceRoot });
+  for (const line of collisionDecision.action === "refuse" ? collisionDecision.lines : []) {
+    console.error(line);
+  }
+  if (collisionDecision.action === "warn") {
+    console.warn(collisionDecision.message);
+  } else if (collisionDecision.action === "skip") {
+    console.log(collisionDecision.message);
+  }
+  if (collisionDecision.action === "refuse") {
+    if (import.meta.main) {
+      process.exit(1);
+    }
   }
 }
 

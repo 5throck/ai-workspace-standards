@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-21T14:04:52.292Z
+**Generated**: 2026-11-21T14:52:51.702Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -167,7 +167,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | child_process, fs, path |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.46.0 | scripts/new-project.ts | child_process, crypto, fs, os, path |
+| new-project.ts | 1.47.0 | scripts/new-project.ts | child_process, crypto, fs, os, path |
 | normalize-registry-provenance.ts | 1.1.0 | scripts/normalize-registry-provenance.ts | fs, path |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | fs, js-yaml, path, url |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | child_process, fs, path |
