@@ -149,17 +149,16 @@ All numeric outputs in deliverables (aggregations, statistics, percentages, metr
 
 ## Humanize External (Korean AI-tell lint)
 
-Two external clones, declared in `external-deps.json` (spec `docs/designs/2026-11-16-humanize-external-design.md`), support Korean prose quality checks:
+The external clone declared in `external-deps.json` (spec `docs/designs/2026-11-16-humanize-external-design.md`; 2026-11-21 owner ruling per `docs/designs/2026-11-21-cowork-imnotai-retirement-design.md` retired the former im-not-ai dependency) supports Korean prose quality checks:
 
 | id | upstream | pin | provides |
 |----|----------|-----|----------|
 | `humanize` | `5throck/Humanize` (MIT) | `v1.0.0` | local lint server (`serve.ts`, `rules.js`) that detects Korean AI-tell patterns |
-| `im-not-ai` | `epoko77-ai/im-not-ai` (MIT) | `v2.4.4` | `humanize-monolith` agent family and the AI-tell taxonomy / quick-rules rulebook |
 
-Both install into the gitignored `external/<id>/` directories.
+It installs into the gitignored `external/<id>/` directory.
 
 ```bash
-bun scripts/external-deps.ts install --id humanize     # also: --id im-not-ai
+bun scripts/external-deps.ts install --id humanize
 bun scripts/humanize/humanize-adapter.ts serve [--port 8765]
 bun scripts/humanize/humanize-adapter.ts analyze <file> [--url http://localhost:8765] [--json]
 bun scripts/humanize/humanize-adapter.ts paths [--json]
@@ -244,4 +243,4 @@ Key rules:
 
 ---
 
-*co-work.context.md version: 1.5 — Humanize External section added (humanize + im-not-ai external deps, spec 2026-11-16-humanize-external-design); prior: 1.4 — Automation Runbook section added + Domain Rule 6 [WORK-R3] (when to script vs when to hand off; backlog §8 Open row 14, closed 2026-08-26); connector-schemas referenced (Domain Rule 5)*
+*co-work.context.md version: 1.6 — Humanize External section: im-not-ai dependency retired per the 2026-11-21 owner ruling (adapter = sole Humanize coupling; docs/designs/2026-11-21-cowork-imnotai-retirement-design.md); prior: 1.5 — Humanize External section added (humanize + im-not-ai external deps, spec 2026-11-16-humanize-external-design); prior: 1.4 — Automation Runbook section added + Domain Rule 6 [WORK-R3] (when to script vs when to hand off; backlog §8 Open row 14, closed 2026-08-26); connector-schemas referenced (Domain Rule 5)*
