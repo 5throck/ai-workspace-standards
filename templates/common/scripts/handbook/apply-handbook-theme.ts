@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // scripts/handbook/apply-handbook-theme.ts
 // CSS theme applicator for handbooks.
 // Built-in themes define :root (light) + .dark (manual toggle via dark-mode-toggle.js).
@@ -733,6 +733,11 @@ const ALIASES = {
 const JA_FONT_FAMILY =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Meiryo, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif";
 
+// Inline diagram <g> elements on ja pages hardcode a generic font stack; defer them to the page font.
+const JA_SVG_OVERRIDE =
+  `/* Inline diagram groups on ja pages hardcode a generic stack; defer to the page font */\n` +
+  `:root:lang(ja) svg g[font-family^="-apple-system"], :root:lang(ja) svg g[font-family^="system-ui"] { font-family: var(--font-family); }\n`;
+
 function generateCss(theme: ThemePalette): string {
   let css = `/* handbook-variables.css — ${theme.name} theme */\n`;
   css += `/* ${theme.desc} */\n`;
@@ -768,6 +773,7 @@ function generateCss(theme: ThemePalette): string {
   css += `  --line-height-body: 1.55;\n`;
   css += `  --line-height-compact: 1.5;\n`;
   css += `}\n`;
+  css += JA_SVG_OVERRIDE;
 
   return css;
 }
