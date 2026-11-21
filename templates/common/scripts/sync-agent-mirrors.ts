@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.3.0
+// @version 1.3.1
+// v1.3.1 (2026-11-22, U-20261121-002): EOL-insensitive mirror parity. The SSOT
+//          body was embedded raw while the mirror frontmatter is emitted with
+//          "\n" joins, so a CRLF working copy (Windows + core.autocrlf) produced
+//          a projection that could never equal the CRLF mirror on disk — every
+//          agent read as "differing". SSOT content is now LF-normalized at read
+//          time and the comparison normalizes the on-disk mirror too, so the
+//          projection is identical for LF and CRLF checkouts.
 // v1.3.0 (2026-10-29, U-20261029-001 — T-20261029-008 follow-up): per-agent
 //          CHECK-mode degrade replaces the v1.2.0 blanket skip. The blanket
 //          guard (discovery-null + mirrors-exist -> skip everything green) both
@@ -88,6 +95,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, w
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { die } from "./lib/error-handling.ts";
+import { normalizeLineEndings } from "./lib/encoding-utils.ts";
 import * as yaml from "js-yaml";
 import { composeResolvedAgentContent } from "./helpers/resolve-pm-stub.ts";
 
@@ -436,7 +444,11 @@ export function parseSsotAgent(
   const rel = relative(root, filePath).split("\\").join("/");
   let content: string;
   try {
-    content = readFileSync(filePath, "utf8");
+    // EOL-normalize at read time (v1.3.1, U-20261121-002): the body is embedded
+    // verbatim into the projection, and the mirror on a CRLF checkout is CRLF
+    // throughout — normalizing here (not only at compare time) keeps the
+    // projection itself checkout-independent.
+    content = normalizeLineEndings(readFileSync(filePath, "utf8"));
   } catch (err) {
     throw new SsotError(`${rel}: unreadable (${(err as Error).message})`);
   }
@@ -555,7 +567,7 @@ export function parseSsotAgent(
         rel,
       );
     }
-    body = bodyOf(composed.content);
+    body = bodyOf(normalizeLineEndings(composed.content));
   }
   if (body.trim() === "") {
     throw new SsotError(`${rel}: resolved body is empty — refusing to project an empty mirror`);
@@ -781,7 +793,9 @@ export function syncAgentMirrors(
         continue;
       }
       const existing = readFileSync(mirrorPath, "utf8");
-      if (existing !== content) {
+      // Compare EOL-insensitively (v1.3.1, U-20261121-002): a Windows checkout
+      // smudges the mirror to CRLF while the projection is LF-normalized.
+      if (normalizeLineEndings(existing) !== content) {
         result.drifts.push({
           kind: "differing",
           file: relative(root, mirrorPath),

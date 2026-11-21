@@ -152,10 +152,13 @@ describe('projection: frontmatter + body byte-preservation', () => {
     expect(mirror).not.toMatch(/^lifecycle:/m);
   });
 
-  test('CRLF fixture: body bytes preserved verbatim, frontmatter stays generator-built LF', () => {
-    // Pins the Windows-checkout scenario end to end: the fixture on disk carries
-    // \r\n (what a CRLF checkout produces), the mirror body must carry the SAME
-    // \r\n bytes, and the generator-built frontmatter stays \n regardless.
+  test('CRLF fixture: body normalized to LF, and a CRLF-checked-out mirror still reports parity', () => {
+    // U-20261121-002 (v1.3.1) changed the contract this test used to pin. Before,
+    // the fixture's \r\n bytes were embedded verbatim while the generator-built
+    // frontmatter stayed \n, so on a Windows checkout the projection was mixed-EOL
+    // and could never equal the fully-CRLF mirror on disk — every agent read as
+    // "differing". Now the SSOT body is LF-normalized at read time (the mirror is
+    // LF on disk, checkout-independent) and the comparison is EOL-insensitive.
     const crlf = PM_SSOT.replace(/\n/g, '\r\n');
     makeProject({ 'pm.md': crlf });
     const res = syncAgentMirrors(SCRATCH);
@@ -165,11 +168,13 @@ describe('projection: frontmatter + body byte-preservation', () => {
     const fixtureFm = fixtureOnDisk.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/)![0];
     const fixtureBody = fixtureOnDisk.slice(fixtureFm.length);
     expect(fixtureBody).toContain('\r\n');
-    expect(mirror.endsWith(fixtureBody)).toBe(true);
-    const fmLines = mirror.slice(0, mirror.indexOf('-->')).split('\n');
-    expect(fmLines[1]).toBe('name: pm');
-    expect(fmLines[3]).toBe('model: sonnet');
-    expect(fmLines.join('\n')).not.toContain('\r');
+    expect(mirror).not.toContain('\r');
+    expect(mirror.endsWith(fixtureBody.replace(/\r\n/g, '\n'))).toBe(true);
+    // Simulate the Windows checkout: git smudges the mirror file to CRLF on disk.
+    const mirrorPath = path.join(mirrorDir(), 'pm.md');
+    fs.writeFileSync(mirrorPath, mirror.replace(/\n/g, '\r\n'), 'utf8');
+    const check = syncAgentMirrors(SCRATCH, { check: true });
+    expect(check.ok, JSON.stringify(check.drifts)).toBe(true);
   });
 
   test('description with quotes/colons is safely double-quoted', () => {

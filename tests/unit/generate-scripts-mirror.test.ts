@@ -204,6 +204,29 @@ describe('extractRegistrySpan (R15 span definition)', () => {
   test('null when no | script | header row exists', () => {
     expect(extractRegistrySpan('# nothing here\n')).toBeNull();
   });
+
+  // U-20261121-002: a Windows checkout smudges both files to CRLF. The
+  // synthesized span is "\n"-joined, so raw \r in the extracted span made an
+  // unchanged registry read as drift (measured before the fix: both-CRLF
+  // reported unequal).
+  test('CRLF content yields the same span as LF (EOL-insensitive)', () => {
+    const lf = ['# Title', '', '## Registry', '', HEADER, SEPARATOR, row('a.ts', 'L0+L1'), row('b.ts', 'L0')].join('\n');
+    const crlf = lf.replace(/\n/g, '\r\n');
+    expect(extractRegistrySpan(crlf)).toBe(extractRegistrySpan(lf));
+  });
+
+  test('a CRLF root registry and a CRLF mirror report no drift', () => {
+    const content = rootRegistry([row('a.ts', 'L0+L1'), row('b.ts', 'L0')]);
+    const dir = makeTemplateTree({});
+    try {
+      const lfSpan = buildMirrorRegistrySpan(content, dir);
+      const crlfSpan = buildMirrorRegistrySpan(content.replace(/\n/g, '\r\n'), dir);
+      expect(crlfSpan).toBe(lfSpan);
+      expect(extractRegistrySpan(crlfSpan.replace(/\n/g, '\r\n'))).toBe(extractRegistrySpan(lfSpan));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('live tree invariants (post-normalization)', () => {

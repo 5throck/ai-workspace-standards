@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-21T14:52:51.702Z
+**Generated**: 2026-11-21T15:31:36.034Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -146,7 +146,7 @@
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | fs, path |
 | generate-l3-readme.ts | 1.0.3 | scripts/generate-l3-readme.ts | fs, path |
 | generate-raci.ts | 1.2.1 | scripts/generate-raci.ts | fs, js-yaml, path |
-| generate-scripts-mirror.ts | 1.1.0 | scripts/generate-scripts-mirror.ts | fs, path, url |
+| generate-scripts-mirror.ts | 1.1.1 | scripts/generate-scripts-mirror.ts | fs, path, url |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | fs, path, process |
 | generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
 | generate-skill-lifecycle-records.ts | 1.3.1 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
@@ -195,7 +195,7 @@
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | fs, path |
 | spec-register.ts | 1.6.0 | scripts/spec-register.ts | fs, path |
 | stop-gate.ts | 1.0.0 | scripts/stop-gate.ts | fs, path |
-| sync-agent-mirrors.ts | 1.3.0 | scripts/sync-agent-mirrors.ts | fs, js-yaml, path, url |
+| sync-agent-mirrors.ts | 1.3.1 | scripts/sync-agent-mirrors.ts | fs, js-yaml, path, url |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
 | sync-model-registry.ts | 1.3.0 | scripts/sync-model-registry.ts | fs, path |
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | fs, path |
