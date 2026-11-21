@@ -3039,6 +3039,16 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261121-02",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
+      "id": "dec:DEC-20261121-03",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -8770,8 +8780,8 @@
       "name": "adopt-project",
       "scope": "root",
       "capability": "adopt-project",
-      "content_hash": "e4a8ce9944bda5d3",
-      "version": "1.1.1",
+      "content_hash": "b3ad11c21bc0eec9",
+      "version": "1.1.2",
       "mirrors": [
         "skills/adopt-project/SKILL.md",
         ".claude/skills/adopt-project/SKILL.md",
@@ -9182,8 +9192,8 @@
       "name": "project-to-variant",
       "scope": "root",
       "capability": "project-to-variant",
-      "content_hash": "231dd3563b434c1f",
-      "version": "1.3.0",
+      "content_hash": "32a340aced783d82",
+      "version": "1.3.1",
       "mirrors": [
         "skills/project-to-variant/SKILL.md",
         ".claude/skills/project-to-variant/SKILL.md",
@@ -9558,8 +9568,8 @@
       "name": "upgrade-project",
       "scope": "root",
       "capability": "upgrade-project",
-      "content_hash": "8961b3065ea92e76",
-      "version": "1.6.2",
+      "content_hash": "5e93ab403877eec2",
+      "version": "1.6.3",
       "mirrors": [
         "skills/upgrade-project/SKILL.md",
         ".claude/skills/upgrade-project/SKILL.md",
@@ -12732,6 +12742,18 @@
       "type": "cites_skill",
       "from": "dec:DEC-20261121-01",
       "to": "skill:common/decision-record",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261121-02",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261121-03",
+      "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
     },
     {
@@ -18425,7 +18447,25 @@
     {
       "type": "cites_skill",
       "from": "doc:co-utility/README.md",
+      "to": "skill:root/adopt-project",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/README.md",
       "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/README.md",
+      "to": "skill:root/new-project",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-utility/README.md",
+      "to": "skill:root/project-to-variant",
       "source": "workflow-doc"
     },
     {
@@ -34135,6 +34175,12 @@
         "field": "relates_to",
         "index": 1
       }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/project-to-variant",
+      "to": "skill:root/adopt-project",
+      "source": "prose"
     },
     {
       "type": "composes_with",

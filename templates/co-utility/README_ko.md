@@ -7,8 +7,9 @@ lang_reason: source-material
 # co-utility
 
 > **언어**: [English](README.md) · **한국어**
-> **상태**: ⚠️ Beta — v0.1.0
+> **상태**: ⚠️ Beta — v0.2.0
 > Standalone utility/tool application workflow — multi-interface (web UI + desktop shell + CLI) apps sharing one core service, with runtime-output isolation, locale-matrix i18n, and external-input security audits. Doctrine derived from the QuickDL engagement (2026-11).
+> **소비 방식: adoption-only** — 이 템플릿은 기존 외부 프로젝트(예: QuickDL)를 fleet variant로 전환하는 `project-to-variant` / `adopt-project` 전용 대상입니다. `new-project` 스캐폴드 후보가 아니며, variant.json의 `consumption` 선언으로 스캐폴드 열거에서 제외됩니다.
 
 ## 개요
 
@@ -17,6 +18,8 @@ Standalone utility/tool application workflow — multi-interface (web UI + deskt
 ## 빠른 시작
 
 이것은 워크스페이스 템플릿의 beta 변형입니다. `templates/common`에서 상속하며 변형별 맞춤 설정을 포함합니다.
+
+> Adoption 경로 전용: 기존 외부 프로젝트를 이 변형으로 편입하려면 `adopt-project` / `project-to-variant`를 사용하세요 — `new-project`는 이 변형을 거부합니다(위의 소비 방식 참조).
 
 > **설계 게이트 (ADR-0074)**: 코드 변경에는 스펙이 동반되어야 합니다 — `docs/designs/<spec-id>-design.md`를 만들고 등록한(`bun scripts/spec-register.ts --file <설계문서> --source manual`) 뒤 `/sync`하세요. 동기화 시 스펙 검사가 문서 없는 코드 변경을 차단합니다; 사소한 변경은 `--spec-exempt=E1..E5`를 쓸 수 있습니다.
 
@@ -92,4 +95,4 @@ Standalone utility/tool application workflow — multi-interface (web UI + deskt
 
 ---
 
-*최근 갱신: 2026-11-18*
+*최근 갱신: 2026-11-21*

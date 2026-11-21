@@ -9,7 +9,7 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.1.1
+version: 1.1.2
 owner: scaffolding-expert
 last_reviewed: 2026-10-31
 relates_to:
@@ -75,6 +75,12 @@ bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform all|cla
 - Colliding foreign files are archived byte-identical under `scripts/_legacy/` and to an external backup directory (path in the report); nothing is deleted.
 - Foreign skills are protected from registry prunes via the variant.json skill_manifest seed.
 - Adoption never commits; rollback guidance (HEAD SHA + backup path) is printed on failure.
+
+## Adoption-only variants (consumption birth certificate)
+
+Since adopt-project v1.8.0, when the target template's `variant.json` declares `consumption: "adoption-only"` (`co-utility` is the canonical target), the seeded project's `variant.json` is **stamped with the same `consumption` value** at adoption time — the field's "consumption birth certificate" (design `docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md` §5.6/§5.7). `variant.json` is PROJECT_STATE (ADR-0073) and is never wave-delivered, so adoption is the only moment a newly adopted project receives the field; a template that does not declare it leaves the key absent (scaffoldable default).
+
+The same run also **registers the adopted `co-*` name as an exclusion row in `docs/fleet-membership.json`** (default ON): the fleet loops — the `resync-audit` scan and the `backport-diff` / `evidence-backport-scan` default sets — become blind to the project by name, without any change to those tools. Passing `--keep-in-fleet` declines the registration with a loud warning (the upgrade-project engine's adoption-only refusal, v1.115.0, remains the backstop in that case, but the project then shows up in loop scans). Explicitly naming an adoption project to any loop tool stays read-only-with-notice.
 
 ## References
 

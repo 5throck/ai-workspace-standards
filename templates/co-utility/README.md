@@ -1,13 +1,14 @@
 ---
 sync_version: 1
-content_hash: 0ef7639c84d954cc7d70a110a0620571d4f5a4ec81c47b3e0badf9d028661879
+content_hash: 0a7b4bdcdb94663410271db80a4e23015e36e5125bfcf0b680136e0e528083f8
 ---
 
 # co-utility
 
 > **Language**: **English** · [한국어](README_ko.md)
-> **Status**: ⚠️ Beta — v0.1.0
+> **Status**: ⚠️ Beta — v0.2.0
 > Standalone utility/tool application workflow — multi-interface (web UI + desktop shell + CLI) apps sharing one core service, with runtime-output isolation, locale-matrix i18n, and external-input security audits. Doctrine derived from the QuickDL engagement (2026-11).
+> **Consumption: adoption-only** — this template is the target for `project-to-variant` / `adopt-project` conversions of existing out-of-fleet projects (e.g. QuickDL). It is NOT a `new-project` scaffold candidate — scaffold enumeration excludes it by the variant.json `consumption` declaration.
 
 ## Overview
 
@@ -16,6 +17,8 @@ Standalone utility/tool application workflow — multi-interface (web UI + deskt
 ## Quick Start
 
 This is a beta variant of the workspace template. It inherits from `templates/common` and includes variant-specific customizations.
+
+> Adoption path only: to bring an existing out-of-fleet project into this variant, use `adopt-project` / `project-to-variant` — `new-project` refuses this variant (see Consumption above).
 
 > **Design Gate (ADR-0074)**: code changes must ship with a spec — create `docs/designs/<spec-id>-design.md`, register it (`bun scripts/spec-register.ts --file <design-doc> --source manual`), then `/sync`. The sync-time spec-check blocks undocumented code changes; trivial changes can use `--spec-exempt=E1..E5`.
 
@@ -90,4 +93,4 @@ See `scripts/helpers/variant-governance-rules.ts` for promotion criteria.
 
 ---
 
-*Last Updated: 2026-11-19*
+*Last Updated: 2026-11-21*

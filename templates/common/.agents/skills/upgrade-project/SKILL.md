@@ -1,11 +1,11 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: 1.6.2
+version: 1.6.3
 status: active
 scope: workspace
 owner: pm
-last_updated: 2026-10-26
+last_updated: 2026-11-21
 last_reviewed: 2026-10-31
 relates_to:
   - skill: promote-variant
@@ -154,6 +154,19 @@ bun scripts/upgrade-project.ts <project> --rollback   # exits 1 if the restore f
 git stash list
 git stash pop stash@{0}
 ```
+
+## Curated path (adoption-only variants)
+
+Since `upgrade-project.ts` v1.115.0, a target whose `variant.json` declares `consumption: "adoption-only"` (e.g. a project adopted from the `co-utility` template) is **refused at the engine level** — fail-closed, with the curated-path pointer in the refusal message. The engine is the single funnel every caller passes through (manual CLI, skill-driven resync waves, gateway spawn, any cron), so this gate guards all of them by default; it is refusal-grade, unlike the outside-`Projects/` WARN + confirm prompt (H14), which is prompt-grade and `--yes`-bypassable.
+
+The only route to deliver template content to an adoption-only project is the **curated path**:
+
+1. **Dry run with the override**: `bun scripts/upgrade-project.ts <target> --confirm-curated --dry-run` — the refusal lifts and the full category plan prints. Dry-run stays the default until `--confirm` is also passed: **two explicit tokens** are required before anything writes.
+2. **Human structure mapping**: review the plan and decide per-surface applicability by hand — adoption projects are structurally heterogeneous, so a standard wave is inapplicable by design.
+3. **Execute narrowly**: append `--confirm --surfaces <claim-classes> --platform <p>`. `--surfaces` narrows delivery to the selected claim classes and is validated against the run's upgrade-policy claims; an unknown claim class fails the run.
+4. **Manual commit** (adoption projects are never auto-committed), then verify `.claude/template-version.txt` and `bun scripts/audit.ts` in the project.
+
+The overrides are **per-invocation only**: `--confirm-curated`, `--confirm`, and `--surfaces` are never persisted, and no project config can set them. Template status and project status are independent axes (an adopted project may be `stable` while its template is `beta`) — this gate, not a template-status gate, is the operative control. Full design: `docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md` §5 (gate table §5.4, curated runbook §5.5).
 
 ## See Also
 

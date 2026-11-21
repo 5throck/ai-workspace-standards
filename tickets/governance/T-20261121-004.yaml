@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261121-004
+kind: manual
+title: >-
+  new-project scaffold guard: refuse or warn when a same-name remote repo
+  already exists — 2026-11-20 co-work incident: a session ran new-project
+  scaffolding into Projects/co-work while github.com/5throck/co-work was live
+  with 52 PRs; the local repo had no origin remote so the histories diverged
+  silently; recovered 2026-11-21 by realigning to origin with backups (tags
+  archive/cowork/local-scaffold and archive/cowork/scaffold-session-logs). Ask:
+  add a pre-scaffold guard to the new-project flow — remote existence probe (gh
+  repo view <org>/<name>) plus non-empty Projects/<name> probe, each blocking
+  the scaffold unless an explicit override flag is passed
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-21T10:48:39.793+09:00'
+history:
+  - at: '2026-11-21T10:48:39.793+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

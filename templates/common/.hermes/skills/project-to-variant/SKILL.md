@@ -1,7 +1,7 @@
 ---
 name: project-to-variant
 description: "Convert an existing standalone project into an official variant template. Use when: a proven project should become a reusable template for future projects."
-version: 1.3.0
+version: 1.3.1
 status: active
 scope: workspace
 owner: scaffolding-expert
@@ -28,6 +28,10 @@ Converts an existing standalone project into an official `co-*` variant template
 - 3+ custom agents or 2+ custom skills have been developed
 - The project is expected to spawn 3+ future projects
 - The project has been tested in 2+ engagements and is stable
+
+### Adoption-only targets
+
+This tool also serves the adoption path: it can target a template whose `variant.json` declares `consumption: "adoption-only"` — `co-utility` is the first (the target template for converting existing out-of-fleet projects, e.g. QuickDL, via `adopt-project`). The template's declaration is stamped into the adopted project's `variant.json` by `adopt-project` at adoption time (design `docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md` §5.6). Promotion back toward templates — this tool or `l3-to-variant-pipeline.ts` — stays explicitly-pathed and human-gated: adoption-only projects are never promoted by automation, adoption sources get the `PROMOTION_CHECKLIST.md` adoption-source review line (design §5.4), and overlaying an existing variant such as `co-utility` still requires `--overlay-variant` authorization (refuse by default).
 
 ## Script
 
