@@ -153,7 +153,7 @@
       "migration_guides": []
     },
     "co-utility": {
-      "latest": "0.1.0",
+      "latest": "0.2.0",
       "status": "beta",
       "released": "2026-11-18",
       "security_advisories": [],

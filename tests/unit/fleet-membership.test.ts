@@ -248,3 +248,50 @@ describe('exclusionForName / exclusionNotice (§6.3/§6.4/§6.7 surfaces)', () =
     }
   });
 });
+
+describe('adoption-time exclusion rows (adopt-project v1.8.0 registration shape — design §5.7)', () => {
+  // The exact row shape adopt-project.ts writes on adopting into an adoption-only
+  // variant (consumption:"adoption-only", spec 2026-11-21-co-utility-dedup-and-adoption-role-design.md):
+  const ADOPTION_ROW = {
+    id: 'co-adopted-utility',
+    reason:
+      'Adoption-only variant project (adopted into templates/co-utility, variant.json "consumption": "adoption-only") — registered at adoption time by adopt-project so the resync-audit scan and the backport batteries stay blind (delivery goes through the curated upgrade-project path: --confirm-curated, dry-run default, --surfaces selection). Design: docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.7.',
+    decided: '2026-11-21',
+    decision_ref: 'DEC-20261107-01',
+  };
+  const ADOPTION_REGISTRY = JSON.stringify({ version: 1, excluded: [ADOPTION_ROW] });
+
+  test('the adoption row removes the adopted project from listFleetProjects (loop consumers blinded)', () => {
+    const root = makeWorkspace({ projects: ['co-adopted-utility', 'co-real'], registry: ADOPTION_REGISTRY });
+    try {
+      expect(listFleetProjects(root)).toEqual(['Projects/co-real']);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('exclusionForName finds the adoption row (the adopt-project collision-guard path)', () => {
+    const root = makeWorkspace({ registry: ADOPTION_REGISTRY });
+    try {
+      expect(exclusionForName('co-adopted-utility', root)?.decision_ref).toBe('DEC-20261107-01');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test('a non-co-* adopted name cannot carry a row (namespace rule adopt-project relies on to skip registration)', () => {
+    // adopt-project registers only co-* names: anything else is structurally invisible
+    // to listFleetProjects(), and writing a non-conforming row would fail-closed-break
+    // every fleet tool. The validator must reject such a row.
+    const root = makeWorkspace({
+      registry: JSON.stringify({ version: 1, excluded: [{ ...ADOPTION_ROW, id: 'quickdl' }] }),
+    });
+    try {
+      const loaded = loadFleetRegistry(root);
+      expect(loaded.ok).toBe(false);
+      if (!loaded.ok) expect(loaded.error).toBe('malformed');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});

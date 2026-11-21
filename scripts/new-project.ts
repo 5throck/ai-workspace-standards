@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.45.0
+// @version 1.46.0
+// v1.46.0 (2026-11-21, spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md
+//          §2.2/§5.4): adoption-only consumption filter — getValidVariants() excludes variants
+//          whose variant.json declares "consumption": "adoption-only" (both the filesystem scan
+//          and the pinned-tag scan — the tag path reads each candidate's variant.json through
+//          `git show`), so adoption-only variants never appear in the candidate list and
+//          simulate-pipeline inherits the filter (it drives this enumeration). An explicit
+//          --variant naming an adoption-only variant fails fast with a pointer to
+//          adopt-project / project-to-variant (the message names the field so the intent is
+//          discoverable). Absent/unreadable variant.json = scaffoldable default (absent-key
+//          semantics — zero behavior change for every existing variant).
 // v1.45.0 (2026-11-17, design docs/designs/2026-11-17-new-project-precheck-argv-design.md, T-20261117-009):
 //          the lifecycle governance pre-check now runs in-process via helpers/validate-output.ts
 //          runGovernancePrecheck (no validator JSON through argv — it exceeded the Windows 32K command line
@@ -564,7 +574,32 @@ try {
 }
 
 // ── Variant detection & validation ────────────────────────────────────────────
-function getValidVariants(fromTag?: string): string[] {
+// v1.46.0 (design 2026-11-21-co-utility-dedup-and-adoption-role-design §2.2): read a
+// variant's consumption role. Absent/unreadable manifest or absent key → undefined
+// (the scaffoldable default). The tag path reads the variant.json AT THE TAG via
+// `git show` — a pinned scaffold must honor the pinned tree's role, not HEAD's.
+function variantConsumption(dirName: string, fromTag?: string): string | undefined {
+  try {
+    let raw: string;
+    if (fromTag) {
+      const r = spawnSync("git", ["-C", workspaceRoot, "show", `${fromTag}:templates/${dirName}/variant.json`], {
+        encoding: "utf8",
+      });
+      if (r.status !== 0) return undefined;
+      raw = r.stdout;
+    } else {
+      const manifestPath = join(workspaceRoot, "templates", dirName, "variant.json");
+      if (!existsSync(manifestPath)) return undefined;
+      raw = readFileSync(manifestPath, "utf8");
+    }
+    const consumption = JSON.parse(raw)?.consumption;
+    return typeof consumption === "string" ? consumption : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function variantCandidates(fromTag?: string): string[] {
   if (fromTag) {
     // T-20260927-019: `git archive <tag> --list` is invalid syntax (git rejects it with
     // "extra command line parameter", so EVERY pinned scaffold failed). List the tag's tree
@@ -587,8 +622,19 @@ function getValidVariants(fromTag?: string): string[] {
     .sort();
 }
 
+/** Scaffoldable variants: candidates minus the adoption-only ones (v1.46.0 consumption filter). */
+function getValidVariants(fromTag?: string): string[] {
+  return variantCandidates(fromTag).filter((d) => variantConsumption(d, fromTag) !== "adoption-only");
+}
+
+/** Adoption-only variants (v1.46.0): recognized by name for the explicit-request fail-fast. */
+function getAdoptionOnlyVariants(fromTag?: string): string[] {
+  return variantCandidates(fromTag).filter((d) => variantConsumption(d, fromTag) === "adoption-only");
+}
+
 const tag = templateVer ? `template-v${templateVer}` : "";
 const validVariants = getValidVariants(tag || undefined);
+const adoptionOnlyVariants = getAdoptionOnlyVariants(tag || undefined);
 
 if (tag && validVariants.length === 0) {
   console.error(`❌ Could not detect variants from tag '${tag}'. Tag may not exist.`);
@@ -608,6 +654,25 @@ if (!variant) {
 }
 
 if (!validVariants.includes(variant)) {
+  // v1.46.0: an explicit request for an adoption-only variant gets its own fail-fast —
+  // the variant EXISTS, it is just not scaffoldable (design §2.2: the message names the
+  // field and points to the sanctioned consumers so the intent is discoverable).
+  if (adoptionOnlyVariants.includes(variant)) {
+    console.error(
+      `❌ Variant '${variant}' is adoption-only (variant.json "consumption": "adoption-only") — new-project cannot scaffold it.`,
+    );
+    console.error(
+      `   Adoption-only variants are the TARGET TEMPLATE for existing projects, not new-project candidates.`,
+    );
+    console.error(
+      `   Convert an existing project into this variant: bun scripts/adopt-project.ts <project-path> --variant ${variant}`,
+    );
+    console.error(`   Or promote a project to a template variant: bun scripts/project-to-variant.ts`);
+    console.error(`   (design docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md §2.2)`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+  }
   console.error(`❌ Invalid variant: ${variant}`);
   console.error(`   Valid variants: ${validVariants.join(" ")}`);
   if (import.meta.main) {

@@ -3,9 +3,9 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.45.0
+- **Version**: 1.46.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-17
+- **Last Updated**: 2026-11-21
 - **Last Reviewer**: automation-engineer
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort. The duplicate Metadata section (a v1.10.0-era leftover) was merged into this single section on 2026-09-16.
 
@@ -21,6 +21,7 @@
 - **2026-09-24**: v1.29.0 — §2.3b generalizes extends-stub resolution to every agents/*.md carrying `extends:` frontmatter (13 variant i18n-specialist stubs now resolve against templates/common bodies). Spec: docs/designs/2026-09-25-inventory-decisions-batch-design.md
 - **2026-09-25**: v1.30.0 — `--platform hermes` profile joins (ADR-0088 W2): hermes-primary keeps `.hermes/` and drops CLAUDE.md/GEMINI.md; all other profiles are hermes-opt-out.
 - **2026-11-17**: v1.45.0 — lifecycle governance pre-check runs in-process via helpers/validate-output.ts runGovernancePrecheck (design docs/designs/2026-11-17-new-project-precheck-argv-design.md, T-20261117-009, DEC-20261117-08): no validator JSON through argv (Windows 32K limit), spawn failures report error code/signal + stderr tail, unparsable validator output blocks the scaffold (fail-closed, no bypass), blocking errors scoped to the target variant + common.
+- **2026-11-21**: v1.46.0 — adoption-only consumption filter (spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md §2.2): getValidVariants() excludes variants whose variant.json declares `consumption: "adoption-only"` (filesystem + pinned-tag scans — the tag path reads each candidate's variant.json via `git show`); an explicit `--variant` naming one fails fast with the adopt-project/project-to-variant pointer; absent key = scaffoldable default. simulate-pipeline inherits the filter (drives this enumeration).
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
@@ -51,6 +52,7 @@
 | 2026-11-07 | production | production | v1.42.0 (spec docs/designs/2026-11-07-external-deps-machinery-design.md — implements the upstream external-dependency machinery): §7.9 EXTERNAL DEPS FETCH after project materialization (§7.8) — installs each pinned external git dependency from the scaffolded project's external-deps.json into its gitignored install_dir (D2 WARN posture; `--strict-external-deps` hard-fails; documented retry is `upgrade-project <project> --external-deps-only`); appends .gitignore coverage (D5) and writes the resolved commit back (D1 advisory). Core in scripts/lib/external-deps.ts v1.0.0 fetchProjectExternalDeps. Additive: variants without external-deps.json seeds are unaffected. | automation-engineer |
 | 2026-11-05 | production | production | v1.41.0 (spec docs/designs/2026-11-05-cowork-deliverables-structure-design.md): §2.6a-2 new co-work branch — scaffold creates deliverables/{reports,drafts,research,references,presentations}/ with per-dir READMEs referencing docs/co-work.context.md Output Destination Mapping and the {topic}-YYYY-MM-DD[_ko] naming convention (Korean-default deliverable language carve-out); co-consult block (§2.6a) byte-identical. Additive: other variants unaffected. | automation-engineer |
 | 2026-11-07 | production | production | v1.44.0 (spec docs/designs/2026-11-07-external-deps-standard-design.md §5.3/§5.4 E5, T-20261107-005): §7.9 reports pre-install-gate refusals (lib/external-deps.ts v1.1.0 — license policy + R3 external/<id> convention; a deny-class dependency is never cloned) as distinct SKIPPED rows (--strict-external-deps hard-fails on them); the documented retry is the project-local CLI `bun scripts/external-deps.ts install` (root --external-deps-only stays valid). | automation-engineer |
+| 2026-11-21 | production | production | v1.46.0 (spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md §2.2): adoption-only consumption filter — getValidVariants() excludes adoption-only variants (filesystem + pinned-tag scans); explicit --variant fails fast with the adopt-project/project-to-variant pointer; absent key = scaffoldable default | automation-engineer |
 
 ## Acceptance Criteria
 

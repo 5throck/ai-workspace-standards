@@ -19,6 +19,7 @@
 | 8 | **Minimum beta duration** | Pending | 3 months in beta status. |
 | 9 | **Zero unresolved bugs** | Pending | 0 open bug reports at promotion time. |
 | 10 | **User feedback** | Pending | Positive feedback from beta users; no critical complaints. |
+| 11 | **Adoption-source review** | Pending | co-utility is adoption-only (`variant.json` `"consumption": "adoption-only"`): every engagement is an adopted project with a structure of its own (evidence: quickdl, a Python multi-interface app). Before promotion, review each adoption source and record per project how its structure mapped onto the variant doctrine (which fleet surfaces applied, which project-owned surfaces were preserved) — structure mapping is judged by a human per project, never automated (design `docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md` §5.4/§5.5; promotion path via `adopt-project` → curated `upgrade-project` runs). |
 
 ## Review History
 

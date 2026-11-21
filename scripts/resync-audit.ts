@@ -2,7 +2,17 @@
 /**
  * resync-audit.ts — Provenance audit of uncommitted content in Projects/co-*
  * (project-resync skill Step 0).
- * @version 1.11.0
+ * @version 1.12.0
+ *
+ * v1.12.0 (2026-11-21, spec
+ *          docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.4):
+ *          defensive adoption-only skip — the daily fleet scan is blinded to adoption
+ *          projects by the adoption-time docs/fleet-membership.json exclusion row
+ *          (adopt-project v1.8.0), but a row can be hand-removed; when the scan meets an
+ *          adoption-only project anyway (project variant.json "consumption":
+ *          "adoption-only"), it SKIPS with a one-line INFO log — never an error, never a
+ *          write. The variant.json read is lazy and flag-present-only (absent file / absent
+ *          key = zero behavior change for every normal fleet member).
  *
  * v1.11.0 (2026-11-18, T-20261118-004, spec
  *          docs/designs/2026-11-18-resync-audit-retention-prune-design.md):
@@ -204,7 +214,7 @@ import { spawnSync } from "node:child_process";
 import { exclusionNotice, listFleetProjects, listTenantLoopProjects, tenantForProjectPath } from "./lib/fleet.ts";
 import { resolveClaim } from "./lib/upgrade-policy.ts";
 
-const VERSION = "1.11.0";
+const VERSION = "1.12.0";
 
 interface FileRow {
   file: string;
@@ -361,6 +371,23 @@ function warnIfNotFleetMember(projects: string[]): void {
   for (const p of projects) {
     const notice = exclusionNotice(p);
     if (notice) console.warn(`⚠️  resync-audit: ${notice}`);
+  }
+}
+
+/**
+ * v1.12.0 (adoption-role design §5.4, defensive layer): true when the project's own
+ * variant.json declares "consumption": "adoption-only". Lazy, flag-present-only read —
+ * absent file / absent key / malformed manifest = false, so a normal fleet member performs
+ * zero behavior change. The adoption-time exclusion row in docs/fleet-membership.json is
+ * the primary blind; this is the backstop for a hand-removed row.
+ */
+function isAdoptionOnlyProject(projectPath: string): boolean {
+  const p = join(projectPath, "variant.json");
+  if (!existsSync(p)) return false;
+  try {
+    return JSON.parse(readFileSync(p, "utf-8"))?.consumption === "adoption-only";
+  } catch {
+    return false;
   }
 }
 
@@ -942,6 +969,13 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
     console.log("|---|---|---|---|---|---|");
     for (const project of targets0.sort()) {
       if (!existsSync(join(project, ".git"))) continue;
+      // v1.12.0 (adoption-role design §5.4): defensive skip — one INFO line, read-only, no error.
+      if (isAdoptionOnlyProject(project)) {
+        console.log(
+          `ℹ️  resync-audit: ${project} is adoption-only (variant.json "consumption": "adoption-only") — skipped (design 2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.4; its docs/fleet-membership.json exclusion row is missing)`,
+        );
+        continue;
+      }
       const branch = git(project, ["rev-parse", "--abbrev-ref", "HEAD"]) || "?";
       const dirty = git(project, ["status", "--porcelain"]).split("\n").filter(Boolean).length;
       const unpushedRaw = git(project, ["rev-list", "--count", "@{upstream}..HEAD"]);
@@ -984,6 +1018,14 @@ Default projects: all Projects/co-*. Never modifies the tree, never pushes.`);
   for (const project of targets) {
     if (!existsSync(join(project, ".git"))) {
       console.warn(`⚠️  resync-audit: ${project} is not a git repo — skipped.`);
+      continue;
+    }
+    // v1.12.0 (adoption-role design §5.4): defensive adoption-only skip — one INFO line,
+    // never an error, never a write (the fleet-membership exclusion row is the primary blind).
+    if (isAdoptionOnlyProject(project)) {
+      console.log(
+        `ℹ️  resync-audit: ${project} is adoption-only (variant.json "consumption": "adoption-only") — skipped (design 2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.4; its docs/fleet-membership.json exclusion row is missing)`,
+      );
       continue;
     }
     const branch = git(project, ["rev-parse", "--abbrev-ref", "HEAD"]) || "?";

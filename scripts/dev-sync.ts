@@ -1,4 +1,11 @@
-// @version 1.52.0
+// @version 1.52.1
+// v1.52.1 (2026-11-21): step 6.55 Windows argv-limit fix — the gate's single
+//          `git ls-files -z -- ${required}` spawn passed ALL required paths in
+//          one argv (810 paths / 52KB at the current registry size), past the
+//          ~32KB Windows command-line limit ("bun: File name too long"), so
+//          every registry-landing commit failed on Windows. The spawn is now
+//          chunked at 64 paths (~8KB) and unioned into the same idxSet —
+//          semantics unchanged, Unix unaffected (repro + fix verified locally).
 // v1.52.0 (2026-11-18, T-20261118-003, spec
 //          docs/designs/2026-11-18-memory-gate-step2-deadlock-design.md §3.2):
 //          step 2's branch-keyed session-block replace gains the OWED-SET
@@ -2918,8 +2925,16 @@ try {
     // keeps the predicate pure; this step only materializes it).
     const required = [...new Set(entries.flatMap((entry) => requiredPathsForEntry(entry)))];
     const idxSet = new Set<string>();
-    if (required.length > 0) {
-      const lsRes = await $`git ls-files -z -- ${required}`.quiet().nothrow();
+    // v1.37.1 (T-20261121 Windows argv fix): `git ls-files -z -- ${required}`
+    // passed all 810 required paths in ONE spawn — 52KB of argv, past the
+    // ~32KB Windows command-line limit ("bun: File name too long"). Chunk the
+    // spawn at 64 paths (~8KB) so the gate works on Windows at any registry
+    // size; results are unioned into the same idxSet (pure read, same
+    // semantics). Unix was never affected.
+    const LS_FILES_CHUNK = 64;
+    for (let i = 0; i < required.length; i += LS_FILES_CHUNK) {
+      const chunk = required.slice(i, i + LS_FILES_CHUNK);
+      const lsRes = await $`git ls-files -z -- ${chunk}`.quiet().nothrow();
       if (lsRes.exitCode !== 0) throw new Error(lsRes.stderr.toString());
       for (const p of lsRes.stdout.toString().split("\0").filter(Boolean)) idxSet.add(p);
     }
