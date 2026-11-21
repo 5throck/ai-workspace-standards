@@ -1,7 +1,7 @@
 ---
 name: storyline
 scope: co-deck
-version: 1.6.0
+version: 1.7.0
 lang: ko
 lang_reason: proper-noun (Step 3.5 quotes verbatim Korean defect strings and replacement wording from the affected deck)
 description: >
@@ -49,19 +49,28 @@ Designs the lecture narrative flow (`storyline.md`) and per-slide content (`slid
 
 ### Step 1.6: Optional Pre-Build Lint (Humanize, U-20261114-009 item 3)
 
-When a Humanize rule-engine server is reachable (the offline Korean AI-tic rule
-engine; default `http://localhost:8765`), run a deck-wide lint of the authored
-narration and bullets through `POST /api/analyze` before the build:
+Prerequisite: the lint runs from the pinned Humanize clone delivered by the
+external-deps machinery at scaffold (external-deps.json id `humanize`); if the
+clone is missing, install it with `bun scripts/external-deps.ts install --id
+humanize`.
+
+Run a deck-wide lint of the authored narration and bullets through the
+Humanize adapter (the pinned clone's rule engine — the adapter probes the
+server, reuses a listening Humanize instance or spawns one from the clone, and
+shuts its spawned server down afterwards):
 
 ```bash
-curl -s -X POST http://localhost:8765/api/analyze \
-  -H "Content-Type: application/json" -d "$(bun -e 'const t = await Bun.file(process.argv[1]).text(); console.log(JSON.stringify({ text: t }))' slide_deck.md)"
+bun scripts/co-deck/humanize-adapter.ts analyze slide_deck.md
+# machine reads (one JSON object with the findings array):
+bun scripts/co-deck/humanize-adapter.ts analyze slide_deck.md --json
 ```
 
 Report the finding count and the top patterns; severe findings are rewritten at
 authoring time (numbers and density preserved — the lint flags AI-tic phrasing,
-not content). The step is OPTIONAL and skips silently when the server is
-unreachable (connection refused = lint unavailable, never a build blocker).
+not content). The step is OPTIONAL and skips silently when the lint is
+unavailable (the adapter prints the reason and exits 0 — lint unavailable,
+never a build blocker; a missing clone is the one hard error with the install
+hint).
 
 ### Step 1.7: Slidedata Generator Hygiene (U-20261114-009 item 4)
 

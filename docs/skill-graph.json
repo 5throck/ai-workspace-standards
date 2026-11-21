@@ -6641,8 +6641,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "98d6e63174952270",
-      "version": "1.6.0",
+      "content_hash": "4ebf17160dda2acc",
+      "version": "1.7.0",
       "mirrors": [
         "templates/co-deck/skills/storyline/SKILL.md"
       ],

@@ -1,5 +1,5 @@
 {
-  "$comment": "co-deck variant seed (schema v2) — extends templates/common/external-deps.json (merge on id). quickdl is the video download engine behind scripts/co-deck/download-videos.ts (design docs/designs/2026-11-16-quickdl-external-design.md; standard docs/designs/2026-11-07-external-deps-standard-design.md). Install: bun scripts/external-deps.ts install --id quickdl, then the one-time venv setup in the adapter header.",
+  "$comment": "co-deck variant seed (schema v2) — extends templates/common/external-deps.json (merge on id). quickdl is the video download engine behind scripts/co-deck/download-videos.ts (design docs/designs/2026-11-16-quickdl-external-design.md; standard docs/designs/2026-11-07-external-deps-standard-design.md). Install: bun scripts/external-deps.ts install --id quickdl, then the one-time venv setup in the adapter header. humanize (5throck/Humanize, pin v1.0.0, Korean AI-tell lint server) is the storyline Step 1.6 lint dependency, consumed as-is behind the single adapter scripts/co-deck/humanize-adapter.ts (design docs/designs/2026-11-21-humanize-seed-country-profiles-design.md; install: bun scripts/external-deps.ts install --id humanize); its market_scope [\"ko-language\"] is advisory metadata — nothing gates on it (T-20261121-001, standard Addendum C).",
   "schema_version": 2,
   "dependencies": [
     {
@@ -15,6 +15,21 @@
       "license": "MIT",
       "usage": "as-is",
       "adapter": "scripts/co-deck/download-videos.ts"
+    },
+    {
+      "id": "humanize",
+      "repo": "https://github.com/5throck/Humanize",
+      "pin": "v1.0.0",
+      "commit": "4860b0ec45a68d1be031f120e6d3fd5219569bc9",
+      "install": "git clone --depth 1 --branch {pin} {repo} {dir}",
+      "install_dir": "external/humanize",
+      "consumer": "Korean AI-tell lint (scripts/co-deck/humanize-adapter.ts; storyline Step 1.6)",
+      "compatibility_test": "bun scripts/co-deck/humanize-adapter.ts selftest",
+      "propagation": "never",
+      "license": "MIT",
+      "usage": "as-is",
+      "adapter": "scripts/co-deck/humanize-adapter.ts",
+      "market_scope": ["ko-language"]
     }
   ]
 }

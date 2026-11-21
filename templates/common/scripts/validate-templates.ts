@@ -1,8 +1,32 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.86.0
+ * @version 1.87.0
  *
+ * v1.87.0 (2026-11-21, design docs/designs/2026-11-21-humanize-seed-country-profiles-design.md
+ *          Part C, T-20261121-002): new WARN-only check `market-scope-country` (B-10) —
+ *          the market_scope(deps) ↔ country_config(variant) advisory consistency rule.
+ *          For each variant, each external-deps seed entry whose `market_scope` includes
+ *          "KR" requires "KR" in the carrying variant's country_config.supported; a
+ *          violation emits one WARN row naming the dep id. Rulings baked in: (1)
+ *          "ko-language" members are categorically EXEMPT in both directions — language
+ *          scope NEVER implies country scope and vice versa (ADR-0057 §5, country ≠
+ *          language; the exemption is the load-bearing doctrine pin,
+ *          tests/unit/validate-templates-market-scope-country.test.ts); (2) unknown
+ *          market_scope values are skipped here — verify V10 already warns on them
+ *          (T-20261121-001 §5.2), one warning per unknown value; (3) direction is
+ *          ONE-WAY dep → variant (declaring KR without KR-scoped deps is fine — market
+ *          capability ≠ dependency carriage); (4) severity is WARN, never FAIL —
+ *          consistent with T-20261121-001's advisory phase-1 posture, escalation to FAIL
+ *          is a future ruling; (5) scope is template seeds only (project manifests have
+ *          their own flows; seed-vs-project divergence stayed deferred, T-001 §5.5);
+ *          (6) NOT behavioral gating — fetch/install filtering by country remains
+ *          T-20261121-001 N1, untouched. Decision logic extracted as the pure exported
+ *          helper collectMarketScopeCountryIssues (the scripts/lib/country-scoped-agents.ts
+ *          pure-helper precedent); the check reads the two surfaces the validator already
+ *          loads (the variant's seed JSON — already parsed by checkExternalDepLicense's
+ *          parser — and variant.json), no new IO surfaces. scripts/lib/external-deps.ts
+ *          is UNTOUCHED (zero L1 lib churn, design G5).
  * v1.86.0 (2026-11-18, spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1,
  *          DEC-20261117-06; detection batch PR-C, T-20261118-001): new check `sync-detection` —
  *          a variant.json `syncDetection` block (optional top-level key, absent = OFF per the
@@ -1279,6 +1303,48 @@ function checkCountryProfileDivergence(): void {
   }
 }
 
+// ── B-10: market_scope(deps) ↔ country_config(variant) consistency (T-20261121-002) ──
+
+/**
+ * Pure decision core of the B-10 advisory consistency check (design
+ * docs/designs/2026-11-21-humanize-seed-country-profiles-design.md Part C) — one
+ * issue per seed dep whose market_scope includes "KR" while the carrying variant's
+ * country_config.supported does not declare KR.
+ *
+ * Rulings baked in (do not "fix" these without a design cycle):
+ * - "ko-language" is categorically EXEMPT in both directions: language scope never
+ *   implies country scope (ADR-0057 §5, country ≠ language). A Korean-language lint
+ *   on a US-market deck still helps; a KR-market variant may produce English output.
+ * - Unknown market_scope values are skipped by THIS check — verify V10 owns their
+ *   warning (T-20261121-001 §5.2); one warning per unknown value, not two.
+ * - Direction is one-way dep → variant: a variant declaring KR without carrying
+ *   KR-scoped deps is fine (market capability ≠ dependency carriage).
+ * - Severity is WARN (caller's choice); this helper only decides the rows.
+ */
+export interface MarketScopeCountryIssue {
+  depId: string;
+  message: string;
+}
+
+export function collectMarketScopeCountryIssues(
+  deps: ReadonlyArray<{ id: string; market_scope?: string[] }>,
+  supported: ReadonlyArray<string> | undefined,
+  variantName: string,
+): MarketScopeCountryIssue[] {
+  const issues: MarketScopeCountryIssue[] = [];
+  const supportedSet = new Set((supported ?? []).map((c) => String(c).trim().toUpperCase()));
+  for (const dep of deps) {
+    const scopes = Array.isArray(dep.market_scope) ? dep.market_scope : [];
+    if (!scopes.includes("KR")) continue;
+    if (supportedSet.has("KR")) continue;
+    issues.push({
+      depId: dep.id,
+      message: `templates/${variantName}/external-deps.json '${dep.id}' market_scope includes 'KR' but country_config.supported does not declare KR`,
+    });
+  }
+  return issues;
+}
+
 // ── B-03r / B-03a: exists→declared reverse reconciliation helpers (T-20260912-014) ──
 
 /** File extensions treated as invokable scripts for manifest reconciliation. */
@@ -1780,6 +1846,39 @@ function checkVariantManifests(): Map<string, VariantManifest> {
             "country-config",
             `templates/${dir}/variant.json country_config.default is '${countryConfig.default}'. Policy requires region-neutral (null).`,
           );
+        }
+      }
+
+      // B-10: market_scope(deps) ↔ country_config(variant) advisory consistency (v1.87.0,
+      // design docs/designs/2026-11-21-humanize-seed-country-profiles-design.md Part C) —
+      // a seed entry whose market_scope includes "KR" requires KR in the carrying
+      // variant's country_config.supported. WARN-only (advisory phase-1 posture,
+      // T-20261121-001 precedent); ko-language/unknown scopes exempt (ADR-0057 §5 —
+      // language never implies country); one-way dep → variant; NOT behavioral gating
+      // (fetch/install filtering by country remains T-20261121-001 N1). Reads the two
+      // surfaces the validator already loads; a malformed seed is skipped silently —
+      // checkExternalDepLicense already FAILs it and one defect gets one row.
+      const variantSeedPath = join(TEMPLATES_DIR, dir, "external-deps.json");
+      if (existsSync(variantSeedPath)) {
+        try {
+          const seed = parseExternalDepsManifest(
+            readFileSync(variantSeedPath, "utf-8"),
+            `templates/${dir}/external-deps.json`,
+          );
+          for (const issue of collectMarketScopeCountryIssues(
+            seed.dependencies,
+            Array.isArray(countryConfig?.supported) ? (countryConfig.supported as string[]) : undefined,
+            dir,
+          )) {
+            warn(
+              dir,
+              "market-scope-country",
+              `${issue.message} (B-10, advisory — design docs/designs/2026-11-21-humanize-seed-country-profiles-design.md Part C)`,
+              `Add "KR" to templates/${dir}/variant.json country_config.supported (or scope the dep to a language/market it actually serves)`,
+            );
+          }
+        } catch {
+          /* malformed seed — external-dep-license already FAILed it; no double report */
         }
       }
 

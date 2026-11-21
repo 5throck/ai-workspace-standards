@@ -3,7 +3,7 @@
   "description": "General work and task execution workflow variant for research, documentation, and project coordination. Includes specialized collaboration agents covering analysis, content writing, technical writing, project coordination, and MS365 integration. Includes the native PPTX deck capability (spec 2026-11-03-co-work-native-pptx-deck-design, export tier rebased onto ppt-master per design 2026-11-06-deck-emitter-ppt-master-rebase-design): deck-builder agent authors per-page canonical SVG under deterministic quality gates (python svg_check.py) and exports natively editable DrawingML via ppt-master-adapter.ts + the ppt-master chain.",
   "variant_type": "collaboration",
   "status": "stable",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "inherits_common": "templates/common",
   "created_at": "2026-05-28T00:00:00.000Z",
   "lifecycle": {
@@ -129,7 +129,7 @@
   },
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": [],
+    "supported": ["KR"],
     "default": null
   },
   "script_manifest": {

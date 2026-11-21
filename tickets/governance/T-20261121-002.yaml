@@ -1,0 +1,43 @@
+schemaVersion: 1
+id: T-20261121-002
+kind: manual
+title: >-
+  Humanize external for co-deck + country profiles for co-deck/co-work. Owner
+  directive 2026-11-21: "humanize 프로젝트가 co-deck과 co-work에 external로 반영될 필요가 있을 듯
+  해. 둘다 country profile에 적용을 받게 될 듯 해." Current state:
+  templates/co-work/external-deps.json HAS humanize (5throck/Humanize v1.0.0,
+  market_scope ["ko-language"] via T-20261121-001);
+  templates/co-deck/external-deps.json does NOT (only market-neutral quickdl —
+  co-deck consumes the Humanize lint as an optional unpinned HTTP POST to a
+  running server, storyline Step 1.6, skips silently when unreachable);
+  templates/co-deck/variant.json country_config supported [] and
+  templates/co-work/variant.json country_config supported [] — neither declares
+  KR despite carrying Korea-language/market dependencies. Expected: (1) humanize
+  added to templates/co-deck/external-deps.json as a pinned external (the
+  storyline lint dependency becomes a tracked, scaffold-delivered dependency
+  instead of an optional unversioned server call); (2) country profiles for
+  co-deck and co-work ruled — what applying "the country profile" means for
+  variants whose seeds carry market_scope deps (supported gains KR? ko-language
+  handling? does market_scope on a dep imply a country_config consistency
+  requirement on the carrying variant?); (3) the
+  market_scope(deps)↔country_config(variant) relationship designed — the
+  T-20261121-001 advisory field explicitly deferred behavioral gating, but the
+  owner now signals the connection is real; design the consistency rule
+  (advisory vs enforced) with the ADR-0057/0058 country-scoped-assets precedent.
+  Needs Design Gate: new seed entry (compatibility_test + adapter surface
+  decision — co-deck has NO humanize adapter script today, unlike co-work's
+  scripts/humanize/humanize-adapter.ts), country profile changes on two
+  variants, and the market_scope↔country_config consistency ruling.
+priority: normal
+status: waiting
+attempts: 0
+created_at: '2026-11-21T00:00:00.000+09:00'
+history:
+  - at: '2026-11-21T00:00:00.000+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-21T13:23:43.870+09:00'
+    from: backlog
+    to: waiting
+result: null
+error: null
