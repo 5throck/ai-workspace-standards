@@ -8,7 +8,7 @@
 
 ## Phase History
 
-- **2026-11-19**: Initial release — defined as part of the co-utility variant team (doctrine from the QuickDL engagement).
+- **2026-11-19**: Fleet bespoke-record convention — recorded alongside the variant's `agents/pm.md` extends-stub (`extends: ../../common/agents/pm.md`). The stub resolves to common's PM body at scaffold time and carries no `governance:` pointer of its own; this record documents that relationship, not a bespoke variant PM definition.
 
 ## Acceptance Criteria
 

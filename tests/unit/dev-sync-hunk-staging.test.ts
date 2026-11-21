@@ -9,7 +9,9 @@
  * tests/unit/dev-sync-scoped-staging-default.test.ts — these tests read the real
  * source and assert the contract textually.
  *
- * @version 1.0.0
+ * @version 1.0.1
+ * v1.0.1 (2026-11-21): T8 pin 1.52.0 → 1.52.1 — dev-sync.ts bumped for the step-6.55
+ *          Windows argv-limit fix (chunked git ls-files spawn, spec-registry gate).
  */
 import { describe, test, expect } from 'bun:test';
 import { readFileSync, existsSync } from 'node:fs';
@@ -70,7 +72,7 @@ describe('dev-sync hunk-adjudicated staging (T-20261117-015)', () => {
   });
 
   test('T8: version header bumped with the spec reference', () => {
-    expect(src).toMatch(/@version 1\.52\.0/);
+    expect(src).toMatch(/@version 1\.52\.1/);
     // the v1.51.0 spec reference survives the T-20261118-003 bump alongside it
     expect(src).toMatch(/2026-11-18-dev-sync-hunk-staging-design\.md/);
     expect(src).toMatch(/2026-11-18-memory-gate-step2-deadlock-design\.md/);

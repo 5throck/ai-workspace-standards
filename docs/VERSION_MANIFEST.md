@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-21T00:15:25.672Z
+**Generated**: 2026-11-21T04:17:30.531Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -105,7 +105,7 @@
 
 | Name | Version | Location | Dependencies |
 |------|---------|----------|--------------|
-| adopt-project.ts | 1.7.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
+| adopt-project.ts | 1.8.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
 | agent-create.ts | 1.0.2 | scripts/agent-create.ts | fs, path |
 | agent-delete.ts | 1.0.2 | scripts/agent-delete.ts | fs, path |
 | agent-lifecycle-audit.ts | 1.9.1 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
@@ -132,7 +132,7 @@
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
 | detect-backport.ts | 1.0.0 | scripts/detect-backport.ts | child_process, crypto, fs, path |
-| dev-sync.ts | 1.52.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| dev-sync.ts | 1.52.1 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |
@@ -167,7 +167,7 @@
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | child_process, fs, path |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
-| new-project.ts | 1.45.0 | scripts/new-project.ts | child_process, crypto, fs, os, path |
+| new-project.ts | 1.46.0 | scripts/new-project.ts | child_process, crypto, fs, os, path |
 | normalize-registry-provenance.ts | 1.1.0 | scripts/normalize-registry-provenance.ts | fs, path |
 | procedure-coverage.ts | 1.0.0 | scripts/procedure-coverage.ts | fs, js-yaml, path, url |
 | project-to-variant.ts | 1.5.0 | scripts/project-to-variant.ts | child_process, fs, path |
@@ -181,7 +181,7 @@
 | render-commands.ts | 1.1.0 | scripts/render-commands.ts | fs, path |
 | render-pdf-deck.ts | 1.0.1 | scripts/render-pdf-deck.ts | fs, path, url |
 | resolve-variants.ts | 1.0.3 | scripts/resolve-variants.ts | fs, js-yaml, path |
-| resync-audit.ts | 1.11.0 | scripts/resync-audit.ts | child_process, fs, path |
+| resync-audit.ts | 1.12.0 | scripts/resync-audit.ts | child_process, fs, path |
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | path |
 | review-baseline.ts | 1.6.0 | scripts/review-baseline.ts | N/A |
 | route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | fs, path |
@@ -217,7 +217,7 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.114.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.115.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.2.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.1 | scripts/validate-doc-folder.ts | fs, path |
@@ -233,7 +233,7 @@
 | validate-templates.ts | 1.86.0 | scripts/validate-templates.ts | child_process, crypto, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
-| validate-variant-readiness.ts | 1.1.0 | scripts/validate-variant-readiness.ts | fs, path |
+| validate-variant-readiness.ts | 1.2.0 | scripts/validate-variant-readiness.ts | fs, path |
 | variant-feature.ts | 1.1.0 | scripts/variant-feature.ts | child_process, fs, path |
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | crypto, fs, path, url |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |

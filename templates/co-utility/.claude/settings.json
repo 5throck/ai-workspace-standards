@@ -21,7 +21,71 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "teammateMode": "auto",
+  "worktree": {
+    "bgIsolation": "none"
+  },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/pm-dispatch-gate.ts",
+            "timeout": 10,
+            "statusMessage": "Checking PM dispatch policy..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/gateguard-fact-force.ts --mode ask",
+            "timeout": 30,
+            "statusMessage": "GateGuard: checking first-edit importers..."
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/agent-model-gate.ts",
+            "timeout": 10,
+            "statusMessage": "Checking Agent dispatch model tier..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/delete-guard.ts",
+            "timeout": 10,
+            "statusMessage": "Checking recursive-delete guard..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
+            "timeout": 60,
+            "async": true,
+            "asyncRewake": true,
+            "statusMessage": "Running post-edit lifecycle check..."
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -55,21 +119,6 @@
         ]
       }
     ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/post-write-lifecycle-check.ts",
-            "timeout": 60,
-            "async": true,
-            "asyncRewake": true,
-            "statusMessage": "Running post-edit lifecycle check..."
-          }
-        ]
-      }
-    ],
     "TeammateIdle": [
       {
         "matcher": "",
@@ -99,57 +148,7 @@
         ]
       }
     ],
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/gateguard-fact-force.ts --mode ask",
-            "timeout": 30,
-            "statusMessage": "GateGuard: checking first-edit importers..."
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/pm-dispatch-gate.ts",
-            "timeout": 10,
-            "statusMessage": "Checking PM dispatch policy..."
-          }
-        ],
-        "matcher": "Agent"
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/delete-guard.ts",
-            "timeout": 10,
-            "statusMessage": "Checking recursive-delete guard..."
-          }
-        ],
-        "matcher": "Bash"
-      },
-      {
-        "matcher": "Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun scripts/hooks/agent-model-gate.ts",
-            "timeout": 10,
-            "statusMessage": "Checking Agent dispatch model tier..."
-          }
-        ]
-      }
-    ]
-  },
-  "worktree": {
-    "bgIsolation": "none"
-  },
-  "footerLinksRegexes": [
-    ".trail/[\\w./-]+\\.md"
-  ]
+    "UserPromptSubmit": [],
+    "Stop": []
+  }
 }

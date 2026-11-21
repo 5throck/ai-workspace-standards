@@ -1,5 +1,16 @@
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-21, spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md
+//          §2.2/§5.4/§5.9): variant.json `consumption` shape/enum check — if present, the
+//          only recognized value is "adoption-only" (absent key = scaffoldable default);
+//          any other value is a blocking error (a silently ignored misconfiguration would
+//          defeat the opt-out, same rule as the syncDetection gate). An adoption-only
+//          variant MUST NOT declare a `syncDetection` block — automatic backport
+//          detection is out of scope for adoption variants (design §5.4 flow table,
+//          detect-backport row); declaring both is a blocking error.
 /**
+ * validate-variant-readiness.ts
+ *
+ * Variant Readiness Gate (VRG).
  * validate-variant-readiness.ts
  *
  * Variant Readiness Gate (VRG).
@@ -108,6 +119,30 @@ if (hold && hold.hold === true) {
     "promotion-hold",
     `promotion is ON HOLD by the project owner — explicit user permission is required before promoting${hold.reason ? `: ${hold.reason}` : ""}`,
   );
+}
+
+// v1.2.0 (2026-11-21, design 2026-11-21-co-utility-dedup-and-adoption-role-design §2.2/§5.4):
+// `consumption` shape/enum gate. Absent key = scaffoldable default (zero behavior change);
+// the ONLY recognized value is "adoption-only" — the adoption-only role implies all three
+// automation shields (no new-project scaffold, no automated upgrade delivery, no automated
+// backport participation). An unknown value is a blocking error: a silently ignored
+// misconfiguration would defeat the opt-out (same rule as the syncDetection gate above).
+// ADOPTION-ONLY ⇒ NO syncDetection (design §5.4, detect-backport row): the sync-embedded
+// backport detector is per-project opt-in machinery and is prohibited for adoption-only
+// variants — declaring both is a blocking error.
+const ADOPTION_ONLY_CONSUMPTION = "adoption-only";
+if (vj.consumption !== undefined) {
+  if (vj.consumption !== ADOPTION_ONLY_CONSUMPTION) {
+    err(
+      "variant-consumption",
+      `variant.json consumption "${String(vj.consumption)}" is invalid — the only recognized value is "${ADOPTION_ONLY_CONSUMPTION}" (absent key = scaffoldable default; design 2026-11-21-co-utility-dedup-and-adoption-role-design §2.2)`,
+    );
+  } else if (vj.syncDetection !== undefined) {
+    err(
+      "variant-consumption-syncdetection",
+      `adoption-only variant must NOT declare a syncDetection block — automatic backport detection is out of scope for adoption variants (design 2026-11-21-co-utility-dedup-and-adoption-role-design §5.4); remove the block or drop the adoption-only role`,
+    );
+  }
 }
 
 const agents = Array.isArray(vj.agents) ? (vj.agents as Array<{ name?: string; file?: string }>) : [];

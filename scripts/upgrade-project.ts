@@ -1,5 +1,31 @@
 #!/usr/bin/env bun
-// @version 1.114.0
+// @version 1.115.0
+// v1.115.0 (2026-11-21, spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md
+//          §5.3-§5.5): adoption-only engine gate — the engine is the single funnel every
+//          caller passes through (manual CLI, skill-driven resync waves, gateway spawn, any
+//          cron), so the gate is ENGINE-LEVEL and FAIL-CLOSED. Before any write, in every
+//          mode, the target's delivered variant.json is read LAZY and FLAG-PRESENT-ONLY
+//          (tenant-guard v1.98.0 §3.4 pattern): absent file / absent key / malformed JSON =
+//          zero behavior change (a normal fleet target performs zero extra IO and a malformed
+//          variant.json elsewhere can never fail an ordinary upgrade). consumption:
+//          "adoption-only" → REFUSE with the curated-path pointer (design §5.5) — refusal-
+//          grade, NOT bypassable by --yes (the outside-Projects H14 prompt is prompt-grade
+//          and stays --yes-bypassable; this gate is the refusal above it). Override is
+//          per-invocation only, never persisted, no config can set it: --confirm-curated
+//          unlocks the target for THIS invocation; dry-run remains the default until
+//          --confirm is ALSO passed (two explicit tokens, mirroring the tenant guard);
+//          a non-adoption target gets a no-op WARN (behavior otherwise byte-identical).
+//          New --surfaces <claim-classes> (only valid with --confirm-curated): comma list
+//          validated against the dry-run plan's upgrade-policy claims (the distinct
+//          resolveClaim pass ids over the effective template tree — unknown token = error
+//          listing the inventory); when set, claim-classed delivery is narrowed to the
+//          selected passes (TEMPLATE TREE SYNC / VARIANT ASSET DIRS / REGION PROFILES /
+//          PROCEDURES / GOVERNANCE FILES / SYNC_IF_NEWER agents·skills·scripts) — the
+//          pass identity constants come from upgrade-policy, never string literals where
+//          an export exists. Scope note (documented, not silent): passes OUTSIDE the claim
+//          vocabulary (LOCKED/MERGE/DOCS_MERGE/DOCS_OVERWRITE/COMMANDS_SYNC, platform
+//          merges, add-if-missing seeds) still run — the curated runbook reviews the
+//          dry-run plan first and uses --platform for platform surfaces.
 // v1.114.0 (2026-11-20, T-20261120-003 — design
 //          docs/designs/2026-11-20-upgrade-adopt-row-truthfulness-design.md):
 //          VARIANT-SCRIPTS WALK-ABORT FIX — DECISION ROWS NOW COVER EVERY OWNED
@@ -1501,6 +1527,7 @@ import {
   DECISION_SEVERITY_CONTRACT,
   TEMPLATE_TREE_SYNC_PASS,
   VARIANT_ASSET_DIRS_PASS,
+  REGION_PROFILES_PASS,
   MERGE_MANAGED_FILES,
   backfillStubFrontmatter,
   baselineKeyFor,
@@ -1624,6 +1651,15 @@ let yesFlag = false;
 // TENANT target — deliberately distinct from --yes (the outside-Projects prompt
 // consent, untouched). Tenants default to dry-run without it.
 let confirmFlag = false;
+// v1.115.0 (adoption-role design §5.3-§5.5): per-invocation curated unlock for an
+// ADOPTION-ONLY target (variant.json "consumption": "adoption-only"). Never persisted;
+// no project config can set it. Dry-run remains the default until --confirm is ALSO
+// passed (two explicit tokens).
+let confirmCuratedFlag = false;
+// v1.115.0: comma list of claim classes for a curated narrow delivery (--surfaces).
+// Validated AFTER variant resolution against the effective tree's upgrade-policy
+// claims; null = no selection (full plan).
+let surfacesArg: string | null = null;
 // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
 // §6.2, DEC-20261107-01): operator agency for a sanctioned one-off upgrade
 // into a NON-member project (e.g. cleaning up co-abap-plugin's resync
@@ -1716,6 +1752,21 @@ for (let i = 0; i < args.length; i++) {
   // the flag is a no-op there (non-tenant behavior is otherwise unchanged).
   if (args[i] === "--confirm") {
     confirmFlag = true;
+    continue;
+  }
+  // v1.115.0 (adoption-role design §5.4): curated unlock for an adoption-only target —
+  // per-invocation only, pairs with the existing --confirm execute consent and the new
+  // --surfaces claim-class selection. Accepts --surfaces <v> and --surfaces=<v>.
+  if (args[i] === "--confirm-curated") {
+    confirmCuratedFlag = true;
+    continue;
+  }
+  if (args[i] === "--surfaces" && args[i + 1]) {
+    surfacesArg = args[++i];
+    continue;
+  }
+  if (args[i]?.startsWith("--surfaces=")) {
+    surfacesArg = args[i].slice("--surfaces=".length);
     continue;
   }
   if (args[i] === "--allow-non-member") {
@@ -1851,6 +1902,16 @@ if (portCandidates && !dryRun) {
   console.error("ERROR: --port-candidates is a dry-run-only report mode — re-run with --dry-run --port-candidates.");
   process.exit(1);
 }
+
+// v1.115.0 (adoption-role design §5.4): --surfaces is a curated-path-only flag — it
+// shapes the delivery plan for an explicitly unlocked adoption-only target, so using
+// it anywhere else is a mistake, not a narrowing. Fail fast before any target IO.
+if (surfacesArg !== null && !confirmCuratedFlag) {
+  console.error(
+    "ERROR: --surfaces is a curated-path-only flag — it is only valid together with --confirm-curated (an adoption-only target unlocked for this invocation).",
+  );
+  process.exit(1);
+}
 const reportPortCandidates = portCandidates && dryRun;
 if (reportPortCandidates) {
   console.error("[port-candidates] pass output suppressed — the would-revert inventory follows on stdout.");
@@ -1882,7 +1943,7 @@ function applyClearTombstoneArg(raw: string): void {
 
 if (!projectPath) {
   console.error(
-    "Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--confirm] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>[,<glob>...]]]... [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]",
+    "Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--confirm] [--confirm-curated [--surfaces <claim-classes>]] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>[,<glob>...]]]... [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]",
   );
   process.exit(1);
 }
@@ -2032,6 +2093,68 @@ if (!targetInsideProjects) {
       "WARN: --confirm only gates a registered tenant-loop target — ignored for this target (use --yes for the outside-Projects consent).",
     );
   }
+}
+
+// ── Adoption-only consumption gate (v1.115.0, design 2026-11-21-co-utility-dedup-and-adoption-role-design §5.3-§5.5) ──
+// The engine is the single funnel every caller passes through (manual CLI, skill-driven
+// resync waves, gateway spawn, any cron), so the gate lives HERE — engine-level,
+// fail-closed, in every mode (preflight / dry-run / apply / rollback / external-deps-only).
+// Lazy, FLAG-PRESENT-ONLY read (tenant-guard v1.98.0 pattern): a target with no
+// variant.json, no `consumption` key, or an unparseable manifest performs zero behavior
+// change — a normal fleet target and a malformed variant.json elsewhere can never fail an
+// ordinary upgrade. `consumption: "adoption-only"` → REFUSE (refusal-grade: NOT bypassable
+// by --yes, unlike the prompt-grade H14 check below) with the curated-path pointer; the
+// ONLY override is --confirm-curated for this invocation, and even then dry-run remains
+// the default until --confirm is also passed (two explicit tokens — design §5.3(4)).
+let adoptionOnlyTarget = false;
+{
+  const targetVariantJsonPath = join(projectDir, "variant.json");
+  if (existsSync(targetVariantJsonPath)) {
+    try {
+      const tvj = JSON.parse(readFileSync(targetVariantJsonPath, "utf8")) as Record<string, unknown>;
+      adoptionOnlyTarget = tvj?.consumption === "adoption-only";
+    } catch {
+      /* malformed target variant.json — not this gate's concern (variant.json is
+         PROJECT_STATE, project-owned; the fleet guard + operator cover the rest) */
+    }
+  }
+}
+if (adoptionOnlyTarget) {
+  if (!confirmCuratedFlag) {
+    const targetName = basename(projectDir);
+    console.error(
+      `ERROR: '${targetName}' declares "consumption": "adoption-only" in its variant.json — refusing the template wave (fail-closed, docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.3).`,
+    );
+    console.error(
+      "   Adoption projects are structurally heterogeneous (their platform docs/layout are their own); automated delivery is out of scope by default.",
+    );
+    console.error("   The curated manual path (design §5.5):");
+    console.error(
+      `     1. Review the plan:  bun scripts/upgrade-project.ts ${projectPath} --confirm-curated --dry-run`,
+    );
+    console.error("     2. Decide per-surface applicability (structure mapping is human curation).");
+    console.error(
+      "     3. Execute narrowly: append --confirm --surfaces <claim-classes> --platform <p>  (keep --confirm-curated)",
+    );
+    console.error("     4. Commit manually — adoption projects never auto-commit.");
+    process.exit(1);
+  }
+  // Curated unlock active — dry-run default until --confirm (two explicit tokens).
+  if (!dryRun && !confirmFlag) {
+    console.warn(
+      "WARN: curated unlock active — upgrade defaults to dry-run — pass --confirm to execute (design 2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.5).",
+    );
+    dryRun = true;
+  }
+  console.log(
+    `INFO: curated unlock active for '${basename(projectDir)}' (variant.json "consumption": "adoption-only") — delivery is operator-curated this invocation${
+      surfacesArg !== null ? `; --surfaces selection: ${surfacesArg}` : ""
+    }; adoption projects never auto-commit.`,
+  );
+} else if (confirmCuratedFlag) {
+  console.warn(
+    'WARN: --confirm-curated only unlocks an adoption-only target (variant.json "consumption": "adoption-only") — ignored for this target.',
+  );
 }
 
 if (!targetInsideProjects && !tenantTarget) {
@@ -2249,6 +2372,62 @@ if (templatesDir === join(workspaceRoot, "templates") || !variant.trim()) {
 if (!commonOnlySync && !existsSync(templatesDir)) {
   console.error(`ERROR: Template variant not found: ${templatesDir}`);
   process.exit(1);
+}
+
+// ── --surfaces validation (v1.115.0, adoption-role design §5.4) ───────────────
+// Validate the curated claim-class selection against THE DRY-RUN PLAN's upgrade-policy
+// claims: the distinct resolveClaim pass ids over the effective template tree for this
+// variant (delivery-bearing classes only — bookkeeping classes in "(...)" and
+// PROJECT_STATE/TEMPLATE_ONLY policies are not selectable surfaces). Unknown token =
+// error listing the inventory (a typo must never silently widen or narrow the plan).
+// The helpers below gate the claim-classed delivery passes; when no selection is made
+// every pass keeps today's behavior byte-identically.
+const surfacesSelected: Set<string> | null = (() => {
+  if (surfacesArg === null) return null;
+  const requested = surfacesArg
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  if (requested.length === 0) {
+    console.error(
+      'ERROR: --surfaces requires a comma-separated list of claim classes (e.g. --surfaces "TEMPLATE TREE SYNC,PROCEDURES").',
+    );
+    process.exit(1);
+  }
+  const inventory = new Set<string>();
+  if (!commonOnlySync) {
+    for (const { rel } of iterEffectiveTemplateFiles(commonDir, existsSync(templatesDir) ? templatesDir : null)) {
+      const claim = resolveClaim(rel, variant);
+      if (claim.pass.startsWith("(")) continue; // "(project state)", "(scaffold-removed)", … — bookkeeping, not delivery
+      if (claim.policy === "PROJECT_STATE" || claim.policy === "TEMPLATE_ONLY") continue;
+      inventory.add(claim.pass);
+    }
+  }
+  const unknown = requested.filter((r) => !inventory.has(r));
+  if (unknown.length > 0) {
+    console.error(`ERROR: --surfaces: unknown claim class(es): ${unknown.map((u) => `'${u}'`).join(", ")}.`);
+    console.error(
+      `   Valid claim classes for this run's plan (variant '${variant}'): ${[...inventory].sort().join(" | ") || "(none)"}`,
+    );
+    process.exit(1);
+  }
+  return new Set(requested);
+})();
+/** Pass gate for braced claim-classed delivery blocks: true when the pass may run. */
+function surfacesAllowsPass(pass: string): boolean {
+  return surfacesSelected === null || surfacesSelected.has(pass);
+}
+/** Inverse for in-loop guards (break/continue style). */
+function surfacesBlocked(pass: string): boolean {
+  return surfacesSelected !== null && !surfacesSelected.has(pass);
+}
+if (surfacesSelected !== null) {
+  console.log(
+    `INFO: --surfaces selection active — claim-classed delivery narrowed to: ${[...surfacesSelected].join(", ")}.`,
+  );
+  console.log(
+    "      Passes outside the claim vocabulary (LOCKED/MERGE/DOCS_MERGE/DOCS_OVERWRITE/COMMANDS_SYNC, platform merges, add-if-missing seeds) still run — review the dry-run plan and use --platform for platform surfaces (design §5.5).",
+  );
 }
 
 // ── Hub-consumption preflight (§15.4, T-20261103-003-2) ──────────────────────
@@ -5334,6 +5513,11 @@ function collectScriptFiles(root: string, dryTag: string): string[] {
 }
 
 for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+  // v1.115.0: --surfaces claim-class gate — the pass id matches resolveClaim's scripts/** branch.
+  if (surfacesBlocked("SYNC_IF_NEWER: scripts/")) {
+    console.log("  withheld — --surfaces selection does not include 'SYNC_IF_NEWER: scripts/'");
+    break;
+  }
   const relPath = `scripts/${rel}`;
   const tplFile = join(relSourceRoot, rel);
   const projFile = join(projectDir, relPath);
@@ -5505,384 +5689,390 @@ console.log("");
 const variantScriptsSrc = join(templatesDir, "scripts", variant);
 if (existsSync(variantScriptsSrc)) {
   console.log(`--- VARIANT SCRIPTS: scripts/${variant}/ ---`);
-  const variantScriptsDst = join(projectDir, "scripts", variant);
-  const seenVariantScripts = new Set<string>();
-  const syncVariantScripts = (dir: string, rel: string): void => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "temp") continue;
-      const abs = join(dir, entry.name);
-      const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
-      if (entry.isDirectory()) {
-        syncVariantScripts(abs, entryRel);
-      } else if (
-        entry.isFile() &&
-        (entry.name.endsWith(".ts") || entry.name.endsWith(".mjs") || entry.name.endsWith(".json"))
-      ) {
-        // .json included since 1.44.0: variant config files (atc-rulepack.json,
-        // tsconfig.json) were scaffold-delivered but had no upgrade delivery
-        // path, so post-scaffold template updates never reached live projects.
-        // Unversioned .json flows through the hash-compare branch below.
-        seenVariantScripts.add(entryRel);
-        const rel2 = `scripts/${variant}/${entryRel}`;
-        const projFile = join(projectDir, rel2);
-        const tplVer = extractScriptVersion(abs);
-        if (tplVer) {
-          const projVer = existsSync(projFile) ? extractScriptVersion(projFile) : "";
-          if (!existsSync(projFile)) {
-            console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
-            if (!dryRun) {
-              mkdirSync(dirname(projFile), { recursive: true });
-              copyFileSync(abs, projFile);
-              reconcileScriptRegistry(rel2);
-            }
-            recordDecision(rel2, "SYNC", "VARIANT SCRIPTS", "NEW", `delivered (none) → ${tplVer}`);
-            noteDelivered(rel2);
-            console.log(`  ${dryTag}COPIED: ${rel2}`);
-            syncChanged++;
-          } else if (semverGt(tplVer, projVer)) {
-            const deliverable = readFileSync(abs, "utf8");
-            const proceeded = evolvedDeliveryGuard({
-              rel: rel2,
-              policy: "SYNC",
-              pass: "VARIANT SCRIPTS",
-              projectFile: projFile,
-              deliverableContent: deliverable,
-              onConflictSkip: () => {
-                console.log(
-                  `  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`,
-                );
-                console.log(
-                  "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
-                );
-              },
-            });
-            // v1.114.0 (T-20261120-003): the guard-skip used to `return` out of the
-            // recursive walk, aborting every remaining scripts/<variant>/ file in this
-            // directory frame — no decision row, no copy, no CONFLICT/SKIP line for any
-            // of them (the 2026-11-19 co-deck wave: only auto-calibrate.ts carried a
-            // VARIANT SCRIPTS row; the .mjs/.json walk-only surfaces lost both channels).
-            // A conflict-skip skips ONE file, not the walk — the overlay arm's
-            // `if (proceeded)` shape, so the walk continues and every owned path gets
-            // exactly one truthful row.
-            if (proceeded) {
-              if (isLocallyModified(projFile)) {
-                console.log(
-                  `  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
-                );
-                recordDecision(
-                  rel2,
-                  "SYNC",
-                  "VARIANT SCRIPTS",
-                  "CONFLICT",
-                  `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`,
-                  priorBaselines[rel2],
-                  "WARN",
-                );
-              } else {
-                console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
-                recordDecision(
-                  rel2,
-                  "SYNC",
-                  "VARIANT SCRIPTS",
-                  "ADOPT",
-                  `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`,
-                  priorBaselines[rel2],
-                );
-              }
+  // v1.115.0: --surfaces claim-class gate — variant scripts/** carry the same
+  // "SYNC_IF_NEWER: scripts/" claim class as the common pool (resolveClaim).
+  if (surfacesBlocked("SYNC_IF_NEWER: scripts/")) {
+    console.log("  withheld — --surfaces selection does not include 'SYNC_IF_NEWER: scripts/'");
+  } else {
+    const variantScriptsDst = join(projectDir, "scripts", variant);
+    const seenVariantScripts = new Set<string>();
+    const syncVariantScripts = (dir: string, rel: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "temp") continue;
+        const abs = join(dir, entry.name);
+        const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+          syncVariantScripts(abs, entryRel);
+        } else if (
+          entry.isFile() &&
+          (entry.name.endsWith(".ts") || entry.name.endsWith(".mjs") || entry.name.endsWith(".json"))
+        ) {
+          // .json included since 1.44.0: variant config files (atc-rulepack.json,
+          // tsconfig.json) were scaffold-delivered but had no upgrade delivery
+          // path, so post-scaffold template updates never reached live projects.
+          // Unversioned .json flows through the hash-compare branch below.
+          seenVariantScripts.add(entryRel);
+          const rel2 = `scripts/${variant}/${entryRel}`;
+          const projFile = join(projectDir, rel2);
+          const tplVer = extractScriptVersion(abs);
+          if (tplVer) {
+            const projVer = existsSync(projFile) ? extractScriptVersion(projFile) : "";
+            if (!existsSync(projFile)) {
+              console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
               if (!dryRun) {
+                mkdirSync(dirname(projFile), { recursive: true });
                 copyFileSync(abs, projFile);
                 reconcileScriptRegistry(rel2);
-                noteDelivered(rel2);
               }
-              console.log(`  ${dryTag}COPIED: ${rel2}`);
-              syncChanged++;
-            }
-          } else if (projVer === tplVer && fileHash(abs) !== fileHash(projFile)) {
-            // E3 (PR-B): equal-version fork — restore only on baseline / vintage provenance.
-            if (equalVersionRestore(rel2, "SYNC", "VARIANT SCRIPTS", projFile, readFileSync(abs, "utf8"), projVer)) {
-              if (!dryRun) {
-                copyFileSync(abs, projFile);
-                reconcileScriptRegistry(rel2);
-                noteDelivered(rel2);
-              }
-              console.log(`  ${dryTag}COPIED: ${rel2}`);
-              syncChanged++;
-            }
-          } else if (semverGt(projVer, tplVer)) {
-            recordProjectAhead(rel2, "SYNC", "VARIANT SCRIPTS", projVer, tplVer, readFileSync(abs, "utf8"));
-          } else {
-            console.log(`  OK     ${rel2}  ${projVer}`);
-            if (fileHash(abs) === fileHash(projFile)) noteParity(rel2); // A2
-          }
-        } else {
-          // Unversioned file — template is canonical; compare by content hash.
-          if (!existsSync(projFile)) {
-            console.log(`  NEW   ${rel2}  (hash)`);
-            if (!dryRun) {
-              mkdirSync(dirname(projFile), { recursive: true });
-              copyFileSync(abs, projFile);
-            }
-            recordDecision(rel2, "SYNC", "VARIANT SCRIPTS", "NEW", "delivered (hash-based, project copy absent)");
-            noteDelivered(rel2);
-            console.log(`  ${dryTag}COPIED: ${rel2}`);
-            syncChanged++;
-          } else if (fileHash(abs) !== fileHash(projFile)) {
-            const deliverable = readFileSync(abs, "utf8");
-            const proceeded = evolvedDeliveryGuard({
-              rel: rel2,
-              policy: "SYNC",
-              pass: "VARIANT SCRIPTS",
-              projectFile: projFile,
-              deliverableContent: deliverable,
-              onConflictSkip: () => {
-                console.log(
-                  `  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  (unversioned, content changed) — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`,
-                );
-                console.log(
-                  "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
-                );
-              },
-            });
-            // v1.114.0 (T-20261120-003): same walk-abort fix as the versioned arm —
-            // a guard-skip here also used to kill the whole recursive walk.
-            if (proceeded) {
-              if (isLocallyModified(projFile)) {
-                console.log(
-                  `  ⚠️  CONFLICT ${rel2}  (unversioned, local modifications exist — template will overwrite)`,
-                );
-                recordDecision(
-                  rel2,
-                  "SYNC",
-                  "VARIANT SCRIPTS",
-                  "CONFLICT",
-                  "unversioned hash change over uncommitted local modifications (pre-upgrade stash covers rollback)",
-                  priorBaselines[rel2],
-                  "WARN",
-                );
-              } else {
-                console.log(`  UPDATE ${rel2}  (hash changed)`);
-                recordDecision(
-                  rel2,
-                  "SYNC",
-                  "VARIANT SCRIPTS",
-                  "ADOPT",
-                  "unversioned hash-gated delivery over the delivered baseline",
-                  priorBaselines[rel2],
-                );
-              }
-              if (!dryRun) copyFileSync(abs, projFile);
+              recordDecision(rel2, "SYNC", "VARIANT SCRIPTS", "NEW", `delivered (none) → ${tplVer}`);
               noteDelivered(rel2);
               console.log(`  ${dryTag}COPIED: ${rel2}`);
               syncChanged++;
+            } else if (semverGt(tplVer, projVer)) {
+              const deliverable = readFileSync(abs, "utf8");
+              const proceeded = evolvedDeliveryGuard({
+                rel: rel2,
+                policy: "SYNC",
+                pass: "VARIANT SCRIPTS",
+                projectFile: projFile,
+                deliverableContent: deliverable,
+                onConflictSkip: () => {
+                  console.log(
+                    `  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`,
+                  );
+                  console.log(
+                    "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+                  );
+                },
+              });
+              // v1.114.0 (T-20261120-003): the guard-skip used to `return` out of the
+              // recursive walk, aborting every remaining scripts/<variant>/ file in this
+              // directory frame — no decision row, no copy, no CONFLICT/SKIP line for any
+              // of them (the 2026-11-19 co-deck wave: only auto-calibrate.ts carried a
+              // VARIANT SCRIPTS row; the .mjs/.json walk-only surfaces lost both channels).
+              // A conflict-skip skips ONE file, not the walk — the overlay arm's
+              // `if (proceeded)` shape, so the walk continues and every owned path gets
+              // exactly one truthful row.
+              if (proceeded) {
+                if (isLocallyModified(projFile)) {
+                  console.log(
+                    `  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
+                  );
+                  recordDecision(
+                    rel2,
+                    "SYNC",
+                    "VARIANT SCRIPTS",
+                    "CONFLICT",
+                    `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`,
+                    priorBaselines[rel2],
+                    "WARN",
+                  );
+                } else {
+                  console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
+                  recordDecision(
+                    rel2,
+                    "SYNC",
+                    "VARIANT SCRIPTS",
+                    "ADOPT",
+                    `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`,
+                    priorBaselines[rel2],
+                  );
+                }
+                if (!dryRun) {
+                  copyFileSync(abs, projFile);
+                  reconcileScriptRegistry(rel2);
+                  noteDelivered(rel2);
+                }
+                console.log(`  ${dryTag}COPIED: ${rel2}`);
+                syncChanged++;
+              }
+            } else if (projVer === tplVer && fileHash(abs) !== fileHash(projFile)) {
+              // E3 (PR-B): equal-version fork — restore only on baseline / vintage provenance.
+              if (equalVersionRestore(rel2, "SYNC", "VARIANT SCRIPTS", projFile, readFileSync(abs, "utf8"), projVer)) {
+                if (!dryRun) {
+                  copyFileSync(abs, projFile);
+                  reconcileScriptRegistry(rel2);
+                  noteDelivered(rel2);
+                }
+                console.log(`  ${dryTag}COPIED: ${rel2}`);
+                syncChanged++;
+              }
+            } else if (semverGt(projVer, tplVer)) {
+              recordProjectAhead(rel2, "SYNC", "VARIANT SCRIPTS", projVer, tplVer, readFileSync(abs, "utf8"));
+            } else {
+              console.log(`  OK     ${rel2}  ${projVer}`);
+              if (fileHash(abs) === fileHash(projFile)) noteParity(rel2); // A2
             }
           } else {
-            console.log(`  OK     ${rel2}  (hash match)`);
-            noteParity(rel2); // A2
+            // Unversioned file — template is canonical; compare by content hash.
+            if (!existsSync(projFile)) {
+              console.log(`  NEW   ${rel2}  (hash)`);
+              if (!dryRun) {
+                mkdirSync(dirname(projFile), { recursive: true });
+                copyFileSync(abs, projFile);
+              }
+              recordDecision(rel2, "SYNC", "VARIANT SCRIPTS", "NEW", "delivered (hash-based, project copy absent)");
+              noteDelivered(rel2);
+              console.log(`  ${dryTag}COPIED: ${rel2}`);
+              syncChanged++;
+            } else if (fileHash(abs) !== fileHash(projFile)) {
+              const deliverable = readFileSync(abs, "utf8");
+              const proceeded = evolvedDeliveryGuard({
+                rel: rel2,
+                policy: "SYNC",
+                pass: "VARIANT SCRIPTS",
+                projectFile: projFile,
+                deliverableContent: deliverable,
+                onConflictSkip: () => {
+                  console.log(
+                    `  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  (unversioned, content changed) — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`,
+                  );
+                  console.log(
+                    "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+                  );
+                },
+              });
+              // v1.114.0 (T-20261120-003): same walk-abort fix as the versioned arm —
+              // a guard-skip here also used to kill the whole recursive walk.
+              if (proceeded) {
+                if (isLocallyModified(projFile)) {
+                  console.log(
+                    `  ⚠️  CONFLICT ${rel2}  (unversioned, local modifications exist — template will overwrite)`,
+                  );
+                  recordDecision(
+                    rel2,
+                    "SYNC",
+                    "VARIANT SCRIPTS",
+                    "CONFLICT",
+                    "unversioned hash change over uncommitted local modifications (pre-upgrade stash covers rollback)",
+                    priorBaselines[rel2],
+                    "WARN",
+                  );
+                } else {
+                  console.log(`  UPDATE ${rel2}  (hash changed)`);
+                  recordDecision(
+                    rel2,
+                    "SYNC",
+                    "VARIANT SCRIPTS",
+                    "ADOPT",
+                    "unversioned hash-gated delivery over the delivered baseline",
+                    priorBaselines[rel2],
+                  );
+                }
+                if (!dryRun) copyFileSync(abs, projFile);
+                noteDelivered(rel2);
+                console.log(`  ${dryTag}COPIED: ${rel2}`);
+                syncChanged++;
+              }
+            } else {
+              console.log(`  OK     ${rel2}  (hash match)`);
+              noteParity(rel2); // A2
+            }
           }
         }
-      }
-    }
-  };
-  syncVariantScripts(variantScriptsSrc, "");
-  // Preserve project-only variant scripts (files in the project not in the template).
-  const preserveVariantScripts = (dir: string, rel: string): void => {
-    if (!existsSync(dir)) return;
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "temp") continue;
-      const abs = join(dir, entry.name);
-      const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
-      if (entry.isDirectory()) {
-        preserveVariantScripts(abs, entryRel);
-      } else if (
-        entry.isFile() &&
-        (entry.name.endsWith(".ts") || entry.name.endsWith(".mjs") || entry.name.endsWith(".json")) &&
-        !seenVariantScripts.has(entryRel)
-      ) {
-        console.log(`  PRESERVE (project-only): scripts/${variant}/${entryRel}`);
-      }
-    }
-  };
-  preserveVariantScripts(variantScriptsDst, "");
-
-  // T-20261012-001 completion (T-20261017-001 canary): variant OVERLAY top-level
-  // scripts (templates/<variant>/scripts/*.ts, e.g. co-abap's
-  // validate-abap-platform-parity.ts) had no upgrade delivery path — new-project
-  // §6.6 delivers them at scaffold time, upgrades never did, so the variant's CI
-  // job referencing the script failed with Module-not-found. Same NEW/UPDATE
-  // semantics as the nested walk, delivered to project scripts/ root.
-  const overlayScriptsTop = join(templatesDir, "scripts");
-  if (existsSync(overlayScriptsTop)) {
-    for (const entry of readdirSync(overlayScriptsTop, { withFileTypes: true })) {
-      if (!entry.isFile() || !entry.name.endsWith(".ts")) continue;
-      const rel2 = `scripts/${entry.name}`;
-      const src = join(overlayScriptsTop, entry.name);
-      const projFile = join(projectDir, rel2);
-      const tplVer = extractScriptVersion(src);
-      if (!tplVer) {
-        // C-E: overlay arm — same silent-skip class as the common scripts walk.
-        console.log(`  SKIP (no version): ${rel2}`);
-        recordDecision(
-          rel2,
-          "SYNC",
-          "VARIANT SCRIPTS",
-          "UNVERSIONED_SKIP",
-          "overlay script carries no @version header — cannot be version-gated or delivered; add @version template-side",
-        );
-        continue;
-      }
-      const projVer = existsSync(projFile) ? extractScriptVersion(projFile) : "";
-      if (!existsSync(projFile)) {
-        console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
-        if (!dryRun) {
-          mkdirSync(dirname(projFile), { recursive: true });
-          copyFileSync(src, projFile);
-        }
-        recordDecision(rel2, "SYNC", "VARIANT SCRIPTS", "NEW", `delivered overlay script (none) → ${tplVer}`);
-        noteDelivered(rel2);
-        console.log(`  ${dryTag}COPIED: ${rel2}`);
-        syncChanged++;
-      } else if (semverGt(tplVer, projVer)) {
-        const deliverable = readFileSync(src, "utf8");
-        const proceeded = evolvedDeliveryGuard({
-          rel: rel2,
-          policy: "SYNC",
-          pass: "VARIANT SCRIPTS",
-          projectFile: projFile,
-          deliverableContent: deliverable,
-          onConflictSkip: () => {
-            console.log(
-              `  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`,
-            );
-            console.log(
-              "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
-            );
-          },
-        });
-        if (proceeded) {
-          if (isLocallyModified(projFile)) {
-            console.log(
-              `  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
-            );
-            recordDecision(
-              rel2,
-              "SYNC",
-              "VARIANT SCRIPTS",
-              "CONFLICT",
-              `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`,
-              priorBaselines[rel2],
-              "WARN",
-            );
-          } else {
-            console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
-            recordDecision(
-              rel2,
-              "SYNC",
-              "VARIANT SCRIPTS",
-              "ADOPT",
-              `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`,
-              priorBaselines[rel2],
-            );
-          }
-          if (!dryRun) copyFileSync(src, projFile);
-          noteDelivered(rel2);
-          console.log(`  ${dryTag}COPIED: ${rel2}`);
-          // v1.114.0 (T-20261120-003): moved inside `if (proceeded)` — a
-          // conflict-skipped overlay script never changed anything, so counting it
-          // inflated the pass's changed-files summary.
-          syncChanged++;
-        }
-      } else if (semverGt(projVer, tplVer)) {
-        recordProjectAhead(rel2, "SYNC", "VARIANT SCRIPTS", projVer, tplVer, readFileSync(src, "utf8"));
-      } else {
-        console.log(`  OK     ${rel2}`);
-      }
-      // Auto-register the delivered top-level script (same contract as the
-      // nested scan below): a delivered script without a row fails the
-      // project's first verify-scripts (T-20261012-001 lesson).
-      const regPath = join(projectDir, "scripts", "SCRIPTS.md");
-      if (!dryRun && existsSync(regPath)) {
-        const regText = readFileSync(regPath, "utf-8");
-        if (!regText.split("\n").some((l) => l.includes(`\`${entry.name}\``))) {
-          const ver = tplVer;
-          appendRegistryRows(regPath, [
-            `| \`${entry.name}\` | L2-only | ${ver} | active | Variant-delivered top-level script (auto-registered at upgrade, T-20261012-001) | —| L2-only | —|`,
-          ]);
-          console.log(`  📝 SCRIPTS.md: registered ${entry.name} (v${ver})`);
-        }
-      }
-    }
-  }
-
-  // T-20261012-001: variant top-level/nested-delivered scripts need registry
-  // rows in the project scripts/SCRIPTS.md — the L1 snapshot has no rows for
-  // them (co-abap's sap-mcp-proxy.ts failed the project's first verify-scripts).
-  // Append a row per delivered variant script the registry lacks, versioned
-  // from the script's own @version header. Rows land at the end of the FIRST
-  // registry table; source/layer stay L2-only (variant-delivered).
-  const projectRegPath = join(projectDir, "scripts", "SCRIPTS.md");
-  if (existsSync(projectRegPath)) {
-    const reg = readFileSync(projectRegPath, "utf-8");
-    const existingRows = new Set(
-      reg
-        .split("\n")
-        .filter((l) => /^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(l))
-        .map((l) => l.split("|")[1]?.replace(/`/g, "").trim())
-        .filter(Boolean) as Array<string>,
-    );
-    const missingRows: string[] = [];
-    const scanVariantScripts = (dir: string, rel: string): void => {
-      for (const e of readdirSync(dir, { withFileTypes: true })) {
-        const childRel = rel ? `${rel}/${e.name}` : e.name;
-        if (e.isDirectory()) {
-          if (e.name === "hooks" || e.name === "temp") continue;
-          scanVariantScripts(join(dir, e.name), childRel);
-          continue;
-        }
-        if (!e.name.endsWith(".ts")) continue;
-        if (existingRows.has(childRel) || existingRows.has(e.name)) continue;
-        const header = readFileSync(join(dir, e.name), "utf-8");
-        const version = header.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? "1.0.0";
-        missingRows.push(
-          `| \`${childRel}\` | L2-only | ${version} | active | Variant-delivered script (auto-registered at upgrade, T-20261012-001) | —| L2-only | —|`,
-        );
       }
     };
-    // v1.91.0 guard: projects without a scripts/<variant>/ directory (co-work's
-    // variant scripts live at scripts/deck/, delivered via the top-level scripts/
-    // passes) crashed this walk with a raw ENOENT (reproduced at v1.90.0 HEAD —
-    // the block predates the external-deps wave; the guard is the minimal fix
-    // that unblocks any dry-run/apply of such projects).
-    if (existsSync(variantScriptsDst)) scanVariantScripts(variantScriptsDst, variant);
-    if (missingRows.length > 0 && appendRegistryRows(projectRegPath, missingRows)) {
-      console.log(`  📝 SCRIPTS.md: registered ${missingRows.length} variant-delivered script(s) (T-20261012-001)`);
+    syncVariantScripts(variantScriptsSrc, "");
+    // Preserve project-only variant scripts (files in the project not in the template).
+    const preserveVariantScripts = (dir: string, rel: string): void => {
+      if (!existsSync(dir)) return;
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "temp") continue;
+        const abs = join(dir, entry.name);
+        const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+          preserveVariantScripts(abs, entryRel);
+        } else if (
+          entry.isFile() &&
+          (entry.name.endsWith(".ts") || entry.name.endsWith(".mjs") || entry.name.endsWith(".json")) &&
+          !seenVariantScripts.has(entryRel)
+        ) {
+          console.log(`  PRESERVE (project-only): scripts/${variant}/${entryRel}`);
+        }
+      }
+    };
+    preserveVariantScripts(variantScriptsDst, "");
+
+    // T-20261012-001 completion (T-20261017-001 canary): variant OVERLAY top-level
+    // scripts (templates/<variant>/scripts/*.ts, e.g. co-abap's
+    // validate-abap-platform-parity.ts) had no upgrade delivery path — new-project
+    // §6.6 delivers them at scaffold time, upgrades never did, so the variant's CI
+    // job referencing the script failed with Module-not-found. Same NEW/UPDATE
+    // semantics as the nested walk, delivered to project scripts/ root.
+    const overlayScriptsTop = join(templatesDir, "scripts");
+    if (existsSync(overlayScriptsTop)) {
+      for (const entry of readdirSync(overlayScriptsTop, { withFileTypes: true })) {
+        if (!entry.isFile() || !entry.name.endsWith(".ts")) continue;
+        const rel2 = `scripts/${entry.name}`;
+        const src = join(overlayScriptsTop, entry.name);
+        const projFile = join(projectDir, rel2);
+        const tplVer = extractScriptVersion(src);
+        if (!tplVer) {
+          // C-E: overlay arm — same silent-skip class as the common scripts walk.
+          console.log(`  SKIP (no version): ${rel2}`);
+          recordDecision(
+            rel2,
+            "SYNC",
+            "VARIANT SCRIPTS",
+            "UNVERSIONED_SKIP",
+            "overlay script carries no @version header — cannot be version-gated or delivered; add @version template-side",
+          );
+          continue;
+        }
+        const projVer = existsSync(projFile) ? extractScriptVersion(projFile) : "";
+        if (!existsSync(projFile)) {
+          console.log(`  NEW   ${rel2}  (none) → ${tplVer}`);
+          if (!dryRun) {
+            mkdirSync(dirname(projFile), { recursive: true });
+            copyFileSync(src, projFile);
+          }
+          recordDecision(rel2, "SYNC", "VARIANT SCRIPTS", "NEW", `delivered overlay script (none) → ${tplVer}`);
+          noteDelivered(rel2);
+          console.log(`  ${dryTag}COPIED: ${rel2}`);
+          syncChanged++;
+        } else if (semverGt(tplVer, projVer)) {
+          const deliverable = readFileSync(src, "utf8");
+          const proceeded = evolvedDeliveryGuard({
+            rel: rel2,
+            policy: "SYNC",
+            pass: "VARIANT SCRIPTS",
+            projectFile: projFile,
+            deliverableContent: deliverable,
+            onConflictSkip: () => {
+              console.log(
+                `  ⏭️  CONFLICT DISPOSITION (SKIP): ${rel2}  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; project copy PRESERVED (non-zero exit at completion)`,
+              );
+              console.log(
+                "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+              );
+            },
+          });
+          if (proceeded) {
+            if (isLocallyModified(projFile)) {
+              console.log(
+                `  ⚠️  CONFLICT ${rel2}  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
+              );
+              recordDecision(
+                rel2,
+                "SYNC",
+                "VARIANT SCRIPTS",
+                "CONFLICT",
+                `${projVer} → ${tplVer} — uncommitted local modifications overwritten (pre-upgrade stash covers rollback)`,
+                priorBaselines[rel2],
+                "WARN",
+              );
+            } else {
+              console.log(`  UPDATE ${rel2}  ${projVer} → ${tplVer}`);
+              recordDecision(
+                rel2,
+                "SYNC",
+                "VARIANT SCRIPTS",
+                "ADOPT",
+                `${projVer} → ${tplVer} — version-gated delivery over the delivered baseline`,
+                priorBaselines[rel2],
+              );
+            }
+            if (!dryRun) copyFileSync(src, projFile);
+            noteDelivered(rel2);
+            console.log(`  ${dryTag}COPIED: ${rel2}`);
+            // v1.114.0 (T-20261120-003): moved inside `if (proceeded)` — a
+            // conflict-skipped overlay script never changed anything, so counting it
+            // inflated the pass's changed-files summary.
+            syncChanged++;
+          }
+        } else if (semverGt(projVer, tplVer)) {
+          recordProjectAhead(rel2, "SYNC", "VARIANT SCRIPTS", projVer, tplVer, readFileSync(src, "utf8"));
+        } else {
+          console.log(`  OK     ${rel2}`);
+        }
+        // Auto-register the delivered top-level script (same contract as the
+        // nested scan below): a delivered script without a row fails the
+        // project's first verify-scripts (T-20261012-001 lesson).
+        const regPath = join(projectDir, "scripts", "SCRIPTS.md");
+        if (!dryRun && existsSync(regPath)) {
+          const regText = readFileSync(regPath, "utf-8");
+          if (!regText.split("\n").some((l) => l.includes(`\`${entry.name}\``))) {
+            const ver = tplVer;
+            appendRegistryRows(regPath, [
+              `| \`${entry.name}\` | L2-only | ${ver} | active | Variant-delivered top-level script (auto-registered at upgrade, T-20261012-001) | —| L2-only | —|`,
+            ]);
+            console.log(`  📝 SCRIPTS.md: registered ${entry.name} (v${ver})`);
+          }
+        }
+      }
     }
+
+    // T-20261012-001: variant top-level/nested-delivered scripts need registry
+    // rows in the project scripts/SCRIPTS.md — the L1 snapshot has no rows for
+    // them (co-abap's sap-mcp-proxy.ts failed the project's first verify-scripts).
+    // Append a row per delivered variant script the registry lacks, versioned
+    // from the script's own @version header. Rows land at the end of the FIRST
+    // registry table; source/layer stay L2-only (variant-delivered).
+    const projectRegPath = join(projectDir, "scripts", "SCRIPTS.md");
+    if (existsSync(projectRegPath)) {
+      const reg = readFileSync(projectRegPath, "utf-8");
+      const existingRows = new Set(
+        reg
+          .split("\n")
+          .filter((l) => /^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(l))
+          .map((l) => l.split("|")[1]?.replace(/`/g, "").trim())
+          .filter(Boolean) as Array<string>,
+      );
+      const missingRows: string[] = [];
+      const scanVariantScripts = (dir: string, rel: string): void => {
+        for (const e of readdirSync(dir, { withFileTypes: true })) {
+          const childRel = rel ? `${rel}/${e.name}` : e.name;
+          if (e.isDirectory()) {
+            if (e.name === "hooks" || e.name === "temp") continue;
+            scanVariantScripts(join(dir, e.name), childRel);
+            continue;
+          }
+          if (!e.name.endsWith(".ts")) continue;
+          if (existingRows.has(childRel) || existingRows.has(e.name)) continue;
+          const header = readFileSync(join(dir, e.name), "utf-8");
+          const version = header.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? "1.0.0";
+          missingRows.push(
+            `| \`${childRel}\` | L2-only | ${version} | active | Variant-delivered script (auto-registered at upgrade, T-20261012-001) | —| L2-only | —|`,
+          );
+        }
+      };
+      // v1.91.0 guard: projects without a scripts/<variant>/ directory (co-work's
+      // variant scripts live at scripts/deck/, delivered via the top-level scripts/
+      // passes) crashed this walk with a raw ENOENT (reproduced at v1.90.0 HEAD —
+      // the block predates the external-deps wave; the guard is the minimal fix
+      // that unblocks any dry-run/apply of such projects).
+      if (existsSync(variantScriptsDst)) scanVariantScripts(variantScriptsDst, variant);
+      if (missingRows.length > 0 && appendRegistryRows(projectRegPath, missingRows)) {
+        console.log(`  📝 SCRIPTS.md: registered ${missingRows.length} variant-delivered script(s) (T-20261012-001)`);
+      }
+    }
+    // Sync the variant SCRIPTS.md registry from the template.
+    const variantRegSrc = join(variantScriptsSrc, "SCRIPTS.md");
+    const variantRegDst = join(variantScriptsDst, "SCRIPTS.md");
+    if (
+      existsSync(variantRegSrc) &&
+      (!existsSync(variantRegDst) || fileHash(variantRegSrc) !== fileHash(variantRegDst)) &&
+      // E2 (DEC-20261111-01 D4): the registry overwrite never drops LOCAL-PATCH markers.
+      !markerLossBlocks(
+        `scripts/${variant}/SCRIPTS.md`,
+        "SYNC",
+        "VARIANT SCRIPTS",
+        variantRegDst,
+        readFileSync(variantRegSrc, "utf8"),
+      )
+    ) {
+      console.log(`  UPDATE scripts/${variant}/SCRIPTS.md  (registry)`);
+      // v1.91.1 mkdir guard: the project may not have a scripts/<variant>/ directory
+      // at all (co-work's variant scripts live at scripts/deck/), so the dest dir
+      // for this registry copy cannot be assumed. Node's copyfile ENOENT names the
+      // SOURCE in `path` — the missing dest dir is the actual cause.
+      if (!dryRun) mkdirSync(dirname(variantRegDst), { recursive: true });
+      if (!dryRun) copyFileSync(variantRegSrc, variantRegDst);
+      console.log(`  ${dryTag}COPIED: scripts/${variant}/SCRIPTS.md`);
+      syncChanged++;
+    }
+    console.log("");
   }
-  // Sync the variant SCRIPTS.md registry from the template.
-  const variantRegSrc = join(variantScriptsSrc, "SCRIPTS.md");
-  const variantRegDst = join(variantScriptsDst, "SCRIPTS.md");
-  if (
-    existsSync(variantRegSrc) &&
-    (!existsSync(variantRegDst) || fileHash(variantRegSrc) !== fileHash(variantRegDst)) &&
-    // E2 (DEC-20261111-01 D4): the registry overwrite never drops LOCAL-PATCH markers.
-    !markerLossBlocks(
-      `scripts/${variant}/SCRIPTS.md`,
-      "SYNC",
-      "VARIANT SCRIPTS",
-      variantRegDst,
-      readFileSync(variantRegSrc, "utf8"),
-    )
-  ) {
-    console.log(`  UPDATE scripts/${variant}/SCRIPTS.md  (registry)`);
-    // v1.91.1 mkdir guard: the project may not have a scripts/<variant>/ directory
-    // at all (co-work's variant scripts live at scripts/deck/), so the dest dir
-    // for this registry copy cannot be assumed. Node's copyfile ENOENT names the
-    // SOURCE in `path` — the missing dest dir is the actual cause.
-    if (!dryRun) mkdirSync(dirname(variantRegDst), { recursive: true });
-    if (!dryRun) copyFileSync(variantRegSrc, variantRegDst);
-    console.log(`  ${dryTag}COPIED: scripts/${variant}/SCRIPTS.md`);
-    syncChanged++;
-  }
-  console.log("");
 }
 
 // ── Project asset allowlist (v1.16.0) ────────────────────────────────────────
@@ -5977,6 +6167,11 @@ console.log("--- SYNC_IF_NEWER: agents/ ---");
 const tplAgentsDirs = [join(templatesDir, "agents"), join(commonDir, "agents")];
 const seenAgents = new Set<string>();
 for (const agentsDir of tplAgentsDirs) {
+  // v1.115.0: --surfaces claim-class gate — the pass id matches resolveClaim's agents/** branch.
+  if (surfacesBlocked("SYNC_IF_NEWER: agents/")) {
+    console.log("  withheld — --surfaces selection does not include 'SYNC_IF_NEWER: agents/'");
+    break;
+  }
   if (!existsSync(agentsDir)) continue;
   for (const fname of readdirSync(agentsDir)) {
     if (!fname.endsWith(".md") || seenAgents.has(fname)) continue;
@@ -6410,275 +6605,281 @@ const catchUpDir = (srcRoot: string, dstRoot: string): { copied: number; drifted
 const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[] } =>
   catchUpDir(join(tplSkillsDir, skillName), join(projectDir, "skills", skillName));
 if (existsSync(tplSkillsDir)) {
-  for (const skillName of readdirSync(tplSkillsDir)) {
-    const tplSkillFile = join(tplSkillsDir, skillName, "SKILL.md");
-    if (!existsSync(tplSkillFile)) continue;
-    seenSkills.add(skillName);
-    const projSkillFile = join(projectDir, "skills", skillName, "SKILL.md");
-    const tplVer = extractFrontmatterVersion(tplSkillFile);
-    const copyWholeSkillDir = (): void => {
-      if (dryRun) return;
-      mkdirSync(dirname(projSkillFile), { recursive: true });
-      cpSync(join(tplSkillsDir, skillName), join(projectDir, "skills", skillName), { recursive: true });
-    };
-    if (tplVer) {
-      const projVer = extractFrontmatterVersion(projSkillFile);
-      if (!existsSync(projSkillFile)) {
-        // D2 (U-20261028-001): tombstone guard before the whole-directory copy —
-        // a deleted, previously delivered skill is not silently re-delivered.
-        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "SYNC_IF_NEWER: skills/")) continue;
-        const contractCommonDelivery =
-          assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
-        if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
-          console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
+  // v1.115.0: --surfaces claim-class gate — the pass id matches resolveClaim's skills/** branch.
+  if (surfacesBlocked("SYNC_IF_NEWER: skills/")) {
+    console.log("  withheld — --surfaces selection does not include 'SYNC_IF_NEWER: skills/'");
+  } else
+    for (const skillName of readdirSync(tplSkillsDir)) {
+      const tplSkillFile = join(tplSkillsDir, skillName, "SKILL.md");
+      if (!existsSync(tplSkillFile)) continue;
+      seenSkills.add(skillName);
+      const projSkillFile = join(projectDir, "skills", skillName, "SKILL.md");
+      const tplVer = extractFrontmatterVersion(tplSkillFile);
+      const copyWholeSkillDir = (): void => {
+        if (dryRun) return;
+        mkdirSync(dirname(projSkillFile), { recursive: true });
+        cpSync(join(tplSkillsDir, skillName), join(projectDir, "skills", skillName), { recursive: true });
+      };
+      if (tplVer) {
+        const projVer = extractFrontmatterVersion(projSkillFile);
+        if (!existsSync(projSkillFile)) {
+          // D2 (U-20261028-001): tombstone guard before the whole-directory copy —
+          // a deleted, previously delivered skill is not silently re-delivered.
+          if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "SYNC_IF_NEWER: skills/")) continue;
+          const contractCommonDelivery =
+            assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
+          if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
+            console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
+            recordDecision(
+              `skills/${skillName}/SKILL.md`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "SKIP",
+              "not in the variant.json skill allowlist — new-asset injection withheld",
+            );
+            continue;
+          }
+          if (contractCommonDelivery) {
+            console.log(
+              `  ℹ️  contract common_skill delivered despite variant.json allowlist — refresh skill_manifest.allowlist to record it`,
+            );
+          }
+          console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
+          copyWholeSkillDir();
           recordDecision(
             `skills/${skillName}/SKILL.md`,
             "SYNC",
             "SYNC_IF_NEWER: skills/",
-            "SKIP",
-            "not in the variant.json skill allowlist — new-asset injection withheld",
+            "NEW",
+            `whole skill directory delivered (none) → ${tplVer}${contractCommonDelivery ? " (contract common_skill bypassed the allowlist)" : ""}`,
           );
-          continue;
-        }
-        if (contractCommonDelivery) {
-          console.log(
-            `  ℹ️  contract common_skill delivered despite variant.json allowlist — refresh skill_manifest.allowlist to record it`,
-          );
-        }
-        console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
-        copyWholeSkillDir();
-        recordDecision(
-          `skills/${skillName}/SKILL.md`,
-          "SYNC",
-          "SYNC_IF_NEWER: skills/",
-          "NEW",
-          `whole skill directory delivered (none) → ${tplVer}${contractCommonDelivery ? " (contract common_skill bypassed the allowlist)" : ""}`,
-        );
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
-        syncChanged++;
-      } else if (semverGt(tplVer, projVer)) {
-        // D2 matrix: version-gated whole-directory delivery over committed
-        // project evolution escalates to CONFLICT (ERROR) — default SKIP.
-        const deliverable = readFileSync(tplSkillFile, "utf8");
-        const skillRel = `skills/${skillName}/SKILL.md`;
-        const proceeded = evolvedDeliveryGuard({
-          rel: skillRel,
-          policy: "SYNC",
-          pass: "SYNC_IF_NEWER: skills/",
-          projectFile: projSkillFile,
-          deliverableContent: deliverable,
-          onConflictSkip: () => {
-            console.log(
-              `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  ${projVer || "(none)"} → ${tplVer}  — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
-            );
-            console.log(
-              "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
-            );
-          },
-        });
-        if (!proceeded) continue;
-        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
-        // check every counterpart's marker count, not just SKILL.md.
-        if (
-          dirMarkerLossBlocks(
-            `skills/${skillName}`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            join(tplSkillsDir, skillName),
-            join(projectDir, "skills", skillName),
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
+          noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
+          syncChanged++;
+        } else if (semverGt(tplVer, projVer)) {
+          // D2 matrix: version-gated whole-directory delivery over committed
+          // project evolution escalates to CONFLICT (ERROR) — default SKIP.
+          const deliverable = readFileSync(tplSkillFile, "utf8");
+          const skillRel = `skills/${skillName}/SKILL.md`;
+          const proceeded = evolvedDeliveryGuard({
+            rel: skillRel,
+            policy: "SYNC",
+            pass: "SYNC_IF_NEWER: skills/",
+            projectFile: projSkillFile,
+            deliverableContent: deliverable,
+            onConflictSkip: () => {
+              console.log(
+                `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  ${projVer || "(none)"} → ${tplVer}  — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
+              );
+              console.log(
+                "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+              );
+            },
+          });
+          if (!proceeded) continue;
+          // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+          // check every counterpart's marker count, not just SKILL.md.
+          if (
+            dirMarkerLossBlocks(
+              `skills/${skillName}`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              join(tplSkillsDir, skillName),
+              join(projectDir, "skills", skillName),
+            )
           )
-        )
-          continue;
-        // G05: Warn if project file has local modifications.
-        if (isLocallyModified(projSkillFile)) {
-          console.log(
-            `  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer || "(none)"} → ${tplVer}  (local modifications exist)`,
-          );
+            continue;
+          // G05: Warn if project file has local modifications.
+          if (isLocallyModified(projSkillFile)) {
+            console.log(
+              `  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer || "(none)"} → ${tplVer}  (local modifications exist)`,
+            );
+            recordDecision(
+              skillRel,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "CONFLICT",
+              `${projVer || "(none)"} → ${tplVer} — uncommitted local modifications overwritten by the whole-directory copy (pre-upgrade stash covers rollback)`,
+              priorBaselines[skillRel],
+              "WARN",
+            );
+          } else {
+            console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer || "(none)"} → ${tplVer}`);
+            recordDecision(
+              skillRel,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "ADOPT",
+              `${projVer || "(none)"} → ${tplVer} — version-gated whole-directory delivery over the delivered baseline`,
+              priorBaselines[skillRel],
+            );
+          }
+          copyWholeSkillDir();
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
+          noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
+          syncChanged++;
+        } else {
+          const { copied, drifted } = catchUpSkillDir(skillName);
+          if (copied > 0) {
+            console.log(
+              `  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`,
+            );
+            recordDecision(
+              `skills/${skillName}/`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "NEW",
+              `additive catch-up — ${copied} missing file(s) delivered at the same version ${projVer} (nothing overwritten)`,
+            );
+            noteDelivered(`skills/${skillName}`);
+            syncChanged++;
+          } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
+            console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+          }
+          for (const d of drifted) {
+            console.log(
+              `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
+            );
+            recordDecision(
+              `skills/${skillName}/${d}`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "DRIFT_PRESERVE",
+              "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+              priorBaselines[`skills/${skillName}/${d}`],
+            );
+          }
+          // E3 (PR-B): the additive catch-up above still ran; a project-ahead skill also gets the
+          // PROJECT_AHEAD row (after the catch-up row).
+          if (semverGt(projVer, tplVer)) {
+            recordProjectAhead(
+              `skills/${skillName}/SKILL.md`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              projVer,
+              tplVer,
+              readFileSync(tplSkillFile, "utf8"),
+            );
+          }
+        }
+      } else {
+        // No explicit version — compare by content hash
+        const tplHash = fileHash(tplSkillFile);
+        const projHash = fileHash(projSkillFile);
+        if (!existsSync(projSkillFile)) {
+          // D2 (U-20261028-001): tombstone guard before the whole-directory copy
+          // (hash-based arm) — same refusal as the version-based NEW above.
+          if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "SYNC_IF_NEWER: skills/")) continue;
+          const contractCommonDelivery =
+            assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
+          if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
+            console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
+            recordDecision(
+              `skills/${skillName}/SKILL.md`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "SKIP",
+              "not in the variant.json skill allowlist — new-asset injection withheld (hash-based)",
+            );
+            continue;
+          }
+          if (contractCommonDelivery) {
+            console.log(
+              `  ℹ️  contract common_skill delivered despite variant.json allowlist — refresh skill_manifest.allowlist to record it`,
+            );
+          }
+          console.log(`  NEW   skills/${skillName}/SKILL.md  (hash-based)`);
+          copyWholeSkillDir();
           recordDecision(
-            skillRel,
+            `skills/${skillName}/SKILL.md`,
             "SYNC",
             "SYNC_IF_NEWER: skills/",
-            "CONFLICT",
-            `${projVer || "(none)"} → ${tplVer} — uncommitted local modifications overwritten by the whole-directory copy (pre-upgrade stash covers rollback)`,
-            priorBaselines[skillRel],
-            "WARN",
+            "NEW",
+            "whole skill directory delivered (hash-based, project copy absent)",
           );
-        } else {
-          console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer || "(none)"} → ${tplVer}`);
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
+          noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
+          syncChanged++;
+        } else if (tplHash !== projHash) {
+          const deliverable = readFileSync(tplSkillFile, "utf8");
+          const skillRel = `skills/${skillName}/SKILL.md`;
+          const proceeded = evolvedDeliveryGuard({
+            rel: skillRel,
+            policy: "SYNC",
+            pass: "SYNC_IF_NEWER: skills/",
+            projectFile: projSkillFile,
+            deliverableContent: deliverable,
+            onConflictSkip: () => {
+              console.log(
+                `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  (content changed) — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
+              );
+              console.log(
+                "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+              );
+            },
+          });
+          if (!proceeded) continue;
+          // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+          // check every counterpart's marker count, not just SKILL.md.
+          if (
+            dirMarkerLossBlocks(
+              `skills/${skillName}`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              join(tplSkillsDir, skillName),
+              join(projectDir, "skills", skillName),
+            )
+          )
+            continue;
+          console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
           recordDecision(
             skillRel,
             "SYNC",
             "SYNC_IF_NEWER: skills/",
             "ADOPT",
-            `${projVer || "(none)"} → ${tplVer} — version-gated whole-directory delivery over the delivered baseline`,
+            "hash-gated whole-directory delivery over the delivered baseline",
             priorBaselines[skillRel],
           );
-        }
-        copyWholeSkillDir();
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
-        syncChanged++;
-      } else {
-        const { copied, drifted } = catchUpSkillDir(skillName);
-        if (copied > 0) {
-          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`);
-          recordDecision(
-            `skills/${skillName}/`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            "NEW",
-            `additive catch-up — ${copied} missing file(s) delivered at the same version ${projVer} (nothing overwritten)`,
-          );
+          copyWholeSkillDir();
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
           noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
           syncChanged++;
-        } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
-          console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
-        }
-        for (const d of drifted) {
-          console.log(
-            `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
-          );
-          recordDecision(
-            `skills/${skillName}/${d}`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            "DRIFT_PRESERVE",
-            "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
-            priorBaselines[`skills/${skillName}/${d}`],
-          );
-        }
-        // E3 (PR-B): the additive catch-up above still ran; a project-ahead skill also gets the
-        // PROJECT_AHEAD row (after the catch-up row).
-        if (semverGt(projVer, tplVer)) {
-          recordProjectAhead(
-            `skills/${skillName}/SKILL.md`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            projVer,
-            tplVer,
-            readFileSync(tplSkillFile, "utf8"),
-          );
-        }
-      }
-    } else {
-      // No explicit version — compare by content hash
-      const tplHash = fileHash(tplSkillFile);
-      const projHash = fileHash(projSkillFile);
-      if (!existsSync(projSkillFile)) {
-        // D2 (U-20261028-001): tombstone guard before the whole-directory copy
-        // (hash-based arm) — same refusal as the version-based NEW above.
-        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "SYNC_IF_NEWER: skills/")) continue;
-        const contractCommonDelivery =
-          assetGate && !assetGate.skills.has(skillName) && contractCommonSkills.has(skillName);
-        if (assetGate && !assetGate.skills.has(skillName) && !contractCommonDelivery) {
-          console.log(`  SKIP (not in variant.json skill allowlist): skills/${skillName}/SKILL.md`);
-          recordDecision(
-            `skills/${skillName}/SKILL.md`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            "SKIP",
-            "not in the variant.json skill allowlist — new-asset injection withheld (hash-based)",
-          );
-          continue;
-        }
-        if (contractCommonDelivery) {
-          console.log(
-            `  ℹ️  contract common_skill delivered despite variant.json allowlist — refresh skill_manifest.allowlist to record it`,
-          );
-        }
-        console.log(`  NEW   skills/${skillName}/SKILL.md  (hash-based)`);
-        copyWholeSkillDir();
-        recordDecision(
-          `skills/${skillName}/SKILL.md`,
-          "SYNC",
-          "SYNC_IF_NEWER: skills/",
-          "NEW",
-          "whole skill directory delivered (hash-based, project copy absent)",
-        );
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
-        syncChanged++;
-      } else if (tplHash !== projHash) {
-        const deliverable = readFileSync(tplSkillFile, "utf8");
-        const skillRel = `skills/${skillName}/SKILL.md`;
-        const proceeded = evolvedDeliveryGuard({
-          rel: skillRel,
-          policy: "SYNC",
-          pass: "SYNC_IF_NEWER: skills/",
-          projectFile: projSkillFile,
-          deliverableContent: deliverable,
-          onConflictSkip: () => {
-            console.log(
-              `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  (content changed) — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
+        } else {
+          const { copied, drifted } = catchUpSkillDir(skillName);
+          if (copied > 0) {
+            console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
+            recordDecision(
+              `skills/${skillName}/`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "NEW",
+              `additive catch-up — ${copied} missing file(s) delivered (hash match, nothing overwritten)`,
             );
+            noteDelivered(`skills/${skillName}`);
+            syncChanged++;
+          } else if (drifted.length === 0) {
+            console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+          }
+          for (const d of drifted) {
             console.log(
-              "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+              `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
             );
-          },
-        });
-        if (!proceeded) continue;
-        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
-        // check every counterpart's marker count, not just SKILL.md.
-        if (
-          dirMarkerLossBlocks(
-            `skills/${skillName}`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            join(tplSkillsDir, skillName),
-            join(projectDir, "skills", skillName),
-          )
-        )
-          continue;
-        console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
-        recordDecision(
-          skillRel,
-          "SYNC",
-          "SYNC_IF_NEWER: skills/",
-          "ADOPT",
-          "hash-gated whole-directory delivery over the delivered baseline",
-          priorBaselines[skillRel],
-        );
-        copyWholeSkillDir();
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "SYNC_IF_NEWER: skills/"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/ (whole directory)`);
-        syncChanged++;
-      } else {
-        const { copied, drifted } = catchUpSkillDir(skillName);
-        if (copied > 0) {
-          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
-          recordDecision(
-            `skills/${skillName}/`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            "NEW",
-            `additive catch-up — ${copied} missing file(s) delivered (hash match, nothing overwritten)`,
-          );
-          noteDelivered(`skills/${skillName}`);
-          syncChanged++;
-        } else if (drifted.length === 0) {
-          console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
-        }
-        for (const d of drifted) {
-          console.log(
-            `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
-          );
-          recordDecision(
-            `skills/${skillName}/${d}`,
-            "SYNC",
-            "SYNC_IF_NEWER: skills/",
-            "DRIFT_PRESERVE",
-            "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
-            priorBaselines[`skills/${skillName}/${d}`],
-          );
+            recordDecision(
+              `skills/${skillName}/${d}`,
+              "SYNC",
+              "SYNC_IF_NEWER: skills/",
+              "DRIFT_PRESERVE",
+              "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+              priorBaselines[`skills/${skillName}/${d}`],
+            );
+          }
         }
       }
     }
-  }
 }
 // List project-only skills as PRESERVE
 const projSkillsDir = join(projectDir, "skills");
@@ -6706,218 +6907,225 @@ console.log("");
 const variantSkillsSrc = join(templatesDir, "skills");
 if (existsSync(variantSkillsSrc)) {
   console.log(`--- VARIANT SKILLS: skills/${variant}/ ---`);
-  for (const skillName of readdirSync(variantSkillsSrc)) {
-    const tplSkillFile = join(variantSkillsSrc, skillName, "SKILL.md");
-    if (!existsSync(tplSkillFile)) continue;
-    const tplSkillDir = join(variantSkillsSrc, skillName);
-    const projSkillDir = join(projectDir, "skills", skillName);
-    const projSkillFile = join(projSkillDir, "SKILL.md");
-    const tplVer = extractFrontmatterVersion(tplSkillFile);
-    const projVer = existsSync(projSkillFile) ? extractFrontmatterVersion(projSkillFile) : "";
-    const copySkillDir = (): void => {
-      mkdirSync(projSkillDir, { recursive: true });
-      // v1.37.0: recursive merge — the old two-level walk skipped files at
-      // depth ≥ 3 (e.g. references/validation/*).
-      cpSync(tplSkillDir, projSkillDir, { recursive: true });
-    };
-    if (tplVer) {
-      if (!existsSync(projSkillFile)) {
-        // D2 (U-20261028-001): tombstone guard before the whole-directory copy —
-        // variant skills follow the common skills pass's refusal semantics.
-        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "VARIANT SKILLS")) continue;
-        console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
-        if (!dryRun) copySkillDir();
-        recordDecision(
-          `skills/${skillName}/SKILL.md`,
-          "SYNC",
-          "VARIANT SKILLS",
-          "NEW",
-          `variant skill directory delivered (none) → ${tplVer}`,
-        );
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
-        syncChanged++;
-      } else if (semverGt(tplVer, projVer)) {
-        const deliverable = readFileSync(tplSkillFile, "utf8");
-        const skillRel = `skills/${skillName}/SKILL.md`;
-        const proceeded = evolvedDeliveryGuard({
-          rel: skillRel,
-          policy: "SYNC",
-          pass: "VARIANT SKILLS",
-          projectFile: projSkillFile,
-          deliverableContent: deliverable,
-          onConflictSkip: () => {
-            console.log(
-              `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
-            );
-            console.log(
-              "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
-            );
-          },
-        });
-        if (!proceeded) continue;
-        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
-        // check every counterpart's marker count, not just SKILL.md.
-        if (dirMarkerLossBlocks(`skills/${skillName}`, "SYNC", "VARIANT SKILLS", tplSkillDir, projSkillDir)) continue;
-        if (isLocallyModified(projSkillFile)) {
-          console.log(
-            `  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
-          );
+  // v1.115.0: --surfaces claim-class gate — variant skills/** carry the same
+  // "SYNC_IF_NEWER: skills/" claim class as the common pool (resolveClaim).
+  if (surfacesBlocked("SYNC_IF_NEWER: skills/")) {
+    console.log("  withheld — --surfaces selection does not include 'SYNC_IF_NEWER: skills/'");
+  } else
+    for (const skillName of readdirSync(variantSkillsSrc)) {
+      const tplSkillFile = join(variantSkillsSrc, skillName, "SKILL.md");
+      if (!existsSync(tplSkillFile)) continue;
+      const tplSkillDir = join(variantSkillsSrc, skillName);
+      const projSkillDir = join(projectDir, "skills", skillName);
+      const projSkillFile = join(projSkillDir, "SKILL.md");
+      const tplVer = extractFrontmatterVersion(tplSkillFile);
+      const projVer = existsSync(projSkillFile) ? extractFrontmatterVersion(projSkillFile) : "";
+      const copySkillDir = (): void => {
+        mkdirSync(projSkillDir, { recursive: true });
+        // v1.37.0: recursive merge — the old two-level walk skipped files at
+        // depth ≥ 3 (e.g. references/validation/*).
+        cpSync(tplSkillDir, projSkillDir, { recursive: true });
+      };
+      if (tplVer) {
+        if (!existsSync(projSkillFile)) {
+          // D2 (U-20261028-001): tombstone guard before the whole-directory copy —
+          // variant skills follow the common skills pass's refusal semantics.
+          if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "VARIANT SKILLS")) continue;
+          console.log(`  NEW   skills/${skillName}/SKILL.md  (none) → ${tplVer}`);
+          if (!dryRun) copySkillDir();
           recordDecision(
-            skillRel,
+            `skills/${skillName}/SKILL.md`,
             "SYNC",
             "VARIANT SKILLS",
-            "CONFLICT",
-            `${projVer} → ${tplVer} — uncommitted local modifications overwritten by the whole-directory copy (pre-upgrade stash covers rollback)`,
-            priorBaselines[skillRel],
-            "WARN",
+            "NEW",
+            `variant skill directory delivered (none) → ${tplVer}`,
           );
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
+          noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
+          syncChanged++;
+        } else if (semverGt(tplVer, projVer)) {
+          const deliverable = readFileSync(tplSkillFile, "utf8");
+          const skillRel = `skills/${skillName}/SKILL.md`;
+          const proceeded = evolvedDeliveryGuard({
+            rel: skillRel,
+            policy: "SYNC",
+            pass: "VARIANT SKILLS",
+            projectFile: projSkillFile,
+            deliverableContent: deliverable,
+            onConflictSkip: () => {
+              console.log(
+                `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  ${projVer} → ${tplVer}  — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
+              );
+              console.log(
+                "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+              );
+            },
+          });
+          if (!proceeded) continue;
+          // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+          // check every counterpart's marker count, not just SKILL.md.
+          if (dirMarkerLossBlocks(`skills/${skillName}`, "SYNC", "VARIANT SKILLS", tplSkillDir, projSkillDir)) continue;
+          if (isLocallyModified(projSkillFile)) {
+            console.log(
+              `  ⚠️  CONFLICT skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}  (local modifications exist — template will overwrite)`,
+            );
+            recordDecision(
+              skillRel,
+              "SYNC",
+              "VARIANT SKILLS",
+              "CONFLICT",
+              `${projVer} → ${tplVer} — uncommitted local modifications overwritten by the whole-directory copy (pre-upgrade stash covers rollback)`,
+              priorBaselines[skillRel],
+              "WARN",
+            );
+          } else {
+            console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}`);
+            recordDecision(
+              skillRel,
+              "SYNC",
+              "VARIANT SKILLS",
+              "ADOPT",
+              `${projVer} → ${tplVer} — version-gated variant-skill delivery over the delivered baseline`,
+              priorBaselines[skillRel],
+            );
+          }
+          if (!dryRun) copySkillDir();
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
+          noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
+          syncChanged++;
         } else {
-          console.log(`  UPDATE skills/${skillName}/SKILL.md  ${projVer} → ${tplVer}`);
+          // v1.38.0: equal-version catch-up, same policy as the common skills pass
+          const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
+          if (copied > 0) {
+            console.log(
+              `  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`,
+            );
+            recordDecision(
+              `skills/${skillName}/`,
+              "SYNC",
+              "VARIANT SKILLS",
+              "NEW",
+              `additive catch-up — ${copied} missing file(s) delivered at the same version ${projVer} (nothing overwritten)`,
+            );
+            noteDelivered(`skills/${skillName}`);
+            syncChanged++;
+          } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
+            console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
+          }
+          for (const d of drifted) {
+            console.log(
+              `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
+            );
+            recordDecision(
+              `skills/${skillName}/${d}`,
+              "SYNC",
+              "VARIANT SKILLS",
+              "DRIFT_PRESERVE",
+              "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+              priorBaselines[`skills/${skillName}/${d}`],
+            );
+          }
+          if (semverGt(projVer, tplVer)) {
+            recordProjectAhead(
+              `skills/${skillName}/SKILL.md`,
+              "SYNC",
+              "VARIANT SKILLS",
+              projVer,
+              tplVer,
+              readFileSync(tplSkillFile, "utf8"),
+            );
+          }
+        }
+      } else {
+        const tplHash = fileHash(tplSkillFile);
+        const projHash = existsSync(projSkillFile) ? fileHash(projSkillFile) : "";
+        if (!existsSync(projSkillFile)) {
+          // D2 (U-20261028-001): tombstone guard before the whole-directory copy
+          // (variant, hash-based arm).
+          if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "VARIANT SKILLS")) continue;
+          console.log(`  NEW   skills/${skillName}/SKILL.md  (hash)`);
+          if (!dryRun) copySkillDir();
+          recordDecision(
+            `skills/${skillName}/SKILL.md`,
+            "SYNC",
+            "VARIANT SKILLS",
+            "NEW",
+            "variant skill directory delivered (hash-based, project copy absent)",
+          );
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
+          noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
+          syncChanged++;
+        } else if (tplHash !== projHash) {
+          const deliverable = readFileSync(tplSkillFile, "utf8");
+          const skillRel = `skills/${skillName}/SKILL.md`;
+          const proceeded = evolvedDeliveryGuard({
+            rel: skillRel,
+            policy: "SYNC",
+            pass: "VARIANT SKILLS",
+            projectFile: projSkillFile,
+            deliverableContent: deliverable,
+            onConflictSkip: () => {
+              console.log(
+                `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  (content changed) — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
+              );
+              console.log(
+                "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+              );
+            },
+          });
+          if (!proceeded) continue;
+          // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
+          // check every counterpart's marker count, not just SKILL.md.
+          if (dirMarkerLossBlocks(`skills/${skillName}`, "SYNC", "VARIANT SKILLS", tplSkillDir, projSkillDir)) continue;
+          console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
           recordDecision(
             skillRel,
             "SYNC",
             "VARIANT SKILLS",
             "ADOPT",
-            `${projVer} → ${tplVer} — version-gated variant-skill delivery over the delivered baseline`,
+            "hash-gated variant-skill delivery over the delivered baseline",
             priorBaselines[skillRel],
           );
-        }
-        if (!dryRun) copySkillDir();
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
-        syncChanged++;
-      } else {
-        // v1.38.0: equal-version catch-up, same policy as the common skills pass
-        const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
-        if (copied > 0) {
-          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (same version ${projVer})`);
-          recordDecision(
-            `skills/${skillName}/`,
-            "SYNC",
-            "VARIANT SKILLS",
-            "NEW",
-            `additive catch-up — ${copied} missing file(s) delivered at the same version ${projVer} (nothing overwritten)`,
-          );
+          if (!dryRun) copySkillDir();
+          if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
           noteDelivered(`skills/${skillName}`);
+          console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
           syncChanged++;
-        } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
-          console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
-        }
-        for (const d of drifted) {
-          console.log(
-            `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
-          );
-          recordDecision(
-            `skills/${skillName}/${d}`,
-            "SYNC",
-            "VARIANT SKILLS",
-            "DRIFT_PRESERVE",
-            "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
-            priorBaselines[`skills/${skillName}/${d}`],
-          );
-        }
-        if (semverGt(projVer, tplVer)) {
-          recordProjectAhead(
-            `skills/${skillName}/SKILL.md`,
-            "SYNC",
-            "VARIANT SKILLS",
-            projVer,
-            tplVer,
-            readFileSync(tplSkillFile, "utf8"),
-          );
-        }
-      }
-    } else {
-      const tplHash = fileHash(tplSkillFile);
-      const projHash = existsSync(projSkillFile) ? fileHash(projSkillFile) : "";
-      if (!existsSync(projSkillFile)) {
-        // D2 (U-20261028-001): tombstone guard before the whole-directory copy
-        // (variant, hash-based arm).
-        if (tombstoneSkip(`skills/${skillName}/SKILL.md`, "SYNC", "VARIANT SKILLS")) continue;
-        console.log(`  NEW   skills/${skillName}/SKILL.md  (hash)`);
-        if (!dryRun) copySkillDir();
-        recordDecision(
-          `skills/${skillName}/SKILL.md`,
-          "SYNC",
-          "VARIANT SKILLS",
-          "NEW",
-          "variant skill directory delivered (hash-based, project copy absent)",
-        );
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
-        syncChanged++;
-      } else if (tplHash !== projHash) {
-        const deliverable = readFileSync(tplSkillFile, "utf8");
-        const skillRel = `skills/${skillName}/SKILL.md`;
-        const proceeded = evolvedDeliveryGuard({
-          rel: skillRel,
-          policy: "SYNC",
-          pass: "VARIANT SKILLS",
-          projectFile: projSkillFile,
-          deliverableContent: deliverable,
-          onConflictSkip: () => {
-            console.log(
-              `  ⏭️  CONFLICT DISPOSITION (SKIP): skills/${skillName}/  (content changed) — project-evolved since the last delivery AND template changed; whole-directory delivery SKIPPED, project copies PRESERVED (non-zero exit at completion)`,
+        } else {
+          const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
+          if (copied > 0) {
+            console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
+            recordDecision(
+              `skills/${skillName}/`,
+              "SYNC",
+              "VARIANT SKILLS",
+              "NEW",
+              `additive catch-up — ${copied} missing file(s) delivered (hash match, nothing overwritten)`,
             );
+            noteDelivered(`skills/${skillName}`);
+            syncChanged++;
+          } else if (drifted.length === 0) {
+            console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
+          }
+          for (const d of drifted) {
             console.log(
-              "      proceed with --disposition adopt-template[=glob], or port the content template-side per design §6 (adjudicated-port procedure)",
+              `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
             );
-          },
-        });
-        if (!proceeded) continue;
-        // E2 (DEC-20261111-01 D4): the whole-directory copy overwrites every template file —
-        // check every counterpart's marker count, not just SKILL.md.
-        if (dirMarkerLossBlocks(`skills/${skillName}`, "SYNC", "VARIANT SKILLS", tplSkillDir, projSkillDir)) continue;
-        console.log(`  UPDATE skills/${skillName}/SKILL.md  (content changed)`);
-        recordDecision(
-          skillRel,
-          "SYNC",
-          "VARIANT SKILLS",
-          "ADOPT",
-          "hash-gated variant-skill delivery over the delivered baseline",
-          priorBaselines[skillRel],
-        );
-        if (!dryRun) copySkillDir();
-        if (!dryRun) reconcileSkillLifecycleRecord(skillName, tplSkillFile, "VARIANT SKILLS"); // delivery-riding R1
-        noteDelivered(`skills/${skillName}`);
-        console.log(`  ${dryTag}COPIED: skills/${skillName}/`);
-        syncChanged++;
-      } else {
-        const { copied, drifted } = catchUpDir(tplSkillDir, projSkillDir);
-        if (copied > 0) {
-          console.log(`  CATCH-UP skills/${skillName}/  ${copied} missing file(s) delivered (hash match)`);
-          recordDecision(
-            `skills/${skillName}/`,
-            "SYNC",
-            "VARIANT SKILLS",
-            "NEW",
-            `additive catch-up — ${copied} missing file(s) delivered (hash match, nothing overwritten)`,
-          );
-          noteDelivered(`skills/${skillName}`);
-          syncChanged++;
-        } else if (drifted.length === 0) {
-          console.log(`  OK     skills/${skillName}/SKILL.md  (hash match)`);
-        }
-        for (const d of drifted) {
-          console.log(
-            `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
-          );
-          recordDecision(
-            `skills/${skillName}/${d}`,
-            "SYNC",
-            "VARIANT SKILLS",
-            "DRIFT_PRESERVE",
-            "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
-            priorBaselines[`skills/${skillName}/${d}`],
-          );
+            recordDecision(
+              `skills/${skillName}/${d}`,
+              "SYNC",
+              "VARIANT SKILLS",
+              "DRIFT_PRESERVE",
+              "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+              priorBaselines[`skills/${skillName}/${d}`],
+            );
+          }
         }
       }
     }
-  }
   console.log("");
 }
 
@@ -6959,7 +7167,8 @@ const variantAssetDirs = existsSync(templatesDir)
       .filter((e) => e.isDirectory() && !VARIANT_ASSET_DIR_SKIP.has(e.name))
       .map((e) => e.name)
   : [];
-if (variantAssetDirs.length > 0) {
+// v1.115.0: --surfaces claim-class gate — the pass is withheld when its class is not selected.
+if (variantAssetDirs.length > 0 && surfacesAllowsPass(VARIANT_ASSET_DIRS_PASS)) {
   console.log(`--- VARIANT ASSET DIRS: ${variantAssetDirs.join(", ")} ---`);
   // v1.48.0 (T-20260924-011 — spec docs/designs/2026-09-25-codex-merge-claim-routing-design.md
   // D2/R4-R6): the pass consults resolveClaim per walked file and delivers only
@@ -7118,6 +7327,8 @@ console.log("--- GOVERNANCE FILES SYNC (add-if-missing) ---");
 const GOVERNANCE_FILES = ["LICENSE", "SECURITY.md"];
 let govFilesCopied = 0;
 for (const fileName of GOVERNANCE_FILES) {
+  // v1.115.0: --surfaces claim-class gate — the pass id matches resolveClaim's GOVERNANCE_FILES branch.
+  if (surfacesBlocked("GOVERNANCE FILES")) break;
   const src = existsSync(join(templatesDir, fileName)) ? join(templatesDir, fileName) : join(commonDir, fileName);
   const dst = join(projectDir, fileName);
   if (!existsSync(src)) continue;
@@ -7155,7 +7366,9 @@ console.log("");
 // if absent (it is the closed output-type vocabulary validators rely on).
 console.log("--- PROCEDURES SYNC (add-if-missing) ---");
 let proceduresCopied = 0;
-{
+// v1.115.0: --surfaces claim-class gate ("PROCEDURES" has no upgrade-policy export —
+// the pass id lives only in resolveClaim's procedures/** branch).
+if (surfacesAllowsPass("PROCEDURES")) {
   const projProcDir = join(projectDir, "procedures");
   const variantProcDir = join(templatesDir, "procedures");
   const commonProcDir = join(commonDir, "procedures");
@@ -7224,7 +7437,8 @@ console.log("");
 // variant-specific (no templates/common counterpart).
 console.log("--- REGION PROFILES SYNC (add-if-missing) ---");
 let regionProfilesCopied = 0;
-{
+// v1.115.0: --surfaces claim-class gate (pass id from upgrade-policy's export).
+if (surfacesAllowsPass(REGION_PROFILES_PASS)) {
   // templatesDir is already the variant template dir (templates/<variant>).
   const srcDir = join(templatesDir, "region-profiles");
   const dstDir = join(projectDir, "region-profiles");
@@ -7283,7 +7497,8 @@ console.log("");
 //                withheld template changes log TEMPLATE_DELTA rows; wholesale adoption via
 //                --disposition adopt-template=<glob>.
 console.log("--- TEMPLATE TREE SYNC: uncovered template files (default policy) ---");
-{
+// v1.115.0: --surfaces claim-class gate (pass id from upgrade-policy's export).
+if (surfacesAllowsPass(TEMPLATE_TREE_SYNC_PASS)) {
   const variantTplDir = existsSync(templatesDir) ? templatesDir : null;
   for (const { rel, abs } of iterEffectiveTemplateFiles(commonDir, variantTplDir)) {
     const claim = resolveClaim(rel, variant);

@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.7.0
+// @version 1.8.0
+// v1.8.0 (2026-11-21, spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md
+//          §5.6/§5.7): adoption-time fleet blinding + consumption birth certificate.
+//          (1) On successful adoption of a project whose template variant declares
+//          "consumption": "adoption-only", an exclusion row is registered in
+//          docs/fleet-membership.json (DEC-20261107-01 SSOT) — default ON, --keep-in-fleet
+//          declines with a loud warning (the upgrade-project engine gate still protects, but
+//          the project then shows up in loop scans). Registration is namespace-aware: only
+//          co-* names can carry a row (the registry schema validates ^co-[a-z0-9-]{1,40}$ and
+//          listFleetProjects() only enumerates Projects/co-* — any other adopted name is
+//          already structurally invisible to the loop consumers, so no row is written for it).
+//          (2) The variant.json seed now stamps `consumption` from the template explicitly
+//          and is KEPT for adoption-only variants (not removed at settling — the field is the
+//          project-side identity that makes the engine-level upgrade gate bind; it stays
+//          info/exclude-protected, never tracked). The hygiene pass tolerates it there.
 // v1.7.0 (2026-11-20, T-20261120-001 — design
 //          docs/designs/2026-11-20-adoption-gaps-batch-design.md): four adoption-gap
 //          fixes (U-20261119-002): (1) context-overlay stack substitution — new
@@ -86,7 +100,8 @@ import { applyContextTemplate, DEFAULT_PM_ROLE_DESCRIPTIONS } from "./helpers/te
 import { applySubstitutions, substituteFiles } from "./helpers/substitute-placeholders.ts";
 import { blankL0Refs } from "./helpers/l0-ref-policy.ts";
 import { PLATFORM_PROFILES, PROFILE_OWNED_PATHS, parsePlatformList, type PlatformProfile } from "./lib/platforms.ts";
-import { exclusionForName } from "./lib/fleet.ts";
+import { exclusionForName, fleetExclusions } from "./lib/fleet.ts";
+import { localDateISO } from "./lib/local-date.ts";
 import { setStateFile, resetStateFile, saveState, loadState, type PipelineState } from "./lib/pipeline-state.ts";
 
 const GREEN = "\x1b[32m";
@@ -136,6 +151,9 @@ function getArg(flag: string): string | undefined {
 const VALUE_FLAGS = new Set(["--variant", "--platform", "--project", "--stack"]);
 const DRY_RUN = args.includes("--dry-run");
 const REFRESH_CONTEXT = args.includes("--refresh-context");
+// v1.8.0 (adoption-role design §5.7): decline the adoption-time fleet-exclusion
+// registration (default is to register when the template variant is adoption-only).
+const KEEP_IN_FLEET = args.includes("--keep-in-fleet");
 const YES = args.includes("--yes") || args.includes("-y") || process.env.CI === "true" || process.env.CI === "1";
 let platform = getArg("--platform") ?? "all";
 let selectedProfiles: PlatformProfile[] = [...PLATFORM_PROFILES];
@@ -147,7 +165,7 @@ const projectArg = getArg("--project") ?? positional;
 
 if (!projectArg) {
   console.error(
-    "Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--stack language=…,framework=…,…] [--refresh-context] [--dry-run] [--yes]",
+    "Usage: bun scripts/adopt-project.ts <project-path> --variant co-<x> [--platform <profile>[,<profile>...]|all] [--stack language=…,framework=…,…] [--refresh-context] [--keep-in-fleet] [--dry-run] [--yes]",
   );
   process.exit(1);
 }
@@ -309,11 +327,17 @@ if (!existsSync(variantDir))
   fail(`Variant template not found: templates/${variant}\n       Valid variants: ${availableVariants.join(", ")}`);
 
 let variantStatus = "";
+// v1.8.0 (adoption-role design §5.6): the template variant's consumption role —
+// "adoption-only" turns on the birth-certificate seed and the fleet-exclusion registration.
+let templateConsumption: string | undefined;
 try {
-  variantStatus = JSON.parse(readFileSync(join(variantDir, "variant.json"), "utf8")).status ?? "";
+  const tplVj = JSON.parse(readFileSync(join(variantDir, "variant.json"), "utf8")) as Record<string, unknown>;
+  variantStatus = (tplVj.status as string) ?? "";
+  templateConsumption = typeof tplVj.consumption === "string" ? tplVj.consumption : undefined;
 } catch {
   /* none */
 }
+const templateAdoptionOnly = templateConsumption === "adoption-only";
 if (variantStatus && variantStatus !== "stable") {
   if (YES) {
     console.log(
@@ -527,7 +551,14 @@ if (!DRY_RUN) {
     console.log(`  📦 backed up ${c.rel} → ${relative(WORKSPACE_ROOT, dest)}`);
   }
   // Foreign-skill manifest seed — invisible to git status and to `stash -u` via info/exclude.
-  if (plan.foreignSkills.length > 0) {
+  // v1.8.0 (adoption-role design §5.6.2): an adoption-only template variant ALSO seeds the
+  // project's variant.json even with no foreign skills — the seed stamps `consumption`
+  // explicitly from the template so the field exists at birth (the engine-level upgrade
+  // gate reads THIS file; PROJECT_STATE per ADR-0073 means no wave can ever deliver it).
+  // The seed spreads the whole template manifest (skill_manifest seed unchanged) —
+  // status/version/description stay the TEMPLATE's values at seed time; the project side
+  // owns them from there (design §5.8: template and project status are independent axes).
+  if (plan.foreignSkills.length > 0 || templateAdoptionOnly) {
     const tplVariantJson = JSON.parse(readFileSync(join(variantDir, "variant.json"), "utf8")) as Record<
       string,
       unknown
@@ -543,12 +574,25 @@ if (!DRY_RUN) {
         .filter((s) => !have.has(s))
         .map((s) => ({ name: s, reason: "adopted foreign skill (adopt-project)" })),
     ];
-    const seeded = { ...tplVariantJson, skill_manifest: { ...manifest, variant_specific: merged } };
+    const seeded: Record<string, unknown> = {
+      ...tplVariantJson,
+      skill_manifest: { ...manifest, variant_specific: merged },
+    };
+    if (templateAdoptionOnly) {
+      seeded.consumption = "adoption-only";
+    }
     writeFileSync(join(projectDir, "variant.json"), JSON.stringify(seeded, null, 2) + "\n");
     appendInfoExclude(projectDir, "variant.json");
-    console.log(
-      `  🛡️  seeded variant.json skill_manifest with ${plan.foreignSkills.length} foreign skill(s) (info/exclude-protected)`,
-    );
+    if (plan.foreignSkills.length > 0) {
+      console.log(
+        `  🛡️  seeded variant.json skill_manifest with ${plan.foreignSkills.length} foreign skill(s) (info/exclude-protected)`,
+      );
+    }
+    if (templateAdoptionOnly) {
+      console.log(
+        `  🛡️  seeded variant.json "consumption": "adoption-only" (birth certificate — the upgrade-project engine gate reads this file; info/exclude-protected)`,
+      );
+    }
   }
 }
 
@@ -659,6 +703,7 @@ const report = {
     to: string | null;
   } | null,
   env: { hooksPath: false, bunInstall: false, graft: false, gitleaksFindings: -1, auditSmoke: "not-run" },
+  fleetExclusion: null as null | { registered: boolean; id?: string; decision_ref?: string; note?: string },
 };
 
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { files?: string[] };
@@ -719,8 +764,11 @@ if (plan.retainedForeignScripts.length > 0 && existsSync(projScriptsMd)) {
 }
 
 // 3. Remove the seeded variant.json (scaffold parity) + its info/exclude entry.
+// v1.8.0 (adoption-role design §5.6.2): an adoption-only variant's seed is KEPT — the
+// stamped `consumption` field is the project-side identity that makes the engine-level
+// upgrade gate bind for this project. It stays info/exclude-protected (never tracked).
 const seededVariantJson = join(projectDir, "variant.json");
-if (existsSync(seededVariantJson) && plan.foreignSkills.length > 0) {
+if (existsSync(seededVariantJson) && plan.foreignSkills.length > 0 && !templateAdoptionOnly) {
   rmSync(seededVariantJson);
   removeInfoExclude(projectDir, "variant.json");
   console.log("  🗑️  variant.json seed removed (scaffold parity)");
@@ -904,12 +952,21 @@ if (existsSync(ctxVariantPath)) {
     .filter((e) => e.isFile())
     .map((e) => e.name);
   const findings = scanHygieneRootArtifacts(rootFiles);
-  for (const f of findings) {
+  // v1.8.0 (adoption-role design §5.6.2): an adoption-only variant's variant.json is the
+  // intended birth certificate (consumption carrier for the engine gate) — tolerate it
+  // here instead of telling the operator to delete the gate's input.
+  const tolerated = findings.filter((f) => !(templateAdoptionOnly && f.file === "variant.json"));
+  if (tolerated.length !== findings.length) {
+    console.log(
+      `  🛡️  hygiene: variant.json tolerated at the project root — adoption-only consumption carrier (design 2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.6.2)`,
+    );
+  }
+  for (const f of tolerated) {
     console.log(
       `${YELLOW}  ⚠️  hygiene: ${f.file} at the project root — ${f.reason} — remove (git rm) or justify.${RESET}`,
     );
   }
-  report.hygieneFindings = findings;
+  report.hygieneFindings = tolerated;
 }
 
 // 6-8. Add-if-missing seeds: memory index, docs README pair, CHANGELOG.
@@ -1131,6 +1188,59 @@ if (smoke.status !== 0) {
   );
 } else {
   console.log("  ✅ audit smoke passed");
+}
+
+// 23b. Adoption-time fleet blinding (v1.8.0, adoption-role design §5.7): on successful
+// adoption of a project whose template variant is consumption:"adoption-only", register an
+// exclusion row in docs/fleet-membership.json (the DEC-20261107-01 SSOT) so EVERY loop
+// consumer (resync-audit scan, backport batteries, fleet reports) is blind to the adopted
+// project without touching any of them — listFleetProjects() stays pure name-based.
+// Default ON; --keep-in-fleet declines with a loud warning (the upgrade-project engine
+// gate still protects the project, but it then shows up in loop scans). Workspace-side
+// write — never dirties the project tree; skipped entirely in --dry-run.
+if (templateAdoptionOnly && !DRY_RUN) {
+  const registryPath = join(WORKSPACE_ROOT, "docs", "fleet-membership.json");
+  const fleetNameRe = /^co-[a-z0-9-]{1,40}$/;
+  if (!fleetNameRe.test(projectName)) {
+    // The registry schema validates ^co-[a-z0-9-]{1,40}$ and listFleetProjects() only
+    // enumerates Projects/co-* — any other adopted name (e.g. an outside-Projects app
+    // keeping its own name) is ALREADY structurally invisible to the loop consumers.
+    // Writing a non-conforming row would fail-closed-break every fleet tool — never do it.
+    report.fleetExclusion = {
+      registered: false,
+      note: `name '${projectName}' is outside the co-* fleet namespace — no exclusion row required (structurally invisible to listFleetProjects())`,
+    };
+    console.log(
+      `  ℹ️  fleet membership: '${projectName}' is outside the co-* fleet namespace — the loop scans cannot see it (no exclusion row required; design §5.2).`,
+    );
+  } else if (KEEP_IN_FLEET) {
+    report.fleetExclusion = { registered: false, id: projectName, note: "--keep-in-fleet: no exclusion row written" };
+    console.log(
+      `${YELLOW}  ⚠️  --keep-in-fleet: '${projectName}' STAYS a fleet member — resync-audit and the backport batteries WILL scan it (design §5.7). The upgrade-project engine gate (consumption:"adoption-only" refusal) still protects it, but every loop consumer sees it. Reversal: remove the docs/fleet-membership.json row, or re-run adoption.${RESET}`,
+    );
+  } else {
+    const existing = fleetExclusions(WORKSPACE_ROOT); // valid by this point (Phase-2 guard ran fail-closed)
+    if (existing.some((e) => e.id === projectName)) {
+      report.fleetExclusion = { registered: false, id: projectName, note: "exclusion row already present" };
+      console.log(`  ℹ️  fleet membership: exclusion row for '${projectName}' already present — kept as-is.`);
+    } else {
+      const row = {
+        id: projectName,
+        reason: `Adoption-only variant project (adopted into templates/${variant}, variant.json "consumption": "adoption-only") — registered at adoption time by adopt-project so the resync-audit scan and the backport batteries stay blind (delivery goes through the curated upgrade-project path: --confirm-curated, dry-run default, --surfaces selection). Design: docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md §5.7.`,
+        decided: localDateISO(),
+        decision_ref: "DEC-20261107-01",
+      };
+      const updated = { version: 1, excluded: [...existing, row] };
+      writeFileSync(registryPath, JSON.stringify(updated, null, 2) + "\n");
+      report.fleetExclusion = { registered: true, id: projectName, decision_ref: row.decision_ref };
+      console.log(
+        `  🚫 registered fleet-exclusion row for '${projectName}' in docs/fleet-membership.json — loop consumers (resync-audit, backport batteries) are blind to this project (design §5.7).`,
+      );
+      console.log(
+        "     Removal path: delete the row (the sanctioned reversal) — the engine gate keeps protecting the project either way.",
+      );
+    }
+  }
 }
 
 // 24. Decisions record (post-delivery — outside the engine's stash window).
