@@ -71,6 +71,9 @@ import {
   migrateManifestV1ToV2,
   isLegacyV1WithEntries,
   EXTERNAL_DEP_LICENSE_POLICY,
+  ENTRY_FIELDS_V2,
+  KNOWN_MARKET_SCOPES,
+  V2_CONTRACT_FIELDS,
   type ExternalDepEntry,
   type ExternalDepsManifest,
   type UpstreamTagCheck,
@@ -653,6 +656,44 @@ describe('schema v2 parse (standard §5.2)', () => {
   });
 });
 
+// ── v1.4.0: advisory market_scope (T-20261121-001, standard Addendum C) ────────
+
+describe('market_scope parse validation (T-20261121-001, standard Addendum C)', () => {
+  test('KNOWN_MARKET_SCOPES is the documented registry; ENTRY_FIELDS_V2 admits the field; migration does not carry it', () => {
+    expect(KNOWN_MARKET_SCOPES).toEqual(['KR', 'ko-language']);
+    expect(ENTRY_FIELDS_V2).toContain('market_scope');
+    expect(V2_CONTRACT_FIELDS).not.toContain('market_scope');
+  });
+  test('valid arrays parse and round-trip verbatim (unknown values included — new-market flexibility)', () => {
+    for (const ms of [['KR'], ['ko-language'], ['KR', 'ko-language'], ['JP', 'JP']]) {
+      const m = parseExternalDepsManifest(v2Doc([{ ...V2_VALID_ENTRY, market_scope: ms }]));
+      expect(m.dependencies[0].market_scope).toEqual(ms);
+    }
+  });
+  test('absence is legal (market-neutral entry)', () => {
+    const m = parseExternalDepsManifest(v2Doc([V2_VALID_ENTRY]));
+    expect(m.dependencies[0].market_scope).toBeUndefined();
+  });
+  test('non-array values are rejected with a precise error', () => {
+    for (const bad of ['KR', 42, { scope: 'KR' }, null]) {
+      expect(() => parseExternalDepsManifest(v2Doc([{ ...V2_VALID_ENTRY, market_scope: bad }]))).toThrow(/market_scope must be an array of market-scope strings/);
+    }
+  });
+  test('an empty array is rejected (omit the field for market-neutral instead)', () => {
+    expect(() => parseExternalDepsManifest(v2Doc([{ ...V2_VALID_ENTRY, market_scope: [] }]))).toThrow(/market_scope must be a non-empty array/);
+  });
+  test('non-string and empty members are rejected with the member index', () => {
+    expect(() => parseExternalDepsManifest(v2Doc([{ ...V2_VALID_ENTRY, market_scope: ['KR', 7] }]))).toThrow(/market_scope\[1\] must be a non-empty string/);
+    expect(() => parseExternalDepsManifest(v2Doc([{ ...V2_VALID_ENTRY, market_scope: [null] }]))).toThrow(/market_scope\[0\] must be a non-empty string/);
+    expect(() => parseExternalDepsManifest(v2Doc([{ ...V2_VALID_ENTRY, market_scope: [''] }]))).toThrow(/market_scope\[0\] must be a non-empty string/);
+    expect(() => parseExternalDepsManifest(v2Doc([{ ...V2_VALID_ENTRY, market_scope: ['   '] }]))).toThrow(/market_scope\[0\] must be a non-empty string/);
+  });
+  test('a v1 document carrying the field is rejected as an unknown field (v2-only addition)', () => {
+    const v1entry = { ...entryFor('https://github.com/x/y'), market_scope: ['KR'] };
+    expect(() => parseExternalDepsManifest(JSON.stringify({ schema_version: 1, dependencies: [v1entry] }))).toThrow(/unknown field\(s\) for schema v1: market_scope/);
+  });
+});
+
 describe('license policy (standard §5.4 + Addendum A.1 — R2)', () => {
   const ev = (license: string, decision?: string) => evaluateLicensePolicy({ id: 'd', license, license_decision: decision });
   test('allow class passes', () => {
@@ -805,6 +846,38 @@ describe('verifyProjectExternalDeps (standard §5.3 V1-V9, local fixture repos)'
     const { findings } = verifyProjectExternalDeps(projectDir, { manifestOnly: true });
     expect(sev(findings, 'V1')).toEqual(['warn']);
     expect(sev(findings, 'V2')).toEqual(['fail']);
+  });
+});
+
+describe('verify V10 — advisory market_scope registry (T-20261121-001, manifest-only)', () => {
+  beforeEach(() => { scratchRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'extdeps-v10-')); });
+  afterEach(() => fs.rmSync(scratchRoot, { recursive: true, force: true }));
+
+  function setupWithScope(marketScope: string[] | undefined): string {
+    const projectDir = path.join(scratchRoot, 'proj');
+    fs.mkdirSync(projectDir, { recursive: true });
+    const entry = v2EntryFor('https://github.com/x/fixture-dep', marketScope === undefined ? {} : { market_scope: marketScope });
+    writeManifest(projectDir, { schema_version: 2, dependencies: [entry] });
+    return projectDir;
+  }
+  const v10 = (f: ReturnType<typeof verifyProjectExternalDeps>['findings']) => f.filter((x) => x.check === 'V10');
+
+  test('known values → PASS row; unknown values → WARN naming the value and the documented set', () => {
+    const known = verifyProjectExternalDeps(setupWithScope(['ko-language']), { manifestOnly: true });
+    expect(v10(known.findings).map((x) => x.severity)).toEqual(['pass']);
+    expect(v10(known.findings)[0].message).toContain('nothing gates on it');
+    const unknown = verifyProjectExternalDeps(setupWithScope(['JP']), { manifestOnly: true });
+    expect(v10(unknown.findings).map((x) => x.severity)).toEqual(['warn']);
+    expect(v10(unknown.findings)[0].message).toContain("'JP' not in the documented set [KR, ko-language]");
+    const mixed = verifyProjectExternalDeps(setupWithScope(['KR', 'JP']), { manifestOnly: true });
+    expect(v10(mixed.findings).map((x) => x.severity)).toEqual(['warn']);
+    expect(v10(mixed.findings)[0].message).toContain("'JP'");
+    expect(v10(mixed.findings)[0].message).not.toContain("'KR'");
+  });
+  test('absent → no V10 row (existing verify output stays byte-stable); V10 never FAILs', () => {
+    const r = verifyProjectExternalDeps(setupWithScope(undefined), { manifestOnly: true });
+    expect(v10(r.findings)).toEqual([]);
+    expect(r.findings.some((f) => f.check === 'V10' && f.severity === 'fail')).toBe(false);
   });
 });
 
