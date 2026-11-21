@@ -3,7 +3,7 @@
   "description": "Lecture and presentation material production variant — 11-stage AI workflow from research to print-ready PDF. Includes 14 agents (1 PM orchestrator + 10 slide-pipeline specialists + 2 handbook specialists + 1 i18n-specialist) covering research, source verification, content, design, image curation, diagram/chart generation, HTML build (6 themes), layout measurement, and PDF export. The H-Stage handbook pipeline (skills + scripts) is provided by the common template (promoted 2026-08-30); the handbook-writer/handbook-reviewer agents remain variant-defined (ADR-0043).",
   "variant_type": "lecture",
   "status": "stable",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "inherits_common": "templates/common",
   "created_at": "2026-06-17T08:35:00.906Z",
   "lifecycle": {
@@ -367,6 +367,10 @@
         "path": "scripts/co-deck/download-videos.ts"
       },
       {
+        "name": "humanize-adapter",
+        "path": "scripts/co-deck/humanize-adapter.ts"
+      },
+      {
         "path": "scripts/co-deck/patch-zen-white-bubble.ts",
         "reason": "U-20261114-012 promotion path — the parameterized zen x white-bubble patch layer ships in the template (2026-11-16)"
       }
@@ -426,7 +430,7 @@
   },
   "country_config": {
     "profiles_dir": "docs/countries",
-    "supported": [],
+    "supported": ["KR"],
     "default": null
   }
 }

@@ -140,13 +140,13 @@ describe('SCRIPTS.md registry rows (both layers) + L1 mirror presence', () => {
     }
   });
 
-  test('validate-templates.ts row is 1.86.0 on root and common SCRIPTS.md', () => {
+  test('validate-templates.ts row is 1.87.0 on root and common SCRIPTS.md', () => {
     for (const rel of ['scripts/SCRIPTS.md', 'templates/common/scripts/SCRIPTS.md']) {
       const row = read(join(ROOT, rel))
         .split('\n')
         .find((l) => l.startsWith('| `validate-templates.ts` |'));
       expect(row, `${rel} validate-templates.ts row`).toBeDefined();
-      expect(row).toContain('| L0 | 1.86.0 | active |');
+      expect(row).toContain('| L0 | 1.87.0 | active |');
     }
   });
 
