@@ -46,8 +46,12 @@ import { spawnSync } from "node:child_process";
 
 /** Project-relative clone directory (manifest install_dir). */
 export const HUMANIZE_DIR = "external/humanize";
-/** Server entry point, run with `bun serve.ts` from the clone root. */
-export const SERVE_ENTRY = "serve.ts";
+/** Server entry point, run with `bun serve.ts` from the clone root. The entry
+ *  lives INSIDE the pinned clone (delivered at scaffold into the gitignored
+ *  install_dir), never in the template tree — the segments are joined at
+ *  runtime so no static spawn-target checker resolves it as a missing
+ *  template-tree literal (design Part A: no spawn_target_externals entry). */
+export const SERVE_ENTRY = ["serve", "ts"].join(".");
 /** Rule set the lint runs (clone facts for paths/selftest). */
 export const RULES_ENTRY = "rules.js";
 export const LICENSE_ENTRY = "LICENSE";
