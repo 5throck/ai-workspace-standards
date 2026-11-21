@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261122-002
+kind: manual
+title: >-
+  test failures (co-newbiz): 11 tests fail in the unit suite
+  (accounting-equation validation, normalize.py KRW conversion, field-mapping
+  coverage, KPI stage ratios — all in the financial-model pipeline). First
+  observed 2026-11-22 STEP E baseline review; the 2026-11-19 wave delivered
+  clean. Needs triage: are these regression from the 2026-11-19 wave (template
+  0.30.0 re-sync of app/web-next or scripts/) or pre-existing fixture/data
+  drift? Fix or file per-test follow-ups. NOT the same class as the co-deck
+  partial delivery (all files were delivered; the failures are content-level).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-22T03:11:22.034+09:00'
+history:
+  - at: '2026-11-22T03:11:22.034+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

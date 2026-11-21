@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261122-001
+kind: manual
+title: >-
+  mechanical: check-handbook-archmap-drift reports 16 DRIFT rows (8 assets + 8
+  inline bodies) across Handbooks/intro-to-ai-harness and
+  multi-agent-harness-handbook — the canonical
+  docs/architecture/workspace-architecture{,.en,.es,.ja}.svg set changed in
+  fd93f5cdc (2026-11-21 workspace sync, 13 files) but the handbook copies were
+  not re-rendered/re-propagated. Fix: re-render or copy the canonical SVGs/HTML
+  inline bodies into the handbook copies at the paths the checker reports (all
+  under Handbooks/*/docs/assets/img/ and */docs/appendix/). Introduced:
+  2026-11-21, affects the D8-adjacent handbook parity gate (review-baseline row
+  8 FAIL).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-22T03:04:25.037+09:00'
+history:
+  - at: '2026-11-22T03:04:25.037+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
