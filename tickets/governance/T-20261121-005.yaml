@@ -1,0 +1,32 @@
+schemaVersion: 1
+id: T-20261121-005
+kind: manual
+title: >-
+  Nightly Scaffold E2E (all variants) fails on adoption-only variants: the
+  E2E harness loop enumerates every templates/co-* variant and runs new-project
+  on each, but adoption-only variants (variant.json "consumption":
+  "adoption-only") cannot be scaffolded by design — new-project correctly
+  refuses them, and the harness counts that refusal as a failure. Evidence
+  (run 44885736677, 2026-11-21): "Variant 'co-utility' is adoption-only
+  (variant.json consumption: adoption-only) — new-project cannot scaffold it"
+  → summary 15/16 passed, FAILED: co-utility. First failure: 2026-11-21 (the
+  11-20 run succeeded — co-utility joined the variant set between 11-20 and
+  11-21 via the QuickDL promotion, U-20261119-002). The harness (scripts/
+  test-new-project.ts all-variants mode) must consult variant.json
+  consumption: adoption-only variants are SKIP-with-reason (the new-project
+  refusal is CORRECT behavior, the harness should not count it as a failure).
+  Fix: the harness loop reads each variant's variant.json consumption field
+  and skips adoption-only variants with a SKIP line in the summary (15/16 →
+  "15 passed, 1 skipped (adoption-only: co-utility)"). Needs Design Gate-lite
+  (E2E harness behavior change — the harness is scripts/test-new-project.ts,
+  workspace-root).
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-21T00:00:00.000+09:00
+history:
+  - at: 2026-11-21T00:00:00.000+09:00
+    from: null
+    to: backlog
+result: null
+error: null

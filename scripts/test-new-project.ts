@@ -2,7 +2,16 @@
 /**
  * test-new-project.ts — E2E Test for new-project.ts
  *
- * @version 1.12.0
+ * @version 1.13.0
+ * v1.13.0 (2026-11-21, T-20261121-005 — spec
+ *         2026-11-21-e2e-skip-adoption-only-design): --all-variants mode consults each
+ *         variant's variant.json `consumption` field before scaffolding — adoption-only
+ *         variants (first: co-utility) are skipped with a "skipped (adoption-only: <v>)"
+ *         line and counted as skipped in the summary ("N passed, M skipped
+ *         (adoption-only)"), not as failures: new-project's refusal of an adoption-only
+ *         variant is correct behavior, and counting it as a failure broke the Nightly
+ *         Scaffold E2E at 15/16 (run 44885736677). Absent/unparseable variant.json →
+ *         treated as scaffoldable (no skip).
  * v1.12.0 (2026-11-13, PR #1991 CI): Test 27 AC3 footer pin (2.15) replaced with a
  *         template-derived expectation — the scaffolded docs/context.md footer version must
  *         equal templates/common/docs/context.md's current footer version. The literal pin
@@ -20,7 +29,7 @@
  * v1.10.0 (2026-10-02): Test 27 footer pin 2.13 → 2.14 — templates/common/docs/context.md gained a
  * footer bump for the Supported Surfaces delivery (T-20261001-021); the pin lagged the bump and
  * tripped the scripts E2E suite in CI as the 2026-09-30 T-20260926-011 pin class did.
- * @last_updated 2026-11-06
+ * @last_updated 2026-11-21
  *
  * v1.9.0 (2026-09-29, T-20260929-002): Test 4 also asserts the initial
  *         scaffold commit (HEAD exists) seeded by new-project.ts v1.33.0.
@@ -151,7 +160,24 @@ if (allVariants && import.meta.main) {
     .sort();
   console.log(`\n🧪 All-variants mode: ${variants.length} variants (${variants.join(", ")})`);
   const failedVariants: string[] = [];
+  const skippedVariants: string[] = [];
   for (const v of variants) {
+    // T-20261121-005: adoption-only variants (variant.json consumption:
+    // "adoption-only", e.g. co-utility) cannot be scaffolded by design —
+    // new-project correctly refuses them, so the harness must not count that
+    // refusal as a failure. Skip before spawning; absent/unparseable
+    // variant.json → treat as scaffoldable (no skip).
+    let consumption: unknown;
+    try {
+      consumption = JSON.parse(readFileSync(join(tplDir, v, "variant.json"), "utf-8")).consumption;
+    } catch {
+      consumption = undefined;
+    }
+    if (consumption === "adoption-only") {
+      console.log(`⏭️  ${v}: skipped (adoption-only: ${v})`);
+      skippedVariants.push(v);
+      continue;
+    }
     console.log(`\n${"═".repeat(60)}\n🧪 Variant run: ${v}\n${"═".repeat(60)}`);
     const proc = Bun.spawnSync(
       ["bun", "scripts/test-new-project.ts", `PmStub-${v}`, "--variant", v, "--platform", platformArg, "--yes"],
@@ -160,7 +186,11 @@ if (allVariants && import.meta.main) {
     if (proc.exitCode !== 0) failedVariants.push(v);
   }
   console.log(`\n${"═".repeat(60)}`);
-  console.log(`📊 All-variants summary: ${variants.length - failedVariants.length}/${variants.length} variants passed`);
+  const passed = variants.length - failedVariants.length - skippedVariants.length;
+  console.log(`📊 All-variants summary: ${passed} passed, ${skippedVariants.length} skipped (adoption-only)`);
+  if (skippedVariants.length > 0) {
+    console.log(`   SKIPPED (adoption-only): ${skippedVariants.join(", ")}`);
+  }
   if (failedVariants.length > 0) {
     console.log(`   FAILED: ${failedVariants.join(", ")}`);
   }
