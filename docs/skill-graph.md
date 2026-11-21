@@ -212,7 +212,7 @@
 | `common/sync` | common | 1.10.0 | common/automation-engineer | — | — | — | — |
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/accessibility-audit` | L0 | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
-| `root/adopt-project` | L0 | 1.1.1 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
+| `root/adopt-project` | L0 | 1.1.2 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
 | `root/agent-lifecycle-manager` | L0 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L0 | 1.0.2 | co-architect/technical-writer, co-work/technical-writer | — | — | — | — |
 | `root/ci-triage` | L0 | 0.2.0 | common/automation-engineer | — | — | — | — |
@@ -234,7 +234,7 @@
 | `root/platform-skill-lifecycle-manager` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/project-resync` | L0 | 1.10.0 | — | — | root/project-review (composes_with), root/project-to-variant, root/sync (composes_with), root/upgrade-project (follows) | — | — |
 | `root/project-review` | L0 | 1.3.2 | — | — | — | — | — |
-| `root/project-to-variant` | L0 | 1.3.0 | — | — | root/promote-variant (composes_with) | — | — |
+| `root/project-to-variant` | L0 | 1.3.1 | — | — | root/promote-variant (composes_with) | — | — |
 | `root/promote-variant` | L0 | 1.4.0 | — | — | root/create-variant (follows), root/sync (follows) | — | — |
 | `root/release-template` | L0 | 1.0.0 | — | — | root/promote-variant | — | — |
 | `root/research-analysis` | L0 | 1.0.2 | co-architect/analyst, co-work/analyst | — | root/documentation-writing (enables) | — | — |
@@ -254,7 +254,7 @@
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L0 | 1.0.1 | co-architect/design-lead, co-architect/visual-designer, co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
-| `root/upgrade-project` | L0 | 1.6.2 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
+| `root/upgrade-project` | L0 | 1.6.3 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
 | `root/variant-feature` | L0 | 1.0.0 | — | — | root/upgrade-project (composes_with) | — | — |
 | `root/zod-contract-gate` | L0 | 1.0.3 | common/contract-gate-engineer | — | root/security-scan | — | — |
 
@@ -488,6 +488,8 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261120-03` | decision | `root/decision-write-integrity` | — | — |
 | `dec:DEC-20261120-04` | decision | `root/decision-write-integrity` | — | — |
 | `dec:DEC-20261121-01` | decision | `common/decision-record` | — | — |
+| `dec:DEC-20261121-02` | decision | `root/decision-write-integrity` | — | — |
+| `dec:DEC-20261121-03` | decision | `root/decision-write-integrity` | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
@@ -719,7 +721,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-utility/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-utility/agents/qa.md` | doc | `co-utility/post-write-check` | — | — |
 | `doc:co-utility/docs/co-utility.context.md` | doc | `co-utility/post-write-check`, `common/i18n-audit`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
-| `doc:co-utility/README.md` | doc | `co-utility/post-write-check`, `root/meeting-facilitation` | — | — |
+| `doc:co-utility/README.md` | doc | `co-utility/post-write-check`, `root/adopt-project`, `root/meeting-facilitation`, `root/new-project`, `root/project-to-variant` | — | — |
 | `doc:co-work/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-work/agents/analyst.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/agents/content-writer.md` | doc | `root/meeting-facilitation` | — | — |
