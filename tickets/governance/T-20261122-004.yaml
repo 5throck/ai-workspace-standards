@@ -10,12 +10,28 @@ title: >-
   hint echo the actual failing sub-check names. Needs Design Gate (dev-sync is
   protected).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-22T22:05:43.015+09:00'
 history:
   - at: '2026-11-22T22:05:43.015+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-23T00:05:23.070+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T00:05:23.093+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T00:05:23.139+09:00'
+    from: review
+    to: done
+result: >-
+  PR #2153 (merge 145253c92, CI 4/4 green): dev-sync.ts v1.53.0 step 3.89
+  skill-graph pre-convergence + step-3.9 verbatim FAIL-line echo via
+  lib/audit-fail-hint.ts v1.0.0 per design
+  2026-11-22-dev-sync-skill-graph-preconvergence-design.md (spec-registered) —
+  3.85 contract, WARN-on-failure, audit.ts untouched, core-script template
+  identity verified (verify-scripts --check-drift 146 pairs). Step 3.89
+  exercised live in the landing sync. Full unit suite green.
 error: null
