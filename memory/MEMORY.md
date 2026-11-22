@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-23](2026-11-23.md) | chore(tickets): land U-20261122-006/008/010 resolves + T-20261122-003/004 done moves (PR #2153 batch) |
 | [2026-11-22](2026-11-22.md) | fix(gates): make drift-gate comparisons EOL-insensitive |
 | [2026-11-21](2026-11-21.md) | chore(templates): workspace sync (15 files) |
 | [2026-11-20](2026-11-20.md) | fix(validate-decisions): memory/archive resolves DEC memory references (U-20261119-001) |
@@ -15,7 +16,7 @@
 | [2026-11-17](2026-11-17.md) | chore(housekeeping): land memory archival, README regens, governance tickets T-20261117-001..005 |
 | [2026-11-16](2026-11-16.md) | docs(docs): workspace sync (21 files) |
 | [2026-11-16](2026-11-16.md) | chore(templates): workspace sync (61 files) |
-| [2026-11-15](2026-11-15.md) | feat(co-deck): backport project script improvements into templates/co-deck (U-20261114-006/-008/-009, T-20261109-003 batch) |
+| 2026-11-15 | feat(co-deck): backport project script improvements into templates/co-deck (U-20261114-006/-008/-009, T-20261109-003 batch) |
 | 2026-11-14 | feat(upgrade): country-scoped agents registry relocation (schema pair) + pre-delivery country guard (v1.105.0) — T-20261112-004/-005; orphan mirror removal (T-20261112-006) + SLR fix-text refresh (T-20261112-007); spec 2026-11-14-country-scoped-agents-registry-and-prune-design |
 | 2026-11-13 | chore: workspace sync (0 files) |
 | 2026-11-13 | fix(governance): E2E scaffold validation alignment for upstream triage batch (PR #1991 CI) |
