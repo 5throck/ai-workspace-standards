@@ -9,7 +9,7 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.9.1
+ * @version 1.9.2
  *          v1.9.1 (2026-11-12, common-agents CA-3, design 2026-11-12-common-agents-for-common-skills
  *          §5.7): agentNameExists() also resolves owners against templates/common/agents (the
  *          common skill-owner roster), so L0 skills owned by a common agent (design-system-lead,
@@ -631,7 +631,10 @@ function extractFrontmatterDate(filePath: string, field: string): string | null 
     const content = readFileSync(filePath, "utf-8");
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
     if (!frontmatterMatch) return null;
-    const m = frontmatterMatch[1].match(new RegExp(`^\\s*${field}:\\s*['"]?(\\S+)`, "m"));
+    // Anchor to the non-indented key: `^\s*field:` would match a nested
+    // `lifecycle:` block's indented `last_updated:` instead of the top-level key,
+    // causing the staleness check to judge the wrong date (U-20261122-009).
+    const m = frontmatterMatch[1].match(new RegExp(`^${field}:\\s*['"]?(\\S+)`, "m"));
     return m ? m[1] : null;
   } catch {
     return null;

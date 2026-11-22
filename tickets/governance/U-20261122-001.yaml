@@ -3,14 +3,25 @@ id: U-20261122-001
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-22T10:35:03.069+09:00
+created_at: '2026-11-22T10:35:03.069+09:00'
 history:
-  - at: 2026-11-22T10:35:03.069+09:00
+  - at: '2026-11-22T10:35:03.069+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-22T21:44:25.116+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-22T21:44:25.116+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-22T21:44:25.116+09:00'
+    from: review
+    to: done
+result: >-
+  Root fix verified on origin/main via PR #2150 (merged): the defect's code fix
+  is present in origin and confirmed by the 2026-11-22 session.
 error: null
 upstream:
   project: co-security
@@ -19,12 +30,28 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/test-runner.ts (L0-owned, consumed by CI "Unit Tests") fails OPEN when the unit-test directory does not exist: the suite discovery returns an empty file list and the job passes green having run zero tests. Variant projects (L3) have no top-level tests/ dir — the suites live only at the workspace root — so the CI unit-test gate is a no-op there while SCRIPTS.md rows claim "Unit-pinned by tests/unit/*.test.ts". Expected: fail closed (or emit a loud WARN surfaced to the job summary) when the configured suite directory is absent, and/or scope "unit-pinned" registry text so L3 readers know the pin lives at L0.'
+  symptom: >-
+    scripts/test-runner.ts (L0-owned, consumed by CI "Unit Tests") fails OPEN
+    when the unit-test directory does not exist: the suite discovery returns an
+    empty file list and the job passes green having run zero tests. Variant
+    projects (L3) have no top-level tests/ dir — the suites live only at the
+    workspace root — so the CI unit-test gate is a no-op there while SCRIPTS.md
+    rows claim "Unit-pinned by tests/unit/*.test.ts". Expected: fail closed (or
+    emit a loud WARN surfaced to the job summary) when the configured suite
+    directory is absent, and/or scope "unit-pinned" registry text so L3 readers
+    know the pin lives at L0.
   affected_paths:
     - scripts/test-runner.ts
     - .github/workflows/ci.yml
   identity_source: cwd
-  repro: '1. In any variant project without a top-level tests/ directory (git log --all -- tests/ empty), run bun run test:unit or open the CI Unit Tests job (default-on). 2. scripts/test-runner.ts:335 does if (!existsSync(suite.dir)) return files; — fail-open: zero test files discovered. 3. The job passes green despite running zero tests; registry rows claiming "Unit-pinned by tests/unit/*.test.ts" (e.g. detect-backport 26 tests) are unverifiable in-repo because the suites live only at the L0 workspace root.'
+  repro: >-
+    1. In any variant project without a top-level tests/ directory (git log
+    --all -- tests/ empty), run bun run test:unit or open the CI Unit Tests job
+    (default-on). 2. scripts/test-runner.ts:335 does if (!existsSync(suite.dir))
+    return files; — fail-open: zero test files discovered. 3. The job passes
+    green despite running zero tests; registry rows claiming "Unit-pinned by
+    tests/unit/*.test.ts" (e.g. detect-backport 26 tests) are unverifiable
+    in-repo because the suites live only at the L0 workspace root.
   triage: inbox
   flagged: true
   triage_reasons:
@@ -34,4 +61,11 @@ upstream:
   dedupe_key: 0c8bec547f65f357355d36fb909fab4dd700dce4ce2e71f4b0e1d35a7598a4e4
   duplicates:
     - project: co-security
-      at: 2026-11-22T10:35:03.069+09:00
+      at: '2026-11-22T10:35:03.069+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2150
+    template_version: unreleased
+    summary: >-
+      Root fix verified on origin/main via PR #2150 (merged): the defect's code
+      fix is present in origin and confirmed by the 2026-11-22 session.

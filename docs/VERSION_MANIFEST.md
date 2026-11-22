@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-22T08:03:34.988Z
+**Generated**: 2026-11-22T12:50:15.048Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -24,7 +24,7 @@
 | automation-engineer | agents/automation-engineer.md | medium | claude-sonnet-5-5 | 2026-11-12 |
 | docs-writer | agents/docs-writer.md | medium | claude-sonnet-5-5 | 2026-11-10 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | claude-sonnet-5-5 | 2026-10-30 |
-| pm | agents/pm.md | medium | claude-sonnet-5-5 | 2026-11-12 |
+| pm | agents/pm.md | medium | claude-sonnet-5-5 | 2026-11-22 |
 | scaffolding-expert | agents/scaffolding-expert.md | low | claude-haiku-5-5 | 2026-11-10 |
 | security-expert | agents/security-expert.md | medium | claude-sonnet-5-5 | 2026-11-10 |
 | skill-graph-analyst | agents/skill-graph-analyst.md | low | claude-haiku-5-5 | 2026-10-30 |
@@ -108,7 +108,7 @@
 | adopt-project.ts | 1.8.0 | scripts/adopt-project.ts | child_process, crypto, fs, path |
 | agent-create.ts | 1.0.2 | scripts/agent-create.ts | fs, path |
 | agent-delete.ts | 1.0.2 | scripts/agent-delete.ts | fs, path |
-| agent-lifecycle-audit.ts | 1.9.1 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
+| agent-lifecycle-audit.ts | 1.9.2 | scripts/agent-lifecycle-audit.ts | child_process, fs, path, process |
 | agent-list.ts | 1.1.0 | scripts/agent-list.ts | fs, path |
 | agent-verify.ts | 1.0.2 | scripts/agent-verify.ts | fs, path |
 | analyze-git-history.ts | 1.0.2 | scripts/analyze-git-history.ts | child_process |

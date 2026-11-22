@@ -3,14 +3,25 @@ id: U-20261122-003
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-22T10:35:19.382+09:00
+created_at: '2026-11-22T10:35:19.382+09:00'
 history:
-  - at: 2026-11-22T10:35:19.382+09:00
+  - at: '2026-11-22T10:35:19.382+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-22T21:44:25.156+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-22T21:44:25.156+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-22T21:44:25.156+09:00'
+    from: review
+    to: done
+result: >-
+  Root fix verified on origin/main via PR #2150 (merged): the defect's code fix
+  is present in origin and confirmed by the 2026-11-22 session.
 error: null
 upstream:
   project: co-security
@@ -19,11 +30,31 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/validate-decisions.ts validates only the internal integrity of existing DEC records (frontmatter, knowledge_refs/evidence_refs resolvability) but never cross-checks DEC ids CITED in CHANGELOG.md and memory/*.md prose against docs/decisions/ — so a decision record that was ruled but never filed (the exact ADR-0061 gate failure mode) passes the gate green. Real instance: co-security cited DEC-20261121-02 (gate-② reversal) in CHANGELOG + two memory logs for a day+ with no docs/decisions/DEC-20261121-02.md, while syncs reported "validate-decisions: 0 warnings". Expected: a check that scans CHANGELOG.md + memory/*.md (flat logs) for DEC-YYYYMMDD-NN tokens and fails/warns when the referenced file is absent in docs/decisions/.'
+  symptom: >-
+    scripts/validate-decisions.ts validates only the internal integrity of
+    existing DEC records (frontmatter, knowledge_refs/evidence_refs
+    resolvability) but never cross-checks DEC ids CITED in CHANGELOG.md and
+    memory/*.md prose against docs/decisions/ — so a decision record that was
+    ruled but never filed (the exact ADR-0061 gate failure mode) passes the gate
+    green. Real instance: co-security cited DEC-20261121-02 (gate-② reversal) in
+    CHANGELOG + two memory logs for a day+ with no
+    docs/decisions/DEC-20261121-02.md, while syncs reported "validate-decisions:
+    0 warnings". Expected: a check that scans CHANGELOG.md + memory/*.md (flat
+    logs) for DEC-YYYYMMDD-NN tokens and fails/warns when the referenced file is
+    absent in docs/decisions/.
   affected_paths:
     - scripts/validate-decisions.ts
   identity_source: cwd
-  repro: '1. Cite a nonexistent decision id in CHANGELOG.md and memory/YYYY-MM-DD.md prose (e.g. "DEC-20261121-02" with no docs/decisions/DEC-20261121-02.md). 2. Run bun scripts/validate-decisions.ts — 0 warnings: the validator (scripts/validate-decisions.ts:220-226) only checks knowledge_refs/evidence_refs resolvability inside existing DEC files; it never cross-checks DEC ids cited in CHANGELOG.md or memory logs against docs/decisions/. 3. Real case: co-security cited DEC-20261121-02 in 5 places for a gate reversal while the record file did not exist; the gap survived a full sync including a "validate-decisions 0 warnings" observation.'
+  repro: >-
+    1. Cite a nonexistent decision id in CHANGELOG.md and memory/YYYY-MM-DD.md
+    prose (e.g. "DEC-20261121-02" with no docs/decisions/DEC-20261121-02.md). 2.
+    Run bun scripts/validate-decisions.ts — 0 warnings: the validator
+    (scripts/validate-decisions.ts:220-226) only checks
+    knowledge_refs/evidence_refs resolvability inside existing DEC files; it
+    never cross-checks DEC ids cited in CHANGELOG.md or memory logs against
+    docs/decisions/. 3. Real case: co-security cited DEC-20261121-02 in 5 places
+    for a gate reversal while the record file did not exist; the gap survived a
+    full sync including a "validate-decisions 0 warnings" observation.
   triage: inbox
   flagged: true
   triage_reasons:
@@ -32,4 +63,11 @@ upstream:
   dedupe_key: b8a7a7973329ceaf930d8f1b144c86e95dc77ceafa3914ad730ae2a86a5700d6
   duplicates:
     - project: co-security
-      at: 2026-11-22T10:35:19.382+09:00
+      at: '2026-11-22T10:35:19.382+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2150
+    template_version: unreleased
+    summary: >-
+      Root fix verified on origin/main via PR #2150 (merged): the defect's code
+      fix is present in origin and confirmed by the 2026-11-22 session.
