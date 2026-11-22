@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-21T23:10:51.992Z
+**Generated**: 2026-11-22T08:02:06.136Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -193,7 +193,7 @@
 | skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun, fs, path |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
 | spec-hygiene-sweep.ts | 1.0.0 | scripts/spec-hygiene-sweep.ts | fs, path |
-| spec-register.ts | 1.6.0 | scripts/spec-register.ts | fs, path |
+| spec-register.ts | 1.6.1 | scripts/spec-register.ts | fs, path |
 | stop-gate.ts | 1.0.0 | scripts/stop-gate.ts | fs, path |
 | sync-agent-mirrors.ts | 1.3.1 | scripts/sync-agent-mirrors.ts | fs, js-yaml, path, url |
 | sync-md.ts | 1.4.0 | scripts/sync-md.ts | N/A |
@@ -211,7 +211,7 @@
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
 | test-new-project.ts | 1.13.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.17.2 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.17.3 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | child_process, fs, os, path |
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
@@ -219,7 +219,7 @@
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
 | upgrade-project.ts | 1.115.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
-| validate-decisions.ts | 1.2.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
+| validate-decisions.ts | 1.2.1 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.1 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.2 | scripts/validate-md-language.ts | child_process, fs, path |

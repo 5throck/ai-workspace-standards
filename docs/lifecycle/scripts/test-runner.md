@@ -4,7 +4,7 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.17.2
+- **Version**: 1.17.3
 - **Owner**: automation-engineer
 - **Last Updated**: 2026-11-17 (v1.17.2 upgrade-decision-log suite budget 300s -> 600s; v1.17.0 junit batched-tail execution, windows CI test speedup spec; v1.16.0 four more co-workspace files join FILE_TIME_BUDGETS, T-20261114-008; v1.15.0 longest-first parallel dispatch, CI speed; v1.14.0 `upgrade-vintage-pending.test.ts` budget row, overwrite-protection PR-B; v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
 ## Description

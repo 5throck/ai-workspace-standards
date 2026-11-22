@@ -1,0 +1,34 @@
+schemaVersion: 1
+id: U-20261122-004
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-22T10:35:34.603+09:00
+history:
+  - at: 2026-11-22T10:35:34.603+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/spec-register.ts --file <design-doc> --status <status> silently drops the status when the spec already exists: registerSpec''s existing-entry branch (~lines 248-255) refreshes last_updated but ignores options.status, while still printing "Updated: <id>" — the caller believes the status advanced (e.g. proposed→implemented at landing) but the registry stays stale. The sanctioned --update <id> --status path works, so the bug is specifically the --file path''s ignored flag plus its success message. Expected: either apply options.status on the existing-entry branch or print "Updated (status unchanged — use --update <id> --status to advance)" instead of the plain success line.'
+  affected_paths:
+    - scripts/spec-register.ts
+  identity_source: cwd
+  repro: '1. Register a spec normally (creates entry with status proposed). 2. Later run: bun scripts/spec-register.ts --file docs/designs/<spec>-design.md --source manual --status implemented. 3. Output prints "Updated: <id>" but the entry''s status stays "proposed": registerSpec''s existing-entry branch (scripts/spec-register.ts:248-255) refreshes last_updated while silently ignoring options.status. 4. The sanctioned workaround is the separate --update <id> --status <status> path, but the --file path''s success message actively misleads (real case: a status flip appeared to succeed, was recorded as implemented in a CHANGELOG entry, and the registry stayed proposed until a review caught it).'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/spec-register.ts=false
+  dedupe_key: 9c77fff991bedd36959f2fd4033d9a34c176e423203dddaf1e9030601e1b3913
+  duplicates:
+    - project: co-security
+      at: 2026-11-22T10:35:34.603+09:00

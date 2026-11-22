@@ -1,4 +1,4 @@
-// @version 1.6.0
+// @version 1.6.1
 // v1.6.0 (2026-10-05, T-20261005-005, spec docs/designs/2026-10-05-spec-registry-entries-projection-design.md):
 //           one-file-per-spec SSOT — docs/specs/entries/<id>.json holds one
 //           pretty-printed SpecEntry per file and docs/specs/registry.json
@@ -248,6 +248,10 @@ export function registerSpec(options: {
   if (existing) {
     existing.last_updated = today();
     if (options.meetingRef) existing.meeting_ref = options.meetingRef;
+    if (options.status && options.status !== existing.status) {
+      existing.status = options.status as typeof existing.status;
+      console.log(`  status: ${existing.status} (advanced via --file --status)`);
+    }
     writeEntryFile(existing);
     regenerateProjection();
     console.log(`${GREEN}Updated: ${id}${RESET}`);

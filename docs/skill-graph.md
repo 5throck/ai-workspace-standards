@@ -432,7 +432,9 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20260930-01` | decision | `common/decision-record` | — | — |
 | `dec:DEC-20260930-02` | decision | `common/decision-record` | — | — |
 | `dec:DEC-20261003-01` | decision | — | — | — |
+| `dec:DEC-20261007-01` | decision | — | — | — |
 | `dec:DEC-20261023-01` | decision | — | — | — |
+| `dec:DEC-20261024-01` | decision | — | — | — |
 | `dec:DEC-20261026-01` | decision | `root/project-review` | — | — |
 | `dec:DEC-20261026-02` | decision | `root/project-review` | — | — |
 | `dec:DEC-20261026-03` | decision | `root/project-review` | — | — |
@@ -468,6 +470,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261110-03` | decision | — | — | — |
 | `dec:DEC-20261110-04` | decision | — | — | — |
 | `dec:DEC-20261111-01` | decision | `root/decision-write-integrity`, `root/project-resync`, `root/upgrade-project` | — | — |
+| `dec:DEC-20261114-04` | decision | — | — | — |
 | `dec:DEC-20261116-01` | decision | `common/decision-record`, `root/sync` | — | — |
 | `dec:DEC-20261116-02` | decision | `common/decision-record`, `root/sync` | — | — |
 | `dec:DEC-20261116-03` | decision | `common/decision-record`, `root/sync` | — | — |
@@ -937,7 +940,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `devops-admin` | agent | divergence | co-abap@1.1.2 #59a99f2f; co-price@2.2.1 #20aad471 |
 | `i18n-specialist` | agent | version-drift | co-abap@1.1.1 #40d3e5c6; co-design@1.2.1 #12201d88; co-develop@1.1.1 #45bc30ca; co-hr@1.1.0 #767ba449; co-security@1.1.2 #7e665ada; common@1.3.2 #e0bd9ada |
 | `ms365-expert` | agent | version-drift | co-architect@1.1.1 #d66a2884; co-work@1.1.1 #a594ed3b |
-| `pm` | agent | divergence | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.3 #9264b767; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.4 #6e05a2a4; root@1.3.0 #2340c4b8 |
+| `pm` | agent | divergence | co-abap@1.1.2 #aef5c9bd; co-architect@1.2.3 #9264b767; co-export@1.2.1 #609b94fa; co-hr@0.2.0 #6ac97fcf; co-news@1.2.0 #300729db; co-price@2.1.1 #4d3a346b; co-safety@1.1.1 #8c47500b; common@1.4.4 #6e05a2a4; root@1.3.0 #0c55f10f |
 | `project-coordinator` | agent | version-drift | co-architect@1.1.1 #ea0ba5e1; co-work@1.1.1 #ef8c8cfa |
 | `prototype-engineer` | agent | version-drift | co-architect@1.1.1 #5b481cf7; co-design@1.1.1 #f906e607 |
 | `security-monitor` | agent | version-drift | co-abap@1.1.1 #2f8a2b8a; co-develop@1.1.1 #00cd6298; co-game@1.1.1 #dc9d7b81; co-price@2.2.1 #94b3b224 |
@@ -967,7 +970,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 |------|-------|-------|
 | adr | 57 | (expected until docs `references` edges are mined) |
 | agent | 13 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, co-security/i18n-specialist, co-utility/security, root/skill-graph-analyst |
-| decision | 31 | (expected until docs `references` edges are mined) |
+| decision | 34 | (expected until docs `references` edges are mined) |
 | skill | 1 | root/trail |
 
 ## Skills Without `used_by` (G6)

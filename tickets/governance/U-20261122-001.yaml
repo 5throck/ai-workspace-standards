@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: U-20261122-001
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-22T10:35:03.069+09:00
+history:
+  - at: 2026-11-22T10:35:03.069+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/test-runner.ts (L0-owned, consumed by CI "Unit Tests") fails OPEN when the unit-test directory does not exist: the suite discovery returns an empty file list and the job passes green having run zero tests. Variant projects (L3) have no top-level tests/ dir — the suites live only at the workspace root — so the CI unit-test gate is a no-op there while SCRIPTS.md rows claim "Unit-pinned by tests/unit/*.test.ts". Expected: fail closed (or emit a loud WARN surfaced to the job summary) when the configured suite directory is absent, and/or scope "unit-pinned" registry text so L3 readers know the pin lives at L0.'
+  affected_paths:
+    - scripts/test-runner.ts
+    - .github/workflows/ci.yml
+  identity_source: cwd
+  repro: '1. In any variant project without a top-level tests/ directory (git log --all -- tests/ empty), run bun run test:unit or open the CI Unit Tests job (default-on). 2. scripts/test-runner.ts:335 does if (!existsSync(suite.dir)) return files; — fail-open: zero test files discovered. 3. The job passes green despite running zero tests; registry rows claiming "Unit-pinned by tests/unit/*.test.ts" (e.g. detect-backport 26 tests) are unverifiable in-repo because the suites live only at the L0 workspace root.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/test-runner.ts=true
+    - info:in_last_delivery .github/workflows/ci.yml=false
+  dedupe_key: 0c8bec547f65f357355d36fb909fab4dd700dce4ce2e71f4b0e1d35a7598a4e4
+  duplicates:
+    - project: co-security
+      at: 2026-11-22T10:35:03.069+09:00

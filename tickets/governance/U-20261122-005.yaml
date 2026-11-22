@@ -1,0 +1,40 @@
+schemaVersion: 1
+id: U-20261122-005
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-22T10:35:34.622+09:00
+history:
+  - at: 2026-11-22T10:35:34.622+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The common-agents wave (2026-11-18, T-20261112-008) delivered automation-engineer / contract-gate-engineer / design-system-lead with registry rows, mirrors, and AGENTS.md tables, but did not update the PM body''s dispatch flow: agents/pm.md names only automation-engineer (in the /sync row) and never mentions contract-gate-engineer or design-system-lead, although both declare handoff_from: [pm] and PM-ONLY dispatch in their own bodies. The routing is thus wired everywhere except the one file a PM actually reads at triage. Expected: a dispatch-example row (or routing sentence) per skill-owner agent in agents/pm.md, matching how the /sync row references automation-engineer.'
+  affected_paths:
+    - agents/pm.md
+    - agents/automation-engineer.md
+    - agents/contract-gate-engineer.md
+    - agents/design-system-lead.md
+  identity_source: cwd
+  repro: '1. Read agents/pm.md (the common PM body delivered to all projects) dispatch flow / teammate examples. 2. Grep for the three 2026-11-18 common agents: automation-engineer appears only in the /sync pipeline row; contract-gate-engineer and design-system-lead — whose frontmatter says handoff_from: [pm] and bodies declare PM-ONLY dispatch — appear nowhere in the PM body. 3. A PM following the body''s dispatch examples alone has no route to hand work to the two PM-only skill owners.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery agents/pm.md=false
+    - info:in_last_delivery agents/automation-engineer.md=false
+    - info:in_last_delivery agents/contract-gate-engineer.md=false
+    - info:in_last_delivery agents/design-system-lead.md=false
+  dedupe_key: fbadd7990ca1db2537edaa19fd3b940b9bb48a835a130658d7b1e71eb9154184
+  duplicates:
+    - project: co-security
+      at: 2026-11-22T10:35:34.622+09:00

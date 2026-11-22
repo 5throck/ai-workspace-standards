@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261122-002
+kind: manual
+title: Upstream request from co-security
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-22T10:35:19.363+09:00
+history:
+  - at: 2026-11-22T10:35:19.363+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-security
+  variant: co-security
+  template_version: 0.30.0
+  source: project/co-security
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/detect-backport.ts spawns git without the repo''s mandatory git-env sanitizer: the git() helper (spawnSync("git", args, { cwd, encoding: "utf-8" })) inherits GIT_DIR/GIT_WORK_TREE from the environment, so run from a hook or sync-pipeline context its diff surface (origin/main...HEAD) and git-dir discovery can be redirected to a foreign repo — redirecting where detect-backport writes its report/state files. The codebase already encodes this incident history as scripts/lib/git-env.ts (gitCleanEnv), used by template-vintage.ts and mandated for repo-integrity checks, but the new detect-backport script (v1.0.0, 2026-11-18) predates none of it and simply does not reuse the sanitizer. Expected: pass env: gitCleanEnv() (or gitCleanEnvForShell) in the git() helper.'
+  affected_paths:
+    - scripts/detect-backport.ts
+    - scripts/lib/git-env.ts
+  identity_source: cwd
+  repro: '1. Open scripts/detect-backport.ts around line 194-195 — the git() helper calls spawnSync("git", args, { cwd, encoding: "utf-8" }) with no env option. 2. Compare with the repo convention: scripts/lib/git-env.ts exposes gitCleanEnv()/gitCleanEnvForShell() and scripts/lib/template-vintage.ts:48,101 passes it on every git spawn; the 2026-11-09 rogue-commit incident established "every inheriting git spawn honors GIT_DIR over cwd discovery". 3. Run detect-backport from a context where GIT_DIR/GIT_WORK_TREE is set (e.g. a hook or sync pipeline env): its diff surface origin/main...HEAD and rev-parse --git-dir resolve against the foreign repo, redirecting report/state file writes (~line 678).'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/detect-backport.ts=true
+    - info:in_last_delivery scripts/lib/git-env.ts=false
+  dedupe_key: 70bd4b28a3c1aad9a0f03602b742a3e7ce85757a359eba9513cf487d57605f6d
+  duplicates:
+    - project: co-security
+      at: 2026-11-22T10:35:19.363+09:00

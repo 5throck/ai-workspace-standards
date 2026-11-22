@@ -1,6 +1,6 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.17.2
+ * @version 1.17.3
  *
  * v1.17.2 (2026-11-17, CI evidence runs 44018675727 + 44052958547): `upgrade-decision-log.test.ts`
  *          suite budget 300s -> 600s (test stays 60s). Both windows-latest main pushes hit
@@ -332,7 +332,12 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
 function getTestFiles(suite: TestSuite): string[] {
   const files: string[] = [];
   try {
-    if (!existsSync(suite.dir)) return files;
+    if (!existsSync(suite.dir)) {
+      console.warn(
+        `⚠ test-runner: suite directory "${suite.dir}" does not exist — 0 tests discovered (fail-open; the pin lives at L0, see T-20261122-003)`,
+      );
+      return files;
+    }
     const entries = readdirSync(suite.dir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isFile()) continue;

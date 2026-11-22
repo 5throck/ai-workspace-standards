@@ -13,12 +13,26 @@ title: >-
   2026-11-21, affects the D8-adjacent handbook parity gate (review-baseline row
   8 FAIL).
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-22T03:04:25.037+09:00'
 history:
   - at: '2026-11-22T03:04:25.037+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-22T09:43:44.333+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-22T09:43:44.362+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-22T09:43:44.379+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in-run during the 2026-11-22 runner session: 8 canonical SVGs copied to
+  handbook docs/assets/img/ + 8 inline SVG bodies replaced in handbook
+  docs/appendix/ HTML files (intro-to-ai-harness G_Workspace_Architecture,
+  multi-agent-harness-handbook E_Workspace_Architecture).
+  check-handbook-archmap-drift now reports 0 DRIFT.
 error: null
