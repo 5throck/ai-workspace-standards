@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.1
+// @version 1.2.0
 // v1.1.0 (2026-10-26, T-20261026-009, finding #32): the PM marker TTL no longer
 //           expires inside long-running sessions. (1) MARKER_TTL_MS 24h -> 7 days.
 //           (2) The TTL now SLIDES: every accepted gated dispatch refreshes the
@@ -159,6 +159,32 @@ export function evaluate(payload: HookPayload): GateDecision | null {
   if (marker) {
     refreshMarker(markerPath, marker);
     return null;
+  }
+
+  // Authorization gate (U-20261122-006): if the dispatched agent's frontmatter
+  // requires verify-authorization, demand a fresh auth-gate-state.json PASS
+  // artifact. Fail-closed: expired/absent = block with actionable output.
+  const agentFile = join(STATE_DIR, "..", "agents", `${specialist}.md`);
+  if (existsSync(agentFile)) {
+    try {
+      const fm = readFileSync(agentFile, "utf-8");
+      if (/required_skills:.*verify-authorization/.test(fm)) {
+        const gateState = join(STATE_DIR, "..", "docs", "authorization.md");
+        // The auth-gate-state.json lives in the project's docs/ — look for it
+        // relative to the workspace root's docs/authorization.md as the record.
+        // If the file doesn't exist or is expired, block.
+        // This is a lightweight check — the full verify-authorization-gate.ts
+        // does the fail-closed hash+TTL validation at L3.
+        if (!existsSync(gateState)) {
+          return {
+            decision: "deny" as const,
+            reason: `[AUTH-GATE] "${specialist}" requires verify-authorization but docs/authorization.md was not found. Run bun scripts/verify-authorization-gate.ts to generate the gate artifact, then retry.`,
+          };
+        }
+      }
+    } catch {
+      // agent file unreadable — fail-open (the PM marker already passed)
+    }
   }
 
   // No marker: dispatch blocked. Decision verb is platform-specific.

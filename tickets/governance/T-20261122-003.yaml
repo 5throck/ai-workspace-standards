@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261122-003
+kind: manual
+title: >-
+  design (generator enhancement): generate-skill-lifecycle-records.ts has no
+  mechanism for per-record delivery-status notes — hand-added annotations (e.g.
+  Variant delivery: NOT DELIVERED on k-* records) are silently overwritten at
+  the next publish. Fix: either a metadata field the generator preserves
+  (delivery_status or variant_notes key carried through regeneration) or
+  documented placement outside the generated body (companion file). Needs Design
+  Gate.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-22T22:05:42.979+09:00'
+history:
+  - at: '2026-11-22T22:05:42.979+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
