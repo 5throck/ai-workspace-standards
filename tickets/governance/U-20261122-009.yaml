@@ -3,14 +3,24 @@ id: U-20261122-009
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-22T21:33:02.069+09:00
+created_at: '2026-11-22T21:33:02.069+09:00'
 history:
-  - at: 2026-11-22T21:33:02.069+09:00
+  - at: '2026-11-22T21:33:02.069+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-22T22:03:04.507+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-22T22:03:04.507+09:00'
+    from: review
+    to: done
+result: >-
+  Regex anchor fixed in agent-lifecycle-audit.ts 1.9.2: extractFrontmatterDate
+  now anchors to the non-indented key (^field:) instead of ^\s*field:,
+  preventing nested lifecycle: block dates from being judged as top-level
+  staleness (U-20261122-009). L1 mirror synced.
 error: null
 upstream:
   project: co-security
@@ -19,11 +29,34 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/agent-lifecycle-audit.ts Check 11 (frontmatter staleness) is order-dependent: extractFrontmatterDate anchors `^\s*last_updated:` with the multiline flag, so for agents whose `lifecycle:` block precedes the top-level `last_updated:` key, the first regex match is the nested lifecycle date and the audit judges staleness on the wrong field. The workspace''s own doctrine (bumpNestedLifecycleLastUpdated, upgrade-versions.ts v1.2.0, DEC-20261029-01 A1) bumps the nested date on content changes — which clears the warning — but a bare top-level bump, which the dev-sync mechanical bump performs, silently cannot. Expected: anchor the top-level extraction to the non-indented key (`^last_updated:`) and read the nested lifecycle date as a separate, clearly-scoped value.'
+  symptom: >-
+    scripts/agent-lifecycle-audit.ts Check 11 (frontmatter staleness) is
+    order-dependent: extractFrontmatterDate anchors `^\s*last_updated:` with the
+    multiline flag, so for agents whose `lifecycle:` block precedes the
+    top-level `last_updated:` key, the first regex match is the nested lifecycle
+    date and the audit judges staleness on the wrong field. The workspace's own
+    doctrine (bumpNestedLifecycleLastUpdated, upgrade-versions.ts v1.2.0,
+    DEC-20261029-01 A1) bumps the nested date on content changes — which clears
+    the warning — but a bare top-level bump, which the dev-sync mechanical bump
+    performs, silently cannot. Expected: anchor the top-level extraction to the
+    non-indented key (`^last_updated:`) and read the nested lifecycle date as a
+    separate, clearly-scoped value.
   affected_paths:
     - scripts/agent-lifecycle-audit.ts
   identity_source: cwd
-  repro: '1. Any delivered agent whose frontmatter has the `lifecycle:` block BEFORE the top-level `last_updated:` key (canonical layout in templates/common/agents/automation-engineer.md and the two sibling 2026-11-18 common agents). 2. Run agent-lifecycle-audit after changing the top-level `last_updated` to a fresh date: extractFrontmatterDate (scripts/agent-lifecycle-audit.ts:629) matches `^\s*last_updated:` with the multiline flag — `\s*` skips indentation, so the first match is the nested `lifecycle.last_updated` (line ~11), not the top-level key (line ~14). 3. The audit reports the nested date as stale even though the top-level date is fresh; dev-sync''s top-level mechanical bump (step 4.87) cannot clear the warning. Real case: co-security''s 3 common agents warned ×3 after the 2026-11-18 wave despite fresh top-level dates.'
+  repro: >-
+    1. Any delivered agent whose frontmatter has the `lifecycle:` block BEFORE
+    the top-level `last_updated:` key (canonical layout in
+    templates/common/agents/automation-engineer.md and the two sibling
+    2026-11-18 common agents). 2. Run agent-lifecycle-audit after changing the
+    top-level `last_updated` to a fresh date: extractFrontmatterDate
+    (scripts/agent-lifecycle-audit.ts:629) matches `^\s*last_updated:` with the
+    multiline flag — `\s*` skips indentation, so the first match is the nested
+    `lifecycle.last_updated` (line ~11), not the top-level key (line ~14). 3.
+    The audit reports the nested date as stale even though the top-level date is
+    fresh; dev-sync's top-level mechanical bump (step 4.87) cannot clear the
+    warning. Real case: co-security's 3 common agents warned ×3 after the
+    2026-11-18 wave despite fresh top-level dates.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +64,12 @@ upstream:
   dedupe_key: 0a3d012622ee5ac78fd29aadac9279bbcb29184f6e60d88725b0d3a89c754c02
   duplicates:
     - project: co-security
-      at: 2026-11-22T21:33:02.069+09:00
+      at: '2026-11-22T21:33:02.069+09:00'
+  resolution:
+    outcome: fixed
+    template_version: unreleased
+    summary: >-
+      Regex anchor fixed in agent-lifecycle-audit.ts 1.9.2:
+      extractFrontmatterDate now anchors to the non-indented key (^field:)
+      instead of ^\s*field:, preventing nested lifecycle: block dates from being
+      judged as top-level staleness (U-20261122-009). L1 mirror synced.
