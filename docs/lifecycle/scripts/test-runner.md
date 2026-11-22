@@ -4,9 +4,9 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.17.3
+- **Version**: 1.18.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-17 (v1.17.2 upgrade-decision-log suite budget 300s -> 600s; v1.17.0 junit batched-tail execution, windows CI test speedup spec; v1.16.0 four more co-workspace files join FILE_TIME_BUDGETS, T-20261114-008; v1.15.0 longest-first parallel dispatch, CI speed; v1.14.0 `upgrade-vintage-pending.test.ts` budget row, overwrite-protection PR-B; v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
+- **Last Updated**: 2026-11-23 (v1.18.0 `upgrade-policy-eviction.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s), U-20261122-011 — five full upgrade-project.ts engine spawns + three cheap --audit-core-deltas report spawns, windows-slow engine family budget; prior: v1.17.2 upgrade-decision-log suite budget 300s -> 600s; v1.17.0 junit batched-tail execution, windows CI test speedup spec; v1.16.0 four more co-workspace files join FILE_TIME_BUDGETS, T-20261114-008; v1.15.0 longest-first parallel dispatch, CI speed; v1.14.0 `upgrade-vintage-pending.test.ts` budget row, overwrite-protection PR-B; v1.13.1 upgrade-core-locked-fork budget row; v1.13.0 `upgrade-overwrite-protection.test.ts` joins FILE_TIME_BUDGETS, PR #1963; v1.12.0 `co-workspace-composer-wire-regression.test.ts` joins FILE_TIME_BUDGETS, T-20261111-003)
 ## Description
 
 Suite-aware test runner wrapping `bun test` with per-test and per-file wall-time
@@ -16,6 +16,7 @@ default suite `integration`).
 
 ## Phase History
 
+- **1.18.0** (v1.18.0 (2026-11-23, U-20261122-011 — spec docs/designs/2026-11-23-variant-core-script-loss-detection-design.md): `upgrade-policy-eviction.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s, first-time entry per the v1.6.0 convention) — five full upgrade-project.ts engine spawns (scene A default + grant, scene B, AC-5 rerun + vintage) plus three cheap --audit-core-deltas report spawns; windows-slow engine family budget as upgrade-overwrite-protection.)
 - **1.17.2** (v1.17.2 (2026-11-17, CI evidence runs 44018675727 + 44052958547): upgrade-decision-log.test.ts FILE_TIME_BUDGETS suite 300s -> 600s (test stays 60s) after win32 timeouts at 300000ms.)
 - **1.17.1** (v1.17.1 (2026-11-16): tail batching SHIPPED OFF (default 0) after CI run 43788899945 measured the windows unit step at 414s vs a 371s ideal at batch size 12 (pre-batching baseline packed near-perfectly at 361/359), with a failing batch member costing the whole batch an individual re-run; `TEST_RUNNER_BATCH_SIZE=N` re-enables.)
 - **1.17.0** (v1.17.0 (2026-11-16, spec 2026-11-15-windows-ci-test-speedup-design): non-budgeted unit-suite tail batched ~12 files per `bun test --reporter=junit` process with per-file attribution and a mandatory individual re-run fallback; new `TEST_RUNNER_CONCURRENCY` / `TEST_RUNNER_BATCH_SIZE` env knobs. Renumbered from 1.16.0 on the origin/main merge — main independently claimed 1.16.0 for the T-20261114-008 budget rows.)
@@ -23,6 +24,7 @@ default suite `integration`).
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-23 | production | production | v1.17.3 → v1.18.0 (U-20261122-011, spec docs/designs/2026-11-23-variant-core-script-loss-detection-design.md): `upgrade-policy-eviction.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s, first-time entry) — five full engine spawns + three cheap --audit-core-deltas report spawns; windows-slow engine family budget. | automation-engineer |
 | 2026-11-16 | production | production | v1.17.0 (spec 2026-11-15-windows-ci-test-speedup-design): non-budgeted tail batched ~12 files per `bun test --reporter=junit` process (311 spawns → ~36) with per-file attribution from junit XML + mandatory individual re-run fallback (verified: live 12-file batch exit 0, 12/12 attributed; 2 real fallbacks re-attributed cleanly); `TEST_RUNNER_CONCURRENCY`/`TEST_RUNNER_BATCH_SIZE` env knobs (win32=6 default evidence-gated OFF — stays min(availableParallelism(), 4)). Renumbered 1.16.0 → 1.17.0 on the origin/main merge (main independently claimed 1.16.0 for T-20261114-008 budget rows). | automation-engineer |
 | 2026-11-12 | production | production | v1.15.0 (CI speed): parallel dispatch is longest-first via exported pure `orderLongestFirst()` (FILE_TIME_BUDGETS rows first, larger budget first, report order unchanged) — windows test:unit ~345s vs ~60s ubuntu, tail = upgrade-decision-log 163s / upgrade-overwrite-protection 119s / co-workspace-admin-console 103s / upgrade-tree-sync 97s / mcp-upstream-server 51s. |
 | 2026-11-12 | production | production | v1.14.0 (overwrite-protection PR-B): `upgrade-vintage-pending.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s) — three full upgrade-project.ts engine spawns per file run; same windows-slow family budget. | automation-engineer |

@@ -1,6 +1,15 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.17.3
+ * @version 1.18.0
+ *
+ * v1.18.0 (2026-11-23, U-20261122-011 — spec
+ *          docs/designs/2026-11-23-variant-core-script-loss-detection-design.md):
+ *          `upgrade-policy-eviction.test.ts` joins FILE_TIME_BUDGETS (suite 300s /
+ *          test 60s, first-time entry per the v1.6.0 convention) — the eviction
+ *          wiring replay spawns the full upgrade-project.ts engine five times
+ *          (two shared scene-A runs, scene B, the AC-5 rerun + vintage run) plus
+ *          three cheap --audit-core-deltas report spawns; same windows-slow
+ *          engine family budget as upgrade-overwrite-protection.
  *
  * v1.17.2 (2026-11-17, CI evidence runs 44018675727 + 44052958547): `upgrade-decision-log.test.ts`
  *          suite budget 300s -> 600s (test stays 60s). Both windows-latest main pushes hit
@@ -327,6 +336,10 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   "upgrade-core-locked-fork.test.ts": { suite: 300000, test: 60000 },
   // Overwrite-protection PR-B replay: three engine spawns (dry-run, apply, apply + grant) per file run.
   "upgrade-vintage-pending.test.ts": { suite: 300000, test: 60000 },
+  // U-20261122-011 eviction replay: five full engine spawns (scene A default +
+  // grant, scene B, AC-5 rerun + vintage) + three cheap --audit-core-deltas
+  // report spawns per file run.
+  "upgrade-policy-eviction.test.ts": { suite: 300000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {
