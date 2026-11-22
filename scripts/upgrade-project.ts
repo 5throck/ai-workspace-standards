@@ -1,5 +1,33 @@
 #!/usr/bin/env bun
-// @version 1.115.0
+// @version 1.116.0
+// v1.116.0 (2026-11-23, U-20261122-011 — spec
+//          docs/designs/2026-11-23-variant-core-script-loss-detection-design.md §5-§6):
+//          loss-attribution + eviction transparency + legacy core-delta scan.
+//          (a) LOST IDS: every MARKER_LOSS row detail and the adopt-grant override
+//          ADOPT row now name the LOCAL-PATCH ticket ids the delivery would lose
+//          (lostLocalPatchIds, upgrade-policy v1.49.0) — a deliberate loss is
+//          attributable to filed upstream tickets forever, not just counted
+//          ("2 → 0 (2 lost)"). Verdict/severity matrix byte-identical.
+//          (b) EVICTED LINES: on every deliver path that discards differing
+//          project content — UNBASELINED_OVERWRITE, adopt-override of MARKER_LOSS,
+//          ADOPT over PROJECT_EVOLVED, adopt of an unproven fork (equal-version
+//          arm), and the core-locked canonical restores — the decision detail
+//          carries a capped evictedDelta listing (first 10 lines + remaining
+//          count) vs the recorded delivery baseline (baseline text recovered from
+//          the manifest's blob id, else hash-matched against template git history;
+//          unrecoverable baseline = no listing, no false positives by
+//          construction; vintage-proven copies never list — the UNTOUCHED and
+//          vintage short-circuits are preserved) and the exit summary gains an
+//          EVICTED LINES block grouped by path.
+//          (c) --audit-core-deltas [--project <path>]... (read-only, report-only,
+//          exits before any pass runs): diffs each project's CORE_LOCKED_SCRIPTS
+//          copies (scripts/dev-sync.ts, scripts/audit.ts — the const hoists here,
+//          shared with the SYNC_IF_NEWER pass) against their recorded delivery
+//          baselines and reports the PROJECT-AUTHORED DELTA (line count + capped
+//          listing + LOCAL-PATCH ids inside the delta) — content equal to the last
+//          delivered baseline cannot be variant-authored, so committed unmarked
+//          variant blocks are found with zero false positives by construction
+//          (G3 legacy discovery; the co-newbiz 0a701b29 loss class).
 // v1.115.0 (2026-11-21, spec docs/designs/2026-11-21-co-utility-dedup-and-adoption-role-design.md
 //          §5.3-§5.5): adoption-only engine gate — the engine is the single funnel every
 //          caller passes through (manual CLI, skill-driven resync waves, gateway spawn, any
@@ -1450,7 +1478,7 @@ import {
   bumpNestedLifecycleLastUpdated,
   scaffoldChangelogEntry,
 } from "./helpers/upgrade-versions.ts";
-import { scanLocalPatches } from "./helpers/local-patch-scan.ts";
+import { LOCAL_PATCH_RE, scanLocalPatches } from "./helpers/local-patch-scan.ts";
 import {
   declaredSkillNames,
   isAdoptionIdentityFlipped,
@@ -1552,6 +1580,9 @@ import {
   pendingKindForDecision,
   mergePendingBackport,
   LOCAL_PATCH_MARKER_RE,
+  EVICTED_LINES_CAP,
+  evictedDelta,
+  lostLocalPatchIds,
   markerLoss,
   markerLossDetail,
   rewriteTemplateProvenanceVersion,
@@ -1618,6 +1649,13 @@ let dryRun = false;
 let portCandidates = false;
 // D6: --json switches the --port-candidates report to the machine-readable form.
 let reportJson = false;
+// v1.116.0 (U-20261122-011, design §6): --audit-core-deltas runs the read-only
+// legacy scan (CORE_LOCKED_SCRIPTS copies vs their recorded delivery baselines)
+// and exits BEFORE any pass runs — no gates, no stash, no writes in any mode.
+// --project <path> (repeatable) selects scan roots; without it the positional
+// target (or cwd) is the single root.
+let auditCoreDeltas = false;
+const auditProjectRoots: string[] = [];
 
 // D6 (--port-candidates): the classification run is silent — pass output is
 // suppressed from the validation block until the terminal report (restored on
@@ -1725,6 +1763,20 @@ for (let i = 0; i < args.length; i++) {
   }
   if (args[i] === "--port-candidates") {
     portCandidates = true;
+    continue;
+  }
+  // v1.116.0 (U-20261122-011): legacy committed-delta scan over core scripts.
+  // Accepts --project <path> and --project=<path> (repeatable).
+  if (args[i] === "--audit-core-deltas") {
+    auditCoreDeltas = true;
+    continue;
+  }
+  if (args[i] === "--project" && args[i + 1]) {
+    auditProjectRoots.push(args[++i]);
+    continue;
+  }
+  if (args[i]?.startsWith("--project=")) {
+    auditProjectRoots.push(args[i].slice("--project=".length));
     continue;
   }
   if (args[i] === "--json") {
@@ -1941,9 +1993,146 @@ function applyClearTombstoneArg(raw: string): void {
   clearTombstoneGrants.push({ re: globToRegExp(glob), source: glob });
 }
 
+// ── --audit-core-deltas: legacy committed-delta scan (v1.116.0, U-20261122-011) ──
+// Design §6 (docs/designs/2026-11-23-variant-core-script-loss-detection-design.md):
+// diff each project's CORE_LOCKED_SCRIPTS copies against their recorded delivery
+// baselines and report the PROJECT-AUTHORED DELTA — content equal to the last
+// delivered baseline cannot be variant-authored, so committed unmarked variant
+// blocks are found with zero false positives by construction. READ-ONLY and
+// REPORT-ONLY: the scan runs here — BEFORE path resolution, guards, gates, the
+// pre-upgrade stash or any pass — and exits 0 in every mode (findings are
+// informational; the human adjudicates). This placement also lets the flag scan
+// OTHER roots via --project without a positional target: a fleet sweep
+// (`--audit-core-deltas --project Projects/co-a --project Projects/co-b …`) from
+// the workspace root never trips the root-target guard.
+const CORE_LOCKED_SCRIPTS = ["scripts/dev-sync.ts", "scripts/audit.ts"];
+
+/** One root's scan row for runCoreDeltaAudit. */
+function auditBaselineTextOf(
+  workspaceRoot: string,
+  templateRoots: string[],
+  getHistory: () => TemplateBlobHistory,
+  rel: string,
+  baseline: DecisionBaseline,
+): string | null {
+  // 1) the manifest's recorded blob id (E4, three-way-merge base lookup) — the
+  //    exact delivered bytes when the workspace object store still holds them.
+  if (baseline.blob) {
+    for (const t of readBlobTexts(workspaceRoot, [baseline.blob])) {
+      if (baselineKeyFor(rel, t) === baseline.hash) return t;
+    }
+  }
+  // 2) hash-match against historical template revisions: delivered core-script
+  //    bytes are raw template bytes, so the baseline revision is (almost) always
+  //    a committed template blob.
+  const candidatePaths = templateRoots.map((r) => `${r}/${rel}`);
+  for (const t of readBlobTexts(workspaceRoot, blobIdsFor(candidatePaths, getHistory()))) {
+    if (baselineKeyFor(rel, t) === baseline.hash) return t;
+  }
+  return null; // unrecoverable — no listing (no false positives by construction)
+}
+
+/** --audit-core-deltas entry (v1.116.0): scan roots, report, exit 0. */
+function runCoreDeltaAudit(): void {
+  const root = realpathSync(resolve(import.meta.dir, ".."));
+  const roots = auditProjectRoots.length > 0 ? auditProjectRoots : [projectPath || process.cwd()];
+  console.log("# core-delta audit — committed project-authored delta vs delivered baselines");
+  console.log(
+    "  spec: docs/designs/2026-11-23-variant-core-script-loss-detection-design.md §6 (read-only, report-only — exit 0, nothing gates)",
+  );
+  let scannedRoots = 0;
+  let deltaPaths = 0;
+  let deltaLines = 0;
+  for (const rawRoot of roots) {
+    let projRoot: string;
+    try {
+      projRoot = realpathSync(resolve(rawRoot));
+    } catch {
+      console.log(`\nproject: ${rawRoot}\n  SKIP — cannot resolve the real path`);
+      continue;
+    }
+    if (!existsSync(projRoot)) {
+      console.log(`\nproject: ${rawRoot}\n  SKIP — directory not found`);
+      continue;
+    }
+    scannedRoots++;
+    console.log(`\nproject: ${projRoot}`);
+    // The project's own provenance marker names its variant (canonical root copy
+    // first, then the legacy .claude/ copy) — template candidates follow it.
+    let rootVariant = "";
+    for (const marker of [join(projRoot, "template-version.txt"), join(projRoot, ".claude", "template-version.txt")]) {
+      if (!existsSync(marker)) continue;
+      rootVariant = (readFileSync(marker, "utf8").match(/^variant=(.*)$/m)?.[1] ?? "").trim();
+      if (rootVariant) break;
+    }
+    const templateRoots =
+      rootVariant && rootVariant !== "common" ? [`templates/${rootVariant}`, "templates/common"] : ["templates/common"];
+    let history: TemplateBlobHistory | null = null;
+    const getHistory = (): TemplateBlobHistory => (history ??= loadTemplateBlobHistory(root, templateRoots));
+    const manifestPath = join(projRoot, ".claude", "last-upgrade-delivery.json");
+    let baselines: Record<string, DecisionBaseline> = {};
+    try {
+      baselines = JSON.parse(readFileSync(manifestPath, "utf8"))?.baselines ?? {};
+    } catch {
+      baselines = {};
+    }
+    if (!existsSync(manifestPath)) console.log("  (no delivery manifest — nothing to diff)");
+    for (const rel of CORE_LOCKED_SCRIPTS) {
+      const copyPath = join(projRoot, rel);
+      if (!existsSync(copyPath)) {
+        console.log(`  ${rel} — no project copy — nothing to audit`);
+        continue;
+      }
+      const baseline = baselines[rel];
+      if (!baseline) {
+        console.log(`  ${rel} — no recorded delivery baseline (never delivered under the manifest) — nothing to diff`);
+        continue;
+      }
+      let projectText = "";
+      try {
+        projectText = readFileSync(copyPath, "utf8");
+      } catch {
+        console.log(`  ${rel} — unreadable project copy — skipped`);
+        continue;
+      }
+      const baselineText = auditBaselineTextOf(root, templateRoots, getHistory, rel, baseline);
+      if (baselineText === null) {
+        console.log(
+          `  ${rel} — baseline text unrecoverable (baseline ${baseline.hash.slice(0, 12)}… matches no readable blob or template revision) — no listing (compare against git history manually)`,
+        );
+        continue;
+      }
+      const delta = evictedDelta(projectText, baselineText, "");
+      if (delta.lines.length === 0 && delta.truncated === 0) {
+        console.log(`  ${rel} — no project-authored delta`);
+        continue;
+      }
+      const total = delta.lines.length + delta.truncated;
+      deltaPaths++;
+      deltaLines += total;
+      // Marker ids over the FULL authored delta (uncapped) — ids inside truncated
+      // lines must not be missed.
+      const keptIds = new Set([...baselineText.matchAll(LOCAL_PATCH_RE)].map((m) => m[1]));
+      const ids = [
+        ...new Set([...projectText.matchAll(LOCAL_PATCH_RE)].map((m) => m[1]).filter((id) => !keptIds.has(id))),
+      ];
+      console.log(
+        `  ${rel} — PROJECT-AUTHORED DELTA: ${total} line(s) vs the delivered baseline${ids.length > 0 ? ` [LOCAL-PATCH ids: ${ids.join(", ")}]` : " (unmarked)"}`,
+      );
+      for (const l of delta.lines) console.log(`      - ${l.length > 160 ? `${l.slice(0, 157)}…` : l}`);
+      if (delta.truncated > 0) console.log(`      (+${delta.truncated} more line(s) truncated)`);
+    }
+  }
+  console.log(
+    `\nsummary: ${scannedRoots} project(s) scanned · ${deltaPaths} path(s) with project-authored delta · ${deltaLines} authored line(s) (report-only — exit 0, nothing gates)`,
+  );
+  process.exit(0);
+}
+if (auditCoreDeltas) runCoreDeltaAudit();
+
 if (!projectPath) {
   console.error(
-    "Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--confirm] [--confirm-curated [--surfaces <claim-classes>]] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>[,<glob>...]]]... [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]]",
+    "Usage: bun scripts/upgrade-project.ts <project-path> [--variant <variant>] [--platform <profile>[,<profile>...]|all] [--dry-run] [--confirm] [--confirm-curated [--surfaces <claim-classes>]] [--prune-removed] [--rollback] [--yes] [--skip-context-commonization] [--force-context-sync] [--accept-ci-perm-diff] [--external-deps-only] [--disposition adopt-template[=<glob>[,<glob>...]]]... [--tombstone <glob>]... [--tombstone-reason <text>] [--clear-tombstone <glob>]... [--changelog-entry] [--port-candidates [--json]] [--audit-core-deltas [--project <path>]...]",
   );
   process.exit(1);
 }
@@ -3604,6 +3793,61 @@ function recordDecision(
   notePendingCandidate(path, verdict, severity);
 }
 
+// ── Eviction transparency (v1.116.0, U-20261122-011, design §5.2b) ───────────
+// Every deliver path that discards differing project content records WHAT it
+// discards: the evicted lines go into the decision detail (capped) and the
+// EVICTED LINES exit-summary block (grouped by path). Loss transparency, not an
+// ownership claim — the human adjudicates. Vintage-proven copies never list
+// (provenance proves template content, not project authorship — AC-5 noise
+// floor), and an unrecoverable baseline lists nothing (no false positives by
+// construction).
+interface EvictedLinesRow {
+  rel: string;
+  policy: string;
+  pass: string;
+  lines: string[];
+  truncated: number;
+}
+const evictedRows: EvictedLinesRow[] = [];
+const evictedSeen = new Set<string>(); // one listing per path per run
+
+/** Recover the TEXT of a recorded delivery baseline. 1) the manifest's blob id;
+ *  2) hash-match against historical template revisions (delivered raw-bytes
+ *  content is a committed template blob). Null = unrecoverable → no listing. */
+function resolveBaselineText(rel: string): string | null {
+  const baseline = priorBaselines[rel];
+  if (!baseline) return ""; // no baseline: every non-deliverable project line is project-authored
+  if (baseline.blob) {
+    for (const t of readBlobTexts(workspaceRoot, [baseline.blob])) {
+      if (baselineKeyFor(rel, t) === baseline.hash) return t;
+    }
+  }
+  const candidatePaths = vintageCandidates(rel);
+  for (const t of readBlobTexts(workspaceRoot, blobIdsFor(candidatePaths, getVintageHistory()))) {
+    if (baselineKeyFor(rel, t) === baseline.hash) return t;
+  }
+  return null;
+}
+
+/** Decision-detail suffix naming the project-authored lines a delivery discards
+ *  ("" when: the copy is vintage-proven, the baseline text is unrecoverable, or
+ *  the delta is empty). One listing per path per run — the first deliver-path
+ *  caller records it; later rows for the same path stay clean. */
+function evictionSuffix(rel: string, policy: string, pass: string, projectText: string, afterText: string): string {
+  if (evictedSeen.has(rel)) return "";
+  if (isVintageProven(rel, projectText)) return "";
+  const baselineText = resolveBaselineText(rel);
+  if (baselineText === null) return "";
+  const delta = evictedDelta(projectText, baselineText, afterText);
+  if (delta.lines.length === 0 && delta.truncated === 0) return "";
+  evictedSeen.add(rel);
+  evictedRows.push({ rel, policy, pass, lines: delta.lines, truncated: delta.truncated });
+  const total = delta.lines.length + delta.truncated;
+  const listed = delta.lines.map((l) => `\n      · ${l.length > 160 ? `${l.slice(0, 157)}…` : l}`).join("");
+  const more = delta.truncated > 0 ? `\n      · (+${delta.truncated} more line(s) truncated)` : "";
+  return `; EVICTED: ${total} project-authored line(s) discarded vs the delivered baseline (design §5.2):${listed}${more}`;
+}
+
 // ── E3 template-vintage provenance (PR-B) ────────────────────────────────────
 // A project file whose bytes equal ANY historical revision of its template counterpart is
 // untouched template vintage (no project-authored content). History is loaded lazily — one
@@ -3745,8 +3989,9 @@ function evolvedDeliveryGuard(input: {
     // E2 (DEC-20261111-01 D4): every LOCAL-PATCH form counts as a marker.
     let marked = false;
     let vintage = false;
+    let projectText = "";
     try {
-      const projectText = readFileSync(input.projectFile, "utf8");
+      projectText = readFileSync(input.projectFile, "utf8");
       marked = LOCAL_PATCH_MARKER_RE.test(projectText);
       // E3: vintage-proven (project bytes equal a historical template revision) — raw-bytes
       // passes only; agents/ and docs/context.md are rendered deliverables.
@@ -3756,12 +4001,19 @@ function evolvedDeliveryGuard(input: {
     }
     const outcome = resolveUnbaselinedDisposition(input.rel, marked, disposition, vintage);
     const adoptGranted = dispositionAdopts(input.rel);
+    // v1.116.0 (U-20261122-011): deliver paths name the project-authored lines
+    // they discard (no baseline — every non-deliverable project line is
+    // authored); vintage-proven copies list nothing (AC-5 noise floor).
+    const evSuffix =
+      outcome.deliver && !vintage
+        ? evictionSuffix(input.rel, input.policy, input.pass, projectText, input.deliverableContent)
+        : "";
     recordDecision(
       input.rel,
       input.policy,
       input.pass,
       outcome.verdict,
-      outcome.detail,
+      `${outcome.detail}${evSuffix}`,
       undefined,
       undefined,
       adoptGranted && outcome.verdict === "ADOPT" ? "adopt-template" : undefined,
@@ -3789,12 +4041,25 @@ function evolvedDeliveryGuard(input: {
     // but the override is recorded so the lost markers stay visible.
     if (markerLossBlocks(input.rel, input.policy, input.pass, input.projectFile, input.deliverableContent))
       return false;
+    // v1.116.0 (U-20261122-011): an adopt grant over evolved content delivers
+    // over project-authored lines — name them (the grant arm is the only deliver
+    // verdict here; vintage-proven copies list nothing, AC-5).
+    let evolvedProjectText = "";
+    try {
+      evolvedProjectText = readFileSync(input.projectFile, "utf8");
+    } catch {
+      /* unreadable — eviction listing degrades to empty */
+    }
+    const evSuffix =
+      outcome.verdict === "ADOPT"
+        ? evictionSuffix(input.rel, input.policy, input.pass, evolvedProjectText, input.deliverableContent)
+        : "";
     recordDecision(
       input.rel,
       input.policy,
       input.pass,
       outcome.verdict,
-      outcome.detail,
+      `${outcome.detail}${evSuffix}`,
       baseline,
       undefined,
       outcome.verdict === "ADOPT" ? "adopt-template" : undefined,
@@ -3862,23 +4127,30 @@ function markerLossBlocks(rel: string, policy: string, pass: string, projectFile
   // E3: vintage-proven bytes carry no project-authored content — any marker text came from an
   // older template revision (checked only on an actual loss: the lookup is lazy).
   if (isVintageProven(rel, projectText)) return false;
+  // v1.116.0 (U-20261122-011): name the ticket ids the delivery would lose — the
+  // count alone ("2 → 0") is not attributable; the ids are.
+  const lostIds = lostLocalPatchIds(projectText, afterText);
+  const lostIdNote = lostIds.length > 0 ? `; lost ids: ${lostIds.join(", ")}` : "";
   if (dispositionAdopts(rel)) {
+    // Deliver path (grant override): the evicted-lines listing rides the ADOPT
+    // row (design §5.2b — a deliberate loss is attributable forever).
+    const evSuffix = evictionSuffix(rel, policy, pass, projectText, afterText);
     recordDecision(
       rel,
       policy,
       pass,
       "ADOPT",
-      `LOCAL-PATCH marker count ${loss.before} → ${loss.after} (${loss.lost} lost) overridden by explicit --disposition adopt-template (decision recorded)`,
+      `LOCAL-PATCH marker count ${loss.before} → ${loss.after} (${loss.lost} lost) overridden by explicit --disposition adopt-template (decision recorded); superseded by the template copy${lostIdNote}${evSuffix}`,
       priorBaselines[rel],
       undefined,
       "adopt-template",
     );
     console.log(
-      `  ✅ DISPOSITION (adopt-template): ${rel} — ${loss.lost} LOCAL-PATCH marker(s) superseded by the template copy (decision recorded)`,
+      `  ✅ DISPOSITION (adopt-template): ${rel} — ${loss.lost} LOCAL-PATCH marker(s) superseded by the template copy (decision recorded${lostIds.length > 0 ? `; lost ids: ${lostIds.join(", ")}` : ""})`,
     );
     return false;
   }
-  recordDecision(rel, policy, pass, "MARKER_LOSS", markerLossDetail(loss), priorBaselines[rel]);
+  recordDecision(rel, policy, pass, "MARKER_LOSS", markerLossDetail(loss, lostIds), priorBaselines[rel]);
   enrichPending(rel, { deliverable: afterText });
   console.log(
     `  ⏭️  MARKER_LOSS (SKIP): ${rel} — delivery would drop ${loss.lost} LOCAL-PATCH marker(s) (${loss.before} → ${loss.after}); project copy PRESERVED (non-zero exit at completion)`,
@@ -3932,12 +4204,16 @@ function equalVersionRestore(
     );
     return false;
   }
+  // v1.116.0 (U-20261122-011): the grant arm (ADOPT over an unproven fork)
+  // delivers over project-authored lines — name them. The provenance-proven
+  // DRIFT_RESTORED arms destroy no authored content and list nothing (AC-5).
+  const evSuffix = outcome.verdict === "ADOPT" ? evictionSuffix(rel, policy, pass, projectText, deliverable) : "";
   recordDecision(
     rel,
     policy,
     pass,
     outcome.verdict,
-    `${version} ${outcome.detail}`,
+    `${version} ${outcome.detail}${evSuffix}`,
     priorBaselines[rel],
     outcome.severity,
     outcome.verdict === "ADOPT" ? "adopt-template" : undefined,
@@ -5461,7 +5737,8 @@ console.log("--- SYNC_IF_NEWER: scripts/ ---");
 
 // T-20260921-010: the two AGENTS.md-locked core scripts. A project-side fork with
 // a bumped @version used to fall through every restore branch into a silent OK.
-const CORE_LOCKED_SCRIPTS = ["scripts/dev-sync.ts", "scripts/audit.ts"];
+// v1.116.0: the constant hoisted to the --audit-core-deltas block near the CLI
+// front (top of file) — the legacy scan consumes the same list; no behavior change.
 
 // G11: Auto-discover script subdirectories from template instead of hardcoding.
 // v1.50.0 (Design Gate delivery repair, spec docs/designs/2026-09-25-registry-policy-completeness-design.md
@@ -5621,12 +5898,23 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
       );
       // D3 decision log: the canonical restore is sanctioned (ADR-0085 D3) but
       // always worth reading — DRIFT_RESTORED (WARN).
+      // v1.116.0 (U-20261122-011): the unconditional canonical restore is a
+      // deliver path over differing project content — the unmarked fork lines it
+      // discards are named (the marker-loss override case is already listed by
+      // the guard's own ADOPT row; one listing per path per run).
+      const evSuffix = evictionSuffix(
+        relPath,
+        "SYNC",
+        "SYNC_IF_NEWER: scripts/",
+        readFileSync(projFile, "utf8"),
+        readFileSync(tplFile, "utf8"),
+      );
       recordDecision(
         relPath,
         "SYNC",
         "SYNC_IF_NEWER: scripts/",
         "DRIFT_RESTORED",
-        `${projVer} equal-version content drift — restored to canonical (ADR-0085 D3 integrity rule)`,
+        `${projVer} equal-version content drift — restored to canonical (ADR-0085 D3 integrity rule)${evSuffix}`,
         priorBaselines[relPath],
       );
     } else if (
@@ -5654,12 +5942,22 @@ for (const [rel, relSourceRoot] of [...scriptSourceMap.entries()].sort(([a], [b]
     console.log(
       `  ⚠️  CORE-SCRIPT FORK ${relPath}  project ${projVer} vs template ${tplVer} — locked core script must not be modified; restored to canonical`,
     );
+    // v1.116.0 (U-20261122-011): deliver path over differing project content —
+    // name the discarded fork lines (dedupe keeps the guard's ADOPT listing the
+    // only one when an adopt grant already recorded it).
+    const evSuffix = evictionSuffix(
+      relPath,
+      "SYNC",
+      "SYNC_IF_NEWER: scripts/",
+      readFileSync(projFile, "utf8"),
+      readFileSync(tplFile, "utf8"),
+    );
     recordDecision(
       relPath,
       "SYNC",
       "SYNC_IF_NEWER: scripts/",
       "DRIFT_RESTORED",
-      `locked core script fork (project ${projVer} vs template ${tplVer}) — restored to canonical`,
+      `locked core script fork (project ${projVer} vs template ${tplVer}) — restored to canonical${evSuffix}`,
       priorBaselines[relPath],
     );
     if (!dryRun) {
@@ -10297,6 +10595,29 @@ if (import.meta.main && !securityPass) process.exit(1);
     for (const d of preserved) console.log(`  ${d.path}   (pass: ${d.pass})`);
     console.log(
       "  Backport the project change template-side, or take the template copy with --disposition adopt-template[=glob].",
+    );
+  }
+}
+// v1.116.0 (U-20261122-011, design §5.2b): the EVICTED LINES block — every path
+// this run delivered over differing project content, with the project-authored
+// lines it discarded (capped listing, grouped by path). Transparency, not a
+// gate: clean and vintage-proven projects produce no rows at all (AC-5 noise
+// floor). Restore via --rollback, or port template-side before the next wave.
+{
+  if (import.meta.main && evictedRows.length > 0) {
+    console.log("\n--------------------------------------------------------");
+    console.log(
+      `  EVICTED LINES — ${evictedRows.length} path(s) delivered over project-authored content (loss-transparency listing, not an ownership claim)`,
+    );
+    console.log("--------------------------------------------------------");
+    for (const row of evictedRows) {
+      const total = row.lines.length + row.truncated;
+      console.log(`  ${row.rel}   [pass: ${row.pass}]   ${total} project-authored line(s) discarded:`);
+      for (const l of row.lines) console.log(`      · ${l.length > 160 ? `${l.slice(0, 157)}…` : l}`);
+      if (row.truncated > 0) console.log(`      · (+${row.truncated} more line(s) truncated)`);
+    }
+    console.log(
+      "  These project-authored lines disappeared in this run's delivery: restore with --rollback, or port them template-side (adjudicated-port procedure, docs/designs/2026-10-27-sync-overwrite-policy-design.md §6).",
     );
   }
 }

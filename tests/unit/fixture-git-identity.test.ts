@@ -104,6 +104,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "upgrade-decision-log.test.ts",
   "upgrade-core-locked-fork.test.ts",
   "upgrade-overwrite-protection.test.ts",
+  "upgrade-policy-eviction.test.ts",
   "upgrade-project-adoption-gate.test.ts",
   "upgrade-project-disposition-grants.test.ts",
   "upgrade-project-tenant-guard.test.ts",

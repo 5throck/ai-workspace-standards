@@ -1,4 +1,16 @@
-// @version 1.48.0
+// @version 1.49.0
+// v1.49.0 (2026-11-23, U-20261122-011 — spec
+//          docs/designs/2026-11-23-variant-core-script-loss-detection-design.md §5.2):
+//          two pure, unit-pinned loss-transparency helpers. lostLocalPatchIds() names
+//          the LOCAL-PATCH ticket ids a delivery would lose (id grammar = the existing
+//          LOCAL_PATCH_RE; `pending` included) — wired into the MARKER_LOSS row detail
+//          and the adopt-grant override ADOPT row so a deliberate loss is attributable
+//          forever. evictedDelta() computes the exact project-authored lines a
+//          delivery discards vs the recorded delivery baseline (deterministic: lines
+//          absent from BOTH the baseline and the deliverable; blank lines ignored;
+//          capped at EVICTED_LINES_CAP + truncated count) — consumed by every deliver
+//          path and the --audit-core-deltas legacy scan. Verdict/severity matrix
+//          unchanged (detection adds attribution, never new blocks).
 // v1.48.0 (2026-11-19, T-20261119-009 — design
 //          docs/designs/2026-11-19-delivery-riding-records-design.md): DecisionVerdict
 //          gains RECORD_BUMP (INFO), SCRIPT_ROW_SYNTHESIZED (INFO) and
@@ -432,6 +444,11 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
+// v1.49.0: the LOCAL-PATCH id grammar (U-20261122-011) — same import the engine
+// already ships to scaffolds (upgrade-project.ts imports this helper too), so the
+// delivery set is unchanged and no @l2-propagate marker is introduced (the
+// local-patch-scan v1.0.1 lesson, U-20261012-001).
+import { LOCAL_PATCH_RE } from "../helpers/local-patch-scan.ts";
 
 /** Delivery policies. `SYNC` is the default fallback (deliver with conflict warning). */
 export type UpgradePolicy =
@@ -1922,9 +1939,76 @@ export function markerLoss(
   return after < before ? { lost: before - after, before, after } : null;
 }
 
-/** Detail text of a MARKER_LOSS decision. */
-export function markerLossDetail(loss: { lost: number; before: number; after: number }): string {
-  return `delivery would lower the LOCAL-PATCH marker count ${loss.before} → ${loss.after} (${loss.lost} marker(s) lost) — MARKER_LOSS: write SKIPPED, project copy preserved (re-run with --disposition adopt-template[=glob] only once the template carries the patch hunk)`;
+/** Detail text of a MARKER_LOSS decision. `lostIds` (v1.49.0, U-20261122-011) names
+ *  the LOCAL-PATCH ticket ids the delivery would lose — appended when non-empty so
+ *  the loss is attributable to filed upstream tickets, not just counted. */
+export function markerLossDetail(loss: { lost: number; before: number; after: number }, lostIds?: string[]): string {
+  const base = `delivery would lower the LOCAL-PATCH marker count ${loss.before} → ${loss.after} (${loss.lost} marker(s) lost) — MARKER_LOSS: write SKIPPED, project copy preserved (re-run with --disposition adopt-template[=glob] only once the template carries the patch hunk)`;
+  return lostIds && lostIds.length > 0 ? `${base}; lost LOCAL-PATCH ids: ${lostIds.join(", ")}` : base;
+}
+
+/**
+ * v1.49.0 (U-20261122-011, design §5.2a): the LOCAL-PATCH ticket ids present in
+ * `projectText` and absent from `afterText` (the text a delivery would leave).
+ * Id grammar is the existing LOCAL_PATCH_RE (`LOCAL-PATCH(upstream-request:
+ * <U-id|pending>)`); `pending` is a valid id. Deterministic: first-occurrence
+ * order in the project copy, deduplicated. Pure.
+ */
+export function lostLocalPatchIds(projectText: string, afterText: string): string[] {
+  const idsOf = (text: string): Set<string> => {
+    const out = new Set<string>();
+    for (const m of text.matchAll(LOCAL_PATCH_RE)) out.add(m[1]);
+    return out;
+  };
+  const kept = idsOf(afterText);
+  const lost: string[] = [];
+  for (const id of idsOf(projectText)) {
+    if (!kept.has(id)) lost.push(id);
+  }
+  return lost;
+}
+
+/** v1.49.0 (U-20261122-011): cap of the evicted-line listing (first N lines,
+ *  remainder reported as `truncated`). Retuning is an owner decision (design O-1). */
+export const EVICTED_LINES_CAP = 10;
+
+/**
+ * v1.49.0 (U-20261122-011, design §5.2b): the exact project-authored lines a
+ * delivery discards — lines present in `projectText`, absent from the recorded
+ * delivery baseline `baselineText` ("" when no baseline exists: every
+ * non-deliverable project line is then project-authored), and absent from
+ * `afterText` (the text the delivery would leave). No-op by construction when
+ * the project bytes equal the baseline (nothing project-authored exists). Blank
+ * lines and trailing whitespace are ignored (supersetCheck normalization);
+ * duplicates collapse to the first occurrence. Deterministic output in
+ * first-occurrence order, capped: `lines` carries at most EVICTED_LINES_CAP
+ * entries and `truncated` the remaining count. Pure — loss transparency, not an
+ * ownership claim: the listing says "these project-authored lines disappear",
+ * the human adjudicates.
+ */
+export function evictedDelta(
+  projectText: string,
+  baselineText: string,
+  afterText: string,
+): { lines: string[]; truncated: number } {
+  const norm = (t: string): string[] =>
+    t
+      .replace(/\r\n/g, "\n")
+      .split("\n")
+      .map((l) => l.trimEnd());
+  const baseSet = new Set(norm(baselineText));
+  const afterSet = new Set(norm(afterText));
+  const seen = new Set<string>();
+  const all: string[] = [];
+  for (const l of norm(projectText)) {
+    if (l.trim() === "") continue;
+    if (baseSet.has(l)) continue;
+    if (afterSet.has(l)) continue;
+    if (seen.has(l)) continue;
+    seen.add(l);
+    all.push(l);
+  }
+  return { lines: all.slice(0, EVICTED_LINES_CAP), truncated: Math.max(0, all.length - EVICTED_LINES_CAP) };
 }
 
 /**
