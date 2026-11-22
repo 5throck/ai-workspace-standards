@@ -28,7 +28,23 @@
  * The core is pure over an injected Tree so unit tests run on in-memory file maps. The CLI is
  * the only place that touches the real filesystem.
  *
- * @version 1.3.1
+ * Variant-notes preservation (U-20261122-008, design
+ * docs/designs/2026-11-22-skill-record-variant-notes-design.md): a
+ * `<!-- variant-notes:start -->` … `<!-- variant-notes:end -->` block in an existing generated
+ * record is re-emitted verbatim after the title on regeneration; malformed blocks are WARNed
+ * and dropped.
+ *
+ * @version 1.4.0
+ *
+ * v1.4.0 (2026-11-22, T-20261122-003 / U-20261122-008 — design
+ *         docs/designs/2026-11-22-skill-record-variant-notes-design.md): marked-block
+ *         preservation. extractVariantNotes() pulls the exact marker-to-marker slice out of an
+ *         existing generated record; main() applies it at the single --write/--check choke point
+ *         (injected after the H1 part, before ## Metadata, AFTER finalizeClean — verbatim means
+ *         verbatim: the internal-ref filter and Hangul wrapping never touch the author's lines;
+ *         the note author owns the language policy inside their own block). Absent block = zero
+ *         diff; malformed block (unclosed start / stray end / extras) = WARN + drop, never a
+ *         crash; empty block = treated as absent, no warning.
  *
  * v1.3.1 (2026-11-14, T-20261112-007): the missing-record fix text no longer claims the records are
  *          "published by the templates PR" — the SLR gate now BLOCKS a sync whose records are missing/stale,
@@ -506,6 +522,59 @@ export function isGeneratedRecord(content: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Variant-notes preservation (U-20261122-008, design D1/D2)
+// ---------------------------------------------------------------------------
+
+export const VARIANT_NOTES_START = "<!-- variant-notes:start -->";
+export const VARIANT_NOTES_END = "<!-- variant-notes:end -->";
+
+/** Pure (no fs): pull the sanctioned human region out of an existing generated
+ * record. Well-formed single block -> the exact marker-to-marker slice (marker
+ * lines inclusive). No block -> null, no warnings. Malformed (start without end,
+ * end without start, extra/stray markers) -> null PLUS one warning per defect —
+ * never throws, never crashes a publish. An empty block (start immediately
+ * followed by end) is treated as absent without a warning: there is nothing to
+ * preserve. When several start markers exist, the FIRST well-formed pair wins
+ * and the extras are warned about. */
+export function extractVariantNotes(existingContent: string): { block: string | null; warnings: string[] } {
+  const lines = existingContent.split("\n");
+  const starts: number[] = [];
+  const ends: number[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line === VARIANT_NOTES_START) starts.push(i);
+    else if (line === VARIANT_NOTES_END) ends.push(i);
+  }
+  if (starts.length === 0 && ends.length === 0) return { block: null, warnings: [] };
+  if (starts.length === 0) {
+    return { block: null, warnings: [`${ends.length} end marker(s) without a start marker`] };
+  }
+  const firstEnd = ends.find((e) => e > starts[0]);
+  if (firstEnd === undefined) {
+    return { block: null, warnings: ["start marker without an end marker (unclosed at EOF)"] };
+  }
+  const warnings: string[] = [];
+  const strayEnds = ends.filter((e) => e < starts[0] || e > firstEnd).length;
+  if (starts.length > 1) warnings.push(`${starts.length - 1} extra start marker(s) beyond the first block`);
+  if (strayEnds > 0) warnings.push(`${strayEnds} stray end marker(s) outside the first block`);
+  if (firstEnd === starts[0] + 1) return { block: null, warnings };
+  return { block: lines.slice(starts[0], firstEnd + 1).join("\n"), warnings };
+}
+
+/** Re-insert the preserved block as a part between the H1 part and the
+ * ## Metadata part (renderRecord joins parts with "\n\n", and the existing
+ * hand notes already live at that seam). The first line-anchored H1 wins —
+ * in a generated record that is always the title part, whose first line is
+ * GENERATED_MARKER. Unexpected shape -> unchanged content rather than a
+ * corrupted record. */
+export function injectVariantNotes(content: string, block: string): string {
+  const h1 = /^#[^\n]*\n/m.exec(content);
+  if (h1 === null) return content;
+  const at = h1.index + h1[0].length;
+  return content.slice(0, at) + "\n" + block + "\n" + content.slice(at);
+}
+
+// ---------------------------------------------------------------------------
 // Planning
 // ---------------------------------------------------------------------------
 
@@ -965,6 +1034,22 @@ export function main(argv: string[], root: string = ROOT): number {
 
   for (const p of plan.problems) console.error(`[PROBLEM] ${p.group}/${p.skill}: ${p.message}`);
   if (plan.problems.length > 0) return 1;
+
+  // Variant-notes preservation (U-20261122-008, design D2): single choke point for
+  // --check and --write. For each planned record whose target exists and is a
+  // generated record, lift the sanctioned human region out of the on-disk content
+  // and inject it into the regenerated content before comparison/write. Keeps
+  // --check parity exact for annotated records and leaves renderRecord untouched
+  // for the pure projection/derivation tests.
+  for (const r of plan.records) {
+    const existing = tree.read(r.path);
+    if (existing === null || !isGeneratedRecord(existing)) continue;
+    const { block, warnings } = extractVariantNotes(existing);
+    for (const w of warnings) {
+      console.error(`[WARN] ${r.path}: variant-notes block ${w}; dropped — fix the markers and re-run`);
+    }
+    if (block !== null) r.content = injectVariantNotes(r.content, block);
+  }
 
   if (check) {
     const findings = checkPlan(tree, plan, scanDirs);

@@ -72,8 +72,10 @@ describe('dev-sync hunk-adjudicated staging (T-20261117-015)', () => {
   });
 
   test('T8: version header bumped with the spec reference', () => {
-    expect(src).toMatch(/@version 1\.52\.1/);
-    // the v1.51.0 spec reference survives the T-20261118-003 bump alongside it
+    // v1.53.0 (2026-11-22, T-20261122-004): step 3.89 + 3.9 hint landing bumped
+    // the header; this pin moves with every header bump (the two 2026-11-18
+    // spec references below must survive each bump alongside it).
+    expect(src).toMatch(/@version 1\.53\.0/);
     expect(src).toMatch(/2026-11-18-dev-sync-hunk-staging-design\.md/);
     expect(src).toMatch(/2026-11-18-memory-gate-step2-deadlock-design\.md/);
   });

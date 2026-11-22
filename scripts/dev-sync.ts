@@ -1,4 +1,31 @@
-// @version 1.52.1
+// @version 1.53.0
+// v1.53.0 (2026-11-22, T-20261122-004 / U-20261122-010 — design
+//          docs/designs/2026-11-22-dev-sync-skill-graph-preconvergence-design.md):
+//          (1) NEW STEP 3.89 — skill-graph pre-convergence, inserted between
+//          3.88 and 3.9 (3.87/3.88 were taken): audit.ts auto-activates the
+//          skill-graph drift gate on EVERY invocation — including 3.9's
+//          `--spec-check --lifecycle-only` call — but the pipeline regenerated
+//          docs/skill-graph.json only at step 4.65, AFTER the blocking 3.9
+//          gate, so any sync touching skills/agents hit a false-positive
+//          blocking failure and needed a manual regenerate + re-run dance.
+//          Pre-regenerate here (guarded bare `bun scripts/generate-skill-graph.ts`,
+//          the same guard expression as 4.65 so the two steps can never
+//          disagree about applicability; failure = WARN naming the step, 3.85's
+//          exact failure philosophy — the audit is the gate, pre-convergence is
+//          a courtesy), then stage the refreshed projection with array-form
+//          `git add docs/skill-graph.json` (3.86 idiom). Bare invocation only —
+//          the per-scope loop stays 4.65's job; 4.65 remains the final
+//          convergence pass (same inputs, second run is a no-op).
+//          (2) STEP 3.9 HINT — the first audit invocation captures its output
+//          (.quiet()) and echoes it verbatim (visible output unchanged), and
+//          the static "no relevant spec activity" boilerplate is replaced by
+//          the audit's actual FAIL lines: stderr split / ANSI-stripped /
+//          `[FAIL] `-matched via lib/audit-fail-hint.ts v1.0.0 (audit.ts's
+//          output contract consumed as-is — audit.ts itself is NOT modified),
+//          display name = text before the first " — "/": " separator, full
+//          message indented under each name, cap 10 with an `… +N more` tail;
+//          the two Fix lines stay; auto-E5, the early-publish heal, exit codes,
+//          and the no-registry INACTIVE branch are untouched.
 // v1.52.1 (2026-11-21): step 6.55 Windows argv-limit fix — the gate's single
 //          `git ls-files -z -- ${required}` spawn passed ALL required paths in
 //          one argv (810 paths / 52KB at the current registry size), past the
@@ -593,6 +620,7 @@ import { isAgentMdPath, bumpMechanicalLastUpdated } from "./helpers/agent-mechan
 import { driftCheck } from "./helpers/ticket-drift.ts";
 import { owedBlocks, parseBlocks, unionScan, wellFormedScan } from "./helpers/memory-union-verify.ts";
 import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from "./lib/workspace-hygiene.ts";
+import { formatSpecCheckHint, parseAuditFailLines } from "./lib/audit-fail-hint.ts";
 import {
   assertWorkTreeHealthy,
   diffRepoConfig,
@@ -1538,9 +1566,38 @@ if (fs.existsSync(path.join("memory"))) {
   );
 }
 
+// 3.89 Skill-graph pre-convergence (T-20261122-004 / U-20261122-010, design
+// docs/designs/2026-11-22-dev-sync-skill-graph-preconvergence-design.md)
+// audit.ts auto-activates the skill-graph drift gate on EVERY invocation —
+// including Step 3.9's `--spec-check --lifecycle-only` call — and that gate
+// failed BLOCKING before Step 4.65 could regenerate docs/skill-graph.json
+// whenever this sync edited skills/agents. Pre-regenerate here so 3.9's audit
+// compares against a fresh projection. Step 4.65 stays as the final convergence
+// pass — same inputs, so the second run is a no-op.
+const preGenGraphTs = path.join("scripts", "generate-skill-graph.ts");
+if (fs.existsSync(preGenGraphTs)) {
+  const preGraphRes = await $`bun ${preGenGraphTs}`.quiet().nothrow();
+  if (preGraphRes.exitCode !== 0) {
+    console.warn(
+      `⚠️  Step 3.89: skill-graph pre-regeneration failed (exit ${preGraphRes.exitCode}) — Step 3.9 will re-check`,
+    );
+  } else {
+    // Stage the refreshed projection (3.86 idiom: array-form git add, cwd pinned).
+    const addRes = await $`git add docs/skill-graph.json`.quiet().nothrow();
+    if (addRes.exitCode !== 0) {
+      console.warn(
+        `⚠️  Step 3.89: staging docs/skill-graph.json failed (exit ${addRes.exitCode}) — Step 3.9 will re-check`,
+      );
+    } else {
+      console.log("📋 Step 3.89: skill-graph pre-converged for the 3.9 audit");
+    }
+  }
+}
+
 // 3.9 Spec registry check (BLOCKING since ADR-0055 Stage 2 — the relevance check
 // Fails when a code diff has no spec activity; stale/missing-spec stay WARN).
-// Output is intentionally visible (no .quiet()); same idiom as step 3.97.
+// Output is captured (.quiet()) and echoed verbatim so it stays visible; the
+// captured stderr is parsed for the failing-sub-check hint (v1.53.0, D2).
 const specRegPath = path.join("docs", "specs", "registry.json");
 if (fs.existsSync(specRegPath)) {
   // Pass the exemption via SYNC_SPEC_EXEMPT (documented env fallback in audit.ts):
@@ -1549,7 +1606,12 @@ if (fs.existsSync(specRegPath)) {
   const specEnv = specExempt ? { SYNC_SPEC_EXEMPT: specExempt } : {};
   const specRes = await $`bun scripts/audit.ts --spec-check --lifecycle-only`
     .env({ ...process.env, ...specEnv })
+    .quiet()
     .nothrow();
+  // Visibility preserved (design D2 step 1): the captured streams scroll by
+  // exactly as the streaming invocation's did.
+  process.stdout.write(specRes.stdout);
+  process.stderr.write(specRes.stderr);
   if (specRes.exitCode !== 0) {
     // v1.16.0: auto-E5 — a diff fully explained by the recorded upgrade delivery
     // (.claude/last-upgrade-delivery.json) IS a sync execution; retry with E5.
@@ -1637,8 +1699,19 @@ if (fs.existsSync(specRegPath)) {
       }
     }
     if (!handled) {
-      console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
-      console.error("  The diff touches code (scripts/templates/agents) with no relevant spec activity.");
+      // v1.53.0 hint: quote the audit's actual FAIL lines (name + full message)
+      // instead of guessing at causes; fall back to the generic framing when
+      // the failure carried no parseable FAIL rows (nonzero exit from another
+      // cause). The two Fix lines stay — they remain correct guidance for the
+      // relevance sub-check; each FAIL message carries its own targeted remedy.
+      const failMessages = parseAuditFailLines(String(specRes.stderr ?? ""));
+      if (failMessages.length > 0) {
+        console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode}) — failing sub-check(s):${RESET}`);
+        for (const line of formatSpecCheckHint(failMessages)) console.error(line);
+      } else {
+        console.error(`${RED}✗ Step 3.9: spec-check FAILED (exit ${specRes.exitCode})${RESET}`);
+        console.error("  The diff touches code (scripts/templates/agents) with no relevant spec activity.");
+      }
       console.error("  Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the");
       console.error(
         "  sync with --spec-exempt=E1..E5 (docs/governance/agents/execution-plan-templates.md §5.1.1 categories; e.g. --spec-exempt=E3 for a typo hotfix).",
