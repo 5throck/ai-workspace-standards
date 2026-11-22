@@ -3,7 +3,7 @@
  * detect-backport.ts — sync-embedded detection of backport candidates and
  * template-layer defects (design docs/designs/2026-11-17-sync-auto-detection-design.md,
  * detection batch PR-B / T-20261118-001).
- * @version 1.0.0
+ * @version 1.0.1
  *
  * v1.0.0 (2026-11-18, spec docs/designs/2026-11-17-sync-auto-detection-design.md
  *         §5/§6, DEC-20261117-06): opt-in detector run by a project's /sync flow
@@ -85,6 +85,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { gitCleanEnv } from "./lib/git-env.ts";
 import { scanLocalPatches, type LocalPatchFinding } from "./helpers/local-patch-scan.ts";
 import { resolveClaim, VARIANT_ASSET_DIRS_PASS } from "./lib/upgrade-policy.ts";
 import { isDeliveryPolicy, type UpgradePolicy } from "./lib/upgrade-policy.ts";
@@ -192,7 +193,7 @@ interface DiffSurface {
 }
 
 function git(args: string[], cwd: string): { ok: boolean; stdout: string } {
-  const res = spawnSync("git", args, { cwd, encoding: "utf-8" });
+  const res = spawnSync("git", args, { cwd, encoding: "utf-8", env: gitCleanEnv() });
   return { ok: res.status === 0, stdout: (res.stdout ?? "").toString() };
 }
 
