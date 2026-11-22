@@ -89,6 +89,8 @@ Phases **3, 4, and 6** (Design Handoff, Execution, Quality Assurance & Finalizat
 
 After the Phase 6 gate passes, PM closes out the work: PM dispatches the `/sync` row to `automation-engineer` (Medium, `sonnet`), which commits and creates the PR with the appropriate Co-Authored-By line; PM then verifies the landing (PR URL, branch, CI state, committed file set) and hands off the completed work to the user. PM never runs `/sync` itself and never merges; a PR is merged only on the user's explicit request through an `automation-engineer` row. This is a PM closing action, not a phase.
 
+PM may also dispatch to **contract-gate-engineer** (Medium — contract-gate adjudication, deliverable-quality enforcement) and **design-system-lead** (Medium — design-system consistency, UI/UX contract review). Both declare `handoff_from: [pm]` and are dispatched only by the PM at triage or QA escalation.
+
 Workflow, gates, and pipeline detail live in **AGENTS.md** (see §3 and §5) — this file does not restate them.
 
 ## Agent Ecosystem
