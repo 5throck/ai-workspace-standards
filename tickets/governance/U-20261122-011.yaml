@@ -1,0 +1,120 @@
+schemaVersion: 1
+id: U-20261122-011
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-22T23:31:47.971+09:00'
+history:
+  - at: '2026-11-22T23:31:47.971+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-23T05:03:20.215+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T05:03:20.215+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T05:03:20.215+09:00'
+    from: review
+    to: done
+result: >-
+  Variant core-script loss detection landed in workspace PR #2156 (merge
+  affa8615f, CI 4/4): upgrade-policy.ts v1.49.0 lostLocalPatchIds() +
+  evictedDelta() pure helpers; upgrade-project.ts v1.116.0 —
+  MARKER_LOSS/adopt-override rows name lost LOCAL-PATCH ids, eviction listing
+  (vs delivery baseline, cap 10) on all five deliver-path families incl.
+  core-locked canonical restores, exit-summary EVICTED LINES block, new
+  --audit-core-deltas legacy scan (fleet: 16 projects, 15 clean, co-newbiz flags
+  exactly the pending-retirement inventory naming
+  U-20261107-003/U-20261108-001). AGENTS.md hooks-section addendum: variant
+  additions in delivered core scripts unsupported — marker-registered patch
+  (ADR-0097) or script_manifest.local only. Ruling per design
+  2026-11-23-variant-core-script-loss-detection-design.md (spec-registered).
+  Promotion verdicts: U-20261107-003 + U-20261108-001 ALREADY-UPSTREAM (dev-sync
+  v1.43.0 S0 content map; PR #1942) — retire-on-adoption at co-newbiz's next
+  wave. 20 new unit tests; full suite 346 files green; fleet dry-runs zero
+  EVICTED lines (noise floor preserved).
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    Upgrade delivery can silently drop variant-local additions that live inside
+    a delivered core script. In co-newbiz, a variant-specific gate block added
+    to scripts/audit.ts (ADR-0070 server-boundary check, wired 2026-08-26) was
+    removed without any CONFLICT record or warning when the 2026-08-29 upgrade
+    wave replaced audit.ts. The ADR and SCRIPTS.md kept claiming the gate was
+    CI-wired, 5 direct page-level DB imports outside app/api accumulated
+    undetected, and the loss was only rediscovered by a manual project review on
+    2026-11-22 via git archaeology (added 0a701b29, lost 4d6793e6). The same
+    delivery semantics left audit.ts and dev-sync.ts carrying two unresolved
+    ERROR-severity LOCAL-PATCH CONFLICT dispositions (U-20261108-001,
+    U-20261107-003) with no promotion tracker.
+  affected_paths:
+    - scripts/audit.ts
+    - scripts/dev-sync.ts
+    - scripts/co-newbiz/audit-variant.ts
+  identity_source: cwd
+  local_workaround_diff: >-
+    Variant-owned gates now live exclusively in
+    scripts/co-newbiz/audit-variant.ts (declared via variant.json
+    script_manifest.local), which survives upgrade waves; the boundary gate was
+    re-implemented there as a blocking runServerBoundaryGate
+    (lint-server-boundary.ts v1.1.0 allowlist mode per DEC-20261122-01).
+    Additionally two variant LOCAL-PATCHes to the delivered core scripts are
+    pending upstream promotion and carry inline markers: U-20261107-003
+    (dev-sync.ts scoped-staging commits regenerate VERSION_MANIFEST) and
+    U-20261108-001 (audit.ts biome reformat + nul-lint-ignore placement +
+    biome.json override note).
+  repro: >-
+    1. Variant adds a variant-specific gate block to the delivered core script
+    scripts/audit.ts (commit 0a701b29, 2026-08-27, comment: "co-newbiz-specific,
+    not part of the shared workspace template"), wiring
+    scripts/co-newbiz/lint-server-boundary.ts into the full audit pass; ADR-0070
+    documents it as CI-wired. 2. upgrade-project delivers a rewritten
+    scripts/audit.ts in the next wave (commit 4d6793e6, 2026-08-29): the variant
+    block disappears with no CONFLICT recorded and no warning emitted. 3. Docs
+    citing the gate stay stale; 5 boundary violations accumulate undetected for
+    ~3 months until a manual project review re-discovers the loss via git
+    archaeology (2026-11-22). Expected: delivery-time hunk-level detection that
+    flags the disappearance of variant-local additions inside delivered core
+    scripts (or hard documentation that variant additions to core scripts are
+    unsupported and must live only in variant.json-declared scripts).
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: scripts/co-newbiz/audit-variant.ts'
+    - info:in_last_delivery scripts/audit.ts=false
+    - info:in_last_delivery scripts/dev-sync.ts=false
+    - info:in_last_delivery scripts/co-newbiz/audit-variant.ts=false
+  dedupe_key: 95067fd373e4865de11b3369be8c86a009aa79ed88c3cb1f83da9868160c13f2
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-22T23:31:47.971+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2156
+    template_version: 0.30.0
+    summary: >-
+      Variant core-script loss detection landed in workspace PR #2156 (merge
+      affa8615f, CI 4/4): upgrade-policy.ts v1.49.0 lostLocalPatchIds() +
+      evictedDelta() pure helpers; upgrade-project.ts v1.116.0 —
+      MARKER_LOSS/adopt-override rows name lost LOCAL-PATCH ids, eviction
+      listing (vs delivery baseline, cap 10) on all five deliver-path families
+      incl. core-locked canonical restores, exit-summary EVICTED LINES block,
+      new --audit-core-deltas legacy scan (fleet: 16 projects, 15 clean,
+      co-newbiz flags exactly the pending-retirement inventory naming
+      U-20261107-003/U-20261108-001). AGENTS.md hooks-section addendum: variant
+      additions in delivered core scripts unsupported — marker-registered patch
+      (ADR-0097) or script_manifest.local only. Ruling per design
+      2026-11-23-variant-core-script-loss-detection-design.md (spec-registered).
+      Promotion verdicts: U-20261107-003 + U-20261108-001 ALREADY-UPSTREAM
+      (dev-sync v1.43.0 S0 content map; PR #1942) — retire-on-adoption at
+      co-newbiz's next wave. 20 new unit tests; full suite 346 files green;
+      fleet dry-runs zero EVICTED lines (noise floor preserved).
