@@ -1,14 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // generate-skill-lifecycle-records.test.ts — skill lifecycle record generator (U-20261112-005 PR-1).
 // Pure in-process: every case runs on an in-memory file map (the CLI case uses two tiny tmp dirs);
 // no real tree walk, no spawn.
+// v1.1.0 (2026-11-22, U-20261122-008): variant-notes preservation cases — extraction (well-formed
+//          / absent / empty / malformed), injection position, byte-identical round-trip, verbatim
+//          guarantee (internal-ref lines and Hangul survive), and CLI --check/--write parity on a
+//          tmp tree through the single main() choke point.
 
 import { describe, expect, test } from "bun:test";
 import {
   GENERATED_MARKER,
   checkPlan,
   deriveRecord,
+  extractVariantNotes,
+  injectVariantNotes,
   isGeneratedRecord,
   main,
   mapTree,
@@ -412,6 +418,148 @@ describe("Korean handling (Language Policy)", () => {
       const bare = r.content.replace(/`[^`]*`/g, "");
       expect(/[\uAC00-\uD7A3]/.test(bare)).toBe(false);
       expect(r.content).toContain("`만들어줘`");
+    }
+  });
+});
+
+describe("variant-notes preservation (U-20261122-008)", () => {
+  const START = "<!-- variant-notes:start -->";
+  const END = "<!-- variant-notes:end -->";
+  const NOTE_LINE = "Variant delivery note (2026-11-22): NOT DELIVERED to co-security — country-scoped-pruned.";
+  const BLOCK = [START, NOTE_LINE, END].join("\n");
+
+  test("well-formed block: the exact marker-to-marker slice, no warnings", () => {
+    const doc = [GENERATED_MARKER, "", "# k-dart Skill Lifecycle", "", BLOCK, "", "## Metadata", ""].join("\n");
+    const { block, warnings } = extractVariantNotes(doc);
+    expect(warnings).toEqual([]);
+    expect(block).toBe(BLOCK);
+  });
+
+  test("absent block: null, no warnings (zero-diff no-op for unannotated records)", () => {
+    const doc = [GENERATED_MARKER, "", "# k-dart Skill Lifecycle", "", "## Metadata", ""].join("\n");
+    expect(extractVariantNotes(doc)).toEqual({ block: null, warnings: [] });
+  });
+
+  test("empty block (start immediately followed by end): treated as absent, no warning", () => {
+    const doc = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", START, END, "", "## Metadata", ""].join("\n");
+    expect(extractVariantNotes(doc)).toEqual({ block: null, warnings: [] });
+  });
+
+  test("malformed: unclosed start, stray end, and double block each WARN and drop — never throw", () => {
+    const unclosed = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", START, NOTE_LINE, "", "## Metadata", ""].join("\n");
+    expect(extractVariantNotes(unclosed)).toEqual({
+      block: null,
+      warnings: ["start marker without an end marker (unclosed at EOF)"],
+    });
+
+    const stray = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", END, "", "## Metadata", ""].join("\n");
+    expect(extractVariantNotes(stray)).toEqual({
+      block: null,
+      warnings: ["1 end marker(s) without a start marker"],
+    });
+
+    // double block: FIRST well-formed pair wins, extras warned about
+    const double = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", BLOCK, "", BLOCK, "", "## Metadata", ""].join("\n");
+    const dbl = extractVariantNotes(double);
+    expect(dbl.block).toBe(BLOCK);
+    expect(dbl.warnings).toEqual(["1 extra start marker(s) beyond the first block", "1 stray end marker(s) outside the first block"]);
+
+    // nesting: start, start, end
+    const nested = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", START, START, "inner", END, "", "## Metadata", ""].join("\n");
+    const nest = extractVariantNotes(nested);
+    expect(nest.block).toBe([START, START, "inner", END].join("\n"));
+    expect(nest.warnings).toEqual(["1 extra start marker(s) beyond the first block"]);
+  });
+
+  test("injectVariantNotes places the block between the H1 and ## Metadata; unexpected shape is left alone", () => {
+    const doc = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", "## Metadata", "", "- x", ""].join("\n");
+    const out = injectVariantNotes(doc, BLOCK);
+    expect(out).toBe([GENERATED_MARKER, "", "# t Skill Lifecycle", "", BLOCK, "", "## Metadata", "", "- x", ""].join("\n"));
+    expect(injectVariantNotes("no h1 here", BLOCK)).toBe("no h1 here");
+  });
+
+  test("round-trip is byte-identical (extract -> inject -> extract)", () => {
+    const doc = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", "## Metadata", ""].join("\n");
+    const once = injectVariantNotes(doc, BLOCK);
+    const { block } = extractVariantNotes(once);
+    expect(block).toBe(BLOCK);
+    expect(injectVariantNotes(doc, block as string)).toBe(once);
+  });
+
+  test("verbatim guarantee: internal-ref lines and Hangul inside the block survive untouched", () => {
+    const hostile = [START, "- cites ADR-0103 and docs/designs/2026-01-01-x-design.md", "- 한국거래소 flow (종목기본정보)", END].join("\n");
+    const doc = [GENERATED_MARKER, "", "# t Skill Lifecycle", "", "## Metadata", ""].join("\n");
+    const out = injectVariantNotes(doc, hostile);
+    // finalizeClean would have filtered the ADR line and code-wrapped the Hangul;
+    // preservation bypasses it, so both lines are byte-identical.
+    expect(out).toContain("- cites ADR-0103 and docs/designs/2026-01-01-x-design.md");
+    expect(out).toContain("- 한국거래소 flow (종목기본정보)");
+    expect(out).not.toContain("`한국거래소`");
+  });
+
+  test("CLI --check parity and --write preservation on a real tmp tree (the single main() choke point)", () => {
+    const root = mkdtempSync(join(tmpdir(), "slr-notes-"));
+    try {
+      mkdirSync(join(root, "templates/common/skills/alpha"), { recursive: true });
+      writeFileSync(
+        join(root, "templates/common/skills/alpha/SKILL.md"),
+        "---\nname: alpha\nstatus: active\nowner: pm\n---\n",
+        "utf-8",
+      );
+      const recordPath = join(root, "templates/common/docs/lifecycle/skills/alpha.md");
+      const silence = () => {
+        const origLog = console.log;
+        const origErr = console.error;
+        console.log = () => {};
+        console.error = () => {};
+        return () => {
+          console.log = origLog;
+          console.error = origErr;
+        };
+      };
+      let restore = silence();
+      try {
+        expect(main(["--write"], root)).toBe(0);
+      } finally {
+        restore();
+      }
+      const clean = readFileSync(recordPath, "utf-8");
+      expect(isGeneratedRecord(clean)).toBe(true);
+      expect(clean).not.toContain(START);
+
+      // The one-time hand migration: the annotation lands at the seam, wrapped in markers.
+      const annotated = injectVariantNotes(clean, BLOCK);
+      writeFileSync(recordPath, annotated, "utf-8");
+      restore = silence();
+      try {
+        expect(main(["--check"], root)).toBe(0); // parity exact for annotated records
+        expect(main(["--write"], root)).toBe(0); // byte-identical skip, nothing rewritten
+      } finally {
+        restore();
+      }
+      expect(readFileSync(recordPath, "utf-8")).toBe(annotated);
+
+      // A malformed block is WARNed, dropped, and deterministically rewritten without residue.
+      writeFileSync(recordPath, injectVariantNotes(clean, `${START}\n${NOTE_LINE}\n`), "utf-8");
+      let warnText = "";
+      const origErr = console.error;
+      console.error = (s?: unknown) => {
+        warnText += String(s ?? "");
+      };
+      const origLog = console.log;
+      console.log = () => {};
+      try {
+        expect(main(["--write"], root)).toBe(0); // exit code unchanged by the WARN
+      } finally {
+        console.error = origErr;
+        console.log = origLog;
+      }
+      expect(warnText).toContain("[WARN]");
+      expect(warnText).toContain("variant-notes block start marker without an end marker");
+      const rewritten = readFileSync(recordPath, "utf-8");
+      expect(rewritten).toBe(clean); // block dropped: regenerated content, no marker residue
+    } finally {
+      rmSync(root, { recursive: true, force: true });
     }
   });
 });

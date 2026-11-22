@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-22T13:42:05.953Z
+**Generated**: 2026-11-22T14:53:45.478Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -132,7 +132,7 @@
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.5.0 | scripts/design-lint.ts | fs, js-yaml, path |
 | detect-backport.ts | 1.0.0 | scripts/detect-backport.ts | child_process, crypto, fs, path |
-| dev-sync.ts | 1.52.1 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| dev-sync.ts | 1.53.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |
@@ -149,7 +149,7 @@
 | generate-scripts-mirror.ts | 1.1.1 | scripts/generate-scripts-mirror.ts | fs, path, url |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | fs, path, process |
 | generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
-| generate-skill-lifecycle-records.ts | 1.3.1 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
+| generate-skill-lifecycle-records.ts | 1.4.0 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
 | generate-version-manifest.ts | 1.12.1 | scripts/generate-version-manifest.ts | bun, child_process, fs, js-yaml, module, path |
 | graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | child_process, fs, path, url |
 | hub-bootstrap.ts | 1.6.0 | scripts/hub-bootstrap.ts | child_process, crypto, fs, path |

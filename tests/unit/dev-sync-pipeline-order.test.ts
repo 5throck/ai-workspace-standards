@@ -82,3 +82,78 @@ describe('dev-sync pipeline step ordering', () => {
     expect(noopExit).toBeLessThan(step1Composition);
   });
 });
+
+// T-20261122-004 / U-20261122-010, spec
+// docs/designs/2026-11-22-dev-sync-skill-graph-preconvergence-design.md —
+// step 3.89 (skill-graph pre-convergence) placement and the step-3.9 hint wiring.
+// dev-sync.ts is not import-safe (monolithic top-level-await script), so the
+// wiring is asserted textually (house pattern, see dev-sync-empty-index-guard.test.ts);
+// the pure parser it relies on is pinned directly by tests/unit/audit-fail-hint.test.ts.
+describe('dev-sync step 3.89 pre-convergence and step 3.9 hint (v1.53.0)', () => {
+  const firstAuditCommand = 'bun scripts/audit.ts --spec-check --lifecycle-only';
+  const step388 = devSyncSource.indexOf('GATE_3_88_ACTIVATED_AT = ');
+  const step389 = devSyncSource.indexOf('3.89 Skill-graph pre-convergence');
+  const firstAudit = devSyncSource.indexOf('bun scripts/audit.ts --spec-check --lifecycle-only');
+
+  test('step 3.89 exists, sits after 3.88 and before the first 3.9 audit invocation', () => {
+    expect(step388).toBeGreaterThan(-1);
+    expect(step389).toBeGreaterThan(-1);
+    expect(firstAudit).toBeGreaterThan(-1);
+    expect(step389).toBeGreaterThan(step388);
+    expect(step389).toBeLessThan(firstAudit);
+  });
+
+  test('3.89 is guarded on the generator existing — the same probe as step 4.65', () => {
+    // Both steps probe scripts/generate-skill-graph.ts (3.89 via the design's
+    // path.join const, 4.65 via its literal existsSync), so they can never
+    // disagree about applicability (fresh-scaffold no-op).
+    expect(devSyncSource).toContain('const preGenGraphTs = path.join("scripts", "generate-skill-graph.ts");');
+    expect(devSyncSource).toContain('if (fs.existsSync(preGenGraphTs)) {');
+    expect(devSyncSource).toContain('if (fs.existsSync("scripts/generate-skill-graph.ts")) {');
+    // Bare invocation only — no --scope loop duplicated into 3.89.
+    const step389End = devSyncSource.indexOf('// 3.9 Spec registry check');
+    const scopeIn389 = devSyncSource.slice(step389, step389End).includes('--scope');
+    expect(scopeIn389).toBe(false);
+  });
+
+  test('3.89 failure = WARN naming the step; staging failure = WARN; success logs the pre-convergence line', () => {
+    expect(devSyncSource).toContain('⚠️  Step 3.89: skill-graph pre-regeneration failed (exit ${preGraphRes.exitCode}) — Step 3.9 will re-check');
+    expect(devSyncSource).toContain('⚠️  Step 3.89: staging docs/skill-graph.json failed (exit ${addRes.exitCode}) — Step 3.9 will re-check');
+    expect(devSyncSource).toContain('📋 Step 3.89: skill-graph pre-converged for the 3.9 audit');
+    // The staging uses the 3.86 array-form git add idiom.
+    expect(devSyncSource).toContain('git add docs/skill-graph.json');
+  });
+
+  test('the FIRST audit invocation captures (.quiet) and echoes verbatim; retries keep their form', () => {
+    const first = devSyncSource.indexOf(firstAuditCommand);
+    const firstBlock = devSyncSource.slice(first, first + 600);
+    expect(firstBlock).toContain('.quiet()');
+    // Echo right after the await — visible output unchanged.
+    const echo = devSyncSource.indexOf('process.stdout.write(specRes.stdout);', first);
+    expect(echo).toBeGreaterThan(first);
+    expect(devSyncSource.slice(first, echo)).toContain('.nothrow()');
+    // The auto-E5 retry and the early-publish heal retry are unchanged (no .quiet, no echo).
+    const retry = devSyncSource.indexOf(firstAuditCommand, first + 1);
+    const heal = devSyncSource.indexOf(firstAuditCommand, retry + 1);
+    expect(retry).toBeGreaterThan(-1);
+    expect(heal).toBeGreaterThan(-1);
+    expect(devSyncSource.slice(retry, retry + 200)).not.toContain('.quiet()');
+    expect(devSyncSource.slice(heal, heal + 200)).not.toContain('.quiet()');
+  });
+
+  test('the failing-sub-check hint replaces the static block; Fix lines and fallback stay', () => {
+    const hintBlock = devSyncSource.indexOf('failing sub-check(s):');
+    expect(hintBlock).toBeGreaterThan(firstAudit);
+    expect(devSyncSource).toContain('parseAuditFailLines(String(specRes.stderr ?? ""))');
+    expect(devSyncSource).toContain('formatSpecCheckHint(failMessages)');
+    // Cap: the formatter carries the cap; the dev-sync side must not unroll it.
+    expect(devSyncSource.slice(hintBlock, hintBlock + 400)).not.toContain('slice(0, 10)');
+    // Generic fallback for zero parseable FAIL rows.
+    expect(devSyncSource).toContain('The diff touches code (scripts/templates/agents) with no relevant spec activity.');
+    // The two Fix lines are kept verbatim.
+    expect(devSyncSource).toContain('Fix: update docs/specs/ (or docs/designs/) alongside the change, or legitimize the');
+    expect(devSyncSource).toContain('--spec-exempt=E1..E5 (docs/governance/agents/execution-plan-templates.md §5.1.1 categories');
+    // The no-registry INACTIVE branch is untouched.
+    expect(devSyncSource).toContain('the Universal Design Gate spec-check is INACTIVE in this repository');
+  });
+});

@@ -3,14 +3,28 @@ id: U-20261122-007
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-22T12:10:57.483+09:00
+created_at: '2026-11-22T12:10:57.483+09:00'
 history:
-  - at: 2026-11-22T12:10:57.483+09:00
+  - at: '2026-11-22T12:10:57.483+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-22T23:06:42.892+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-22T23:07:05.427+09:00'
+    from: review
+    to: done
+result: >-
+  Already fixed in workspace PR #2152 (merge 4bd616012, 2026-11-22):
+  agents/pm.md:96 carries the verify-authorization dispatch subsection —
+  offensive agents (required_skills: [verify-authorization]) require a current
+  verify-authorization PASS (machine gate, fail-closed, 24h TTL + record-hash
+  pin + window) before dispatch, residual noted (signature authenticity stays
+  human). L0 hook arm landed same batch
+  (scripts/hooks/pm-dispatch-gate.ts:164-188). L3 delivery to co-security at
+  next upgrade wave.
 error: null
 upstream:
   project: co-security
@@ -19,13 +33,34 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
-  symptom: 'agents/pm.md (the common PM body, read first by the PM role bootstrap on every platform) contains zero references to the verify-authorization hard gate, while the offensive agents'' own bodies/frontmatter require PM-confirmed PASS before dispatch. The enforcement contract is therefore invisible at the triage surface: a PM working from pm.md alone would dispatch pentester/red-team-lead without any authorization step. Expected: a short subsection in the PM body''s dispatch flow stating that agents with required_skills containing verify-authorization require a current verify-authorization PASS (machine-checkable via the variant''s verify-authorization-gate script where present) before dispatch, with the residual noted (signature authenticity stays human).'
+  symptom: >-
+    agents/pm.md (the common PM body, read first by the PM role bootstrap on
+    every platform) contains zero references to the verify-authorization hard
+    gate, while the offensive agents' own bodies/frontmatter require
+    PM-confirmed PASS before dispatch. The enforcement contract is therefore
+    invisible at the triage surface: a PM working from pm.md alone would
+    dispatch pentester/red-team-lead without any authorization step. Expected: a
+    short subsection in the PM body's dispatch flow stating that agents with
+    required_skills containing verify-authorization require a current
+    verify-authorization PASS (machine-checkable via the variant's
+    verify-authorization-gate script where present) before dispatch, with the
+    residual noted (signature authenticity stays human).
   affected_paths:
     - agents/pm.md
     - agents/red-team-lead.md
     - agents/pentester.md
   identity_source: cwd
-  repro: '1. Open agents/pm.md (the common PM body) and grep for verify-authorization: zero references. 2. The prerequisite prose lives only in agents/red-team-lead.md:38 ("may only be dispatched after PM has confirmed verify-authorization PASS") and pentester.md frontmatter (required_skills). 3. A PM reading only agents/pm.md — the file the PM role bootstrap mandates reading first — has no signal that offensive-agent dispatches carry a hard authorization prerequisite. Related: co-security''s PM had to be reminded via review; the gate is now machine-checked (scripts/verify-authorization-gate.ts) but the PM body still does not reference it.'
+  repro: >-
+    1. Open agents/pm.md (the common PM body) and grep for verify-authorization:
+    zero references. 2. The prerequisite prose lives only in
+    agents/red-team-lead.md:38 ("may only be dispatched after PM has confirmed
+    verify-authorization PASS") and pentester.md frontmatter (required_skills).
+    3. A PM reading only agents/pm.md — the file the PM role bootstrap mandates
+    reading first — has no signal that offensive-agent dispatches carry a hard
+    authorization prerequisite. Related: co-security's PM had to be reminded via
+    review; the gate is now machine-checked
+    (scripts/verify-authorization-gate.ts) but the PM body still does not
+    reference it.
   triage: ready
   flagged: false
   triage_reasons:
@@ -35,4 +70,17 @@ upstream:
   dedupe_key: 7db5114fd81762a3cece589f290409b143d067533002e8a4a0e459fc60a28d2b
   duplicates:
     - project: co-security
-      at: 2026-11-22T12:10:57.483+09:00
+      at: '2026-11-22T12:10:57.483+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2152
+    template_version: 0.30.0
+    summary: >-
+      Already fixed in workspace PR #2152 (merge 4bd616012, 2026-11-22):
+      agents/pm.md:96 carries the verify-authorization dispatch subsection —
+      offensive agents (required_skills: [verify-authorization]) require a
+      current verify-authorization PASS (machine gate, fail-closed, 24h TTL +
+      record-hash pin + window) before dispatch, residual noted (signature
+      authenticity stays human). L0 hook arm landed same batch
+      (scripts/hooks/pm-dispatch-gate.ts:164-188). L3 delivery to co-security at
+      next upgrade wave.
