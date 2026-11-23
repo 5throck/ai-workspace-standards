@@ -2,8 +2,25 @@
 /**
  * design-lint.ts — deterministic design-compliance lint (sub-check runner).
  * Runnable companion to the token-usage-lint and design-foundation specs.
- * @version 2.5.0
+ * @version 2.6.0
  *
+ * v2.6.0 (2026-11-23, U-20261123-001 — spec
+ *       docs/designs/2026-11-23-design-lint-bracket-scope-and-fallback-chains-design.md):
+ *       token-role-misuse scope restore + var() fallback chains — (1) G1
+ *       false positive (131 sites in co-newbiz): TEXT_COLOR_DECL's guard
+ *       accepted the `[color:` fragment inside Tailwind arbitrary-value
+ *       bracket utilities, so `border-[color:var(--x-border)]` /
+ *       `bg-[color:var(--x-bg)]` fired text-color misuse for border-/bg-role
+ *       tokens; a `[`-preceded `color:` is now excluded (negative lookbehind)
+ *       and a dedicated `text-[color:<value>]` matcher keeps the text-utility
+ *       arm in scope — restoring v2.4.0's documented rule that non-text color
+ *       declarations are out of scope. (2) G2 blind spot: the var() matcher
+ *       required an immediate close paren, so fallback-chain heads escaped —
+ *       `var(--warning,var(--warning-fg,var(--muted-fg)))` in a text context
+ *       was invisible; the matcher now captures the head token of every
+ *       `var(` occurrence (nested fallback chains included), so each chain
+ *       level is a role-var use. Behavior changes in both directions — minor
+ *       bump. Pinned by tests/unit/design-lint-token-role.test.ts.
  * v2.5.0 (2026-10-29, U-20261028-014 — spec
  *       docs/designs/2026-10-29-owner-decision-batch-design.md §2): new
  *       repeatable `--allow <literal>` flag — extra allowlist entries merged
@@ -116,7 +133,7 @@ import { join, relative } from "node:path";
 import { load as loadYaml } from "js-yaml";
 import { isThemeOverridableGroup } from "./helpers/theme-token-policy.ts";
 
-const VERSION = "2.5.0";
+const VERSION = "2.6.0";
 
 /** Sub-check execution order (canonical; --check selections are re-sorted to this). */
 const CHECK_ORDER = [
@@ -829,9 +846,27 @@ function runTokenUsage(opts: CliOptions): CheckResult {
 // ---------------------------------------------------------------------------
 
 /** Text-color declaration value: `color:` NOT part of a compound property
- *  (background-color, border-color, …) and not a custom-property definition.
- *  The capture is the declaration's value up to `;` or `}`. */
-const TEXT_COLOR_DECL = /(^|[^\w-])color\s*:\s*([^;}]*)(?=[;}]|$)/g;
+ *  (background-color, border-color, …), not a custom-property definition,
+ *  and not the `[color:` fragment of a Tailwind arbitrary-value bracket
+ *  utility — bracket utilities carry their own matcher below (v2.6.0,
+ *  U-20261123-001: `border-[color:var(--x-border)]` and friends are non-text
+ *  declarations and must not read as text color). The capture is the
+ *  declaration's value up to `;` or `}`. */
+const TEXT_COLOR_DECL = /(?<![\w-])(?<!\[)color\s*:\s*([^;}]*)(?=[;}]|$)/g;
+
+/** Text-color role via Tailwind arbitrary-value utility: `text-[color:<value>]`.
+ *  Only the `text-` utility carries text-color semantics — `border-[color:…]`,
+ *  `bg-[color:…]`, `ring-[color:…]` etc. are non-text declarations and stay
+ *  out of scope per the v2.4.0 documented rule (v2.6.0, U-20261123-001). */
+const TEXT_UTILITY_BRACKET_COLOR = /(?<![\w-])text-\[color\s*:\s*([^\]]*)\]/g;
+
+/** Custom-property reference head: the token named immediately after `var(`.
+ *  Anchoring on the close paren is dropped on purpose — fallback chains nest,
+ *  and every chain level's head is a role-var use
+ *  (`var(--a,var(--b,var(--c)))` yields --a, --b and --c; v2.6.0,
+ *  U-20261123-001: the v2.4.0 close-paren-anchored matcher could not see
+ *  fallback heads at all). */
+const VAR_REF_HEAD = /var\(\s*(--[A-Za-z0-9-]+)/g;
 
 /** Tokens whose ROLE forbids text-color use: bare status fills and every
  *  `*-bg` / `*-border` surface/stroke role (bg/fg/border triplet convention). */
@@ -854,9 +889,11 @@ function lintTokenRoleMisuse(file: string, root: string): RawFinding[] {
   const lines = content.split(/\r?\n/);
   lines.forEach((line, i) => {
     const exemption = extractExemption(line);
-    for (const m of line.matchAll(TEXT_COLOR_DECL)) {
-      const value = m[2];
-      for (const t of value.matchAll(/var\(\s*(--[A-Za-z0-9-]+)\s*\)/g)) {
+    const textValues = [...line.matchAll(TEXT_COLOR_DECL), ...line.matchAll(TEXT_UTILITY_BRACKET_COLOR)].map(
+      (m) => m[1],
+    );
+    for (const value of textValues) {
+      for (const t of value.matchAll(VAR_REF_HEAD)) {
         const token = t[1];
         if (tokenRoleAllowsTextColor(token)) continue;
         findings.push({
