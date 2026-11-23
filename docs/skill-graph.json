@@ -3064,6 +3064,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261123-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -7990,19 +7995,6 @@
       ]
     },
     {
-      "id": "skill:co-safety/meeting-facilitation",
-      "type": "skill",
-      "layer": "variant:co-safety",
-      "name": "meeting-facilitation",
-      "scope": "co-safety",
-      "capability": "meeting-facilitation",
-      "content_hash": "690ba21e0e5773ce",
-      "version": "1.5.0",
-      "mirrors": [
-        "templates/co-safety/skills/meeting-facilitation/SKILL.md"
-      ]
-    },
-    {
       "id": "skill:co-safety/mid-construction-inspection",
       "type": "skill",
       "layer": "variant:co-safety",
@@ -9064,6 +9056,7 @@
       "mirrors": [
         "skills/meeting-facilitation/SKILL.md",
         "templates/common/skills/meeting-facilitation/SKILL.md",
+        "templates/co-safety/skills/meeting-facilitation/SKILL.md",
         ".claude/skills/meeting-facilitation/SKILL.md",
         ".gemini/skills/meeting-facilitation/SKILL.md",
         ".agents/skills/meeting-facilitation/SKILL.md",
@@ -9360,8 +9353,8 @@
       "name": "skill-graph-analytics",
       "scope": "root",
       "capability": "skill-graph-analytics",
-      "content_hash": "edc409c66634d7b6",
-      "version": "1.4.0",
+      "content_hash": "0dd4499ee9ac37e1",
+      "version": "1.5.0",
       "mirrors": [
         "skills/skill-graph-analytics/SKILL.md",
         ".claude/skills/skill-graph-analytics/SKILL.md",
@@ -12768,6 +12761,12 @@
     {
       "type": "cites_skill",
       "from": "dec:DEC-20261121-03",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261123-01",
       "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
     },
@@ -17406,12 +17405,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
-      "to": "skill:co-safety/meeting-facilitation",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/AGENTS.md",
       "to": "skill:co-safety/project-review",
       "source": "workflow-doc"
     },
@@ -17437,6 +17430,12 @@
       "type": "cites_skill",
       "from": "doc:co-safety/AGENTS.md",
       "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/AGENTS.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -17964,12 +17963,6 @@
     {
       "type": "cites_skill",
       "from": "doc:co-safety/README.md",
-      "to": "skill:co-safety/meeting-facilitation",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-safety/README.md",
       "to": "skill:co-safety/permit-to-work",
       "source": "workflow-doc"
     },
@@ -17977,6 +17970,12 @@
       "type": "cites_skill",
       "from": "doc:co-safety/README.md",
       "to": "skill:co-safety/risk-assessment",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-safety/README.md",
+      "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
     {
@@ -22472,7 +22471,7 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-safety.governance-audit",
-      "to": "skill:co-safety/meeting-facilitation",
+      "to": "skill:root/meeting-facilitation",
       "source": "procedure_schema"
     },
     {
@@ -30339,21 +30338,21 @@
       "source": "prose"
     },
     {
+      "type": "references",
+      "from": "skill:co-safety/compliance-gap",
+      "to": "skill:common/k-law",
+      "source": "prose"
+    },
+    {
       "type": "follows",
       "from": "skill:co-safety/compliance-gap",
-      "to": "skill:co-safety/meeting-facilitation",
+      "to": "skill:root/meeting-facilitation",
       "source": "relates_to",
       "provenance": {
         "file": "templates/co-safety/skills/compliance-gap/SKILL.md",
         "field": "relates_to",
         "index": 0
       }
-    },
-    {
-      "type": "references",
-      "from": "skill:co-safety/compliance-gap",
-      "to": "skill:common/k-law",
-      "source": "prose"
     },
     {
       "type": "references",
@@ -30555,12 +30554,6 @@
       "from": "skill:co-safety/landfill-methane-anaerobic-explosion-planner",
       "to": "skill:co-safety/tool-box-meeting",
       "source": "prose"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-safety/meeting-facilitation",
-      "to": "output_type.governance_actions",
-      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -34051,6 +34044,12 @@
       "to": "skill:root/sync",
       "source": "override",
       "reason": "Machine-integration edge (2026-09-23 orphan audit, T-20260923-001): gateguard enforces the .githooks pre-commit/pre-push gates that every /sync commit+PR passes through; it is invoked by git hooks, not referenced in workflow-doc prose, so the citation scan cannot see it."
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/meeting-facilitation",
+      "to": "output_type.governance_actions",
+      "source": "procedure_schema"
     },
     {
       "type": "references",

@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261123-007
+kind: manual
+title: >-
+  GitHub Actions billing outage since 2026-11-21: every CI run on 5throck repos
+  fails at startup ('account payments have failed') — checks never start; fleet
+  landing PRs co-consult #135, co-deck #258, co-safety #240 were merged on local
+  verification despite never-started checks while the runner's billing-wall
+  exception is SUSPENDED pending owner re-authorization (these session merges
+  await owner ratification or revert); owner actions: fix billing, then ratify
+  or revert the 3 merges, then re-authorize or permanently retire the exception
+  policy
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-23T14:42:07.071+09:00'
+history:
+  - at: '2026-11-23T14:42:07.071+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

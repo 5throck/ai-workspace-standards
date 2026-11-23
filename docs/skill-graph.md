@@ -126,7 +126,7 @@
 | `co-safety/chemical-risk-assessment` | variant:co-safety | 1.1.0 | — | — | — | — | — |
 | `co-safety/coke-oven-pah-heat-stress-planner` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/completion-inspection` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/compliance-gap` | variant:co-safety | 1.0.0 | — | — | co-safety/meeting-facilitation (follows) | — | — |
+| `co-safety/compliance-gap` | variant:co-safety | 1.0.0 | — | — | root/meeting-facilitation (follows) | — | — |
 | `co-safety/construction-permit-overview` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/contractor-onboarding` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/cosmetics-solvent-exposure-monitor` | variant:co-safety | 1.0.0 | — | — | — | — | — |
@@ -152,7 +152,6 @@
 | `co-safety/investigation/hazop-analysis` | variant:co-safety | — | — | — | — | — | — |
 | `co-safety/iso14971-risk-scorer` | variant:co-safety | 1.1.0 | — | — | — | — | — |
 | `co-safety/landfill-methane-anaerobic-explosion-planner` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/meeting-facilitation` | variant:co-safety | 1.5.0 | — | — | — | — | — |
 | `co-safety/mid-construction-inspection` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/msds-parser` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/munitions-magazine-storage-safety-planner` | variant:co-safety | 1.0.0 | — | — | — | — | — |
@@ -242,7 +241,7 @@
 | `root/security-scan` | L0 | 1.3.0 | — | — | — | — | — |
 | `root/service-design` | L0 | 1.1.0 | co-architect/design-lead, co-architect/service-designer, co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/simulate-pipeline` | L0 | 1.0.2 | — | — | — | — | — |
-| `root/skill-graph-analytics` | L0 | 1.4.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
+| `root/skill-graph-analytics` | L0 | 1.5.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
 | `root/skill-lifecycle-manager` | L0 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L0 | 1.1.0 | — | — | — | — | — |
@@ -493,6 +492,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `dec:DEC-20261121-01` | decision | `common/decision-record` | — | — |
 | `dec:DEC-20261121-02` | decision | `root/decision-write-integrity` | — | — |
 | `dec:DEC-20261121-03` | decision | `root/decision-write-integrity` | — | — |
+| `dec:DEC-20261123-01` | decision | `root/decision-write-integrity` | — | — |
 | `doc:AGENTS.md` | doc | `common/decision-record`, `common/evidence-ledger`, `common/handbook`, `common/handbook-sync-audit`, `common/i18n-audit`, `common/i18n-formatting`, `common/i18n-layout`, `common/i18n-locale-config`, `root/agent-lifecycle-manager`, `root/create-variant`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/promote-variant`, `root/security-scan`, `root/simulate-pipeline`, `root/skill-graph-analytics`, `root/skill-lifecycle-manager`, `root/sync` | — | — |
 | `doc:CLAUDE.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-abap/AGENTS.md` | doc | `co-abap/abap-code-review`, `co-abap/abap-dev`, `co-abap/desktop-app-fallback`, `co-abap/dump-monitor`, `co-abap/performance-tuning`, `co-abap/post-write-chain`, `co-abap/sap-co`, `co-abap/sap-fi`, `co-abap/sap-le`, `co-abap/sap-mm`, `co-abap/sap-pp`, `co-abap/sap-sd`, `co-abap/source-command-celebrate`, `common/decision-record`, `common/handbook`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
@@ -677,7 +677,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-price/agents/pricing-strategist.md` | doc | `co-price/map-channel-enforcement`, `co-price/pricing-governance` | — | — |
 | `doc:co-price/docs/co-price.context.md` | doc | `co-price/gabor-granger`, `co-price/harness-verification`, `co-price/i18n-audit`, `co-price/prisma-7`, `co-price/trade-promotion-roi`, `co-price/van-westendorp-psm`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-price/README.md` | doc | `co-price/competitive-intelligence`, `co-price/double-entry-reconciliation`, `co-price/excel-export`, `co-price/executive-presentation`, `co-price/financial-statement-prep`, `co-price/gabor-granger`, `co-price/harness-verification`, `co-price/i18n-audit`, `co-price/insight-synthesis`, `co-price/map-channel-enforcement`, `co-price/math-function-plotter`, `co-price/pdf-export`, `co-price/price-waterfall-analysis`, `co-price/pricing-governance`, `co-price/pricing-playbook`, `co-price/prisma-7`, `co-price/scenario-comparison`, `co-price/sheet-model`, `co-price/trade-promotion-roi`, `co-price/ui-component-design`, `co-price/van-westendorp-psm` | — | — |
-| `doc:co-safety/AGENTS.md` | doc | `co-safety/meeting-facilitation`, `co-safety/project-review`, `co-safety/skill-lifecycle-manager`, `co-safety/sync`, `common/k-law`, `root/agent-lifecycle-manager`, `root/security-scan`, `root/source-command-commit-push-pr` | — | — |
+| `doc:co-safety/AGENTS.md` | doc | `co-safety/project-review`, `co-safety/skill-lifecycle-manager`, `co-safety/sync`, `common/k-law`, `root/agent-lifecycle-manager`, `root/meeting-facilitation`, `root/security-scan`, `root/source-command-commit-push-pr` | — | — |
 | `doc:co-safety/agents/compliance-agent.md` | doc | `common/k-law` | — | — |
 | `doc:co-safety/agents/ehschem-agent.md` | doc | `co-safety/environmental-compliance-checker`, `co-safety/process-hazard-screening`, `co-safety/tar-planning` | — | — |
 | `doc:co-safety/agents/ehsconst-agent.md` | doc | `co-safety/fall-hazard-assessor`, `co-safety/safety-inspection-validator` | — | — |
@@ -701,7 +701,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-safety/docs/co-safety.context.md` | doc | `co-safety/permit-to-work`, `co-safety/skill-lifecycle-manager`, `co-safety/tool-box-meeting`, `common/k-law`, `root/agent-lifecycle-manager` | — | — |
 | `doc:co-safety/docs/user-guide_ko.md` | doc | `co-safety/arc-flash-analyzer`, `co-safety/asset-integrity-check`, `co-safety/audit-preparation`, `co-safety/compliance-gap`, `co-safety/construction-permit-overview`, `co-safety/contractor-onboarding`, `co-safety/emergency-response`, `co-safety/ess-fire-risk-assessor`, `co-safety/ghs-classifier`, `co-safety/gmp-deviation-capa`, `co-safety/gmp-qrm`, `co-safety/msds-parser`, `co-safety/permit-to-work`, `co-safety/process-hazard-screening`, `co-safety/psm-loto`, `co-safety/psm-moc`, `co-safety/risk-assessment`, `co-safety/root-cause-analysis`, `co-safety/sync`, `co-safety/tank-integrity-validator`, `co-safety/tar-planning`, `co-safety/tool-box-meeting`, `common/k-law` | — | — |
 | `doc:co-safety/docs/user-guide.md` | doc | `co-safety/arc-flash-analyzer`, `co-safety/asset-integrity-check`, `co-safety/audit-preparation`, `co-safety/compliance-gap`, `co-safety/construction-permit-overview`, `co-safety/contractor-onboarding`, `co-safety/emergency-response`, `co-safety/ess-fire-risk-assessor`, `co-safety/ghs-classifier`, `co-safety/gmp-deviation-capa`, `co-safety/gmp-qrm`, `co-safety/msds-parser`, `co-safety/permit-to-work`, `co-safety/process-hazard-screening`, `co-safety/psm-loto`, `co-safety/psm-moc`, `co-safety/risk-assessment`, `co-safety/root-cause-analysis`, `co-safety/sync`, `co-safety/tank-integrity-validator`, `co-safety/tar-planning`, `co-safety/tool-box-meeting`, `common/k-law` | — | — |
-| `doc:co-safety/README.md` | doc | `co-safety/compliance-gap`, `co-safety/emergency-response`, `co-safety/meeting-facilitation`, `co-safety/permit-to-work`, `co-safety/risk-assessment` | — | — |
+| `doc:co-safety/README.md` | doc | `co-safety/compliance-gap`, `co-safety/emergency-response`, `co-safety/permit-to-work`, `co-safety/risk-assessment`, `root/meeting-facilitation` | — | — |
 | `doc:co-safety/workflows/_INDEX.md` | doc | `co-safety/fall-hazard-assessor`, `co-safety/tool-box-meeting` | — | — |
 | `doc:co-safety/workflows/README.en.md` | doc | `common/k-law` | — | — |
 | `doc:co-safety/workflows/README.md` | doc | `co-safety/benefit-risk-assessor`, `co-safety/chemical-risk-assessment`, `co-safety/completion-inspection`, `co-safety/compliance-gap`, `co-safety/construction-permit-overview`, `co-safety/contractor-onboarding`, `co-safety/dts-verification`, `co-safety/emergency-response`, `co-safety/ghs-classifier`, `co-safety/glp-data-integrity-checker`, `co-safety/glp-study-protocol-validator`, `co-safety/gmp-change-control`, `co-safety/mid-construction-inspection`, `co-safety/msds-parser`, `co-safety/permit-to-work`, `co-safety/pre-construction-technical-review`, `co-safety/protocol-deviation-analyzer`, `co-safety/psm-loto`, `co-safety/risk-assessment`, `co-safety/sae-causality-assessor`, `co-safety/signal-detector`, `co-safety/temperature-excursion-analyzer`, `co-safety/tool-box-meeting` | — | — |
@@ -954,7 +954,6 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `design-foundation` | skill | divergence | co-design@1.3.0 #5cc8c410; root@1.1.1 #74fdd004 |
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.2 #b5259cc8 |
 | `i18n-layout` | skill | divergence | co-work@1.1.2 #55cc9f30; common@1.1.1 #67b31c6f |
-| `meeting-facilitation` | skill | divergence | co-safety@1.5.0 #690ba21e; root@1.6.0 #815b03b3 |
 | `pdf-export` | skill | divergence | co-deck@2.2.1 #4250f2a6; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
@@ -975,7 +974,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 ## Skills Without `used_by` (G6)
 
-135 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+134 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -1003,9 +1002,9 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 | `co-safety/daily/compliance-gap` | co-safety/safety-governance-manager (co-safety.governance-audit) |
 | `co-safety/daily/risk-assessment` | co-safety/safety-workflow-manager (co-safety.daily-risk-assessment) |
 | `co-safety/investigation/hazop-analysis` | co-safety/safety-workflow-manager (co-safety.daily-risk-assessment) |
-| `co-safety/meeting-facilitation` | co-safety/pm (co-safety.governance-audit) |
 | `common/decision-record` | co-architect/storyteller (co-architect.narrative-design); co-architect/technical-writer (co-architect.document-production); co-work/storyteller (co-work.narrative-design); co-work/technical-writer (co-work.document-production) |
 | `common/evidence-ledger` | co-architect/analyst (co-architect.document-production, co-architect.project-intake-analysis); co-work/analyst (co-work.document-production, co-work.project-intake-analysis) |
+| `root/meeting-facilitation` | co-safety/pm (co-safety.governance-audit) |
 | `root/security-scan` | co-abap/pm (co-utility.environment-bootstrap); co-develop/designer (co-utility.feature-implementation) |
 | `root/standup-synthesizer` | co-architect/project-coordinator (co-architect.distribution-integration); co-work/project-coordinator (co-work.distribution-integration) |
 
@@ -1014,7 +1013,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-23), window 90 days. Skill nodes with usage: 6.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (4): co-safety/script-lifecycle-manager, co-safety/sync, root/adopt-project, root/sync
-- **unused** (0 sessions in 90 days) (241): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 201 more
+- **unused** (0 sessions in 90 days) (240): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 200 more
 
 ## Ambiguous Name Resolutions
 

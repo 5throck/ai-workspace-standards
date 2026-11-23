@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: T-20261123-002
+kind: manual
+title: >-
+  co-deck: PR #257 (pr/20261120-031202-fix-co-deck-deliver-20-variant-scripts-m)
+  already merged, but local worktree has staged WIP across 147 files (~5.3k
+  insertions: skills/handbook, skills/meeting-facilitation, skills/storyline,
+  template-version.txt) plus unstaged edits — real delivery WIP in progress; do
+  not discard — skill-graph coverage blocked on pr/* checkout
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-23T10:40:11.759+09:00'
+history:
+  - at: '2026-11-23T10:40:11.759+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-23T11:28:03.250+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T11:28:03.267+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T11:28:12.943+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved: 150-file novel WIP (undelivered template-0.30.0 delivery, 50 ERROR
+  dispositions) cannot land through sanctioned paths (D3.1 auto-E5 refusal) —
+  preserved verbatim on wip/20261123-preserved-co-deck-full (stash commit
+  675120af) + local stash@{0}; main restored 917aa90->31a6b08 via PR #258 (graph
+  regeneration + pm.md mirror re-projection, merged per user ruling after GitHub
+  Actions billing outage); stale pr branch deleted; mirror parity green, graph
+  current, fleet coverage restored; follow-up: human disposition of the
+  preserved WIP
+error: null
