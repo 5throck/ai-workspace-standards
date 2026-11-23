@@ -1,0 +1,90 @@
+schemaVersion: 1
+id: U-20261123-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-23T08:13:24.442+09:00'
+history:
+  - at: '2026-11-23T08:13:24.442+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-23T09:49:26.615+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T09:49:26.615+09:00'
+    from: review
+    to: done
+result: >-
+  design-lint v2.6.0 landed in workspace PR #2158 (merge feaa4fab7, CI 4/4): G1
+  — TEXT_COLOR_DECL guard now double-negative-lookbehind (?<![\w-])(?<!\[),
+  bracket-utility fragments (border-[color:...]/bg-[color:...]) out of scope per
+  v2.4.0 documented scope, while a dedicated text-[color:...] matcher keeps
+  TEXT-role utilities checked; G2 — var() matcher captures the chain head per
+  var( occurrence (var\(\s*(--[A-Za-z0-9-]+), so nested fallback chains
+  var(--a,var(--b,var(--c))) are detected at every level without a paren-depth
+  parser (strict detection superset, disclosed in design). Root cause: G1
+  shipped in v2.4.0 (commit 87b688b6f), not the v2.5.0 delta. Fleet sanity on
+  co-newbiz: 1128 -> 64 fails (all 1095 bracket-utility FPs eliminated;
+  remaining 64 true positives incl. one new G2 fallback-chain catch). 5 unit
+  tests; full suite 346 files green; spec
+  2026-11-23-design-lint-bracket-scope-and-fallback-chains-design registered.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    design-lint v2.5.0 token-role-misuse rule produces 131 false positives on
+    Tailwind arbitrary-value color utilities and cannot detect var()-fallback
+    chains in text-color contexts.
+  affected_paths:
+    - scripts/design-lint.ts
+  identity_source: cwd
+  repro: >-
+    1. G1 false positive: any Tailwind arbitrary-value utility of the form
+    `border-[color:var(--x-border)]` or `bg-[color:var(--x-bg)]` in app/web-next
+    (e.g. app/web-next/components/stages/brownfield/LonglistTable.tsx and 130
+    other sites) — design-lint v2.5.0 token-role-misuse rule fires
+    token-role-misuse because TEXT_COLOR_DECL matches the `[color:` fragment
+    inside the bracket utility, flagging border-role/bg-role tokens as
+    text-color misuse. v2.4.0's own header documents bracket utilities as out of
+    scope, so the rule contradicts the documented scope. 2. G2 blind spot: a
+    text-role rule whose var() regex rejects fallback chains —
+    `var(--warning,var(--warning-fg,var(--muted-fg)))` in a text context escapes
+    detection (observed at app/web-next/components/wacc/BetaPanel.tsx:412, fixed
+    manually in the 2026-11-23 burn-down). Both classes are visible in the
+    2026-11-23 scan of record: exit 1 with 146 token-role-misuse fails of which
+    131 are the bracket-utility class.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/design-lint.ts=true
+  dedupe_key: 15c3d47602a25c8490635b29e536039098f6a911d8c203eb0d09b5640188e368
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-23T08:13:24.442+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2158
+    template_version: 0.30.0
+    summary: >-
+      design-lint v2.6.0 landed in workspace PR #2158 (merge feaa4fab7, CI 4/4):
+      G1 — TEXT_COLOR_DECL guard now double-negative-lookbehind
+      (?<![\w-])(?<!\[), bracket-utility fragments
+      (border-[color:...]/bg-[color:...]) out of scope per v2.4.0 documented
+      scope, while a dedicated text-[color:...] matcher keeps TEXT-role
+      utilities checked; G2 — var() matcher captures the chain head per var(
+      occurrence (var\(\s*(--[A-Za-z0-9-]+), so nested fallback chains
+      var(--a,var(--b,var(--c))) are detected at every level without a
+      paren-depth parser (strict detection superset, disclosed in design). Root
+      cause: G1 shipped in v2.4.0 (commit 87b688b6f), not the v2.5.0 delta.
+      Fleet sanity on co-newbiz: 1128 -> 64 fails (all 1095 bracket-utility FPs
+      eliminated; remaining 64 true positives incl. one new G2 fallback-chain
+      catch). 5 unit tests; full suite 346 files green; spec
+      2026-11-23-design-lint-bracket-scope-and-fallback-chains-design
+      registered.
