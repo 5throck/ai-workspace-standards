@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.5.1
+ * @version 1.6.0
+ * v1.6.0 (2026-11-23, spec
+ *           docs/designs/2026-11-23-skill-graph-history-report-design.md
+ *           §5.2/AC16): allowlist gains `skill-graph-history.html` — the
+ *           auto-emitted history dashboard the v2.5.0 fleet-report
+ *           regenerates after every run (generated artifact, never
+ *           hand-edited; docs/README.md §2 row is the contract).
  * v1.5.1 (2026-11-20, T-20261120-002 / runner-hardening PR-2): allowlist gains
  *           `runner-exec-allowlist.json` — the runner execution-surface allowlist
  *           consumed by verify-prompt-integrity.ts --exec-closure (design
@@ -99,6 +105,7 @@ const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   "protected-paths.json",
   "expected-gate-failures.json",
   "runner-exec-allowlist.json",
+  "skill-graph-history.html",
 ]);
 
 interface WorkspaceFinding {

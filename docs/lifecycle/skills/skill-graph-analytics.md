@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: skill-graph-analytics
 - **Status**: active
-- **Version**: 1.4.0
+- **Version**: 1.5.0
 - **Created**: 2026-09-22
-- **Last Updated**: 2026-11-07 (SKILL.md 1.3.1 → 1.4.0, DEC-20261107-01: fleet membership SSOT — Step 1 records that the report's project set comes from lib/fleet.ts (`Projects/co-*` minus `docs/fleet-membership.json` exclusions; convergence denominators count members only; never a raw glob). Previous: 2026-11-04 SKILL.md 1.3.0 → 1.3.1, T-20261101-004 / DEC-20261103-04: When to Run weekly-cadence note records the decided revival home — the 01:30 fleet runner's FRIDAY FULL OVERRIDE — replacing the "pending adjudication" phrasing)
+- **Last Updated**: 2026-11-23 (SKILL.md 1.4.0 → 1.5.0, spec docs/designs/2026-11-23-skill-graph-history-report-design.md §5.4: When-to-Run cadence refreshed to the unified 03:00 batch runner reality — SECTION R1 carries the daily orphan sweep and the FRIDAY FULL weekly consolidation triage; the 01:30 fleet runner was merged into the unified runner 2026-11-12 and hardened 2026-11-20; as-deployed record docs/governance/automation-prompts/runner-v5.snapshot.txt line 58; "run it manually" standby phrasing dropped, on-demand triggers and triage-only framing unchanged. Previous: 2026-11-07 SKILL.md 1.3.1 → 1.4.0, DEC-20261107-01: fleet membership SSOT — Step 1 records that the report's project set comes from lib/fleet.ts (`Projects/co-*` minus `docs/fleet-membership.json` exclusions; convergence denominators count members only; never a raw glob). Earlier: 2026-11-04 SKILL.md 1.3.0 → 1.3.1, T-20261101-004 / DEC-20261103-04: When to Run weekly-cadence note records the decided revival home — the 01:30 fleet runner's FRIDAY FULL OVERRIDE — replacing the "pending adjudication" phrasing)
 
 ## Description
 Weekly fleet analytics over the per-project skill-graph projections: consolidate root + Projects/<co-x> graphs into a dated snapshot, triage skill convergence (consolidation/promotion candidates), delivery drift (root skills missing from projects), and root-graph orphans (4-way cross-check: definition+registry+mirror+reference). Triage only — tickets, no auto-modification.
@@ -25,6 +25,7 @@ Weekly fleet analytics over the per-project skill-graph projections: consolidate
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-23 | production | production | v1.5.0 (spec 2026-11-23-skill-graph-history-report-design §5.4): cadence refresh — When to Run now records the unified 03:00 batch runner SECTION R1 (daily orphan sweep + FRIDAY FULL weekly consolidation; 01:30 runner merged 2026-11-12, hardened 2026-11-20; runner-v5.snapshot.txt:58 cited as as-deployed record), "run it manually" standby phrasing dropped, on-demand triggers + triage-only framing preserved | pm |
 | 2026-11-03 | production | production | v1.3.0 (T-20261101-004): cadence-note repair — the stale "02:30 ticket runner" trigger reference replaced with the live automation roster (01:30 fleet-review+resync, 04:00 governance-ticket; neither carries the weekly consolidation), the weekly triage marked manual-run pending the revival-home adjudication (recommended: fleet-runner Friday full override), rot-proofed by naming the roster rather than a runner time | pm |
 | 2026-09-22 | - | production | New recurring work type (weekly fleet skill-graph analytics); design implemented and verified | pm |
 

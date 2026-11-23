@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261123-008
+kind: manual
+title: >-
+  Runner silent-skip + missed runs: 2026-11-20 Friday FULL ran
+  (run-manifest-2026-11-20.json) but the skill-graph fleet-report sweep was
+  silently skipped — the weekly triage text rolled 11-19 results forward without
+  invoking the script; no runner artifacts at all on 11-21 and 11-23 (no log, no
+  manifest); request runner-side loud failure: a mandatory run-manifest.ts skip
+  --step <NAME> --reason ledger row (or equivalent) whenever any SECTION R1
+  battery component (incl. the orphan sweep) does not execute, so absence
+  becomes visible in the daily report; decision-class — morning handoff; do NOT
+  modify the runner prompt (prompts.manifest.json sha invariant)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-23T14:42:11.000+09:00'
+history:
+  - at: '2026-11-23T14:42:11.000+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

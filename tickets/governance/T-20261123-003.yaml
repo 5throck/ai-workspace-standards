@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: T-20261123-003
+kind: manual
+title: >-
+  co-safety: PR #239
+  (pr/20261122-031356-chore-upgrade-template-0-30-0-wave-deliv) already merged,
+  but local worktree has staged template-0.30.0 wave delivery changes (11 files,
+  appears to duplicate merged PR content) plus unstaged edits to memory and
+  scripts/SCRIPTS.md — verify staged state against merged PR then commit or
+  discard before default-branch restore — skill-graph coverage blocked on pr/*
+  checkout
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-23T10:40:11.803+09:00'
+history:
+  - at: '2026-11-23T10:40:11.803+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-23T11:28:03.284+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T11:28:03.301+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T11:28:12.963+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved: 13-file novel WIP (undelivered template-0.30.0 delivery, 1
+  unresolved CONFLICT) cannot land (D3.1 auto-E5 refusal) — preserved verbatim
+  on wip/20261123-preserved-co-safety-full (stash commit eb0ecbfe) + local
+  stash@{0}; main restored 7a2c355->2f9420f via PR #240 (pm.md mirror
+  re-projection; graph verified current with no diff; merged per user ruling
+  after GitHub Actions billing outage); stale pr branch deleted; mirror parity
+  green, fleet coverage restored; follow-up: human disposition of the preserved
+  WIP
+error: null

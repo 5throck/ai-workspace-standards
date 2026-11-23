@@ -696,6 +696,18 @@
     },
     {
       "type": "references",
+      "from": "meeting-facilitation",
+      "to": "project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "meeting-facilitation",
+      "to": "team-builder",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "mid-construction-inspection",
       "to": "completion-inspection",
       "source": "prose"

@@ -1,0 +1,29 @@
+schemaVersion: 1
+id: T-20261123-004
+kind: manual
+title: >-
+  co-newbiz: new fleet absentee discovered during Row 1 fleet re-scan
+  (2026-11-23) — checkout on pr/20261123-token-burndown-w1-gates with
+  uncommitted app WIP (web-next pages/components); outside Row 1 scope, not
+  touched — skill-graph coverage blocked on pr/* checkout
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-23T10:41:12.805+09:00'
+history:
+  - at: '2026-11-23T10:41:12.805+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-23T14:42:47.146+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T14:42:47.165+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T14:42:47.182+09:00'
+    from: review
+    to: done
+result: >-
+  co-newbiz wave completed in another session; project back on main and clean;
+  covered in snapshot-2026-11-23 (17/17 fleet coverage).
+error: null

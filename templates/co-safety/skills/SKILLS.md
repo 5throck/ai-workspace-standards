@@ -36,7 +36,7 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 | `hv-cell-formation-electrical-safety-planner` | 1.0.0 | active | battery-agent | — | — | co-safety only — Plan high-voltage DC electrical safety for lithium-ion cell formation, charging, aging, and large… |
 | `iso14971-risk-scorer` | 1.1.0 | active | meddevice-agent | — | — | co-safety only — ISO 14971 risk estimation and scoring for medical devices |
 | `landfill-methane-anaerobic-explosion-planner` | 1.0.0 | active | waste-agent | — | — | co-safety only — Plan landfill + anaerobic-digestion facility safety — methane (CH4) LEL explosion management,… |
-| `meeting-facilitation` | 1.5.0 | active | pm | 2026-07-08 | — | inherited from common — customized fork (variant-maintained) |
+| `meeting-facilitation` | 1.6.0 | active | pm | 2026-11-21 | — | inherited from common — customized fork (variant-maintained) |
 | `mid-construction-inspection` | 1.0.0 | active | gasterm-agent | — | — | co-safety only — Execute KGS on-site mid-construction inspection for gas terminal facilities (LNG/LPG/수소) |
 | `msds-parser` | 1.0.0 | active | msds-agent | — | — | co-safety only — Parse MSDS/SDS documents into structured GHS 16-section records |
 | `munitions-magazine-storage-safety-planner` | 1.0.0 | active | defense-agent | — | — | co-safety only — Plan munitions magazine storage operations — quantity-distance (Q-D) siting, UN hazard-division (HD… |

@@ -26,11 +26,11 @@ function manifestFolders(): string[] {
   return rows.map((l) => /`([^`]+\/)`/.exec(l)![1].replace(/\/$/, ""));
 }
 
-/** Root files: the backticked *.md/*.json names inside the root-files paragraph. */
+/** Root files: the backticked *.md/*.json/*.html names inside the root-files paragraph. */
 function manifestRootFiles(): string[] {
   const start = MANIFEST.indexOf("Root-level loose files");
   const section = MANIFEST.slice(start, MANIFEST.indexOf("## 3.", start));
-  return [...section.matchAll(/`([A-Za-z0-9._-]+\.(?:md|json))`/g)].map((m) => m[1]);
+  return [...section.matchAll(/`([A-Za-z0-9._-]+\.(?:md|json|html))`/g)].map((m) => m[1]);
 }
 
 describe("docs/ folder manifest ↔ validate-doc-folder allowlist parity (T-20261004-013)", () => {

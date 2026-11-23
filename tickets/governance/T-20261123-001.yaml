@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20261123-001
+kind: manual
+title: >-
+  co-consult: PR #133 (pr/20261122-chore-upgrade-wave) already merged, but local
+  worktree dirty (memory/2026-11-13.md deleted, memory/MEMORY.md edited,
+  untracked memory/2026-11-22.md and memory/skill-review/2026-11-22.md) — local
+  memory-log bookkeeping WIP must be committed or discarded before
+  default-branch restore — skill-graph coverage blocked on pr/* checkout
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-23T10:40:11.709+09:00'
+history:
+  - at: '2026-11-23T10:40:11.709+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-23T11:28:03.212+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T11:28:03.232+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T11:28:12.920+09:00'
+    from: review
+    to: done
+result: >-
+  Resolved: both tracked changes were novel (memory/2026-11-13.md deletion +
+  MEMORY.md edit) — preserved via E1 landing PR #134 on
+  wip/20261123-preserved-co-consult (unmerged, human decides); main restored
+  0e60bb1->ff37364 via PR #135 (graph regeneration + pm.md mirror re-projection,
+  merged per user ruling after GitHub Actions billing outage made checks-green
+  unachievable); untracked 2026-11-22 memory logs left in place; mirror parity
+  green, graph current, fleet coverage restored
+error: null

@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261123-006
+kind: manual
+title: >-
+  Preserved-WIP disposition decision: co-deck
+  wip/20261123-preserved-co-deck-full (stash commit 675120af + local stash@{0})
+  carries the entire undelivered template-0.30.0 upgrade delivery (140+ files,
+  ~5.3k ins, delivery manifest has 50 unresolved ERROR dispositions — policy
+  D3.1 blocks auto-E5); co-safety wip/20261123-preserved-co-safety-full
+  (eb0ecbfe) carries a 13-file delivery with 1 unresolved CONFLICT; co-consult
+  PR #134 (wip/20261123-preserved-co-consult, 2 memory-log edits) left OPEN for
+  human decision — resolve dispositions / re-baseline / adopt-template per
+  branch; follow-up: Projects/co-safety skills/meeting-facilitation/SKILL.md is
+  project-ahead-of-template (v1.6.0 post-/meeting-retirement body vs template
+  v1.5.0 stub, sha256 aa2ffa30 vs 2d36e71b) so
+  tests/unit/meeting-command-retirement.test.ts stays expected-red until
+  upstream template promotion; decision-class — never claimed by the nightly
+  runner, morning handoff
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-23T14:42:01.956+09:00'
+history:
+  - at: '2026-11-23T14:42:01.956+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

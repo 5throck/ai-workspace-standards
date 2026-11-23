@@ -2,6 +2,25 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.5.0 (2026-11-23, spec
+ *          docs/designs/2026-11-23-skill-graph-history-report-design.md §5.1-§5.3):
+ *          auto-emitted HTML history dashboard — every successful report run
+ *          (markdown or --json; the daily --json runner is the primary emitter)
+ *          regenerates a single self-contained page over the full snapshot
+ *          history at docs/skill-graph-history.html (override with --html <path>,
+ *          disable with --no-html; parents auto-created). The page inlines a
+ *          compact projection (per-date class counts + NEW/VANISHED replay,
+ *          latest convergence/delivery-gap/fan-in/orphan detail, dynamic fleet
+ *          coverage with transient-absent annotation, governance-ticket scan) as
+ *          a \\u003c-escaped JSON data block rendered client-side — five tabs,
+ *          in-page search, light/dark toggle, CSP
+ *          default-src 'none' + unsafe-inline style/script, zero external
+ *          references, deterministic output (no wall-clock markers). Emission is
+ *          WARN-only (one stderr WARN on any build/write failure; exit code and
+ *          the snapshot are never affected; no partial HTML is left behind).
+ *          Governance-ticket reader implements folded (>-) and literal (|)
+ *          block scalars over tickets/governance/*.yaml + archive. Byte-compat:
+ *          snapshot writes and --json stdout are unchanged from v2.4.0.
  * @version 2.4.0 (2026-11-07, spec
  *          docs/designs/2026-11-07-fleet-membership-ssot-design.md §5,
  *          DEC-20261107-01): fleet membership SSOT — defaultProjects()
@@ -84,18 +103,26 @@
  * Output: a human-readable report on stdout plus a machine snapshot written to
  * memory/skill-graph-metrics/snapshot-<YYYY-MM-DD>.json (local calendar date;
  * one snapshot per date — a same-date rerun overwrites). `--json` prints the
- * snapshot JSON instead of the human report.
+ * snapshot JSON instead of the human report. v2.5.0 additionally auto-emits the
+ * history dashboard docs/skill-graph-history.html after every successful
+ * snapshot write (both modes; see the @version 2.5.0 entry).
  *
- * This tool is read-only over its inputs; it writes only the snapshot file.
+ * This tool is read-only over its inputs; it writes only the snapshot file and
+ * the generated history page (HTML emission failure is WARN-only and never
+ * affects the snapshot or the exit code).
  * It never modifies any graph, skill, or project.
  *
  * Usage:
- *   bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>] [--help]
+ *   bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>]
+ *       [--html <path>] [--no-html] [--help]
  *
  * Options:
  *   --json              print the snapshot JSON instead of the human report
  *   --snapshot-dir <d>  snapshot output directory (default:
  *                       memory/skill-graph-metrics)
+ *   --html <path>       history-page output path override (default:
+ *                       docs/skill-graph-history.html; parents auto-created)
+ *   --no-html           skip the history-page emission (snapshot still written)
  *
  * Exit codes: 0 (report produced), 1 (zero graphs found / usage error).
  *
@@ -103,7 +130,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { checkoutBranch, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
 import { localDateISO } from "./lib/local-date.ts";
@@ -111,7 +138,7 @@ import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.4.0";
+const VERSION = "2.5.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -287,17 +314,45 @@ export function hubQualifyingAssets(project: string, fanIn2: FanIn2Result): stri
     .sort();
 }
 
-function parseArgs(): { json: boolean; snapshotDir: string; help: boolean } {
-  const args = process.argv.slice(2);
+export interface FleetReportArgs {
+  json: boolean;
+  snapshotDir: string;
+  help: boolean;
+  /** v2.5.0: --html <path> override; null = default docs/skill-graph-history.html. */
+  htmlPath: string | null;
+  /** v2.5.0: --no-html (skips the emission entirely; wins over --html). */
+  noHtml: boolean;
+}
+
+/**
+ * v2.5.0: exported (argv-injectable) for unit coverage of the --html/--no-html
+ * surface; unknown arguments stay ignored (v2.4.0 semantics unchanged).
+ */
+export function parseArgs(argv: string[] = process.argv.slice(2)): FleetReportArgs {
   let json = false;
   let snapshotDir = join("memory", "skill-graph-metrics");
   let help = false;
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--help" || args[i] === "-h") help = true;
-    else if (args[i] === "--json") json = true;
-    else if (args[i] === "--snapshot-dir") snapshotDir = args[++i];
+  let htmlPath: string | null = null;
+  let noHtml = false;
+  const usageExit = (flag: string): never => {
+    console.error(`❌ skill-graph-fleet-report: ${flag} requires a value (usage error).`);
+    process.exit(1);
+  };
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--help" || argv[i] === "-h") help = true;
+    else if (argv[i] === "--json") json = true;
+    else if (argv[i] === "--snapshot-dir") {
+      const val = argv[++i];
+      if (val === undefined) usageExit("--snapshot-dir");
+      snapshotDir = val;
+    } else if (argv[i] === "--no-html") noHtml = true;
+    else if (argv[i] === "--html") {
+      const val = argv[++i];
+      if (val === undefined) usageExit("--html");
+      htmlPath = val;
+    }
   }
-  return { json, snapshotDir, help };
+  return { json, snapshotDir, help, htmlPath, noHtml };
 }
 
 /**
@@ -307,8 +362,11 @@ function parseArgs(): { json: boolean; snapshotDir: string; help: boolean } {
  * §5, DEC-20261107-01): Projects/co-* minus the docs/fleet-membership.json
  * exclusions, derived exclusively through lib/fleet.ts (the sole membership
  * path — no co- prefix filter here). Transient-checkout semantics unchanged.
+ * v2.5.0: also returns the skipped transient checkouts so the history page can
+ * annotate absentees ("transient PR checkout") honestly (same derivation, no
+ * second scan).
  */
-function defaultProjects(): string[] {
+function defaultProjects(): { projects: string[]; skipped: Array<{ name: string; branch: string }> } {
   const candidates = listFleetProjects();
   const { projects, skipped } = filterTransientCheckouts(candidates, checkoutBranch);
   for (const s of skipped) {
@@ -316,7 +374,7 @@ function defaultProjects(): string[] {
       `⚠️  skill-graph-fleet-report: ${s.name} is a transient PR working checkout (branch ${s.branch}) — excluded from fleet discovery (T-20261103-004).`,
     );
   }
-  return projects;
+  return { projects, skipped };
 }
 
 /** Load a graph projection file (v1 or v2) as a v2 view; null when absent or unparseable. */
@@ -696,23 +754,734 @@ function markdownReport(
   return lines.join("\n");
 }
 
+// ── v2.5.0 — history dashboard (design docs/designs/2026-11-23-skill-graph-history-report-design.md §5.2-§5.3) ──
+
+/** escapeHtml per the ticket.ts board --html precedent (scripts/ticket.ts:173-180):
+ *  & < > " ' all escaped, so the helper is safe inside text and inside attributes alike. */
+export function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** v2.5.0: a fleet member matching a governance ticket whose title mentions skill-graph. */
+export interface HistoryTicket {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  /** Which store the ticket came from (live wins when an id exists in both). */
+  source: "live" | "archive";
+  /** Title carries the runner's `skill-graph:` NEW-id ticket convention. */
+  runnerFiled: boolean;
+}
+
+export interface FleetInfoInput {
+  /** Total fleet-membership SSOT size (listFleetProjects(), incl. transient-absent members). */
+  count: number;
+  /** Member NAMES (not Projects/ paths), sorted. */
+  members: string[];
+  /** Members whose checkout sits on a transient `pr/*` branch this run. */
+  transientAbsent: string[];
+}
+
+export interface HistorySeriesRow {
+  date: string;
+  projects: Record<string, { nodes: number; edges: number; skills: number }>;
+  classes: { converged: number; divergent: number; unknown: number };
+  newSkills: string[];
+  vanishedSkills: string[];
+}
+
+export interface HistoryGap {
+  /** First missing calendar day (strictly between two snapshot dates). */
+  from: string;
+  /** Last missing calendar day. */
+  to: string;
+  days: number;
+}
+
+export interface HistoryModel {
+  fleet: { count: number; members: Array<{ name: string; transientAbsent: boolean }> };
+  /** Sorted by date ascending. */
+  series: HistorySeriesRow[];
+  /** Missing-day ranges derived from the series — never hardcoded. */
+  gaps: HistoryGap[];
+  latest: {
+    date: string;
+    convergence: {
+      converged: string[];
+      convergenceWithDivergence: Array<{ capability: string; hashes: Record<string, string[]> }>;
+      hashUnknown: string[];
+    };
+    missingFromProjects: Record<string, string[]>;
+    fanIn2: FanIn2Result | null;
+    rootOrphans: Snapshot["rootOrphans"] | null;
+  };
+  tickets: HistoryTicket[];
+}
+
+/**
+ * Minimal YAML scalar reader for governance tickets (design §5.3): extracts the
+ * requested TOP-LEVEL scalar fields, implementing folded (`>` / `>`+chomp) and
+ * literal (`|`+chomp) block scalars — never line-grep. Plain and quoted
+ * single-line scalars are supported; nested structures (history:, upstream:)
+ * are skipped because their keys are indented and never match the indent-0
+ * key line. Unknown keys are ignored.
+ */
+export function extractTicketScalars(src: string, keys: string[]): Record<string, string> {
+  const lines = src.split(/\r?\n/);
+  const out: Record<string, string> = {};
+  const wanted = new Set(keys);
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^([A-Za-z_][A-Za-z0-9_-]*):(?:[ \t]+(.*))?[ \t]*$/);
+    if (!m || !wanted.has(m[1]) || m[1] in out) continue;
+    const inline = (m[2] ?? "").trim();
+    if (inline === "") continue; // indented follow-up lines = nested structure, not our scalars
+    const bm = inline.match(/^([>|])([0-9]*)([+-]?)(?:[ \t]+(.*))?$/);
+    if (bm) {
+      out[m[1]] = readBlockScalar(lines, i + 1, bm[1] === ">", bm[3]);
+      continue;
+    }
+    out[m[1]] = unquoteYamlScalar(inline);
+  }
+  return out;
+}
+
+function unquoteYamlScalar(s: string): string {
+  if (s.length >= 2 && s.startsWith('"') && s.endsWith('"')) return s.slice(1, -1);
+  if (s.length >= 2 && s.startsWith("'") && s.endsWith("'")) return s.slice(1, -1).replace(/''/g, "'");
+  return s;
+}
+
+/** Chomping: `-` strips trailing newlines, default (clip) leaves a single one, `+` keeps all.
+ *  Titles are display strings, so clip is normalized to trimEnd (a trailing newline is never
+ *  meaningful for contains/prefix matching). */
+function trimChomped(s: string, chomp: string): string {
+  if (chomp === "+") return s;
+  return s.replace(/\n+$/, "").trimEnd();
+}
+
+/**
+ * Block-scalar body reader: collects the indented (or blank) lines after the
+ * header, strips the first-content-line indentation, then folds (>) or keeps
+ * literal (|). Folding: single newline between equally-indented lines → space;
+ * a run of n blank lines → n newlines; a more-indented line keeps literal
+ * newlines around itself.
+ */
+function readBlockScalar(lines: string[], start: number, folded: boolean, chomp: string): string {
+  const body: string[] = [];
+  for (let i = start; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.trim() === "") {
+      body.push("");
+      continue;
+    }
+    if (!/^[ \t]/.test(line)) break; // dedented to indent-0 → block ended
+    body.push(line);
+  }
+  let contentIndent = -1;
+  for (const line of body) {
+    if (line.trim() === "") continue;
+    contentIndent = (line.match(/^[ \t]+/)?.[0] ?? "").length;
+    break;
+  }
+  if (contentIndent < 0) return ""; // empty block
+  // `.length` must bind to the Math.min RESULT (the indent width actually stripped),
+  // not to Math.min's numeric return (whose .length is undefined → slice(0) → no strip).
+  const stripped = body.map((l) =>
+    l === "" ? "" : l.slice(Math.min(contentIndent, (l.match(/^[ \t]+/)?.[0] ?? "").length)),
+  );
+  if (!folded) return trimChomped(stripped.join("\n"), chomp);
+  let out = "";
+  let blanks = 0;
+  let prevMore = false;
+  let started = false;
+  for (const line of stripped) {
+    if (line === "") {
+      blanks++;
+      continue;
+    }
+    const more = /^[ \t]/.test(line);
+    if (!started) out = line;
+    else if (blanks > 0) out += "\n".repeat(blanks) + line;
+    else if (prevMore || more) out += "\n" + line;
+    else out += " " + line;
+    blanks = 0;
+    prevMore = more;
+    started = true;
+  }
+  return trimChomped(out, chomp);
+}
+
+/**
+ * v2.5.0 — governance ticket scan for the Tickets tab (design §5.3): read-only
+ * over `liveDir` (tickets/governance) and `archiveDir` (…/archive) *.yaml
+ * files; a title containing `skill-graph` (case-insensitive) matches; titles
+ * starting with `skill-graph:` are the runner's NEW-id tickets (runnerFiled).
+ * Sorted by id descending (newest first); live wins when an id exists in both
+ * stores. Absent directories → empty contribution, no error. The id comes from
+ * the `id:` field or, when the line-oriented reader finds none (e.g. the
+ * flow-style single-line `{id: U-…, title: …}` archived U-tickets whose keys
+ * never start a line), from the filename (`U-YYYYMMDD-NNN.yaml` → `U-…`);
+ * scalar styles plain / quoted / folded `>` / literal `|` are supported for
+ * top-level keys. A file with no extractable id (field AND ticket-shaped
+ * filename) AND no title is malformed → skipped with a stderr note (WARN
+ * posture — never fails the run).
+ */
+export function scanSkillGraphTickets(liveDir: string, archiveDir: string): HistoryTicket[] {
+  const rows: HistoryTicket[] = [];
+  const seen = new Set<string>();
+  const scan = (dir: string, source: "live" | "archive"): void => {
+    if (!existsSync(dir)) return;
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (!e.isFile() || !e.name.endsWith(".yaml")) continue;
+      const path = join(dir, e.name);
+      let raw: string;
+      try {
+        raw = readFileSync(path, "utf-8");
+      } catch (err) {
+        console.warn(
+          `⚠️  skill-graph-fleet-report: unreadable ticket file skipped: ${path} (${err instanceof Error ? err.message : String(err)})`,
+        );
+        continue;
+      }
+      const fields = extractTicketScalars(raw, ["id", "title", "status", "priority"]);
+      const filenameId = e.name.replace(/\.yaml$/, "");
+      const filenameCarriesId = /^[A-Z]-\d{8}-\d{3,4}$/.test(filenameId);
+      if (!fields.id && !fields.title && !filenameCarriesId) {
+        console.warn(`⚠️  skill-graph-fleet-report: malformed ticket file skipped (no id/title found): ${path}`);
+        continue;
+      }
+      const id = fields.id ?? filenameId;
+      if (seen.has(id)) continue; // live store wins over an archived duplicate
+      seen.add(id);
+      const title = (fields.title ?? "").trim();
+      if (!title.toLowerCase().includes("skill-graph")) continue;
+      rows.push({
+        id,
+        title,
+        status: fields.status ?? "",
+        priority: fields.priority ?? "",
+        source,
+        runnerFiled: title.toLowerCase().startsWith("skill-graph:"),
+      });
+    }
+  };
+  scan(liveDir, "live");
+  scan(archiveDir, "archive");
+  return rows.sort((a, b) => (a.id < b.id ? 1 : a.id > b.id ? -1 : 0));
+}
+
+const DAY_MS = 86_400_000;
+
+/** Calendar-day ranges strictly between consecutive snapshot dates (sorted, deduped input). */
+export function deriveGaps(dates: string[]): HistoryGap[] {
+  const sorted = [...new Set(dates)].sort();
+  const out: HistoryGap[] = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const prevMs = Date.parse(`${sorted[i - 1]}T00:00:00Z`);
+    const curMs = Date.parse(`${sorted[i]}T00:00:00Z`);
+    const days = Math.round((curMs - prevMs) / DAY_MS) - 1;
+    if (days <= 0) continue;
+    const from = new Date(prevMs + DAY_MS).toISOString().slice(0, 10);
+    const to = new Date(curMs - DAY_MS).toISOString().slice(0, 10);
+    out.push({ from, to, days });
+  }
+  return out;
+}
+
+/** Fleet-wide skill universe of one snapshot (same reconstruction as the live
+ *  fleetSkillSet: fleetPresence keys ∪ the missingFromProjects lists). */
+function snapshotSkillUniverse(s: Snapshot): Set<string> {
+  const out = new Set(Object.keys(s.fleetPresence ?? {}));
+  for (const list of Object.values(s.missingFromProjects ?? {})) {
+    for (const id of list ?? []) out.add(id);
+  }
+  return out;
+}
+
+/** Parse every snapshot-YYYY-MM-DD.json in the dir, sorted by date (filename-authoritative).
+ *  A malformed snapshot throws — the caller's WARN wrapper turns that into one stderr note. */
+function loadSnapshots(snapshotDir: string): Snapshot[] {
+  if (!existsSync(snapshotDir)) return [];
+  const rows: Snapshot[] = [];
+  for (const f of readdirSync(snapshotDir)) {
+    const m = f.match(/^snapshot-(\d{4}-\d{2}-\d{2})\.json$/);
+    if (!m) continue;
+    let data: Snapshot;
+    try {
+      data = JSON.parse(readFileSync(join(snapshotDir, f), "utf-8")) as Snapshot;
+    } catch (err) {
+      throw new Error(`malformed snapshot ${f}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    if (!data.date) data.date = m[1];
+    rows.push(data);
+  }
+  return rows.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
+ * v2.5.0 — compact projection over the snapshot history (design §5.2): per-date
+ * class counts + pairwise NEW/VANISHED replay (snapshots do not store
+ * historical diffs), derived gap ranges, latest-snapshot detail, dynamic fleet
+ * coverage with the transient-absent annotation, and the governance-ticket
+ * scan. Pure: identical inputs → identical model → byte-identical page.
+ */
+export function buildHistoryModel(
+  snapshots: Snapshot[],
+  fleetInfo: FleetInfoInput,
+  tickets: HistoryTicket[] = [],
+): HistoryModel {
+  const sorted = [...snapshots].sort((a, b) => a.date.localeCompare(b.date));
+  const series: HistorySeriesRow[] = sorted.map((s, i) => {
+    const conv = s.convergence;
+    const classes = {
+      converged: conv?.converged.length ?? 0,
+      divergent: conv?.convergenceWithDivergence.length ?? 0,
+      unknown: conv?.hashUnknown.length ?? 0,
+    };
+    let newSkills: string[] = [];
+    let vanishedSkills: string[] = [];
+    if (i > 0) {
+      const prev = snapshotSkillUniverse(sorted[i - 1]);
+      const cur = snapshotSkillUniverse(s);
+      newSkills = [...cur].filter((id) => !prev.has(id)).sort();
+      vanishedSkills = [...prev].filter((id) => !cur.has(id)).sort();
+    }
+    return { date: s.date, projects: s.projects ?? {}, classes, newSkills, vanishedSkills };
+  });
+  const gaps = deriveGaps(series.map((r) => r.date));
+  const latestSnap = sorted[sorted.length - 1] ?? null;
+  const latest: HistoryModel["latest"] = {
+    date: latestSnap?.date ?? "",
+    convergence: {
+      converged: latestSnap?.convergence?.converged ?? [],
+      convergenceWithDivergence: latestSnap?.convergence?.convergenceWithDivergence ?? [],
+      hashUnknown: latestSnap?.convergence?.hashUnknown ?? [],
+    },
+    missingFromProjects: latestSnap?.missingFromProjects ?? {},
+    fanIn2: latestSnap?.fanIn2 ?? null,
+    rootOrphans: latestSnap?.rootOrphans ?? null,
+  };
+  const present = new Set(Object.keys(latestSnap?.projects ?? {}));
+  const members = fleetInfo.members.map((name) => ({
+    name,
+    transientAbsent: !present.has(name) && fleetInfo.transientAbsent.includes(name),
+  }));
+  return { fleet: { count: fleetInfo.count, members }, series, gaps, latest, tickets };
+}
+
+/** Full page as one deterministic string; write only after it is fully built (design §5.1). */
+export function renderHistoryPage(model: HistoryModel): string {
+  const lastRow = model.series[model.series.length - 1];
+  const presentCount = lastRow ? Object.keys(lastRow.projects).length : 0;
+  const noscriptSummary =
+    `Snapshot ${escapeHtml(model.latest.date)}: ${escapeHtml(String(presentCount))}/${escapeHtml(String(model.fleet.count))}` +
+    ` fleet members covered; convergence ` +
+    `${escapeHtml(String(model.latest.convergence.converged.length))} converged / ` +
+    `${escapeHtml(String(model.latest.convergence.convergenceWithDivergence.length))} divergent / ` +
+    `${escapeHtml(String(model.latest.convergence.hashUnknown.length))} hash-unknown; ` +
+    `${escapeHtml(String(model.tickets.length))} matching governance tickets. ` +
+    `Enable JavaScript for the full dashboard.`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill-Graph Fleet History</title>
+<style>
+:root{--bg:#f6f7f9;--fg:#1c2430;--muted:#5b6673;--card:#ffffff;--border:#d5dae1;--accent:#2563eb;--ok:#15803d;--warn:#b45309;--unk:#64748b;--chip:#e8edf3;--hatch:#c9d2dc}
+:root[data-theme="light"]{--bg:#f6f7f9;--fg:#1c2430;--muted:#5b6673;--card:#ffffff;--border:#d5dae1;--accent:#2563eb;--ok:#15803d;--warn:#b45309;--unk:#64748b;--chip:#e8edf3;--hatch:#c9d2dc}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#12161c;--fg:#dce3ec;--muted:#8b96a5;--card:#1a2028;--border:#2b333e;--accent:#5b9dff;--ok:#4ade80;--warn:#fbbf24;--unk:#94a3b8;--chip:#232b35;--hatch:#39434f}}
+:root[data-theme="dark"]{--bg:#12161c;--fg:#dce3ec;--muted:#8b96a5;--card:#1a2028;--border:#2b333e;--accent:#5b9dff;--ok:#4ade80;--warn:#fbbf24;--unk:#94a3b8;--chip:#232b35;--hatch:#39434f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:16px 20px 0;border-bottom:1px solid var(--border)}
+h1{margin:0 0 8px;font-size:20px}
+.controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.controls input{flex:1;max-width:520px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--fg)}
+.controls button{padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
+#tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab-btn{padding:7px 14px;border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;background:var(--card);color:var(--muted);cursor:pointer;font:inherit}
+.tab-btn.active{color:var(--fg);font-weight:600;border-bottom:1px solid var(--card);margin-bottom:-1px}
+main{padding:16px 20px 40px}
+.tab{display:none}
+.tab.active{display:block}
+.muted{color:var(--muted)}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:130px}
+.stat-v{font-size:22px;font-weight:700}
+.stat-l{color:var(--muted);font-size:12px}
+.absent .row{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 10px;margin:4px 0;color:var(--warn)}
+h2{font-size:15px;margin:18px 0 8px}
+.trend{display:flex;align-items:flex-end;gap:3px;height:56px;padding:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;overflow-x:auto}
+.tcol{display:flex;align-items:flex-end;gap:1px}
+.tcol i{width:7px;display:block;border-radius:1px}
+.tcol i.c{background:var(--ok)}.tcol i.d{background:var(--warn)}.tcol i.u{background:var(--unk)}
+.strip{display:flex;height:20px;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.strip .tick{background:var(--accent)}
+.strip .gap{background:repeating-linear-gradient(45deg,var(--hatch),var(--hatch) 4px,var(--bg) 4px,var(--bg) 8px)}
+table{border-collapse:collapse;width:100%;margin:8px 0;background:var(--card);border:1px solid var(--border);border-radius:8px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+tr:last-child td{border-bottom:none}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.chip{display:inline-block;background:var(--chip);border:1px solid var(--border);border-radius:10px;padding:1px 8px;font-size:12px}
+.chip.hash{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.chip.proj{background:transparent}
+.cap{font-weight:600}
+.hashline{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:2px 0}
+.group{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin:8px 0}
+.count{background:var(--chip);border-radius:10px;padding:1px 8px;font-size:12px;margin-left:8px}
+details.group>summary{cursor:pointer;display:flex;align-items:center}
+details.group[open]>summary{margin-bottom:6px}
+.badge{display:inline-block;background:var(--accent);color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;white-space:nowrap}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+<h1>Skill-Graph Fleet History</h1>
+<div class="controls">
+<input id="search" type="search" placeholder="Search this tab: capability, project, hash, skill id, ticket id or title" aria-label="Search active tab">
+<button id="theme-toggle" type="button" aria-label="Toggle light or dark theme">Theme</button>
+</div>
+<nav id="tabs" aria-label="Report tabs">
+<button class="tab-btn active" data-tab="overview" type="button">Overview</button>
+<button class="tab-btn" data-tab="timeline" type="button">Timeline</button>
+<button class="tab-btn" data-tab="divergence" type="button">Divergence</button>
+<button class="tab-btn" data-tab="gaps" type="button">Delivery gaps</button>
+<button class="tab-btn" data-tab="tickets" type="button">Tickets</button>
+</nav>
+</header>
+<main>
+<section id="tab-overview" class="tab active"></section>
+<section id="tab-timeline" class="tab"></section>
+<section id="tab-divergence" class="tab"></section>
+<section id="tab-gaps" class="tab"></section>
+<section id="tab-tickets" class="tab"></section>
+</main>
+<noscript><p class="muted">${noscriptSummary}</p></noscript>
+<script id="report-data" type="application/json">${JSON.stringify(model).replace(/</g, "\\u003c")}</script>
+<script>
+(function () {
+"use strict";
+var MODEL = JSON.parse(document.getElementById("report-data").textContent);
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function chip(text, cls) { return el("span", cls ? "chip " + cls : "chip", text); }
+function dayAfter(iso) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); }
+function dayBefore(iso) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - 1); return d.toISOString().slice(0, 10); }
+function dayDiff(a, b) { return Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000); }
+function truncate(s, n) { return s.length > n ? s.slice(0, n - 1) + "\\u2026" : s; }
+
+// theme: default follows prefers-color-scheme; the toggle flips and persists (design §5.2)
+var THEME_KEY = "sgf-history-theme";
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  try { localStorage.setItem(THEME_KEY, t); } catch (err) { /* storage unavailable: non-persistent theme */ }
+}
+try {
+  var saved = localStorage.getItem(THEME_KEY);
+  if (saved === "dark" || saved === "light") document.documentElement.setAttribute("data-theme", saved);
+} catch (err) { /* ignore */ }
+function currentTheme() {
+  var attr = document.documentElement.getAttribute("data-theme");
+  if (attr === "dark" || attr === "light") return attr;
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+document.getElementById("theme-toggle").addEventListener("click", function () {
+  setTheme(currentTheme() === "dark" ? "light" : "dark");
+});
+
+// tabs
+var TABS = ["overview", "timeline", "divergence", "gaps", "tickets"];
+var sections = {};
+TABS.forEach(function (t) { sections[t] = document.getElementById("tab-" + t); });
+var active = "overview";
+function activate(name) {
+  active = name;
+  document.querySelectorAll(".tab-btn").forEach(function (b) {
+    b.classList.toggle("active", b.getAttribute("data-tab") === name);
+  });
+  TABS.forEach(function (t) { sections[t].classList.toggle("active", t === name); });
+  applySearch();
+}
+document.querySelectorAll(".tab-btn").forEach(function (b) {
+  b.addEventListener("click", function () { activate(b.getAttribute("data-tab")); });
+});
+
+// search: filters rows of the ACTIVE tab only (design §5.2)
+var searchInput = document.getElementById("search");
+function applySearch() {
+  var q = searchInput.value.trim().toLowerCase();
+  sections[active].querySelectorAll("[data-search]").forEach(function (row) {
+    var hay = row.getAttribute("data-search");
+    row.classList.toggle("hidden", q !== "" && hay.indexOf(q) === -1);
+  });
+}
+searchInput.addEventListener("input", applySearch);
+
+function statCard(value, label) {
+  var c = el("div", "stat");
+  c.appendChild(el("div", "stat-v", value));
+  c.appendChild(el("div", "stat-l", label));
+  return c;
+}
+
+function renderOverview() {
+  var ov = sections.overview;
+  ov.textContent = "";
+  var presentSet = {};
+  // present = projects carried by the latest series row (a member absent there
+  // is a transient PR checkout or had no graph this run)
+  var lastRow = MODEL.series[MODEL.series.length - 1];
+  var present = lastRow ? Object.keys(lastRow.projects) : [];
+  present.forEach(function (p) { presentSet[p] = true; });
+  var head = el("div", "stats");
+  head.appendChild(statCard(present.length + " / " + MODEL.fleet.count, "fleet members covered"));
+  head.appendChild(statCard(String(MODEL.latest.convergence.converged.length), "converged"));
+  head.appendChild(statCard(String(MODEL.latest.convergence.convergenceWithDivergence.length), "divergent"));
+  head.appendChild(statCard(String(MODEL.latest.convergence.hashUnknown.length), "hash-unknown"));
+  ov.appendChild(head);
+  ov.appendChild(el("p", "muted", "Latest snapshot: " + MODEL.latest.date));
+  var absent = MODEL.fleet.members.filter(function (m) { return !presentSet[m.name]; });
+  if (absent.length > 0) {
+    ov.appendChild(el("h2", "", "Absent members"));
+    var ab = el("div", "absent");
+    absent.forEach(function (m) {
+      var reason = m.transientAbsent ? "absent: transient PR checkout" : "absent: no graph this run";
+      var row = el("div", "row", m.name + " \\u2014 " + reason);
+      row.setAttribute("data-search", (m.name + " " + reason).toLowerCase());
+      ab.appendChild(row);
+    });
+    ov.appendChild(ab);
+  }
+  var maxClass = 1;
+  MODEL.series.forEach(function (r) {
+    maxClass = Math.max(maxClass, r.classes.converged, r.classes.divergent, r.classes.unknown);
+  });
+  ov.appendChild(el("h2", "", "Convergence class counts over time"));
+  var strip = el("div", "trend");
+  MODEL.series.forEach(function (r) {
+    var col = el("div", "tcol");
+    col.setAttribute("title", r.date + " \\u2014 converged " + r.classes.converged + ", divergent " + r.classes.divergent + ", hash-unknown " + r.classes.unknown);
+    [["c", r.classes.converged], ["d", r.classes.divergent], ["u", r.classes.unknown]].forEach(function (pair) {
+      var bar = el("i", pair[0]);
+      bar.style.height = Math.max(2, Math.round((pair[1] / maxClass) * 48)) + "px";
+      col.appendChild(bar);
+    });
+    strip.appendChild(col);
+  });
+  ov.appendChild(strip);
+  var totals = { nodes: 0, edges: 0, skills: 0 };
+  present.forEach(function (p) {
+    var s = lastRow.projects[p];
+    totals.nodes += s.nodes; totals.edges += s.edges; totals.skills += s.skills;
+  });
+  ov.appendChild(el("h2", "", "Latest totals (sum over covered projects)"));
+  var tot = el("div", "stats");
+  tot.appendChild(statCard(String(totals.nodes), "graph nodes"));
+  tot.appendChild(statCard(String(totals.edges), "graph edges"));
+  tot.appendChild(statCard(String(totals.skills), "skill nodes"));
+  ov.appendChild(tot);
+}
+
+function renderTimeline() {
+  var tl = sections.timeline;
+  tl.textContent = "";
+  tl.appendChild(el("h2", "", "Snapshot axis (hatched = no snapshot that day)"));
+  var dates = MODEL.series.map(function (r) { return r.date; });
+  if (dates.length > 0) {
+    var first = dates[0];
+    var last = dates[dates.length - 1];
+    var strip = el("div", "strip");
+    var segments = [];
+    var cursor = first;
+    MODEL.gaps.forEach(function (g) {
+      if (g.from > cursor) segments.push({ kind: "tick", start: cursor, days: dayDiff(cursor, g.from), end: dayBefore(g.from) });
+      segments.push({ kind: "gap", start: g.from, days: g.days, end: g.to });
+      cursor = dayAfter(g.to);
+    });
+    if (cursor <= last) segments.push({ kind: "tick", start: cursor, days: dayDiff(cursor, dayAfter(last)), end: last });
+    segments.forEach(function (s) {
+      var seg = el("div", s.kind);
+      seg.style.flexGrow = String(s.days);
+      seg.setAttribute("title", s.kind === "tick"
+        ? (s.days > 1 ? "snapshots " + s.start + " .. " + s.end : "snapshot " + s.start)
+        : "gap " + s.start + " .. " + s.end + " (" + s.days + " days, no snapshot)");
+      strip.appendChild(seg);
+    });
+    tl.appendChild(strip);
+  }
+  tl.appendChild(el("h2", "", "Per-date fleet diff (NEW / VANISHED skills)"));
+  var table = el("table");
+  var thead = el("thead");
+  var hr = el("tr");
+  ["date", "new skills", "vanished skills"].forEach(function (h) { hr.appendChild(el("th", "", h)); });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  var tbody = el("tbody");
+  for (var i = MODEL.series.length - 1; i >= 0; i--) {
+    var r = MODEL.series[i];
+    var tr = el("tr", "row");
+    tr.setAttribute("data-search", (r.date + " " + r.newSkills.join(" ") + " " + r.vanishedSkills.join(" ")).toLowerCase());
+    tr.appendChild(el("td", "mono", r.date));
+    var tdNew = el("td");
+    if (r.newSkills.length === 0) tdNew.appendChild(el("span", "muted", "\\u2014"));
+    else r.newSkills.forEach(function (s) { tdNew.appendChild(chip(s)); });
+    tr.appendChild(tdNew);
+    var tdVan = el("td");
+    if (r.vanishedSkills.length === 0) tdVan.appendChild(el("span", "muted", "\\u2014"));
+    else r.vanishedSkills.forEach(function (s) { tdVan.appendChild(chip(s)); });
+    tr.appendChild(tdVan);
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  tl.appendChild(table);
+}
+
+function renderDivergence() {
+  var dv = sections.divergence;
+  dv.textContent = "";
+  var conv = MODEL.latest.convergence;
+  dv.appendChild(el("h2", "", "Convergence with divergence (" + conv.convergenceWithDivergence.length + ") \\u2014 reconciliation candidates, not auto-promoted"));
+  conv.convergenceWithDivergence.forEach(function (g) {
+    var grp = el("div", "group row");
+    var hay = g.capability;
+    grp.appendChild(el("div", "cap", g.capability));
+    Object.keys(g.hashes).forEach(function (h) {
+      var line = el("div", "hashline");
+      line.appendChild(chip(h.slice(0, 8), "hash"));
+      g.hashes[h].forEach(function (p) {
+        line.appendChild(chip(p, "proj"));
+        hay += " " + h + " " + p;
+      });
+      grp.appendChild(line);
+    });
+    grp.setAttribute("data-search", hay.toLowerCase());
+    dv.appendChild(grp);
+  });
+  dv.appendChild(el("h2", "", "Converged (" + conv.converged.length + ") \\u2014 single content hash"));
+  var chips = el("div", "chips");
+  conv.converged.forEach(function (c) {
+    var cp = chip(c);
+    cp.setAttribute("data-search", c.toLowerCase());
+    chips.appendChild(cp);
+  });
+  dv.appendChild(chips);
+  dv.appendChild(el("h2", "", "Hash-unknown (" + conv.hashUnknown.length + ") \\u2014 at least one carrier is a v1 graph"));
+  var chipsU = el("div", "chips");
+  conv.hashUnknown.forEach(function (c) {
+    var cp = chip(c);
+    cp.setAttribute("data-search", c.toLowerCase());
+    chipsU.appendChild(cp);
+  });
+  dv.appendChild(chipsU);
+}
+
+function renderGaps() {
+  var gp = sections.gaps;
+  gp.textContent = "";
+  gp.appendChild(el("h2", "", "Root skills missing from project graphs (latest snapshot)"));
+  var entries = Object.keys(MODEL.latest.missingFromProjects).map(function (p) {
+    return { project: p, missing: MODEL.latest.missingFromProjects[p] || [] };
+  }).sort(function (a, b) { return b.missing.length - a.missing.length || (a.project < b.project ? -1 : 1); });
+  entries.forEach(function (e) {
+    var det = document.createElement("details");
+    det.className = "group row";
+    var sum = el("summary");
+    sum.appendChild(el("span", "cap", e.project));
+    sum.appendChild(el("span", "count", String(e.missing.length)));
+    det.appendChild(sum);
+    var list = el("div", "chips");
+    e.missing.forEach(function (s) { list.appendChild(chip(s)); });
+    det.appendChild(list);
+    det.setAttribute("data-search", (e.project + " " + e.missing.join(" ")).toLowerCase());
+    gp.appendChild(det);
+  });
+}
+
+function renderTickets() {
+  var tk = sections.tickets;
+  tk.textContent = "";
+  tk.appendChild(el("h2", "", "Governance tickets mentioning skill-graph (live + archive, newest first)"));
+  if (MODEL.tickets.length === 0) {
+    tk.appendChild(el("p", "muted", "No governance ticket title mentions skill-graph."));
+    return;
+  }
+  var table = el("table");
+  var thead = el("thead");
+  var hr = el("tr");
+  ["id", "title", "status", "priority", "source", "filed"].forEach(function (h) { hr.appendChild(el("th", "", h)); });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  var tbody = el("tbody");
+  MODEL.tickets.forEach(function (t) {
+    var tr = el("tr", "row");
+    tr.setAttribute("data-search", (t.id + " " + t.title + " " + t.status + " " + t.priority + " " + t.source).toLowerCase());
+    tr.appendChild(el("td", "mono", t.id));
+    tr.appendChild(el("td", "", truncate(t.title, 140)));
+    tr.appendChild(el("td", "", t.status));
+    tr.appendChild(el("td", "", t.priority));
+    tr.appendChild(el("td", "", t.source));
+    var tdF = el("td");
+    if (t.runnerFiled) tdF.appendChild(el("span", "badge", "runner-filed"));
+    tr.appendChild(tdF);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  tk.appendChild(table);
+}
+
+renderOverview();
+renderTimeline();
+renderDivergence();
+renderGaps();
+renderTickets();
+activate("overview");
+})();
+</script>
+</body>
+</html>`;
+}
+
 export async function main(): Promise<void> {
-  const { json, snapshotDir, help } = parseArgs();
+  const { json, snapshotDir, help, htmlPath, noHtml } = parseArgs();
   if (help) {
     console.log(`skill-graph-fleet-report.ts v${VERSION} — read-only fleet analytics over per-project skill graphs (skill-graph-analytics skill Step 1).
 
 Usage:
-  bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>]
+  bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>] [--html <path>] [--no-html]
 
 Reads docs/skill-graph.json + Projects/<co-x>/docs/skill-graph.json; writes only
 memory/skill-graph-metrics/snapshot-<YYYY-MM-DD>.json (one per date, overwrite
-same-date). Read-only over all inputs.`);
+same-date) plus the auto-emitted history dashboard docs/skill-graph-history.html
+(override --html <path>, disable --no-html; emission failure is WARN-only).
+Read-only over all inputs.`);
     process.exit(0);
   }
 
+  const fleet = defaultProjects();
+  const fleetInfo = {
+    count: fleet.projects.length + fleet.skipped.length,
+    members: [...fleet.projects, ...fleet.skipped.map((s) => s.name)].map((p) => p.split(/[\\/]/).pop() ?? p).sort(),
+    transientAbsent: fleet.skipped.map((s) => s.name.split(/[\\/]/).pop() ?? s.name),
+  };
+
   const today = localDateISO();
   const graphPaths: Array<{ name: string; path: string }> = [{ name: "root", path: join("docs", "skill-graph.json") }];
-  for (const project of defaultProjects()) {
+  for (const project of fleet.projects) {
     graphPaths.push({ name: project.split(/[\\/]/).pop() ?? project, path: join(project, "docs", "skill-graph.json") });
   }
 
@@ -814,6 +1583,45 @@ same-date). Read-only over all inputs.`);
   const statusLine = `📦 snapshot → ${snapshotFile}${previous ? ` (diffed vs snapshot-${previous.date}.json)` : " (baseline — no previous snapshot)"}`;
   if (json) console.error(statusLine);
   else console.log(statusLine);
+
+  // v2.5.0 — history dashboard emission (design
+  // docs/designs/2026-11-23-skill-graph-history-report-design.md §5.1): runs in
+  // BOTH modes (the daily --json runner is the primary emitter); any failure is
+  // exactly one stderr WARN — the snapshot is the primary artifact, the page a
+  // courtesy render — and the run continues to its normal exit. The full page
+  // string is built before the single write, so no partial HTML is ever left
+  // behind (a stale page is honest; a missing one is not an error signal).
+  if (!noHtml) {
+    const outPath = htmlPath ?? join("docs", "skill-graph-history.html");
+    const warnEmission = (reason: string, err: unknown): void => {
+      console.warn(
+        `⚠️ history page generation failed (${reason}): ${err instanceof Error ? err.message : String(err)} — snapshot is unaffected`,
+      );
+    };
+    let page: string | null = null;
+    try {
+      page = renderHistoryPage(
+        buildHistoryModel(
+          loadSnapshots(snapshotDir),
+          fleetInfo,
+          scanSkillGraphTickets(join("tickets", "governance"), join("tickets", "governance", "archive")),
+        ),
+      );
+    } catch (err) {
+      warnEmission("model-build", err);
+    }
+    if (page !== null) {
+      try {
+        mkdirSync(dirname(outPath), { recursive: true });
+        writeFileSync(outPath, page);
+        const htmlLine = `🗂 history page → ${outPath} (${Buffer.byteLength(page, "utf8")} bytes)`;
+        if (json) console.error(htmlLine);
+        else console.log(htmlLine);
+      } catch (err) {
+        warnEmission("page-write", err);
+      }
+    }
+  }
 
   if (json) {
     console.log(JSON.stringify(snapshot, null, 2));
