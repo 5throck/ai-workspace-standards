@@ -3,13 +3,16 @@ id: U-20261123-003
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: backlog
+status: waiting
 attempts: 0
-created_at: 2026-11-23T14:36:52.434+09:00
+created_at: '2026-11-23T14:36:52.434+09:00'
 history:
-  - at: 2026-11-23T14:36:52.434+09:00
+  - at: '2026-11-23T14:36:52.434+09:00'
     from: null
     to: backlog
+  - at: '2026-11-23T20:58:55.243+09:00'
+    from: backlog
+    to: waiting
 result: null
 error: null
 upstream:
@@ -19,13 +22,38 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
-  symptom: 'The 0.30.0 upgrade delivery to a variant project exhibited three delivery-generation defects: (a) an L0-only-layer script (scripts/skill-graph-fleet-report.ts, workspace fleet analytics) was delivered into the variant tree although its registry layer means it should be L0-skipped, and its emitted registry row was the only L0-layer row in the variant registry (on-disk file then trips unregistered-script semantics); (b) the delivered SCRIPTS.md row for that script embedded a raw pipe character inside a backtick literal in a table cell, breaking the 8-column parse; (c) detect-backport.ts''s @version header was bumped to 1.0.1 by the delivery while its SCRIPTS.md row stayed 1.0.0 (version-row mismatch). The variant had to fix (b)+(c) locally and delete (a). Expected: the delivery generator skips L0-only-layer scripts for variant targets, escapes/preserves literal pipes in registry cells, and keeps @version headers and registry rows in lockstep.'
+  symptom: >-
+    The 0.30.0 upgrade delivery to a variant project exhibited three
+    delivery-generation defects: (a) an L0-only-layer script
+    (scripts/skill-graph-fleet-report.ts, workspace fleet analytics) was
+    delivered into the variant tree although its registry layer means it should
+    be L0-skipped, and its emitted registry row was the only L0-layer row in the
+    variant registry (on-disk file then trips unregistered-script semantics);
+    (b) the delivered SCRIPTS.md row for that script embedded a raw pipe
+    character inside a backtick literal in a table cell, breaking the 8-column
+    parse; (c) detect-backport.ts's @version header was bumped to 1.0.1 by the
+    delivery while its SCRIPTS.md row stayed 1.0.0 (version-row mismatch). The
+    variant had to fix (b)+(c) locally and delete (a). Expected: the delivery
+    generator skips L0-only-layer scripts for variant targets, escapes/preserves
+    literal pipes in registry cells, and keeps @version headers and registry
+    rows in lockstep.
   affected_paths:
     - scripts/upgrade-project.ts
     - templates/common/scripts/SCRIPTS.md
   identity_source: cwd
-  repro: '1. Run upgrade-project.ts against a variant project delivering the 0.30.0 wave. 2. Three defects observed in one delivery (co-security, 2026-11-23): (a) scripts/skill-graph-fleet-report.ts — an L0-only-layer workspace fleet-analytics script untracked in the variant — was delivered into the variant tree and its registry row was emitted as the only L0-layer row in the variant registry, tripping "Unregistered script" semantics on the on-disk file; (b) the delivered SCRIPTS.md row for skill-graph-fleet-report.ts v2.5.0 contained a raw `|` inside a backtick literal (`|`) in a cell, making the parser count 9 columns vs the 8-column format; (c) the delivery bumped scripts/detect-backport.ts to @version 1.0.1 (gitCleanEnv change) but left its SCRIPTS.md row at 1.0.0.'
-  triage: inbox
+  repro: >-
+    1. Run upgrade-project.ts against a variant project delivering the 0.30.0
+    wave. 2. Three defects observed in one delivery (co-security, 2026-11-23):
+    (a) scripts/skill-graph-fleet-report.ts — an L0-only-layer workspace
+    fleet-analytics script untracked in the variant — was delivered into the
+    variant tree and its registry row was emitted as the only L0-layer row in
+    the variant registry, tripping "Unregistered script" semantics on the
+    on-disk file; (b) the delivered SCRIPTS.md row for
+    skill-graph-fleet-report.ts v2.5.0 contained a raw `|` inside a backtick
+    literal (`|`) in a cell, making the parser count 9 columns vs the 8-column
+    format; (c) the delivery bumped scripts/detect-backport.ts to @version 1.0.1
+    (gitCleanEnv change) but left its SCRIPTS.md row at 1.0.0.
+  triage: ready
   flagged: false
   triage_reasons:
     - 'path_not_template_managed: templates/common/scripts/SCRIPTS.md'
@@ -35,4 +63,4 @@ upstream:
   dedupe_key: b0a3fb8972543447e7a325972e4c40f8ed4090b1ee4994e414735e717c2867ad
   duplicates:
     - project: co-security
-      at: 2026-11-23T14:36:52.434+09:00
+      at: '2026-11-23T14:36:52.434+09:00'

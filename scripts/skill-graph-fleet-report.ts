@@ -2,6 +2,42 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.6.1 (2026-11-23, Windows CI fix): the root-backfill git operands
+ *          (`git log -- <pathspec>` and `git show <sha>:<path>`) are POSIX-shaped
+ *          through toGitPath(); a `path.join`-built native path made git reject
+ *          the pathspec on Windows ("path 'docs\skill-graph.json' exists on
+ *          disk, but not in <sha>"). The recorded backfill `path` field is
+ *          normalized to the same git form so the artifact stays byte-identical
+ *          across platforms for one HEAD. No behavior change on POSIX hosts.
+ * @version 2.6.0 (2026-11-23, spec
+ *          docs/designs/2026-11-23-skill-graph-observability-design.md §5+§13):
+ *          skill-graph observability extension — (D-A1) additive optional
+ *          per-project `agentGraph` snapshot block (agent id+hash table plus
+ *          deduped agent-touching edge tuples in index form over a per-project
+ *          edge-type enum; legacy snapshots without the block are tolerated —
+ *          the page renders explicit "agent tracking begins <date>" notes; every
+ *          pre-existing snapshot field stays byte-value-identical); (D-A2)
+ *          per-date agent-node and per-edge-type NEW/VANISHED diff classes
+ *          computed at render by replaying consecutive snapshots (20-sample
+ *          caps, relative links to the snapshot files) plus a sixth **Agents**
+ *          tab (agents per project, relationship counts by edge type, newest
+ *          relationship changes, and the >=3-project convergence rollup
+ *          mirroring the analytics capability rules — report-only, the fleet
+ *          report never files tickets) and a small link card to the structure
+ *          page; (D-C) the same run emits docs/skill-graph-structure.html
+ *          (rides the existing --html/--no-html family, its own independent
+ *          WARN island, no new CLI flags): layer composition + hubs as no-JS
+ *          inline SVG, a full-root ego explorer with labeled edge types, and
+ *          per-variant root/template/project juxtaposition with per-hop layer
+ *          vocabulary; (§13 addendum) a deterministic bounded root git-history
+ *          backfill step emitting memory/skill-graph-metrics/root-backfill.json
+ *          (third WARN island; skips when the recorded headSha matches
+ *          `git rev-parse HEAD`; 1,000-commit replay cap aborts with a WARN;
+ *          consumed by both pages — commit-granularity root agent/edge timeline
+ *          with a visible "backfilled from git history" provenance marker).
+ *          Byte-compat: pre-existing snapshot fields and the --json stdout
+ *          shape are unchanged apart from the additive agentGraph block; both
+ *          pages remain deterministic (no wall-clock markers).
  * @version 2.5.0 (2026-11-23, spec
  *          docs/designs/2026-11-23-skill-graph-history-report-design.md §5.1-§5.3):
  *          auto-emitted HTML history dashboard — every successful report run
@@ -105,11 +141,14 @@
  * one snapshot per date — a same-date rerun overwrites). `--json` prints the
  * snapshot JSON instead of the human report. v2.5.0 additionally auto-emits the
  * history dashboard docs/skill-graph-history.html after every successful
- * snapshot write (both modes; see the @version 2.5.0 entry).
+ * snapshot write (both modes; see the @version 2.5.0 entry). v2.6.0 emits the
+ * graph-structure companion page docs/skill-graph-structure.html in the same
+ * runs (independent WARN island) and maintains the root git-history backfill
+ * memory/skill-graph-metrics/root-backfill.json (skipped when fresh at HEAD).
  *
- * This tool is read-only over its inputs; it writes only the snapshot file and
- * the generated history page (HTML emission failure is WARN-only and never
- * affects the snapshot or the exit code).
+ * This tool is read-only over its inputs; it writes only the snapshot file,
+ * the two generated pages, and the root-backfill file (emission failures are
+ * WARN-only and never affect the snapshot or the exit code).
  * It never modifies any graph, skill, or project.
  *
  * Usage:
@@ -119,10 +158,12 @@
  * Options:
  *   --json              print the snapshot JSON instead of the human report
  *   --snapshot-dir <d>  snapshot output directory (default:
- *                       memory/skill-graph-metrics)
+ *                       memory/skill-graph-metrics; root-backfill.json lives
+ *                       here too)
  *   --html <path>       history-page output path override (default:
  *                       docs/skill-graph-history.html; parents auto-created)
- *   --no-html           skip the history-page emission (snapshot still written)
+ *   --no-html           skip the page emissions and the backfill step
+ *                       (snapshot still written)
  *
  * Exit codes: 0 (report produced), 1 (zero graphs found / usage error).
  *
@@ -131,14 +172,16 @@
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { spawnSync } from "node:child_process";
 import { checkoutBranch, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
+import { gitCleanEnv } from "./lib/git-env.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
 import { localDateISO } from "./lib/local-date.ts";
 import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
-import { capabilityOf, loadSkillGraph, nameOf } from "./lib/skill-graph-compat.ts";
+import { capabilityOf, loadSkillGraph, nameOf, upgradeSkillGraph } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.5.0";
+const VERSION = "2.6.1";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -155,6 +198,35 @@ export const HUB_CANDIDATES = ["co-develop", "co-design", "co-security"] as cons
 /** A skill-graph projection (v1 or v2 file, always read through the compat loader). */
 type SkillGraph = SkillGraphV2;
 
+/**
+ * v2.6.0 (D-A1, additive optional per-project snapshot block, design
+ * docs/designs/2026-11-23-skill-graph-observability-design.md §5.1): compact
+ * projection of one graph's agent surface. `n` rows are `[id, content_hash|null]`
+ * — agent nodes first (ids carry the `agent:` kind prefix), then the deduped
+ * non-agent endpoints referenced by the stored edges (hash slot null for them,
+ * so agents are exactly the rows whose id starts with `agent:`). `t` is the
+ * edge-type enum; `e` tuples are `[agentIdx, otherIdx, typeIdx]` over agent-
+ * touching edges (at least one agent endpoint, either direction), deduped.
+ * Measured ~52 KB across the 17-member fleet — ~+35% on the current snapshot
+ * (design §5.1). Absent from every legacy snapshot: every consumer that does
+ * not know the block ignores it.
+ */
+export interface AgentGraphProjection {
+  n: Array<[string, string | null]>;
+  t: string[];
+  e: Array<[number, number, number]>;
+}
+
+/** Per-project snapshot entry: the three legacy scalars (byte-value-identical
+ *  since v1) plus the optional v2.6.0 agentGraph projection (D-A1). */
+interface ProjectEntry {
+  nodes: number;
+  edges: number;
+  skills: number;
+  /** v2.6.0 (additive, optional): agent id+hash table + agent-touching edge tuples. */
+  agentGraph?: AgentGraphProjection;
+}
+
 interface ProjectStats {
   project: string;
   nodes: number;
@@ -164,7 +236,7 @@ interface ProjectStats {
 
 interface Snapshot {
   date: string;
-  projects: Record<string, { nodes: number; edges: number; skills: number }>;
+  projects: Record<string, ProjectEntry>;
   fleetPresence: Record<string, number>;
   missingFromProjects: Record<string, string[]>;
   jaccard: Record<string, number>;
@@ -312,6 +384,560 @@ export function hubQualifyingAssets(project: string, fanIn2: FanIn2Result): stri
     .filter((c) => c.projects.includes(project))
     .map((c) => c.capability)
     .sort();
+}
+
+// ── v2.6.0 — agent-graph observability (design docs/designs/2026-11-23-skill-graph-observability-design.md §5.1-§5.3) ──
+
+/**
+ * v2.6.0 snapshot serializer: the file keeps the v2.5.0 indent-2 formatting for
+ * every pre-existing field (byte-value-identical output for them), while each
+ * new agentGraph block is spliced in COMPACTLY — matching the design §5.1
+ * sketch (inline tuple arrays) and keeping the added bytes near the measured
+ * ~52 KB projection instead of the ~2x indent-2 inflation. Deterministic:
+ * placeholders are derived from project names (fleet basenames, `co-*`), the
+ * spliced content is the block's own compact JSON.
+ */
+export function serializeSnapshot(snapshot: Snapshot): string {
+  const blocks = new Map<string, string>();
+  const placeholdered = {
+    ...snapshot,
+    projects: Object.fromEntries(
+      Object.entries(snapshot.projects ?? {}).map(([project, entry]) => {
+        if (!entry?.agentGraph) return [project, entry];
+        blocks.set(project, JSON.stringify(entry.agentGraph));
+        const { agentGraph, ...scalars } = entry;
+        void agentGraph;
+        return [project, { ...scalars, agentGraph: `@@agentGraph:${project}@@` }];
+      }),
+    ),
+  };
+  let text = JSON.stringify(placeholdered, null, 2);
+  for (const [project, block] of blocks) {
+    // The `"agentGraph":` key already precedes the quoted placeholder value in
+    // the indent-2 text — splice in ONLY the compact block object.
+    text = text.replace(`"@@agentGraph:${project}@@"`, block);
+  }
+  return text + "\n";
+}
+
+/** Sample cap for per-edge-type NEW/VANISHED tuple listings (AC1: <= 20 samples + "+N more"). */
+export const AGENT_SAMPLE_CAP = 20;
+
+/** Cap per learning-candidate class in the rollup callout (byte-budget guard;
+ *  totals carry the uncapped counts). */
+export const ROLLUP_CAP = 40;
+
+/** v2.6.0 — extract the AgentGraphProjection of one graph (pure; the snapshot
+ *  writer and the git-history backfill share this one encoder). Agents first
+ *  in `n`, then deduped non-agent counterpart rows; `e` tuples dedupe on
+ *  (from, to, type) with the agent endpoint always at index 0. */
+export function extractAgentGraph(graph: SkillGraph): AgentGraphProjection {
+  const n: Array<[string, string | null]> = [];
+  const agentIdx = new Map<string, number>();
+  for (const node of graph.nodes ?? []) {
+    if (node.type !== "agent") continue;
+    agentIdx.set(node.id, n.length);
+    n.push([node.id, typeof node.content_hash === "string" && node.content_hash ? node.content_hash : null]);
+  }
+  const extraIdx = new Map<string, number>();
+  const t: string[] = [];
+  const typeIdx = new Map<string, number>();
+  const e: Array<[number, number, number]> = [];
+  const seen = new Set<string>();
+  const indexOfOther = (id: string): number => {
+    const asAgent = agentIdx.get(id);
+    if (asAgent !== undefined) return asAgent;
+    let idx = extraIdx.get(id);
+    if (idx === undefined) {
+      idx = n.length;
+      extraIdx.set(id, idx);
+      n.push([id, null]);
+    }
+    return idx;
+  };
+  for (const edge of graph.edges ?? []) {
+    const fromAgent = typeof edge.from === "string" && agentIdx.has(edge.from);
+    const toAgent = typeof edge.to === "string" && agentIdx.has(edge.to);
+    if (!fromAgent && !toAgent) continue;
+    const key = `${edge.from}|${edge.to}|${edge.type}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    let ti = typeIdx.get(edge.type);
+    if (ti === undefined) {
+      ti = t.length;
+      typeIdx.set(edge.type, ti);
+      t.push(edge.type);
+    }
+    const agentEnd = fromAgent ? (edge.from as string) : (edge.to as string);
+    const otherEnd = fromAgent ? (edge.to as string) : (edge.from as string);
+    e.push([agentIdx.get(agentEnd)!, indexOfOther(otherEnd), ti]);
+  }
+  return { n, t, e };
+}
+
+/** Bare (scope-normalized) name of a graph node id: the last `/` segment —
+ *  `agent:root/architect` -> `architect`, `skill:common/k-dart` -> `k-dart`.
+ *  Project graphs mint ids that keep the ORIGINAL scope (`agent:root/...`), so
+ *  bare-name normalization is what lets fleet copies meet (design §5.3). */
+export function agentBareName(id: string): string {
+  const slash = id.lastIndexOf("/");
+  return slash >= 0 ? id.slice(slash + 1) : id;
+}
+
+/** Kind prefix of a node id: `agent:root/x` -> `agent`, `skill:root/y` -> `skill`. */
+export function agentKindOf(id: string): string {
+  const colon = id.indexOf(":");
+  return colon >= 0 ? id.slice(0, colon) : "";
+}
+
+/** One per-edge-type NEW/VANISHED summary (AC1): tuple count plus up to
+ *  AGENT_SAMPLE_CAP representative `[agentId, otherId, project]` tuples. */
+export interface AgentEdgeTypeSummary {
+  type: string;
+  count: number;
+  sample: Array<[string, string, string]>;
+}
+
+/** v2.6.0 per-date diff classes (D-A2): agent-node NEW/VANISHED ids and
+ *  per-edge-type NEW/VANISHED summaries, aggregated fleet-side across projects. */
+export interface AgentDiffClasses {
+  agentNodes: { added: string[]; removed: string[] };
+  agentEdges: { added: AgentEdgeTypeSummary[]; removed: AgentEdgeTypeSummary[] };
+}
+
+function projectionAgentIds(blocks: Record<string, AgentGraphProjection | undefined>): Set<string> {
+  const out = new Set<string>();
+  for (const block of Object.values(blocks)) {
+    for (const [id] of block?.n ?? []) if (id.startsWith("agent:")) out.add(id);
+  }
+  return out;
+}
+
+/** Deduped agent-touching tuples of a per-project projection map, keyed
+ *  `agent|other|type` -> `{ agent, other, type, project }`. */
+interface ProjectionTuple {
+  agent: string;
+  other: string;
+  type: string;
+  project: string;
+}
+
+function projectionTuples(blocks: Record<string, AgentGraphProjection | undefined>): Map<string, ProjectionTuple> {
+  const out = new Map<string, ProjectionTuple>();
+  for (const [project, block] of Object.entries(blocks)) {
+    for (const [ai, oi, ti] of block?.e ?? []) {
+      const agent = block?.n[ai]?.[0];
+      const other = block?.n[oi]?.[0];
+      const type = block?.t[ti];
+      if (agent === undefined || other === undefined || type === undefined) continue;
+      out.set(`${agent}|${other}|${type}`, { agent, other, type, project });
+    }
+  }
+  return out;
+}
+
+function summarizeAgentEdges(keys: string[], source: Map<string, ProjectionTuple>): AgentEdgeTypeSummary[] {
+  const byType = new Map<string, Array<ProjectionTuple>>();
+  for (const key of keys) {
+    const row = source.get(key);
+    if (!row) continue;
+    const list = byType.get(row.type);
+    if (list) list.push(row);
+    else byType.set(row.type, [row]);
+  }
+  return [...byType.entries()]
+    .map(([type, rows]) => ({
+      type,
+      count: rows.length,
+      sample: rows
+        .sort(
+          (a, b) =>
+            a.agent.localeCompare(b.agent) || a.other.localeCompare(b.other) || a.project.localeCompare(b.project),
+        )
+        .slice(0, AGENT_SAMPLE_CAP)
+        .map((r) => [r.agent, r.other, r.project] as [string, string, string]),
+    }))
+    .sort((a, b) => a.type.localeCompare(b.type));
+}
+
+/**
+ * v2.6.0 (D-A2) — per-date agent diff classes between two per-project
+ * projection maps, replayed at render time (raw projections are stored, never
+ * precomputed diffs). A missing block on the PREVIOUS side (legacy snapshot or
+ * rollout day) diffs against the empty set — the honest full baseline (AC1:
+ * from the first snapshot carrying agentGraph onward every date row carries
+ * the classes); both sides missing yields empty classes. Pure and testable.
+ */
+export function diffAgentGraphs(
+  prevProjects: Record<string, AgentGraphProjection | undefined>,
+  curProjects: Record<string, AgentGraphProjection | undefined>,
+): AgentDiffClasses {
+  const prevIds = projectionAgentIds(prevProjects);
+  const curIds = projectionAgentIds(curProjects);
+  const prevTuples = projectionTuples(prevProjects);
+  const curTuples = projectionTuples(curProjects);
+  const addedKeys = [...curTuples.keys()].filter((k) => !prevTuples.has(k));
+  const removedKeys = [...prevTuples.keys()].filter((k) => !curTuples.has(k));
+  return {
+    agentNodes: {
+      added: [...curIds].filter((id) => !prevIds.has(id)).sort(),
+      removed: [...prevIds].filter((id) => !curIds.has(id)).sort(),
+    },
+    agentEdges: {
+      added: summarizeAgentEdges(addedKeys, curTuples),
+      removed: summarizeAgentEdges(removedKeys, prevTuples),
+    },
+  };
+}
+
+/** v2.6.0 (D-A3) — fleet-level agent/relationship convergence rollup. Mirrors
+ *  the analytics capability rules (skills/skill-graph-analytics/SKILL.md:90-106)
+ *  one level up: promotion = same bare agent name on a single content hash in
+ *  >= threshold project graphs and absent from the root graph; >= 2 hashes =
+ *  reconciliation candidate (never auto-promoted); hash-unknown carries the
+ *  analytics third class. Relationship candidates: normalized
+ *  (agent, kind, endpoint, edgeType) tuples in >= threshold projects with no
+ *  root-graph counterpart. Splits: same normalized agent-endpoint pair carried
+ *  under >= 2 edge types across >= 2 projects. Report-only — the fleet report
+ *  never files tickets. */
+export interface AgentRollup {
+  threshold: number;
+  promotions: Array<{ name: string; hash: string; projects: string[] }>;
+  reconciliations: Array<{ name: string; hashes: Record<string, string[]> }>;
+  hashUnknown: string[];
+  relationships: Array<{ agent: string; kind: string; endpoint: string; edgeType: string; projects: string[] }>;
+  splits: Array<{ agent: string; kind: string; endpoint: string; types: Record<string, string[]> }>;
+  /** Uncapped per-class totals (the listed arrays are capped at ROLLUP_CAP). */
+  totals: { promotions: number; reconciliations: number; hashUnknown: number; relationships: number; splits: number };
+}
+
+/** Root-graph presence keyed the way the rollup joins: bare agent names and
+ *  normalized agent-touching relationship tuples. */
+function rootAgentIndex(rootGraph: SkillGraph): { names: Set<string>; tuples: Set<string> } {
+  const names = new Set<string>();
+  const agentIds = new Set<string>();
+  for (const node of rootGraph.nodes ?? []) {
+    if (node.type !== "agent") continue;
+    agentIds.add(node.id);
+    names.add(agentBareName(node.id));
+  }
+  const tuples = new Set<string>();
+  for (const edge of rootGraph.edges ?? []) {
+    const fromAgent = agentIds.has(edge.from);
+    const toAgent = agentIds.has(edge.to);
+    if (!fromAgent && !toAgent) continue;
+    const agentId = fromAgent ? edge.from : edge.to;
+    const otherId = fromAgent ? edge.to : edge.from;
+    tuples.add(
+      `${agentBareName(agentId)}\u0000${agentKindOf(otherId)}\u0000${agentBareName(otherId)}\u0000${edge.type}`,
+    );
+  }
+  return { names, tuples };
+}
+
+export function buildAgentRollup(
+  projectBlocks: Record<string, AgentGraphProjection | undefined>,
+  rootGraph: SkillGraph | null,
+  threshold: number = CONVERGENCE_THRESHOLD,
+): AgentRollup {
+  const root = rootGraph ? rootAgentIndex(rootGraph) : { names: new Set<string>(), tuples: new Set<string>() };
+
+  // Agent capability convergence (bare name -> per-project hash sets)
+  const carriers = new Map<string, string[]>();
+  const hashesByProject = new Map<string, Map<string, Set<string | null>>>();
+  for (const [project, block] of Object.entries(projectBlocks)) {
+    for (const [id, hash] of block?.n ?? []) {
+      if (!id.startsWith("agent:")) continue;
+      const name = agentBareName(id);
+      if (!carriers.has(name)) carriers.set(name, []);
+      carriers.get(name)!.push(project);
+      if (!hashesByProject.has(name)) hashesByProject.set(name, new Map());
+      const perProject = hashesByProject.get(name)!;
+      if (!perProject.has(project)) perProject.set(project, new Set());
+      perProject.get(project)!.add(hash ?? null);
+    }
+  }
+
+  const promotions: AgentRollup["promotions"] = [];
+  const reconciliations: AgentRollup["reconciliations"] = [];
+  const hashUnknown: string[] = [];
+  for (const [name, list] of [...carriers.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const distinct = new Set(list.sort());
+    if (distinct.size < threshold) continue;
+    const hashGroups = new Map<string, string[]>();
+    let unknown = false;
+    for (const project of distinct) {
+      for (const h of hashesByProject.get(name)!.get(project) ?? []) {
+        if (h === null) {
+          unknown = true;
+          continue;
+        }
+        if (!hashGroups.has(h)) hashGroups.set(h, []);
+        hashGroups.get(h)!.push(project);
+      }
+    }
+    if (hashGroups.size >= 2) {
+      reconciliations.push({
+        name,
+        hashes: Object.fromEntries([...hashGroups.entries()].map(([h, ps]) => [h, [...new Set(ps)].sort()])),
+      });
+    } else if (unknown) {
+      hashUnknown.push(name);
+    } else if (!root.names.has(name)) {
+      const hash = [...hashGroups.keys()][0] ?? "";
+      promotions.push({ name, hash, projects: [...distinct] });
+    }
+  }
+
+  // Relationship convergence + edge-type splits
+  const relCarriers = new Map<string, string[]>();
+  const relSample = new Map<string, { agent: string; kind: string; endpoint: string; edgeType: string }>();
+  const pairTypes = new Map<string, Map<string, Set<string>>>();
+  const pairSample = new Map<string, { agent: string; kind: string; endpoint: string }>();
+  for (const [project, block] of Object.entries(projectBlocks)) {
+    for (const [ai, oi, ti] of block?.e ?? []) {
+      const agentId = block?.n[ai]?.[0];
+      const otherId = block?.n[oi]?.[0];
+      const edgeType = block?.t[ti];
+      if (!agentId?.startsWith("agent:") || otherId === undefined || edgeType === undefined) continue;
+      const agent = agentBareName(agentId);
+      const kind = agentKindOf(otherId);
+      const endpoint = agentBareName(otherId);
+      const relKey = `${agent}\u0000${kind}\u0000${endpoint}\u0000${edgeType}`;
+      if (!relCarriers.has(relKey)) relCarriers.set(relKey, []);
+      relCarriers.get(relKey)!.push(project);
+      relSample.set(relKey, { agent, kind, endpoint, edgeType });
+      const pairKey = `${agent}\u0000${kind}\u0000${endpoint}`;
+      if (!pairTypes.has(pairKey)) pairTypes.set(pairKey, new Map());
+      const types = pairTypes.get(pairKey)!;
+      if (!types.has(edgeType)) types.set(edgeType, new Set());
+      types.get(edgeType)!.add(project);
+      pairSample.set(pairKey, { agent, kind, endpoint });
+    }
+  }
+  const relationships: AgentRollup["relationships"] = [];
+  for (const [key, list] of [...relCarriers.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const distinct = [...new Set(list)].sort();
+    if (distinct.length < threshold) continue;
+    if (root.tuples.has(key)) continue; // root counterpart exists -> not a learning candidate
+    const s = relSample.get(key)!;
+    relationships.push({
+      agent: s.agent,
+      kind: s.kind,
+      endpoint: s.endpoint,
+      edgeType: s.edgeType,
+      projects: distinct,
+    });
+  }
+  const splits: AgentRollup["splits"] = [];
+  for (const [key, types] of [...pairTypes.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    if (types.size < 2) continue;
+    const projectCount = new Set([...types.values()].flatMap((s) => [...s])).size;
+    if (projectCount < 2) continue; // "carried under different edge types ACROSS projects"
+    const s = pairSample.get(key)!;
+    splits.push({
+      agent: s.agent,
+      kind: s.kind,
+      endpoint: s.endpoint,
+      types: Object.fromEntries([...types.entries()].map(([t, ps]) => [t, [...ps].sort()])),
+    });
+  }
+
+  const cap = <T>(rows: T[]): T[] => rows.slice(0, ROLLUP_CAP);
+  return {
+    threshold,
+    promotions: cap(promotions),
+    reconciliations: cap(reconciliations),
+    hashUnknown: cap(hashUnknown.sort()),
+    relationships: cap(relationships),
+    splits: cap(splits),
+    totals: {
+      promotions: promotions.length,
+      reconciliations: reconciliations.length,
+      hashUnknown: hashUnknown.length,
+      relationships: relationships.length,
+      splits: splits.length,
+    },
+  };
+}
+
+// ── v2.6.0 — root git-history backfill (design §13 addendum) ──
+
+/** Hard maximum of commits replayed per backfill run (~7 s expected ceiling at
+ *  the measured ~7 ms/commit); exceeding it aborts the island with a WARN —
+ *  raise the constant deliberately, never silently (§13.3). */
+export const BACKFILL_MAX_COMMITS = 1000;
+
+/** One backfilled root-graph state (per commit date, newest commit of the date
+ *  wins — §13.2 "collapse to one row per commit date"). The projection uses the
+ *  same AgentGraphProjection encoding as the snapshot blocks (one encoder,
+ *  one escape path); `schema` records the blob's top-level `version` (v1 blobs
+ *  lack the field -> 1). */
+export interface RootBackfillRow {
+  date: string;
+  commitCount: number;
+  schema: number;
+  agents: AgentGraphProjection;
+}
+
+/** Durable root git-history backfill series (memory/skill-graph-metrics/
+ *  root-backfill.json): deterministic, no wall-clock content — `headSha` is
+ *  content, so a rerun at the same HEAD is byte-identical (AC-A2). The filename
+ *  never matches the snapshot-YYYY-MM-DD.json freshness-gate pattern (AC-A4). */
+export interface RootBackfillFile {
+  provenance: "git-backfill";
+  headSha: string;
+  path: string;
+  rows: RootBackfillRow[];
+}
+
+/**
+ * Convert a repo-relative path into the form git expects for `-- <pathspec>` and
+ * `<rev>:<path>` operands.
+ *
+ * Why this exists: git pathspecs — both the `<rev>:<path>` form of `git show`
+ * and the pathspec after `--` in `git log` — are **always POSIX-shaped**, even
+ * on Windows. `path.join("docs", "skill-graph.json")` yields `docs\skill-graph.json`
+ * on Windows, which git cannot resolve: it fails with "path
+ * 'docs\skill-graph.json' exists on disk, but not in <sha>" (observed in the
+ * Windows CI leg). Filesystem paths stay native (`join` is correct there); only
+ * operands handed to git go through this helper. Idempotent, so callers may pass
+ * either a native or an already-normalized path.
+ */
+export function toGitPath(p: string): string {
+  return p.split(/[\\/]+/).join("/");
+}
+
+/** Repo HEAD sha via `git -C <dir> rev-parse HEAD`; null when not a repo / git
+ *  unavailable / unborn HEAD (the island turns null into one WARN). */
+export function readHeadSha(repoDir: string): string | null {
+  const res = spawnSync("git", ["-C", repoDir, "rev-parse", "HEAD"], {
+    encoding: "buffer",
+    env: gitCleanEnv() as NodeJS.ProcessEnv,
+  });
+  if (res.status !== 0 || !res.stdout) return null;
+  const sha = res.stdout.toString("utf8").trim();
+  return /^[0-9a-f]{40}$/i.test(sha) ? sha : null;
+}
+
+/** Staleness check (§13.2 rebuild policy): the recorded headSha must parse and
+ *  equal the current HEAD — equal and parseable -> skip. Pure. */
+export function backfillIsFresh(file: { headSha?: string } | null | undefined, headSha: string | null): boolean {
+  if (!headSha) return false;
+  return typeof file?.headSha === "string" && file.headSha === headSha;
+}
+
+/**
+ * Replay `git log --format=%H%x00%cd --date=short -- <relPath>` and extract one
+ * RootBackfillRow per commit DATE (full-blob `git show <sha>:<path>` parse —
+ * diff-parsing is rename/format-change-proof this way, §13.2; the newest commit
+ * of a date wins, commitCount accumulates). Aborts (throws) when the corpus
+ * exceeds `maxCommits` (default BACKFILL_MAX_COMMITS) — the caller's WARN
+ * island turns that into one stderr note. Blob parse failures throw (a
+ * half-replay must never be persisted). `relPath` is accepted in either native
+ * or POSIX form and is converted with toGitPath before reaching git argv.
+ */
+export async function replayGraphHistory(
+  repoDir: string,
+  relPath: string,
+  opts: { maxCommits?: number } = {},
+): Promise<RootBackfillRow[]> {
+  const maxCommits = opts.maxCommits ?? BACKFILL_MAX_COMMITS;
+  // git operands below are POSIX-shaped on every OS — see toGitPath.
+  const gitRelPath = toGitPath(relPath);
+  const log = spawnSync("git", ["-C", repoDir, "log", "--format=%H%x00%cd", "--date=short", "--", gitRelPath], {
+    encoding: "buffer",
+    env: gitCleanEnv() as NodeJS.ProcessEnv,
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  if (log.status !== 0 || !log.stdout) {
+    throw new Error(`git log failed for ${gitRelPath}: ${(log.stderr?.toString("utf8") ?? "").trim()}`);
+  }
+  const commits = log.stdout
+    .toString("utf8")
+    .split("\n")
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      const nul = line.indexOf("\0");
+      return nul > 0 ? { sha: line.slice(0, nul), date: line.slice(nul + 1) } : null;
+    })
+    .filter((c): c is { sha: string; date: string } => c !== null);
+  if (commits.length > maxCommits) {
+    throw new Error(
+      `root-backfill replay cap exceeded: ${commits.length} commits > ${maxCommits} — raise BACKFILL_MAX_COMMITS deliberately if the corpus truly grew`,
+    );
+  }
+  const byDate = new Map<string, RootBackfillRow>();
+  for (const commit of commits) {
+    const show = spawnSync("git", ["-C", repoDir, "show", `${commit.sha}:${gitRelPath}`], {
+      encoding: "buffer",
+      env: gitCleanEnv() as NodeJS.ProcessEnv,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    if (show.status !== 0 || !show.stdout) {
+      throw new Error(`git show ${commit.sha}:${gitRelPath} failed: ${(show.stderr?.toString("utf8") ?? "").trim()}`);
+    }
+    let blob: {
+      version?: number;
+      graph_profile?: string;
+      nodes?: Array<Record<string, any>>;
+      edges?: Array<Record<string, any>>;
+    };
+    try {
+      blob = JSON.parse(show.stdout.toString("utf8"));
+    } catch (err) {
+      throw new Error(`blob ${commit.sha} is not parseable JSON: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    if (!Array.isArray(blob.nodes)) {
+      throw new Error(`blob ${commit.sha} carries no nodes array (unexpected graph schema)`);
+    }
+    const graph = upgradeSkillGraph(blob);
+    const row: RootBackfillRow = {
+      date: commit.date,
+      commitCount: (byDate.get(commit.date)?.commitCount ?? 0) + 1,
+      schema: typeof blob.version === "number" ? blob.version : 1,
+      agents: extractAgentGraph(graph),
+    };
+    byDate.set(commit.date, row); // newest commit of the date wins (log is newest-first)
+  }
+  return [...byDate.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([, row]) => row);
+}
+
+/**
+ * One-shot semantics (§13.2): the step always rebuilds the FULL series from
+ * HEAD — idempotent and re-runnable by construction. Skips (returns the
+ * existing file, rebuilt=false) when the recorded headSha matches the current
+ * HEAD; otherwise replays and atomically rewrites `filePath`. Throws on
+ * non-repo context, cap abort, or any replay failure — the caller's WARN
+ * island owns the failure story (previous file stays, stale-honest).
+ */
+export async function ensureRootBackfill(
+  repoDir: string,
+  relPath: string,
+  filePath: string,
+  opts: { maxCommits?: number } = {},
+): Promise<{ file: RootBackfillFile; rebuilt: boolean }> {
+  const headSha = readHeadSha(repoDir);
+  if (!headSha) throw new Error("not a git repository (no HEAD) — root backfill needs repo history");
+  if (existsSync(filePath)) {
+    try {
+      const existing = JSON.parse(readFileSync(filePath, "utf-8")) as RootBackfillFile;
+      if (backfillIsFresh(existing, headSha)) return { file: existing, rebuilt: false };
+    } catch {
+      // malformed existing file -> full rebuild below (overwrite)
+    }
+  }
+  const rows = await replayGraphHistory(repoDir, relPath, opts);
+  // `path` records the git (POSIX) form, not the caller's native path: the file
+  // is a deterministic artifact and must be byte-identical across platforms for
+  // the same HEAD (toGitPath; replayGraphHistory applies the same form to git).
+  const file: RootBackfillFile = { provenance: "git-backfill", headSha, path: toGitPath(relPath), rows };
+  mkdirSync(dirname(filePath), { recursive: true });
+  // Compact serialization: the file is a machine artifact whose rows carry full
+  // per-date projections (~2 MB on the 340-commit corpus); pretty-printing it
+  // would double the git delta on every HEAD advance for zero readability gain.
+  writeFileSync(filePath, JSON.stringify(file) + "\n");
+  return { file, rebuilt: true };
 }
 
 export interface FleetReportArgs {
@@ -794,6 +1420,41 @@ export interface HistorySeriesRow {
   classes: { converged: number; divergent: number; unknown: number };
   newSkills: string[];
   vanishedSkills: string[];
+  /** v2.6.0 (D-A2): agent-node + per-edge-type NEW/VANISHED vs the prior
+   *  snapshot; null when this snapshot carries no agentGraph block (legacy
+   *  dates — the page renders the "agent tracking begins" note instead). */
+  agents?: AgentDiffClasses | null;
+  /** v2.6.0 (AC1): server-computed relative href to the raw snapshot file
+   *  (null for a non-ISO date — the guard lives here, never in client JS). */
+  snapshotHref?: string | null;
+}
+
+/** v2.6.0: one backfilled root row condensed for page consumption (AC-A1):
+ *  commit-granularity date, per-date commit count, blob schema, agent/edge
+ *  tuple counts, and the bare-name NEW/VANISHED agent lists vs the prior row
+ *  (capped at AGENT_SAMPLE_CAP; computed at render, never stored). */
+export interface BackfillPageRow {
+  date: string;
+  commitCount: number;
+  schema: number;
+  agents: number;
+  edges: number;
+  newAgents: string[];
+  removedAgents: string[];
+}
+
+export interface BackfillSummary {
+  headSha: string;
+  rows: BackfillPageRow[];
+}
+
+/** v2.6.0: latest-snapshot agent surface for the Agents tab (sections 1-2):
+ *  agents per project and agent<->skill relationship counts by edge type,
+ *  fleet aggregate + per project. */
+export interface AgentsLatest {
+  perProject: Record<string, number>;
+  relationshipByType: Record<string, number>;
+  relationshipByProjectType: Record<string, Record<string, number>>;
 }
 
 export interface HistoryGap {
@@ -822,6 +1483,92 @@ export interface HistoryModel {
     rootOrphans: Snapshot["rootOrphans"] | null;
   };
   tickets: HistoryTicket[];
+  /** v2.6.0: first snapshot date carrying any agentGraph block (null when the
+   *  whole corpus is legacy counts-only — no fabricated dates, AC1). */
+  agentTrackingBegins: string | null;
+  /** v2.6.0: latest agent surface (Agents tab sections 1-2); null when the
+   *  latest snapshot carries no agentGraph block. */
+  agentsLatest: AgentsLatest | null;
+  /** v2.6.0 (D-A3): >=3-project convergence rollup (report-only learning
+   *  candidates); null when the caller had no projection/root data. */
+  rollup: AgentRollup | null;
+  /** v2.6.0 (§13): backfilled root timeline (provenance-marked on the page);
+   *  null when the backfill island failed or produced no rows. */
+  backfill: BackfillSummary | null;
+}
+
+/** Condense a RootBackfillFile into page rows with computed bare-name
+ *  NEW/VANISHED agent diffs (§13.2: cross-schema rows diff on bare-name
+ *  normalization only). Pure. */
+export function summarizeBackfill(file: RootBackfillFile | null | undefined): BackfillSummary | null {
+  if (!file || !Array.isArray(file.rows) || file.rows.length === 0) return null;
+  const rows: BackfillPageRow[] = [];
+  let prevAgentNames: Set<string> | null = null;
+  for (const row of file.rows) {
+    const agentNames = new Set<string>();
+    let agentCount = 0;
+    for (const [id] of row.agents?.n ?? []) {
+      if (!id.startsWith("agent:")) continue;
+      agentCount++;
+      agentNames.add(agentBareName(id));
+    }
+    let newAgents: string[] = [];
+    let removedAgents: string[] = [];
+    const prev = prevAgentNames;
+    if (prev !== null) {
+      newAgents = [...agentNames]
+        .filter((n) => !prev.has(n))
+        .sort()
+        .slice(0, AGENT_SAMPLE_CAP);
+      removedAgents = [...prev]
+        .filter((n) => !agentNames.has(n))
+        .sort()
+        .slice(0, AGENT_SAMPLE_CAP);
+    }
+    rows.push({
+      date: row.date,
+      commitCount: row.commitCount,
+      schema: row.schema,
+      agents: agentCount,
+      edges: row.agents?.e?.length ?? 0,
+      newAgents,
+      removedAgents,
+    });
+    prevAgentNames = agentNames;
+  }
+  return { headSha: file.headSha, rows };
+}
+
+/** Latest agent surface (Agents tab sections 1-2) from one snapshot's
+ *  per-project projections. Agent↔skill relationships = stored tuples whose
+ *  OTHER endpoint's kind prefix is `skill`. Returns null when the snapshot
+ *  carries no agentGraph blocks. Pure. */
+function agentsLatestOf(snapshot: Snapshot | null): AgentsLatest | null {
+  const perProject: Record<string, number> = {};
+  const relationshipByType: Record<string, number> = {};
+  const relationshipByProjectType: Record<string, Record<string, number>> = {};
+  let any = false;
+  for (const [project, entry] of Object.entries(snapshot?.projects ?? {})) {
+    const block = entry?.agentGraph;
+    if (!block) continue;
+    any = true;
+    let count = 0;
+    for (const [id] of block.n) if (id.startsWith("agent:")) count++;
+    perProject[project] = count;
+    const byType: Record<string, number> = {};
+    for (const [ai, oi, ti] of block.e) {
+      const agentId = block.n[ai]?.[0];
+      const otherId = block.n[oi]?.[0];
+      const type = block.t[ti];
+      if (!agentId?.startsWith("agent:") || otherId === undefined || type === undefined) continue;
+      if (agentKindOf(otherId) !== "skill") continue;
+      byType[type] = (byType[type] ?? 0) + 1;
+      relationshipByType[type] = (relationshipByType[type] ?? 0) + 1;
+    }
+    relationshipByProjectType[project] = byType;
+  }
+  if (!any) return null;
+  return { perProject, relationshipByType, relationshipByProjectType };
 }
 
 /**
@@ -1029,14 +1776,23 @@ function loadSnapshots(snapshotDir: string): Snapshot[] {
  * class counts + pairwise NEW/VANISHED replay (snapshots do not store
  * historical diffs), derived gap ranges, latest-snapshot detail, dynamic fleet
  * coverage with the transient-absent annotation, and the governance-ticket
- * scan. Pure: identical inputs → identical model → byte-identical page.
+ * scan. v2.6.0 adds the agent replay: per-date agent-node + per-edge-type
+ * NEW/VANISHED classes computed from the raw `agentGraph` projections (rows
+ * whose snapshot lacks the block — every legacy date — carry `agents: null`),
+ * the first tracking date, the latest agent surface, and pass-through of the
+ * rollup + backfill the caller computed. Pure: identical inputs → identical
+ * model → byte-identical page.
  */
 export function buildHistoryModel(
   snapshots: Snapshot[],
   fleetInfo: FleetInfoInput,
   tickets: HistoryTicket[] = [],
+  extras: { rollup?: AgentRollup | null; backfill?: RootBackfillFile | null } = {},
 ): HistoryModel {
   const sorted = [...snapshots].sort((a, b) => a.date.localeCompare(b.date));
+  const SNAPSHOT_HREF_RE = /^\d{4}-\d{2}-\d{2}$/;
+  const hrefOf = (date: string): string | null =>
+    SNAPSHOT_HREF_RE.test(date) ? `../memory/skill-graph-metrics/snapshot-${date}.json` : null;
   const series: HistorySeriesRow[] = sorted.map((s, i) => {
     const conv = s.convergence;
     const classes = {
@@ -1052,7 +1808,27 @@ export function buildHistoryModel(
       newSkills = [...cur].filter((id) => !prev.has(id)).sort();
       vanishedSkills = [...prev].filter((id) => !cur.has(id)).sort();
     }
-    return { date: s.date, projects: s.projects ?? {}, classes, newSkills, vanishedSkills };
+    // v2.6.0: agent replay — a snapshot carrying any agentGraph block diffs
+    // against the prior snapshot's blocks (a legacy prior side = the honest
+    // full baseline: everything NEW); a blockless snapshot carries null.
+    let agents: AgentDiffClasses | null = null;
+    const curBlocks: Record<string, AgentGraphProjection | undefined> = {};
+    const prevBlocks: Record<string, AgentGraphProjection | undefined> = {};
+    for (const [project, entry] of Object.entries(s.projects ?? {})) curBlocks[project] = entry?.agentGraph;
+    for (const [project, entry] of Object.entries(sorted[i - 1]?.projects ?? {}))
+      prevBlocks[project] = entry?.agentGraph;
+    if (Object.values(curBlocks).some((b) => b !== undefined)) {
+      agents = diffAgentGraphs(prevBlocks, curBlocks);
+    }
+    return {
+      date: s.date,
+      projects: s.projects ?? {},
+      classes,
+      newSkills,
+      vanishedSkills,
+      agents,
+      snapshotHref: hrefOf(s.date),
+    };
   });
   const gaps = deriveGaps(series.map((r) => r.date));
   const latestSnap = sorted[sorted.length - 1] ?? null;
@@ -1072,7 +1848,18 @@ export function buildHistoryModel(
     name,
     transientAbsent: !present.has(name) && fleetInfo.transientAbsent.includes(name),
   }));
-  return { fleet: { count: fleetInfo.count, members }, series, gaps, latest, tickets };
+  const beginRow = series.find((r) => r.agents !== null) ?? null;
+  return {
+    fleet: { count: fleetInfo.count, members },
+    series,
+    gaps,
+    latest,
+    tickets,
+    agentTrackingBegins: beginRow?.date ?? null,
+    agentsLatest: agentsLatestOf(latestSnap),
+    rollup: extras.rollup ?? null,
+    backfill: summarizeBackfill(extras.backfill),
+  };
 }
 
 /** Full page as one deterministic string; write only after it is fully built (design §5.1). */
@@ -1109,6 +1896,7 @@ h1{margin:0 0 8px;font-size:20px}
 #tabs{display:flex;gap:4px;flex-wrap:wrap}
 .tab-btn{padding:7px 14px;border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;background:var(--card);color:var(--muted);cursor:pointer;font:inherit}
 .tab-btn.active{color:var(--fg);font-weight:600;border-bottom:1px solid var(--card);margin-bottom:-1px}
+a.tab-link{text-decoration:none;display:inline-block}
 main{padding:16px 20px 40px}
 .tab{display:none}
 .tab.active{display:block}
@@ -1155,14 +1943,17 @@ details.group[open]>summary{margin-bottom:6px}
 <nav id="tabs" aria-label="Report tabs">
 <button class="tab-btn active" data-tab="overview" type="button">Overview</button>
 <button class="tab-btn" data-tab="timeline" type="button">Timeline</button>
+<button class="tab-btn" data-tab="agents" type="button">Agents</button>
 <button class="tab-btn" data-tab="divergence" type="button">Divergence</button>
 <button class="tab-btn" data-tab="gaps" type="button">Delivery gaps</button>
 <button class="tab-btn" data-tab="tickets" type="button">Tickets</button>
+<a class="tab-btn tab-link" href="skill-graph-structure.html" title="Graph-structure companion page">Structure</a>
 </nav>
 </header>
 <main>
 <section id="tab-overview" class="tab active"></section>
 <section id="tab-timeline" class="tab"></section>
+<section id="tab-agents" class="tab"></section>
 <section id="tab-divergence" class="tab"></section>
 <section id="tab-gaps" class="tab"></section>
 <section id="tab-tickets" class="tab"></section>
@@ -1205,7 +1996,7 @@ document.getElementById("theme-toggle").addEventListener("click", function () {
 });
 
 // tabs
-var TABS = ["overview", "timeline", "divergence", "gaps", "tickets"];
+var TABS = ["overview", "timeline", "agents", "divergence", "gaps", "tickets"];
 var sections = {};
 TABS.forEach(function (t) { sections[t] = document.getElementById("tab-" + t); });
 var active = "overview";
@@ -1237,6 +2028,71 @@ function statCard(value, label) {
   c.appendChild(el("div", "stat-v", value));
   c.appendChild(el("div", "stat-l", label));
   return c;
+}
+
+// v2.6.0: the per-row snapshot hrefs are computed SERVER-side (regex-guarded
+// there; see buildHistoryModel's snapshotHref) — full data for any date is one
+// relative navigation away (CSP default-src 'none' governs resource loads, not
+// navigation). The client never synthesizes URLs from model content.
+
+function countTable(pairs, valueHeader, nameHeader) {
+  var table = el("table");
+  var thead = el("thead");
+  var hr = el("tr");
+  [nameHeader || "name", valueHeader].forEach(function (h) { hr.appendChild(el("th", "", h)); });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  var tbody = el("tbody");
+  pairs.forEach(function (p) {
+    var tr = el("tr", "row");
+    tr.setAttribute("data-search", p[0].toLowerCase());
+    tr.appendChild(el("td", "", p[0]));
+    tr.appendChild(el("td", "", String(p[1])));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  return table;
+}
+
+function sortedPairs(rec) {
+  return Object.keys(rec || {}).map(function (k) { return [k, rec[k]]; })
+    .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); });
+}
+
+function edgeSummaryBlock(summaries, kindLabel, href) {
+  var wrap = el("div");
+  var head = el("h3", "", kindLabel);
+  if (href) {
+    var link = el("a", "muted", "full snapshot \\u2192");
+    link.setAttribute("href", href);
+    head.appendChild(document.createTextNode(" "));
+    head.appendChild(link);
+  }
+  wrap.appendChild(head);
+  if (!summaries || summaries.length === 0) {
+    wrap.appendChild(el("p", "muted", "\\u2014"));
+    return wrap;
+  }
+  summaries.forEach(function (s) {
+    var det = document.createElement("details");
+    det.className = "group row";
+    var sum = el("summary");
+    sum.appendChild(el("span", "cap", s.type));
+    sum.appendChild(el("span", "count", String(s.count)));
+    det.appendChild(sum);
+    var chips = el("div", "chips");
+    s.sample.forEach(function (t) {
+      var chipEl = chip(t[0] + " \\u2194 " + t[1] + " (" + t[2] + ")");
+      chipEl.setAttribute("data-search", (t[0] + " " + t[1] + " " + t[2]).toLowerCase());
+      chips.appendChild(chipEl);
+    });
+    if (s.count > s.sample.length) {
+      chips.appendChild(el("span", "muted", "and " + (s.count - s.sample.length) + " more"));
+    }
+    det.appendChild(chips);
+    wrap.appendChild(det);
+  });
+  return wrap;
 }
 
 function renderOverview() {
@@ -1351,6 +2207,195 @@ function renderTimeline() {
   tl.appendChild(table);
 }
 
+function renderAgents() {
+  var ag = sections.agents;
+  ag.textContent = "";
+  ag.appendChild(el("h2", "", "Agent tracking"));
+  if (MODEL.agentTrackingBegins) {
+    ag.appendChild(el("p", "muted", "Agent tracking begins " + MODEL.agentTrackingBegins + " \\u2014 earlier dates record skill capabilities only (legacy snapshots carry no agentGraph block)."));
+  } else {
+    ag.appendChild(el("p", "muted", "No snapshot in this corpus carries an agentGraph block yet \\u2014 agent tracking starts with the next emission."));
+  }
+
+  // (1) agents per project + (2) relationship counts by edge type (latest snapshot)
+  var latest = MODEL.agentsLatest;
+  if (latest) {
+    ag.appendChild(el("h2", "", "Agents per project (latest snapshot " + MODEL.latest.date + ")"));
+    ag.appendChild(countTable(sortedPairs(latest.perProject), "agents", "project"));
+    ag.appendChild(el("h2", "", "Agent\\u2194skill relationships by edge type (fleet aggregate)"));
+    ag.appendChild(countTable(sortedPairs(latest.relationshipByType), "relationships", "edge type"));
+    ag.appendChild(el("h2", "", "Agent\\u2194skill relationships per project"));
+    Object.keys(latest.relationshipByProjectType).sort().forEach(function (p) {
+      var det = document.createElement("details");
+      det.className = "group row";
+      var sum = el("summary");
+      sum.appendChild(el("span", "cap", p));
+      det.appendChild(sum);
+      det.appendChild(countTable(sortedPairs(latest.relationshipByProjectType[p]), "relationships", "edge type"));
+      det.setAttribute("data-search", p.toLowerCase());
+      ag.appendChild(det);
+    });
+  } else {
+    ag.appendChild(el("p", "muted", "Latest snapshot carries no agentGraph block."));
+  }
+
+  // (3) newest relationship changes (reverse-chron feed of the per-date classes)
+  ag.appendChild(el("h2", "", "Newest relationship changes (snapshot-sourced, newest first)"));
+  var feedRows = MODEL.series.filter(function (r) { return r.agents !== null && r.agents !== undefined; });
+  if (feedRows.length === 0) {
+    ag.appendChild(el("p", "muted", "No agentGraph diffs recorded yet."));
+  }
+  for (var fi = feedRows.length - 1; fi >= 0; fi--) {
+    var row = feedRows[fi];
+    var grp = el("div", "group row");
+    grp.setAttribute("data-search", row.date.toLowerCase());
+    var head = el("h3", "", row.date);
+    var href = row.snapshotHref;
+    if (href) {
+      var link = el("a", "muted", "full snapshot \\u2192");
+      link.setAttribute("href", href);
+      head.appendChild(document.createTextNode(" "));
+      head.appendChild(link);
+    }
+    grp.appendChild(head);
+    var nodeLine = el("p", "", "");
+    nodeLine.appendChild(el("span", "cap", "agent nodes "));
+    nodeLine.appendChild(document.createTextNode("added " + row.agents.agentNodes.added.length + ", removed " + row.agents.agentNodes.removed.length));
+    grp.appendChild(nodeLine);
+    if (row.agents.agentNodes.added.length > 0) {
+      var addChips = el("div", "chips");
+      row.agents.agentNodes.added.forEach(function (id) { addChips.appendChild(chip(id)); });
+      grp.appendChild(addChips);
+    }
+    if (row.agents.agentNodes.removed.length > 0) {
+      var remChips = el("div", "chips");
+      row.agents.agentNodes.removed.forEach(function (id) { remChips.appendChild(chip(id)); });
+      grp.appendChild(remChips);
+    }
+    grp.appendChild(edgeSummaryBlock(row.agents.agentEdges.added, "Edges added by type", row.snapshotHref));
+    grp.appendChild(edgeSummaryBlock(row.agents.agentEdges.removed, "Edges removed by type", row.snapshotHref));
+    ag.appendChild(grp);
+  }
+
+  // (A1) backfilled root timeline — commit-granularity, provenance-marked
+  ag.appendChild(el("h2", "", "Root timeline (backfilled from git history)"));
+  if (MODEL.backfill && MODEL.backfill.rows.length > 0) {
+    ag.appendChild(el("p", "muted", "Backfilled from git history \\u2014 commit-granularity only (intra-commit-day states never existed; stale windows replay as repeated identical states, not interpolated gaps). Provenance: " + MODEL.backfill.headSha.slice(0, 12) + "."));
+    var bfTable = el("table");
+    var bthead = el("thead");
+    var bhr = el("tr");
+    ["date", "commits", "schema", "agents", "edges", "new agents", "removed agents", "provenance"].forEach(function (h) { bhr.appendChild(el("th", "", h)); });
+    bthead.appendChild(bhr);
+    bfTable.appendChild(bthead);
+    var btbody = el("tbody");
+    for (var bi = MODEL.backfill.rows.length - 1; bi >= 0; bi--) {
+      var brow = MODEL.backfill.rows[bi];
+      var btr = el("tr", "row");
+      btr.setAttribute("data-search", brow.date.toLowerCase());
+      btr.appendChild(el("td", "mono", brow.date));
+      btr.appendChild(el("td", "", String(brow.commitCount)));
+      btr.appendChild(el("td", "", String(brow.schema)));
+      btr.appendChild(el("td", "", String(brow.agents)));
+      btr.appendChild(el("td", "", String(brow.edges)));
+      var tdNewA = el("td");
+      if (brow.newAgents.length === 0) tdNewA.appendChild(el("span", "muted", "\\u2014"));
+      else brow.newAgents.forEach(function (n) { tdNewA.appendChild(chip(n)); });
+      btr.appendChild(tdNewA);
+      var tdRemA = el("td");
+      if (brow.removedAgents.length === 0) tdRemA.appendChild(el("span", "muted", "\\u2014"));
+      else brow.removedAgents.forEach(function (n) { tdRemA.appendChild(chip(n)); });
+      btr.appendChild(tdRemA);
+      var tdProv = el("td");
+      tdProv.appendChild(el("span", "badge", "backfilled"));
+      btr.appendChild(tdProv);
+      btbody.appendChild(btr);
+    }
+    bfTable.appendChild(btbody);
+    ag.appendChild(bfTable);
+  } else {
+    ag.appendChild(el("p", "muted", "No backfilled root history available \\u2014 showing snapshot-sourced days only."));
+  }
+
+  // (D-A3) learning-candidates callout (report-only; filing belongs to the resync skill + human triage)
+  var rollup = MODEL.rollup;
+  ag.appendChild(el("h2", "", "Learning candidates (>= " + (rollup ? rollup.threshold : 3) + " projects, report-only \\u2014 the fleet report never files tickets)"));
+  if (!rollup) {
+    ag.appendChild(el("p", "muted", "No rollup computed for this run."));
+    return;
+  }
+  function rollupGroup(title, rows, render) {
+    ag.appendChild(el("h3", "", title));
+    if (!rows || rows.length === 0) {
+      ag.appendChild(el("p", "muted", "\\u2014"));
+      return;
+    }
+    var table = el("table");
+    var thead = el("thead");
+    var hr2 = el("tr");
+    var headers = render.headers;
+    headers.forEach(function (h) { hr2.appendChild(el("th", "", h)); });
+    thead.appendChild(hr2);
+    table.appendChild(thead);
+    var tbody2 = el("tbody");
+    rows.forEach(function (r) {
+      var tr = el("tr", "row");
+      tr.setAttribute("data-search", render.search(r).toLowerCase());
+      render.cells(r).forEach(function (cell) { tr.appendChild(el("td", "", cell)); });
+      tbody2.appendChild(tr);
+    });
+    table.appendChild(tbody2);
+    ag.appendChild(table);
+  }
+  function hashGroupsLine(rec) {
+    return Object.keys(rec).map(function (h) { return h.slice(0, 8) + ": " + rec[h].join(", "); }).join(" \\u00b7 ");
+  }
+  rollupGroup(
+    "Agent capability convergence \\u2014 promotion candidates (single hash, absent from root): " + rollup.promotions.length + (rollup.totals.promotions > rollup.promotions.length ? " (showing " + rollup.promotions.length + " of " + rollup.totals.promotions + ")" : ""),
+    rollup.promotions,
+    {
+      headers: ["agent", "hash", "projects"],
+      cells: function (r) { return [r.name, r.hash.slice(0, 8), r.projects.join(", ")]; },
+      search: function (r) { return r.name + " " + r.projects.join(" "); },
+    },
+  );
+  rollupGroup(
+    "Agent capability divergence \\u2014 reconciliation candidates, never auto-promoted: " + rollup.reconciliations.length + (rollup.totals.reconciliations > rollup.reconciliations.length ? " (showing " + rollup.reconciliations.length + " of " + rollup.totals.reconciliations + ")" : ""),
+    rollup.reconciliations,
+    {
+      headers: ["agent", "hash groups"],
+      cells: function (r) { return [r.name, hashGroupsLine(r.hashes)]; },
+      search: function (r) { return r.name; },
+    },
+  );
+  rollupGroup(
+    "Agent capability hash-unknown: " + rollup.hashUnknown.length,
+    rollup.hashUnknown.map(function (n) { return { name: n }; }),
+    {
+      headers: ["agent"],
+      cells: function (r) { return [r.name]; },
+      search: function (r) { return r.name; },
+    },
+  );
+  rollupGroup(
+    "Relationship convergence \\u2014 learning candidates (absent from root): " + rollup.relationships.length + (rollup.totals.relationships > rollup.relationships.length ? " (showing " + rollup.relationships.length + " of " + rollup.totals.relationships + ")" : ""),
+    rollup.relationships,
+    {
+      headers: ["agent", "edge type", "endpoint", "projects"],
+      cells: function (r) { return [r.agent, r.edgeType, r.kind + ":" + r.endpoint, r.projects.join(", ")]; },
+      search: function (r) { return r.agent + " " + r.endpoint + " " + r.edgeType + " " + r.projects.join(" "); },
+    },
+  );
+  rollupGroup(
+    "Edge-type splits \\u2014 divergence-style candidates: " + rollup.splits.length + (rollup.totals.splits > rollup.splits.length ? " (showing " + rollup.splits.length + " of " + rollup.totals.splits + ")" : ""),
+    rollup.splits,
+    {
+      headers: ["agent", "endpoint", "types (projects)"],
+      cells: function (r) { return [r.agent, r.kind + ":" + r.endpoint, hashGroupsLine(r.types)]; },
+      search: function (r) { return r.agent + " " + r.endpoint; },
+    },
+  );
+}
+
 function renderDivergence() {
   var dv = sections.divergence;
   dv.textContent = "";
@@ -1446,10 +2491,460 @@ function renderTickets() {
 
 renderOverview();
 renderTimeline();
+renderAgents();
 renderDivergence();
 renderGaps();
 renderTickets();
 activate("overview");
+})();
+</script>
+</body>
+</html>`;
+}
+
+// ── v2.6.0 — graph-structure companion page (design docs/designs/2026-11-23-skill-graph-observability-design.md §5.5) ──
+
+/** Hub list cap (structure facts by degree, NOT centrality scoring — non-goal §4). */
+export const HUB_CAP = 20;
+
+/** Top-N capability differences per juxtaposition direction (design §5.5 content 3). */
+export const JUXTAPOSITION_CAP = 10;
+
+export interface StructureColumn {
+  /** Human source label, e.g. "root layer slice" or "templates/co-x/docs/skill-graph.json". */
+  source: string;
+  /** The column's own hop layer vocabulary (measured from the data, never assumed). */
+  vocabulary: string;
+  nodes: number;
+  edges: number;
+  byType: Record<string, number>;
+}
+
+export interface StructureVariant {
+  variant: string;
+  root: StructureColumn;
+  template: StructureColumn | null;
+  project: StructureColumn | null;
+  /** Capabilities present in the project but not the template (top JUXTAPOSITION_CAP + more). */
+  projectOnly: { names: string[]; more: number };
+  /** Capabilities present in the template but not the project. */
+  templateOnly: { names: string[]; more: number };
+}
+
+export interface StructureModel {
+  root: { nodes: number; edges: number };
+  /** Compact explorer payload: node ids in graph order (index = node index). */
+  labels: string[];
+  /** Node-type enum (first-seen order). */
+  types: string[];
+  /** Layer enum (first-seen order). */
+  layers: string[];
+  /** Flat [typeIdx, layerIdx] per node. */
+  meta: number[];
+  /** Edge-type enum (first-seen order). */
+  edgeTypes: string[];
+  /** Numeric adjacency [fromIdx, toIdx, typeIdx] over ALL root edges. */
+  adj: Array<[number, number, number]>;
+  /** Layer composition (L0, common, then variant:* alphabetically). */
+  layerMatrix: Array<{ layer: string; total: number; byType: Record<string, number> }>;
+  edgeDistribution: Array<{ type: string; count: number }>;
+  /** Top hubs by degree (structure facts, not scores; cap HUB_CAP). */
+  hubs: Array<{ id: string; degree: number }>;
+  /** Per-variant three-column juxtaposition. */
+  variants: StructureVariant[];
+  /** Root agent/edge count-over-time from the git-history backfill (null when absent). */
+  backfill: {
+    headSha: string;
+    rows: Array<{ date: string; commitCount: number; schema: number; agents: number; edges: number }>;
+  } | null;
+}
+
+/** Bare capability names (skill+agent nodes) of one graph, sorted — the
+ *  juxtaposition diff key. */
+function capabilityBareNames(graph: SkillGraph): Set<string> {
+  const out = new Set<string>();
+  for (const node of graph.nodes ?? []) {
+    if (node.type !== "skill" && node.type !== "agent") continue;
+    out.add(capabilityOf(node));
+  }
+  return out;
+}
+
+function columnOf(graph: SkillGraph, source: string, inducedIds?: Set<string>): StructureColumn {
+  const nodes = graph.nodes ?? [];
+  const byType: Record<string, number> = {};
+  const kept = inducedIds ? nodes.filter((n) => inducedIds.has(n.id)) : nodes;
+  for (const n of kept) byType[n.type] = (byType[n.type] ?? 0) + 1;
+  const idSet = inducedIds ?? new Set(nodes.map((n) => n.id));
+  let edges = 0;
+  for (const e of graph.edges ?? []) {
+    if (idSet.has(e.from) && idSet.has(e.to)) edges++;
+  }
+  const vocab = [...new Set(kept.map((n) => n.layer))].sort().join(" · ") || "(none)";
+  return { source, vocabulary: vocab, nodes: kept.length, edges, byType };
+}
+
+/**
+ * v2.6.0 (D-C) — structure-page model: full-root compact payload (labels +
+ * enums + numeric adjacency, measured ~89 KB), layer composition, degree hubs,
+ * per-variant root/template/project juxtaposition with per-hop vocabulary, and
+ * the backfill count-over-time series. Pure: identical inputs → identical
+ * model → byte-identical page (AC13).
+ */
+export function buildStructureModel(
+  rootGraph: SkillGraph,
+  templateGraphs: Record<string, SkillGraph | null>,
+  projectGraphs: Record<string, SkillGraph | null>,
+  backfill: RootBackfillFile | null,
+): StructureModel {
+  const nodes = rootGraph.nodes ?? [];
+  const edges = rootGraph.edges ?? [];
+  const labels = nodes.map((n) => n.id);
+  const types: string[] = [];
+  const layers: string[] = [];
+  const typeIdx = new Map<string, number>();
+  const layerIdx = new Map<string, number>();
+  const meta: number[] = [];
+  const enumOf = (list: string[], index: Map<string, number>, value: string): number => {
+    let idx = index.get(value);
+    if (idx === undefined) {
+      idx = list.length;
+      index.set(value, idx);
+      list.push(value);
+    }
+    return idx;
+  };
+  for (const n of nodes) {
+    meta.push(enumOf(types, typeIdx, n.type), enumOf(layers, layerIdx, n.layer));
+  }
+  const edgeTypes: string[] = [];
+  const edgeTypeIdx = new Map<string, number>();
+  const adj: Array<[number, number, number]> = [];
+  const nodePos = new Map<string, number>();
+  nodes.forEach((n, i) => nodePos.set(n.id, i));
+  for (const e of edges) {
+    const from = nodePos.get(e.from);
+    const to = nodePos.get(e.to);
+    if (from === undefined || to === undefined) continue;
+    adj.push([from, to, enumOf(edgeTypes, edgeTypeIdx, e.type)]);
+  }
+
+  const layerOrder = (a: string, b: string): number => {
+    const rank = (l: string): number => (l === "L0" ? 0 : l === "common" ? 1 : l.startsWith("variant:") ? 2 : 3);
+    return rank(a) - rank(b) || a.localeCompare(b);
+  };
+  const byLayer = new Map<string, Record<string, number>>();
+  for (const n of nodes) {
+    const slot = byLayer.get(n.layer) ?? {};
+    slot[n.type] = (slot[n.type] ?? 0) + 1;
+    byLayer.set(n.layer, slot);
+  }
+  const layerMatrix = [...byLayer.entries()]
+    .sort((a, b) => layerOrder(a[0], b[0]))
+    .map(([layer, slot]) => ({
+      layer,
+      total: Object.values(slot).reduce((a, b) => a + b, 0),
+      byType: slot,
+    }));
+
+  const dist = new Map<string, number>();
+  for (const e of edges) dist.set(e.type, (dist.get(e.type) ?? 0) + 1);
+  const edgeDistribution = [...dist.entries()]
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count || a.type.localeCompare(b.type));
+
+  const degree = new Map<string, number>();
+  for (const e of edges) {
+    degree.set(e.from, (degree.get(e.from) ?? 0) + 1);
+    degree.set(e.to, (degree.get(e.to) ?? 0) + 1);
+  }
+  const hubs = [...degree.entries()]
+    .map(([id, d]) => ({ id, degree: d }))
+    .sort((a, b) => b.degree - a.degree || a.id.localeCompare(b.id))
+    .slice(0, HUB_CAP);
+
+  const rootVocab = [...new Set(nodes.map((n) => n.layer))].sort(layerOrder).join(" · ");
+  const variantNames = [...new Set(nodes.map((n) => n.layer).filter((l) => l.startsWith("variant:")))]
+    .map((l) => l.slice("variant:".length))
+    .sort();
+  const variants: StructureVariant[] = variantNames.map((variant) => {
+    const sliceId = `variant:${variant}`;
+    const sliceIds = new Set(nodes.filter((n) => n.layer === sliceId).map((n) => n.id));
+    const rootCol = columnOf(rootGraph, `root layer slice (layer == ${sliceId})`, sliceIds);
+    rootCol.vocabulary = rootVocab; // the slice inherits the root hop's vocabulary
+    const template = templateGraphs[variant] ?? null;
+    const project = projectGraphs[variant] ?? null;
+    const templateCol = template ? columnOf(template, `templates/${variant}/docs/skill-graph.json`) : null;
+    const projectCol = project ? columnOf(project, `Projects/${variant}/docs/skill-graph.json`) : null;
+    const diff = (a: Set<string> | null, b: Set<string> | null): { names: string[]; more: number } => {
+      if (!a || !b) return { names: [], more: 0 };
+      const only = [...a].filter((x) => !b.has(x)).sort();
+      return { names: only.slice(0, JUXTAPOSITION_CAP), more: Math.max(0, only.length - JUXTAPOSITION_CAP) };
+    };
+    return {
+      variant,
+      root: rootCol,
+      template: templateCol,
+      project: projectCol,
+      projectOnly: diff(
+        capabilityBareNames(project ?? { version: 2, nodes: [], edges: [] }),
+        capabilityBareNames(template ?? { version: 2, nodes: [], edges: [] }),
+      ),
+      templateOnly: diff(
+        capabilityBareNames(template ?? { version: 2, nodes: [], edges: [] }),
+        capabilityBareNames(project ?? { version: 2, nodes: [], edges: [] }),
+      ),
+    };
+  });
+
+  const backfillRows = (backfill?.rows ?? []).map((r) => ({
+    date: r.date,
+    commitCount: r.commitCount,
+    schema: r.schema,
+    agents: r.agents?.n?.filter(([id]) => id.startsWith("agent:")).length ?? 0,
+    edges: r.agents?.e?.length ?? 0,
+  }));
+
+  return {
+    root: { nodes: nodes.length, edges: edges.length },
+    labels,
+    types,
+    layers,
+    meta,
+    edgeTypes,
+    adj,
+    layerMatrix,
+    edgeDistribution,
+    hubs,
+    variants,
+    backfill: backfillRows.length > 0 ? { headSha: backfill?.headSha ?? "", rows: backfillRows } : null,
+  };
+}
+
+/** Deterministic horizontal SVG bar row (no-JS visible layer composition). */
+function svgBar(label: string, count: number, max: number, fillVar: string): string {
+  const width = max > 0 ? Math.max(2, Math.round((count / max) * 380)) : 2;
+  return `<div class="barrow"><span class="barlabel">${escapeHtml(label)}</span><svg width="440" height="18" role="img" aria-label="${escapeHtml(label)}: ${count}"><rect x="0" y="3" width="${width}" height="12" style="fill:${fillVar}"></rect><text x="${width + 6}" y="14" class="bartext">${count}</text></svg></div>`;
+}
+
+/** Deterministic SVG count-over-time line (backfill series; both series drawn
+ *  against their own maxima — structure facts, not calibrated axes). */
+function svgTrendLine(rows: Array<{ date: string; agents: number; edges: number }>): string {
+  const n = rows.length;
+  const w = 720;
+  const h = 140;
+  const point = (i: number, v: number, max: number): string =>
+    `${Math.round((i / Math.max(1, n - 1)) * (w - 20)) + 10},${h - 10 - Math.round((v / Math.max(1, max)) * (h - 30))}`;
+  const maxA = Math.max(...rows.map((r) => r.agents), 1);
+  const maxE = Math.max(...rows.map((r) => r.edges), 1);
+  const lineA = rows.map((r, i) => point(i, r.agents, maxA)).join(" ");
+  const lineE = rows.map((r, i) => point(i, r.edges, maxE)).join(" ");
+  const first = rows[0];
+  const last = rows[n - 1];
+  return `<svg width="${w}" height="${h}" role="img" aria-label="root agent and agent-touching edge counts over backfilled git history">
+<polyline points="${lineA}" style="fill:none;stroke:var(--accent);stroke-width:2"></polyline>
+<polyline points="${lineE}" style="fill:none;stroke:var(--ok);stroke-width:2"></polyline>
+<text x="10" y="12" class="bartext">agents max ${maxA}</text>
+<text x="120" y="12" class="bartext">edges max ${maxE}</text>
+<text x="10" y="${h - 2}" class="bartext">${escapeHtml(first.date)}</text>
+<text x="${w - 90}" y="${h - 2}" class="bartext">${escapeHtml(last.date)}</text>
+</svg>`;
+}
+
+/**
+ * v2.6.0 (D-C) — the structure page: one deterministic template-literal
+ * document, CSP default-src 'none' + unsafe-inline style/script (the explorer
+ * needs JS), zero external references, data inlined as a \\u003c-escaped JSON
+ * block, every server-rendered dynamic string through escapeHtml. Sections:
+ * (1) layer composition + edge distribution + hubs as inline SVG (no-JS
+ * visible), (2) root agent/edge count-over-time from the backfill, (3) the
+ * searchable full-root ego explorer with edge-type labels, (4) per-variant
+ * three-column juxtaposition.
+ */
+export function renderStructurePage(model: StructureModel): string {
+  const layerRows = model.layerMatrix
+    .map((row) => svgBar(`${row.layer}`, row.total, model.layerMatrix[0]?.total ?? 1, "var(--accent)"))
+    .join("\n");
+  const distMax = model.edgeDistribution[0]?.count ?? 1;
+  const distRows = model.edgeDistribution.map((row) => svgBar(row.type, row.count, distMax, "var(--ok)")).join("\n");
+  const hubRows = model.hubs
+    .map((hub) => `<tr><td class="mono">${escapeHtml(hub.id)}</td><td>${hub.degree}</td></tr>`)
+    .join("\n");
+  const trend = model.backfill && model.backfill.rows.length > 1 ? svgTrendLine(model.backfill.rows) : "";
+  const trendNote = model.backfill
+    ? `<p class="muted">Root agent/edge counts over the backfilled git history (commit-granularity, provenance ${escapeHtml(model.backfill.headSha.slice(0, 12))}) — backfilled from git history; intra-commit-day states never existed.</p>${trend}`
+    : `<p class="muted">No backfilled root history available (the backfill step did not run or found no rows).</p>`;
+  const variantBlocks = model.variants
+    .map((v) => {
+      const colCell = (col: StructureColumn | null, fallback: string): string => {
+        if (!col) return `<td>${escapeHtml(fallback)}</td>`;
+        const topTypes = Object.entries(col.byType)
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .slice(0, 5)
+          .map(([t, c]) => `${escapeHtml(t)} ${c}`)
+          .join(", ");
+        return `<td><strong>${col.nodes}</strong> nodes / <strong>${col.edges}</strong> edges<br><span class="mono small">${topTypes}</span><br><span class="muted small">vocab: ${escapeHtml(col.vocabulary)}</span></td>`;
+      };
+      const diffList = (names: string[], more: number): string =>
+        names.length === 0 && more === 0
+          ? '<span class="muted small">—</span>'
+          : `<span class="mono small">${names.map((nm) => escapeHtml(nm)).join(", ")}</span>${more > 0 ? `<span class="muted small"> +${more} more</span>` : ""}`;
+      return `<details class="group"><summary><span class="cap">${escapeHtml(v.variant)}</span><span class="count">${v.root.nodes} / ${v.template?.nodes ?? "—"} / ${v.project?.nodes ?? "—"}</span></summary>
+<table><thead><tr><th>root (${escapeHtml(v.root.source)})</th><th>template</th><th>project</th></tr></thead>
+<tbody><tr>${colCell(v.root, "no root slice")}${colCell(v.template, `templates/${escapeHtml(v.variant)}/docs/skill-graph.json missing`)}${colCell(v.project, `Projects/${escapeHtml(v.variant)}/docs/skill-graph.json missing`)}</tr></tbody></table>
+<p class="small">Project-only capabilities (top ${JUXTAPOSITION_CAP}): ${diffList(v.projectOnly.names, v.projectOnly.more)}</p>
+<p class="small">Template-only capabilities (top ${JUXTAPOSITION_CAP}): ${diffList(v.templateOnly.names, v.templateOnly.more)}</p>
+</details>`;
+    })
+    .join("\n");
+  const payload = {
+    labels: model.labels,
+    types: model.types,
+    layers: model.layers,
+    meta: model.meta,
+    edgeTypes: model.edgeTypes,
+    adj: model.adj,
+  };
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill-Graph Structure</title>
+<style>
+:root{--bg:#f6f7f9;--fg:#1c2430;--muted:#5b6673;--card:#ffffff;--border:#d5dae1;--accent:#2563eb;--ok:#15803d;--chip:#e8edf3}
+@media (prefers-color-scheme: dark){:root{--bg:#12161c;--fg:#dce3ec;--muted:#8b96a5;--card:#1a2028;--border:#2b333e;--accent:#5b9dff;--ok:#4ade80;--chip:#232b35}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:16px 20px;border-bottom:1px solid var(--border)}
+h1{margin:0 0 6px;font-size:20px}
+h2{font-size:15px;margin:20px 0 8px}
+h3{font-size:13px;margin:12px 0 6px}
+main{padding:16px 20px 40px;max-width:1100px}
+.muted{color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.small{font-size:12px}
+.barrow{display:flex;align-items:center;gap:8px;margin:2px 0}
+.barlabel{min-width:190px;font-size:12px;color:var(--muted)}
+.bartext{font:11px system-ui;fill:var(--fg)}
+table{border-collapse:collapse;width:100%;margin:8px 0;background:var(--card);border:1px solid var(--border);border-radius:8px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+tr:last-child td{border-bottom:none}
+.group{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin:8px 0}
+details.group>summary{cursor:pointer;display:flex;align-items:center;gap:8px}
+.count{background:var(--chip);border-radius:10px;padding:1px 8px;font-size:12px}
+#explorer .controls{display:flex;gap:8px;margin:8px 0}
+#explorer input{flex:1;max-width:520px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--fg)}
+#results{list-style:none;margin:0;padding:0;max-height:200px;overflow-y:auto}
+#results li{padding:4px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+#results li:hover{background:var(--chip)}
+#ego{margin-top:10px}
+.edge-row{padding:3px 0;border-bottom:1px solid var(--border);font-size:13px}
+.edge-type{display:inline-block;background:var(--chip);border:1px solid var(--border);border-radius:10px;padding:0 8px;font-size:11px;margin:0 4px}
+.nodelink{cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<header>
+<h1>Skill-Graph Structure</h1>
+<p class="muted">Root graph ${model.root.nodes} nodes · ${model.root.edges} edges · ${model.edgeTypes.length} edge types. Companion to the <a href="skill-graph-history.html">fleet history dashboard</a> — generated deterministically by <span class="mono">scripts/skill-graph-fleet-report.ts</span> v2.6.0.</p>
+</header>
+<main>
+<section id="composition">
+<h2>Layer composition (node-type × layer, inline SVG — visible without JavaScript)</h2>
+${layerRows}
+<h2>Edge-type distribution</h2>
+${distRows}
+<h2>Top hubs by degree (top ${HUB_CAP} — degree counts, not scored centrality)</h2>
+<table><thead><tr><th>node</th><th>degree</th></tr></thead><tbody>
+${hubRows}
+</tbody></table>
+</section>
+<section id="agentline">
+<h2>Root agent/edge counts over time (git-history backfill)</h2>
+${trendNote}
+</section>
+<section id="explorer">
+<h2>Ego-graph explorer (1-hop neighborhood, labeled edge types)</h2>
+<div class="controls"><input id="q" type="search" placeholder="Search a node id (e.g. skill:root/meeting-facilitation)" aria-label="Search nodes"></div>
+<ul id="results"></ul>
+<div id="ego"></div>
+</section>
+<section id="juxtaposition">
+<h2>Layer juxtaposition per variant (root slice / template / project — counts, not topology)</h2>
+<p class="muted small">Each column states its own hop layer vocabulary. Differences are capability-level bare names, top ${JUXTAPOSITION_CAP} each with +N more.</p>
+${variantBlocks}
+</section>
+</main>
+<script id="structure-data" type="application/json">${JSON.stringify(payload).replace(/</g, "\\u003c")}</script>
+<script>
+(function () {
+"use strict";
+var DATA = JSON.parse(document.getElementById("structure-data").textContent);
+var LABELS = DATA.labels, META = DATA.meta, TYPES = DATA.types, LAYERS = DATA.layers, ETYPES = DATA.edgeTypes, ADJ = DATA.adj;
+var neighbors = {};
+ADJ.forEach(function (t) {
+  var from = t[0], to = t[1], type = t[2];
+  if (!neighbors[from]) neighbors[from] = [];
+  neighbors[from].push({ other: to, type: ETYPES[type], dir: "out" });
+  if (to !== from) {
+    if (!neighbors[to]) neighbors[to] = [];
+    neighbors[to].push({ other: from, type: ETYPES[type], dir: "in" });
+  }
+});
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+var q = document.getElementById("q");
+var results = document.getElementById("results");
+var ego = document.getElementById("ego");
+function select(idx) {
+  ego.textContent = "";
+  var label = LABELS[idx];
+  var typeIdx = META[idx * 2], layerIdx = META[idx * 2 + 1];
+  var head = el("h3", "", label);
+  ego.appendChild(head);
+  ego.appendChild(el("p", "muted small", "type: " + TYPES[typeIdx] + " · layer: " + LAYERS[layerIdx] + " · degree: " + ((neighbors[idx] || []).length)));
+  var list = neighbors[idx] || [];
+  if (list.length === 0) {
+    ego.appendChild(el("p", "muted", "Isolated node (zero edges)."));
+    return;
+  }
+  list.sort(function (a, b) { return a.type < b.type ? -1 : a.type > b.type ? 1 : LABELS[a.other] < LABELS[b.other] ? -1 : 1; });
+  list.forEach(function (edgeR) {
+    var row = el("div", "edge-row");
+    var dirTxt = edgeR.dir === "out" ? "\\u2192" : "\\u2190";
+    row.appendChild(document.createTextNode(dirTxt + " "));
+    var badge = el("span", "edge-type", edgeR.type);
+    row.appendChild(badge);
+    row.appendChild(document.createTextNode(" "));
+    var other = el("span", "nodelink", LABELS[edgeR.other]);
+    other.addEventListener("click", function () { select(edgeR.other); });
+    row.appendChild(other);
+    ego.appendChild(row);
+  });
+}
+q.addEventListener("input", function () {
+  var query = q.value.trim().toLowerCase();
+  results.textContent = "";
+  if (query.length < 2) return;
+  var shown = 0;
+  for (var i = 0; i < LABELS.length && shown < 30; i++) {
+    if (LABELS[i].toLowerCase().indexOf(query) !== -1) {
+      var li = el("li", "", LABELS[i]);
+      li.addEventListener("click", function (idx) { return function () { select(idx); results.textContent = ""; }; }(i));
+      results.appendChild(li);
+      shown++;
+    }
+  }
+  if (shown === 0) results.appendChild(el("li", "muted", "no matching node"));
+});
+select(0);
 })();
 </script>
 </body>
@@ -1467,7 +2962,10 @@ Usage:
 Reads docs/skill-graph.json + Projects/<co-x>/docs/skill-graph.json; writes only
 memory/skill-graph-metrics/snapshot-<YYYY-MM-DD>.json (one per date, overwrite
 same-date) plus the auto-emitted history dashboard docs/skill-graph-history.html
-(override --html <path>, disable --no-html; emission failure is WARN-only).
+and the graph-structure companion docs/skill-graph-structure.html (override
+--html <path>, disable both with --no-html; each emission failure is WARN-only)
+and the root git-history backfill memory/skill-graph-metrics/root-backfill.json
+(skipped when fresh at HEAD; replay cap 1000 commits aborts with a WARN).
 Read-only over all inputs.`);
     process.exit(0);
   }
@@ -1493,6 +2991,10 @@ Read-only over all inputs.`);
   const projectCaps = new Map<string, Map<string, Set<string | null>>>();
   // v2.2.0: fan-in substrate — per-project skill:/agent: capability keys (same load pass, no re-walk)
   const projectFanInKeys = new Map<string, Set<string>>();
+  // v2.6.0 (D-A1): per-project agent projections (same load pass) + the loaded
+  // graphs themselves for the structure page's juxtaposition column.
+  const projectAgentGraphs = new Map<string, AgentGraphProjection>();
+  const loadedGraphs = new Map<string, SkillGraph>();
   const v1Projects: string[] = [];
 
   for (const g of graphPaths) {
@@ -1508,6 +3010,8 @@ Read-only over all inputs.`);
     projectNodeSets.set(g.name, nodeIds(graph));
     projectCaps.set(g.name, skillCapabilities(graph));
     projectFanInKeys.set(g.name, fanInCapabilityKeys(graph));
+    projectAgentGraphs.set(g.name, extractAgentGraph(graph));
+    loadedGraphs.set(g.name, graph);
     if (graph.upgradedFrom === 1) v1Projects.push(g.name);
     stats.push({
       project: g.name,
@@ -1563,7 +3067,19 @@ Read-only over all inputs.`);
 
   const snapshot: Snapshot = {
     date: today,
-    projects: Object.fromEntries(stats.map((s) => [s.project, { nodes: s.nodes, edges: s.edges, skills: s.skills }])),
+    // v2.6.0 (D-A1): the three legacy scalars stay byte-value-identical; each
+    // entry gains the optional agentGraph projection (AC2 additive-only).
+    projects: Object.fromEntries(
+      stats.map((s) => [
+        s.project,
+        {
+          nodes: s.nodes,
+          edges: s.edges,
+          skills: s.skills,
+          agentGraph: projectAgentGraphs.get(s.project),
+        },
+      ]),
+    ),
     fleetPresence,
     missingFromProjects,
     jaccard,
@@ -1578,7 +3094,7 @@ Read-only over all inputs.`);
 
   mkdirSync(snapshotDir, { recursive: true });
   const snapshotFile = join(snapshotDir, `snapshot-${today}.json`);
-  writeFileSync(snapshotFile, JSON.stringify(snapshot, null, 2) + "\n");
+  writeFileSync(snapshotFile, serializeSnapshot(snapshot));
   // --json consumers parse stdout as pure JSON: the status line goes to stderr there.
   const statusLine = `📦 snapshot → ${snapshotFile}${previous ? ` (diffed vs snapshot-${previous.date}.json)` : " (baseline — no previous snapshot)"}`;
   if (json) console.error(statusLine);
@@ -1591,7 +3107,32 @@ Read-only over all inputs.`);
   // courtesy render — and the run continues to its normal exit. The full page
   // string is built before the single write, so no partial HTML is ever left
   // behind (a stale page is honest; a missing one is not an error signal).
+  // v2.6.0 — three independent WARN islands: (0) the §13 root git-history
+  // backfill (feeds BOTH pages), (1) the history page, (2) the structure page —
+  // one island failing never suppresses the others, and every failure is
+  // WARN-only (snapshot, --json stdout, and the exit code are never affected).
   if (!noHtml) {
+    // Island 0 — root backfill (§13.2): skip when the recorded headSha matches
+    // HEAD; otherwise one bounded full replay. Lives beside the snapshots.
+    let backfill: RootBackfillFile | null = null;
+    const backfillPath = join(snapshotDir, "root-backfill.json");
+    try {
+      // Native path is fine here: ensureRootBackfill/replayGraphHistory convert
+      // it to a POSIX git pathspec (toGitPath) — required on Windows.
+      const ensured = await ensureRootBackfill(process.cwd(), join("docs", "skill-graph.json"), backfillPath);
+      backfill = ensured.file;
+      const bfLine = ensured.rebuilt
+        ? `⛏ root backfill → ${backfillPath} (${backfill.rows.length} commit dates replayed)`
+        : `⛏ root backfill fresh at HEAD — skipped (${backfillPath})`;
+      if (json) console.error(bfLine);
+      else console.log(bfLine);
+    } catch (err) {
+      console.warn(
+        `⚠️ root backfill failed (${err instanceof Error ? err.message : String(err)}) — snapshot and both pages are unaffected; the Agents tab renders snapshot-sourced days only`,
+      );
+    }
+
+    // Island 1 — history page.
     const outPath = htmlPath ?? join("docs", "skill-graph-history.html");
     const warnEmission = (reason: string, err: unknown): void => {
       console.warn(
@@ -1600,11 +3141,14 @@ Read-only over all inputs.`);
     };
     let page: string | null = null;
     try {
+      const rollupBlocks: Record<string, AgentGraphProjection | undefined> = {};
+      for (const [project, entry] of Object.entries(snapshot.projects)) rollupBlocks[project] = entry.agentGraph;
       page = renderHistoryPage(
         buildHistoryModel(
           loadSnapshots(snapshotDir),
           fleetInfo,
           scanSkillGraphTickets(join("tickets", "governance"), join("tickets", "governance", "archive")),
+          { rollup: buildAgentRollup(rollupBlocks, rootGraph), backfill },
         ),
       );
     } catch (err) {
@@ -1620,6 +3164,33 @@ Read-only over all inputs.`);
       } catch (err) {
         warnEmission("page-write", err);
       }
+    }
+
+    // Island 2 — structure page (D-C): independent try/WARN; rides the same
+    // --html/--no-html family, no new CLI flags (design §5.5).
+    if (rootGraph) {
+      try {
+        const structPath = join(dirname(outPath), "skill-graph-structure.html");
+        const variantNames = [
+          ...new Set((rootGraph.nodes ?? []).map((n) => n.layer).filter((l) => l.startsWith("variant:"))),
+        ].sort();
+        const templateGraphs: Record<string, SkillGraph | null> = {};
+        for (const v of variantNames) templateGraphs[v] = loadGraph(join("templates", v, "docs", "skill-graph.json"));
+        const projectGraphs: Record<string, SkillGraph | null> = {};
+        for (const v of variantNames) projectGraphs[v] = loadedGraphs.get(v) ?? null;
+        const structPage = renderStructurePage(buildStructureModel(rootGraph, templateGraphs, projectGraphs, backfill));
+        mkdirSync(dirname(structPath), { recursive: true });
+        writeFileSync(structPath, structPage);
+        const structLine = `🗺 structure page → ${structPath} (${Buffer.byteLength(structPage, "utf8")} bytes)`;
+        if (json) console.error(structLine);
+        else console.log(structLine);
+      } catch (err) {
+        console.warn(
+          `⚠️ structure page generation failed: ${err instanceof Error ? err.message : String(err)} — snapshot and history page are unaffected`,
+        );
+      }
+    } else {
+      console.warn("⚠️ structure page skipped: root graph (docs/skill-graph.json) unavailable this run.");
     }
   }
 
