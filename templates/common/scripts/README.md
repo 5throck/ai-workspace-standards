@@ -36,7 +36,11 @@ inputs — writes only the snapshot plus the auto-emitted history dashboard
 `docs/skill-graph-history.html` (v2.5.0: regenerated after every successful snapshot write
 in both modes; `--html <path>` overrides the output path, `--no-html` skips the emission;
 a page-build/write failure is one stderr WARN and never affects the snapshot or the exit
-code); exits 1 when zero graphs are found.
+code) and, since v2.6.0, the graph-structure companion `docs/skill-graph-structure.html`
+(independent WARN island, no new CLI flags) plus the root git-history backfill
+`memory/skill-graph-metrics/root-backfill.json` (skipped when fresh at HEAD; each
+snapshot's per-project entry additionally carries the optional `agentGraph` projection);
+exits 1 when zero graphs are found.
 **Usage**: `bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>] [--html <path>] [--no-html]`
 **Runs automatically**: never automatic — weekly consolidation + daily orphan sweep via the
 `skill-graph-analytics` skill (the unified 03:00 batch runner's SECTION R1 invokes it with

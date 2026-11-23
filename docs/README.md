@@ -66,7 +66,9 @@ registry consumed by `scripts/verify-prompt-integrity.ts --exec-closure`,
 design 2026-11-20-runner-hardening-integrity, T-20261120-002), the
 auto-emitted skill-graph history dashboard (`skill-graph-history.html` —
 generated artifact, regenerated in place after every
-`scripts/skill-graph-fleet-report.ts` run; never hand-edited), and the
+`scripts/skill-graph-fleet-report.ts` run; never hand-edited), the
+graph-structure companion page (`skill-graph-structure.html` — generated
+artifact emitted by the same fleet-report run; never hand-edited), and the
 variant planning pair (`variant-roadmap-2026-q3-q4.md`,
 `variant-benchmark-backlog.md`) — indexed in `index.md`. How-to guides live in
 `guides/`; dated reviews live in `reports/` (2026-10-04 consolidation folded

@@ -17,12 +17,28 @@ title: >-
   upstream template promotion; decision-class — never claimed by the nightly
   runner, morning handoff
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-23T14:42:01.956+09:00'
 history:
   - at: '2026-11-23T14:42:01.956+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-23T20:45:20.378+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T20:45:20.401+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T20:45:20.422+09:00'
+    from: review
+    to: done
+result: >-
+  Routing decided 2026-11-23 (owner: proceed): disposition deferred to the
+  nightly STEP I upgrade wave which carries
+  pre-review/dry-run/post-delivery-verification gates — projects are on clean
+  defaults so the wave redelivers fresh template content;
+  wip/20261123-preserved-co-deck-full (675120af) and
+  wip/20261123-preserved-co-safety-full (eb0ecbfe) retained as archival
+  fallback. co-consult PR #134: see its own disposition.
 error: null

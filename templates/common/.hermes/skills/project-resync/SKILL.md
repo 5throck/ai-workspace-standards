@@ -1,6 +1,6 @@
 ---
 name: project-resync
-version: 1.10.0
+version: 1.11.0
 description: >
   Full bidirectional sync cycle for fleet member projects (Projects/co-*
   minus the docs/fleet-membership.json exclusions): provenance-audit
@@ -15,7 +15,7 @@ status: active
 scope: common
 l2_propagate: false
 owner: pm
-last_updated: 2026-11-20
+last_updated: 2026-11-23
 last_reviewed: 2026-11-08
 prerequisites: gh CLI authenticated; workspace-root CWD
 relates_to:
@@ -238,7 +238,30 @@ landings, small and fresh):
    window** join the extraction pass as candidates; a new/similar skill
    converging across ≥3 projects, or a fleet-report delivery gap (root skill
    missing from projects), files a `skill-graph:`-prefixed ticket row.
-   Report-only — this never edits `skills/`, `templates/`, or projects.
+   Since 1.11.0 (spec docs/designs/2026-11-23-skill-graph-observability-design.md
+   §5.4), sub-step 6 ALSO consumes the agent/edge diffs and the ≥3-project
+   rollup from the same snapshot (the fleet-report's Agents tab carries them
+   ready-made) and adds three candidate classes:
+   - **New fleet-side agent↔skill relationships** — normalized
+     `(agent, endpoint, edge type)` tuples NEW in the window, converging in
+     ≥3 projects, absent from the root graph → ticket candidate.
+   - **Agents newly referencing root skills** — agent nodes NEW in the window
+     whose edges point at skill names present in the root graph → learning
+     candidate for agent-capability promotion review.
+   - **Divergent relationship splits** — the same agent–skill pair carried
+     under different edge types across projects → reconciliation-style
+     candidate (never auto-promoted).
+   Ticket convention for the three new classes: `kind: manual`, title
+   prefix `learning:` — and the title body MUST contain the literal token
+   `skill-graph` (e.g. `learning: skill-graph agent↔skill used_by
+   <agent>→<skill> converged in 4 projects, absent from root`), so the
+   `learning:` extraction routing, the fleet-report ticket scan, and
+   analytics-triage greppability all keep working. The pre-existing candidates
+   of this sub-step (skill sets / node counts) keep their bare
+   `skill-graph:` prefix unchanged. Report-only — this never edits `skills/`,
+   `templates/`, or projects, and promotion stays human-judged; the
+   no-silence rule of sub-step 3 applies unchanged (every landing produces
+   either requests or an explicit negative).
 
 ## Step 2f — Per-project review (cadence; since 1.7.0)
 

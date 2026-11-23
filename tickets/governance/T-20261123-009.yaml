@@ -1,0 +1,46 @@
+schemaVersion: 1
+id: T-20261123-009
+kind: manual
+title: >-
+  dev-sync memory union-verify (step 3.88): spare inventory (owedBlocks) is
+  keyed to merge-time debt only — a session block present in the merged blob but
+  missing from the worktree is invisible to sparing, so step-2 same-branch
+  replace collapses a manual restore before the gate sees it
+  (restore-then-re-collapse on branch=main sessions); observed 2026-11-23 during
+  PR #2160 landing: merge 98b895dc6 dropped a theirs-side block, full-union
+  repair restored it, step 2 re-collapsed it; converged only by restoring
+  without the branch=main segment marker — request: extend owedBlocks sparing to
+  worktree-vs-merged-blob deltas or exempt heading+fingerprint-matching restored
+  blocks from step-2 replacement
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-23T20:35:52.565+09:00'
+history:
+  - at: '2026-11-23T20:35:52.565+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-23T22:07:05.420+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-23T22:07:05.441+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-23T22:07:05.461+09:00'
+    from: review
+    to: done
+result: >-
+  owedBlocks() gained the merged-present sparing class (helper 1.7.0, PR #2162,
+  merge 66175f7f1): git-side membership of each scanned merge's merged blob — no
+  run-time worktree delta (unfireable in the incident itself, same paradox
+  v1.5.0 solved); new OwedBlock.source discriminator merge-drop|merged-present;
+  dev-sync step-2 sparing consumes the extended inventory unchanged (dev-sync
+  byte-unchanged at 1.53.0). Verbatim restore WITH its branch= marker now
+  survives step-2 replace/collapse — the marker-less workaround is no longer
+  required. Pinned by MP-T1..T4 in tests/unit/memory-union-verify.test.ts (MP-T1
+  RED at 1.6.0 / GREEN at 1.7.0; OW-T1..T4 + the v1.6.0 loop pin stayed green).
+  Same batch landed the T-20261123-008-intent snapshot-freshness audit gate
+  (audit 2.71.0 + lib/snapshot-freshness.ts 1.0.0) and the O-2 doc row; spec
+  2026-11-23-fleet-graph-machinery-batch-design; checks green (gitleaks + 3 OS
+  test jobs), merged clean.
+error: null

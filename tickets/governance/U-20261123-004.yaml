@@ -5,9 +5,9 @@ title: Upstream request from co-security
 priority: normal
 status: waiting
 attempts: 0
-created_at: 2026-11-23T14:40:15.203+09:00
+created_at: '2026-11-23T14:40:15.203+09:00'
 history:
-  - at: 2026-11-23T14:40:15.203+09:00
+  - at: '2026-11-23T14:40:15.203+09:00'
     from: null
     to: waiting
 result: null
@@ -19,11 +19,35 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
-  symptom: 'validate-decisions.ts Check V (DEC-id cross-check, upstream U-20261122-003 fix) resolves cited DEC ids only against the project''s local docs/decisions/ and never consults the workspace root''s registry — so an L3 project nested inside ai_workspace that cites workspace-level decisions in prose (the normal state: delivery entries and doctrine references) fails fatally with "ruled but never filed" even though all cited records exist at ai_workspace/docs/decisions/. Real case: 4 accurate workspace-scope citations flagged on co-security''s first post-0.30.0 sync; unblocked only by hand-creating 4 pointer records. Expected: when the id is absent locally, fall back to the workspace-root registry (ROOT/../../docs/decisions/ from a nested project; present at L0 anyway) before failing — or restrict the fatal class to ids that resolve nowhere in the workspace.'
+  symptom: >-
+    validate-decisions.ts Check V (DEC-id cross-check, upstream U-20261122-003
+    fix) resolves cited DEC ids only against the project's local docs/decisions/
+    and never consults the workspace root's registry — so an L3 project nested
+    inside ai_workspace that cites workspace-level decisions in prose (the
+    normal state: delivery entries and doctrine references) fails fatally with
+    "ruled but never filed" even though all cited records exist at
+    ai_workspace/docs/decisions/. Real case: 4 accurate workspace-scope
+    citations flagged on co-security's first post-0.30.0 sync; unblocked only by
+    hand-creating 4 pointer records. Expected: when the id is absent locally,
+    fall back to the workspace-root registry (ROOT/../../docs/decisions/ from a
+    nested project; present at L0 anyway) before failing — or restrict the fatal
+    class to ids that resolve nowhere in the workspace.
   affected_paths:
     - scripts/validate-decisions.ts
   identity_source: cwd
-  repro: '1. In an L3 project nested inside the workspace (ai_workspace/Projects/<variant>), cite a workspace-level decision id in CHANGELOG.md or memory prose (normal: delivery entries and doctrine references cite workspace DEC ids). 2. Run validate-decisions.ts (Check V, delivered with the 0.30.0 wave / upstream U-20261122-003 fix). 3. It FAILS: the id resolves only against the project''s own docs/decisions/ — workspace-root docs/decisions/ (where these ids genuinely live, verified present for all 4 flagged ids: DEC-20261118-01, DEC-20261028-05, DEC-20261029-01, DEC-20261110-03) is never consulted. 4. No escape hatch exists — the check is unconditionally fatal, blocking all syncs until pointer stub records are hand-created. Real case: co-security, 2026-11-23, first sync after the 0.30.0 upgrade delivery.'
+  repro: >-
+    1. In an L3 project nested inside the workspace
+    (ai_workspace/Projects/<variant>), cite a workspace-level decision id in
+    CHANGELOG.md or memory prose (normal: delivery entries and doctrine
+    references cite workspace DEC ids). 2. Run validate-decisions.ts (Check V,
+    delivered with the 0.30.0 wave / upstream U-20261122-003 fix). 3. It FAILS:
+    the id resolves only against the project's own docs/decisions/ —
+    workspace-root docs/decisions/ (where these ids genuinely live, verified
+    present for all 4 flagged ids: DEC-20261118-01, DEC-20261028-05,
+    DEC-20261029-01, DEC-20261110-03) is never consulted. 4. No escape hatch
+    exists — the check is unconditionally fatal, blocking all syncs until
+    pointer stub records are hand-created. Real case: co-security, 2026-11-23,
+    first sync after the 0.30.0 upgrade delivery.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +55,4 @@ upstream:
   dedupe_key: 66f88d1b4d9428cf42baff113e350fb05782bde06385d4115c28348a6bca529c
   duplicates:
     - project: co-security
-      at: 2026-11-23T14:40:15.203+09:00
+      at: '2026-11-23T14:40:15.203+09:00'

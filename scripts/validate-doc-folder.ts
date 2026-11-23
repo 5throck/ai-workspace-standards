@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.6.0
+ * @version 1.7.0
+ * v1.7.0 (2026-11-23, spec
+ *           docs/designs/2026-11-23-skill-graph-observability-design.md
+ *           §5.5/AC10-AC11): allowlist gains `skill-graph-structure.html` —
+ *           the graph-structure companion page the v2.6.0 fleet-report emits
+ *           in the same run as the history dashboard (generated artifact,
+ *           never hand-edited; docs/README.md §2 row is the contract).
  * v1.6.0 (2026-11-23, spec
  *           docs/designs/2026-11-23-skill-graph-history-report-design.md
  *           §5.2/AC16): allowlist gains `skill-graph-history.html` — the
@@ -106,6 +112,7 @@ const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   "expected-gate-failures.json",
   "runner-exec-allowlist.json",
   "skill-graph-history.html",
+  "skill-graph-structure.html",
 ]);
 
 interface WorkspaceFinding {
