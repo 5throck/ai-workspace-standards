@@ -2,6 +2,18 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.6.2 (2026-11-24, backfill invalidation-key fix — loop fix): the
+ *          root-backfill staleness key is now `graphHeadSha` (the last commit
+ *          that touched the replayed graph path, read via
+ *          `git log -1 --format=%H -- <pathspec>`) instead of the repo HEAD.
+ *          HEAD was a fixed-point violation: committing the artifact advanced
+ *          HEAD, invalidated the file on the next run, and dirtied the tree
+ *          again (#2162 → #2164 → #2165). A merge of the artifact does not touch
+ *          docs/skill-graph.json, so the second run after a merge skips the
+ *          rebuild and leaves a clean tree. A legacy file carrying only
+ *          `headSha` reads as stale exactly once, then stabilizes. Page
+ *          provenance now says "as of the last commit that changed the skill
+ *          graph". Supersedes closed PR #2165.
  * @version 2.6.1 (2026-11-23, Windows CI fix): the root-backfill git operands
  *          (`git log -- <pathspec>` and `git show <sha>:<path>`) are POSIX-shaped
  *          through toGitPath(); a `path.join`-built native path made git reject
@@ -144,7 +156,8 @@
  * snapshot write (both modes; see the @version 2.5.0 entry). v2.6.0 emits the
  * graph-structure companion page docs/skill-graph-structure.html in the same
  * runs (independent WARN island) and maintains the root git-history backfill
- * memory/skill-graph-metrics/root-backfill.json (skipped when fresh at HEAD).
+ * memory/skill-graph-metrics/root-backfill.json (skipped when fresh at the
+ * last commit that changed the graph path — v2.6.2; not at HEAD).
  *
  * This tool is read-only over its inputs; it writes only the snapshot file,
  * the two generated pages, and the root-backfill file (emission failures are
@@ -181,7 +194,7 @@ import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf, upgradeSkillGraph } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.6.1";
+const VERSION = "2.6.2";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -781,12 +794,20 @@ export interface RootBackfillRow {
 }
 
 /** Durable root git-history backfill series (memory/skill-graph-metrics/
- *  root-backfill.json): deterministic, no wall-clock content — `headSha` is
- *  content, so a rerun at the same HEAD is byte-identical (AC-A2). The filename
- *  never matches the snapshot-YYYY-MM-DD.json freshness-gate pattern (AC-A4). */
+ *  root-backfill.json): deterministic, no wall-clock content — `graphHeadSha` is
+ *  content, so a rerun at the same graph commit is byte-identical (AC-A2). The
+ *  filename never matches the snapshot-YYYY-MM-DD.json freshness-gate pattern
+ *  (AC-A4).
+ *
+ *  v2.6.2 (loop fix): the invalidation key is `graphHeadSha` — the last commit
+ *  that touched the replayed graph path — NOT the repo HEAD. Keying on HEAD was
+ *  a fixed-point violation: committing this very artifact advances HEAD, which
+ *  invalidated the file on the next run, which dirtied the tree again (the
+ *  #2162 → #2164 → #2165 loop). A legacy file carrying only `headSha` reads as
+ *  stale exactly once, then stabilizes. */
 export interface RootBackfillFile {
   provenance: "git-backfill";
-  headSha: string;
+  graphHeadSha: string;
   path: string;
   rows: RootBackfillRow[];
 }
@@ -820,11 +841,30 @@ export function readHeadSha(repoDir: string): string | null {
   return /^[0-9a-f]{40}$/i.test(sha) ? sha : null;
 }
 
-/** Staleness check (§13.2 rebuild policy): the recorded headSha must parse and
- *  equal the current HEAD — equal and parseable -> skip. Pure. */
-export function backfillIsFresh(file: { headSha?: string } | null | undefined, headSha: string | null): boolean {
-  if (!headSha) return false;
-  return typeof file?.headSha === "string" && file.headSha === headSha;
+/** The last commit that touched the replayed graph path (not the repo HEAD):
+ *  `git -C <dir> log -1 --format=%H -- <gitRelPath>`. Null when git is
+ *  unavailable, the path has no history, or the output is not a sha. The
+ *  pathspec is POSIX-shaped via toGitPath (Windows-safe). */
+export function readGraphHeadSha(repoDir: string, gitRelPath: string): string | null {
+  const res = spawnSync("git", ["-C", repoDir, "log", "-1", "--format=%H", "--", toGitPath(gitRelPath)], {
+    encoding: "buffer",
+    env: gitCleanEnv() as NodeJS.ProcessEnv,
+  });
+  if (res.status !== 0 || !res.stdout) return null;
+  const sha = res.stdout.toString("utf8").trim();
+  return /^[0-9a-f]{40}$/i.test(sha) ? sha : null;
+}
+
+/** Staleness check (§13.2 rebuild policy, v2.6.2): the recorded `graphHeadSha`
+ *  must equal the current graph commit — equal and parseable -> skip. Pure.
+ *  A legacy file with only `headSha` has no `graphHeadSha`, so it reads as
+ *  stale exactly once (one rebuild rewrites it in the new shape). */
+export function backfillIsFresh(
+  file: { graphHeadSha?: string } | null | undefined,
+  graphHeadSha: string | null,
+): boolean {
+  if (!graphHeadSha) return false;
+  return typeof file?.graphHeadSha === "string" && file.graphHeadSha === graphHeadSha;
 }
 
 /**
@@ -904,12 +944,18 @@ export async function replayGraphHistory(
 }
 
 /**
- * One-shot semantics (§13.2): the step always rebuilds the FULL series from
- * HEAD — idempotent and re-runnable by construction. Skips (returns the
- * existing file, rebuilt=false) when the recorded headSha matches the current
- * HEAD; otherwise replays and atomically rewrites `filePath`. Throws on
- * non-repo context, cap abort, or any replay failure — the caller's WARN
- * island owns the failure story (previous file stays, stale-honest).
+ * One-shot semantics (§13.2): the step always rebuilds the FULL series from the
+ * graph tip — idempotent and re-runnable by construction. Skips (returns the
+ * existing file, rebuilt=false) when the recorded `graphHeadSha` matches the
+ * last commit that touched the graph path; otherwise replays and atomically
+ * rewrites `filePath`. Throws on non-repo context, cap abort, or any replay
+ * failure — the caller's WARN island owns the failure story (previous file
+ * stays, stale-honest).
+ *
+ * v2.6.2: invalidation keys on the GRAPH commit, never on HEAD. Committing the
+ * artifact itself (or any unrelated commit) no longer invalidates the file, so
+ * the emitted artifact reaches a fixed point: generate → commit → regenerate
+ * leaves a clean tree.
  */
 export async function ensureRootBackfill(
   repoDir: string,
@@ -917,12 +963,14 @@ export async function ensureRootBackfill(
   filePath: string,
   opts: { maxCommits?: number } = {},
 ): Promise<{ file: RootBackfillFile; rebuilt: boolean }> {
-  const headSha = readHeadSha(repoDir);
-  if (!headSha) throw new Error("not a git repository (no HEAD) — root backfill needs repo history");
+  const graphHeadSha = readGraphHeadSha(repoDir, relPath);
+  if (!graphHeadSha) {
+    throw new Error(`no commit touches ${toGitPath(relPath)} in this repository — root backfill needs graph history`);
+  }
   if (existsSync(filePath)) {
     try {
       const existing = JSON.parse(readFileSync(filePath, "utf-8")) as RootBackfillFile;
-      if (backfillIsFresh(existing, headSha)) return { file: existing, rebuilt: false };
+      if (backfillIsFresh(existing, graphHeadSha)) return { file: existing, rebuilt: false };
     } catch {
       // malformed existing file -> full rebuild below (overwrite)
     }
@@ -930,8 +978,8 @@ export async function ensureRootBackfill(
   const rows = await replayGraphHistory(repoDir, relPath, opts);
   // `path` records the git (POSIX) form, not the caller's native path: the file
   // is a deterministic artifact and must be byte-identical across platforms for
-  // the same HEAD (toGitPath; replayGraphHistory applies the same form to git).
-  const file: RootBackfillFile = { provenance: "git-backfill", headSha, path: toGitPath(relPath), rows };
+  // the same graph commit (toGitPath; replayGraphHistory applies the same form).
+  const file: RootBackfillFile = { provenance: "git-backfill", graphHeadSha, path: toGitPath(relPath), rows };
   mkdirSync(dirname(filePath), { recursive: true });
   // Compact serialization: the file is a machine artifact whose rows carry full
   // per-date projections (~2 MB on the 340-commit corpus); pretty-printing it
@@ -1444,7 +1492,8 @@ export interface BackfillPageRow {
 }
 
 export interface BackfillSummary {
-  headSha: string;
+  /** v2.6.2: the last commit that touched the graph path (not HEAD). */
+  graphHeadSha: string;
   rows: BackfillPageRow[];
 }
 
@@ -1536,7 +1585,7 @@ export function summarizeBackfill(file: RootBackfillFile | null | undefined): Ba
     });
     prevAgentNames = agentNames;
   }
-  return { headSha: file.headSha, rows };
+  return { graphHeadSha: file.graphHeadSha, rows };
 }
 
 /** Latest agent surface (Agents tab sections 1-2) from one snapshot's
@@ -2280,7 +2329,7 @@ function renderAgents() {
   // (A1) backfilled root timeline — commit-granularity, provenance-marked
   ag.appendChild(el("h2", "", "Root timeline (backfilled from git history)"));
   if (MODEL.backfill && MODEL.backfill.rows.length > 0) {
-    ag.appendChild(el("p", "muted", "Backfilled from git history \\u2014 commit-granularity only (intra-commit-day states never existed; stale windows replay as repeated identical states, not interpolated gaps). Provenance: " + MODEL.backfill.headSha.slice(0, 12) + "."));
+    ag.appendChild(el("p", "muted", "Backfilled from git history \\u2014 commit-granularity only (intra-commit-day states never existed; stale windows replay as repeated identical states, not interpolated gaps). Provenance: " + MODEL.backfill.graphHeadSha.slice(0, 12) + " (as of the last commit that changed the skill graph)."));
     var bfTable = el("table");
     var bthead = el("thead");
     var bhr = el("tr");
@@ -2554,7 +2603,8 @@ export interface StructureModel {
   variants: StructureVariant[];
   /** Root agent/edge count-over-time from the git-history backfill (null when absent). */
   backfill: {
-    headSha: string;
+    /** v2.6.2: last commit that changed the skill graph (not HEAD). */
+    graphHeadSha: string;
     rows: Array<{ date: string; commitCount: number; schema: number; agents: number; edges: number }>;
   } | null;
 }
@@ -2717,7 +2767,7 @@ export function buildStructureModel(
     edgeDistribution,
     hubs,
     variants,
-    backfill: backfillRows.length > 0 ? { headSha: backfill?.headSha ?? "", rows: backfillRows } : null,
+    backfill: backfillRows.length > 0 ? { graphHeadSha: backfill?.graphHeadSha ?? "", rows: backfillRows } : null,
   };
 }
 
@@ -2772,7 +2822,7 @@ export function renderStructurePage(model: StructureModel): string {
     .join("\n");
   const trend = model.backfill && model.backfill.rows.length > 1 ? svgTrendLine(model.backfill.rows) : "";
   const trendNote = model.backfill
-    ? `<p class="muted">Root agent/edge counts over the backfilled git history (commit-granularity, provenance ${escapeHtml(model.backfill.headSha.slice(0, 12))}) — backfilled from git history; intra-commit-day states never existed.</p>${trend}`
+    ? `<p class="muted">Root agent/edge counts over the backfilled git history (commit-granularity; as of the last commit that changed the skill graph, ${escapeHtml(model.backfill.graphHeadSha.slice(0, 12))}) — backfilled from git history; intra-commit-day states never existed.</p>${trend}`
     : `<p class="muted">No backfilled root history available (the backfill step did not run or found no rows).</p>`;
   const variantBlocks = model.variants
     .map((v) => {
@@ -2965,7 +3015,8 @@ same-date) plus the auto-emitted history dashboard docs/skill-graph-history.html
 and the graph-structure companion docs/skill-graph-structure.html (override
 --html <path>, disable both with --no-html; each emission failure is WARN-only)
 and the root git-history backfill memory/skill-graph-metrics/root-backfill.json
-(skipped when fresh at HEAD; replay cap 1000 commits aborts with a WARN).
+(skipped when fresh at the last commit that changed the graph path; replay cap
+1000 commits aborts with a WARN).
 Read-only over all inputs.`);
     process.exit(0);
   }
@@ -3112,8 +3163,9 @@ Read-only over all inputs.`);
   // one island failing never suppresses the others, and every failure is
   // WARN-only (snapshot, --json stdout, and the exit code are never affected).
   if (!noHtml) {
-    // Island 0 — root backfill (§13.2): skip when the recorded headSha matches
-    // HEAD; otherwise one bounded full replay. Lives beside the snapshots.
+    // Island 0 — root backfill (§13.2, v2.6.2 key): skip when the recorded
+    // graphHeadSha matches the last commit that changed the graph path;
+    // otherwise one bounded full replay. Lives beside the snapshots.
     let backfill: RootBackfillFile | null = null;
     const backfillPath = join(snapshotDir, "root-backfill.json");
     try {
@@ -3123,7 +3175,7 @@ Read-only over all inputs.`);
       backfill = ensured.file;
       const bfLine = ensured.rebuilt
         ? `⛏ root backfill → ${backfillPath} (${backfill.rows.length} commit dates replayed)`
-        : `⛏ root backfill fresh at HEAD — skipped (${backfillPath})`;
+        : `⛏ root backfill fresh at graph tip ${backfill.graphHeadSha.slice(0, 12)} — skipped (${backfillPath})`;
       if (json) console.error(bfLine);
       else console.log(bfLine);
     } catch (err) {
