@@ -1,4 +1,28 @@
-// @version 2.70.0
+// @version 2.71.0
+// v2.71.0 (2026-11-23, T-20261123-008 intent — design
+//          docs/designs/2026-11-23-fleet-graph-machinery-batch-design.md §3): new
+//          root-only auto-activating gate — skill-graph snapshot freshness,
+//          inserted immediately after the skill-graph drift gate (same Fail/
+//          Warn/Pass mapping, same every-invocation property incl. dev-sync
+//          step 3.9's --spec-check --lifecycle-only call). The 2026-11-20 Friday
+//          FULL runner produced its manifest but silently skipped the
+//          fleet-report sweep, and the gap surfaced only when a human opened
+//          the dashboard; this gate makes staleness mechanical on every audit:
+//          filename-date freshness of memory/skill-graph-metrics/
+//          snapshot-YYYY-MM-DD.json (clone-stable — never mtime) via the new
+//          pure lib snapshot-freshness.ts (one derivation, two callers — this
+//          gate + its unit suite): age > 8 days WARN, age > 15 days FAIL,
+//          missing or zero-snapshot dir FAIL, fresh → Pass (drift-gate family
+//          precedent). Activation discriminator = templates/ exists (the
+//          workspace-root marker — the fleet sweep is root-only, so variant and
+//          project audits self-skip; the upgrade-coverage gate's posture).
+//          Greppable message prefixes "[WARN] skill-graph snapshot freshness:"
+//          / "[FAIL] skill-graph snapshot freshness:" — unique tokens in audit
+//          output, above the ~98 pre-existing daily WARNs. The KST calendar
+//          date (kstDate derivation) is INLINED rather than imported from
+//          scripts/helpers/kst-time.ts: kst-time.ts carries no L1 mirror and
+//          this file is delivered — a static import would dangle delivered
+//          audits (the qa-gate import-safety rule, v2.70.0 header).
 // v2.70.0 (2026-11-18, design docs/designs/2026-11-18-subfile-mirror-drift-gate-design.md,
 //          T-20261118-002): new check arm — L0↔L1 mirror parity EARLY SIGNAL
 //          (workspace root only, placed after the VERSION_MANIFEST gate). Calls the
@@ -391,6 +415,7 @@ import { listFleetProjects } from "./lib/fleet.ts";
 // implementation and can never disagree. qa-gate.ts is itself mirrored to L1
 // alongside audit.ts, so this import survives delivery in both layers.
 import { collectMirrorParityFailures } from "./qa-gate.ts";
+import { assessSnapshotFreshness } from "./lib/snapshot-freshness.ts";
 import { findCwdRootAssignments, isContractTestPath } from "./lib/hermetic-test-roots.ts";
 import {
   detectEncoding,
@@ -4215,6 +4240,50 @@ if (fs.existsSync(path.join("scripts", "verify-skill-graph.ts"))) {
     );
   } else {
     Pass("Skill-graph drift gate: committed projection matches SSOTs");
+  }
+}
+
+// ── Skill-graph snapshot freshness gate (T-20261123-008 intent, design
+//    docs/designs/2026-11-23-fleet-graph-machinery-batch-design.md §3) ─────────
+// Root-only auto-activating gate, on EVERY audit invocation (the drift gate's
+// property: dev-sync step 3.9's --spec-check --lifecycle-only call runs it
+// too). The 03:00 runner's fleet sweep writes one snapshot per KST calendar
+// date into memory/skill-graph-metrics/; on 2026-11-20 the Friday FULL run
+// silently skipped the sweep and the gap surfaced only when a human opened
+// the dashboard — this gate makes staleness mechanical: age > 8 days WARN,
+// age > 15 days FAIL, missing/zero-snapshot dir FAIL, fresh → Pass (the
+// drift-gate family precedent). Freshness signal = committed filename date
+// (clone-stable, never mtime); all semantics live in lib/snapshot-freshness.ts
+// (one derivation, two callers: this gate + tests/unit/snapshot-freshness.test.ts).
+// Activation discriminator = templates/ exists (the workspace-root marker —
+// the fleet sweep and its snapshot dir are root-only, so variant/project
+// audits must not FAIL on a directory they legitimately lack; the
+// upgrade-coverage gate's project-context self-skip posture). Greppable
+// prefixes: "[WARN] skill-graph snapshot freshness:" / "[FAIL] skill-graph
+// snapshot freshness:" — unique tokens in audit output.
+if (fs.existsSync(path.join("templates"))) {
+  // KST calendar date (UTC+09:00, arithmetic offset — host-TZ independent),
+  // the same derivation as scripts/helpers/kst-time.ts kstDate(). Inlined
+  // because kst-time.ts carries no L1 mirror and this file is delivered — a
+  // static import would dangle at delivered contexts (the qa-gate
+  // import-safety rule, v2.70.0 header).
+  const kstDateStr = (): string => new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const freshness = assessSnapshotFreshness({
+    dir: path.join("memory", "skill-graph-metrics"),
+    todayIso: kstDateStr(),
+  });
+  if (freshness.status === "fail") {
+    const suffix =
+      freshness.latest === null
+        ? "the 03:00 runner fleet sweep has never produced a snapshot"
+        : "two missed weeks of the 03:00 runner fleet sweep; check the runner";
+    Fail(`skill-graph snapshot freshness: ${freshness.detail} — ${suffix}`);
+  } else if (freshness.status === "warn") {
+    Warn(
+      `skill-graph snapshot freshness: ${freshness.detail} — the 03:00 runner fleet sweep has not written a snapshot in over a week; check the runner log`,
+    );
+  } else {
+    Pass(`Skill-graph snapshot freshness gate: ${freshness.detail} — the 03:00 runner fleet sweep is current`);
   }
 }
 

@@ -195,9 +195,21 @@ function write(tmp: string, rel: string, content: string): void {
 }
 const read = (tmp: string, rel: string): string => readFileSync(join(tmp, rel), 'utf8');
 
-/** Seed (or extend) a v2 prior-delivery manifest recording `rel`'s baseline
- *  (hash only, the overwrite-protection fixture shape — the engine resolves the
- *  baseline TEXT via the template's committed git history). */
+/** Seed (or extend) a v2 prior-delivery manifest recording `rel`'s baseline —
+ *  hash + E4 blob id (the PRODUCTION manifest shape: upgrade-project records
+ *  `blob: blobIdOf(text)` at delivery), with the blob object MATERIALIZED in
+ *  the workspace object store via `git hash-object -w --stdin` so arm-1
+ *  recovery (auditBaselineTextOf's readBlobTexts on baseline.blob) resolves
+ *  even when the baseline bytes are not yet a committed template revision —
+ *  exactly the state of any in-flight core-script bump whose working tree
+ *  differs from HEAD (a landing that bumps audit.ts/dev-sync.ts runs THIS
+ *  suite pre-commit via dev-sync step 4.85's version-bump test gate; without
+ *  the materialized blob the recovery falls to committed history only and
+ *  reports the baseline unrecoverable, failing AC-3/AC-6). Additive and
+ *  side-effect-free for the repo: one unreachable loose object, no ref or
+ *  worktree change (gc collects it). Committed-revision parity case is
+ *  unchanged: when the bytes ARE a committed revision, arm 2 finds them
+ *  anyway. */
 function seedBaseline(tmp: string, rel: string, baselineContent: string): void {
   const manifestPath = join(tmp, '.claude', 'last-upgrade-delivery.json');
   const manifest = existsSync(manifestPath)
@@ -213,7 +225,20 @@ function seedBaseline(tmp: string, rel: string, baselineContent: string): void {
         baselines: {},
         decisions: [],
       };
-  manifest.baselines[rel] = { hash: baselineKeyFor(rel, baselineContent), templateVersion: '0.0.0' };
+  const blobWrite = spawnSync('git', ['hash-object', '-w', '--stdin'], {
+    input: baselineContent,
+    encoding: 'utf8',
+    cwd: workspaceRoot,
+    env: gitCleanEnv(),
+  });
+  if (blobWrite.status !== 0 || !blobWrite.stdout.trim()) {
+    throw new Error(`seedBaseline: git hash-object -w failed for ${rel}: ${blobWrite.stderr}`);
+  }
+  manifest.baselines[rel] = {
+    hash: baselineKeyFor(rel, baselineContent),
+    templateVersion: '0.0.0',
+    blob: blobWrite.stdout.trim(),
+  };
   if (!manifest.files.includes(rel)) manifest.files.push(rel);
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 }

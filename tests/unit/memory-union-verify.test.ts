@@ -845,3 +845,167 @@ describe('absentOk exit-128 classification (v1.6.0, U-20261120-001)', () => {
     }
   });
 });
+
+// ── owedBlocks merged-present sparing (v1.7.0, T-20261123-009 — design
+//    docs/designs/2026-11-23-fleet-graph-machinery-batch-design.md §2.4) ───────
+//
+// The PR #2160 incident: a merge DELIVERED a theirs-side branch=main session
+// block into the merged blob; a non-merge loss then removed it from the
+// committed state; the manual restore was re-collapsed by a retry's step-2
+// same-branch replace, because owedBlocks() keyed on MERGE-TIME debt only and
+// a block present in `merged` produces no entry — the restored segment had
+// nothing to fingerprint-match. v1.7.0 adds the `merged-present` class: one
+// entry per block of the merged blob, git-side MEMBERSHIP (no run-time
+// worktree delta — the restored block IS in the worktree at the fateful run,
+// so a "merged minus worktree" inventory would be empty exactly when sparing
+// must fire; the same paradox v1.5.0 solved for merge-time debt).
+
+describe('owedBlocks merged-present sparing (T-20261123-009)', () => {
+  function commitAll(msg: string): void {
+    git(['add', '-A']);
+    git(['commit', '-q', '-m', msg]);
+  }
+  /** The dev-sync session marker line — a merge-delivered session block
+   * carries it, and the incident restore was verbatim WITH the marker. */
+  function markedBlock(summary: string, body: string): string {
+    return `<!-- dev-sync:session branch=main -->\n${block(summary, body)}`;
+  }
+  const C_MARKED = () => markedBlock('C', 'gamma');
+
+  /** Clean --no-ff merge that DELIVERS the theirs-side marked block C into the
+   * merged blob (zero merge-drop debt), then — unless skipped — a plain
+   * (non-merge) commit that removes C from committed state (the incident's
+   * loss class: worktree-level loss, no memory-touching merge involved). */
+  function setupMergeDeliveredFixture(opts?: { skipPlainLoss?: boolean; branch?: string }): string {
+    const sideBranch = opts?.branch ?? 'side'; // distinct per sub-fixture: re-init keeps refs
+    git(['init', '-q', '-b', 'main']);
+    git(['config', 'user.name', 'test']);
+    git(['config', 'user.email', 'test@example.com']);
+    git(['config', 'commit.gpgsign', 'false']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n`);
+    commitAll('base');
+    git(['checkout', '-q', '-b', sideBranch]);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${C_MARKED()}\n`);
+    commitAll('side appends marked C');
+    git(['checkout', '-q', 'main']);
+    git(['merge', '--no-ff', '-q', '-m', 'merge side (delivers C)', sideBranch]);
+    const res = Bun.spawnSync(['git', 'rev-parse', 'HEAD'], { cwd: root, stdout: 'pipe', stderr: 'pipe' });
+    const mergeSha = res.stdout.toString().trim();
+    if (!opts?.skipPlainLoss) {
+      writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n`);
+      commitAll('plain commit drops C (non-merge loss)');
+    }
+    return mergeSha;
+  }
+
+  test('MP-T1: merge-delivered block + non-merge loss + verbatim restore → merged-present, sparing classification match', () => {
+    const mergeSha = setupMergeDeliveredFixture();
+    // the restore: C comes back VERBATIM with its marker, uncommitted — the
+    // marker-carrying restore is the whole point (the marker-less workaround
+    // that hid the block from step 2 must no longer be required)
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${C_MARKED()}\n`);
+    const owed = owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root });
+    const owedC = owed.find((o) => o.source === 'merged-present' && o.block.text === C_MARKED());
+    expect(owedC).toBeDefined();
+    expect(owedC!.commit).toBe(mergeSha);
+    expect(owedC!.file).toBe('memory/2026-11-04.md');
+    // informational parent: the ours parent carries only A → "theirs"
+    expect(owedC!.parent).toBe('theirs');
+    // the step-2 classification contract pin (isOwedSegment rules): the
+    // restored same-branch segment fingerprint-matches the entry under
+    // exact-text OR heading+firstLine — this is exactly the precondition step 2
+    // acted on when it re-collapsed the PR #2160 restore (the pin is FALSE at
+    // 1.6.0 — the RED half of the RED/GREEN story).
+    const seg = parseBlocks(C_MARKED());
+    expect(seg).toHaveLength(1);
+    const matched = owed.some(
+      (o) =>
+        o.source === 'merged-present' &&
+        (o.block.text === seg[0]!.text ||
+          (o.block.heading !== '' && o.block.heading === seg[0]!.heading && o.block.firstLine === seg[0]!.firstLine)),
+    );
+    expect(matched).toBe(true);
+  });
+
+  test('MP-T2: no non-merge loss (merged = HEAD = worktree all carry C) → C still listed (accepted over-breadth)', () => {
+    setupMergeDeliveredFixture({ skipPlainLoss: true });
+    // the ordinary post-merge state: the block is everywhere, yet the git-side
+    // membership inventory keeps it until the merge ages out of the 7-day/
+    // 20-merge window — the documented fail-safe, self-healing consequence
+    // (design §2.2): content preservation outranks block-count hygiene.
+    const owed = owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root });
+    expect(owed.some((o) => o.source === 'merged-present' && o.block.text === C_MARKED())).toBe(true);
+  });
+
+  test('MP-T3: merge-drop class unchanged — dropping-merge entries carry source merge-drop with labels intact', () => {
+    // the OW-T1 dropping-merge shape, local to this describe
+    git(['init', '-q', '-b', 'main']);
+    git(['config', 'user.name', 'test']);
+    git(['config', 'user.email', 'test@example.com']);
+    git(['config', 'commit.gpgsign', 'false']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\nSHARED-TAIL\n`);
+    commitAll('base');
+    git(['checkout', '-q', '-b', 'side']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('C', 'gamma')}\n---\nSHARED-TAIL-C\n`);
+    commitAll('side appends C');
+    git(['checkout', '-q', 'main']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n`);
+    commitAll('main appends B');
+    gitAllowConflict(['merge', '--no-commit', '--no-ff', 'side']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('B', 'beta')}\n---\nSHARED-TAIL-B\n`);
+    git(['add', '-A']);
+    commitAll('merge side (resolution drops C)');
+    const mergeSha = Bun.spawnSync(['git', 'rev-parse', 'HEAD'], { cwd: root, stdout: 'pipe', stderr: 'pipe' })
+      .stdout.toString()
+      .trim();
+    const owed = owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root });
+    const dropC = owed.find((o) => o.block.text === block('C', 'gamma'));
+    expect(dropC).toBeDefined();
+    expect(dropC!.source).toBe('merge-drop');
+    expect(dropC!.parent).toBe('theirs');
+    expect(dropC!.commit).toBe(mergeSha);
+    expect(dropC!.file).toBe('memory/2026-11-04.md');
+    // disjointness by construction: C is absent from the merged blob → NO
+    // merged-present entry for it (a block cannot be both absent from and
+    // present in the merged blob)
+    expect(owed.some((o) => o.source === 'merged-present' && o.block.text === block('C', 'gamma'))).toBe(false);
+    // the merged blob's delivered blocks (A, B, SHARED-TAIL-B) DO appear merged-present
+    expect(owed.some((o) => o.source === 'merged-present' && o.block.text === block('B', 'beta'))).toBe(true);
+  });
+
+  test('MP-T4: gating unchanged — absent worktree, deleted-in-merge, and zero window all contribute nothing', () => {
+    // absent worktree file → [] (the tier arms own that shape)
+    setupMergeDeliveredFixture({ skipPlainLoss: true, branch: 'side-a' });
+    rmSync(join(memoryDir, '2026-11-04.md'));
+    expect(owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root })).toEqual([]);
+    // merged === null (deleted in the merge) → contributes nothing even though
+    // the worktree file exists (unionScan's deleted-file arm owns that shape).
+    // Wipe .git first: re-running init in the same dir does NOT orphan the
+    // previous branch, and leftover history would leak the prior fixture's
+    // merges into this fixture's sweep window. (The wording avoids quoting the
+    // census's two literal grep substrings on purpose.)
+    rmSync(join(root, '.git'), { recursive: true, force: true });
+    git(['init', '-q', '-b', 'main']);
+    git(['config', 'user.name', 'test']);
+    git(['config', 'user.email', 'test@example.com']);
+    git(['config', 'commit.gpgsign', 'false']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n`);
+    commitAll('base');
+    git(['checkout', '-q', '-b', 'side-b']);
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('C', 'gamma')}\n`);
+    commitAll('side appends C');
+    git(['checkout', '-q', 'main']);
+    rmSync(join(memoryDir, '2026-11-04.md'));
+    commitAll('main deletes the log');
+    gitAllowConflict(['merge', '--no-commit', '--no-ff', 'side-b']); // modify/delete conflict
+    git(['rm', '-q', 'memory/2026-11-04.md']); // prunes the emptied memory/ dir
+    commitAll('merge side (deletion survives)');
+    mkdirSync(memoryDir, { recursive: true }); // restore the worktree file behind the deleted-in-merge blob
+    writeFileSync(join(memoryDir, '2026-11-04.md'), `${block('A', 'alpha')}\n---\n${block('C', 'gamma')}\n`);
+    expect(owedBlocks({ sinceDays: 365, maxCommits: 20, cwd: root })).toEqual([]);
+    // zero window disables the sweep → []
+    rmSync(join(root, '.git'), { recursive: true, force: true }); // orphan prior sub-fixture history
+    setupMergeDeliveredFixture({ skipPlainLoss: true, branch: 'side-c' });
+    expect(owedBlocks({ sinceDays: 0, maxCommits: 20, cwd: root })).toEqual([]);
+  });
+});
