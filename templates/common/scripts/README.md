@@ -32,10 +32,15 @@ against the newest previous snapshot; top-10 skills by fleet presence. Emits a h
 report on stdout and a machine snapshot at
 `memory/skill-graph-metrics/snapshot-<YYYY-MM-DD>.json` (one per local calendar date;
 same-date reruns overwrite). `--json` prints the snapshot JSON instead. Read-only over all
-inputs — the snapshot is the only write; exits 1 when zero graphs are found.
-**Usage**: `bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>]`
-**Runs automatically**: never automatic — weekly cadence via the `skill-graph-analytics`
-skill (the 02:30 ticket runner may invoke it); operator-invoked on demand
+inputs — writes only the snapshot plus the auto-emitted history dashboard
+`docs/skill-graph-history.html` (v2.5.0: regenerated after every successful snapshot write
+in both modes; `--html <path>` overrides the output path, `--no-html` skips the emission;
+a page-build/write failure is one stderr WARN and never affects the snapshot or the exit
+code); exits 1 when zero graphs are found.
+**Usage**: `bun scripts/skill-graph-fleet-report.ts [--json] [--snapshot-dir <dir>] [--html <path>] [--no-html]`
+**Runs automatically**: never automatic — weekly consolidation + daily orphan sweep via the
+`skill-graph-analytics` skill (the unified 03:00 batch runner's SECTION R1 invokes it with
+`--json` daily, Friday FULL + weekly triage); operator-invoked on demand
 
 #### `backport-diff.ts`
 **Purpose**: Read-only 5-surface backport candidate differ for a project's committed LOCAL-WORK
