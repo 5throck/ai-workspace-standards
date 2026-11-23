@@ -1,5 +1,46 @@
 #!/usr/bin/env bun
-// @version 1.6.0
+// @version 1.7.0
+// v1.7.0 (2026-11-23, T-20261123-009 — design
+//          docs/designs/2026-11-23-fleet-graph-machinery-batch-design.md §2): the
+//          step-2 sparing inventory learns the merge-delivered class. The PR #2160
+//          incident: a merge DELIVERED a theirs-side branch=main session block into
+//          the merged blob; a non-merge loss then removed it from the committed
+//          state; the manual restore was re-collapsed by a retry's step-2
+//          same-branch replace, because owedBlocks() keyed on MERGE-TIME debt only
+//          (droppedBlocks: parent-vs-merged) and a block present in `merged`
+//          produces no entry — the restored segment had nothing to
+//          fingerprint-match. Fix (the v1.5.0 principle applied one level over):
+//          after the existing parent loop, owedBlocks() emits one `merged-present`
+//          entry per block of the merged blob — git-side MEMBERSHIP, no run-time
+//          worktree delta (at the fateful run the restored block IS present in the
+//          worktree, so a "merged blob minus current worktree" inventory would be
+//          empty exactly when sparing must fire — the same unfireability v1.5.0
+//          already diagnosed for merge-time debt). New OwedBlock.source
+//          discriminator: "merge-drop" (the existing class — entries otherwise
+//          unchanged) / "merged-present" (new). `parent` on merged-present entries
+//          is INFORMATIONAL-ONLY: "ours" when the ours parent carries the block
+//          under droppedBlocks.matchesHead's fingerprint rules, "theirs" otherwise
+//          (a resolution-authored block in neither parent gets "theirs"); sparing
+//          and tests key on block + source. No dedup against merge-drop entries
+//          (the classes are disjoint by construction — a block cannot be both
+//          absent from and present in the merged blob; sparing is a boolean
+//          some()). Worktree gating unchanged: an absent worktree file still
+//          contributes nothing and a merged===null (deleted-file) merge still
+//          contributes nothing (the tier arms own those shapes). No new git
+//          plumbing — the merged blob is already fetched and was discarded after
+//          droppedBlocks; it is now parsed instead. dev-sync step 2's
+//          isOwedSegment consumes the extended inventory UNCHANGED (generic
+//          fingerprint matching) — dev-sync stays 1.53.0. Consequence for the
+//          incident: restoring a merge-delivered block WITH its `branch=` marker
+//          now survives step-2 replace/collapse; the marker-less workaround is no
+//          longer required (landed marker-less legacy blocks append/never-match,
+//          behavior unchanged). Accepted over-breadth (fail-safe, self-healing —
+//          the v1.5.0 consequence class): a same-branch segment matching a
+//          merged-present block is spared even when the block is also in HEAD and
+//          the worktree (the ordinary post-merge state) until the merge ages out
+//          of the 7-day/20-merge window — content preservation outranks
+//          block-count hygiene. Pinned by tests/unit/memory-union-verify.test.ts
+//          MP-T1..T4 (MP-T1 demonstrated RED at 1.6.0 / GREEN at 1.7.0).
 // v1.6.0 (2026-11-20, U-20261120-001 — design
 //          docs/designs/2026-11-20-runner-hardening-integrity-design.md §3.5):
 //          the exit-128 noise closure. `git()` gains an `absentOk` option: when
@@ -350,37 +391,61 @@ export function droppedBlocks(
 }
 
 /** One block the union gate currently OWES: a parent-owed block from a bounded
- * recent merge that is NOT accounted for in the current working-tree content.
- * Consumed by dev-sync step 2's session-block replace to spare same-branch
- * segments the gate would otherwise re-collapse (T-20261118-003). */
+ * recent merge that is NOT accounted for in the current working-tree content,
+ * or (v1.7.0) a block the merge DELIVERED into the merged blob. Consumed by
+ * dev-sync step 2's session-block replace to spare same-branch segments the
+ * gate would otherwise re-collapse (T-20261118-003; T-20261123-009). */
 export interface OwedBlock {
   /** Owning merge commit (full hash). */
   commit: string;
   /** Merge-touched flat memory log, repo-relative (e.g. memory/2026-11-04.md). */
   file: string;
-  /** Which parent owes the block. */
+  /** Which parent owes the block. For "merge-drop" entries this is the parent
+   * whose block is missing from the merged blob. For "merged-present" entries
+   * it is INFORMATIONAL-ONLY: "ours" when the ours parent carries the block
+   * verbatim (droppedBlocks.matchesHead fingerprint rules), "theirs"
+   * otherwise (a resolution-authored block in neither parent gets "theirs"). */
   parent: "ours" | "theirs";
   /** The owed block (text / heading / firstLine — droppedBlocks' match keys). */
   block: MemoryBlock;
+  /** v1.7.0 debt-class discriminator. "merge-drop" = merge-time debt (parent
+   * block missing from the merged blob). "merged-present" = the merge
+   * delivered the block INTO the merged blob (T-20261123-009) — a block a
+   * non-merge loss or same-branch replace must not destroy, because the gate's
+   * own merged blob carries it (no merge-time debt exists for it). */
+  source: "merge-drop" | "merged-present";
 }
 
 /**
  * The debt inventory behind unionScan's Arm A findings, as a pure composition
  * of listMemoryMerges + showBlob + droppedBlocks (v1.5.0, T-20261118-003 —
- * design §3.1). Runs the SAME bounded sweep as unionScan; for each merge-touched
- * file the debt is droppedBlocks computed against the MERGED BLOB — the same
- * call the gate's findings tier on (verifyUnion). This is the merge-time
- * inventory a working-tree restoration must satisfy, NOT the still-missing
- * remainder against the current worktree: a restoration satisfies the
- * worktree-side debt before step 2 ever runs, which would zero the inventory
- * and make sparing unfireable in the exact deadlock it closes (head-side
- * clarification verified by DL-T1's red/green; see the v1.5.0 header).
+ * design §3.1; v1.7.0 adds the merged-present class — T-20261123-009, design
+ * docs/designs/2026-11-23-fleet-graph-machinery-batch-design.md §2). Runs the
+ * SAME bounded sweep as unionScan; for each merge-touched file the inventory is
+ * two disjoint classes:
+ *
+ *   "merge-drop" — droppedBlocks computed against the MERGED BLOB (the same
+ *     call the gate's findings tier on, verifyUnion): the merge-time debt a
+ *     working-tree restoration must satisfy. NOT the still-missing remainder
+ *     against the current worktree: a restoration satisfies the worktree-side
+ *     debt before step 2 ever runs, which would zero the inventory and make
+ *     sparing unfireable in the exact deadlock it closes (head-side
+ *     clarification verified by DL-T1's red/green; see the v1.5.0 header).
+ *   "merged-present" (v1.7.0) — one entry per block of the merged blob itself
+ *     (git-side membership; the blob was already fetched for droppedBlocks and
+ *     previously discarded). The PR #2160 class: a merge DELIVERS a block into
+ *     the committed state, a non-merge loss removes it, and step-2 sparing had
+ *     no entry to fingerprint-match — the restore got re-collapsed. Deliberately
+ *     NO worktree subtraction: at the fateful run the restored block IS in the
+ *     worktree, so "merged minus worktree" is empty exactly when sparing must
+ *     fire (the same paradox v1.5.0 solved one level over).
  *
  * Worktree gating per merge-touched file: an absent worktree file contributes
  * nothing (the archive/tombstone tier arms own that state — no actionable
  * worktree restoration exists to spare), and a merge that deleted the file
  * contributes nothing (unionScan's merged===null arm owns it). No tier logic:
- * the caller needs only which blocks are owed, parent- and commit-labeled.
+ * the caller needs only which blocks are owed, class-, parent- and
+ * commit-labeled.
  *
  * Deliberately NO `activationIso` parameter: sparing is tier-agnostic (a
  * WARN-tier owed block spared is harmless, fail-safe), and this keeps the
@@ -403,7 +468,24 @@ export function owedBlocks(opts: { sinceDays: number; maxCommits: number; cwd?: 
         continue; // absent worktree file → contributes nothing (tier arms own that shape)
       }
       for (const { parent, block } of droppedBlocks(ours ?? "", theirs ?? "", merged)) {
-        owed.push({ commit: target.commit, file, parent, block });
+        owed.push({ commit: target.commit, file, parent, block, source: "merge-drop" });
+      }
+      // v1.7.0 merged-present: the blocks the merge DELIVERED into the
+      // committed state. `parent` is informational-only — ours when the ours
+      // parent carries the block under matchesHead's fingerprint rules (exact
+      // text, or heading+firstLine for headed blocks), "theirs" otherwise.
+      const oursBlocks = parseBlocks(ours ?? "");
+      const oursCarries = (block: MemoryBlock): boolean =>
+        oursBlocks.some((m) => m.text === block.text) ||
+        oursBlocks.some((m) => m.heading === block.heading && m.heading !== "" && m.firstLine === block.firstLine);
+      for (const block of parseBlocks(merged)) {
+        owed.push({
+          commit: target.commit,
+          file,
+          parent: oursCarries(block) ? "ours" : "theirs",
+          block,
+          source: "merged-present",
+        });
       }
     }
   }
