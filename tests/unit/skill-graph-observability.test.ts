@@ -43,6 +43,7 @@ import {
   RootBackfillFile,
   serializeSnapshot,
   summarizeBackfill,
+  toGitPath,
 } from '../../scripts/skill-graph-fleet-report.ts';
 import type { SkillGraphV2 } from '../../scripts/lib/skill-graph-compat.ts';
 
@@ -537,6 +538,17 @@ describe('root git-history backfill (§13.2-§13.3, AC-A2/A3/A5/A6)', () => {
     edges: [{ type: 'used_by', from: 'agent:root/legacy', to: 'skill:root/legacy-skill' }],
   });
 
+  // Windows CI regression (PR #2164): git pathspecs are always POSIX-shaped —
+  // `path.join('docs', 'skill-graph.json')` yields `docs\skill-graph.json` on
+  // Windows, which git cannot resolve in `-- <pathspec>` or `<rev>:<path>`.
+  test('toGitPath: every git operand is POSIX-shaped on any OS', () => {
+    expect(toGitPath('docs\\skill-graph.json')).toBe('docs/skill-graph.json');
+    expect(toGitPath(join('docs', 'skill-graph.json'))).toBe('docs/skill-graph.json');
+    expect(toGitPath('docs/skill-graph.json')).toBe('docs/skill-graph.json'); // idempotent
+    expect(toGitPath('a\\\\b/c')).toBe('a/b/c'); // mixed + doubled separators
+    expect(toGitPath('skill-graph.json')).toBe('skill-graph.json'); // no separator
+  });
+
   /** Fixture repo: 4 commits over docs/skill-graph.json — two on one date
    *  (collapse check), one v1-schema blob (schema drift), one growth blob. */
   function fixtureRepo(): string {
@@ -582,6 +594,18 @@ describe('root git-history backfill (§13.2-§13.3, AC-A2/A3/A5/A6)', () => {
       expect(rows[0]?.agents.e.length).toBe(1);
       expect(rows[1]?.schema).toBe(2);
       expect(rows[1]?.agents.n.filter(([id]) => id.startsWith('agent:')).length).toBe(2);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  test('replayGraphHistory: a backslash-shaped (Windows-native) relPath still reaches git', async () => {
+    const repo = fixtureRepo();
+    try {
+      // Literal backslash so this asserts on macOS/Linux too — the helper, not
+      // the host OS, must produce the POSIX operand git needs.
+      const rows = await replayGraphHistory(repo, 'docs\\skill-graph.json');
+      expect(rows.map((r) => r.date)).toEqual(['2026-08-24', '2026-08-25']);
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }

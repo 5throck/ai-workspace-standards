@@ -2,6 +2,13 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.6.1 (2026-11-23, Windows CI fix): the root-backfill git operands
+ *          (`git log -- <pathspec>` and `git show <sha>:<path>`) are POSIX-shaped
+ *          through toGitPath(); a `path.join`-built native path made git reject
+ *          the pathspec on Windows ("path 'docs\skill-graph.json' exists on
+ *          disk, but not in <sha>"). The recorded backfill `path` field is
+ *          normalized to the same git form so the artifact stays byte-identical
+ *          across platforms for one HEAD. No behavior change on POSIX hosts.
  * @version 2.6.0 (2026-11-23, spec
  *          docs/designs/2026-11-23-skill-graph-observability-design.md §5+§13):
  *          skill-graph observability extension — (D-A1) additive optional
@@ -174,7 +181,7 @@ import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf, upgradeSkillGraph } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.6.0";
+const VERSION = "2.6.1";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -784,6 +791,23 @@ export interface RootBackfillFile {
   rows: RootBackfillRow[];
 }
 
+/**
+ * Convert a repo-relative path into the form git expects for `-- <pathspec>` and
+ * `<rev>:<path>` operands.
+ *
+ * Why this exists: git pathspecs — both the `<rev>:<path>` form of `git show`
+ * and the pathspec after `--` in `git log` — are **always POSIX-shaped**, even
+ * on Windows. `path.join("docs", "skill-graph.json")` yields `docs\skill-graph.json`
+ * on Windows, which git cannot resolve: it fails with "path
+ * 'docs\skill-graph.json' exists on disk, but not in <sha>" (observed in the
+ * Windows CI leg). Filesystem paths stay native (`join` is correct there); only
+ * operands handed to git go through this helper. Idempotent, so callers may pass
+ * either a native or an already-normalized path.
+ */
+export function toGitPath(p: string): string {
+  return p.split(/[\\/]+/).join("/");
+}
+
 /** Repo HEAD sha via `git -C <dir> rev-parse HEAD`; null when not a repo / git
  *  unavailable / unborn HEAD (the island turns null into one WARN). */
 export function readHeadSha(repoDir: string): string | null {
@@ -810,7 +834,8 @@ export function backfillIsFresh(file: { headSha?: string } | null | undefined, h
  * of a date wins, commitCount accumulates). Aborts (throws) when the corpus
  * exceeds `maxCommits` (default BACKFILL_MAX_COMMITS) — the caller's WARN
  * island turns that into one stderr note. Blob parse failures throw (a
- * half-replay must never be persisted).
+ * half-replay must never be persisted). `relPath` is accepted in either native
+ * or POSIX form and is converted with toGitPath before reaching git argv.
  */
 export async function replayGraphHistory(
   repoDir: string,
@@ -818,13 +843,15 @@ export async function replayGraphHistory(
   opts: { maxCommits?: number } = {},
 ): Promise<RootBackfillRow[]> {
   const maxCommits = opts.maxCommits ?? BACKFILL_MAX_COMMITS;
-  const log = spawnSync("git", ["-C", repoDir, "log", "--format=%H%x00%cd", "--date=short", "--", relPath], {
+  // git operands below are POSIX-shaped on every OS — see toGitPath.
+  const gitRelPath = toGitPath(relPath);
+  const log = spawnSync("git", ["-C", repoDir, "log", "--format=%H%x00%cd", "--date=short", "--", gitRelPath], {
     encoding: "buffer",
     env: gitCleanEnv() as NodeJS.ProcessEnv,
     maxBuffer: 64 * 1024 * 1024,
   });
   if (log.status !== 0 || !log.stdout) {
-    throw new Error(`git log failed for ${relPath}: ${(log.stderr?.toString("utf8") ?? "").trim()}`);
+    throw new Error(`git log failed for ${gitRelPath}: ${(log.stderr?.toString("utf8") ?? "").trim()}`);
   }
   const commits = log.stdout
     .toString("utf8")
@@ -842,13 +869,13 @@ export async function replayGraphHistory(
   }
   const byDate = new Map<string, RootBackfillRow>();
   for (const commit of commits) {
-    const show = spawnSync("git", ["-C", repoDir, "show", `${commit.sha}:${relPath}`], {
+    const show = spawnSync("git", ["-C", repoDir, "show", `${commit.sha}:${gitRelPath}`], {
       encoding: "buffer",
       env: gitCleanEnv() as NodeJS.ProcessEnv,
       maxBuffer: 64 * 1024 * 1024,
     });
     if (show.status !== 0 || !show.stdout) {
-      throw new Error(`git show ${commit.sha}:${relPath} failed: ${(show.stderr?.toString("utf8") ?? "").trim()}`);
+      throw new Error(`git show ${commit.sha}:${gitRelPath} failed: ${(show.stderr?.toString("utf8") ?? "").trim()}`);
     }
     let blob: {
       version?: number;
@@ -901,7 +928,10 @@ export async function ensureRootBackfill(
     }
   }
   const rows = await replayGraphHistory(repoDir, relPath, opts);
-  const file: RootBackfillFile = { provenance: "git-backfill", headSha, path: relPath, rows };
+  // `path` records the git (POSIX) form, not the caller's native path: the file
+  // is a deterministic artifact and must be byte-identical across platforms for
+  // the same HEAD (toGitPath; replayGraphHistory applies the same form to git).
+  const file: RootBackfillFile = { provenance: "git-backfill", headSha, path: toGitPath(relPath), rows };
   mkdirSync(dirname(filePath), { recursive: true });
   // Compact serialization: the file is a machine artifact whose rows carry full
   // per-date projections (~2 MB on the 340-commit corpus); pretty-printing it
@@ -3087,6 +3117,8 @@ Read-only over all inputs.`);
     let backfill: RootBackfillFile | null = null;
     const backfillPath = join(snapshotDir, "root-backfill.json");
     try {
+      // Native path is fine here: ensureRootBackfill/replayGraphHistory convert
+      // it to a POSIX git pathspec (toGitPath) — required on Windows.
       const ensured = await ensureRootBackfill(process.cwd(), join("docs", "skill-graph.json"), backfillPath);
       backfill = ensured.file;
       const bfLine = ensured.rebuilt
