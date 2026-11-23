@@ -36,6 +36,7 @@ import {
   ensureRootBackfill,
   escapeHtml,
   extractAgentGraph,
+  readGraphHeadSha,
   readHeadSha,
   renderHistoryPage,
   renderStructurePage,
@@ -397,7 +398,7 @@ describe('buildHistoryModel agent replay (AC1: tracking-begins, legacy rows null
   test('summarizeBackfill: rows condensed with bare-name NEW/VANISHED diffs (schema-crossing)', () => {
     const file: RootBackfillFile = {
       provenance: 'git-backfill',
-      headSha: 'a'.repeat(40),
+      graphHeadSha: 'a'.repeat(40),
       path: 'docs/skill-graph.json',
       rows: [
         { date: '2026-08-24', commitCount: 2, schema: 1, agents: projBlock([['agent:root/old', 'h']], [['agent:root/old', 'skill:root/s', 'used_by']]) },
@@ -428,7 +429,7 @@ describe('renderHistoryPage v2.6.0 (Agents tab + link card + safety)', () => {
   );
   const backfill: RootBackfillFile = {
     provenance: 'git-backfill',
-    headSha: 'b'.repeat(40),
+    graphHeadSha: 'b'.repeat(40),
     path: 'docs/skill-graph.json',
     rows: [
       { date: '2026-08-24', commitCount: 3, schema: 1, agents: projBlock([['agent:root/old', 'h']], []) },
@@ -452,7 +453,7 @@ describe('renderHistoryPage v2.6.0 (Agents tab + link card + safety)', () => {
     expect(page).toContain('id="tab-agents"');
     expect(page).toContain('"agentTrackingBegins":"2026-11-22"');
     expect(page).toContain('backfilled from git history');
-    expect(page).toContain('"backfill":{"headSha":"' + 'b'.repeat(40) + '"');
+    expect(page).toContain('"backfill":{"graphHeadSha":"' + 'b'.repeat(40) + '"');
     expect(page).toContain('"rollup":{"threshold":3');
     expect(page).toContain('"promotions":[{"name":"newbot"');
     // relationship feed + the server-computed relative snapshot link (AC1)
@@ -624,23 +625,43 @@ describe('root git-history backfill (§13.2-§13.3, AC-A2/A3/A5/A6)', () => {
     expect(BACKFILL_MAX_COMMITS).toBe(1000);
   });
 
-  test('readHeadSha + backfillIsFresh: stale/missing/malformed states never read as fresh', async () => {
+  /** Commit one file in the fixture repo (advances HEAD without touching the
+   *  graph, or with `graph: true` it rewrites docs/skill-graph.json). */
+  function commitFile(repo: string, name: string, body: string, graph = false): void {
+    if (graph) writeFileSync(join(repo, 'docs', 'skill-graph.json'), body);
+    else writeFileSync(join(repo, name), body);
+    const res = spawnSync('git', ['-C', repo, 'add', '.'], { encoding: 'utf8' });
+    if (res.status !== 0) throw new Error(res.stderr);
+    const commit = spawnSync('git', ['-C', repo, 'commit', '-qm', name], {
+      encoding: 'utf8',
+      env: { ...process.env, GIT_COMMITTER_DATE: '2026-08-27 10:00:00 +0900', GIT_AUTHOR_DATE: '2026-08-27 10:00:00 +0900' },
+    });
+    if (commit.status !== 0) throw new Error(commit.stderr);
+  }
+
+  test('readGraphHeadSha + backfillIsFresh: stale/missing/malformed states never read as fresh', async () => {
     const repo = fixtureRepo();
     try {
-      const head = readHeadSha(repo);
-      expect(head).toMatch(/^[0-9a-f]{40}$/);
-      expect(backfillIsFresh({ headSha: head }, head)).toBe(true);
-      expect(backfillIsFresh({ headSha: '0'.repeat(40) }, head)).toBe(false);
-      expect(backfillIsFresh(null, head)).toBe(false);
-      expect(backfillIsFresh({ headSha: head }, null)).toBe(false);
-      expect(backfillIsFresh(undefined, head)).toBe(false);
+      const graphHead = readGraphHeadSha(repo, join('docs', 'skill-graph.json'));
+      expect(graphHead).toMatch(/^[0-9a-f]{40}$/);
+      // v2.6.2: the key is the graph commit, which is NOT the repo HEAD here
+      // (the fixture ends with an unrelated README commit).
+      expect(graphHead).not.toBe(readHeadSha(repo));
+      expect(backfillIsFresh({ graphHeadSha: graphHead! }, graphHead)).toBe(true);
+      expect(backfillIsFresh({ graphHeadSha: '0'.repeat(40) }, graphHead)).toBe(false);
+      expect(backfillIsFresh(null, graphHead)).toBe(false);
+      expect(backfillIsFresh({ graphHeadSha: graphHead! }, null)).toBe(false);
+      expect(backfillIsFresh(undefined, graphHead)).toBe(false);
+      // a legacy file (headSha only) has no graphHeadSha -> never fresh
+      expect(backfillIsFresh({ headSha: graphHead! } as never, graphHead)).toBe(false);
+      expect(readGraphHeadSha(repo, 'docs/does-not-exist.json')).toBeNull();
       expect(readHeadSha(mkdtempSync(join(tmpdir(), 'sgfr-nonrepo-')))).toBeNull();
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
   });
 
-  test('ensureRootBackfill: writes the file; a fresh headSha skips the rebuild (sentinel proves it)', async () => {
+  test('ensureRootBackfill: writes the file; a fresh graphHeadSha skips the rebuild (sentinel proves it)', async () => {
     const repo = fixtureRepo();
     const dir = mkdtempSync(join(tmpdir(), 'sgfr-ensure-'));
     const target = join(dir, 'root-backfill.json');
@@ -648,15 +669,15 @@ describe('root git-history backfill (§13.2-§13.3, AC-A2/A3/A5/A6)', () => {
       const first = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
       expect(first.rebuilt).toBe(true);
       expect(first.file.provenance).toBe('git-backfill');
-      expect(first.file.headSha).toBe(readHeadSha(repo));
+      expect(first.file.graphHeadSha).toBe(readGraphHeadSha(repo, join('docs', 'skill-graph.json')));
       expect(existsSync(target)).toBe(true);
-      // deterministic content at the same HEAD (AC-A2): a manual rerun writes byte-identical bytes
+      // deterministic content at the same graph commit (AC-A2): byte-identical bytes
       const bytes = readFileSync(target, 'utf-8');
       const second = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
-      expect(second.rebuilt).toBe(false); // headSha match -> skip
+      expect(second.rebuilt).toBe(false); // graphHeadSha match -> skip
       expect(second.file).toEqual(first.file);
       // a sentinel in the file survives a fresh-skip (no rebuild clobbered it)
-      const tampered = JSON.parse(bytes) as { headSha: string };
+      const tampered = JSON.parse(bytes) as { rows: Array<Record<string, unknown>> };
       tampered.rows.push({ date: '9999-01-01', commitCount: 1, schema: 2, agents: { n: [], t: [], e: [] } });
       writeFileSync(target, JSON.stringify(tampered));
       const third = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
@@ -668,18 +689,94 @@ describe('root git-history backfill (§13.2-§13.3, AC-A2/A3/A5/A6)', () => {
     }
   });
 
-  test('ensureRootBackfill rebuilds when HEAD advanced (staleness path)', async () => {
+  test('ensureRootBackfill rebuilds when the GRAPH commit advanced (staleness path)', async () => {
     const repo = fixtureRepo();
     const dir = mkdtempSync(join(tmpdir(), 'sgfr-stale-'));
     const target = join(dir, 'root-backfill.json');
     try {
       const first = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
-      // record a stale headSha -> the next call must replay
-      const stale = { ...first.file, headSha: '1'.repeat(40) };
+      // record a stale graphHeadSha -> the next call must replay
+      const stale = { ...first.file, graphHeadSha: '1'.repeat(40) };
       writeFileSync(target, JSON.stringify(stale));
       const second = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
       expect(second.rebuilt).toBe(true);
-      expect(second.file.headSha).toBe(readHeadSha(repo));
+      expect(second.file.graphHeadSha).toBe(readGraphHeadSha(repo, join('docs', 'skill-graph.json')));
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // ── v2.6.2 regression: the fixed-point proof (loop #2162 → #2164 → #2165) ──
+  test('REGRESSION: an unrelated commit advancing HEAD does NOT invalidate the backfill', async () => {
+    const repo = fixtureRepo();
+    const dir = mkdtempSync(join(tmpdir(), 'sgfr-fixedpoint-'));
+    const target = join(dir, 'root-backfill.json');
+    try {
+      const first = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
+      expect(first.rebuilt).toBe(true);
+      const bytesBefore = readFileSync(target, 'utf-8');
+      const headBefore = readHeadSha(repo);
+      // commit a file that does NOT touch the replayed graph path
+      commitFile(repo, 'OTHER.md', 'unrelated change\n');
+      const headAfter = readHeadSha(repo);
+      expect(headAfter).not.toBe(headBefore); // HEAD really advanced
+      const second = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
+      expect(second.rebuilt).toBe(false); // graph commit unchanged -> skip
+      expect(second.file.graphHeadSha).toBe(first.file.graphHeadSha);
+      expect(readFileSync(target, 'utf-8')).toBe(bytesBefore); // bytes untouched
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('a commit that DOES touch docs/skill-graph.json invalidates (graphHeadSha advances)', async () => {
+    const repo = fixtureRepo();
+    const dir = mkdtempSync(join(tmpdir(), 'sgfr-touch-'));
+    const target = join(dir, 'root-backfill.json');
+    try {
+      const first = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
+      // a genuinely different blob (same bytes would be a no-op commit)
+      const V2_GRAPH_3 = JSON.stringify({
+        version: 2,
+        nodes: [
+          { id: 'agent:root/legacy', type: 'agent', layer: 'L0', content_hash: 'aa11' },
+          { id: 'agent:root/second', type: 'agent', layer: 'L0', content_hash: 'bb22' },
+          { id: 'agent:root/third', type: 'agent', layer: 'L0', content_hash: 'cc33' },
+          { id: 'skill:root/legacy-skill', type: 'skill', layer: 'L0' },
+        ],
+        edges: [{ type: 'used_by', from: 'agent:root/legacy', to: 'skill:root/legacy-skill' }],
+      });
+      commitFile(repo, 'graph', V2_GRAPH_3, true);
+      const second = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
+      expect(second.rebuilt).toBe(true);
+      expect(second.file.graphHeadSha).not.toBe(first.file.graphHeadSha);
+      expect(second.file.graphHeadSha).toBe(readGraphHeadSha(repo, join('docs', 'skill-graph.json')));
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('a legacy file carrying only headSha is stale exactly once', async () => {
+    const repo = fixtureRepo();
+    const dir = mkdtempSync(join(tmpdir(), 'sgfr-legacy-'));
+    const target = join(dir, 'root-backfill.json');
+    try {
+      const graphHead = readGraphHeadSha(repo, join('docs', 'skill-graph.json'))!;
+      // Pre-v2.6.2 artifact: headSha only, no graphHeadSha.
+      writeFileSync(
+        target,
+        JSON.stringify({ provenance: 'git-backfill', headSha: graphHead, path: 'docs/skill-graph.json', rows: [] }),
+      );
+      const first = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
+      expect(first.rebuilt).toBe(true); // legacy shape -> one rebuild
+      const migrated = JSON.parse(readFileSync(target, 'utf-8')) as Record<string, unknown>;
+      expect(migrated.graphHeadSha).toBe(graphHead);
+      expect(migrated).not.toHaveProperty('headSha');
+      const second = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
+      expect(second.rebuilt).toBe(false); // stable thereafter
     } finally {
       rmSync(repo, { recursive: true, force: true });
       rmSync(dir, { recursive: true, force: true });
@@ -727,7 +824,7 @@ function structureModelFixture(backfillFile: RootBackfillFile | null = null): Re
 describe('renderStructurePage (D-C: sections, safety, determinism, budget)', () => {
   const backfillFile: RootBackfillFile = {
     provenance: 'git-backfill',
-    headSha: 'c'.repeat(40),
+    graphHeadSha: 'c'.repeat(40),
     path: 'docs/skill-graph.json',
     rows: [
       { date: '2026-08-24', commitCount: 2, schema: 1, agents: projBlock([['agent:root/a', 'h']], [['agent:root/a', 'skill:root/s', 'used_by']]) },

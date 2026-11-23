@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-23T14:19:31.352Z
+**Generated**: 2026-11-23T15:12:37.429Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -188,7 +188,7 @@
 | run-manifest.ts | 1.1.0 | scripts/run-manifest.ts | child_process, fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
-| skill-graph-fleet-report.ts | 2.6.1 | scripts/skill-graph-fleet-report.ts | child_process, fs, path |
+| skill-graph-fleet-report.ts | 2.6.2 | scripts/skill-graph-fleet-report.ts | child_process, fs, path |
 | skill-lifecycle-audit.ts | 1.15.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
 | skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun, fs, path |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
