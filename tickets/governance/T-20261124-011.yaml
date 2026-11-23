@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261124-011
+kind: manual
+title: >-
+  verify-delivered-versions.ts has two blind spots shown by the 2026-11-24
+  co-deck delivery (PR #259): (1) it sweeps only templates/<variant>/scripts/**
+  and the manifest files[], so common-sourced scripts the engine preserved as
+  CONFLICT (scripts/lib/external-deps.ts 1.2.0 vs 1.4.0,
+  scripts/validate-templates.ts 1.76.0 vs 1.87.0) passed as '148 paths clean';
+  it must sweep the effective common-plus-variant script set; (2) it reports
+  engine-preserved conflicts as plain STALE rows indistinguishable from missed
+  deliveries, and the runner then hand-copied template files over 9
+  project-evolved ones (3 carrying registered LOCAL-PATCH markers) before
+  catching it — the verifier should read the delivery decision log and label
+  CONFLICT-preserved paths as such (exit 1, 'adjudicate'), and the runner prompt
+  should forbid hand-copying over any STALE row that the engine classified
+  CONFLICT
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-24T08:25:25.786+09:00'
+history:
+  - at: '2026-11-24T08:25:25.786+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

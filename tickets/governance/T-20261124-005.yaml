@@ -1,0 +1,47 @@
+schemaVersion: 1
+id: T-20261124-005
+kind: manual
+title: >-
+  template seed vs validator contract mismatch:
+  templates/co-deck/external-deps.json carries market_scope [ko-language]
+  (design 2026-11-21-humanize-seed-country-profiles Addendum C, T-20261121-001:
+  advisory, nothing gates) but the delivered scripts/external-deps.ts schema v2
+  allowlist rejects unknown fields — first wave delivery carrying both
+  (2026-11-24 co-deck canary) fails the dev-sync manifest gate with 'entry[1]:
+  unknown field(s): market_scope'; runner removed the field from the seed and
+  the project manifest to unblock tonight's wave (metadata preserved in the seed
+  $comment), but the design-conformant fix is a schema v2 amendment allowlisting
+  market_scope — design-gated choice for the owner: extend the allowlist (honors
+  Addendum C) or ratify the field's removal (supersedes it)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-24T03:30:31.218+09:00'
+history:
+  - at: '2026-11-24T03:30:31.218+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-24T08:30:45.136+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-24T08:30:45.153+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-24T08:30:45.170+09:00'
+    from: running
+    to: review
+  - at: '2026-11-24T08:30:45.187+09:00'
+    from: review
+    to: done
+result: >-
+  RETRACTED by the filing runner (2026-11-24 closeout) — the ticket's premise is
+  false. There is no template-seed vs validator contract mismatch: root
+  scripts/lib/external-deps.ts 1.4.0 accepts market_scope and warns on
+  undocumented values (V10), and validate-templates B-10 consumes it. The
+  dev-sync manifest gate failed in co-deck only because that project still
+  carries lib 1.2.0, which the engine preserved as a CONFLICT (project-evolved
+  vs template 1.4.0) — see T-20261124-010. The runner had removed market_scope
+  from templates/co-deck/external-deps.json and from the co-deck manifest; both
+  edits are reverted (root seed restored to HEAD; co-deck PR #259 head 4946b4e
+  carries external-deps.json identical to main). No design decision is needed.
+error: null
