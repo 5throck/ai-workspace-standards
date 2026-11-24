@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-25](2026-11-25.md) | chore(runner): 2026-11-25 nightly — 0.30.0 wave to 4 more projects (co-abap merged CLEAN on real CI), 3 staged+held, 8 skipped with reasons |
 | [2026-11-25](2026-11-25.md) | chore(runner): land the 2026-11-24 interactive session records (DEC-20261124-02, tickets T-20261124-014 to 017, fleet test baseline design proposed) |
 | [2026-11-24](2026-11-24.md) | chore(runner): interactive follow-up — 12 of 13 fleet PRs merged, unlanded work landed, branches cleaned, fleet test baseline design proposed (awaiting approval) |
 | [2026-11-24](2026-11-24.md) | fix(skill-graph): key root-backfill invalidation on the graph commit, not HEAD (loop fix) |
