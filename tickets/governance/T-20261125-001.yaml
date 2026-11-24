@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261125-001
+kind: manual
+title: >-
+  co-architect wave blocked by 6 CONFLICTs (equal-version class): agents/
+  mep-engineer, drafting-architect, bylaw-expert, visualization-expert,
+  interior-designer, structural-engineer are project-evolved since the template
+  0.29.0 baseline while the template bumped them for 0.30.0 (version-gated
+  agents delivery) — SYNC_IF_NEWER cannot resolve; 2026-11-25 dry-run preserved
+  the project copies and skipped the delivery (never-force rule); the rest of
+  the delta (12 update rows incl. v4 hardening scripts) is ready; resolution:
+  adjudicated port template-side per 2026-10-27-sync-overwrite-policy-design §6
+  or adopt-template per file with owner sign-off; note the 2026-11-20/22 waves
+  delivered these agents version-gated, so the evolution happened after 11-22
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-25T03:17:23.556+09:00'
+history:
+  - at: '2026-11-25T03:17:23.556+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
