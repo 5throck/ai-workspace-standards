@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261124-014
+kind: manual
+title: >-
+  Private-repository GitHub Actions still fail at startup. T-20261123-007 was
+  closed as 'billing recovered' on the evidence of one public-repository run
+  (root PR #2160), but every private fleet repository still reports runner_id 0
+  and steps 0: twelve repositories between 2026-11-24T06:17Z and 06:18Z,
+  co-architect run 45236774558 attempt 3 at 09:10Z, and the same twelve again
+  between 12:50Z and 12:52Z. Eleven fleet merges on 2026-11-24 therefore carry
+  test-integrity: unverified in the run ledger (DEC-20261124-01,
+  DEC-20261124-02). Action: the owner restores Actions billing for the account,
+  then re-run the CI workflow on main of every fleet repository and treat that
+  run as the validation of record for those merges.
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-24T22:20:28.539+09:00'
+history:
+  - at: '2026-11-24T22:20:28.539+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
