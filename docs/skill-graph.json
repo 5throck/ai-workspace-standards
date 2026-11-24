@@ -3069,6 +3069,11 @@
       "layer": "L0"
     },
     {
+      "id": "dec:DEC-20261124-01",
+      "type": "decision",
+      "layer": "L0"
+    },
+    {
       "id": "doc:AGENTS.md",
       "type": "doc",
       "layer": "L0"
@@ -12767,6 +12772,12 @@
     {
       "type": "cites_skill",
       "from": "dec:DEC-20261123-01",
+      "to": "skill:root/decision-write-integrity",
+      "source": "skills_used"
+    },
+    {
+      "type": "cites_skill",
+      "from": "dec:DEC-20261124-01",
       "to": "skill:root/decision-write-integrity",
       "source": "skills_used"
     },
