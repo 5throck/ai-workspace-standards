@@ -13,12 +13,33 @@ title: >-
   with owner sign-off; the remainder of the 0.30.0->0.30.0 delta (v4 hardening
   scripts) redelivers next wave after resolution
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-24T03:37:46.454+09:00'
 history:
   - at: '2026-11-24T03:37:46.454+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T05:42:29.492+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T05:42:29.510+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-25T05:42:29.526+09:00'
+    from: running
+    to: review
+  - at: '2026-11-25T05:42:29.543+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via co-security PR #147
+  (https://github.com/5throck/co-security/pull/147), left open. Proof:
+  agents/patch-engineer.md is body-identical to
+  templates/co-security/agents/patch-engineer.md (empty body diff; template
+  sentence landed in root PR #2173); the project copy was taken from the
+  template once with --disposition adopt-template=agents/patch-engineer.md,
+  resetting the baseline. agents/pm.md kept as the project copy because the
+  template copy lacks lifecycle.phase/lifecycle.governance. Contained audit exit
+  0.
 error: null

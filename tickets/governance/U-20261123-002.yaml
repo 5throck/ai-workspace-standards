@@ -3,7 +3,7 @@ id: U-20261123-002
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-23T14:28:03.544+09:00'
 history:
@@ -13,7 +13,17 @@ history:
   - at: '2026-11-23T20:58:55.220+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-25T05:40:06.799+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-25T05:40:06.799+09:00'
+    from: review
+    to: done
+result: >-
+  Reciprocal routing sentence added verbatim to
+  templates/co-security/agents/patch-engineer.md (1.1.3), root PR #2173;
+  co-security baseline reset by taking the template copy after a body-identity
+  proof.
 error: null
 upstream:
   project: co-security
@@ -59,3 +69,11 @@ upstream:
   duplicates:
     - project: co-security
       at: '2026-11-23T14:28:03.544+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2173
+    summary: >-
+      Reciprocal routing sentence added verbatim to
+      templates/co-security/agents/patch-engineer.md (1.1.3), root PR #2173;
+      co-security baseline reset by taking the template copy after a
+      body-identity proof.
