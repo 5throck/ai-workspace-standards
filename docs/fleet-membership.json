@@ -19,6 +19,12 @@
       "reason": "Git-worktree husk of the ROOT workspace repo (same shape as co-deck-worktrees): root-mirror content, no variant.json, no template sync obligation. Directory currently absent (removed 2026-11-19, verified empty rmdir-only); excluded defensively so a recreation can never rejoin the fleet (T-20261119-007).",
       "decided": "2026-11-19",
       "decision_ref": "DEC-20261107-01"
+    },
+    {
+      "id": "co-utility",
+      "reason": "Adoption-only variant and a worktree-mirror of the out-of-tree QuickDL adoption site (design 2026-11-21-co-utility-dedup-and-adoption-role-design §5.7): the upgrade engine refuses it by its variant.json consumption flag, and the daily resync audit already skips it with an informational line. The row keeps every loop consumer (resync audit, backport batteries, fleet reports) from meeting it through the Projects/co-* glob.",
+      "decided": "2026-11-25",
+      "decision_ref": "DEC-20261107-01"
     }
   ]
 }
