@@ -13,12 +13,32 @@ title: >-
   or adopt-template per file with owner sign-off; note the 2026-11-20/22 waves
   delivered these agents version-gated, so the evolution happened after 11-22
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-25T03:17:23.556+09:00'
 history:
   - at: '2026-11-25T03:17:23.556+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T05:44:43.792+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T05:44:43.816+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-25T05:44:43.835+09:00'
+    from: running
+    to: review
+  - at: '2026-11-25T05:44:43.852+09:00'
+    from: review
+    to: done
+result: >-
+  Landed via co-architect PR #413
+  (https://github.com/5throck/co-architect/pull/413), left open. Proof: each of
+  the six agents differs from its template copy only on the frontmatter version
+  line (project 1.0.1, template 1.0.2), per
+  docs/reports/2026-11-25-conflict-adjudication-analysis.md 3.3; template copies
+  taken with a six-path --disposition adopt-template; dry-run six ADOPT rows, no
+  other CONFLICT. Contained audit exit 0; verify-delivered-versions exit 0 with
+  0 findings. agents/pm.md kept as the project copy.
 error: null
