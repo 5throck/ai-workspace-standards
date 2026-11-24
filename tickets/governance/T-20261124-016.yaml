@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261124-016
+kind: manual
+title: >-
+  co-deck main fails 12 of 487 tests and CI never sees them: eleven failures in
+  scripts/co-deck/tests/gen-slides-pdf-render.test.ts and one in
+  scripts/co-deck/tests/theme-visual-regression.test.ts, observed on 2026-11-24
+  during the pre-merge battery of PR #259 (main 475 pass and 12 fail). co-deck
+  has no test:unit script, so the CI Unit Tests job is skipped. Design
+  2026-11-24-fleet-test-baseline-design proposes a ticketed 30-day quarantine;
+  this ticket is the fix ticket. Action: fix the twelve tests.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-24T22:22:23.112+09:00'
+history:
+  - at: '2026-11-24T22:22:23.112+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261124-017
+kind: manual
+title: >-
+  scripts/battery.ts verifies a different command set than CI: it runs the
+  project's test script (or bun test) while the CI Unit Tests job runs
+  test:unit, and the raw bun audit where CI runs scripts/dependency-audit.ts.
+  Evidence 2026-11-24: in co-consult, co-export, co-hr, co-news and co-work both
+  runner suites discover zero tests and only the three delivered common tests in
+  scripts/tests execute (26 tests); co-price's raw bun audit fails where the CI
+  wrapper may waive. The scripted fleet merges of 2026-11-24 added test:unit and
+  scripts/tests as extra battery commands. Permanent fix: design
+  2026-11-24-fleet-test-baseline-design (battery v1.1.0 runs the single entry
+  point; the dependency audit is decided there).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-24T22:24:06.441+09:00'
+history:
+  - at: '2026-11-24T22:24:06.441+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -6,6 +6,8 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-25](2026-11-25.md) | chore(runner): land the 2026-11-24 interactive session records (DEC-20261124-02, tickets T-20261124-014 to 017, fleet test baseline design proposed) |
+| [2026-11-24](2026-11-24.md) | chore(runner): interactive follow-up — 12 of 13 fleet PRs merged, unlanded work landed, branches cleaned, fleet test baseline design proposed (awaiting approval) |
 | [2026-11-24](2026-11-24.md) | fix(skill-graph): key root-backfill invalidation on the graph commit, not HEAD (loop fix) |
 | [2026-11-24](2026-11-24.md) | chore(runner): 2026-11-24 nightly batch — 7 deliveries staged, 6 mirror fixes, 13 tickets, no merges (all PRs held for human merge) |
 | [2026-11-23](2026-11-23.md) | chore(tickets): land U-20261122-006/008/010 resolves + T-20261122-003/004 done moves (PR #2153 batch) |
@@ -15,7 +17,7 @@
 | [2026-11-19](2026-11-19.md) | chore(templates): move seed pins quickdl v1.0.1 + im-not-ai v2.4.7 (compat-gated, issue #2096) |
 | [2026-11-18](2026-11-18.md) | docs(trail): record co-deck bgpool PNG leak learning |
 | [2026-11-18](2026-11-18.md) | feat(design): sync-embedded detection — opt-in backport marking and upstream filing (DEC-20261117-06, batch PR-A) |
-| [2026-11-17](2026-11-17.md) | chore(housekeeping): land memory archival, README regens, governance tickets T-20261117-001..005 |
+| 2026-11-17 | chore(housekeeping): land memory archival, README regens, governance tickets T-20261117-001..005 |
 | 2026-11-16 | docs(docs): workspace sync (21 files) |
 | 2026-11-16 | chore(templates): workspace sync (61 files) |
 | 2026-11-15 | feat(co-deck): backport project script improvements into templates/co-deck (U-20261114-006/-008/-009, T-20261109-003 batch) |

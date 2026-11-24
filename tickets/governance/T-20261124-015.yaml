@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261124-015
+kind: manual
+title: >-
+  co-price: bun audit exits 1 on main with 11 vulnerabilities (1 high: Effect
+  ReDoS in Schema.TemplateLiteral for versions up to 3.22.0; 10 moderate: seven
+  Next.js 16.x cache and image advisories, two Vitest, one minimatch). The
+  project's CI runs the waiver-aware wrapper scripts/dependency-audit.ts, while
+  scripts/battery.ts falls back to the raw bun audit because co-price has no
+  audit script. That difference blocked mirror-fix PR #188 on 2026-11-24, whose
+  own diff is one regenerated mirror file. Action: upgrade the vulnerable
+  packages, and align the battery with the CI dependency audit (covered by
+  design 2026-11-24-fleet-test-baseline-design).
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-24T22:21:30.278+09:00'
+history:
+  - at: '2026-11-24T22:21:30.278+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
