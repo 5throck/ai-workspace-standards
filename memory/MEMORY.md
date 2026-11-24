@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-24](2026-11-24.md) | fix(skill-graph): key root-backfill invalidation on the graph commit, not HEAD (loop fix) |
 | [2026-11-24](2026-11-24.md) | chore(runner): 2026-11-24 nightly batch — 7 deliveries staged, 6 mirror fixes, 13 tickets, no merges (all PRs held for human merge) |
 | [2026-11-23](2026-11-23.md) | chore(tickets): land U-20261122-006/008/010 resolves + T-20261122-003/004 done moves (PR #2153 batch) |
 | [2026-11-22](2026-11-22.md) | fix(gates): make drift-gate comparisons EOL-insensitive |

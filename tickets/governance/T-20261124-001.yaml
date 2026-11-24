@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261124-001
+kind: manual
+title: >-
+  dev-sync regenerates docs/skill-graph.json during landing but the root
+  backfill is generated BEFORE that regeneration, so every graph-touching
+  landing commits a backfill keyed to the previous graph commit and the first
+  post-merge fleet-report run must rewrite it (one-time dirty tree + catch-up
+  PR) — the assumption in 2026-11-23-skill-graph-observability-design §13 and
+  2026-11-24-backfill-invalidation-key-design §3 step 2 that 'the artifact
+  commit does not touch docs/skill-graph.json' does not hold for
+  graph-regenerating landings; proposed fixes, pick one at triage: (a) add a
+  dev-sync post-step that regenerates the backfill AFTER its own graph
+  regeneration so every landing ships a consistent pair, or (b) key freshness on
+  a content hash of docs/skill-graph.json at HEAD instead of a commit sha
+  (content-change-only invalidation, ordering-independent). Evidence: PRs
+  #2164/#2166/#2167 plus the observed 6-line docs/skill-graph.json diff in
+  landing commit 43d89f6ee
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-24T00:33:01.972+09:00'
+history:
+  - at: '2026-11-24T00:33:01.972+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
