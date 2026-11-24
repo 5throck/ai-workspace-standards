@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261124-008
+kind: manual
+title: >-
+  run-manifest verify passes with ZERO gateChecks rows although 8 projects
+  entered STEP I on 2026-11-24 (15 gate verdicts were written LATE during STEP J
+  because the runner omitted the pre-dry-run gate-step-i call) — the design rule
+  'a gate that does not fire still writes a row' is enforced by prose only;
+  verify should fail (or warn loudly) when STEP I work exists (delivery PRs or
+  skip rows for STEP_I) and gateChecks holds fewer rows than projects taken into
+  STEP I, and the runner prompt should make the gate-step-i invocation an
+  explicit numbered sub-step before the first dry-run; same night the
+  per-project dry-run ran for the canary (co-deck) only and 7 projects went
+  straight to the real run (co-security's conflict therefore surfaced in the
+  real run as a partial delivery, discarded, tree restored clean) ; TOCTOU
+  re-assert done post hoc: PR merge-base == review basis for all 7
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-24T08:15:45.894+09:00'
+history:
+  - at: '2026-11-24T08:15:45.894+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

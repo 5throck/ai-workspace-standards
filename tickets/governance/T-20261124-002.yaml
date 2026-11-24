@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261124-002
+kind: manual
+title: >-
+  agent-mirror parity drift on .claude/agents/pm.md in 6 fleet projects
+  (co-abap, co-architect, co-develop, co-export, co-game, co-price) — STEP E
+  2026-11-24 baseline audits: mirror carries legacy frontmatter (model: sonnet)
+  while the registry-resolved projection agents/pm.md is at v1.3.0 with model:
+  inherit/tier; systemic class: the 2026-11-23 template-0.30.0 wave deliveries
+  update agents/pm.md but do not regenerate the .claude/ mirror (project-side
+  sync-agent-mirrors.ts is a deliberate write the delivery never performs), so
+  every pm.md-touching wave recreates this drift; mechanical repair per project:
+  bun scripts/sync-agent-mirrors.ts --dir Projects/<p>; systemic prevention
+  candidate: upgrade-delivery post-step regenerating mirrors (same family as
+  T-20261124-001's dev-sync post-step ask); fixes will be pushed as project PRs
+  by runner STEP F 2026-11-24 but cannot merge CLEAN while fleet CI is
+  billing-walled and the wall exception stays suspended
+priority: high
+not_before: '2026-11-24'
+status: backlog
+attempts: 0
+created_at: '2026-11-24T03:13:32.059+09:00'
+history:
+  - at: '2026-11-24T03:13:32.059+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

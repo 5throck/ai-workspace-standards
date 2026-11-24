@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20261124-013
+kind: manual
+title: >-
+  upgrade engine, two delivery gaps seen in the 2026-11-24 wave: (a) variant
+  scripts stored outside scripts/<variant>/ are never classified or delivered —
+  co-work's templates/co-work/scripts/deck/** (svg_check.py 2.1.0 to 2.1.1,
+  tests/test_svg_check.py 2.0.0 to 2.0.1, and 8 new files: render_previews.py
+  plus the sample-business-report fixtures) appear nowhere in the engine's run
+  log and were copied by hand; checked first: the two existing files differed
+  from the template only in their version strings and their last project commit
+  is a template delivery, so no project-side change was overwritten;
+  verify-delivered-versions.ts did report them stale/absent; (b) scripts the
+  engine delivers are not all reflected in the project's scripts/SCRIPTS.md —
+  detect-backport.ts arrived at 1.0.1 with its row still at 1.0.0 in all 7
+  upgraded projects (co-deck, co-design, co-hr, co-learning, co-news, co-work,
+  co-consult), and in co-deck co-deck/tests/ppt-engine-integration.test.ts
+  (1.4.0, row 1.3.0) and co-deck/tests/diagram-helpers.test.ts (1.1.0, row
+  1.0.0) likewise; the engine does write the row for some files (for example
+  lib/external-deps.ts in co-design), so the miss is path-dependent; effect:
+  lifecycle-sync-audit Check A fails and dev-sync blocks until the rows are
+  bumped by hand, every wave; requested fix: (a) extend the variant-script lane
+  to every template path under scripts/ that the variant owns, or print an
+  explicit unclassified line per file; (b) bump the registry row whenever a
+  script file is copied
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-24T08:33:09.981+09:00'
+history:
+  - at: '2026-11-24T08:33:09.981+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261124-012
+kind: manual
+title: >-
+  upgrade engine delivers documents that cite DEC records without delivering the
+  records: after the 2026-11-24 wave the delivered validator (validate-decisions
+  1.2.1, Check V) fails dev-sync step 3.96b in every upgraded project because
+  docs/governance/agents/execution-plan-templates.md and CHANGELOG entries cite
+  DEC-20261028-05 (7 projects: co-deck, co-design, co-hr, co-learning, co-news,
+  co-work, co-consult) and co-work additionally cites DEC-20261106-04, while
+  docs/decisions/ holds no such file; the runner supplied the root records by
+  hand (add-if-missing) to unblock landing; caution for the engine fix: DEC ids
+  are per-repository and collide across repos (DEC-20261107-01 and
+  DEC-20261111-01 are different decisions in root and in co-work), so a
+  mechanical 'copy the same-id record' is unsafe — the engine should deliver the
+  cited record from the citing document's source repo and refuse on an id
+  collision
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-24T08:25:25.813+09:00'
+history:
+  - at: '2026-11-24T08:25:25.813+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261124-007
+kind: manual
+title: >-
+  merge predicate 4 is unsatisfiable in FLEET repos: no fleet repo ships the
+  full-scan gitleaks config (.github/gitleaks-full.toml exists in root only;
+  fleet repos carry .gitleaks.toml, the per-PR config their CI Secret Scan
+  uses), and the rule is fail-closed ('if the full config is absent, the merge
+  FAILS — never fall back'), so the runner can never merge ANY fleet PR under
+  the v4 predicate — 2026-11-24: six STEP F mirror-fix PRs (co-abap#253,
+  co-architect#412, co-develop#217, co-export#74, co-game#77, co-price#188)
+  held, of which co-abap#253 is otherwise CLEAN (public repo, 4/4 real green
+  checks) ; informational scans on that PR's exported diff were leak-free but
+  are NOT a gate pass; note all six also touch memory/** (dev-sync's
+  archive-memory step commits the retention prune and the session log), so
+  predicate 6 holds them for human merge regardless; decision-class: pick one —
+  (a) deliver a full-scan config to fleet repos via templates, (b) amend the
+  predicate to name the fleet full config, or (c) ratify that in a fleet repo a
+  .gitleaks.toml scan of the changed-path export is the full scan when the
+  changed-path set intersects no allowlisted path
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-24T08:15:45.862+09:00'
+history:
+  - at: '2026-11-24T08:15:45.862+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

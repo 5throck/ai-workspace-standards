@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: T-20261124-006
+kind: manual
+title: >-
+  co-security upgrade wave blocked by CONFLICT: agents/patch-engineer.md
+  equal-version drift on project-evolved content (project copy evolved
+  2026-11-22/23 during the security upstream work — contract-gate/patch-engineer
+  rows — while the template copy stayed at the same version, so SYNC_IF_NEWER
+  cannot resolve it); 2026-11-24 runner skipped the wave per the never-force
+  rule and discarded the partial delivery; resolution: adjudicated-port the
+  project content template-side per 2026-10-27-sync-overwrite-policy-design §6
+  (bidirectional superset diff, dry-run no-op proof) or record adopt-template
+  with owner sign-off; the remainder of the 0.30.0->0.30.0 delta (v4 hardening
+  scripts) redelivers next wave after resolution
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-24T03:37:46.454+09:00'
+history:
+  - at: '2026-11-24T03:37:46.454+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

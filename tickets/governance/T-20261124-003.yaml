@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261124-003
+kind: manual
+title: >-
+  co-safety: node_modules absent in the project checkout — contained-run refuses
+  to install (by design), so the nightly baseline audit cannot execute and the
+  project accumulated no review row; 2026-11-24 STEP E skip + STEP I skip both
+  trace to this environment gap; resolution needs a reviewed dependency install
+  (bun install with lockfile) run by the owner or a sanctioned session — the
+  runner never installs; after install, next-night review+upgrade proceed
+  normally
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-24T03:19:55.611+09:00'
+history:
+  - at: '2026-11-24T03:19:55.611+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

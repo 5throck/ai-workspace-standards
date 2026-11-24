@@ -1,0 +1,52 @@
+schemaVersion: 1
+id: T-20261124-004
+kind: manual
+title: >-
+  upgrade engine variant-scripts lane still under-delivers: 2026-11-24 co-deck
+  canary real run delivered 43 SYNC_IF_NEWER root scripts correctly but left 9
+  files in scripts/co-deck/** stale on disk (gen-slides-pdf-render.test.ts,
+  estimate-layout-lint.test.ts, ppt-engine-integration.browser.mjs,
+  validate-image-manifest.test.ts, diagram-helpers.ts,
+  validate-image-manifest.ts, gen-slides-pdf.ts, estimate-layout.ts,
+  gen-visual-images.ts) and did not bump 7 SCRIPTS.md rows for delivered variant
+  scripts (lifecycle-sync-audit Check A errors), and did not regenerate
+  docs/VERSION_MANIFEST.md for the completed set — runner completed the delivery
+  by hand (copy + row bumps + generate-version-manifest) and re-verified: audit
+  exit 0, verify-delivered-versions 148 paths clean; recurrence of the
+  T-20261119-008 family now caught by the v4 verifier but NOT prevented at the
+  engine; requested fix: VARIANT SCRIPTS delivery step to (a) copy every
+  template-newer versioned file, (b) auto-bump project SCRIPTS.md rows for
+  delivered files, (c) regenerate VERSION_MANIFEST after the lane completes
+priority: high
+status: done
+attempts: 0
+created_at: '2026-11-24T03:23:15.238+09:00'
+history:
+  - at: '2026-11-24T03:23:15.238+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-24T08:33:10.000+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-24T08:33:10.017+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-24T08:33:10.034+09:00'
+    from: running
+    to: review
+  - at: '2026-11-24T08:33:10.051+09:00'
+    from: review
+    to: done
+result: >-
+  RETRACTED by the filing runner (2026-11-24 closeout) and re-filed accurately
+  as T-20261124-013. This ticket's co-deck examples are wrong: the 9
+  scripts/co-deck files were NOT under-delivered — the engine had classified
+  them CONFLICT (project-evolved since the last delivery AND template changed)
+  and preserved the project copies on purpose; the runner then hand-overwrote
+  them with template copies, which is what this ticket mistook for an engine
+  gap. That overwrite is reverted in co-deck PR #259 (head 4946b4e) and the
+  conflicts are tracked in T-20261124-010. The sentence 'runner completed the
+  delivery by hand ... re-verified ... 148 paths clean' is withdrawn. The two
+  genuine residues (co-work scripts/deck/** never classified; SCRIPTS.md rows
+  not bumped for delivered scripts) are in T-20261124-013.
+error: null

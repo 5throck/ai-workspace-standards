@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: T-20261124-009
+kind: manual
+title: >-
+  docs/fleet-membership.json lacks the exclusion row for co-utility although the
+  registered+implemented design
+  2026-11-21-co-utility-dedup-and-adoption-role-design §5.7 requires an
+  adoption-time exclusion row for adoption-only variants (resync-audit reports
+  'its docs/fleet-membership.json exclusion row is missing' and falls back to
+  the INFO skip); the file is protected and membership changes are human-only,
+  so the runner files instead of editing — proposed row: id co-utility, decided
+  2026-11-24, decision_ref pointing at the 2026-11-21 design (owner to confirm
+  the DEC id), reason: adoption-only worktree-mirror of the out-of-tree QuickDL
+  adoption site; consequence if not added: every loop consumer (resync audit,
+  backport batteries, fleet reports) keeps meeting co-utility via the
+  Projects/co-* glob and relying on the defensive skip, and the runner must
+  classify it by hand each night
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-24T08:15:45.926+09:00'
+history:
+  - at: '2026-11-24T08:15:45.926+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
