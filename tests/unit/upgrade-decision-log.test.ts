@@ -769,6 +769,27 @@ describe('upgrade-project.ts delivery tombstones (U-20261028-001 D1–D3)', () =
     expect(manifest.tombstones?.[WORKFLOWS_REL]).toBeUndefined();
   }, 180000);
 
+  test('--tombstone under --dry-run is a read-only preview, not a refusal (T-20261125-003)', () => {
+    // Contract flipped by v1.121.0: the flag used to be refused outright, which made
+    // the dry-run review gate unfaithful (a reviewer could not check the glob). The
+    // grant is now previewed, persists nothing, and the apply run still owns the write.
+    // Rider order matters: this MUST run before the mutating grant test below — the
+    // shared 'tombstone-candidate' dir must still hold an UNRECORDED tombstone
+    // candidate (a recorded entry would turn the preview into TOMBSTONED_SKIP).
+    const tmp = useDir('tombstone-candidate');
+    const seeded = readFileSync(join(tmp, '.claude', 'last-upgrade-delivery.json'), 'utf8');
+    const { status, out } = runUpgrade(tmp, ['--dry-run', '--tombstone', WORKFLOWS_REL]);
+    expect(out).not.toContain('apply-mode only');
+    expect(out).toContain('previewed read-only');
+    expect(out).toContain(`TOMBSTONE (would be recorded): ${WORKFLOWS_REL}`);
+    expect(out).toContain('the apply run with --tombstone records the entry');
+    // Only the tombstone was an ERROR — the grant preview resolves it, so exit 0.
+    expect(status).toBe(0);
+    // Persisted nothing: manifest byte-identical, path still absent.
+    expect(readFileSync(join(tmp, '.claude', 'last-upgrade-delivery.json'), 'utf8')).toBe(seeded);
+    expect(existsSync(join(tmp, WORKFLOWS_REL))).toBe(false);
+  }, 180000);
+
   test('--tombstone records the entry (reason, hash, recordedAt) and honors it immediately', () => {
     // v2.0.0: the mutating grant runs LAST on the shared tombstone-candidate
     // dir (after both dry-run riders) — the grant writes the entry this run.
@@ -943,13 +964,6 @@ describe('upgrade-project.ts delivery tombstones (U-20261028-001 D1–D3)', () =
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
-  }, 180000);
-
-  test('--tombstone / --clear-tombstone are refused under --dry-run (apply-mode only)', () => {
-    const tmp = useDir('tombstone-candidate');
-    const { status, out } = runUpgrade(tmp, ['--dry-run', '--tombstone', WORKFLOWS_REL]);
-    expect(status).toBe(1);
-    expect(out).toContain('apply-mode only');
   }, 180000);
 });
 

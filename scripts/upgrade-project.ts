@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.120.0
+// @version 1.121.0
+// v1.121.0 (2026-11-25, T-20261125-003): tombstone flags are previewable under
+//          --dry-run. (1) The hard refusal ("--tombstone / --clear-tombstone are
+//          apply-mode only") is replaced by a read-only preview: tombstoneSkip reports
+//          the would-be TOMBSTONED_SKIP ("🪦 TOMBSTONE (would be recorded)") naming the
+//          grant that matched, records the decision in the dry-run log, and writes
+//          nothing (the manifest write stays inside the apply-only block). (2) New
+//          grant-coverage WARN — a --tombstone glob that matched no candidate, and a
+//          --clear-tombstone glob matching no recorded tombstone/baseline, are named
+//          before the summary: that typo class previously cost a full apply run and
+//          refused again with no diagnostic. The fidelity half of the ticket (a
+//          dry-run not emitting the TOMBSTONED row at all) was already satisfied at
+//          HEAD and is pinned by tests/unit/upgrade-dry-run-tombstone.test.ts.
 // v1.119.0 (2026-11-25, T-20261124-007 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.7):
 //          `.github/gitleaks-full.toml` joins the LOCKED always-take-template
@@ -747,9 +759,9 @@
 //          (baseline without a tombstone) logs `TOMBSTONED` (ERROR) — delivery
 //          refused, run exits non-zero (design §4.4 acceptance shape);
 //          recorded tombstones log `TOMBSTONED_SKIP` (INFO). Resolution flags:
-//          `--tombstone <glob>` (repeatable, apply-mode only — records the
-//          deletion as intended with a reason; the confirmed run honors it
-//          immediately) and `--clear-tombstone <glob>` (drops entries so the
+//          `--tombstone <glob>` (repeatable — records the deletion as intended
+//          with a reason; the confirmed run honors it immediately; under
+//          --dry-run it is previewed read-only — T-20261125-003) and `--clear-tombstone <glob>` (drops entries so the
 //          next run delivers the path as NEW). Per D3b `--disposition
 //          adopt-template` does NOT override a tombstone — the guard never
 //          reads the disposition flag. (D4) AGENTS OWNERSHIP: the agents/
@@ -1762,7 +1774,8 @@ const dispositionGrants: string[] = [];
 // U-20261028-001 (D3): tombstone grants (--tombstone, repeatable) record the
 // project-side deletion of a delivered path as intended; clear grants
 // (--clear-tombstone, repeatable) drop entries so the next run delivers the
-// path as NEW. Both are apply-mode only (validated after the parse loop).
+// path as NEW. Both mutate the manifest, so only apply mode persists them; under
+// --dry-run they are accepted as a read-only preview (T-20261125-003).
 const tombstoneGrants: Array<{ re: RegExp; source: string }> = [];
 // B1: each clear grant keeps its source glob so the TOMBSTONE_CLEARED decision
 // row can name it (the retraction must be auditable, not just silent state).
@@ -1963,15 +1976,23 @@ function applyDispositionArg(raw: string): void {
   };
 }
 
-// U-20261028-001 (D3/D1): tombstone confirmation and clearing are apply-mode
-// operations — they mutate the persisted manifest. A dry-run reports
-// candidates and persists nothing, so a grant there would be silently lost;
-// fail loudly instead.
-if (dryRun && (tombstoneGrants.length > 0 || clearTombstoneGrants.length > 0)) {
-  console.error(
-    "ERROR: --tombstone / --clear-tombstone are apply-mode only — re-run without --dry-run to confirm or clear the deletion intent.",
+// U-20261028-001 (D3/D1): tombstone confirmation and clearing mutate the
+// persisted manifest, so they are APPLY-mode operations — but refusing them in a
+// dry-run made the dry-run review gate unfaithful (T-20261125-003): a reviewer
+// holding a dry-run that says `confirm with --tombstone <path>` could not check
+// that a grant glob actually matches the tombstoned path before spending an
+// apply run on it, and a typo'd glob simply refused again with no diagnostic.
+// Under --dry-run the grants are therefore accepted as a READ-ONLY PREVIEW: the
+// tombstone guard reports the would-be TOMBSTONED_SKIP when the grant matches,
+// and an unmatched grant is reported as a WARN. Nothing is written — the
+// manifest write lives inside the apply-only block, so a preview cannot persist.
+const tombstoneGrantPreview = dryRun && (tombstoneGrants.length > 0 || clearTombstoneGrants.length > 0);
+/** --tombstone globs that matched at least one tombstoned path this run. */
+const matchedTombstoneGrants = new Set<string>();
+if (tombstoneGrantPreview) {
+  console.log(
+    "\n  ℹ️  tombstone grants under --dry-run are previewed read-only — no entry is recorded or cleared; the apply run with the same flags performs the write.",
   );
-  process.exit(1);
 }
 
 // A3: --changelog-entry mutates the project CHANGELOG — apply-mode only, so a
@@ -4431,6 +4452,22 @@ function tombstoneSkip(rel: string, policy: string, pass: string): boolean {
   const outcome = tombstoneGuard(rel, priorManifest, true);
   if (!outcome.fires || !outcome.verdict || !outcome.severity) return false;
   if (outcome.verdict === "TOMBSTONED" && tombstoneGranted(rel)) {
+    for (const grant of tombstoneGrants) if (grant.re.test(rel)) matchedTombstoneGrants.add(grant.source);
+    if (dryRun) {
+      // T-20261125-003: preview the apply outcome without recording the entry.
+      recordDecision(
+        rel,
+        policy,
+        pass,
+        "TOMBSTONED_SKIP",
+        `dry-run preview — --tombstone would record this deletion intent (reason: ${tombstoneReason}) and skip the delivery; no entry is written by a dry-run`,
+        priorBaselines[rel],
+      );
+      console.log(
+        `  🪦 TOMBSTONE (would be recorded): ${rel} — grant matched; the apply run with --tombstone records the entry and skips this delivery (dry-run writes nothing)`,
+      );
+      return true;
+    }
     newlyTombstoned.set(rel, tombstoneReason);
     recordDecision(
       rel,
@@ -10818,6 +10855,57 @@ if (import.meta.main && !securityPass) process.exit(1);
     console.log("  Port the project content template-side (or record a decision) so a later delivery cannot lose it.");
   }
 }
+// T-20261125-003: --dry-run tombstone-grant coverage. A grant glob that matches
+// nothing is the review failure mode the preview exists to catch — the apply run
+// would refuse the very same paths again with no diagnostic naming the glob. Report
+// it as a WARN before the summary so the reviewer fixes the glob first.
+if (tombstoneGrantPreview) {
+  const manifestKeys = [
+    ...Object.keys(priorManifest?.tombstones ?? {}),
+    ...Object.keys(priorManifest?.baselines ?? {}),
+  ];
+  if (matchedTombstoneGrants.size > 0) {
+    console.log(
+      `  🪦 TOMBSTONE GRANT (preview): ${matchedTombstoneGrants.size} path(s) would be recorded by --tombstone ${[...matchedTombstoneGrants].join(", ")}`,
+    );
+  }
+  for (const grant of tombstoneGrants) {
+    if (matchedTombstoneGrants.has(grant.source)) continue;
+    recordDecision(
+      grant.source,
+      "TOMBSTONE",
+      `--tombstone ${grant.source}`,
+      "SKIP",
+      `read-only preview — --tombstone ${grant.source} matched no tombstone candidate in this run; the apply run with the same glob would refuse the same path(s) again (check the glob)`,
+      undefined,
+      "WARN",
+    );
+    console.log(
+      `  ⚠️  TOMBSTONE GRANT (preview): --tombstone ${grant.source} matched NO tombstone candidate — check the glob before the apply run`,
+    );
+  }
+  for (const grant of clearTombstoneGrants) {
+    if (manifestKeys.some((rel) => grant.re.test(rel))) {
+      console.log(
+        `  🪦 TOMBSTONE GRANT (preview): --clear-tombstone ${grant.source} matches a recorded manifest entry — the apply run clears it`,
+      );
+      continue;
+    }
+    recordDecision(
+      grant.source,
+      "TOMBSTONE",
+      `--clear-tombstone ${grant.source}`,
+      "SKIP",
+      `read-only preview — --clear-tombstone ${grant.source} matches no recorded tombstone/baseline in this project (check the glob)`,
+      undefined,
+      "WARN",
+    );
+    console.log(
+      `  ⚠️  TOMBSTONE GRANT (preview): --clear-tombstone ${grant.source} matches NO recorded tombstone/baseline — check the glob`,
+    );
+  }
+}
+
 // D3.1 (T-20261027-004): a run whose decision log carries ERROR-severity
 // entries cannot land silently — non-zero exit with an actionable summary.
 // Earlier passes' deliveries stand; the dispositions are resumable via
