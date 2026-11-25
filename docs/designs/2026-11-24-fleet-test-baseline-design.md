@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-11-24-fleet-test-baseline-design`
 - **Date**: 2026-11-24
-- **Status**: proposed (awaiting owner approval)
+- **Status**: approved (owner approval 2026-11-25, recorded in DEC-20261125-01)
 - **Author**: architect dispatch (PM Row 0, Design Gate, ADR-0074)
 - **Source**: PM dispatch brief 2026-11-24 (owner requests 1-5, relayed in English). Requests 3 and 4 arrived mid-task. Request 5 and the document-impact ruling followed. The battery audit amendment came from tonight's fleet merges.
 - **Related**: designs `2026-10-01-ci-template-unit-test-job-design` and `2026-11-15-windows-ci-test-speedup-design` (both implemented), ADR-0036, ADR-0061, ADR-0074, ADR-0094, ADR-0105, DEC-20261120-01, DEC-20261107-01, U-20261122-001, T-20261123-007, T-20261124-003, T-20261124-010
@@ -213,6 +213,7 @@ Row e depends on where the job falls in the rounding grid. Its duration is U. On
 | fleet | `package.json`, `test-suites.json` per Appendix A | modify, create | 4.3, 4.5 |
 
 - Template files: three in PR-B1, one in PR-B2, four in PR-B3. `agents/architect.md` requires explicit owner confirmation above three per change. The set touches eight template files in total and is flagged for that confirmation.
+- Approved template file set (2026-11-25, DEC-20261125-01). The owner approved the change to eight template files, as listed in the table above: `templates/common/.github/workflows/ci.yml`, `templates/common/scripts/test-runner.ts`, `templates/CHANGELOG.md`, `templates/co-abap/.github/workflows/ci.yml`, `templates/common/package.json`, `templates/common/scripts/SCRIPTS.md`, `templates/common/scripts/README.md`, `templates/common/scripts/README_ko.md`. The table writes the last two without the `templates/common/` prefix.
 - Governance. ADR-0036: script changes are TypeScript under `scripts/`, versioned by the `@version` header and its changelog block. ADR-0074: this document is the Row 0 design. The PM registers it. ADR-0094: template-owned jobs stay authoritative. Cross-platform: the runner spawns argv arrays without a shell, and tag values follow `process.platform`. No Windows-specific code is needed.
 
 | Platform | Impact | Files affected |
@@ -315,6 +316,7 @@ U, for the PM. Alias and manifest PRs in member repositories may meet the projec
 1. Request 3 reading. Adopt "fewer failed CI runs and reruns" as the claimed saving? Recommended default: yes. Measure failed `Unit Tests` runs per member, 14 days before and after.
 2. Root OS composition. A (verify everywhere) or B (independent once)? Recommended default: A. The ten slowest windows files are untagged engine tests (F4). B would remove them from the windows leg, where they fail most often (`FILE_TIME_BUDGETS`). Choose B only from a `--dry-run --os win32` listing.
 3. co-deck. Quarantine the two failing files for 30 days, or fix first? Recommended default: quarantine under a ticket.
+   - 2026-11-25: approved on the recommended default, "quarantine under a ticket": a ticketed 30-day quarantine of the two failing files, with T-20261124-016 as the fix ticket. The co-deck delivery of 2026-11-25 (co-deck PR #260) already reduced the failing tests from 12 to 3.
 4. Matrix proof. Run the throwaway PR in co-abap (rollout step 5)? Recommended default: yes, after its overlay delivery. No fleet member declares an OS-specific test in v1, so this is the only live evidence for an OS leg, and a public repository makes it free.
 5. co-utility and co-security. Adopt the template job in co-utility in v1? Declare the co-security service suite? Recommended default: defer both. co-utility's pytest job and co-security's `assessment-service.yml` already run tests.
 

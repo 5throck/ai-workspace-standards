@@ -3,9 +3,9 @@
 - **Spec ID**: `2026-11-25-upgrade-runner-machinery-batch`
 - **Date**: 2026-11-25
 - **Author**: Template Architect (Design Gate Row 0)
-- **Status**: proposed (awaiting owner approval)
+- **Status**: approved (owner approval 2026-11-25, recorded in DEC-20261125-01)
 - **Tickets**: T-20261124-001, -007, -008, -011, -012, -013, T-20261123-008, U-20261123-003, U-20261123-004, plus two findings raised by the PM on 2026-11-25 (sections 4.8 and 4.9)
-- **Related**: `docs/designs/2026-11-24-fleet-test-baseline-design.md` (T-20261124-017, proposed) is referenced, not re-designed.
+- **Related**: `docs/designs/2026-11-24-fleet-test-baseline-design.md` (T-20261124-017, approved 2026-11-25) is referenced, not re-designed.
 
 ## 0. Conclusion
 
@@ -187,6 +187,8 @@ Smallest safe first. Each row is one PR, merged before the next row starts (dev-
 
 Rows 1 and 2 come first because they stop the 2026-11-24 failure from recurring. Row 5 precedes row 7 because it unblocks one blocked project on its own.
 
+**Implementation note (2026-11-25, PM).** The approved landing shape differs from the table: one pull request, one commit per row in the table's order, one merge. Each commit message carries that row's canary evidence (the command, its exit code and the key output lines), and review is per commit. Reason: seven rows are protected-path human-merge rows, and one pull request per row would stall on a merge per row. Approved in DEC-20261125-01.
+
 ## 6. Alternatives considered
 
 | A. Backfill key | Pro | Con | Decision |
@@ -276,7 +278,12 @@ Not applicable.
 ## 13. Open questions for the owner
 
 1. **T-20261124-007**: confirm option (a). Default: (a).
+   - 2026-11-25: approved on the recommended default, option (a), delivery of the full-scan config to fleet repositories.
 2. **T-20261123-008 schedule**: which nights are scheduled (are weekends excluded)? Default: Monday to Friday, 03:00 KST.
+   - 2026-11-25: approved on the recommended default, scheduled nights Monday to Friday.
 3. **4.8 fast path scope**: frontmatter keys and `@version` only, or also changelog header comments? Default: the narrow scope.
+   - 2026-11-25: approved on the recommended default, the narrow scope.
 4. **4.2 verify result**: fail with exit 4, or warn? Default: fail.
+   - 2026-11-25: approved on the recommended default: verify fails with exit 4.
 5. **ADR**: one amendment to ADR-0105, or a new ADR for the batch? Default: amendment only.
+   - 2026-11-25: approved on the recommended default, one amendment to ADR-0105 and no new ADR.
