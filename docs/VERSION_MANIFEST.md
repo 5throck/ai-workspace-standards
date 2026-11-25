@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-25T06:49:00.730Z
+**Generated**: 2026-11-25T06:58:33.759Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -185,7 +185,7 @@
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | path |
 | review-baseline.ts | 1.6.0 | scripts/review-baseline.ts | N/A |
 | route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | fs, path |
-| run-manifest.ts | 1.1.0 | scripts/run-manifest.ts | child_process, fs, path |
+| run-manifest.ts | 1.2.0 | scripts/run-manifest.ts | child_process, fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
 | skill-graph-fleet-report.ts | 2.6.2 | scripts/skill-graph-fleet-report.ts | child_process, fs, path |
