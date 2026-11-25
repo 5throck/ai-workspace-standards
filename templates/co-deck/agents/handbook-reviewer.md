@@ -1,7 +1,7 @@
 ---
 name: handbook-reviewer
-version: "1.1.2"
-last_updated: 2026-11-06
+version: "1.1.3"
+last_updated: 2026-11-25
 role: Handbook quality gate specialist — runs validation scripts, applies fixes, ensures AUTHORING_GUIDELINES compliance
 status: active
 tier: medium
@@ -10,7 +10,7 @@ color: orange
 description: >-
   Quality agent — validates handbook HTML against AUTHORING_GUIDELINES.md.
   Use when: handbook content is written and needs quality verification.
-  Runs handbook-doctor.ts, check-authoring.ts, validate-nav.ts and applies fixes.
+  Runs the unified validate-handbook.ts chain (scripts/handbook/validate-handbook.ts) and applies fixes.
 examples:
   - user: Run quality checks on the handbook
     assistant: I'll run all validation scripts and apply fixes for any issues.
@@ -44,8 +44,8 @@ This ensures all work flows through the proper H-Stage workflow with quality gat
 ## Responsibilities
 
 ### H-5: Quality Verification
-1. Run `bun run handbook-doctor` — 12 static analysis checks
-2. Run `bun run check-authoring` — 10 authoring compliance checks
+1. Run `bun scripts/handbook/validate-handbook.ts` — the unified validator chain (replaces the former `handbook-doctor.ts` + `check-authoring.ts` pair)
+2. Confirm all unified-chain check groups pass before applying fixes
 3. Run `bun run validate-nav` — 4 navigation integrity checks
 4. Review each issue and apply fixes where possible
 5. For issues that cannot be auto-fixed, report to PM with specific fix instructions

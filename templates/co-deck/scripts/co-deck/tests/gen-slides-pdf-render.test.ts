@@ -1,3 +1,11 @@
+// @version 1.9.1 — last_updated 2026-11-25. Ported from the co-deck project
+//   1.8.0 copy (T-20261124-010, adjudicated port): five assertions of the
+//   project's U-20261119-007 pins had no counterpart in 1.9.0 and are ported
+//   below — the premium-dark spec premise, the classic cover ink, the
+//   two-column card ink, the outline single-column card geometry, and the
+//   contact-fallback no-C_DARK row. The exact pitch-enhanced column anchors
+//   are obsolete: the frame block routes every non-video pitch-enhanced
+//   standard slide to the framed renderer (gen-slides-pdf.ts renderStandardSlide).
 // @version 1.9.0 — batch-2 PR-A2 pins (U-20261119-010, design
 //   2026-11-20-co-deck-pipeline-batch-2-design R1b): opt-in framed PDF↔HTML
 //   parity — spec gates (pitch-enhanced ships the measured `frame` block, no
@@ -1037,6 +1045,8 @@ describe('v1.15.0 U-008(4) PDF side: contact bullets fallback', () => {
     const CARD_INK_WHITE_BUBBLE = `${31 / 255} ${42 / 255} ${68 / 255} rg`;
     expect(runs.filter((r) => r.rg === CARD_INK_WHITE_BUBBLE).length).toBeGreaterThanOrEqual(2);
     expect(runs.filter((r) => r.rg === C_BODY_OP).length).toBe(4);
+    // Ported from co-deck project 1.8.0 (T-20261124-010); assertion had no counterpart in 1.9.0.
+    expect(runs.filter((r) => r.rg === C_DARK_OP).length).toBe(0);
   });
 
   const contactFirstRun = (() => {
@@ -1311,6 +1321,15 @@ describe('v1.16.0 U-20261119-007: premium-dark bgDrawn ink derives from the actu
     backgroundImage: 'images/test.png',
   });
 
+  // Ported from co-deck project 1.8.0 (T-20261124-010); assertion had no counterpart in 1.9.0.
+  test('premise: premium-dark card_dark [11,15,25] and no `dark` key (C_DARK fell back to the fill)', () => {
+    const spec = JSON.parse(
+      readFileSync(join(ROOT, 'docs/html-themes/styles/premium-dark/pdf_color_spec.json'), 'utf-8'),
+    );
+    expect(spec.colors.card_dark).toEqual([11, 15, 25]);
+    expect(spec.colors.dark).toBeUndefined();
+  });
+
   test.skipIf(!haveFonts)('cover title: no ink equals the card fill; title renders white on the dark bubble', () => {
     const runs = textRunOps(titleRun.page);
     expect(runs.length).toBeGreaterThan(0);
@@ -1327,6 +1346,25 @@ describe('v1.16.0 U-20261119-007: premium-dark bgDrawn ink derives from the actu
     const txt = extractText(titleRun.pdfPath);
     if (txt === null) return;
     expect(txt).toContain('Cover Title Pin');
+  });
+
+  // Ported from co-deck project 1.8.0 (T-20261124-010); assertion had no counterpart in 1.9.0.
+  test.skipIf(!haveFonts)('classic cover: the dark-navy bubble gets white ink too (ink derives from the fill, not the constant)', () => {
+    const { dir, rel } = renderFixture(`_clscover_${Date.now()}`, BG_PROFILE,
+      [{ section: 'Cover', title: 'Classic Ink Cover', subtitle: 'sub line', backgroundImage: 'images/test.png' }], 'zen', 'classic');
+    mkdirSync(join(dir, 'images'), { recursive: true });
+    writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
+    const res = runTool(TOOL, rel);
+    expect(res.status).toBe(0);
+    const pdfPath = join(dir, `${rel.split(/[\\/]/).pop()}.pdf`);
+    expect(existsSync(pdfPath)).toBe(true);
+    const runs = textRunOps(decompressedStreams(pdfPath).find((s) => s.includes('Tj') && s.includes('BT'))!);
+    expect(runs.length).toBeGreaterThan(0);
+    // Title = the largest runs on the page (T's cover-title rule).
+    const maxSz = Math.max(...runs.map((r) => r.size));
+    const titleRuns = runs.filter((r) => r.size === maxSz);
+    expect(titleRuns.length).toBeGreaterThan(0);
+    for (const r of titleRuns) expect(r.rg).toBe(PD_TEXT_INK);
   });
 
   test.skipIf(!haveFonts)('punchline statement: ink is readableTextOn on the bubble, never the card fill', () => {
@@ -1401,9 +1439,9 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
     return null;
   }
 
-  function makePitchDeck(tag: string, slide: Record<string, any>) {
+  function makePitchDeck(tag: string, slide: Record<string, any>, theme = 'pitch') {
     const name = `_twocol_${tag}`;
-    const { dir, rel } = renderFixture(name, [], [slide], 'pitch', 'premium-dark');
+    const { dir, rel } = renderFixture(name, [], [slide], theme, 'premium-dark');
     mkdirSync(join(dir, 'images'), { recursive: true });
     writeFileSync(join(dir, 'images', 'test.png'), writeTinyPng());
     const cardsPath = join(dir, 'cards.json');
@@ -1440,6 +1478,10 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
     // The defect: the page-centered card ran THROUGH visR.x and the panel
     // (painted after the text) covered its right portion.
     expect(cardRightPt).toBeLessThanOrEqual(panelX! + 0.5);
+    // Ported from co-deck project 1.8.0 (T-20261124-010); assertion had no counterpart in 1.9.0.
+    // Card ink exists on the dark bubble: title white, bullets light muted.
+    expect(runs.some((r) => r.rg === PD_TEXT_INK)).toBe(true);
+    expect(runs.some((r) => r.rg === PD_MUTED_INK)).toBe(true);
     // No text op may start at or beyond the panel's left edge.
     const runs = textRunOps(twoCol.page);
     expect(runs.length).toBeGreaterThan(0);
@@ -1452,6 +1494,14 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
     expect(panelIdx).toBeGreaterThan(lastTextIdx);
   });
 
+  // Ported from co-deck project 1.8.0 (T-20261124-010); assertion had no counterpart in 1.9.0.
+  // The project pinned the legacy single-column card on `outline` (no visual
+  // region); the theme is kept so the width pin measures the same layout.
+  const outlineSingleCol = makePitchDeck(`o_${Date.now()}`, {
+    section: 'S1', title: 'Single Column Legacy Card',
+    bullets: ['first bullet line', 'second bullet line'],
+  }, 'outline');
+
   test.skipIf(!haveFonts)('single-column: the legacy page-centered card geometry is unchanged', () => {
     expect(singleCol.cards.length).toBe(1);
     const card = singleCol.cards[0];
@@ -1460,6 +1510,15 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
     expect(Math.abs(card.x + card.w / 2 - 0.5)).toBeLessThan(0.02);
     const panel = panelLeftPt(singleCol.page);
     expect(panel).toBeNull();                       // no visual panel on this slide
+  });
+
+  // Ported from co-deck project 1.8.0 (T-20261124-010); assertion had no counterpart in 1.9.0.
+  test.skipIf(!haveFonts)('outline single-column: the card is wider than half the page and page-centered (legacy geometry)', () => {
+    expect(outlineSingleCol.cards.length).toBe(1);
+    const card = outlineSingleCol.cards[0];
+    expect(card.n).toBe(1);
+    expect(card.w).toBeGreaterThan(0.5);
+    expect(Math.abs(card.x + card.w / 2 - 0.5)).toBeLessThan(0.02);
   });
 });
 

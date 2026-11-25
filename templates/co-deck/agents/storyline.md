@@ -1,7 +1,7 @@
 ---
 name: storyline
-version: "1.1.4"
-last_updated: 2026-11-21
+version: "1.1.5"
+last_updated: 2026-11-25
 role: Storyline architect and slide deck planner for lecture content
 status: active
 tier: medium
@@ -189,7 +189,7 @@ When `image_role` is `diagram` or `chart`, add a `visual_spec` block. This is co
 | Field | Required | Values | Notes |
 |-------|---------|--------|-------|
 | `type` | ✅ | `diagram` \| `chart` | Routes to DiagramRenderer or ChartRenderer |
-| `slug` | ✅ | kebab-case string | Output filename: `assets/diagrams/<slug>.svg` |
+| `slug` | ✅ | kebab-case string | Output filename: `deliverables/assets/diagrams/<slug>.svg` |
 | `diagram_type` | diagram only | `cycle` \| `flow` \| `matrix` \| `pyramid` \| `timeline` \| `comparison` | |
 | `orientation` | optional | `horizontal` \| `vertical` \| `auto` | `flow`/`timeline` only — default `auto`; ignored for other types |
 | `elements[].label` | diagram only | string | Node label text |
