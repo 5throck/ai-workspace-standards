@@ -489,6 +489,8 @@ describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
 
 <!-- verify-scripts.ts parses rows between the Registry header and the next ## header. -->
 
+## Registry
+
 | script | source | version | status | removal-date | security-advisory | layer | pair |
 |--------|--------|---------|--------|--------------|-------------------|-------|------|
 `;

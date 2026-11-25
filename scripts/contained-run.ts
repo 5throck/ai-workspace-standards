@@ -1,6 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // contained-run.ts — run project code without the runner's authority (meeting 2026-11-20, issue C)
+//
+// v1.1.0 (2026-11-25, PM finding 2 — design
+//   docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.9):
+//   dependency location for a scripts-scoped manifest. `manifestDir` is the
+//   project root when <project>/package.json exists; otherwise <project>/scripts
+//   when <project>/scripts/package.json exists (design 2026-11-24-co-safety
+//   scripts manifest). The node_modules check and the lifecycle-script refusal
+//   both read from `manifestDir`, so a lifecycle script in scripts/package.json
+//   is now refused (exit 3) instead of going unchecked. No install, every other
+//   refusal and the dirty-tree assertion are unchanged.
 //
 // v1.0.0 (2026-11-20, meeting-2026-11-20-batch-runner-hardening): the v3 prompt made
 //   STEP E/I run each project's own `bun scripts/audit.ts` and test suite directly in
@@ -56,9 +66,19 @@ const command = argv.slice(sep + 1);
 const timeoutSec = Number(flag("timeout") ?? "900");
 if (!Number.isFinite(timeoutSec) || timeoutSec <= 0) die("bad --timeout");
 
+// ── Dependency location (v1.1.0): the root manifest wins; a scripts-scoped
+// manifest is accepted only when the project has no root package.json ─────────
+const rootManifestDir = join(projectDir, "package.json");
+const scriptsManifestDir = join(projectDir, "scripts", "package.json");
+const manifestDir: string | null = existsSync(rootManifestDir)
+  ? projectDir
+  : existsSync(scriptsManifestDir)
+    ? join(projectDir, "scripts")
+    : null;
+
 // ── Refuse lifecycle scripts: they run before any reviewable artifact ──────────
-const pkgPath = join(projectDir, "package.json");
-if (existsSync(pkgPath)) {
+const pkgPath = manifestDir === null ? "" : join(manifestDir, "package.json");
+if (manifestDir !== null) {
   try {
     const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as {
       scripts?: Record<string, string>;
@@ -67,7 +87,7 @@ if (existsSync(pkgPath)) {
     const lifecycle = ["preinstall", "install", "postinstall", "prepare"].filter((k) => pkg.scripts?.[k]);
     if (lifecycle.length > 0) {
       die(
-        `refused — package.json declares lifecycle script(s) ${lifecycle.join(", ")}; ` +
+        `refused — ${pkgPath} declares lifecycle script(s) ${lifecycle.join(", ")}; ` +
           `these execute arbitrary code before anything can be reviewed. Adjudicate before running project code.`,
         3,
       );
@@ -78,14 +98,14 @@ if (existsSync(pkgPath)) {
       );
     }
   } catch (e) {
-    die(`package.json unparsable (${(e as Error).message})`, 3);
+    die(`${pkgPath} unparsable (${(e as Error).message})`, 3);
   }
 }
 
 // ── Require node_modules; NEVER install (absence = SKIPPED, not FAIL) ─────────
-if (!existsSync(join(projectDir, "node_modules"))) {
+if (manifestDir === null || !existsSync(join(manifestDir, "node_modules"))) {
   die(
-    `node_modules absent in ${projectDir} — this tool never installs. The caller must SKIP ` +
+    `node_modules absent in ${manifestDir ?? `${projectDir} (no package.json at the project root or under scripts/)`} — this tool never installs. The caller must SKIP ` +
       `(not FAIL) the project's suite for tonight and record the skip in the run manifest.`,
     3,
   );

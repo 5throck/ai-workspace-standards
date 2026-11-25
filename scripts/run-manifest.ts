@@ -1,7 +1,32 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // run-manifest.ts — run ledger for the unified batch runner (meeting 2026-11-20, issue A)
 //
+// v1.2.0 (2026-11-25, T-20261124-008 + T-20261123-008 — design
+//   docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.2, §4.3):
+//   `verify` compares the gate rows with the work done, and covers components
+//   and missed nights. On 2026-11-24 it passed with zero `gateChecks` rows
+//   while 8 projects entered STEP I, and battery components could be skipped
+//   without a ledger row.
+//   §4.2 GATE COVERAGE (always on): reviewed projects = the distinct projects in
+//   `projectReviews[]`; STEP I skips = `skippedBudget[]` rows whose step is
+//   `STEP_I`; expected gate rows = reviewed minus STEP I skips (floor 0). When
+//   the distinct projects with a `gateChecks[]` row of gate STEP_I_PRE_REVIEW
+//   number fewer than that, `verify` exits 4. It fails; a warning is the
+//   2026-11-24 outcome.
+//   §4.3 CHANGE 1 COMPONENT COVERAGE (`--profile full|fast`): a fixed component
+//   table per profile (COMPONENTS_BY_PROFILE). A component is covered when
+//   `steps[]` holds a row for it (any status, including failed) or
+//   `skippedBudget[]` holds a row whose step is the component name. An uncovered
+//   component makes `verify` exit 5. The names are ledger labels only — the
+//   commands behind them stay with battery.ts.
+//   §4.3 CHANGE 2 MISSED NIGHTS (`--nights N`): the schedule is Monday to
+//   Friday, 03:00 KST (owner ruling 2026-11-25, design §13 question 2). `verify`
+//   looks for a run manifest for each of the N scheduled nights before the
+//   verified date. A scheduled night without a manifest makes `verify` exit 6.
+//   The window excludes the verified date itself: that manifest must exist for
+//   `verify` to read it, so the night that leaves nothing behind is detected by
+//   the next night's run.
 // v1.1.0 (2026-11-20, T-20261119-010 — DEC-20261120-03; spec
 //   docs/designs/2026-11-20-runner-hardening-integrity-design.md §3.1): new
 //   `gate-step-i` subcommand — the STEP I review-admission gate as a ledger
@@ -45,9 +70,11 @@
 //   bun scripts/run-manifest.ts review --project <name> --tier <baseline-only|scoped|full> --outcome <pass|fail> [--basis <head>]
 //   bun scripts/run-manifest.ts gate-step-i --project <p> --basis <head> [--window-days 2] ...
 //                                      (repeatable --project/--basis pairs, one pair per wave project)
-//   bun scripts/run-manifest.ts verify [--require-merged]
+//   bun scripts/run-manifest.ts verify [--require-merged] [--profile full|fast] [--nights N]
 //
 // Exit codes: 0 ok · 1 usage/IO · 2 schema verify failed · 3 no merges recorded while --require-merged
+//             4 fewer STEP I gate rows than reviewed projects (§4.2) · 5 a profile component has no
+//             steps row and no skippedBudget row (§4.3) · 6 a scheduled night has no manifest (§4.3)
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -62,6 +89,54 @@ const REQUIRED_ARRAYS = [
   "projectReviews",
   "gateChecks",
 ] as const;
+
+/** Ledger components per verify profile (design §4.3 change 1). `full` is the whole pipeline
+ *  (PIPELINE ORDER of the runner prompt: STEP A … STEP J); `fast` is the every-night minimum —
+ *  the ticket batch, the fleet reviews and the ledger close. A renamed component fails every
+ *  night until this table is updated; that failure is the purpose of the check. */
+const COMPONENTS_BY_PROFILE: Record<string, readonly string[]> = {
+  full: ["STEP_A", "STEP_B", "STEP_C", "STEP_D", "STEP_E", "STEP_F", "STEP_G", "STEP_H", "STEP_I", "STEP_J"],
+  fast: ["STEP_A", "STEP_E", "STEP_J"],
+};
+
+/** Scheduled nights: Monday to Friday (design §13 question 2, owner ruling 2026-11-25). */
+function isScheduledNight(dateIso: string): boolean {
+  const day = new Date(`${dateIso}T00:00:00Z`).getUTCDay();
+  return day >= 1 && day <= 5;
+}
+
+/** The N scheduled nights strictly before `dateIso`, oldest first. */
+function scheduledNightsBefore(dateIso: string, count: number): string[] {
+  const out: string[] = [];
+  let ms = Date.parse(`${dateIso}T00:00:00Z`);
+  if (!Number.isFinite(ms)) return out;
+  while (out.length < count) {
+    ms -= 24 * 60 * 60 * 1000;
+    const iso = new Date(ms).toISOString().slice(0, 10);
+    if (isScheduledNight(iso)) out.push(iso);
+  }
+  return out;
+}
+
+/** §4.2: reviewed minus STEP I skips, and the projects that carry a STEP I gate row. */
+function gateCoverage(m: Pick<Manifest, "projectReviews" | "skippedBudget" | "gateChecks">): {
+  expected: number;
+  gated: number;
+} {
+  const name = (row: unknown): string => String((row as { project?: unknown }).project ?? "");
+  const reviewed = new Set(m.projectReviews.map(name)).size;
+  const stepISkips = m.skippedBudget.filter((row) => (row as { step?: unknown }).step === "STEP_I").length;
+  const gated = new Set(
+    m.gateChecks.filter((row) => (row as { gate?: unknown }).gate === STEP_I_GATE && name(row) !== "(none)").map(name),
+  ).size;
+  return { expected: Math.max(reviewed - stepISkips, 0), gated };
+}
+
+/** §4.3 change 1: the profile components with neither a steps row nor a skippedBudget row. */
+function uncoveredComponents(m: Pick<Manifest, "steps" | "skippedBudget">, components: readonly string[]): string[] {
+  const recorded = new Set([...m.steps, ...m.skippedBudget].map((row) => (row as { step?: unknown }).step));
+  return components.filter((c) => !recorded.has(c));
+}
 
 /** Gate id stamped on every gate-step-i row (one required array per DEC-20261120-03). */
 const STEP_I_GATE = "STEP_I_PRE_REVIEW";
@@ -364,10 +439,58 @@ switch (cmd) {
       console.error(`✗ manifest has zero mergedPRs rows while --require-merged was passed (${path})`);
       process.exit(3);
     }
+    // §4.2 — one STEP I gate row per reviewed project (minus STEP I skips).
+    const coverage = gateCoverage(m);
+    if (coverage.gated < coverage.expected) {
+      console.error(
+        `✗ STEP I gate coverage FAILED (${path}): ${coverage.gated} project(s) carry a ${STEP_I_GATE} row, ` +
+          `${coverage.expected} expected (${m.projectReviews.length} review row(s) minus STEP I skip(s)) — ` +
+          `the pre-review gate did not run per project`,
+      );
+      process.exit(4);
+    }
+
+    // §4.3 change 1 — component coverage (only when a profile is named).
+    const profile = one(flags, "profile");
+    if (profile !== undefined) {
+      const components = COMPONENTS_BY_PROFILE[profile];
+      if (!components) die(`bad --profile '${profile}' (full|fast)`);
+      const uncovered = uncoveredComponents(m, components);
+      if (uncovered.length > 0) {
+        console.error(
+          `✗ component coverage FAILED (${path}, profile ${profile}): ${uncovered.length} component(s) of ` +
+            `${components.length} have neither a steps row nor a skippedBudget row: ${uncovered.join(", ")}`,
+        );
+        process.exit(5);
+      }
+    }
+
+    // §4.3 change 2 — missed nights (only when a window is named).
+    const nightsRaw = one(flags, "nights");
+    if (nightsRaw !== undefined) {
+      const nights = Number(nightsRaw);
+      if (!Number.isInteger(nights) || nights < 0) die(`bad --nights '${nightsRaw}'`);
+      const date = one(flags, "date") ?? todayLocal();
+      const missing = scheduledNightsBefore(date, nights).filter(
+        (d) => !existsSync(join(STATE_DIR, `run-manifest-${d}.json`)),
+      );
+      if (missing.length > 0) {
+        console.error(
+          `✗ missed-night check FAILED (${path}): ${missing.length} scheduled night(s) before ${date} have no run ` +
+            `manifest: ${missing.join(", ")} (schedule Monday to Friday)`,
+        );
+        process.exit(6);
+      }
+    }
+
     console.log(
       `✓ manifest verify passed: ${m.mergedPRs.length} merge(s), ${m.skippedBudget.length} skip(s), ` +
         `${m.sanctionedRepairs.length} repair(s), ${m.projectReviews.length} review(s), ` +
-        `${m.gateChecks.length} gate check(s)`,
+        `${m.gateChecks.length} gate check(s), ${coverage.gated}/${coverage.expected} project(s) gate-covered` +
+        (profile
+          ? `, ${profile} profile: ${COMPONENTS_BY_PROFILE[profile].length}/${COMPONENTS_BY_PROFILE[profile].length} component(s) covered`
+          : "") +
+        (nightsRaw ? `, ${nightsRaw} scheduled night(s) present` : ""),
     );
     break;
   }

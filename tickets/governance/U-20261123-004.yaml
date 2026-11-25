@@ -3,14 +3,23 @@ id: U-20261123-004
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-23T14:40:15.203+09:00'
 history:
   - at: '2026-11-23T14:40:15.203+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-25T20:39:21.668+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-25T20:39:21.668+09:00'
+    from: review
+    to: done
+result: >-
+  Row 4 commit 5a57171a7: validate-decisions.ts v1.3.0 resolves a DEC id cited
+  by delivered documents against the workspace-root registry (ROOT/../../ with
+  AGENTS.md); no record is delivered into the project
 error: null
 upstream:
   project: co-security
@@ -56,3 +65,10 @@ upstream:
   duplicates:
     - project: co-security
       at: '2026-11-23T14:40:15.203+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2177
+    summary: >-
+      Row 4 commit 5a57171a7: validate-decisions.ts v1.3.0 resolves a DEC id
+      cited by delivered documents against the workspace-root registry
+      (ROOT/../../ with AGENTS.md); no record is delivered into the project

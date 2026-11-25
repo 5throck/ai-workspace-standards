@@ -2,6 +2,17 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.7.0 (2026-11-25, T-20261124-001 — design
+ *          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.1):
+ *          the root-backfill staleness key is `graphContentSha256` — the SHA-256
+ *          of docs/skill-graph.json as stored at the graph commit — recorded
+ *          beside `graphHeadSha` (kept as information). Freshness no longer
+ *          depends on the order of two commits: dev-sync regenerates the graph
+ *          while landing, so the graph commit moved again after the artifact was
+ *          written although the content was equal, and the next fleet-report run
+ *          rebuilt and dirtied the tree. A file without the field is stale once.
+ *          Supersedes the §3 rule of
+ *          docs/designs/2026-11-24-backfill-invalidation-key-design.md.
  * @version 2.6.2 (2026-11-24, backfill invalidation-key fix — loop fix): the
  *          root-backfill staleness key is now `graphHeadSha` (the last commit
  *          that touched the replayed graph path, read via
@@ -186,6 +197,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { checkoutBranch, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
 import { gitCleanEnv } from "./lib/git-env.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
@@ -194,7 +206,7 @@ import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf, upgradeSkillGraph } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.6.2";
+const VERSION = "2.7.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -808,6 +820,10 @@ export interface RootBackfillRow {
 export interface RootBackfillFile {
   provenance: "git-backfill";
   graphHeadSha: string;
+  /** v2.7.0: SHA-256 of the graph file's bytes AT the graph commit — the
+   *  freshness key (design 2026-11-25-upgrade-runner-machinery-batch §4.1).
+   *  `graphHeadSha` stays as information. */
+  graphContentSha256?: string;
   path: string;
   rows: RootBackfillRow[];
 }
@@ -855,15 +871,38 @@ export function readGraphHeadSha(repoDir: string, gitRelPath: string): string | 
   return /^[0-9a-f]{40}$/i.test(sha) ? sha : null;
 }
 
-/** Staleness check (§13.2 rebuild policy, v2.6.2): the recorded `graphHeadSha`
- *  must equal the current graph commit — equal and parseable -> skip. Pure.
- *  A legacy file with only `headSha` has no `graphHeadSha`, so it reads as
- *  stale exactly once (one rebuild rewrites it in the new shape). */
+/** SHA-256 of the replayed graph file's bytes as stored at `graphCommit`
+ *  (`git show <commit>:<pathspec>`). Null when the blob cannot be read. */
+export function readGraphContentSha256(repoDir: string, gitRelPath: string, graphCommit: string): string | null {
+  const res = spawnSync("git", ["-C", repoDir, "show", `${graphCommit}:${toGitPath(gitRelPath)}`], {
+    encoding: "buffer",
+    env: gitCleanEnv() as NodeJS.ProcessEnv,
+    maxBuffer: 256 * 1024 * 1024,
+  });
+  if (res.status !== 0 || !res.stdout) return null;
+  return createHash("sha256").update(res.stdout).digest("hex");
+}
+
+/** Staleness check (§13.2 rebuild policy; v2.7.0 content key — design
+ *  2026-11-25-upgrade-runner-machinery-batch §4.1, replacing the v2.6.2 rule in
+ *  §3 of 2026-11-24-backfill-invalidation-key-design): the artifact is fresh
+ *  when the recorded `graphContentSha256` equals the SHA-256 of the graph file
+ *  at the current graph commit. Freshness then does not depend on the order of
+ *  two commits: dev-sync regenerates `docs/skill-graph.json` while landing, so
+ *  the graph commit moves again after the artifact was written although the
+ *  content is equal (T-20261124-001). `graphHeadSha` is recorded as
+ *  information; it is compared only when no content hash is available (the
+ *  v2.6.2 behaviour). A legacy file without `graphContentSha256` reads as stale
+ *  exactly once — one rebuild rewrites it in the new shape. Pure. */
 export function backfillIsFresh(
-  file: { graphHeadSha?: string } | null | undefined,
+  file: { graphHeadSha?: string; graphContentSha256?: string } | null | undefined,
   graphHeadSha: string | null,
+  graphContentSha256?: string | null,
 ): boolean {
   if (!graphHeadSha) return false;
+  if (graphContentSha256) {
+    return typeof file?.graphContentSha256 === "string" && file.graphContentSha256 === graphContentSha256;
+  }
   return typeof file?.graphHeadSha === "string" && file.graphHeadSha === graphHeadSha;
 }
 
@@ -946,8 +985,9 @@ export async function replayGraphHistory(
 /**
  * One-shot semantics (§13.2): the step always rebuilds the FULL series from the
  * graph tip — idempotent and re-runnable by construction. Skips (returns the
- * existing file, rebuilt=false) when the recorded `graphHeadSha` matches the
- * last commit that touched the graph path; otherwise replays and atomically
+ * existing file, rebuilt=false) when the recorded `graphContentSha256` matches
+ * the graph file's content at the last commit that touched the graph path
+ * (v2.7.0); otherwise replays and atomically
  * rewrites `filePath`. Throws on non-repo context, cap abort, or any replay
  * failure — the caller's WARN island owns the failure story (previous file
  * stays, stale-honest).
@@ -970,7 +1010,9 @@ export async function ensureRootBackfill(
   if (existsSync(filePath)) {
     try {
       const existing = JSON.parse(readFileSync(filePath, "utf-8")) as RootBackfillFile;
-      if (backfillIsFresh(existing, graphHeadSha)) return { file: existing, rebuilt: false };
+      if (backfillIsFresh(existing, graphHeadSha, readGraphContentSha256(repoDir, relPath, graphHeadSha))) {
+        return { file: existing, rebuilt: false };
+      }
     } catch {
       // malformed existing file -> full rebuild below (overwrite)
     }
@@ -979,7 +1021,13 @@ export async function ensureRootBackfill(
   // `path` records the git (POSIX) form, not the caller's native path: the file
   // is a deterministic artifact and must be byte-identical across platforms for
   // the same graph commit (toGitPath; replayGraphHistory applies the same form).
-  const file: RootBackfillFile = { provenance: "git-backfill", graphHeadSha, path: toGitPath(relPath), rows };
+  const file: RootBackfillFile = {
+    provenance: "git-backfill",
+    graphHeadSha,
+    graphContentSha256: readGraphContentSha256(repoDir, relPath, graphHeadSha) ?? undefined,
+    path: toGitPath(relPath),
+    rows,
+  };
   mkdirSync(dirname(filePath), { recursive: true });
   // Compact serialization: the file is a machine artifact whose rows carry full
   // per-date projections (~2 MB on the 340-commit corpus); pretty-printing it

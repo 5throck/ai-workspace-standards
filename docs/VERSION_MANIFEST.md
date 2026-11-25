@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-25T00:19:51.653Z
+**Generated**: 2026-11-25T12:02:02.318Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -126,7 +126,7 @@
 | cleanup-completed-md.ts | 1.1.0 | scripts/cleanup-completed-md.ts | fs, path |
 | clear-pm-approval.ts | 1.0.0 | scripts/clear-pm-approval.ts | fs |
 | compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | fs, path |
-| contained-run.ts | 1.0.0 | scripts/contained-run.ts | child_process, fs, os, path |
+| contained-run.ts | 1.1.0 | scripts/contained-run.ts | child_process, fs, os, path |
 | create-l3-scaffold.ts | 1.21.0 | scripts/create-l3-scaffold.ts | child_process, fs, path, url |
 | dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
@@ -185,10 +185,10 @@
 | retry-handler.ts | 1.1.0 | scripts/retry-handler.ts | path |
 | review-baseline.ts | 1.6.0 | scripts/review-baseline.ts | N/A |
 | route-audit-scan.ts | 1.0.1 | scripts/route-audit-scan.ts | fs, path |
-| run-manifest.ts | 1.1.0 | scripts/run-manifest.ts | child_process, fs, path |
+| run-manifest.ts | 1.2.0 | scripts/run-manifest.ts | child_process, fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
-| skill-graph-fleet-report.ts | 2.6.2 | scripts/skill-graph-fleet-report.ts | child_process, fs, path |
+| skill-graph-fleet-report.ts | 2.7.0 | scripts/skill-graph-fleet-report.ts | child_process, crypto, fs, path |
 | skill-lifecycle-audit.ts | 1.15.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
 | skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun, fs, path |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
@@ -217,9 +217,9 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.116.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.120.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
-| validate-decisions.ts | 1.2.1 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
+| validate-decisions.ts | 1.3.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.7.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.2 | scripts/validate-md-language.ts | child_process, fs, path |
@@ -238,7 +238,7 @@
 | verify-adr-governance.ts | 1.7.0 | scripts/verify-adr-governance.ts | crypto, fs, path, url |
 | verify-agent-deliverables.ts | 1.0.1 | scripts/verify-agent-deliverables.ts | fs |
 | verify-country-prune.ts | 1.2.0 | scripts/verify-country-prune.ts | child_process, fs, os, path, url |
-| verify-delivered-versions.ts | 1.0.0 | scripts/verify-delivered-versions.ts | fs, path |
+| verify-delivered-versions.ts | 1.2.0 | scripts/verify-delivered-versions.ts | fs, path |
 | verify-memory.ts | 1.3.0 | scripts/verify-memory.ts | fs, path |
 | verify-new-project-tests.ts | 1.0.3 | scripts/verify-new-project-tests.ts | fs |
 | verify-platform-lifecycle.ts | 1.6.1 | scripts/verify-platform-lifecycle.ts | fs, path |

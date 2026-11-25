@@ -1,8 +1,20 @@
 #!/usr/bin/env bun
 /**
  * Decision Record Chain Validator (ADR-0061)
- * @version 1.2.1
+ * @version 1.3.0
  */
+// v1.3.0 (2026-11-25, T-20261124-012 / U-20261123-004 — design
+//           docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.5):
+//           Check V falls back to the workspace-root registry. Delivered
+//           template documents cite workspace-level decision records that the
+//           engine does not deliver, so the project validator blocked dev-sync in
+//           every upgraded project. A cited DEC id that is absent from
+//           <ROOT>/docs/decisions resolves against <workspace-root>/docs/decisions,
+//           where the workspace root is ROOT/../../ and is used only when it holds
+//           AGENTS.md. A local id wins on collision. An id that resolves only at
+//           the root is reported in an INFO line naming the root record (and in the
+//           `rootResolved` array under --json). An id that resolves nowhere stays
+//           fatal. The engine still delivers no decision record.
 // v1.2.1 (2026-11-22, upstream U-20261122-003): cross-check DEC ids CITED in
 //           CHANGELOG.md and memory/*.md prose against docs/decisions/ — a DEC id
 //           referenced in a CHANGELOG entry or memory log but with no
@@ -323,6 +335,17 @@ function main() {
       if (m) knownDecIds.add(m[1]);
     }
   }
+  // v1.3.0: the workspace-root registry (ROOT/../../), used only when it holds AGENTS.md.
+  const rootRegistryDir = join(ROOT, "..", "..", "docs", "decisions");
+  const workspaceRoot = join(ROOT, "..", "..");
+  const rootDecIds = new Set<string>();
+  if (existsSync(join(workspaceRoot, "AGENTS.md")) && existsSync(rootRegistryDir)) {
+    for (const f of readdirSync(rootRegistryDir)) {
+      const m = f.match(/^(DEC-\d{8}-\d{2,})\.md$/);
+      if (m) rootDecIds.add(m[1]);
+    }
+  }
+  const rootResolved: string[] = [];
   const citedDecIds = new Map<string, string[]>(); // id -> source files
   const decToken = /DEC-\d{8}-\d{2,}/g;
   for (const src of proseSources) {
@@ -331,7 +354,10 @@ function main() {
     const text = readFileSync(abs, "utf8");
     for (const m of text.matchAll(decToken)) {
       const id = m[0];
-      if (!knownDecIds.has(id)) {
+      if (!knownDecIds.has(id) && rootDecIds.has(id)) {
+        // a local id wins on collision: this branch is reached only when the local registry lacks it
+        if (!rootResolved.includes(id)) rootResolved.push(id);
+      } else if (!knownDecIds.has(id)) {
         const files = citedDecIds.get(id) ?? [];
         files.push(src);
         citedDecIds.set(id, files);
@@ -349,13 +375,24 @@ function main() {
 
   validateDecisions();
 
+  for (const id of rootResolved) {
+    const line = `DEC id "${id}" resolves at the workspace root: ${join(workspaceRoot, "docs", "decisions", `${id}.md`)}`;
+    if (JSON_MODE) continue;
+    console.log(`${colors.dim}ℹ️  ${line}${colors.reset}`);
+  }
+
   const errors = issues.filter((i) => i.level === "error");
   const warnings = issues.filter((i) => i.level === "warning");
 
   if (JSON_MODE) {
     console.log(
       JSON.stringify(
-        { errors, warnings, summary: `${errors.length} error(s), ${warnings.length} warning(s)` },
+        {
+          errors,
+          warnings,
+          rootResolved,
+          summary: `${errors.length} error(s), ${warnings.length} warning(s)`,
+        },
         null,
         2,
       ),

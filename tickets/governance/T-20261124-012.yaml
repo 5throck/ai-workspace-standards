@@ -16,12 +16,27 @@ title: >-
   cited record from the citing document's source repo and refuse on an id
   collision
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-24T08:25:25.813+09:00'
 history:
   - at: '2026-11-24T08:25:25.813+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T20:39:29.987+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T20:39:30.006+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-25T20:39:30.024+09:00'
+    from: running
+    to: review
+  - at: '2026-11-25T20:39:30.043+09:00'
+    from: review
+    to: done
+result: >-
+  Row 4 commit 5a57171a7: Check V resolves a root-only DEC id with an INFO line
+  and still fails an id present nowhere
+  (tests/unit/validate-decisions-root-fallback.test.ts, 10 pass)
 error: null
