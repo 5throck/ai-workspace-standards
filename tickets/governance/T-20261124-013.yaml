@@ -24,12 +24,41 @@ title: >-
   explicit unclassified line per file; (b) bump the registry row whenever a
   script file is copied
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-24T08:33:09.981+09:00'
 history:
   - at: '2026-11-24T08:33:09.981+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T22:44:35.500+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T22:44:35.517+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-25T22:44:35.534+09:00'
+    from: running
+    to: review
+  - at: '2026-11-25T22:44:35.553+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by the machinery batch row 7 (PR #2177, commit ffed5d8b9,
+  upgrade-project.ts 1.120.0, upgrade-policy.ts 1.53.0). (a) The script lane now
+  enumerates every file under templates/<variant>/scripts and
+  templates/common/scripts, so co-work's deck .py files (svg_check.py,
+  render_previews.py, test_svg_check.py) are listed and versioned files
+  delivered; a file no lane can place gets an UNCLASSIFIED row naming it instead
+  of silence. (b) After the last script pass every copied file's @version is
+  compared with its scripts/SCRIPTS.md row; a mismatch reconciles once and a
+  remaining mismatch is REGISTRY_DRIFT with a non-zero exit. Four acceptance
+  criteria demonstrated by test; the L0-only skip criterion is covered by unit
+  test only because skill-graph-fleet-report.ts has no template twin for any
+  lane to visit. Recorded deviation: an absent scripts/SCRIPTS.md does not raise
+  REGISTRY_DRIFT (it made 53 existing engine fixtures fail); the error fires
+  only when a registry exists and a row still disagrees. A fleet dry-run over
+  all 18 Projects/co-* produced zero REGISTRY DRIFT and zero UNREGISTERED SCRIPT
+  rows in 15 projects. Evidence:
+  docs/reports/2026-11-25-machinery-batch-evidence.md row 7.
 error: null
