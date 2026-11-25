@@ -1,0 +1,9 @@
+{
+  "id": "2026-11-25-agent-lifecycle-extends-and-dry-run-tombstone-design",
+  "title": "agent lifecycle extends and dry run tombstone design",
+  "file": "docs/designs/2026-11-25-agent-lifecycle-extends-and-dry-run-tombstone-design.md",
+  "status": "implemented",
+  "source": "manual",
+  "created": "2026-11-25",
+  "last_updated": "2026-11-25"
+}

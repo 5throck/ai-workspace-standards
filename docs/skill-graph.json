@@ -631,7 +631,7 @@
       "scope": "co-abap",
       "capability": "pm",
       "content_hash": "aef5c9bdcc78d9d0",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "mirrors": [
         "templates/co-abap/agents/pm.md",
         "templates/co-consult/agents/pm.md",
@@ -874,7 +874,7 @@
       "scope": "co-architect",
       "capability": "pm",
       "content_hash": "9264b7670cdea00f",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "mirrors": [
         "templates/co-architect/agents/pm.md"
       ]
@@ -1630,7 +1630,7 @@
       "scope": "co-export",
       "capability": "pm",
       "content_hash": "609b94fa50ba8904",
-      "version": "1.2.1",
+      "version": "1.2.2",
       "mirrors": [
         "templates/co-export/agents/pm.md"
       ]
@@ -1943,7 +1943,7 @@
       "scope": "co-hr",
       "capability": "pm",
       "content_hash": "6ac97fcfddb4746f",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "mirrors": [
         "templates/co-hr/agents/pm.md"
       ]
@@ -2034,7 +2034,7 @@
       "scope": "co-news",
       "capability": "pm",
       "content_hash": "300729db1b7c53d9",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "mirrors": [
         "templates/co-news/agents/pm.md"
       ]
@@ -2203,7 +2203,7 @@
       "scope": "co-price",
       "capability": "pm",
       "content_hash": "4d3a346b010a1213",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "mirrors": [
         "templates/co-price/agents/pm.md"
       ]
@@ -2593,7 +2593,7 @@
       "scope": "common",
       "capability": "pm",
       "content_hash": "6e05a2a4d6428018",
-      "version": "1.4.4",
+      "version": "1.4.5",
       "mirrors": [
         "templates/common/agents/pm.md"
       ]

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Agent Lifecycle Validation Script
- * @version 1.4.1
+ * @version 1.4.2
  *
  * Validates all agents/*.md files for required lifecycle frontmatter
  * and checks governance records in docs/lifecycle/agents/*.md
@@ -9,6 +9,18 @@
  * Performs two validations:
  * 1. Runtime definition validation: agents/*.md must have lifecycle frontmatter
  * 2. Governance record validation: docs/lifecycle/agents/*.md must have detailed documentation
+ *
+ * v1.4.2 (2026-11-25, T-20261125-002): Part 1 resolves the ADR-0033 `extends:` chain before
+ *          checking lifecycle.phase / lifecycle.governance. It previously validated every file
+ *          standalone, so an inherited field read as missing — the one contract every other
+ *          gate already honours (validators/schema-validator.ts skips extends stubs precisely
+ *          because "the required fields live in the parent and are merged at resolve time";
+ *          validate-templates.ts checkAgents resolves the same chain via resolveExtends).
+ *          Root CI never noticed because this script scans `<cwd>/agents` only and never reads
+ *          templates/; a project that received the unresolved stub instead of the resolved
+ *          body failed. Resolution stays strict: a base that does not exist in the current
+ *          checkout (the project-cwd case) contributes nothing, so such a stub still fails —
+ *          the failure message now names the unresolvable extends target.
  *
  * Usage:
  *   bun scripts/validate-agents.ts
@@ -195,6 +207,95 @@ export function isAgentFile(filename: string): boolean {
   return filename.endsWith(".md") && !/^README(_\w+)?\.md$/.test(filename) && !filename.startsWith("_");
 }
 
+// Max depth of an ADR-0033 extends chain (mirrors helpers/extends-validator.ts).
+export const MAX_EXTENDS_DEPTH = 5;
+
+/**
+ * Dotted field paths declared in a markdown file's YAML frontmatter.
+ * Handles both the flattened (`lifecycle.phase: production`) and nested
+ * (`lifecycle:` + indented `phase:`) forms the legacy check accepted, and skips
+ * block-scalar bodies (`role: |`) so prose lines cannot be mistaken for keys.
+ */
+export function frontmatterFieldPaths(rawContent: string): Set<string> {
+  const fields = new Set<string>();
+  const content = normalizeContent(rawContent);
+  const match = content.match(/^---\n([\s\S]*?)\n---/m);
+  if (!match) return fields;
+
+  const stack: Array<{ indent: number; key: string }> = [];
+  let blockScalarIndent = -1;
+
+  for (const line of match[1].split("\n")) {
+    if (line.trim() === "") continue;
+    const indent = line.search(/\S/);
+
+    // Inside a block scalar: skip until indentation returns to the key's level.
+    if (blockScalarIndent >= 0) {
+      if (indent > blockScalarIndent) continue;
+      blockScalarIndent = -1;
+    }
+
+    const trimmed = line.trim();
+    if (trimmed.startsWith("- ") || trimmed === "-") continue; // list item, not a key
+    const colonIdx = trimmed.indexOf(":");
+    if (colonIdx === -1) continue;
+    const key = trimmed.slice(0, colonIdx).trim();
+    if (!key || key.startsWith("#")) continue;
+
+    while (stack.length > 0 && indent <= stack[stack.length - 1].indent) stack.pop();
+    fields.add([...stack.map((s) => s.key), key].join("."));
+
+    const value = trimmed.slice(colonIdx + 1).trim();
+    if (value.startsWith("|") || value.startsWith(">")) {
+      blockScalarIndent = indent;
+      continue;
+    }
+    stack.push({ indent, key });
+  }
+
+  return fields;
+}
+
+/** The `extends:` target of a file's frontmatter, or null. */
+export function readExtendsTarget(rawContent: string): string | null {
+  const content = normalizeContent(rawContent);
+  const match = content.match(/^---\n([\s\S]*?)\n---/m);
+  if (!match) return null;
+  const extendsMatch = match[1].match(/^extends:\s*["']?([^"'\n]+?)["']?\s*$/m);
+  return extendsMatch ? extendsMatch[1].trim() : null;
+}
+
+/**
+ * Field paths a file declares itself plus everything inherited through its
+ * `extends:` chain (ADR-0033). A base that does not exist in this checkout
+ * contributes nothing — `unresolvedExtends` reports the target so the caller
+ * can say why an inherited field is not actually available here.
+ */
+export function resolveFrontmatterFields(
+  filePath: string,
+  visited: Set<string> = new Set(),
+  depth = 0,
+): { fields: Set<string>; unresolvedExtends: string | null } {
+  const fields = new Set<string>();
+  const absPath = resolve(filePath);
+  if (visited.has(absPath)) return { fields, unresolvedExtends: null };
+  visited.add(absPath);
+  if (!existsSync(absPath)) return { fields, unresolvedExtends: null };
+
+  const rawContent = readFileSync(absPath, "utf-8");
+  for (const fieldPath of frontmatterFieldPaths(rawContent)) fields.add(fieldPath);
+
+  const target = readExtendsTarget(rawContent);
+  if (!target || depth >= MAX_EXTENDS_DEPTH) return { fields, unresolvedExtends: null };
+
+  const basePath = resolve(dirname(absPath), target);
+  if (!existsSync(basePath)) return { fields, unresolvedExtends: target };
+
+  const base = resolveFrontmatterFields(basePath, visited, depth + 1);
+  for (const fieldPath of base.fields) fields.add(fieldPath);
+  return { fields, unresolvedExtends: base.unresolvedExtends };
+}
+
 // Part 1: Validate runtime definitions (agents/*.md)
 function validateRuntimeDefinitions(agentsDir: string = AGENTS_DIR): void {
   if (!JSON_MODE) console.log(`\n${colors.cyan}📋 Part 1: Runtime Definition Validation (agents/*.md)${colors.reset}`);
@@ -205,23 +306,28 @@ function validateRuntimeDefinitions(agentsDir: string = AGENTS_DIR): void {
     totalFiles++;
     const agentName = file.replace(".md", "");
     const filePath = join(agentsDir, file);
-    const rawContent = readFileSync(filePath, "utf-8");
 
     const missingFields: string[] = [];
 
-    // Check for required frontmatter fields
+    // Check for required frontmatter fields, honouring the ADR-0033 extends chain
+    // (v1.4.2, T-20261125-002 — an inherited lifecycle block satisfies the check).
+    const resolved = resolveFrontmatterFields(filePath);
     for (const field of FRONTMATTER_REQUIRED_FIELDS) {
-      if (!hasNestedField(rawContent, field)) {
+      if (!resolved.fields.has(field)) {
         missingFields.push(field);
       }
     }
 
     if (missingFields.length > 0) {
+      const extendsHint =
+        resolved.unresolvedExtends !== null
+          ? `\n     Note: extends '${resolved.unresolvedExtends}' does not resolve in this checkout, so an inherited lifecycle block is unavailable here — declare lifecycle locally.`
+          : "";
       fail(
         agentName,
         "frontmatter-missing",
         `${agentName}: Missing frontmatter fields: ${missingFields.join(", ")}`,
-        `Add missing fields to YAML frontmatter:\n     lifecycle:\n       phase: production\n       created: YYYY-MM-DD\n       last_updated: YYYY-MM-DD\n       governance: docs/lifecycle/agents/${agentName}.md`,
+        `Add missing fields to YAML frontmatter:\n     lifecycle:\n       phase: production\n       created: YYYY-MM-DD\n       last_updated: YYYY-MM-DD\n       governance: docs/lifecycle/agents/${agentName}.md${extendsHint}`,
       );
     } else {
       pass(`${agentName}: All required frontmatter fields present`);
@@ -456,9 +562,15 @@ function validateAgentBodyCompleteness(): void {
   for (const entry of readdirSync(AGENTS_DIR)) {
     if (!isAgentFile(entry)) continue;
     const content = readFileSync(join(AGENTS_DIR, entry), "utf-8");
+    // Extends-pattern stubs hydrate at scaffold — same skip as the schema check. The
+    // skip must not depend on the L0-only schema validator being importable (v1.4.2,
+    // T-20261125-002): in a delivered project validators/ is absent, so the stubs were
+    // being failed for stub quality while L0 skipped them — the same tier asymmetry
+    // that made the lifecycle check disagree between L0 and a project checkout.
+    if (readExtendsTarget(content) !== null) continue;
     if (parseFrontmatterYaml) {
       const fm = parseFrontmatterYaml(content);
-      if (fm.extends) continue; // extends-pattern stubs hydrate at scaffold — same skip as the schema check
+      if (fm.extends) continue;
     }
     const finding = agentBodyCompletenessFinding(content);
     if (finding)

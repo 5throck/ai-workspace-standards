@@ -4,8 +4,8 @@ name: pm
 tier: medium
 description: 'Orchestrates multi-agent workflows. Enforces quality gates. Decides agent hiring/firing and approves agent skill requests. Use when: "Managing workflow", "Coordinating multi-phase tasks", "PM orchestration needed"'
 variant: co-hr
-version: "0.2.0"
-last_updated: "2026-10-27"
+version: "0.2.1"
+last_updated: 2026-11-26
 status: active
 owner: architect
 capabilities:
