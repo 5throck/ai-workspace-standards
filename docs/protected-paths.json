@@ -28,14 +28,15 @@
     "scripts/contained-run.ts"
   ],
   "fleetParityCarveOut": {
-    "comment": "Paths the runner MAY merge in FLEET repos (Projects/co-*) when the PR is an upgrade-wave delivery whose diff for these paths is byte-identical to the template source at the delivered version. Root-repo merges touching these paths remain HOLD. Membership changes are human-only (this file is protected). Seeded 2026-11-20 per DEC-20261120-01 with the T-20261116-002 defect-fix channel.",
+    "comment": "Paths the runner MAY merge in FLEET repos (Projects/co-*) when the PR is an upgrade-wave delivery whose diff for these paths is byte-identical to the template source at the delivered version. Root-repo merges touching these paths remain HOLD. Membership changes are human-only (this file is protected). Seeded 2026-11-20 per DEC-20261120-01 with the T-20261116-002 defect-fix channel. | v2026-11-25 (machinery batch, design 2026-11-25-upgrade-runner-machinery-batch §4.7, T-20261124-007): `.github/gitleaks-full.toml` added — the full-scan secrets config is delivered to every fleet repository (byte copy of the root file at templates/common/.github/gitleaks-full.toml) so merge predicate 4 can run there; the path carries the engine LOCKED claim, as the parity-closure guard requires.",
     "paths": [
       ".githooks/commit-msg",
       ".githooks/pre-commit",
       ".githooks/pre-push",
       ".githooks/post-checkout",
       ".githooks/pre-rebase",
-      ".github/workflows/ci.yml"
+      ".github/workflows/ci.yml",
+      ".github/gitleaks-full.toml"
     ]
   },
   "outOfRepoProtected": [

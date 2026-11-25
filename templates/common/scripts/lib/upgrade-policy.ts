@@ -1,4 +1,9 @@
-// @version 1.51.0
+// @version 1.52.0
+// v1.52.0 (2026-11-25, T-20261124-007 — design
+//          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.7):
+//          `.github/gitleaks-full.toml` joins LOCKED_FILES — the full-scan
+//          secrets config is delivered to every fleet repository, and only a
+//          LOCKED or MERGE_MANAGED path may enter the fleetParityCarveOut.
 // v1.51.0 (2026-11-25, T-20261124-013 / U-20261123-003 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.6):
 //          three decision verdicts for the engine's script lane —
@@ -675,7 +680,15 @@ const REGENERATED_FILES = new Set([
 
 const PRESERVE_FILES = new Set(["README.md", "README_ko.md", "CHANGELOG.md", "docs/README.md", "docs/README_ko.md"]);
 
-const LOCKED_FILES = new Set([".gitattributes", ".gitleaks.toml"]);
+// v1.52.0 (2026-11-25, T-20261124-007 — design
+// docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.7): the
+// full-scan secrets config joins the locked set. It is delivered to every fleet
+// repository from templates/common/.github/gitleaks-full.toml (byte copy of the
+// root file) so the runner's merge predicate 4 can run there, and it must carry
+// the engine's LOCKED claim: the fleetParityCarveOut parity guard
+// (verify-prompt-integrity.ts --parity-closure, runner-hardening design §3.6.4)
+// admits only LOCKED or MERGE_MANAGED paths into the carve-out.
+const LOCKED_FILES = new Set([".gitattributes", ".gitleaks.toml", ".github/gitleaks-full.toml"]);
 
 /**
  * Files whose WORKSPACE-MANAGED blocks upgrade MERGE unions into projects. Exported

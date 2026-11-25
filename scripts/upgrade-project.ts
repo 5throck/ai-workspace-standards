@@ -1,5 +1,10 @@
 #!/usr/bin/env bun
-// @version 1.118.0
+// @version 1.119.0
+// v1.119.0 (2026-11-25, T-20261124-007 — design
+//          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.7):
+//          `.github/gitleaks-full.toml` joins the LOCKED always-take-template
+//          list — the full-scan secrets config reaches every fleet repository as
+//          a byte copy of templates/common/.github/gitleaks-full.toml.
 // v1.118.0 (2026-11-25, T-20261124-013 / U-20261123-003 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.6):
 //          four script-lane gaps. (a) UNVISITED SCRIPTS — collectScriptFiles
@@ -5203,6 +5208,11 @@ const LOCKED_FILES = [
   ".githooks/commit-msg",
   ".githooks/post-checkout",
   ".githooks/pre-rebase",
+  // v1.119.0 (design 2026-11-25-upgrade-runner-machinery-batch §4.7): the full-scan
+  // secrets config is delivered to every project as a byte copy of the template
+  // (itself a byte copy of the root file), so the runner's merge predicate 4 can
+  // run in fleet repositories. No merge: there is one scanning configuration.
+  ".github/gitleaks-full.toml",
 ];
 for (const rel of LOCKED_FILES) {
   const src = resolveTemplate(rel);

@@ -168,6 +168,20 @@ contested questions. Its findings shaped every term below:
      schedule-change rule (ADR + §9.8 + prompts move together) stays in force and its
      scope now names this ADR's surfaces — `docs/protected-paths.json` and the
      registered design doc join the same-change-set requirement.
+   - **Amendment 2026-11-25 (fleet delivery of the full-scan config; design
+     `docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md` §4.7,
+     T-20261124-007)**: merge predicate 4 names `.github/gitleaks-full.toml`, and no
+     fleet repository carried it, so no fleet pull request could satisfy the
+     predicate. The engine now delivers the file to every fleet repository from
+     `templates/common/.github/gitleaks-full.toml`, a byte copy of the root file
+     (a drift test fails CI on divergence). The fail-closed rule and the predicate
+     text are unchanged: there is one scanning configuration. The path joins
+     `fleetParityCarveOut.paths` in `docs/protected-paths.json` so a fleet upgrade
+     wave may carry it under the carve-out's conditions (passed STEP I gates, blob
+     byte-identical to the template source, `verify-delivered-versions.ts` exit 0);
+     it carries the engine's LOCKED claim, which the parity-closure guard requires
+     of every carve-out entry. Root-repository merges that touch the path stay
+     hold-for-human-merge under `docs/adr/**` and `.github/gitleaks*.toml`.
 8. **Mechanics bound by artifacts, not prose** (design doc
    `docs/designs/2026-11-12-unified-batch-runner-design.md`, spec-registered): the
    run manifest (`.pipeline-state/run-manifest-<date>.json`, written at STEP 0 with
