@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-25T10:43:17.868Z
+**Generated**: 2026-11-25T10:47:00.109Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -219,7 +219,7 @@
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
 | upgrade-project.ts | 1.116.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
-| validate-decisions.ts | 1.2.1 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
+| validate-decisions.ts | 1.3.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.7.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.2 | scripts/validate-md-language.ts | child_process, fs, path |
