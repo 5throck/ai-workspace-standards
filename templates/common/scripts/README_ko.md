@@ -51,6 +51,27 @@ bun run dispatch:parallel # 병렬 디스패치 실행
 bun run dispatch:serial   # 직렬 디스패치 실행
 ```
 
+## 테스트 (fleet 표준 — design 2026-11-24-fleet-test-baseline-design, ADR-0106)
+
+테스트 진입점은 하나입니다: `bun scripts/test-runner.ts all` (CI `Unit Tests`, dev-sync 별칭,
+`battery.ts`, 로컬 실행이 모두 같은 명령을 씁니다).
+
+- 실행 순서: 기준선 `common` (`scripts/tests` 의 평평한 `*.test.ts`) → `tests/unit` 이 있으면 `unit`
+  → `test-suites.json` 의 `include` 에 나열한 내장 스위트 → 선언된 스위트.
+- 테스트를 하나도 찾지 못하면 fail-closed 입니다 (`result=no-tests`, 종료 코드 1). 모든 실행은
+  `TEST-RUN-SUMMARY` 한 줄로 끝나며, 판정은 종료 코드입니다.
+- 별칭 표준: `test` 와 `test:unit` → `bun scripts/test-runner.ts all`,
+  `test:common` → `bun scripts/test-runner.ts common`.
+- 스위트 선언은 프로젝트 루트의 `test-suites.json` (프로젝트 소유, 템플릿이 배포하지 않음)에
+  `bun-test` / `command` / `workspace` 타입으로 적습니다. `all`, `common`, `unit`, `integration`,
+  `scenarios`, `scripts` 이름은 가릴 수 없습니다.
+- 격리(quarantine)는 실패하는 대상을 계속 실행하되 실행을 실패시키지 않습니다:
+  `{ "path", "ticket", "reason", "expires" }`, `expires` 는 실행일로부터 최대 60일. 만료된 항목은
+  적용되지 않습니다. `optOut` (`reason`, `ticket`, `review`)은 기록된 공식 opt-out 입니다.
+- OS 적용 범위: `.test.ts` 앞 접미사 — `<name>.win32.test.ts`, `.darwin.test.ts`, `.linux.test.ts`.
+  접미사가 없으면 OS 독립입니다. 선언된 스위트에는 `"os"` 키를 쓸 수 있습니다. fleet CI 는 OS 독립
+  부분을 ubuntu 에서 한 번 실행하고, `--plan-os` 가 선언을 보고할 때만 OS 레그를 추가합니다.
+
 ## 하이브리드 스크립팅 모델
 
 이 프로젝트는 하이브리드 스크립팅 접근 방식을 따릅니다:

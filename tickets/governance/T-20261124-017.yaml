@@ -13,12 +13,26 @@ title: >-
   2026-11-24-fleet-test-baseline-design (battery v1.1.0 runs the single entry
   point; the dependency audit is decided there).
 priority: low
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-24T22:24:06.441+09:00'
 history:
   - at: '2026-11-24T22:24:06.441+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T22:09:13.730+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T22:09:13.754+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-25T22:09:13.778+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by design 2026-11-24-fleet-test-baseline-design (ADR-0106, PR #2178):
+  battery v1.1.0 runs bun scripts/test-runner.ts all (the CI entry point) and
+  the dependency-audit wrapper, so the battery and CI share one command set. AC9
+  and AC12 met; tests/unit/battery.test.ts 6 pass / 0 fail, and the CI workflow
+  text is pinned by tests/unit/ci-template-fleet-test-baseline.test.ts.
 error: null

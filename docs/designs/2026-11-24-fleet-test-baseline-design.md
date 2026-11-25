@@ -2,7 +2,7 @@
 
 - **Spec id**: `2026-11-24-fleet-test-baseline-design`
 - **Date**: 2026-11-24
-- **Status**: approved (owner approval 2026-11-25, recorded in DEC-20261125-01)
+- **Status**: implemented (approved 2026-11-25, recorded in DEC-20261125-01; implemented by PR-A, evidence `docs/reports/2026-11-25-fleet-test-baseline-evidence.md`)
 - **Author**: architect dispatch (PM Row 0, Design Gate, ADR-0074)
 - **Source**: PM dispatch brief 2026-11-24 (owner requests 1-5, relayed in English). Requests 3 and 4 arrived mid-task. Request 5 and the document-impact ruling followed. The battery audit amendment came from tonight's fleet merges.
 - **Related**: designs `2026-10-01-ci-template-unit-test-job-design` and `2026-11-15-windows-ci-test-speedup-design` (both implemented), ADR-0036, ADR-0061, ADR-0074, ADR-0094, ADR-0105, DEC-20261120-01, DEC-20261107-01, U-20261122-001, T-20261123-007, T-20261124-003, T-20261124-010
@@ -334,3 +334,50 @@ U, for the PM. Alias and manifest PRs in member repositories may meet the projec
 | co-newbiz | none in v1 | yes | baseline, then `unit`. Human merge |
 | co-utility | none | deferred | adoption-only (Q5) |
 | All members | No OS-specific test declared in v1. No opt-out granted. | | |
+
+## Implementation notes (2026-11-25)
+
+Dated record of where the implementation differs from, or sharpens, the text above.
+The evidence per acceptance criterion is `docs/reports/2026-11-25-fleet-test-baseline-evidence.md`.
+
+1. **§4.5 `all` outcome on files that are discovered but not applicable.** The first cut
+   made a suite step fail closed whenever its *applicable* target count was zero. That is
+   wrong for OS selection: a `tests/unit` holding only `.win32.test.ts` files is not an
+   empty suite on darwin, it is a platform selection. FC2 is therefore keyed on
+   **discovered** targets: a declared suite or an `include` entry with zero discovered
+   targets exits 1; a step whose discovered files are all tagged for another platform
+   prints its `  - <path> (not applicable on <os>: tagged <os>)` lines, dispatches nothing
+   and does not fail. The baseline keeps the strict rule (FC5 makes an OS tag in
+   `scripts/tests` fatal, so the baseline can never be "not applicable").
+2. **§4.9 `--plan-os` counting basis.** `--plan-os` runs the `all` selection for linux and
+   reports a platform when the selection contains at least one target **tagged** for it —
+   counted from discovery, not from the currently selected platform, so the ubuntu leg can
+   report `["win32"]` for a file it does not run.
+3. **§4.5 lazy helper import.** `test-runner.ts` imported `helpers/scaffold-markers.ts`
+   eagerly, and that module's own import chain (`layer-filter.ts`, `lib/platforms.ts`,
+   `lib/country-scoped-agents.ts`) does not exist in every project and never in a test
+   fixture. The hygiene predicate is now loaded lazily by the `scripts` suite only, so
+   `all`, `common` and every declared suite run in a project that has the runner alone.
+4. **§4.10 `concurrency` is a new allowed top-level key.** The template now carries a
+   workflow-level `concurrency` block, so `scripts/lib/ci-workflow-merge.ts` v1.1.0 accepts
+   `concurrency` at the top level as well as reserving `unit-tests-os`. Without it, a
+   project copy written by the first merge would be rejected as `MIGRATION_UNSAFE` by the
+   next one.
+5. **§4.6 install step.** The root manifest test is a shell `if` and the nested lockfile
+   sweep is a `for` loop over `$(find …)` (not `find … | while read`), so a failed nested
+   install fails the step; both job bodies set `shell: bash`, including on the OS legs.
+6. **§4.10 template `CHANGELOG.md`.** The entry landed under `[Unreleased]` rather than as
+   a new version heading: the release version is assigned by the template release
+   process (`auto-release-template`), and hand-writing `0.31.0` here would pre-empt it.
+7. **§4.3 co-deck quarantine baseline.** The design's §13 answer cites 12 failing tests;
+   the 2026-11-25 local measurement of the declared `deck` suite (31 files) is 457 pass /
+   11 fail, all 11 inside the two files the quarantine names
+   (`gen-slides-pdf-render.test.ts`, `theme-visual-regression.test.ts`). The quarantine
+   entry covers the files, so the count changes nothing; it is recorded because the
+   design's number is stale.
+8. **Root aliases (N2).** Root `package.json` is unchanged, as designed: root has no
+   `scripts/tests/`, so `common` and `all` are not root entry points. The fleet alias
+   standard is carried by `templates/common/package.json` only.
+9. **Evidence limits.** Fleet CI runs could not be triggered (private repositories,
+   billing wall — T-20261124-014); AC10 stays pending on that, and the evidence report
+   records contained local runs instead.

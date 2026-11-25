@@ -1,4 +1,11 @@
-// @version 1.0.0
+// @version 1.1.0
+// v1.1.0 (2026-11-25, AC6 of design
+//          docs/designs/2026-11-24-fleet-test-baseline-design.md, ADR-0106):
+//          `unit-tests-os` joins CI_RESERVED_JOBS — the template`s second test
+//          job (the declared-only OS matrix leg) is template-owned, so a project
+//          region may not declare it; `concurrency` joins the allowed top-level keys
+//          because the template now carries a workflow-level cancellation block, so a
+//          project copy written by a merge must not be rejected on the next merge.
 // v1.0.0 (2026-10-01, T-20260930-026 PR-A, ADR-0094 — spec
 //          docs/designs/2026-10-01-ci-template-unit-test-job-design.md §6):
 //          fail-closed merge of a project's `.github/workflows/ci.yml` with the
@@ -46,8 +53,8 @@ export interface CiMergeResult {
 
 export const CI_MARKER_BEGIN = "  # PROJECT-JOBS-BEGIN";
 export const CI_MARKER_END = "  # PROJECT-JOBS-END";
-export const CI_RESERVED_JOBS = ["audit", "secret-scan", "unit-tests"];
-const TOP_LEVEL_ALLOWED = ["name", "on", "permissions", "env", "jobs"];
+export const CI_RESERVED_JOBS = ["audit", "secret-scan", "unit-tests", "unit-tests-os"];
+const TOP_LEVEL_ALLOWED = ["name", "on", "permissions", "env", "concurrency", "jobs"];
 const REGION_FORBIDDEN_TOP_KEYS = ["on", "permissions", "env", "name", "jobs"];
 const REGION_PRIVILEGE_KEYS = ["permissions", "environment", "secrets"];
 const MARKER_CODES: CiMergeErrorCode[] = ["MARKER_COUNT", "MARKER_ORDER", "MARKER_INDENT"];

@@ -138,8 +138,8 @@ describe('one case per error code', () => {
     expect(codes(M(dupTop))).toContain('DUPLICATE_KEY');
   });
 
-  test('RESERVED_JOB for audit, secret-scan, unit-tests', () => {
-    for (const key of ['audit', 'secret-scan', 'unit-tests']) {
+  test('RESERVED_JOB for audit, secret-scan, unit-tests, unit-tests-os', () => {
+    for (const key of ['audit', 'secret-scan', 'unit-tests', 'unit-tests-os']) {
       const r = M(withRegion(`  ${key}:\n    runs-on: ubuntu-latest\n`));
       expect(r.ok).toBe(false);
       expect(codes(r)).toContain('RESERVED_JOB');
@@ -176,7 +176,9 @@ describe('one case per error code', () => {
     const anchored = HEAD.replace('runs-on: ubuntu-latest\n    steps:\n      - run: bun scripts/audit.ts', 'runs-on: &r ubuntu-latest\n    steps:\n      - run: bun scripts/audit.ts') + TEST_JOB.replace('ubuntu-latest', '*r');
     expect(codes(M(anchored))).toContain('MIGRATION_UNSAFE');
     expect(codes(M(`---\n${HEAD}---\nname: other\n`))).toContain('MIGRATION_UNSAFE');
-    expect(codes(M(`${HEAD.replace('jobs:', 'concurrency: x\njobs:')}${TEST_JOB}`))).toContain('MIGRATION_UNSAFE');
+    expect(codes(M(`${HEAD.replace('jobs:', 'bogus-key: x\njobs:')}${TEST_JOB}`))).toContain('MIGRATION_UNSAFE');
+    // `concurrency` is a legal workflow key the template now carries (v1.1.0).
+    expect(codes(M(`${HEAD.replace('jobs:', 'concurrency: x\njobs:')}${TEST_JOB}`))).not.toContain('MIGRATION_UNSAFE');
   });
 
   test('MIGRATION_UNSAFE: perm/trigger diff requires the explicit flag', () => {

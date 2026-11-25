@@ -200,6 +200,19 @@ Track these metrics monthly to ensure operational health:
 
 ---
 
+#### 9.9 Test Baseline and Fleet CI
+
+One command runs the tests: `bun scripts/test-runner.ts all` — CI `Unit Tests`, the
+`package.json` aliases (`test` and `test:unit`), the root runner and a developer's local
+run all use it. It covers the baseline `common` (`scripts/tests/*.test.ts`, where the
+delivered common tests live) first and fails closed (`result=no-tests`, exit 1) when no
+test is discovered, so a CI job can never pass with zero tests. A project declares further
+suites in its own `test-suites.json`; OS-specific tests are declared by a
+`.<win32|darwin|linux>.test.ts` suffix, and fleet CI runs the OS-independent part once on
+ubuntu plus an OS leg only when the declaration exists. Exceptions are recorded in the
+repository — a ticketed, time-boxed `quarantine`, or an `optOut` block — never a skipped
+job. See [ADR-0106](../../docs/adr/0106-fleet-test-baseline.md).
+
 #### 9.6 Escalation Procedures
 
 **Level 1: Routine issues** (audit failures, state mismatches)

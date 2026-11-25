@@ -424,6 +424,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `adr:0103` | adr | — | — | — |
 | `adr:0104` | adr | — | root/upgrade-project | — |
 | `adr:0105` | adr | — | — | — |
+| `adr:0106` | adr | — | — | — |
 | `dec:DEC-20260825-01` | decision | — | — | — |
 | `dec:DEC-20260825-02` | decision | `root/sync` | — | — |
 | `dec:DEC-20260829-01` | decision | `common/decision-record` | — | — |
@@ -970,7 +971,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 | Type | Count | Nodes |
 |------|-------|-------|
-| adr | 57 | (expected until docs `references` edges are mined) |
+| adr | 58 | (expected until docs `references` edges are mined) |
 | agent | 13 | co-abap/i18n-specialist, co-architect/mep-engineer, co-architect/structural-engineer, co-architect/visualization-expert, co-design/i18n-specialist, co-develop/i18n-specialist, co-hr/i18n-specialist, co-hr/pm, co-news/pm, co-price/pm, co-security/i18n-specialist, co-utility/security, root/skill-graph-analyst |
 | decision | 34 | (expected until docs `references` edges are mined) |
 | skill | 1 | root/trail |
