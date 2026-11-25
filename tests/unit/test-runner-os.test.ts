@@ -145,6 +145,21 @@ describe("AC5: a .win32.test.ts file off its platform", () => {
     const r = await run(root, "all", "--os-scope", "independent", "--dry-run");
     expect(field(summaryOf(r.out), "scope")).toBe("independent");
     expect(field(summaryOf(r.out), "files")).toBe("1");
+    expect(r.out).not.toContain("w.win32.test.ts\n");
+  });
+
+  test("--os-scope independent excludes a tag that equals the selected platform", async () => {
+    // Windows CI caught this: with the selection on win32, "independent" used to
+    // behave like "both" and dispatched the win32-tagged file. Platform-agnostic
+    // because the platform is passed explicitly.
+    const root = fixture();
+    withTagged(root);
+    const r = await run(root, "all", "--os", "win32", "--os-scope", "independent", "--dry-run");
+    expect(r.code).toBe(0);
+    expect(field(summaryOf(r.out), "files")).toBe("1");
+    expect(r.out).not.toContain("w.win32.test.ts\n");
+    const both = await run(root, "all", "--os", "win32", "--dry-run");
+    expect(field(summaryOf(both.out), "files")).toBe("2");
   });
 
   test("--os-scope specific is exempt from the baseline rules", async () => {

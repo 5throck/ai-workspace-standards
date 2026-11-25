@@ -1302,8 +1302,14 @@ function buildPlan(entry: string, ctx: RunContext): Plan {
     // OS selection runs at discovery, before orderLongestFirst (design 4.8).
     const discovered = flatTestFiles(dirs).map((file) => ({ file, tag: parseOsTag(file) }));
     const applicable = discovered.filter((f) => {
+      // A suite-level `os` key already gated the whole suite on this platform.
       if (suiteOs !== undefined) return true;
-      return specific ? f.tag === os : f.tag === null || f.tag === os;
+      // Scope is explicit: "independent" must stay untagged-only even when the tag
+      // equals the running platform (a win32-tagged file IS "both" on win32, but it
+      // is never part of the OS-independent leg).
+      if (scope === "independent") return f.tag === null;
+      if (scope === "specific") return f.tag === os;
+      return f.tag === null || f.tag === os;
     });
     const excluded = discovered
       .filter((f) => !applicable.includes(f) && f.tag !== null)
@@ -1415,7 +1421,13 @@ function buildPlan(entry: string, ctx: RunContext): Plan {
         if (!builtin) continue;
         const files = getTestFiles(builtin).map(toPosixPath);
         const discovered = files.map((file) => ({ file, tag: parseOsTag(file) }));
-        const applicable = discovered.filter((f) => (specific ? f.tag === os : f.tag === null || f.tag === os));
+        const applicable = discovered.filter((f) =>
+          scope === "independent"
+            ? f.tag === null
+            : scope === "specific"
+              ? f.tag === os
+              : f.tag === null || f.tag === os,
+        );
         for (const f of discovered) if (f.tag) osSpecific[f.tag] += 1;
         const targets = applicable.map((f) => f.file);
         if (discovered.length === 0 && !specific && !fatal) {
@@ -1461,7 +1473,9 @@ function buildPlan(entry: string, ctx: RunContext): Plan {
     // Built-in specialized suites keep their v1.18.0 verdict: an absent suite is a notice, exit 0.
     const files = getTestFiles(builtin).map(toPosixPath);
     const discovered = files.map((file) => ({ file, tag: parseOsTag(file) }));
-    const applicable = discovered.filter((f) => (specific ? f.tag === os : f.tag === null || f.tag === os));
+    const applicable = discovered.filter((f) =>
+      scope === "independent" ? f.tag === null : scope === "specific" ? f.tag === os : f.tag === null || f.tag === os,
+    );
     for (const f of applicable) if (f.tag) osSpecific[f.tag] += 1;
     steps.push({
       name: entry,
