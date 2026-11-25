@@ -12,12 +12,39 @@ title: >-
   becomes visible in the daily report; decision-class — morning handoff; do NOT
   modify the runner prompt (prompts.manifest.json sha invariant)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-23T14:42:11.000+09:00'
 history:
   - at: '2026-11-23T14:42:11.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T22:44:35.430+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T22:44:35.447+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-25T22:44:35.464+09:00'
+    from: running
+    to: review
+  - at: '2026-11-25T22:44:35.483+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by the machinery batch rows 2 and 9 (PR #2177). verify --profile
+  full|fast checks a fixed component table and exits 5 when a table component
+  has neither a steps row nor a skippedBudget row ('8 component(s) of 10 ...' on
+  the 2026-11-25 manifest); verify --nights N exits 6 when a scheduled night has
+  no manifest (reproduced: 2026-11-23). The runner prompt now records the
+  just-finished step with 'run-manifest.ts step --step <NAME> --status
+  complete|failed' at every boundary, in addition to the skipped-budget row
+  rule, and runs the previous-night verification at STEP 0; both are live and
+  verify-prompt-integrity reports 1/1 match. Note: this ticket forbade modifying
+  the runner prompt (prompts.manifest.json sha invariant), but the approved
+  design 2026-11-25-upgrade-runner-machinery-batch-design section 4.10
+  (owner-approved, DEC-20261125-01) superseded that constraint with one
+  governance change set; the manifest sha was updated with the snapshot in the
+  same commit. Evidence: docs/reports/2026-11-25-machinery-batch-evidence.md row
+  2.
 error: null

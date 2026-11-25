@@ -15,12 +15,37 @@ title: >-
   real run as a partial delivery, discarded, tree restored clean) ; TOCTOU
   re-assert done post hoc: PR merge-base == review basis for all 7
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-24T08:15:45.894+09:00'
 history:
   - at: '2026-11-24T08:15:45.894+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T22:44:35.359+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T22:44:35.376+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-25T22:44:35.394+09:00'
+    from: running
+    to: review
+  - at: '2026-11-25T22:44:35.413+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed by the machinery batch rows 2 and 9 (PR #2177, commits 9ea92d8bc and
+  a1f9417fc, run-manifest.ts 1.2.0). verify now computes the expected STEP I
+  gate rows from projectReviews[] minus the STEP_I skip rows and exits 4 when
+  gateChecks holds fewer: reproduced with exit 4 on a copy of the 2026-11-24
+  manifest whose gateChecks were emptied ('0 project(s) carry a
+  STEP_I_PRE_REVIEW row, 6 expected'). The design's acceptance expectation that
+  the STORED 2026-11-24 manifest exits 4 is stale — that manifest now holds the
+  15 gate rows written late during that run, so it exits 0. The runner prompt
+  now makes the gate call an explicit numbered sub-step, STEP I (0a), before the
+  first dry-run; that prompt text is live and verify-prompt-integrity reports
+  1/1 match. Also fixed: the dry-run now applies to every admitted project
+  (canary limits only the first real run). Evidence:
+  docs/reports/2026-11-25-machinery-batch-evidence.md rows 2 and 9.
 error: null

@@ -156,3 +156,9 @@ Not the cause (ruled out from the log): CRLF/`core.autocrlf`, `path.relative`, d
 - **Fix**: new pure helper `toPosixPath(rel, platform = process.platform)` in `scripts/lib/upgrade-policy.ts` (1.53.0; its `templates/common/scripts` twin is byte-identical). `scripts/verify-delivered-versions.ts` (1.2.0) and the `scripts/upgrade-project.ts` sweep (1.120.0) normalise each glob entry with it. The Windows arm is a parameter so it is unit-tested on every OS; POSIX is the identity function (a backslash is a legal filename character there).
 - **Tests**: neither existing assertion was loosened. Added: `toPosixPath` cases with literal backslashes in both files; in the verifier test the finding set is now exactly the three template scripts with no backslash; in the engine test every UNCLASSIFIED row must start with `scripts/`, contain no backslash, never name a file a script lane delivered, and never name a registry file.
 - **Registry**: `scripts/SCRIPTS.md` rows for the three scripts, the regenerated `templates/common/scripts/SCRIPTS.md` mirror span, and `docs/lifecycle/scripts/upgrade-project.md` (Version, changelog, Phase History row).
+
+## Upstream request U-20261123-003 — kept open
+
+- Row 7 implements the L0-only guard: a script whose only registry row has layer `L0`/`L0-only` is never copied to a variant target (`L0_ONLY_SKIP` at INFO), covered by a unit helper test.
+- The script lane now names every file it cannot place (`UNCLASSIFIED` at WARN) instead of passing over it silently.
+- The original event is still unexplained: `skill-graph-fleet-report.ts` appeared in co-security on 2026-11-23, but that script has no `templates/common/scripts/` twin and is not under `templates/co-security/scripts/`, so no lane visits it and the engine-run canary for the skip cannot fire. The code path that copied it was not identified. The ticket therefore stays open rather than being closed on a mitigation whose trigger is unproven.
