@@ -109,6 +109,13 @@ When adjudication determines the project side is canonical (post-incident restor
    - **Post-wave verification ticket**: after the delivery wave, a check confirms project == template at the ported paths and the drift watchlist entry is closed.
 6. **Guard rails.** The port never deletes project-only content from the project side; the template side is the write target. If the project copy carries scaffold substitutions (project name renders), port the template-form (tokens), not the rendered bytes.
 
+**Procedure note (2026-11-25, T-20261125-004).** An adjudication brief starts from the engine's full dry-run decision table, never from a verifier's list or a ticket's file list. On 2026-11-25 the co-deck analysis (`docs/designs/2026-11-25-conflict-adjudication-analysis.md`) covered the 12 files named in T-20261124-010, while the engine reported 42 distinct preserved paths, because its input was the list of `verify-delivered-versions.ts`, which sees scripts only (T-20261124-011). Steps:
+
+1. Run `bun scripts/upgrade-project.ts Projects/<p> --dry-run --prune-removed` and save the complete output.
+2. Build the inventory from every row of that output: PRESERVED, CONFLICT, PENDING BACKPORT, MARKER_LOSS, and each `decision` row of the delivery manifest.
+3. Reconcile a ticket or verifier list against that inventory before analysis. A list that names fewer paths than the engine is a subset; name the missing paths in the brief.
+4. State the inventory count in the brief header (engine paths, covered paths, not covered paths).
+
 ## 7. D3 — Decision log schema (manifest v2)
 
 ```jsonc

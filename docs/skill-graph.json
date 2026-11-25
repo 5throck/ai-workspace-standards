@@ -9588,8 +9588,8 @@
       "name": "upgrade-project",
       "scope": "root",
       "capability": "upgrade-project",
-      "content_hash": "5e93ab403877eec2",
-      "version": "1.6.3",
+      "content_hash": "69c0255550b8c305",
+      "version": "1.6.4",
       "mirrors": [
         "skills/upgrade-project/SKILL.md",
         ".claude/skills/upgrade-project/SKILL.md",

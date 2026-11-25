@@ -3,6 +3,7 @@
 ## Metadata
 - **Skill**: upgrade-project
 - **Status**: active
+- **Version**: 1.6.4
 - **Version**: 1.6.3
 - **Owner**: pm
 - **Created**: 2026-07-31
@@ -27,6 +28,7 @@ Upgrades an existing L2/L3 project to the current template version: syncs templa
 | 2026-09-21 | production | production | SKILL.md v1.5.1: `--platform` values corrected to `claude\|antigravity\|codex\|all` (the documented `both` was renamed to `all` in script v1.34.0 and hard-errored), script pin refreshed v1.28.0 → v1.39.0 (2026-09-21 project review C-2/H-10) | pm |
 | 2026-09-27 | production | production | SKILL.md v1.5.2: marker table gains the missing COMMON-CODEX row and the new COMMON-HERMES row (managed-block-merge v1.3.0, spec 2026-09-27-hermes-merge-marker-design) — found during the post-v0.7.0 fleet upgrade where HERMES.md could not reach existing L2 projects | pm |
 | 2026-10-26 | production | production | SKILL.md v1.6.0 → v1.6.1: citation-only correction (SCRIPTS.md provenance citation; spec docs/designs/2026-10-26-project-review-remediation-design.md R4) — no behavior change | pm |
+| 2026-11-26 | production | production | SKILL.md v1.6.3 → v1.6.4: dry-run review step gains the rule that a CONFLICT review or adjudication brief starts from the engine's full dry-run decision table, not a verifier's or a ticket's file list (T-20261125-004) — procedure only, no engine change | pm |
 
 ## Acceptance Criteria
 

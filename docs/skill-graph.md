@@ -253,7 +253,7 @@
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L0 | 1.0.1 | co-architect/design-lead, co-architect/visual-designer, co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
-| `root/upgrade-project` | L0 | 1.6.3 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
+| `root/upgrade-project` | L0 | 1.6.4 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
 | `root/variant-feature` | L0 | 1.0.0 | — | — | root/upgrade-project (composes_with) | — | — |
 | `root/zod-contract-gate` | L0 | 1.0.3 | common/contract-gate-engineer | — | root/security-scan | — | — |
 

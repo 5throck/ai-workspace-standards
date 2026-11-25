@@ -1,11 +1,11 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: 1.6.3
+version: 1.6.4
 status: active
 scope: workspace
 owner: pm
-last_updated: 2026-11-21
+last_updated: 2026-11-26
 last_reviewed: 2026-10-31
 relates_to:
   - skill: promote-variant
@@ -139,7 +139,7 @@ variants / quarterly. Full procedure: `skills/context-commonization-review/SKILL
 Run the upgrader from the workspace root (`bun scripts/upgrade-project.ts Projects/<p> ...`).
 
 1. **Check version**: `cat Projects/<p>/.claude/template-version.txt`
-2. **Dry run**: `bun scripts/upgrade-project.ts Projects/<p> --dry-run --prune-removed`
+2. **Dry run**: `bun scripts/upgrade-project.ts Projects/<p> --dry-run --prune-removed`. Save the complete output. When you review a CONFLICT or prepare an adjudication brief, build the file inventory from this full decision table (PRESERVED, CONFLICT, PENDING BACKPORT, MARKER_LOSS). Do not start from a verifier's list or a ticket's file list: those lists can be a subset (2026-11-25: a ticket named 12 files, the engine reported 42). Reconcile any shorter list against the dry run and state both counts in the brief.
 3. **Ensure a clean tree**: the pre-upgrade stash reverts uncommitted changes, so land local work first via the project's own pipeline: `cd Projects/<p> && bun scripts/dev-sync.ts --body-file <body> "<msg>"`
 4. **Run upgrade**: `bun scripts/upgrade-project.ts Projects/<p> --prune-removed` (`--prune-removed` is mandatory to retire stale engine copies; see project-resync Step 4)
 5. **Review**: `cd Projects/<p> && git status && git diff --cached`
