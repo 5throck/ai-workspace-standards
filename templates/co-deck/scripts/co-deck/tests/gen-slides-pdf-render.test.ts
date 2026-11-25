@@ -1478,13 +1478,13 @@ describe('v1.16.0 U-20261119-007: two-column card anchors inside the text column
     // The defect: the page-centered card ran THROUGH visR.x and the panel
     // (painted after the text) covered its right portion.
     expect(cardRightPt).toBeLessThanOrEqual(panelX! + 0.5);
+    // No text op may start at or beyond the panel's left edge.
+    const runs = textRunOps(twoCol.page);
+    expect(runs.length).toBeGreaterThan(0);
     // Ported from co-deck project 1.8.0 (T-20261124-010); assertion had no counterpart in 1.9.0.
     // Card ink exists on the dark bubble: title white, bullets light muted.
     expect(runs.some((r) => r.rg === PD_TEXT_INK)).toBe(true);
     expect(runs.some((r) => r.rg === PD_MUTED_INK)).toBe(true);
-    // No text op may start at or beyond the panel's left edge.
-    const runs = textRunOps(twoCol.page);
-    expect(runs.length).toBeGreaterThan(0);
     for (const r of runs) expect(r.x).toBeLessThan(panelX! + 0.5);
     // Panel still paints after the text (legacy z-order kept) — safe now
     // because nothing extends under it.
