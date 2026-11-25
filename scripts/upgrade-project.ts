@@ -1,5 +1,21 @@
 #!/usr/bin/env bun
-// @version 1.117.0
+// @version 1.118.0
+// v1.118.0 (2026-11-25, T-20261124-013 / U-20261123-003 — design
+//          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.6):
+//          four script-lane gaps. (a) UNVISITED SCRIPTS — collectScriptFiles
+//          also enumerates `.py` (the co-work deck scripts live outside both
+//          lanes and were copied by hand); after both script lanes every file
+//          under templates/<variant>/scripts and templates/common/scripts that
+//          no lane placed gets an UNCLASSIFIED (WARN) decision row.
+//          (b) REGISTRY ROWS — after the last script pass one loop compares the
+//          @version of each script whose project copy equals the template with
+//          its scripts/SCRIPTS.md row, calls reconcileScriptRegistry on a
+//          mismatch, and records REGISTRY_DRIFT (ERROR) when the row still
+//          disagrees. (c) L0-ONLY SCRIPTS — scriptRowGate skips a script whose
+//          only row source is the L0 registry at layer L0/L0-only with
+//          L0_ONLY_SKIP (INFO); the L0→L3 layer rewrite on append is removed.
+//          (d) RAW PIPE — an appended registry row escapes a pipe inside a
+//          backtick code span as `\|` (upgrade-policy.ts v1.51.0 helpers).
 // v1.117.0 (2026-11-25, PM finding 1 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.8):
 //          content-identity fast path in `evolvedDeliveryGuard` — a
@@ -1569,6 +1585,9 @@ import {
   backfillStubFrontmatter,
   baselineKeyFor,
   classifyProjectState,
+  escapeRegistryRowPipes,
+  isL0OnlyRegistryRow,
+  registryRowVersion,
   globToRegExp,
   expandGrantGlobs,
   INSTRUCTION_FILE_RELS,
@@ -3004,7 +3023,13 @@ function fileHash(filePath: string): string {
  * the delivered sub-registry file and per-file reconciliation is out of scope.
  */
 type ScriptRowResolution =
-  | { kind: "registry"; sourceRow: string; sourceVersion: string }
+  | {
+      kind: "registry";
+      sourceRow: string;
+      sourceVersion: string;
+      /** v1.118.0 (§4.6 c): true when only the L0 registry holds the row and its layer is L0/L0-only. */
+      l0Only: boolean;
+    }
   | { kind: "sub-registry"; subRow: string; subVersion: string; description: string }
   | { kind: "ambiguous"; rows: string[] }
   | { kind: "absent" };
@@ -3020,10 +3045,22 @@ function resolveUpstreamScriptRow(scriptRelPath: string): ScriptRowResolution {
   // under a variant-prefixed name (e.g. `co-deck/handbook/check-links.ts` at L0
   // vs plain `handbook/check-links.ts` in the project) only match the common
   // registry, so the fallback is what makes the handbook/ suite reconcile.
-  for (const registryFile of [scriptsMd, join(commonDir, "scripts", "SCRIPTS.md")]) {
-    if (!existsSync(registryFile)) continue;
-    const match = readFileSync(registryFile, "utf8").match(rowLookupRe);
-    if (match) return { kind: "registry", sourceRow: match[0], sourceVersion: match[1].trim() };
+  {
+    const l1Registry = join(commonDir, "scripts", "SCRIPTS.md");
+    const l0Row = existsSync(scriptsMd) ? readFileSync(scriptsMd, "utf8").match(rowLookupRe)?.[0] : undefined;
+    const l1Row = existsSync(l1Registry) ? readFileSync(l1Registry, "utf8").match(rowLookupRe)?.[0] : undefined;
+    const row = l0Row ?? l1Row; // L0 registry first, then L1 — the pre-v1.118.0 order
+    if (row) {
+      const m = row.match(rowLookupRe);
+      if (m) {
+        return {
+          kind: "registry",
+          sourceRow: row,
+          sourceVersion: m[1].trim(),
+          l0Only: isL0OnlyRegistryRow(l0Row, l1Row),
+        };
+      }
+    }
   }
 
   // Variant sub-registry fallback (v1.112.0): scripts delivered from
@@ -3074,6 +3111,21 @@ function subRowDescription(subRow: string): string {
 function scriptRowGate(scriptRelPath: string): boolean {
   if (isSubRegistryGoverned(scriptRelPath, variant)) return true;
   const res = resolveUpstreamScriptRow(scriptRelPath);
+  if (res.kind === "registry" && res.l0Only) {
+    // v1.118.0 (§4.6 c): an L0-only script is workspace machinery — it is never
+    // copied to a variant target (U-20261123-003 a).
+    console.log(
+      `  ⏭️  L0-ONLY SKIP ${scriptRelPath} — its only registry row is L0/${res.sourceRow.split("|")[2]?.trim()}; not delivered to a variant`,
+    );
+    recordDecision(
+      scriptRelPath,
+      "SYNC",
+      "SYNC_IF_NEWER: scripts/",
+      "L0_ONLY_SKIP",
+      `only registry row is the L0 scripts/SCRIPTS.md row (layer ${res.sourceRow.split("|")[2]?.trim()}) — L0-only script, delivery skipped for a variant target`,
+    );
+    return false;
+  }
   if (res.kind === "registry" || res.kind === "sub-registry") return true;
   const detail =
     res.kind === "ambiguous"
@@ -3110,6 +3162,20 @@ function scriptRowGate(scriptRelPath: string): boolean {
  * upstream rows land an UNREGISTERED_SCRIPT (ERROR) row here as defense-in-depth:
  * the pre-copy scriptRowGate should already have skipped the delivery.
  */
+/** v1.118.0 (§4.6 b): index just after the `## Registry` table's separator row
+ *  (`|---|---|`), or -1 when the heading or its header row is absent. */
+function afterRegistrySeparator(lines: string[]): number {
+  const regStart = lines.findIndex((l) => /^## Registry\s*$/.test(l));
+  if (regStart < 0) return -1;
+  let sawHeader = false;
+  for (let i = regStart + 1; i < lines.length; i++) {
+    if (/^##\s/.test(lines[i]) || /^####\s+`/.test(lines[i])) break;
+    if (/^\|\s*-{3,}/.test(lines[i])) return sawHeader ? i + 1 : -1;
+    if (/^\|\s*[^|]/.test(lines[i])) sawHeader = true;
+  }
+  return -1;
+}
+
 function reconcileScriptRegistry(scriptRelPath: string): void {
   const registryPath = join(projectDir, "scripts", "SCRIPTS.md");
   if (!existsSync(registryPath)) return;
@@ -3228,15 +3294,18 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
   // No row at all — append the upstream row at the shared registry boundary
   // (helpers/registry-append.ts registryAppendIndex; the same `## Registry`
   // anchor + first-`#### \`` bound the prune helpers respect).
-  // Rows marked layer `L0`/`L0-only` are invisible to verify-scripts at project
-  // context (L0_ONLY_LAYERS skip) while the file itself ships on disk, which
-  // reads as "Unregistered script" — rewrite the layer cell to `L3` on append.
-  const appendedRow = resolution.sourceRow.replace(
-    /^(\| `[^`]+` \| [^|]*\| [^|]*\| [^|]*\| [^|]*\| [^|]*\| )([^|]+)(\|)/,
-    (_m, head, layer, tail) => (/^L0(-only)?$/.test(layer.trim()) ? `${head}L3${tail}` : _m),
-  );
+  // v1.118.0 (§4.6 c): the L0→L3 layer rewrite on append is removed — an
+  // L0-only row never reaches this point (scriptRowGate skips the delivery), so
+  // a rewritten L3 row can no longer hide an undeliverable script.
+  // v1.118.0 (§4.6 d): a literal pipe inside a backtick code span is escaped, so
+  // the row keeps its 8 columns (U-20261123-003 b).
+  const appendedRow = escapeRegistryRowPipes(resolution.sourceRow);
   const lines = content.split("\n");
-  const insertAt = registryAppendIndex(lines);
+  // v1.118.0 (§4.6 b): a registry table with a heading and a header row but no
+  // data row yet has no "last row" for registryAppendIndex — insert right after
+  // the separator row so a first delivery can register its row.
+  let insertAt = registryAppendIndex(lines);
+  if (insertAt < 0) insertAt = afterRegistrySeparator(lines);
   if (insertAt > 0) {
     lines.splice(insertAt, 0, appendedRow);
     writeFileSync(registryPath, lines.join("\n"), "utf8");
@@ -5805,7 +5874,9 @@ function collectScriptFiles(root: string, dryTag: string): string[] {
       }
       if (stat.isDirectory()) {
         walk(fullPath, rel ? `${rel}/${entry}` : entry);
-      } else if (stat.isFile() && entry.endsWith(".ts")) {
+      } else if (stat.isFile() && (entry.endsWith(".ts") || entry.endsWith(".py"))) {
+        // v1.118.0 (§4.6 a): `.py` joins the walk — version-gated through its
+        // `@version` docstring line (extractScriptVersion reads the same token).
         found.push(rel ? `${rel}/${entry}` : entry);
       }
     }
@@ -6010,6 +6081,8 @@ console.log("");
 // based where an @version header exists (line or JSDoc style); hash-based for
 // unversioned files (template is canonical). Project-only files are preserved.
 const variantScriptsSrc = join(templatesDir, "scripts", variant);
+// v1.118.0 (§4.6 a): the variant-lane walk, as paths relative to templates/<variant>/scripts.
+const seenVariantScriptsAll = new Set<string>();
 if (existsSync(variantScriptsSrc)) {
   console.log(`--- VARIANT SCRIPTS: scripts/${variant}/ ---`);
   // v1.115.0: --surfaces claim-class gate — variant scripts/** carry the same
@@ -6035,6 +6108,7 @@ if (existsSync(variantScriptsSrc)) {
           // path, so post-scaffold template updates never reached live projects.
           // Unversioned .json flows through the hash-compare branch below.
           seenVariantScripts.add(entryRel);
+          seenVariantScriptsAll.add(entryRel);
           const rel2 = `scripts/${variant}/${entryRel}`;
           const projFile = join(projectDir, rel2);
           const tplVer = extractScriptVersion(abs);
@@ -6395,6 +6469,65 @@ if (existsSync(variantScriptsSrc)) {
       syncChanged++;
     }
     console.log("");
+  }
+}
+
+// ── v1.118.0 (§4.6 a + b): script-lane coverage and registry-row lockstep ─────
+// (a) Every file under the two script source roots that no lane placed is named
+//     in an UNCLASSIFIED (WARN) row — a file the engine silently never visited
+//     was the 2026-11-24 co-work deck gap.
+// (b) One loop compares the @version of each script whose project copy equals
+//     the template copy with its scripts/SCRIPTS.md row (main-registry-governed
+//     paths only; a sub-registry file rides its own delivered SCRIPTS.md). A
+//     mismatch is reconciled once; a mismatch that remains is REGISTRY_DRIFT
+//     (ERROR). Apply mode only — a dry run writes nothing to reconcile.
+{
+  for (const srcRoot of scriptSourceRoots) {
+    for (const entry of new Bun.Glob("**/*").scanSync({ cwd: srcRoot, absolute: false })) {
+      if (entry.split("/").some((part) => part.startsWith(".") || part === "node_modules" || part === "temp")) continue;
+      if (!existsSync(join(srcRoot, entry)) || statSync(join(srcRoot, entry)).isDirectory()) continue;
+      const placedByCommonLane = scriptSourceMap.get(entry) === srcRoot;
+      const placedByVariantLane = srcRoot === variantScriptsRoot && seenVariantScriptsAll.has(entry);
+      if (placedByCommonLane || placedByVariantLane) continue;
+      if (entry === "SCRIPTS.md" || entry.endsWith("/SCRIPTS.md")) continue; // registry files, not scripts
+      // README.md / README_ko.md under scripts/ are documentation — a docs lane delivers them.
+      if (/(^|[\\/])README(_[a-z]{2})?\.md$/.test(entry)) continue;
+      recordDecision(
+        `scripts/${entry}`,
+        "SYNC",
+        "SYNC_IF_NEWER: scripts/",
+        "UNCLASSIFIED",
+        "template file under a script source root that no script lane places (not .ts/.py in the common lane, not .ts/.mjs/.json/.py under scripts/<variant>/) — not delivered by this run; deliver it through an asset lane or register a delivery claim",
+      );
+      console.log(`  ❔ UNCLASSIFIED scripts/${entry} — no script lane places this file (not delivered)`);
+    }
+  }
+  if (!dryRun) {
+    const registryPath = join(projectDir, "scripts", "SCRIPTS.md");
+    for (const [rel] of [...scriptSourceMap.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+      if (isSubRegistryGoverned(`scripts/${rel}`, variant)) continue;
+      const projFile = join(projectDir, "scripts", rel);
+      const tplFile = join(scriptSourceMap.get(rel)!, rel);
+      if (!existsSync(projFile) || fileHash(projFile) !== fileHash(tplFile)) continue;
+      // No registry file: nothing to reconcile against (the registry itself is
+      // not a script-lane deliverable) — not a drift of a delivered script.
+      if (!existsSync(registryPath)) continue;
+      let rowVersion = registryRowVersion(readFileSync(registryPath, "utf8"), rel);
+      if (rowVersion === extractScriptVersion(projFile)) continue;
+      reconcileScriptRegistry(`scripts/${rel}`);
+      rowVersion = registryRowVersion(readFileSync(registryPath, "utf8"), rel);
+      const fileVersion = extractScriptVersion(projFile);
+      if (rowVersion !== fileVersion) {
+        recordDecision(
+          `scripts/${rel}`,
+          "SYNC",
+          "SYNC_IF_NEWER: scripts/",
+          "REGISTRY_DRIFT",
+          `file @version ${fileVersion} but scripts/SCRIPTS.md row ${rowVersion ?? "absent"} after reconciliation — bump the row template-side or remove the stale project row`,
+        );
+        console.log(`  ✗ REGISTRY DRIFT scripts/${rel} — file v${fileVersion}, registry row ${rowVersion ?? "absent"}`);
+      }
+    }
   }
 }
 

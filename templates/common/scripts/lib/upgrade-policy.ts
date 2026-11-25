@@ -1,4 +1,16 @@
-// @version 1.50.0
+// @version 1.51.0
+// v1.51.0 (2026-11-25, T-20261124-013 / U-20261123-003 — design
+//          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.6):
+//          three decision verdicts for the engine's script lane —
+//          UNCLASSIFIED (WARN: a template script file no lane can place),
+//          REGISTRY_DRIFT (ERROR: a delivered script whose SCRIPTS.md row
+//          version still differs after reconciliation), L0_ONLY_SKIP (INFO: a
+//          script whose only row source is the L0 registry at layer L0/L0-only
+//          is never copied to a variant target) — plus the pure helpers
+//          `escapeRegistryRowPipes` (a literal pipe inside a backtick code span
+//          becomes `\\|`, so the row keeps 8 columns),
+//          `registryRowVersion` (splits on unescaped pipes) and
+//          `isL0OnlyRegistryRow`.
 // v1.50.0 (2026-11-25, PM finding 1 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.8):
 //          content-identity fast path. `classifyProjectState` returns the new
@@ -1561,6 +1573,10 @@ export type DecisionVerdict =
   // the deliverable apart from its version line, last_updated and lifecycle
   // block — delivered as the template copy without a sign-off step.
   | "CONTENT_EQUIVALENT"
+  // Machinery batch §4.6 (2026-11-25): engine script-lane gaps.
+  | "UNCLASSIFIED"
+  | "REGISTRY_DRIFT"
+  | "L0_ONLY_SKIP"
   // Overwrite-protection design E2 (DEC-20261111-01 D4): a delivery write would
   // lower the file's LOCAL-PATCH marker count — the write is skipped.
   | "MARKER_LOSS"
@@ -1617,6 +1633,9 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   UNBASELINED_OVERWRITE: "WARN",
   EVOLVED_PRESERVE: "WARN",
   CONTENT_EQUIVALENT: "INFO",
+  UNCLASSIFIED: "WARN",
+  REGISTRY_DRIFT: "ERROR",
+  L0_ONLY_SKIP: "INFO",
   MARKER_LOSS: "ERROR",
   PROJECT_AHEAD: "WARN",
   SEED_LAG: "WARN",
@@ -1806,6 +1825,64 @@ export function baselineKeyFor(rel: string, content: string): string {
  * same content a delivery would write); `baseline` is the recorded provenance
  * or undefined (first run after the policy lands — degrade, design §8).
  */
+/** v1.51.0 (§4.6 d): escape every unescaped pipe INSIDE a backtick code span of a
+ *  registry row as `\\|`, so a literal `a|b` in a cell does not split the row.
+ *  Pipes outside code spans (the cell separators) are untouched. Pure. */
+export function escapeRegistryRowPipes(row: string): string {
+  let out = "";
+  let inCode = false;
+  for (let i = 0; i < row.length; i++) {
+    const ch = row[i];
+    if (ch === "`") {
+      inCode = !inCode;
+      out += ch;
+    } else if (ch === "\\" && row[i + 1] === "|") {
+      out += "\\|"; // already escaped
+      i++;
+    } else if (ch === "|" && inCode) {
+      out += "\\|";
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+/** v1.51.0 (§4.6 d): split a registry row into cells on unescaped pipes. */
+export function splitRegistryRow(row: string): string[] {
+  const cells: string[] = [];
+  let cur = "";
+  for (let i = 0; i < row.length; i++) {
+    if (row[i] === "\\" && row[i + 1] === "|") {
+      cur += "|";
+      i++;
+    } else if (row[i] === "|") {
+      cells.push(cur.trim());
+      cur = "";
+    } else {
+      cur += row[i];
+    }
+  }
+  return cells.slice(1); // drop the empty cell before the first pipe
+}
+
+/** v1.51.0 (§4.6 b): the version cell of the project registry row for `name`
+ *  (path relative to scripts/), or null when the row is absent. */
+export function registryRowVersion(registryText: string, name: string): string | null {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const row = registryText.match(new RegExp(`^\\| \`${escaped}\` \\|.*\\r?$`, "m"))?.[0];
+  if (!row) return null;
+  return splitRegistryRow(row)[2] ?? null;
+}
+
+/** v1.51.0 (§4.6 c): true when the L0 registry holds the row, the L1 common
+ *  registry does not, and the L0 row's layer cell is L0 or L0-only. Such a
+ *  script is never copied to a variant target. */
+export function isL0OnlyRegistryRow(l0Row: string | undefined, l1Row: string | undefined): boolean {
+  if (!l0Row || l1Row) return false;
+  return /^(L0|L0-only)$/.test(splitRegistryRow(l0Row)[1] ?? "");
+}
+
 /**
  * v1.50.0 (machinery batch §4.8): the content-identity form of a file. Removes
  * ONLY the frontmatter keys `version` and `last_updated`, the `lifecycle` block
