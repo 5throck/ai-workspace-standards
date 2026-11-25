@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-25T12:02:02.318Z
+**Generated**: 2026-11-25T13:03:57.831Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -117,7 +117,7 @@
 | auto-release-template.ts | 1.0.0 | scripts/auto-release-template.ts | child_process, fs, path |
 | automation-lock.ts | 1.0.0 | scripts/automation-lock.ts | fs, os, path, url |
 | backport-diff.ts | 1.3.0 | scripts/backport-diff.ts | child_process, fs, path |
-| battery.ts | 1.0.0 | scripts/battery.ts | crypto, fs, path |
+| battery.ts | 1.1.0 | scripts/battery.ts | crypto, fs, path |
 | bootstrap-stages.ts | 1.1.0 | scripts/bootstrap-stages.ts | fs, js-yaml, path |
 | changelog-normalize.ts | 1.0.0 | scripts/changelog-normalize.ts | fs |
 | check-handbook-archmap-drift.ts | 1.0.0 | scripts/check-handbook-archmap-drift.ts | crypto, fs, path |
@@ -211,7 +211,7 @@
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
 | test-new-project.ts | 1.13.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.18.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.19.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | child_process, fs, os, path |
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |

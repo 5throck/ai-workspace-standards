@@ -1,6 +1,52 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.18.0
+ * @version 1.19.0
+ *
+ * v1.19.0 (2026-11-25, T-20261124-017 — spec
+ *          docs/designs/2026-11-24-fleet-test-baseline-design.md, ADR-0106): the
+ *          fleet test baseline. (1) ENTRY POINTS — `all` (baseline `common`, then
+ *          `unit` when the directory exists, then the built-ins listed in the
+ *          project`s test-suites.json `include`, then its declared suites) and
+ *          `common` (flat *.test.ts in scripts/tests; the three delivered common
+ *          tests are its core). Built-in specialized suites keep their v1.18.0
+ *          behavior and verdict. (2) FAIL-CLOSED — FC1 zero baseline (in `common`
+ *          or inside `all`) exits 1 with result=no-tests and stops `all` before
+ *          any other suite; FC2 a declared suite or an `include` entry with zero
+ *          targets exits 1; FC3 a baseline whose parsed test total is 0 exits 1;
+ *          FC4 an invalid test-suites.json exits 1 for every entry point; FC5 a
+ *          baseline file carrying an OS tag exits 1. An absent built-in
+ *          specialized suite keeps exit 0 and prints a WARN row, so the fleet
+ *          delivery is neutral for existing aliases. U-20261122-001 asked for
+ *          exactly this fail-closed behavior; v1.17.3 had answered with a WARN
+ *          only, and that WARN cited a ticket about another subject. (3) DECLARED
+ *          SUITES — test-suites.json (project root, project-owned, not delivered
+ *          by the template): `bun-test` (flat files per directory), `command`
+ *          (argv array, no shell, project root as cwd, counts -1) and
+ *          `workspace` (directories matching a glob that carry a package.json
+ *          `test` script). Unknown keys and types, shadowed built-in names,
+ *          zero-match declarations and a bad `include` are validation errors.
+ *          Quarantine entries (path, ticket, reason, expires — at most 60 days
+ *          out) keep their target running and report its failure without failing
+ *          the run; an expired entry is not honored. `optOut` (reason, ticket,
+ *          review) makes `common`/`all` print result=opt-out. (4) SUMMARY —
+ *          every run ends with exactly one TEST-RUN-SUMMARY line
+ *          (schema=1 entry= os= scope= suites=ran/resolved files= files_failed=
+ *          tests= tests_failed= not_applicable= quarantined_failed= result=);
+ *          counts come from bun`s `N pass`/`N fail` rows (stdout or stderr —
+ *          piped bun writes its report to stderr), -1 means unknown. The exit
+ *          code stays the verdict. (5) OS APPLICABILITY — a file tag
+ *          `<name>.<win32|darwin|linux>.test.ts` and an optional suite `os` key;
+ *          `--os <platform>` evaluates another platform, `--os-scope
+ *          independent|specific|both` selects the part (default both), and
+ *          `--plan-os` prints the non-linux platforms with an OS-specific
+ *          target (e.g. ["win32"]) for the template`s declared-only matrix leg.
+ *          A tag renames nothing: flat *.test.ts discovery is unchanged. OS
+ *          selection runs at discovery, before orderLongestFirst; every
+ *          dispatched file keeps its per-file pass/fail line (design 2026-11-15
+ *          invariant). (6) `--dry-run` prints the selection and the summary line
+ *          (result=selected) and executes nothing. The scripts-suite hygiene
+ *          helper is loaded lazily so the fleet entry points never depend on
+ *          the scripts/helpers import chain.
  *
  * v1.18.0 (2026-11-23, U-20261122-011 — spec
  *          docs/designs/2026-11-23-variant-core-script-loss-detection-design.md):
@@ -205,7 +251,6 @@
 import { readdirSync, existsSync, rmSync, mkdirSync, readFileSync } from "node:fs";
 import { join, basename } from "node:path";
 import { availableParallelism, cpus } from "node:os";
-import { isTransientTestFixture } from "./helpers/scaffold-markers.ts";
 
 interface TestSuite {
   name: string;
@@ -347,7 +392,7 @@ function getTestFiles(suite: TestSuite): string[] {
   try {
     if (!existsSync(suite.dir)) {
       console.warn(
-        `⚠ test-runner: suite directory "${suite.dir}" does not exist — 0 tests discovered (fail-open; the pin lives at L0, see T-20261122-003)`,
+        `⚠ test-runner: suite directory "${suite.dir}" does not exist — 0 tests discovered (non-fatal: a built-in specialized suite)`,
       );
       return files;
     }
@@ -812,6 +857,20 @@ interface HygieneSnapshot {
 }
 
 /**
+ * Transient-fixture predicate, loaded lazily (v1.19.0): only the `scripts` suite
+ * hygiene check needs it, so the fleet entry points never depend on the
+ * scripts/helpers import chain behind it.
+ */
+function isTransientTestFixtureDir(name: string): boolean {
+  try {
+    const mod = require("./helpers/scaffold-markers.ts") as typeof import("./helpers/scaffold-markers.ts");
+    return mod.isTransientTestFixture(name);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Snapshot workspace pollution baselines BEFORE the suite runs:
  * dirty paths under docs/templates/ (git status) and transient fixture
  * dirs under templates/. Only DELTAS after the suite are blamed on it.
@@ -837,7 +896,7 @@ function takeHygieneSnapshot(): HygieneSnapshot {
   try {
     if (existsSync("templates")) {
       for (const entry of readdirSync("templates", { withFileTypes: true })) {
-        if (entry.isDirectory() && isTransientTestFixture(entry.name)) snap.fixtureDirs.add(entry.name);
+        if (entry.isDirectory() && isTransientTestFixtureDir(entry.name)) snap.fixtureDirs.add(entry.name);
       }
     }
   } catch {
@@ -876,7 +935,7 @@ function verifyHygiene(snap: HygieneSnapshot): string[] {
   if (existsSync("templates")) {
     try {
       for (const entry of readdirSync("templates", { withFileTypes: true })) {
-        if (entry.isDirectory() && isTransientTestFixture(entry.name) && !snap.fixtureDirs.has(entry.name)) {
+        if (entry.isDirectory() && isTransientTestFixtureDir(entry.name) && !snap.fixtureDirs.has(entry.name)) {
           violations.push(
             `transient test fixture left behind: templates/${entry.name}/ (E2E cleanup failed or crashed mid-run)`,
           );
@@ -890,56 +949,691 @@ function verifyHygiene(snap: HygieneSnapshot): string[] {
   return violations;
 }
 
-export async function runTests(suiteName: string = "integration", options: RunOptions = {}): Promise<boolean> {
-  const suite = suites.find((s) => s.name === suiteName);
-  if (!suite) {
-    console.error(`Available suites: ${suites.map((s) => s.name).join(", ")}`);
-    throw new Error(`Suite not found: ${suiteName}`);
+// ── v1.19.0: fleet test baseline (design 2026-11-24-fleet-test-baseline-design) ──
+
+/** `process.platform` values a file tag or a suite `os` key may carry. */
+export const OS_PLATFORMS = ["win32", "darwin", "linux"] as const;
+export type TestOs = (typeof OS_PLATFORMS)[number];
+export type OsScope = "independent" | "specific" | "both";
+
+const OS_TAG_RE = /^(.+)\.(win32|darwin|linux)\.test\.ts$/;
+
+/** File-level OS declaration: `<name>.<os>.test.ts`. No tag = OS-independent. */
+export function parseOsTag(file: string): TestOs | null {
+  const m = basename(file).match(OS_TAG_RE);
+  return m ? (m[2] as TestOs) : null;
+}
+
+/** Selection rule for one file (design 4.8). */
+export function isFileApplicable(file: string, os: TestOs, scope: OsScope): boolean {
+  const tag = parseOsTag(file);
+  if (scope === "independent") return tag === null;
+  if (scope === "specific") return tag === os;
+  return tag === null || tag === os;
+}
+
+export interface DeclaredSuite {
+  name: string;
+  type: "bun-test" | "command" | "workspace";
+  dirs: string[];
+  command: string[];
+  os?: TestOs;
+}
+
+export interface QuarantineEntry {
+  path: string;
+  ticket: string;
+  reason: string;
+  expires: string;
+}
+
+export interface TestSuitesManifest {
+  version: 1;
+  include: string[];
+  suites: DeclaredSuite[];
+  quarantine: QuarantineEntry[];
+  optOut?: { reason: string; ticket: string; review: string };
+}
+
+const BUILTIN_SPECIALIZED = ["integration", "scenarios", "scripts"];
+const RESERVED_SUITE_NAMES = ["all", "common", "unit", ...BUILTIN_SPECIALIZED];
+const SUITE_TYPES = ["bun-test", "command", "workspace"];
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const SUITE_NAME_RE = /^[a-z0-9][a-z0-9_-]*$/;
+const MANIFEST_KEYS = ["version", "include", "suites", "quarantine", "optOut"];
+const SUITE_KEYS = ["name", "type", "dirs", "command", "os"];
+const QUARANTINE_KEYS = ["path", "ticket", "reason", "expires"];
+
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+const isNonEmptyString = (v: unknown): v is string => typeof v === "string" && v.trim() !== "";
+
+function isValidIsoDate(v: string): boolean {
+  if (!ISO_DATE_RE.test(v)) return false;
+  const ms = Date.parse(`${v}T00:00:00Z`);
+  return !Number.isNaN(ms) && new Date(ms).toISOString().slice(0, 10) === v;
+}
+
+function isOs(v: unknown): v is TestOs {
+  return typeof v === "string" && (OS_PLATFORMS as readonly string[]).includes(v);
+}
+
+function isSafeRelDir(v: string): boolean {
+  return !v.startsWith("/") && !/^[A-Za-z]:/.test(v) && !v.split(/[\\/]/).includes("..");
+}
+
+/** Validate a parsed `test-suites.json`. Returns human-readable errors (empty = valid). */
+export function validateTestSuitesManifest(raw: unknown, runDate: Date = new Date()): string[] {
+  const errors: string[] = [];
+  if (!isObj(raw)) return ["test-suites.json: top level must be an object"];
+  for (const key of Object.keys(raw)) {
+    if (!MANIFEST_KEYS.includes(key)) errors.push(`test-suites.json: unknown key "${key}"`);
+  }
+  if (raw.version !== 1) errors.push(`test-suites.json: "version" must be 1`);
+
+  const include = raw.include ?? [];
+  if (!Array.isArray(include) || !include.every((v) => typeof v === "string")) {
+    errors.push(`test-suites.json: "include" must be an array of built-in suite names`);
+  } else {
+    for (const name of include) {
+      if (!BUILTIN_SPECIALIZED.includes(name)) {
+        errors.push(
+          `test-suites.json: "include" accepts built-in specialized suites only (${BUILTIN_SPECIALIZED.join(", ")}); got "${name}"`,
+        );
+      }
+    }
+    if (new Set(include).size !== include.length) errors.push(`test-suites.json: "include" repeats a suite`);
   }
 
-  const files = getTestFiles(suite);
-
-  if (files.length === 0) {
-    console.log(`No tests found for suite: ${suiteName}`);
-    return true;
+  const suites = raw.suites ?? [];
+  if (!Array.isArray(suites)) {
+    errors.push(`test-suites.json: "suites" must be an array`);
+  } else {
+    const seen = new Set<string>();
+    for (const s of suites) {
+      if (!isObj(s)) {
+        errors.push(`test-suites.json: each suite must be an object`);
+        continue;
+      }
+      const label = `suite "${isNonEmptyString(s.name) ? s.name : "?"}"`;
+      for (const key of Object.keys(s)) {
+        if (!SUITE_KEYS.includes(key)) errors.push(`test-suites.json: ${label}: unknown key "${key}"`);
+      }
+      if (!isNonEmptyString(s.name) || !SUITE_NAME_RE.test(s.name)) {
+        errors.push(`test-suites.json: ${label}: "name" must match ${SUITE_NAME_RE}`);
+      } else if (RESERVED_SUITE_NAMES.includes(s.name)) {
+        errors.push(`test-suites.json: ${label}: the name shadows a built-in entry point or "all"`);
+      } else if (seen.has(s.name)) {
+        errors.push(`test-suites.json: ${label}: duplicate suite name`);
+      }
+      if (isNonEmptyString(s.name)) seen.add(s.name);
+      if (!SUITE_TYPES.includes(s.type as string)) {
+        errors.push(`test-suites.json: ${label}: "type" must be one of ${SUITE_TYPES.join(", ")}`);
+      } else if (s.type === "command") {
+        if (!Array.isArray(s.command) || s.command.length === 0 || !s.command.every(isNonEmptyString)) {
+          errors.push(`test-suites.json: ${label}: "command" suites need a non-empty argv array "command"`);
+        }
+      } else {
+        const dirs = s.dirs;
+        if (!Array.isArray(dirs) || dirs.length === 0 || !dirs.every(isNonEmptyString)) {
+          errors.push(`test-suites.json: ${label}: "${s.type}" suites need a non-empty array "dirs"`);
+        } else {
+          for (const dir of dirs as string[]) {
+            if (!isSafeRelDir(dir))
+              errors.push(`test-suites.json: ${label}: "dirs" entry "${dir}" must be a repository-relative path`);
+          }
+        }
+      }
+      if (s.os !== undefined && !isOs(s.os)) {
+        errors.push(`test-suites.json: ${label}: "os" must be one of ${OS_PLATFORMS.join(", ")}`);
+      }
+    }
   }
 
-  const isParallel = options.parallel !== undefined ? options.parallel : !suite.sequential && files.length > 1;
+  const quarantine = raw.quarantine ?? [];
+  if (!Array.isArray(quarantine)) {
+    errors.push(`test-suites.json: "quarantine" must be an array`);
+  } else {
+    const maxMs = runDate.getTime() + 60 * 24 * 60 * 60 * 1000;
+    for (const q of quarantine) {
+      if (!isObj(q)) {
+        errors.push(`test-suites.json: each quarantine entry must be an object`);
+        continue;
+      }
+      const label = `quarantine "${isNonEmptyString(q.path) ? q.path : "?"}"`;
+      for (const key of QUARANTINE_KEYS) {
+        if (!isNonEmptyString(q[key])) errors.push(`test-suites.json: ${label}: "${key}" is required`);
+      }
+      for (const key of Object.keys(q)) {
+        if (!QUARANTINE_KEYS.includes(key)) errors.push(`test-suites.json: ${label}: unknown key "${key}"`);
+      }
+      if (isNonEmptyString(q.expires)) {
+        if (!isValidIsoDate(q.expires)) {
+          errors.push(`test-suites.json: ${label}: "expires" must be YYYY-MM-DD`);
+        } else if (Date.parse(`${q.expires}T00:00:00Z`) > maxMs) {
+          errors.push(`test-suites.json: ${label}: "expires" is more than 60 days after the run date`);
+        }
+      }
+      if (isNonEmptyString(q.path) && !isSafeRelDir(q.path)) {
+        errors.push(`test-suites.json: ${label}: "path" must be repository-relative`);
+      }
+    }
+  }
+
+  if (raw.optOut !== undefined) {
+    const o = raw.optOut;
+    if (!isObj(o)) {
+      errors.push(`test-suites.json: "optOut" must be an object`);
+    } else {
+      for (const key of ["reason", "ticket", "review"]) {
+        if (!isNonEmptyString(o[key])) errors.push(`test-suites.json: "optOut": "${key}" is required`);
+      }
+      for (const key of Object.keys(o)) {
+        if (!["reason", "ticket", "review"].includes(key))
+          errors.push(`test-suites.json: "optOut": unknown key "${key}"`);
+      }
+    }
+  }
+  return errors;
+}
+
+/** Parse and validate the manifest text. `manifest` is undefined on any error. */
+export function parseTestSuitesManifest(
+  text: string,
+  runDate: Date = new Date(),
+): { manifest: TestSuitesManifest | undefined; errors: string[] } {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch (err: any) {
+    return { manifest: undefined, errors: [`test-suites.json is not valid JSON: ${err.message}`] };
+  }
+  const errors = validateTestSuitesManifest(raw, runDate);
+  if (errors.length > 0) return { manifest: undefined, errors };
+  const m = raw as TestSuitesManifest;
+  return {
+    manifest: { ...m, include: m.include ?? [], suites: m.suites ?? [], quarantine: m.quarantine ?? [] },
+    errors: [],
+  };
+}
+
+const toPosix = (p: string): string => p.replace(/\\/g, "/");
+
+/** A quarantine entry is honored from the run date until its expiry date, inclusive. */
+export function isQuarantineActive(q: QuarantineEntry, runDate: Date = new Date()): boolean {
+  const today = runDate.toISOString().slice(0, 10);
+  return q.expires >= today;
+}
+
+/** Active quarantine entries matching a target: the exact file, or anything under the entry path. */
+export function quarantineFor(
+  path: string,
+  quarantine: QuarantineEntry[],
+  runDate: Date = new Date(),
+): QuarantineEntry[] {
+  const norm = toPosix(path);
+  return quarantine.filter(
+    (q) => isSafeRelDir(q.path) && isQuarantineActive(q, runDate) && (norm === q.path || norm.startsWith(`${q.path}/`)),
+  );
+}
+
+/** One regex extracts every field of the summary line (design 4.4). */
+export const TEST_RUN_SUMMARY_RE =
+  /^TEST-RUN-SUMMARY schema=(\d+) entry=(\S+) os=(\S+) scope=(\S+) suites=(\d+)\/(\d+) files=(\d+) files_failed=(\d+) tests=(-?\d+) tests_failed=(-?\d+) not_applicable=(\d+) quarantined_failed=(-?\d+) result=(\S+)$/;
+
+/** bun's final ` N pass` / ` N fail` rows. Null when the text carries neither. */
+export function parseBunCounts(text: string): { pass: number; fail: number } | null {
+  const passRe = /^\s*(\d+) pass\b/gm;
+  const failRe = /^\s*(\d+) fail\b/gm;
+  let pass = 0;
+  let fail = 0;
+  let seen = false;
+  for (const re of [passRe, failRe]) {
+    for (let m = re.exec(text); m !== null; m = re.exec(text)) {
+      seen = true;
+      if (re === passRe) pass += Number(m[1]);
+      else fail += Number(m[1]);
+    }
+  }
+  return seen ? { pass, fail } : null;
+}
+
+/** Platforms (other than linux) with at least one OS-specific target, as `--plan-os` prints it. */
+export function formatPlanOs(platforms: TestOs[]): string {
+  const ordered = (["win32", "darwin"] as TestOs[]).filter((p) => platforms.includes(p));
+  return JSON.stringify(ordered);
+}
+
+interface RunContext {
+  os: TestOs;
+  scope: OsScope;
+  dryRun: boolean;
+  runDate: Date;
+  manifest: TestSuitesManifest;
+}
+
+interface Step {
+  name: string;
+  /** baseline | builtin | declared */
+  kind: "baseline" | "builtin" | "declared";
+  type: "bun-test" | "command" | "workspace";
+  /** Applicable targets: file paths, or workspace directories. */
+  targets: string[];
+  excluded: { path: string; tag: TestOs }[];
+  timeout: number;
+  sequential: boolean;
+  execMode: "bun-test" | "bun-script";
+  batching: boolean;
+  hygiene: boolean;
+  command?: string[];
+  /** Suite-level OS declaration; undefined = applies to every OS. */
+  suiteOs?: TestOs;
+}
+
+interface Plan {
+  steps: Step[];
+  /** Suites the OS selection leaves out (printed as notices, never dispatched). */
+  skipped: { name: string; reason: string }[];
+  optedOut: TestSuitesManifest["optOut"];
+  /** The first rule that fails closed, with the step it belongs to. Nothing at or after it runs. */
+  fatal: { name: string; detail: string } | null;
+  osSpecific: Record<TestOs, number>;
+}
+
+const toPosixPath = (p: string): string => p.replace(/\\/g, "/");
+
+/** Flat `*.test.ts` files directly in each directory. Sorted, de-duplicated. */
+function flatTestFiles(dirs: string[]): string[] {
+  const out = new Set<string>();
+  for (const dir of dirs) {
+    try {
+      if (!existsSync(dir)) continue;
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.isFile() && entry.name.endsWith(".test.ts")) out.add(toPosixPath(join(dir, entry.name)));
+      }
+    } catch (error: any) {
+      if (error.code !== "ENOENT") console.error(`Error reading directory ${dir}: ${error.message}`);
+    }
+  }
+  return [...out].sort();
+}
+
+/** Directories matching a glob that carry a `package.json` with a `test` script. */
+function workspaceTargets(globs: string[]): { dirs: string[]; skipped: string[] } {
+  const dirs = new Set<string>();
+  const skipped: string[] = [];
+  for (const glob of globs) {
+    let found: string[] = [];
+    try {
+      for (const hit of new Bun.Glob(glob).scanSync({ cwd: ".", onlyFiles: false })) found.push(toPosixPath(hit));
+    } catch (error: any) {
+      console.error(`Error scanning ${glob}: ${error.message}`);
+    }
+    for (const dir of found.sort()) {
+      if (dirs.has(dir) || skipped.includes(dir)) continue;
+      try {
+        if (!existsSync(join(dir, "package.json"))) continue;
+        const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { scripts?: Record<string, string> };
+        if (pkg.scripts?.test) dirs.add(dir);
+        else skipped.push(dir);
+      } catch {
+        skipped.push(dir);
+      }
+    }
+  }
+  return { dirs: [...dirs], skipped };
+}
+
+/** Build the selection for one entry point. Discovery only: nothing is executed. */
+function buildPlan(entry: string, ctx: RunContext): Plan {
+  const { os, scope, manifest } = ctx;
+  const steps: Step[] = [];
+  const skipped: { name: string; reason: string }[] = [];
+  const osSpecific: Record<TestOs, number> = { win32: 0, darwin: 0, linux: 0 };
+  const specific = scope === "specific";
+  let fatal: Plan["fatal"] = null;
+
+  const fileStep = (
+    name: string,
+    kind: Step["kind"],
+    dirs: string[],
+    extra: Partial<Step>,
+    suiteOs?: TestOs,
+  ): Step | null => {
+    // OS selection runs at discovery, before orderLongestFirst (design 4.8).
+    const discovered = flatTestFiles(dirs).map((file) => ({ file, tag: parseOsTag(file) }));
+    const applicable = discovered.filter((f) => {
+      if (suiteOs !== undefined) return true;
+      return specific ? f.tag === os : f.tag === null || f.tag === os;
+    });
+    const excluded = discovered
+      .filter((f) => !applicable.includes(f) && f.tag !== null)
+      .map((f) => ({ path: f.file, tag: f.tag as TestOs }));
+    // OS-specific targets are counted on every DISCOVERED target, whatever the selected platform.
+    if (suiteOs !== undefined) osSpecific[suiteOs] += discovered.length;
+    else for (const f of discovered) if (f.tag) osSpecific[f.tag] += 1;
+    const targets = applicable.map((f) => f.file);
+    if (discovered.length === 0 && !specific && !fatal) {
+      fatal = { name, detail: `suite "${name}" resolved 0 target(s) under ${dirs.join(", ")}` };
+    }
+    const step: Step = {
+      name,
+      kind,
+      type: "bun-test",
+      targets,
+      excluded,
+      timeout: 120000,
+      sequential: false,
+      execMode: "bun-test",
+      batching: false,
+      hygiene: false,
+      suiteOs,
+    };
+    return Object.assign(step, extra);
+  };
+
+  const addDeclared = (s: DeclaredSuite): void => {
+    if (s.os !== undefined && (scope === "independent" || s.os !== os)) {
+      skipped.push({ name: s.name, reason: `suite os ${s.os}` });
+      return;
+    }
+    if (s.type === "command") {
+      if (s.os !== undefined) osSpecific[s.os] += 1;
+      steps.push({
+        name: s.name,
+        kind: "declared",
+        type: "command",
+        targets: ["<command>"],
+        excluded: [],
+        timeout: 300000,
+        sequential: true,
+        execMode: "bun-test",
+        batching: false,
+        hygiene: false,
+        command: s.command,
+        suiteOs: s.os,
+      });
+      return;
+    }
+    if (s.type === "workspace") {
+      const found = workspaceTargets(s.dirs);
+      for (const dir of found.skipped) skipped.push({ name: s.name, reason: `"${dir}" has no test script` });
+      if (s.os !== undefined) osSpecific[s.os] += found.dirs.length;
+      if (found.dirs.length === 0 && !specific && !fatal) {
+        fatal = {
+          name: s.name,
+          detail: `suite "${s.name}" resolved 0 workspace directories under ${s.dirs.join(", ")}`,
+        };
+      }
+      steps.push({
+        name: s.name,
+        kind: "declared",
+        type: "workspace",
+        targets: found.dirs,
+        excluded: [],
+        timeout: 300000,
+        sequential: true,
+        execMode: "bun-test",
+        batching: false,
+        hygiene: false,
+        suiteOs: s.os,
+      });
+      return;
+    }
+    const step = fileStep(s.name, "declared", s.dirs, {}, s.os);
+    if (step) steps.push(step);
+  };
+
+  const declared = () => manifest.suites.forEach(addDeclared);
+
+  if (entry === "all") {
+    // FC1: the baseline is evaluated first; a zero baseline stops the run here.
+    const baseline = fileStep("common", "baseline", ["scripts/tests"], {});
+    const optedOut = ctx.manifest.optOut;
+    if (baseline) {
+      if (baseline.targets.length === 0 && !optedOut && !specific && !fatal) {
+        fatal = { name: "common", detail: `no tests in scripts/tests (the fleet baseline)` };
+      }
+      // FC5: the baseline is OS-independent by definition.
+      if (!specific) {
+        const tagged = baseline.excluded.length + baseline.targets.filter((f) => parseOsTag(f) !== null).length;
+        if (tagged > 0 && !fatal) {
+          fatal = { name: "common", detail: `a baseline file carries an OS tag; the baseline is OS-independent` };
+        }
+      }
+      if (!optedOut || specific) steps.push(baseline);
+    }
+    if (!optedOut || specific) {
+      if (existsSync("tests/unit")) {
+        const unit = fileStep("unit", "builtin", ["tests/unit"], {
+          timeout: suites[0].timeout,
+          batching: true,
+        });
+        if (unit) steps.push(unit);
+      }
+      for (const name of manifest.include) {
+        const builtin = suites.find((s) => s.name === name);
+        if (!builtin) continue;
+        const files = getTestFiles(builtin).map(toPosixPath);
+        const discovered = files.map((file) => ({ file, tag: parseOsTag(file) }));
+        const applicable = discovered.filter((f) => (specific ? f.tag === os : f.tag === null || f.tag === os));
+        for (const f of discovered) if (f.tag) osSpecific[f.tag] += 1;
+        const targets = applicable.map((f) => f.file);
+        if (discovered.length === 0 && !specific && !fatal) {
+          fatal = { name, detail: `built-in suite "${name}" listed in include resolved 0 target(s)` };
+        }
+        steps.push({
+          name,
+          kind: "builtin",
+          type: "bun-test",
+          targets,
+          excluded: discovered
+            .filter((f) => !applicable.includes(f) && f.tag !== null)
+            .map((f) => ({ path: f.file, tag: f.tag as TestOs })),
+          timeout: builtin.timeout,
+          sequential: Boolean(builtin.sequential),
+          execMode: name === "scripts" ? "bun-script" : "bun-test",
+          batching: false,
+          hygiene: name === "scripts",
+        });
+      }
+      declared();
+    }
+    return { steps, skipped, optedOut, fatal, osSpecific };
+  }
+
+  if (entry === "common") {
+    const baseline = fileStep("common", "baseline", ["scripts/tests"], {});
+    if (baseline) {
+      if (
+        !specific &&
+        baseline.excluded.length + baseline.targets.filter((f) => parseOsTag(f) !== null).length > 0 &&
+        !fatal
+      ) {
+        fatal = { name: "common", detail: "a baseline file carries an OS tag; the baseline is OS-independent" };
+      }
+      steps.push(baseline);
+    }
+    return { steps, skipped, optedOut: ctx.manifest.optOut, fatal, osSpecific };
+  }
+
+  const builtin = suites.find((s) => s.name === entry);
+  if (builtin) {
+    // Built-in specialized suites keep their v1.18.0 verdict: an absent suite is a notice, exit 0.
+    const files = getTestFiles(builtin).map(toPosixPath);
+    const discovered = files.map((file) => ({ file, tag: parseOsTag(file) }));
+    const applicable = discovered.filter((f) => (specific ? f.tag === os : f.tag === null || f.tag === os));
+    for (const f of applicable) if (f.tag) osSpecific[f.tag] += 1;
+    steps.push({
+      name: entry,
+      kind: "builtin",
+      type: "bun-test",
+      targets: applicable.map((f) => f.file),
+      excluded: discovered
+        .filter((f) => !applicable.includes(f) && f.tag !== null)
+        .map((f) => ({ path: f.file, tag: f.tag as TestOs })),
+      timeout: builtin.timeout,
+      sequential: Boolean(builtin.sequential),
+      execMode: entry === "scripts" ? "bun-script" : "bun-test",
+      batching: entry === "unit",
+      hygiene: entry === "scripts",
+    });
+    return { steps, skipped, optedOut: ctx.manifest.optOut, fatal, osSpecific };
+  }
+
+  const declaredSuite = manifest.suites.find((s) => s.name === entry);
+  if (declaredSuite) {
+    addDeclared(declaredSuite);
+    return { steps, skipped, optedOut: ctx.manifest.optOut, fatal, osSpecific };
+  }
+
+  throw new Error(`Suite not found: ${entry}`);
+}
+
+/** Fleet alias standard (design 4.5): WARN when package.json differs from the standard lines. */
+const FLEET_ALIAS_STANDARD: Record<string, string> = {
+  test: "bun scripts/test-runner.ts all",
+  "test:unit": "bun scripts/test-runner.ts all",
+  "test:common": "bun scripts/test-runner.ts common",
+};
+
+function warnOnAliasDrift(): void {
+  let scripts: Record<string, string> | undefined;
+  try {
+    scripts = (JSON.parse(readFileSync("package.json", "utf8")) as { scripts?: Record<string, string> }).scripts;
+  } catch {
+    return;
+  }
+  if (!scripts) return;
+  for (const [alias, standard] of Object.entries(FLEET_ALIAS_STANDARD)) {
+    const actual = scripts[alias];
+    if (actual !== undefined && actual.trim() !== standard) {
+      console.log(`  ⚠ test-runner: alias "${alias}" is "${actual}"; the fleet standard line is "${standard}"`);
+    }
+  }
+}
+
+interface RunCounts {
+  ran: number;
+  resolved: number;
+  files: number;
+  filesFailed: number;
+  tests: number;
+  testsFailed: number;
+  testsUnknown: boolean;
+  quarantinedFailed: number;
+  quarantineSeen: boolean;
+  failed: boolean;
+  notApplicable: number;
+  /** FC3: the baseline ran and its parsed test total is zero. */
+  baselineZero: boolean;
+}
+
+/** Spawn an argv array (no shell) with a kill timer; stdout/stderr are captured. */
+async function runProcess(
+  label: string,
+  argv: string[],
+  cwd: string | undefined,
+  timeoutMs: number,
+  env: Record<string, string> = {},
+): Promise<TestFileResult> {
+  const startTime = Date.now();
+  let proc: ReturnType<typeof Bun.spawn> | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  try {
+    proc = Bun.spawn(argv, { cwd, env: { ...process.env, ...env }, stdout: "pipe", stderr: "pipe" });
+    const stdoutPromise = proc.stdout
+      ? new Response(proc.stdout as ReadableStream<Uint8Array>).text()
+      : Promise.resolve("");
+    const stderrPromise = proc.stderr
+      ? new Response(proc.stderr as ReadableStream<Uint8Array>).text()
+      : Promise.resolve("");
+    const timeoutPromise = new Promise<{ timedOut: true }>((resolve) => {
+      timer = setTimeout(() => {
+        try {
+          proc?.kill();
+        } catch {}
+        resolve({ timedOut: true });
+      }, timeoutMs);
+    });
+    const execPromise = Promise.all([stdoutPromise, stderrPromise, proc.exited]).then(([stdout, stderr, exitCode]) => ({
+      timedOut: false as const,
+      stdout,
+      stderr,
+      exitCode,
+    }));
+    const raced = await Promise.race([execPromise, timeoutPromise]);
+    if (timer) clearTimeout(timer);
+    if (raced.timedOut) {
+      const [stdout, stderr] = await Promise.all([stdoutPromise, stderrPromise]);
+      return {
+        file: label,
+        success: false,
+        durationMs: Date.now() - startTime,
+        stdout,
+        stderr,
+        exitCode: null,
+        timedOut: true,
+        error: `Test timed out after ${timeoutMs}ms`,
+      };
+    }
+    const { stdout, stderr, exitCode } = raced;
+    return {
+      file: label,
+      success: exitCode === 0,
+      durationMs: Date.now() - startTime,
+      stdout,
+      stderr,
+      exitCode,
+      timedOut: false,
+      error: exitCode !== 0 ? `Process exited with code ${exitCode}` : undefined,
+    };
+  } catch (err: any) {
+    if (timer) clearTimeout(timer);
+    return {
+      file: label,
+      success: false,
+      durationMs: Date.now() - startTime,
+      stdout: "",
+      stderr: "",
+      exitCode: null,
+      timedOut: false,
+      error: err.message,
+    };
+  }
+}
+
+/** Run one file step. Per-file report lines keep their v1.18.0 format (design 4.8 invariant). */
+async function executeFileStep(step: Step, ctx: RunContext, counts: RunCounts, options: RunOptions): Promise<void> {
+  const files = step.targets;
+  const suiteName = step.name;
+  const suiteTimeout = step.timeout;
+  const isParallel = options.parallel !== undefined ? options.parallel : !step.sequential && files.length > 1;
   const numCpus = availableParallelism ? availableParallelism() : cpus().length;
   const defaultConcurrency = resolveDefaultConcurrency(numCpus);
   const concurrency = isParallel ? Math.max(1, options.concurrency || Math.min(files.length, defaultConcurrency)) : 1;
-  // Batch mode (v1.16.0, design item 3): unit suite only — non-budgeted files
-  // grouped into ~12-file `bun test` invocations; budgeted files (per-file
-  // kill budgets + BUDGET-HEADROOM WARN semantics) and all other suites keep
-  // one process per file. Sequential mode never batches, and the tail batching
-  // itself is OPT-IN (`TEST_RUNNER_BATCH_SIZE=N`, default 0 = disabled — see
-  // DEFAULT_BATCH_SIZE for the CI evidence that turned it off).
-  const batchingEnabled = suiteName === "unit" && isParallel && resolveBatchSize() > 0;
-  // Explicit `--timeout` CLI wins over the per-file overrides (manual runs
-  // know what they asked for); otherwise overridden files get their budgets
-  // and everything else the suite default + DEFAULT_TEST_TIMEOUT_MS.
+  const batchingEnabled = step.batching && isParallel && resolveBatchSize() > 0;
   const cliTimeoutMs = options.timeout;
   const resolveBudgets = (file: string): { suite: number; test: number } => {
     if (cliTimeoutMs) return { suite: cliTimeoutMs, test: cliTimeoutMs };
     const override = FILE_TIME_BUDGETS[basename(file)];
-    return { suite: override?.suite ?? suite.timeout, test: override?.test ?? DEFAULT_TEST_TIMEOUT_MS };
+    return { suite: override?.suite ?? suiteTimeout, test: override?.test ?? DEFAULT_TEST_TIMEOUT_MS };
   };
 
   const modeStr = isParallel ? `parallel (concurrency: ${concurrency})` : "sequential";
   console.log(`Running ${suiteName} suite (${files.length} test file${files.length === 1 ? "" : "s"}, ${modeStr})...`);
+  for (const x of step.excluded) {
+    console.log(`  - ${x.path} (not applicable on ${ctx.os}: tagged ${x.tag})`);
+  }
 
   const startTime = Date.now();
   let results: TestFileResult[] = [];
-  const hygieneSnapshot = suiteName === "scripts" ? takeHygieneSnapshot() : null;
+  const hygieneSnapshot = step.hygiene ? takeHygieneSnapshot() : null;
 
   try {
-    const execMode = suiteName === "scripts" ? ("bun-script" as const) : ("bun-test" as const);
+    const execMode = step.execMode;
     if (isParallel && concurrency > 1) {
       try {
         const dispatchOrder = orderLongestFirst(files);
-        // v1.16.0 batching: budgeted files stay individual (longest-first);
-        // non-budgeted files chunk alphabetically into ~12-file `bun test`
-        // batches (design item 3). Jobs preserve the dispatch order.
         const batchSize = batchingEnabled ? resolveBatchSize() : 0;
         type Job = { kind: "single"; file: string } | { kind: "batch"; files: string[] };
         const jobs: Job[] = [];
@@ -966,9 +1660,6 @@ export async function runTests(suiteName: string = "integration", options: RunOp
               execMode,
             ).then((res) => [res]);
           }
-          // Batch kill timer (design §3.3): the sum of member suite budgets,
-          // capped at 120s per member — budgeted members never enter batches,
-          // so each member's suite budget here is the suite default.
           const batchBudget = Math.min(
             job.files.reduce((sum, f) => sum + resolveBudgets(f).suite, 0),
             120000 * job.files.length,
@@ -982,10 +1673,12 @@ export async function runTests(suiteName: string = "integration", options: RunOp
           );
         });
 
-        // Report in the original (alphabetical) file order, not dispatch order.
         const byFile = new Map<string, TestFileResult>();
         for (const jobResults of ordered) {
-          for (const res of jobResults) byFile.set(res.file, res);
+          for (const res of jobResults) {
+            byFile.set(res.file, res);
+            if (res.stdout === "" && res.success) counts.testsUnknown = true;
+          }
         }
         results = files.map((f) => byFile.get(f)!);
       } catch (err: any) {
@@ -995,14 +1688,9 @@ export async function runTests(suiteName: string = "integration", options: RunOp
         results = [];
         for (let i = 0; i < files.length; i++) {
           const budgets = resolveBudgets(files[i]);
-          const res = await executeTestFile(
-            files[i],
-            budgets.suite,
-            execMode === "bun-test" ? budgets.test : null,
-            1,
-            execMode,
+          results.push(
+            await executeTestFile(files[i], budgets.suite, execMode === "bun-test" ? budgets.test : null, 1, execMode),
           );
-          results.push(res);
         }
       }
     } else {
@@ -1010,22 +1698,15 @@ export async function runTests(suiteName: string = "integration", options: RunOp
         const file = files[i];
         console.log(`  Running: ${file}`);
         const budgets = resolveBudgets(file);
-        const res = await executeTestFile(
-          file,
-          budgets.suite,
-          execMode === "bun-test" ? budgets.test : null,
-          1,
-          execMode,
+        results.push(
+          await executeTestFile(file, budgets.suite, execMode === "bun-test" ? budgets.test : null, 1, execMode),
         );
-        results.push(res);
       }
     }
 
     const totalDuration = Date.now() - startTime;
     let hasFailures = false;
 
-    // Post-suite hygiene assertion (scripts suite only): the suite must not
-    // modify docs/templates/ nor leave transient fixture dirs behind.
     if (hygieneSnapshot) {
       const violations = verifyHygiene(hygieneSnapshot);
       for (const v of violations) {
@@ -1042,10 +1723,6 @@ export async function runTests(suiteName: string = "integration", options: RunOp
     }
 
     for (const res of results) {
-      // BUDGET-HEADROOM WARN (v1.8.0, T-20261030-002): slow burn-in against a
-      // file's resolved budget is visible in every run log, not just at raise
-      // time. WARN only — CI timing variance must not block merges; the raise
-      // policy lives in the FILE_TIME_BUDGETS doc block.
       const budgets = resolveBudgets(res.file);
       const headroomPct = Math.round((res.durationMs / budgets.suite) * 100);
       if (headroomPct >= 60) {
@@ -1053,10 +1730,31 @@ export async function runTests(suiteName: string = "integration", options: RunOp
           `  ⚠️  BUDGET-HEADROOM: ${basename(res.file)} took ${res.durationMs}ms (${headroomPct}% of its ${budgets.suite}ms suite budget) — a raise requires a ticket with CI-run evidence; 2 raises/quarter triggers a mandatory split/trim review`,
         );
       }
+      const parsed = execMode === "bun-test" ? parseBunCounts(`${res.stdout}\n${res.stderr}`) : null;
+      if (execMode === "bun-test") {
+        if (parsed) {
+          counts.tests += parsed.pass + parsed.fail;
+          counts.testsFailed += parsed.fail;
+        } else {
+          counts.testsUnknown = true;
+        }
+      }
+      counts.files += 1;
+      const quarantine = quarantineFor(res.file, ctx.manifest.quarantine, ctx.runDate);
+      if (quarantine.length > 0) counts.quarantineSeen = true;
       if (res.success) {
         console.log(`  ✓ ${res.file} (${res.durationMs}ms)`);
       } else {
-        hasFailures = true;
+        if (quarantine.length === 0) {
+          hasFailures = true;
+          counts.filesFailed += 1;
+        } else {
+          const q = quarantine[0];
+          counts.quarantinedFailed += Math.max(parsed?.fail ?? 0, 1);
+          console.log(
+            `  ! ${res.file} (${res.durationMs}ms) — QUARANTINED under ${q.ticket} until ${q.expires}; the failure is reported and does not fail this run`,
+          );
+        }
         console.error(`\n================================================================================`);
         console.error(`FAIL: ${res.file}`);
         console.error(`--------------------------------------------------------------------------------`);
@@ -1081,23 +1779,263 @@ export async function runTests(suiteName: string = "integration", options: RunOp
       console.error(
         `✗ ${suiteName} suite failed (${failedCount} of ${files.length} test files failed, total ${totalDuration}ms)`,
       );
-      return false;
+      counts.failed = true;
+      return;
     }
-
     console.log(`✓ ${suiteName} suite passed (${totalDuration}ms)`);
-    return true;
+    // FC3: a baseline whose files hold no test at all is an empty baseline.
+    if (step.kind === "baseline") counts.baselineZero = counts.tests === 0;
   } catch (error: any) {
     console.error(`✗ Suite execution error: ${error.message}`);
-    return false;
+    counts.failed = true;
+  }
+}
+
+/** Run one `command` or `workspace` step: the exit code is the verdict. */
+async function executeCommandStep(step: Step, counts: RunCounts): Promise<void> {
+  if (step.type === "command") {
+    console.log(`Running ${step.name} suite (command: ${(step.command ?? []).join(" ")})...`);
+    const res = await runProcess((step.command ?? []).join(" "), step.command ?? [], undefined, step.timeout);
+    counts.files += 1;
+    counts.testsUnknown = true;
+    if (res.success) {
+      console.log(`  ✓ ${res.file} (${res.durationMs}ms)`);
+    } else {
+      counts.filesFailed += 1;
+      counts.failed = true;
+      console.error(
+        `\nFAIL: ${res.file}\nStatus: ${res.timedOut ? `TIMEOUT (${step.timeout}ms)` : `FAILED (exit code ${res.exitCode})`}`,
+      );
+      if (res.stdout.trim()) console.error(`--- STDOUT ---\n${res.stdout.trim()}`);
+      if (res.stderr.trim()) console.error(`--- STDERR ---\n${res.stderr.trim()}\n`);
+    }
+    return;
+  }
+  console.log(
+    `Running ${step.name} suite (workspace: ${step.targets.length} director${step.targets.length === 1 ? "y" : "ies"})...`,
+  );
+  for (const dir of step.targets) {
+    const res = await runProcess(dir, ["bun", "run", "test"], dir, step.timeout);
+    const parsed = parseBunCounts(`${res.stdout}\n${res.stderr}`);
+    if (parsed) {
+      counts.tests += parsed.pass + parsed.fail;
+      counts.testsFailed += parsed.fail;
+    } else {
+      counts.testsUnknown = true;
+    }
+    counts.files += 1;
+    if (res.success) {
+      console.log(`  ✓ ${dir} (${res.durationMs}ms)`);
+    } else {
+      counts.filesFailed += 1;
+      counts.failed = true;
+      console.error(
+        `\nFAIL: ${dir}\nStatus: ${res.timedOut ? `TIMEOUT (${step.timeout}ms)` : `FAILED (exit code ${res.exitCode})`}`,
+      );
+      if (res.stdout.trim()) console.error(`--- STDOUT ---\n${res.stdout.trim()}`);
+      if (res.stderr.trim()) console.error(`--- STDERR ---\n${res.stderr.trim()}\n`);
+    }
+  }
+}
+
+interface SummaryFields {
+  entry: string;
+  os: TestOs;
+  scope: OsScope;
+  counts: RunCounts;
+  result: "pass" | "fail" | "no-tests" | "opt-out" | "selected";
+}
+
+function summaryLine(f: SummaryFields): string {
+  const c = f.counts;
+  const known = !c.testsUnknown;
+  return (
+    `TEST-RUN-SUMMARY schema=1 entry=${f.entry} os=${f.os} scope=${f.scope} suites=${c.ran}/${c.resolved} ` +
+    `files=${c.files} files_failed=${c.filesFailed} tests=${known ? c.tests : -1} tests_failed=${known ? c.testsFailed : -1} ` +
+    `not_applicable=${c.notApplicable} quarantined_failed=${c.quarantineSeen ? c.quarantinedFailed : -1} result=${f.result}`
+  );
+}
+
+export interface RunOptions {
+  parallel?: boolean;
+  concurrency?: number;
+  timeout?: number;
+  /** Print the selection and the summary line; execute nothing. */
+  dryRun?: boolean;
+  /** Evaluate the selection for another platform (default: `process.platform`). */
+  os?: TestOs;
+  /** OS selection scope (default: `both`). */
+  osScope?: OsScope;
+  planOs?: boolean;
+}
+
+function newCounts(): RunCounts {
+  return {
+    ran: 0,
+    resolved: 0,
+    files: 0,
+    filesFailed: 0,
+    tests: 0,
+    testsFailed: 0,
+    testsUnknown: false,
+    quarantinedFailed: 0,
+    quarantineSeen: false,
+    failed: false,
+    notApplicable: 0,
+    baselineZero: false,
+  };
+}
+
+const emptyManifest = (): TestSuitesManifest => ({ version: 1, include: [], suites: [], quarantine: [] });
+
+function loadManifest(runDate: Date): { manifest: TestSuitesManifest | undefined; errors: string[] } {
+  if (!existsSync("test-suites.json")) return { manifest: emptyManifest(), errors: [] };
+  return parseTestSuitesManifest(readFileSync("test-suites.json", "utf8"), runDate);
+}
+
+/** Execute one entry point. Prints the summary line last and returns the exit code. */
+export async function executeRun(entry: string, options: RunOptions = {}): Promise<number> {
+  const os = options.os ?? (process.platform as TestOs);
+  const scope = options.osScope ?? "both";
+  const runDate = new Date();
+  let exitCode = 1;
+  let summaryPrinted = false;
+  const printSummary = (counts: RunCounts, result: SummaryFields["result"]): void => {
+    if (summaryPrinted) return;
+    summaryPrinted = true;
+    console.log(summaryLine({ entry, os, scope, counts, result }));
+  };
+  try {
+    const loaded = loadManifest(runDate);
+    if (loaded.errors.length > 0 || !loaded.manifest) {
+      for (const e of loaded.errors) console.error(`✗ test-runner: ${e}`);
+      printSummary(newCounts(), "fail");
+      return 1;
+    }
+    const ctx: RunContext = { os, scope, dryRun: Boolean(options.dryRun), runDate, manifest: loaded.manifest };
+    const plan = buildPlan(entry, ctx);
+    const counts = newCounts();
+    const specific = scope === "specific";
+    const baselineEntry = entry === "all" || entry === "common";
+
+    if (entry === "all") warnOnAliasDrift();
+    for (const s of plan.skipped) console.log(`  - suite ${s.name} skipped on ${os} (${s.reason})`);
+
+    if (plan.optedOut && !specific && baselineEntry) {
+      const o = plan.optedOut as NonNullable<TestSuitesManifest["optOut"]>;
+      console.log(`⚠ test-runner: opt-out recorded in test-suites.json (${o.ticket}; review ${o.review}): ${o.reason}`);
+      printSummary(counts, "opt-out");
+      return 0;
+    }
+    const fatal = plan.fatal;
+    if (fatal) {
+      console.error(`✗ test-runner: fail-closed: ${fatal.detail} (result=no-tests)`);
+      printSummary(counts, "no-tests");
+      return 1;
+    }
+    if (ctx.dryRun) {
+      console.log(`DRY-RUN: entry ${entry}, os ${os}, scope ${scope} — nothing is executed`);
+      for (const step of plan.steps) {
+        counts.notApplicable += step.excluded.length;
+        if (step.targets.length === 0) {
+          console.log(`  ${step.name}: 0 target(s)`);
+          continue;
+        }
+        counts.resolved += 1;
+        counts.files += step.targets.length;
+        console.log(`  ${step.name}: ${step.targets.length} target(s)`);
+        for (const t of step.targets) console.log(`    ${t}`);
+        for (const x of step.excluded) console.log(`    - ${x.path} (not applicable on ${os}: tagged ${x.tag})`);
+      }
+      printSummary(counts, "selected");
+      return 0;
+    }
+
+    for (const step of plan.steps) {
+      // The first fail-closed rule stops the run before its suite starts.
+      if (plan.fatal && plan.fatal.name === step.name) break;
+      counts.notApplicable += step.excluded.length;
+      if (step.targets.length === 0 && step.excluded.length > 0) {
+        // Every discovered file belongs to another OS: report the selection, dispatch nothing.
+        for (const x of step.excluded) console.log(`  - ${x.path} (not applicable on ${os}: tagged ${x.tag})`);
+        continue;
+      }
+      if (step.targets.length === 0) {
+        // An absent built-in specialized suite keeps exit 0 (neutral fleet delivery).
+        console.log(`No tests found for suite: ${step.name}`);
+        console.log(
+          `  ⚠ test-runner: suite "${step.name}" resolved 0 target(s) — non-fatal: a built-in specialized suite`,
+        );
+        continue;
+      }
+      counts.resolved += 1;
+      counts.ran += 1;
+      if (step.type === "bun-test") await executeFileStep(step, ctx, counts, options);
+      else await executeCommandStep(step, counts);
+    }
+    if (counts.failed) {
+      printSummary(counts, "fail");
+      exitCode = 1;
+    } else if (counts.baselineZero) {
+      console.error("✗ test-runner: fail-closed: the baseline parsed test total is 0 (result=no-tests)");
+      printSummary(counts, "no-tests");
+      exitCode = 1;
+    } else if (counts.resolved === 0) {
+      printSummary(counts, "no-tests");
+      exitCode = 0;
+    } else {
+      printSummary(counts, "pass");
+      exitCode = 0;
+    }
+    return exitCode;
+  } catch (error: any) {
+    console.error(`✗ test-runner: ${error.message}`);
+    printSummary(newCounts(), "fail");
+    return 1;
   } finally {
     try {
-      if (existsSync("tests/.temp")) {
-        rmSync("tests/.temp", { recursive: true, force: true });
-      }
+      if (existsSync("tests/.temp")) rmSync("tests/.temp", { recursive: true, force: true });
     } catch (e: any) {
       console.error(`[test-runner] Error during temp dir cleanup: ${e.message || e}`);
     }
   }
+}
+
+/** `--plan-os`: JSON array of the non-linux platforms with an OS-specific target in `all`. */
+export async function planOsLegs(): Promise<number> {
+  const runDate = new Date();
+  const base = { os: "linux" as TestOs, scope: "both" as OsScope, dryRun: true, runDate };
+  try {
+    const loaded = loadManifest(runDate);
+    if (loaded.errors.length > 0 || !loaded.manifest) {
+      for (const e of loaded.errors) console.error(`✗ test-runner: ${e}`);
+      console.error(summaryLine({ entry: "all", os: base.os, scope: base.scope, counts: newCounts(), result: "fail" }));
+      return 1;
+    }
+    const plan = buildPlan("all", { ...base, manifest: loaded.manifest });
+    const fatal = plan.fatal;
+    if (fatal) {
+      console.error(`✗ test-runner: fail-closed: ${fatal.detail} (result=no-tests)`);
+      console.error(
+        summaryLine({ entry: "all", os: base.os, scope: base.scope, counts: newCounts(), result: "no-tests" }),
+      );
+      return 1;
+    }
+    const platforms = (["win32", "darwin"] as TestOs[]).filter((p) => plan.osSpecific[p] > 0);
+    console.log(formatPlanOs(platforms));
+    console.error(
+      summaryLine({ entry: "all", os: base.os, scope: base.scope, counts: newCounts(), result: "selected" }),
+    );
+    return 0;
+  } catch (error: any) {
+    console.error(`✗ test-runner: ${error.message}`);
+    return 1;
+  }
+}
+
+/** Backward-compatible wrapper: true when the run exits 0. */
+export async function runTests(suiteName: string = "integration", options: RunOptions = {}): Promise<boolean> {
+  return (await executeRun(suiteName, options)) === 0;
 }
 
 function parseArgs(args: string[]): { suiteName: string; options: RunOptions } {
@@ -1105,6 +2043,14 @@ function parseArgs(args: string[]): { suiteName: string; options: RunOptions } {
   let parallel: boolean | undefined = undefined;
   let concurrency: number | undefined = undefined;
   let timeout: number | undefined = undefined;
+  let dryRun = false;
+  let os: TestOs | undefined = undefined;
+  let osScope: OsScope | undefined = undefined;
+  let planOs = false;
+
+  const isOs = (v: string | undefined): v is TestOs =>
+    Boolean(v) && (OS_PLATFORMS as readonly string[]).includes(v as string);
+  const isScope = (v: string | undefined): v is OsScope => v === "independent" || v === "specific" || v === "both";
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -1118,23 +2064,34 @@ function parseArgs(args: string[]): { suiteName: string; options: RunOptions } {
     } else if (arg === "--timeout" || arg === "-t") {
       const val = parseInt(args[++i], 10);
       if (!isNaN(val) && val > 0) timeout = val;
+    } else if (arg === "--dry-run") {
+      dryRun = true;
+    } else if (arg === "--plan-os") {
+      planOs = true;
+    } else if (arg === "--os") {
+      const val = args[++i];
+      if (!isOs(val)) throw new Error(`--os expects one of ${OS_PLATFORMS.join(", ")}; got "${val}"`);
+      os = val;
+    } else if (arg === "--os-scope") {
+      const val = args[++i];
+      if (!isScope(val)) throw new Error(`--os-scope expects independent, specific or both; got "${val}"`);
+      osScope = val;
     } else if (!arg.startsWith("-")) {
       suiteName = arg;
     }
   }
 
-  return { suiteName, options: { parallel, concurrency, timeout } };
+  return { suiteName, options: { parallel, concurrency, timeout, dryRun, os, osScope, planOs } };
 }
 
 // CLI entrypoint
 if (import.meta.main) {
-  const { suiteName, options } = parseArgs(process.argv.slice(2));
-  runTests(suiteName, options)
-    .then((success) => {
-      process.exit(success ? 0 : 1);
-    })
-    .catch((error) => {
-      console.error(error.message);
-      process.exit(1);
-    });
+  try {
+    const parsed = parseArgs(process.argv.slice(2));
+    const code = parsed.options.planOs ? await planOsLegs() : await executeRun(parsed.suiteName, parsed.options);
+    process.exit(code);
+  } catch (error) {
+    console.error((error as Error).message);
+    process.exit(1);
+  }
 }
