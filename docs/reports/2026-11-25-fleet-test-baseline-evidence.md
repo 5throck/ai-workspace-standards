@@ -166,3 +166,36 @@ recorded as a stale design fact (design implementation note 7).
 - **co-newbiz / co-utility / co-safety / co-security / co-design / co-develop / co-learning
   / co-game** were not run: they are rollout waves after the canary, and the brief named
   eight projects.
+
+## Addendum — Windows CI failure on PR #2178 and the final CI state
+
+The first push of this pull request failed `test (windows-latest, 18.x)` (run
+45620792717) on `tests/unit/test-runner-os.test.ts > AC5 > --os-scope independent keeps
+only untagged files` (`files=2`, expected 1). The root cause was in the runner, not in the
+test: every selection site used `specific ? tag === os : tag === null || tag === os`, so on
+a win32 host an **independent** run accepted the `.win32.test.ts` file, because its tag
+equals the running platform. The darwin host masked it — the fixture tags win32. Left
+unfixed, the fleet's OS-independent ubuntu leg would have been fine but any local Windows
+`--os-scope independent` run (and the windows leg if it ever ran that scope) would have
+dispatched OS-specific tests. Fixed in commit `f021d8a8f`-class change (see the branch's
+`fix(test-runner): os-scope independent …` commit): the scope is explicit at all three
+selection sites, and a platform-agnostic case (`--os win32 --os-scope independent`) now
+pins it on every OS.
+
+Final check states on the fix commit (run 45622650174):
+
+| Check | State | Duration |
+|---|---|---|
+| `test (ubuntu-latest, 18.x)` | **pass** | 2m18s |
+| `test (windows-latest, 18.x)` | **pass** | 9m23s |
+| `test (macos-latest, 18.x)` | **pass** | 2m36s |
+| `Hook secret gates (gitleaks smoke test)` | **pass** | 14s |
+
+Local re-verification after the fix: `bun test` on the six new/modified test files — 69
+pass, 0 fail (the byte-identity case included, after re-syncing the L1 twin);
+`bun scripts/audit.ts` exit 0; `bun scripts/validate-templates.ts` exit 0 with 0 errors;
+`bun scripts/typecheck.ts` exit 0.
+
+Fleet-repository CI (`Unit Tests` on the members) remains **NOT RUN** — private
+repositories are billing-walled (T-20261124-014), so AC8 and the CI half of AC10 stay
+pending on that ticket, exactly as design risk K5 records.
