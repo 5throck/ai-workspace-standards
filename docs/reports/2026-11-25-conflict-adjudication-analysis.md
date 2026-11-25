@@ -99,3 +99,9 @@ No step writes to the template, so the section 6 hash table reduces to recording
 - The template lineage of T for rows 3, 5 and 9 (whether T was ported from P or re-authored) was inferred from content, not from the port records.
 - Row 12: why the recorded baseline equals the template content while the project copy is older.
 - co-architect: which lifecycle-stripped difference makes the engine call the copies project-evolved.
+
+## 8. Status at 2026-11-25 end of day
+
+- Stages A–D and G were adopted in https://github.com/5throck/co-deck/pull/260 — 27 paths taken from the template on the strength of the adjudication above, plus the template-side ports landed in root PR #2175 (render test 1.9.1 with five ported assertions, L3 recorded obsolete/unreachable in 1.17.0; three agent path lines; the inject-video-players 1.3.0 backport). `.mcp.json` was tombstoned, because the template no longer ships it to co-deck.
+- Test evidence: before 429 tests / 417 pass / 12 fail; after 465 / 462 / 3, no new failing title. The three remaining failures are the U-005 `/W` gids pin, the footnote-scrim ladder pin, and the visual-regression baseline comparison.
+- Remaining, 15 files kept as project copies, owner decision pending (T-20261124-010 stays open): `docs/html-themes/styles/white-bubble/style.css`, whose 41 per-slide `.zen-visual` cap lines the template removed on purpose in U-20261116-001 (the caps belong in the deck's own override block; which deck needed them is not recorded), and the 14 PNG baselines under `docs/html-themes/baselines/` (project recapture 2026-11-10 versus template 2026-11-17/20; the two `zen/white-bubble` files differ by an order of magnitude in size). Decide the PNG set after a capture run on the adopted template CSS.
