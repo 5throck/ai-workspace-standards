@@ -58,7 +58,8 @@
  *          the fail-closed direction (a differently-styled leak still refuses), and the
  *          both-sides seam wiring of both probes.
  *
- * @version 1.3.7 (2026-11-25: registry gains upgrade-policy-content-equivalent.test.ts — the content-identity fast-path engine tests spawn git via the upgrade engine)
+ * @version 1.3.8 (2026-11-25: registry gains contained-run-manifest-dir.test.ts — the manifest-dir tests spawn git for the dirty-tree assertion)
+ * v1.3.7 (2026-11-25: registry gains upgrade-policy-content-equivalent.test.ts — the content-identity fast-path engine tests spawn git via the upgrade engine)
  * v1.3.6 (2026-11-21: registry gains upgrade-project-adoption-gate.test.ts — the adoption-only engine gate spawns git via the upgrade engine)
  * v1.3.5 (2026-11-20: registry gains upgrade-variant-scripts-walk.test.ts — T-20261120-003)
  * v1.3.4 (2026-11-16: registry gains upgrade-project-disposition-grants.test.ts — T-20261114-005)
@@ -106,6 +107,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "upgrade-core-locked-fork.test.ts",
   "upgrade-overwrite-protection.test.ts",
   "upgrade-policy-content-equivalent.test.ts",
+  "contained-run-manifest-dir.test.ts",
   "upgrade-policy-eviction.test.ts",
   "upgrade-project-adoption-gate.test.ts",
   "upgrade-project-disposition-grants.test.ts",
