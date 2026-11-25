@@ -36,6 +36,7 @@ import {
   ensureRootBackfill,
   escapeHtml,
   extractAgentGraph,
+  readGraphContentSha256,
   readGraphHeadSha,
   readHeadSha,
   renderHistoryPage,
@@ -661,6 +662,20 @@ describe('root git-history backfill (§13.2-§13.3, AC-A2/A3/A5/A6)', () => {
     }
   });
 
+  test('readGraphContentSha256 hashes the blob at the commit and nulls on a bad read', async () => {
+    const repo = fixtureRepo();
+    try {
+      const graphHead = readGraphHeadSha(repo, join('docs', 'skill-graph.json'));
+      const digest = readGraphContentSha256(repo, join('docs', 'skill-graph.json'), graphHead!);
+      expect(digest).toMatch(/^[0-9a-f]{64}$/);
+      expect(readGraphContentSha256(repo, join('docs', 'skill-graph.json'), 'f'.repeat(40))).toBeNull();
+      // the same bytes at the same commit hash the same on a second read
+      expect(readGraphContentSha256(repo, join('docs', 'skill-graph.json'), graphHead!)).toBe(digest);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
   test('ensureRootBackfill: writes the file; a fresh graphHeadSha skips the rebuild (sentinel proves it)', async () => {
     const repo = fixtureRepo();
     const dir = mkdtempSync(join(tmpdir(), 'sgfr-ensure-'));
@@ -695,8 +710,13 @@ describe('root git-history backfill (§13.2-§13.3, AC-A2/A3/A5/A6)', () => {
     const target = join(dir, 'root-backfill.json');
     try {
       const first = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
-      // record a stale graphHeadSha -> the next call must replay
-      const stale = { ...first.file, graphHeadSha: '1'.repeat(40) };
+      // v2.7.0: a stale graphHeadSha over EQUAL content is fresh (the content key)
+      const sameContent = { ...first.file, graphHeadSha: '1'.repeat(40) };
+      writeFileSync(target, JSON.stringify(sameContent));
+      const untouched = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
+      expect(untouched.rebuilt).toBe(false);
+      // a stale graphContentSha256 -> the next call must replay
+      const stale = { ...first.file, graphContentSha256: '1'.repeat(64) };
       writeFileSync(target, JSON.stringify(stale));
       const second = await ensureRootBackfill(repo, join('docs', 'skill-graph.json'), target);
       expect(second.rebuilt).toBe(true);
@@ -905,4 +925,33 @@ describe('renderStructurePage (D-C: sections, safety, determinism, budget)', () 
   test('in-test budget pin: the fixture page is far under the 800 KB structure budget', () => {
     expect(Buffer.byteLength(renderStructurePage(structureModelFixture(backfillFile)), 'utf8')).toBeLessThanOrEqual(800 * 1024);
   });
+});
+
+// v2.7.0 (T-20261124-001, design 2026-11-25-upgrade-runner-machinery-batch §4.1):
+// the staleness key is the graph CONTENT hash, not the graph commit.
+describe('backfillIsFresh — content key (v2.7.0)', () => {
+  const A = 'a'.repeat(64);
+  const B = 'b'.repeat(64);
+  const sha1 = '1'.repeat(40);
+  const sha2 = '2'.repeat(40);
+
+  test('same content hash and a different graph commit returns true', () => {
+    expect(backfillIsFresh({ graphHeadSha: sha1, graphContentSha256: A }, sha2, A)).toBe(true);
+  });
+
+  test('a different content hash returns false', () => {
+    expect(backfillIsFresh({ graphHeadSha: sha1, graphContentSha256: A }, sha2, B)).toBe(false);
+    expect(backfillIsFresh({ graphHeadSha: sha1, graphContentSha256: A }, sha1, B)).toBe(false);
+  });
+
+  test('a legacy file without the field is stale once', () => {
+    expect(backfillIsFresh({ graphHeadSha: sha1 }, sha1, A)).toBe(false);
+    expect(backfillIsFresh({ graphHeadSha: sha1, graphContentSha256: A }, sha1, A)).toBe(true);
+  });
+
+  test('without a content hash the graph commit is still compared (v2.6.2 behaviour)', () => {
+    expect(backfillIsFresh({ graphHeadSha: sha1 }, sha1, null)).toBe(true);
+    expect(backfillIsFresh({ graphHeadSha: sha1 }, sha2, undefined)).toBe(false);
+  });
+
 });

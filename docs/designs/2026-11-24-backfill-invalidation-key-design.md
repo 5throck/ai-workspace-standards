@@ -36,6 +36,12 @@ A second, smaller defect: page provenance printed a HEAD sha that changed even w
 
 ## 3. Convergence proof
 
+> **Rule replaced (2026-11-25).** The freshness key is no longer the graph commit. It is the content of the graph at that commit: the artifact records `graphContentSha256`, the SHA-256 of `docs/skill-graph.json` as stored at the graph commit, and `backfillIsFresh` returns true when that hash is equal. `graphHeadSha` stays in the file as information and is compared only when no content hash is available. Decision and tests: `docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md` §4.1 (T-20261124-001, `scripts/skill-graph-fleet-report.ts` v2.7.0).
+>
+> **Why the v2.6.2 rule was not sufficient.** Step 2 below assumes the landing commit does not touch `docs/skill-graph.json`. dev-sync regenerates that file while landing (step 4.65), so the graph commit `G` moves again after the artifact was written. The next fleet-report run then saw `file.graphHeadSha !== G`, rebuilt the series and dirtied the tree, although the graph content was byte-equal. The content key makes the outcome independent of the order of the two commits.
+
+The original v2.6.2 argument is kept below as the record of what it proved.
+
 Let `G` be the last commit touching `docs/skill-graph.json` and `H` the repo HEAD.
 
 1. Run at HEAD `H₀`: artifact records `graphHeadSha = G`. Tree dirty with pages + backfill.
