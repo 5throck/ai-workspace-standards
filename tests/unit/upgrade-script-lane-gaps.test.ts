@@ -18,7 +18,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { afterAll, describe, expect, test } from 'bun:test';
 
-import { escapeRegistryRowPipes, isL0OnlyRegistryRow, registryRowVersion, splitRegistryRow } from '../../scripts/lib/upgrade-policy.ts';
+import { escapeRegistryRowPipes, isL0OnlyRegistryRow, registryRowVersion, splitRegistryRow, toPosixPath } from '../../scripts/lib/upgrade-policy.ts';
 import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
 import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
@@ -54,6 +54,16 @@ describe('registry helpers (design §4.6 c, d)', () => {
     expect(isL0OnlyRegistryRow('| `s.ts` | L0 | 1.0.0 | active | d | — | L0 | — |', '| `s.ts` | L0+L1 | 1.0.0 | a | d |')).toBe(false);
     expect(isL0OnlyRegistryRow('| `s.ts` | L3 | 1.0.0 | active | d | — | L3 | — |', undefined)).toBe(false);
     expect(isL0OnlyRegistryRow(undefined, undefined)).toBe(false);
+  });
+
+  test('toPosixPath: a walker entry becomes a POSIX-style key on every OS', () => {
+    // Bun.Glob.scanSync yields `\`-separated entries on Windows while the lanes' keys
+    // (readdirSync + name joins) are `/`-separated. Literal backslashes stand in for
+    // the Windows walker here (it yields `/` on POSIX/macOS).
+    expect(toPosixPath('deck\\tests\\fixtures\\a.svg', 'win32')).toBe('deck/tests/fixtures/a.svg');
+    expect(toPosixPath('deck\\nested\\SCRIPTS.md', 'win32')).toBe('deck/nested/SCRIPTS.md');
+    expect(toPosixPath('deck\\svg_check.py', 'win32')).toBe('deck/svg_check.py');
+    expect(toPosixPath('deck\\svg_check.py', 'darwin')).toBe('deck\\svg_check.py');
   });
 });
 
@@ -124,6 +134,17 @@ describe('engine — script lane gaps (design §4.6)', () => {
     expect(unclassified.every((r) => r.severity === 'WARN')).toBe(true);
     // documentation and registry files are not scripts — never named
     expect(unclassified.map((r) => r.path)).not.toContain('scripts/README.md');
+    // OS-independent invariants (PR #2177 Windows CI: rows carried `\` paths there,
+    // which is toContain-missed above and also mis-read delivered scripts as unplaced).
+    expect(unclassified.every((r) => !r.path.includes('\\'))).toBe(true); // manifest paths are POSIX-style on every OS
+    expect(unclassified.every((r) => r.path.startsWith('scripts/'))).toBe(true);
+    const unclassifiedPaths = new Set(unclassified.map((r) => r.path));
+    // files a script lane delivered are placed — never UNCLASSIFIED
+    for (const rel of ['scripts/deck/svg_check.py', 'scripts/deck/ppt-master-adapter.ts', 'scripts/lib/upgrade-policy.ts']) {
+      expect(unclassifiedPaths.has(rel)).toBe(false);
+    }
+    // a nested registry file is a registry, not an unclassified script
+    expect([...unclassifiedPaths].filter((p) => p.endsWith('/SCRIPTS.md') || p === 'scripts/SCRIPTS.md')).toEqual([]);
   });
 
   test('(b) a stale registry row is reconciled to the delivered file version', () => {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.119.0
+// @version 1.120.0
 // v1.119.0 (2026-11-25, T-20261124-007 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.7):
 //          `.github/gitleaks-full.toml` joins the LOCKED always-take-template
@@ -1628,6 +1628,7 @@ import {
   type PendingBackportEntry,
   type PriorDeliveryState,
   type ProjectStateVerdict,
+  toPosixPath,
   type TombstoneEntry,
 } from "./lib/upgrade-policy.ts";
 import {
@@ -6493,7 +6494,12 @@ if (existsSync(variantScriptsSrc)) {
 //     (ERROR). Apply mode only — a dry run writes nothing to reconcile.
 {
   for (const srcRoot of scriptSourceRoots) {
-    for (const entry of new Bun.Glob("**/*").scanSync({ cwd: srcRoot, absolute: false })) {
+    for (const rawEntry of new Bun.Glob("**/*").scanSync({ cwd: srcRoot, absolute: false })) {
+      // Bun.Glob yields `\`-separated paths on Windows; the lanes' keys (readdirSync +
+      // name joins), the filters below and the decision row are POSIX-style. Without
+      // this, every delivered script read as unplaced and nested registry files
+      // were named UNCLASSIFIED on Windows (PR #2177 Windows CI).
+      const entry = toPosixPath(rawEntry);
       if (entry.split("/").some((part) => part.startsWith(".") || part === "node_modules" || part === "temp")) continue;
       if (!existsSync(join(srcRoot, entry)) || statSync(join(srcRoot, entry)).isDirectory()) continue;
       const placedByCommonLane = scriptSourceMap.get(entry) === srcRoot;

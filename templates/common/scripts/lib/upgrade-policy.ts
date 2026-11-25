@@ -1,4 +1,4 @@
-// @version 1.52.0
+// @version 1.53.0
 // v1.52.0 (2026-11-25, T-20261124-007 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.7):
 //          `.github/gitleaks-full.toml` joins LOCKED_FILES — the full-scan
@@ -574,6 +574,19 @@ export const TRAIL_RETIRED_SEEDS = [".claude/helpers/graft-hooks.cjs", ".claude/
 /** True when `rel` is a graft-era seed retired by the trail migration. */
 export function isTrailRetiredSeed(rel: string): boolean {
   return (TRAIL_RETIRED_SEEDS as readonly string[]).includes(rel.replace(/\\/g, "/"));
+}
+
+/** Normalise a relative path's separators to `/`.
+ *
+ *  Directory walkers disagree by OS: `readdirSync` + name joins give `/` on every
+ *  platform, while `Bun.Glob.scanSync` yields `\` on Windows. Every manifest key,
+ *  decision path, policy key and registry row is POSIX-style, so a walker result
+ *  must pass through here before it is compared, recorded or printed. A backslash
+ *  is not a legal filename character on Windows, so the rewrite there is lossless;
+ *  on POSIX it is a no-op (a backslash can be a literal filename character).
+ *  `platform` is a parameter so the Windows arm is unit-testable on any OS. */
+export function toPosixPath(rel: string, platform: string = process.platform): string {
+  return platform === "win32" ? rel.split("\\").join("/") : rel;
 }
 
 /** The one file the SCHEMA_MERGE delivery policy claims (spec

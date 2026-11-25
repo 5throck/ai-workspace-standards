@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // verify-delivered-versions.ts — post-delivery verification (meeting 2026-11-20, issue D / R18)
 //
 // v1.1.0 (2026-11-25, T-20261124-011 — design
@@ -48,7 +48,7 @@
 // Exit codes: 0 clean · 1 findings · 2 usage/IO
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { baselineKeyFor } from "./lib/upgrade-policy.ts";
+import { baselineKeyFor, toPosixPath } from "./lib/upgrade-policy.ts";
 
 export type FindingKind = "absent" | "stale" | "conflict" | "conflict-overwritten";
 export type Finding = { kind: FindingKind; path: string; detail: string };
@@ -118,7 +118,8 @@ export function verifyDeliveredVersions(input: VerifyInput): Finding[] {
     if (entry.verdict === "CONFLICT") candidates.add(entry.path);
   }
   for (const entry of new Bun.Glob("scripts/**/*").scanSync({ cwd: templateDir, absolute: false })) {
-    candidates.add(entry);
+    // Bun.Glob yields `\`-separated paths on Windows; manifest paths are POSIX-style.
+    candidates.add(toPosixPath(entry));
   }
 
   // Engine-preserved paths: pendingBackport kind CONFLICT, or a decisions[] entry

@@ -11,7 +11,8 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { baselineKeyFor } from "../../scripts/lib/upgrade-policy.ts";
+import { baselineKeyFor, toPosixPath } from "../../scripts/lib/upgrade-policy.ts";
+import { sep } from "node:path";
 import { type Finding, verifyDeliveredVersions } from "../../scripts/verify-delivered-versions.ts";
 
 const dirs: string[] = [];
@@ -98,6 +99,31 @@ describe("verifyDeliveredVersions — conflicts (design §4.4)", () => {
     const findings = verifyDeliveredVersions({ projectDir: project, templateDir: template, manifest: { files: [] } });
     expect(kindOf(findings, "scripts/variant/only.ts")).toBe("absent");
     expect(kindOf(findings, "scripts/old.ts")).toBe("absent");
+    // OS-independent: a template-derived finding is addressed by its manifest-style
+    // (POSIX) path. Bun.Glob yields `\`-separated entries on Windows; PR #2177's
+    // Windows CI received `undefined` here before the sweep normalised them.
+    // The project tree is empty, so every template script is `absent` — exactly these three.
+    expect(findings.map((f) => f.path).sort()).toEqual([
+      "scripts/lib/common.ts",
+      "scripts/old.ts",
+      "scripts/variant/only.ts",
+    ]);
+    expect(findings.every((f) => !f.path.includes("\\"))).toBe(true);
+  });
+
+  test("toPosixPath: the Windows arm normalises Bun.Glob separators on any OS", () => {
+    // Literal backslashes stand in for what Bun.Glob.scanSync yields on Windows
+    // (it yields `/` here, so the real sweep cannot reproduce it on POSIX/macOS).
+    expect(toPosixPath("scripts\\variant\\only.ts", "win32")).toBe("scripts/variant/only.ts");
+    expect(toPosixPath("deck\\tests\\x.svg", "win32")).toBe("deck/tests/x.svg");
+    expect(toPosixPath("a.ts", "win32")).toBe("a.ts");
+    // POSIX: identity — a backslash is a legal filename character, never a separator.
+    expect(toPosixPath("a\\b.ts", "darwin")).toBe("a\\b.ts");
+    expect(toPosixPath("a\\b.ts", "linux")).toBe("a\\b.ts");
+    // The default is the running platform, so the sweep is a no-op here.
+    expect(toPosixPath("scripts/variant/only.ts")).toBe("scripts/variant/only.ts");
+    expect(["win32", "darwin", "linux"]).toContain(process.platform);
+    expect(toPosixPath(sep === "\\" ? "a\\b" : "a/b")).toBe("a/b");
   });
 
   test("a clean project has no findings and no conflict rows", () => {
