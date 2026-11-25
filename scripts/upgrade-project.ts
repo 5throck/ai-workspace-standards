@@ -1,5 +1,14 @@
 #!/usr/bin/env bun
-// @version 1.116.0
+// @version 1.117.0
+// v1.117.0 (2026-11-25, PM finding 1 — design
+//          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.8):
+//          content-identity fast path in `evolvedDeliveryGuard` — a
+//          CONTENT_EQUIVALENT candidate (project and deliverable byte-equal apart
+//          from the version line, `last_updated` and the lifecycle block; decided
+//          in upgrade-policy.ts v1.50.0) delivers the template copy with verdict
+//          CONTENT_EQUIVALENT at INFO, no adopt grant needed. `markerLossBlocks`
+//          still runs first: a project marker the template lacks blocks the
+//          delivery. The baseline resets at manifest write, as for an adopt.
 // v1.116.0 (2026-11-23, U-20261122-011 — spec
 //          docs/designs/2026-11-23-variant-core-script-loss-detection-design.md §5-§6):
 //          loss-attribution + eviction transparency + legacy core-delta scan.
@@ -4031,6 +4040,22 @@ function evolvedDeliveryGuard(input: {
       enrichPending(input.rel, { deliverable: input.deliverableContent });
     if (markerLossBlocks(input.rel, input.policy, input.pass, input.projectFile, input.deliverableContent))
       return false;
+    return true;
+  }
+  if (cls.state === "CONTENT_EQUIVALENT") {
+    // §4.8 fast path (v1.117.0): the body IS the template's — the only differences
+    // are version line, last_updated and lifecycle block. Guard kept: a project
+    // LOCAL-PATCH marker the template lacks still blocks.
+    if (markerLossBlocks(input.rel, input.policy, input.pass, input.projectFile, input.deliverableContent))
+      return false;
+    recordDecision(
+      input.rel,
+      input.policy,
+      input.pass,
+      "CONTENT_EQUIVALENT",
+      "project copy equals the template apart from its version line, last_updated and lifecycle block — template copy delivered (baseline refreshed at manifest write)",
+      priorBaselines[input.rel],
+    );
     return true;
   }
   if (cls.state !== "PROJECT_EVOLVED") return true;

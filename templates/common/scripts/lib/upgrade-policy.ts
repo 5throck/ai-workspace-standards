@@ -1,4 +1,13 @@
-// @version 1.49.0
+// @version 1.50.0
+// v1.50.0 (2026-11-25, PM finding 1 — design
+//          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.8):
+//          content-identity fast path. `classifyProjectState` returns the new
+//          state CONTENT_EQUIVALENT when a PROJECT_EVOLVED candidate and the
+//          deliverable are byte-equal after removing only the YAML frontmatter
+//          keys `version` and `last_updated`, the `lifecycle` block and the
+//          `@version` value (`contentEquivalentText`). Every body line stays in
+//          the comparison, so a real difference still conflicts. The new
+//          decision verdict CONTENT_EQUIVALENT is INFO.
 // v1.49.0 (2026-11-23, U-20261122-011 — spec
 //          docs/designs/2026-11-23-variant-core-script-loss-detection-design.md §5.2):
 //          two pure, unit-pinned loss-transparency helpers. lostLocalPatchIds() names
@@ -1548,6 +1557,10 @@ export type DecisionVerdict =
   // past the template while the template content did not change since the
   // baseline — the engine preserves the project copy (SKIP) and reports it.
   | "EVOLVED_PRESERVE"
+  // Machinery batch §4.8 (2026-11-25): a PROJECT_EVOLVED candidate that equals
+  // the deliverable apart from its version line, last_updated and lifecycle
+  // block — delivered as the template copy without a sign-off step.
+  | "CONTENT_EQUIVALENT"
   // Overwrite-protection design E2 (DEC-20261111-01 D4): a delivery write would
   // lower the file's LOCAL-PATCH marker count — the write is skipped.
   | "MARKER_LOSS"
@@ -1603,6 +1616,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   VERIFY_SKIPPED: "INFO",
   UNBASELINED_OVERWRITE: "WARN",
   EVOLVED_PRESERVE: "WARN",
+  CONTENT_EQUIVALENT: "INFO",
   MARKER_LOSS: "ERROR",
   PROJECT_AHEAD: "WARN",
   SEED_LAG: "WARN",
@@ -1749,7 +1763,12 @@ export interface DeliveryManifestV2 {
 }
 
 /** How a project file relates to its delivered baseline and today's deliverable (design D1). */
-export type ProjectStateClassification = "UNTOUCHED" | "IN_SYNC" | "PROJECT_EVOLVED" | "NO_BASELINE";
+export type ProjectStateClassification =
+  | "UNTOUCHED"
+  | "IN_SYNC"
+  | "PROJECT_EVOLVED"
+  | "NO_BASELINE"
+  | "CONTENT_EQUIVALENT";
 
 export interface ProjectStateVerdict {
   state: ProjectStateClassification;
@@ -1787,6 +1806,34 @@ export function baselineKeyFor(rel: string, content: string): string {
  * same content a delivery would write); `baseline` is the recorded provenance
  * or undefined (first run after the policy lands — degrade, design §8).
  */
+/**
+ * v1.50.0 (machinery batch §4.8): the content-identity form of a file. Removes
+ * ONLY the frontmatter keys `version` and `last_updated`, the `lifecycle` block
+ * and the value of the first `@version` token. Every other byte — the whole
+ * body, changelog lines included — stays in the comparison. Pure.
+ */
+export function contentEquivalentText(text: string): string {
+  const fm = text.match(/^---\n([\s\S]*?)\n---/);
+  if (!fm) return text.replace(/@version\s+\d+\.\d+\.\d+/, "@version");
+  const lines = fm[1].split("\n");
+  const kept: string[] = [];
+  let skipping = false;
+  for (const line of lines) {
+    if (/^lifecycle:\s*$/.test(line)) {
+      skipping = true;
+      continue;
+    }
+    if (skipping) {
+      if (/^[^\s#]/.test(line)) skipping = false;
+      else continue;
+    }
+    if (/^(version|last_updated):\s*/.test(line)) continue;
+    kept.push(line);
+  }
+  const body = text.slice(fm[0].length);
+  return `---\n${kept.join("\n")}\n---${body}`.replace(/@version\s+\d+\.\d+\.\d+/, "@version");
+}
+
 export function classifyProjectState(
   rel: string,
   projectContent: string,
@@ -1804,6 +1851,11 @@ export function classifyProjectState(
   }
   if (matchesDeliverable) {
     return { state: "IN_SYNC", matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
+  }
+  if (contentEquivalentText(projectContent) === contentEquivalentText(deliverableContent)) {
+    // §4.8 fast path: version line, last_updated and lifecycle block are the only
+    // differences — the body is the template's own content.
+    return { state: "CONTENT_EQUIVALENT", matchesDeliverable, templateChanged: true };
   }
   return { state: "PROJECT_EVOLVED", matchesDeliverable, templateChanged: deliverableKey !== baseline.hash };
 }
