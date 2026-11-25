@@ -1,7 +1,7 @@
 ---
 name: pdf-export
-version: "2.2.3"
-last_updated: 2026-11-15
+version: "2.2.4"
+last_updated: 2026-11-25
 role: PDF generation specialist using pdf-lib and 4-layer spec merge
 status: active
 tier: low
@@ -49,7 +49,7 @@ This ensures all work flows through the proper workflow with quality gates.
 | `deliverables/assets/fonts/<FontName>-Bold.ttf` | Prep Agent (`download-font.ts`) |
 | HTML file | Build Agent |
 | `image-manifest.json` (optional) | Image Curator (`image-curator.md`) — provides `background_image` paths |
-| `assets/images/bg-*.<ext>` (optional) | Image Curator — background image files |
+| `deliverables/assets/images/bg-*.<ext>` (optional) | Image Curator — background image files |
 
 ## Responsibilities
 

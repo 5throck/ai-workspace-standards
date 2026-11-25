@@ -1193,8 +1193,8 @@
       "name": "handbook-reviewer",
       "scope": "co-deck",
       "capability": "handbook-reviewer",
-      "content_hash": "9af4125a0b0fa679",
-      "version": "1.1.2",
+      "content_hash": "86f9f5853fa0b37d",
+      "version": "1.1.3",
       "mirrors": [
         "templates/co-deck/agents/handbook-reviewer.md"
       ]
@@ -1258,8 +1258,8 @@
       "name": "pdf-export",
       "scope": "co-deck",
       "capability": "pdf-export",
-      "content_hash": "af052ebf35439aa6",
-      "version": "2.2.3",
+      "content_hash": "36e2d15fc8cce384",
+      "version": "2.2.4",
       "mirrors": [
         "templates/co-deck/agents/pdf-export.md"
       ]
@@ -1297,8 +1297,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "58771a37bba1cc6d",
-      "version": "1.1.4",
+      "content_hash": "738c5b05ede898f6",
+      "version": "1.1.5",
       "mirrors": [
         "templates/co-deck/agents/storyline.md"
       ]
