@@ -102,7 +102,38 @@ Every canary and every named test below was **re-run read-only** on 2026-11-25 b
 - **Two files outside the design's row 8 list, both required by its goal**: the parity-closure guard admits only LOCKED or MERGE_MANAGED paths into the carve-out, so the path needed the LOCKED claim; and the engine's LOCKED pass is a hardcoded list, so the claim alone did not deliver the file (it was absent from the fresh project before the list entry was added).
 - **Design canary NOT RUN**: "co-abap: wave PR carries the file; predicate 4 runs and passes" needs a real upgrade of a fleet project, which writes under `Projects/*`.
 
-## Row 9 — §4.10 runner prompt revision — NOT IMPLEMENTED
+## Row 9 — §4.10 runner prompt revision — repository half landed
+
+- **Status**: the repository half is landed: `docs/governance/automation-prompts/runner-v6.snapshot.txt` (new) and the `prompts.manifest.json` entry for `automation-dfba3ff1-a1df-42e3-b358-7c641f974648` (sha256 `f0744a2aa8eaa5432f91353202ed98c62b3e453bebf6885f1d9ba3e53edb0ae7`, `snapshot` now `runner-v6.snapshot.txt`, 24,076 bytes). `runner-v5.snapshot.txt` is kept as the prior ratified generation, as v4 was at the v5 bump (commit `ef37c242c`).
+- **Live store**: update pending the PR merge — performed by the PM. The PM pastes the exact bytes of `runner-v6.snapshot.txt` into the live prompt. The file has NO trailing newline; the live v5 text has none either, so a paste that adds one will not hash to the manifest value.
+- **How v6 was made**: v5 plus six exact string replacements, each required to match once (header sentence, STEP 0, STEP I (0a) inserted, STEP I (1), STEP I (5), PER-STEP DEADLINES). The diff against v5 is 5 lines removed and 6 added. Nothing else was reworded.
+- **Verifier method**: `scripts/verify-prompt-integrity.ts` reads the live `prompt` column of `automations` for the automation id through bun:sqlite read-only and hashes its UTF-8 bytes (no trimming, no newline normalisation). It hashes the file named in the manifest `snapshot` field as raw bytes. Both must equal the manifest `sha256`. There is no flag that skips the live store (`--store`, `--exec-closure`, `--parity-closure`, `--gate`, `--no-ticket` only).
+- **Verification 1 (real store, v5 live)**: `bun scripts/verify-prompt-integrity.ts --no-ticket --exec-closure` — exit **1**, the expected result before the store is updated.
+  - `✗ automation-dfba3ff1-a1df-42e3-b358-7c641f974648 — unratified-live-edit: live store is AHEAD of the ratified record — the snapshot still hashes to the manifest sha256 (store text changed without a governance change set)` (the verdict text reads "ahead" because the script names the older direction; here the live text is BEHIND, at v5)
+  - `hunks: live lines 5-41 (37) vs snapshot lines 5-42 (38)`
+  - `✓ exec-closure: 17 prompt-referenced script(s) inside protectedPaths ∪ runner-exec-allowlist`
+  - `✗ prompt integrity ALERT (scheduled, host Mac-mini-6.local): exit 1 — alert JSON .pipeline-state/prompt-integrity-alert-2026-11-25.json`
+  - The one mismatch is live against the manifest. The snapshot and the manifest agree: both hash to `f0744a2a…` (`shasum -a 256 runner-v6.snapshot.txt` and the manifest `sha256` are identical). The alert wrote one `prompt-integrity ALERT` line into `memory/2026-11-25.md`; that line was removed from the working tree before the commit because it describes the pre-merge state, not a runner event.
+- **Verification 2 (store copy, v6 pasted)**: a copy of `~/.zcode/v2/tasks-index.sqlite` under the system temp directory, with the copy's prompt set to the snapshot text (the live store was not written). `bun scripts/verify-prompt-integrity.ts --store <copy> --no-ticket --exec-closure --parity-closure` — exit **0**.
+  - `✓ automation-dfba3ff1-a1df-42e3-b358-7c641f974648 — match: live, manifest, and snapshot agree`
+  - `✓ exec-closure: 17 prompt-referenced script(s) inside protectedPaths ∪ runner-exec-allowlist`
+  - `✓ parity-closure: 7 fleetParityCarveOut path(s) inside engine LOCKED ∪ MERGE_MANAGED`
+  - `✓ prompt integrity: 1/1 match (scheduled, host Mac-mini-6.local)`
+  - The copy's prompt hashed to `c91eeb1c…` (v5) before the update, which confirms that a paste of the file bytes reproduces the manifest hash.
+- **Until the PM updates the store**: on this branch the verifier exits 1, and the runner's STEP 0 `--gate` wrapper aborts a 03:00 run that executes from a checkout holding v6 in the manifest with v5 in the store. The store must be updated before the first 03:00 run after the merge.
+- **Deviation from the brief**: the brief named `run-manifest.ts step --status <done|failed>`. The CLI accepts `begin|complete|failed|skipped-budget` and rejects `done`. The prompt uses `complete`.
+- **Not verifiable here**: the prompt is behaviour text. Whether the runner writes the `complete` rows and makes `verify --profile full --nights 1` pass is seen on the first night after the store update.
+
+### Textual changes (v5 to v6)
+
+1. Header: inserted after "post-delivery verification;" — "revised to v6 by design 2026-11-25-upgrade-runner-machinery-batch-design §4.10 (DEC-20261125-01)". The existing history text is unchanged.
+2. STEP 0, after the ledger init — "Then verify the previous night (T-20261123-008): run `bun scripts/run-manifest.ts verify --date <previous night> --profile full --nights 1`; exit 5 (a component of the profile has no ledger row) or exit 6 (a scheduled night has no run manifest) is reported loudly in the daily report — it does not abort the run."
+3. STEP I, new (0a) — "GATE CALL (T-20261124-008): BEFORE the first dry-run, run `bun scripts/run-manifest.ts gate-step-i --project <p> --basis <head>` (repeatable pairs, one pair per wave project; run it once with every admitted project) and confirm its exit code. Exit 0 = the submitted projects are admitted; a non-zero exit = the projects it names lack a fresh review pass — SKIP them tonight (`run-manifest.ts skip --step STEP_I --reason "..."`), waves defer per carried-wave-first, and they NEVER enter (1). A dry-run that starts before this call has exited did not pass the gate."
+4. STEP I (1), appended — "The DRY-RUN runs for EVERY project admitted to STEP I; canary-first limits only the first REAL run (4), never the dry-run."
+5. STEP I (5), appended — "A `[conflict]` or `[conflict-overwritten]` row is NEVER fixed by copying a template file over the project copy (T-20261124-011): the project copy is engine-preserved and is adjudicated, not overwritten — the delivery is recorded INCOMPLETE and a ticket is filed naming the path and the merge SHA."
+6. PER-STEP DEADLINES, after "write the row):" — "at every step boundary the runner records the step it has just finished with `run-manifest.ts step --step <NAME> --status complete`, or `--status failed` when the step failed, in addition to the `skipped-budget` row rule that follows. `<NAME>` is the component name written exactly as the ledger expects it: STEP_A, STEP_B, STEP_C, STEP_D, STEP_E, STEP_F, STEP_G, STEP_H, STEP_I, STEP_J. The profile tables (`full`, `fast`) and their component lists are defined in `scripts/run-manifest.ts`, never in this prompt." The existing `skipped-budget` sentence follows unchanged.
+
+### First attempt (rows 1–8 session) — superseded
 
 - **Status**: stopped before any file was written. No commit.
 - **Reason**: the revision needs the live prompt text in the ZCode automation store to be replaced. That store is out of repository (design section 3, `docs/protected-paths.json` `outOfRepoProtected`) and is edited by the human operator; the v5 ratification on 2026-11-20 recorded that store edits were made out-of-band by the dispatching session. This session has no tool that writes the store.
