@@ -19,12 +19,27 @@ title: >-
   .gitleaks.toml scan of the changed-path export is the full scan when the
   changed-path set intersects no allowlisted path
 priority: high
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-24T08:15:45.862+09:00'
 history:
   - at: '2026-11-24T08:15:45.862+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-25T20:39:30.061+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-25T20:39:30.078+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-25T20:39:30.096+09:00'
+    from: running
+    to: review
+  - at: '2026-11-25T20:39:30.113+09:00'
+    from: review
+    to: done
+result: >-
+  Row 8 commit 8b42bbeec: templates/common/.github/gitleaks-full.toml is
+  byte-identical to the root file and delivered by the LOCKED pass
+  (tests/unit/gitleaks-full-config-parity.test.ts, 3 pass)
 error: null
