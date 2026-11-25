@@ -36,7 +36,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `translate` | 1.0.3 | active | pm | 2026-11-08 | — | — |
 | `project-to-variant` | 1.3.1 | active | scaffolding-expert | 2026-11-08 | — | Convert existing standalone project into official variant template |
 | `adopt-project` | 1.1.2 | active | scaffolding-expert | 2026-10-31 | — | Convert an existing external project into a workspace-standard project in place (preserves content + git history); automates variant-conversion-guide §3 Scenario B |
-| `upgrade-project` | 1.6.3 | active | pm | 2026-10-31 | — | Upgrade existing L2/L3 project to current template version |
+| `upgrade-project` | 1.6.4 | active | pm | 2026-10-31 | — | Upgrade existing L2/L3 project to current template version |
 | `migrate-project` | 1.0.0 | active | scaffolding-expert | 2026-09-23 | — | End-to-end external-project migration: GitHub baseline → adopt-project → machine-verified result (artifacts, platform twins, provenance, hooksPath, audit smoke) |
 | `variant-feature` | 1.0.0 | active | scaffolding-expert | 2026-11-08 | — | Add features (agents, skills, scripts, docs) to existing variant |
 | `new-project` | 1.0.0 | active | scaffolding-expert | 2026-11-08 | — | Scaffold a fresh project instance from `templates/<variant>` (non-interactive `new-project.ts` dispatch: variant pick, platform profile, identity flags, post-scaffold verification); L0 operator only — not deployed to L2 |
