@@ -1,6 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // battery.ts — recorded-exit-code compensation battery (meeting 2026-11-20, issue B5)
+//
+// v1.1.0 (2026-11-25, T-20261124-017 — design
+//   docs/designs/2026-11-24-fleet-test-baseline-design.md §4.5, ADR-0106): the
+//   battery runs the CI command set. (1) Tests: `bun scripts/test-runner.ts all`,
+//   the single fleet entry point, with the project as cwd. The `bun run test` and
+//   `bun test` fallbacks are removed; a project without the runner records an
+//   exit-1 row without spawning. Each test row carries the runner's
+//   TEST-RUN-SUMMARY line as `summary` (the exit code stays the verdict). (2)
+//   Dependency audit: `bun scripts/dependency-audit.ts` when that file exists,
+//   the raw `bun audit` only when it does not — exactly what the CI
+//   `Dependency Audit` job runs, waivers included. (3) The documentation audit is
+//   its own command: `bun scripts/audit.ts` when the file exists. The
+//   `hasScript("audit")` branch is removed. v1.0.0 ran the documentation audit in
+//   the audit slot in 14 members and no dependency audit at all.
 //
 // v1.0.0 (2026-11-20, meeting-2026-11-20-batch-runner-hardening): the 2026-11-19
 //   billing-wall exception merge (co-deck#252) was approved by a shell harness that
@@ -26,6 +40,8 @@ type Row = {
   exit: number;
   stdoutSha256: string;
   tail: string;
+  /** The runner's TEST-RUN-SUMMARY line when the command printed one (v1.1.0). */
+  summary?: string;
 };
 
 function die(msg: string): never {
@@ -51,47 +67,50 @@ if (!Number.isFinite(timeoutSec) || timeoutSec <= 0) die(`bad --timeout`);
 const extraIdx = argv.indexOf("--");
 const extra = extraIdx >= 0 ? argv.slice(extraIdx + 1) : [];
 
-function hasScript(name: string): boolean {
-  try {
-    const pkg = JSON.parse(readFileSync(join(project, "package.json"), "utf8")) as {
-      scripts?: Record<string, string>;
-    };
-    return Boolean(pkg.scripts?.[name]);
-  } catch {
-    return false;
-  }
-}
+const hasFile = (rel: string): boolean => existsSync(join(project, rel));
 
-const commands: string[][] = [];
-// Dependency audit: prefer the project's own script if it exists, else bun audit.
-commands.push(hasScript("audit") ? ["bun", "run", "audit"] : ["bun", "audit"]);
-// Test suite: the project's own entry point, exit-code asserted.
-commands.push(hasScript("test") ? ["bun", "run", "test"] : ["bun", "test"]);
-for (const e of extra) commands.push(["sh", "-c", e]);
+const RUNNER = "scripts/test-runner.ts";
+const commands: { cmd: string[]; skipSpawn?: boolean }[] = [];
+// Dependency audit: the CI wrapper when the project carries it, else the raw command.
+commands.push({
+  cmd: hasFile("scripts/dependency-audit.ts") ? ["bun", "scripts/dependency-audit.ts"] : ["bun", "audit"],
+});
+// Documentation audit: its own command (v1.0.0 reached it only through the `audit` script).
+if (hasFile("scripts/audit.ts")) commands.push({ cmd: ["bun", "scripts/audit.ts"] });
+// Test suite: the single fleet entry point. A missing runner is a failed row, not a skip.
+commands.push(hasFile(RUNNER) ? { cmd: ["bun", RUNNER, "all"] } : { cmd: ["bun", RUNNER, "all"], skipSpawn: true });
+for (const e of extra) commands.push({ cmd: ["sh", "-c", e] });
 
 const rows: Row[] = [];
 let failures = 0;
 
-for (const cmd of commands) {
+for (const { cmd, skipSpawn } of commands) {
   const started = Date.now();
   let stdout = "";
   let exit = 1;
   try {
-    const proc = Bun.spawnSync(cmd, {
-      cwd: project,
-      stdout: "pipe",
-      stderr: "pipe",
-      timeout: timeoutSec * 1000,
-    });
-    stdout = `${proc.stdout?.toString() ?? ""}${proc.stderr?.toString() ?? ""}`;
-    exit = proc.exitCode ?? 1;
+    if (skipSpawn) {
+      stdout = `battery: ${RUNNER} is missing in the project — the fleet entry point cannot run`;
+    } else {
+      const proc = Bun.spawnSync(cmd, {
+        cwd: project,
+        stdout: "pipe",
+        stderr: "pipe",
+        timeout: timeoutSec * 1000,
+      });
+      stdout = `${proc.stdout?.toString() ?? ""}${proc.stderr?.toString() ?? ""}`;
+      exit = proc.exitCode ?? 1;
+    }
   } catch (e) {
     stdout = `spawn failed: ${(e as Error).message}`;
     exit = 1;
   }
   const sha = createHash("sha256").update(stdout).digest("hex");
   const tail = stdout.trim().split("\n").slice(-3).join(" ⏎ ").slice(0, 300);
-  rows.push({ at: new Date().toISOString(), project, cmd: cmd.join(" "), exit, stdoutSha256: sha, tail });
+  const summaryLine = stdout.split(/\r?\n/).find((l) => l.startsWith("TEST-RUN-SUMMARY "));
+  const row: Row = { at: new Date().toISOString(), project, cmd: cmd.join(" "), exit, stdoutSha256: sha, tail };
+  if (summaryLine) row.summary = summaryLine;
+  rows.push(row);
   if (exit !== 0) failures += 1;
   const ms = Date.now() - started;
   console.log(`${exit === 0 ? "✓" : "✗"} ${cmd.join(" ")} → exit ${exit} (${ms}ms)`);
