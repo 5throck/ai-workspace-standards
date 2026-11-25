@@ -6,6 +6,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-26](2026-11-26.md) | chore(runner): 2026-11-26 nightly closeout — daily reports, orphan-sweep artifacts, memory block |
 | [2026-11-25](2026-11-25.md) | chore(runner): 2026-11-25 nightly — 0.30.0 wave to 4 more projects (co-abap merged CLEAN on real CI), 3 staged+held, 8 skipped with reasons |
 | [2026-11-25](2026-11-25.md) | chore(runner): land the 2026-11-24 interactive session records (DEC-20261124-02, tickets T-20261124-014 to 017, fleet test baseline design proposed) |
 | [2026-11-24](2026-11-24.md) | chore(runner): interactive follow-up — 12 of 13 fleet PRs merged, unlanded work landed, branches cleaned, fleet test baseline design proposed (awaiting approval) |
@@ -16,8 +17,8 @@
 | [2026-11-21](2026-11-21.md) | chore(templates): workspace sync (15 files) |
 | [2026-11-20](2026-11-20.md) | fix(validate-decisions): memory/archive resolves DEC memory references (U-20261119-001) |
 | [2026-11-19](2026-11-19.md) | chore(templates): move seed pins quickdl v1.0.1 + im-not-ai v2.4.7 (compat-gated, issue #2096) |
-| [2026-11-18](2026-11-18.md) | docs(trail): record co-deck bgpool PNG leak learning |
-| [2026-11-18](2026-11-18.md) | feat(design): sync-embedded detection — opt-in backport marking and upstream filing (DEC-20261117-06, batch PR-A) |
+| 2026-11-18 | docs(trail): record co-deck bgpool PNG leak learning |
+| 2026-11-18 | feat(design): sync-embedded detection — opt-in backport marking and upstream filing (DEC-20261117-06, batch PR-A) |
 | 2026-11-17 | chore(housekeeping): land memory archival, README regens, governance tickets T-20261117-001..005 |
 | 2026-11-16 | docs(docs): workspace sync (21 files) |
 | 2026-11-16 | chore(templates): workspace sync (61 files) |
