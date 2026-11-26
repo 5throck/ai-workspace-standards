@@ -20,7 +20,7 @@
  */
 
 import { describe, expect, test, afterAll } from 'bun:test';
-import { existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -145,5 +145,55 @@ describe('publishTicketWithRetry (T-20261026-009, finding #29)', () => {
       ),
     ).toThrow(/disk on fire/);
     expect(calls).toBe(1);
+  });
+
+  test('T-20261127-001b: an ARCHIVED same-day U id raises the allocation floor', async () => {
+    // The widened nextSeqForToday scan (v1.16.0) covers both stores AND both
+    // archive dirs — a same-day id that left the live store (archiveTickets
+    // --days 0, or pending restoreTicket) must not be re-minted live; the
+    // collision would resurface as cross-store ambiguity on restore
+    // (the U-20261126-003 double-assignment shape).
+    //
+    // Runs in a SUBPROCESS with UPSTREAM_WORKSPACE_ROOT set BEFORE the module
+    // import: WORKSPACE_ROOT is read once at module load, and in a shared bun
+    // test process another file may have already imported the server module
+    // without the seam (pinning ticketsDir() to the real repo — the exact
+    // hazard this file's header seam note warns about). A subprocess is
+    // hermetic against load order AND against the real store: the 2026-11-27
+    // in-process version of this test wrote test stubs into the real
+    // tickets/governance (caught and removed in T-20261127-001's delivery).
+    const ws = mkdtempSync(join(tmpdir(), 'upstream-idalloc-archive-'));
+    try {
+      const gov = join(ws, 'tickets', 'governance');
+      mkdirSync(join(gov, 'archive'), { recursive: true });
+      // Same KST arithmetic as the module prefix source (machine-TZ independent).
+      const kstDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, '');
+      const pfx = `U-${kstDate}`;
+      writeFileSync(join(gov, 'archive', `${pfx}-003.yaml`), 'seed: archived\n', 'utf-8');
+      const harness = `
+const { publishTicketWithRetry } = await import(${JSON.stringify(join(import.meta.dir, '..', '..', 'scripts', 'mcp-upstream-server.ts'))});
+const id = publishTicketWithRetry((id) => ({ schemaVersion: 1, id }));
+console.log(JSON.stringify({ id }));
+`;
+      const harnessPath = join(ws, 'alloc-harness.ts');
+      writeFileSync(harnessPath, harness, 'utf-8');
+      const proc = Bun.spawn(['bun', 'run', harnessPath], {
+        cwd: ws,
+        env: { ...process.env, UPSTREAM_WORKSPACE_ROOT: ws },
+        stdout: 'pipe',
+        stderr: 'pipe',
+      });
+      const [out, err, code] = await Promise.all([
+        new Response(proc.stdout).text(),
+        new Response(proc.stderr).text(),
+        proc.exited,
+      ]);
+      expect(code).toBe(0);
+      const { id } = JSON.parse(out.trim().split('\n').pop()!);
+      expect(id).toBe(`${pfx}-004`);
+      expect(existsSync(join(gov, `${pfx}-004.yaml`))).toBe(true);
+    } finally {
+      rmSync(ws, { recursive: true, force: true });
+    }
   });
 });

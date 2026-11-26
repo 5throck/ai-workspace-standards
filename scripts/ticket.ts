@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.16.0
+// @version 1.17.0
+// v1.17.0 (2026-11-27, T-20261127-001a — spec
+//          docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §3.2):
+//          doctor's referenced-id drift arm gains the AMBIGUOUS block (report-only,
+//          the diagnostic surface decision (ii)): cited ids resolving in MULTIPLE
+//          stores/archives (helpers/ticket-drift.ts v1.1.0 ambiguous findings, typed
+//          AmbiguousTicketError from helpers/ticket-store.ts v1.16.0) print with both
+//          paths and the qualify-or-de-duplicate fix, separated from the unresolved
+//          silent-loss block. No store/CLI semantics changed in this file.
 // v1.16.0 (2026-11-08, spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md
 //          §3.3, WP1): the reprioritize --actor grammar accepts
 //          `spoke-tenant:gw-<12hex>` (gateway tenant agents). A tenant actor follows
@@ -651,6 +659,21 @@ try {
         );
         for (const f of drift.unresolved)
           console.log(`🔎  ${f.id} cited at ${f.file}:${f.line} — resolves in NO store or archive`);
+      }
+      // v1.17.0 (T-20261127-001a, spec
+      // docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §3.2): the
+      // AMBIGUOUS arm — cited ids resolving in MULTIPLE stores/archives are provenance
+      // problems (the ticket exists, twice), not losses; reported separately from the
+      // unresolved (silent-loss) block above, same findings the dev-sync step warns on.
+      if (drift.ambiguous.length > 0) {
+        console.log(
+          `\nAmbiguous ticket-id citations in memory/ (${drift.ambiguous.length} of ${drift.cited} cited) — resolve in MULTIPLE stores (provenance problem, NOT a loss):`,
+        );
+        for (const f of drift.ambiguous) {
+          const where = f.locations.length > 0 ? f.locations.join(" and ") : "multiple stores";
+          console.log(`⚠️  ${f.id} cited at ${f.file}:${f.line} — exists in BOTH ${f.scope}: ${where}`);
+        }
+        console.log(`    Fix: qualify with 'governance/<id>' / 'service/<id>' or de-duplicate the store.`);
       }
       // Archive visibility (design 2026-10-04-ticket-archive-design.md): archived
       // tickets leave the live stores, so state them here instead of staying silent.

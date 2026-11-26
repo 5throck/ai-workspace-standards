@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.15.0
+// @version 1.16.0
+// v1.16.0 (2026-11-27, spec docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md,
+//          T-20261127-001): (a) typed AmbiguousTicketError — resolveTicketLocation's two
+//          ambiguous throws (BOTH stores / BOTH archives) now carry structured
+//          { id, locations, scope } fields so consumers (driftCheck, doctor) can
+//          distinguish cross-store AMBIGUITY from NOT-FOUND without parsing message
+//          text; the message text itself is unchanged (pinned by tests). (b) nextSeqGuess
+//          widens its max-seq scan from the two live stores to BOTH stores AND BOTH
+//          archive directories via the new exported storeScanDirs() — a same-day id that
+//          left a live store through archiveTickets (--days 0) or sits pending restore
+//          no longer lets create mint a colliding id (the U-20261126-003 double-assignment
+//          shape). EEXIST retry loops unchanged as the concurrency backstop.
 // v1.15.0 (2026-11-05, spec docs/designs/2026-11-04-project-loss-hardening-design.md
 //          §5.3, T-20261104-004 item 3 — ticket-store durability): createTicket
 //          closes the empty-file crash window and learns duplicate refusal.
@@ -287,12 +298,29 @@ function todayPrefix(): string {
   return `T-${kstDate().replace(/-/g, "")}`;
 }
 
+/** Store-pair scan set for id allocation (v1.16.0, T-20261127-001b / spec §4):
+ * BOTH live stores AND BOTH archive directories, derived from either store
+ * ("in both directions" — `dir` may be the governance store or the service
+ * store). Scanning the archives closes the allocation blind spot where a
+ * same-day id that left a live store through archiveTickets (--days 0) or sits
+ * pending restoreTicket let create mint a colliding id — the collision then
+ * resurfaces as cross-store ambiguity when the archived twin is restored.
+ * Nonexistent directories are skipped by the callers' existsSync guard.
+ * Residual documented limit (spec §2): a DIFFERENT checkout on another branch
+ * cannot see this tree's files — the EEXIST retry loops remain the backstop. */
+export function storeScanDirs(dir: string): string[] {
+  const governanceDir = basename(dir) === "governance" ? dir : join(dir, "governance");
+  const serviceDir = basename(dir) === "governance" ? dirname(dir) : dir;
+  return [serviceDir, governanceDir, archiveDirFor(serviceDir), archiveDirFor(governanceDir)];
+}
+
 function nextSeqGuess(dir: string, prefix: string): number {
   // T-20260912-025: ids live in ONE namespace across both ticket directories —
   // move/list resolve an id with governance/ precedence, so a seq guessed from
   // the target directory alone can mint an id that shadows (or is shadowed by)
   // a same-day ticket in the other directory. Always scan both.
-  const dirs = basename(dir) === "governance" ? [dir, dirname(dir)] : [dir, join(dir, "governance")];
+  // v1.16.0 (T-20261127-001b): also scan BOTH archive directories (storeScanDirs).
+  const dirs = storeScanDirs(dir);
   let max = 0;
   for (const d of dirs) {
     if (!existsSync(d)) continue;
@@ -481,6 +509,27 @@ function createTicketUnlocked(dir: string, input: CreateTicketInput, opts: Creat
   throw new Error(`[ticket-store] could not allocate a ticket id after ${MAX_ATTEMPTS} attempts`);
 }
 
+/** Typed cross-store ambiguity (v1.16.0, T-20261127-001a / spec §3.1): thrown by
+ * resolveTicketLocation when a bare id exists in BOTH live stores or BOTH archive
+ * directories. Carries the conflicting paths so drift-style consumers can report
+ * AMBIGUITY as a provenance problem (naming both locations) instead of mistaking
+ * it for a loss. The message text is unchanged from the historical plain-Error form
+ * (ticket-id-namespacing tests pin its content). */
+export class AmbiguousTicketError extends Error {
+  readonly id: string;
+  /** Both conflicting file paths (governance path first, matching the message). */
+  readonly locations: string[];
+  /** Whether the id is double-resident in the live stores or in the archives. */
+  readonly scope: "stores" | "archives";
+  constructor(id: string, locations: string[], scope: "stores" | "archives", message: string) {
+    super(message);
+    this.name = "AmbiguousTicketError";
+    this.id = id;
+    this.locations = locations;
+    this.scope = scope;
+  }
+}
+
 /** Maps a CLI-level id to the store that owns it (T-20261001-009). Service and
  * governance tickets share the `T-YYYYMMDD-NNN` id format but live in different
  * directories, so a bare id can be ambiguous. Accepts the explicit forms
@@ -530,7 +579,10 @@ export function resolveTicketLocation(serviceDir: string, governanceDir: string,
   const inService = existsSync(servicePath);
   const inGovernance = existsSync(governancePath);
   if (inService && inGovernance) {
-    throw new Error(
+    throw new AmbiguousTicketError(
+      id,
+      [governancePath, servicePath],
+      "stores",
       `[ticket-store] ambiguous ticket id ${id}: it exists in BOTH stores — ` +
         `${governancePath} and ${servicePath}. ` +
         `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,
@@ -541,7 +593,10 @@ export function resolveTicketLocation(serviceDir: string, governanceDir: string,
   const inServiceArchive = existsSync(serviceArchivePath);
   const inGovernanceArchive = existsSync(governanceArchivePath);
   if (inServiceArchive && inGovernanceArchive) {
-    throw new Error(
+    throw new AmbiguousTicketError(
+      id,
+      [governanceArchivePath, serviceArchivePath],
+      "archives",
       `[ticket-store] ambiguous ticket id ${id}: it exists in BOTH archives — ` +
         `${governanceArchivePath} and ${serviceArchivePath}. ` +
         `Re-run with 'governance/${id}' or 'service/${id}' to pick one.`,

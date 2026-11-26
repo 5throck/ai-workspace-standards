@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // ticket-drift.ts — Referenced-id drift check (project-loss-hardening design
 // §5.3b, T-20261104-004 item 3): every ticket id CITED in memory/YYYY-MM-DD.md
 // (pattern \b[TU]-\d{8}-\d{3,4}\b) must resolve via the ticket store's
@@ -11,6 +11,20 @@
 // surfaces the same findings as the diagnostic arm). Detection is deliberately
 // bounded: only ids matching the citation pattern count — free-text references
 // that do not match the id shape are out of scope (design §4-B option C).
+//
+// v1.1.0 (2026-11-27, spec docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md
+//          §3, T-20261127-001a): AMBIGUOUS vs NOT-FOUND distinction. A cited id that
+//          resolves in MULTIPLE stores (resolveTicketLocation throws the typed
+//          AmbiguousTicketError) is a provenance problem — the ticket EXISTS, twice —
+//          not a silent loss; v1.0.0 bare-caught every throw into `unresolved` and
+//          mis-reported exactly that shape as "resolve in NO store or archive"
+//          (7 ids FATALed at dev-sync step 3.87 on 2026-11-26 with the wrong
+//          diagnostic). The report now carries `ambiguous` findings (id, citation
+//          site, both paths, stores-vs-archives scope) separately from `unresolved`,
+//          and the step-3.87 presentation/decision logic moves here as exported
+//          reportDriftFindings() so the FATAL semantics have ONE definition shared
+//          by dev-sync, `ticket.ts doctor`, and the replay tests: unresolved >
+//          0 = "fatal", ambiguous-only = "ambiguous" (non-fatal), else "pass".
 //
 // L0/L1 delivery note: dev-sync.ts is L0+L1 (byte-identical mirror), so this
 // helper ships to templates/common/scripts/helpers. The store module it
@@ -35,27 +49,64 @@ export interface DriftFinding {
   line: number;
 }
 
+/** One citation whose id resolves in MULTIPLE stores — AMBIGUITY, not loss
+ * (v1.1.0, T-20261127-001a). A provenance problem: the ticket exists (twice),
+ * and consumers must qualify which store they mean (governance/<id> vs
+ * service/<id>) or de-duplicate the store. */
+export interface AmbiguityFinding extends DriftFinding {
+  /** Both conflicting file paths (governance path first). */
+  locations: string[];
+  /** Whether the id is double-resident in the live stores or in the archives. */
+  scope: "stores" | "archives";
+}
+
 export interface DriftReport {
   /** Total distinct cited ids scanned (deduplicated across files). */
   cited: number;
   /** Cited ids that resolve nowhere — each is a candidate silent-loss event. */
   unresolved: DriftFinding[];
+  /** Cited ids resolving in MULTIPLE stores/archives — provenance problems,
+   * NOT losses (v1.1.0). Non-fatal at the step-3.87 gate. */
+  ambiguous: AmbiguityFinding[];
 }
 
 /** resolveTicketLocation's shape, structurally typed so this helper never
  * statically depends on the L0-only store module. */
 type TicketLocationResolver = (serviceDir: string, governanceDir: string, id: string) => unknown;
 
+/** The typed ambiguity error, structurally typed for the same reason. */
+interface AmbiguousTicketErrorLike {
+  new (
+    id: string,
+    locations: string[],
+    scope: "stores" | "archives",
+    message: string,
+  ): Error & {
+    readonly id: string;
+    readonly locations: string[];
+    readonly scope: "stores" | "archives";
+  };
+}
+
 /** Ticket-id citation shape (same grammar the store enforces at its boundary:
  * T-YYYYMMDD-NNN service/governance tickets and U-YYYYMMDD-NNN upstream
  * requests; 3-4 digit seq, matching TICKET_ID_PATTERN's widened v1.5.0 form). */
 const TICKET_ID_CITATION_PATTERN = /\b([TU]-\d{8}-\d{3,4})\b/g;
 
-/** Loads resolveTicketLocation through a guarded dynamic import. At L0 the
- * L0-only store module is present and the check is fully armed; in a delivered
- * L1 tree the module does not exist and the load failure degrades the check to
- * a documented no-op (see the header note). */
-async function loadStoreResolver(): Promise<TicketLocationResolver | null> {
+/** Message fragment identifying the store module's typed ambiguity throw. Used
+ * as a defensive fallback when the dynamically loaded module predates the
+ * AmbiguousTicketError class (message text is a stable contract pinned by the
+ * ticket-id-namespacing tests). */
+const AMBIGUOUS_MESSAGE_FRAGMENT = "[ticket-store] ambiguous ticket id";
+
+/** Loads resolveTicketLocation + AmbiguousTicketError through a guarded dynamic
+ * import. At L0 the L0-only store module is present and the check is fully
+ * armed; in a delivered L1 tree the module does not exist and the load failure
+ * degrades the check to a documented no-op (see the header note). */
+async function loadStoreResolver(): Promise<{
+  resolve: TicketLocationResolver;
+  AmbiguousTicketError: AmbiguousTicketErrorLike | null;
+} | null> {
   try {
     // computed specifier: tsc must not resolve this statically — ticket-store.ts is
     // L0-only and absent from delivered trees (TS2307 broke the L1 Typecheck CI step;
@@ -63,8 +114,9 @@ async function loadStoreResolver(): Promise<TicketLocationResolver | null> {
     const storeSpecifier = "./ticket-store.ts";
     const mod = (await import(storeSpecifier)) as {
       resolveTicketLocation: TicketLocationResolver;
+      AmbiguousTicketError?: AmbiguousTicketErrorLike;
     };
-    return mod.resolveTicketLocation;
+    return { resolve: mod.resolveTicketLocation, AmbiguousTicketError: mod.AmbiguousTicketError ?? null };
   } catch {
     return null;
   }
@@ -75,7 +127,8 @@ async function loadStoreResolver(): Promise<TicketLocationResolver | null> {
  * memoryDir, serviceDir or governanceDir is not an error: a directory that
  * does not exist simply contributes no citations / no resolutions (variant
  * projects may not have a store yet). Unresolved ids are returned as findings
- * with file+line so triage is mechanical (design §9 risk-table row). */
+ * with file+line so triage is mechanical (design §9 risk-table row);
+ * ambiguous ids (v1.1.0) are returned SEPARATELY with both paths. */
 export async function driftCheck(opts: {
   memoryDir: string;
   serviceDir: string;
@@ -97,20 +150,90 @@ export async function driftCheck(opts: {
       }
     }
   }
-  const resolve = await loadStoreResolver();
-  if (resolve === null) {
+  const loaded = await loadStoreResolver();
+  if (loaded === null) {
     // Delivered tree without the L0-only store machinery: nothing to resolve
     // against, so the check cannot distinguish loss from absence — degrade to
     // a no-op (zero findings) rather than false-FATALing every variant sync.
-    return { cited: cited.size, unresolved: [] };
+    return { cited: cited.size, unresolved: [], ambiguous: [] };
   }
+  const { resolve, AmbiguousTicketError } = loaded;
   const unresolved: DriftFinding[] = [];
+  const ambiguous: AmbiguityFinding[] = [];
   for (const [id, where] of cited) {
     try {
       resolve(serviceDir, governanceDir, id);
-    } catch {
-      unresolved.push({ id, file: where.file, line: where.line });
+    } catch (err: unknown) {
+      // v1.1.0 (T-20261127-001a): separate AMBIGUITY (cross-store duplicate — the
+      // ticket exists, twice) from NOT-FOUND (silent loss). instanceof against the
+      // dynamically loaded class; message-fragment fallback keeps the distinction
+      // working against an older store module that still throws a plain Error.
+      const isAmbiguous =
+        (AmbiguousTicketError !== null && err instanceof AmbiguousTicketError) ||
+        (err instanceof Error && err.message.includes(AMBIGUOUS_MESSAGE_FRAGMENT));
+      if (isAmbiguous && err instanceof Error) {
+        const typed = err as Error & { locations?: unknown; scope?: unknown };
+        const locations = Array.isArray(typed.locations) ? (typed.locations as string[]) : [];
+        const scope = typed.scope === "archives" ? "archives" : "stores";
+        ambiguous.push({ id, file: where.file, line: where.line, locations, scope });
+      } else {
+        unresolved.push({ id, file: where.file, line: where.line });
+      }
     }
   }
-  return { cited: cited.size, unresolved };
+  return { cited: cited.size, unresolved, ambiguous };
+}
+
+// --- Step-3.87 gate presentation/decision (v1.1.0, spec §3.2) -----------------
+// One definition of the gate's output + verdict, consumed by dev-sync step 3.87,
+// `ticket.ts doctor`, and the replay tests. dev-sync exits 1 ONLY on "fatal".
+
+const RED = "\x1b[31m";
+const GREEN = "\x1b[32m";
+const YELLOW = "\x1b[33m";
+const RESET = "\x1b[0m";
+
+export type DriftGateVerdict = "pass" | "ambiguous" | "fatal";
+
+/** Prints the step-3.87 findings and returns the gate verdict:
+ * - "fatal": at least one cited id resolves NOWHERE (silent-loss candidate) —
+ *   dev-sync exits 1, exactly as before v1.1.0.
+ * - "ambiguous": no unresolved ids, but ≥1 id resolves in MULTIPLE stores or
+ *   archives (AMBIGUOUS — provenance problem, NOT a loss; the store files all
+ *   exist). Non-fatal: dev-sync proceeds, the warning names both paths and the
+ *   fix (qualify the citation or de-duplicate the store).
+ * - "pass": every cited id resolves in exactly one store or archive. */
+export function reportDriftFindings(report: DriftReport): DriftGateVerdict {
+  if (report.unresolved.length > 0) {
+    console.error(
+      `${RED}✗ Step 3.87: ticket-store memory-drift — ${report.unresolved.length} cited ticket id(s) resolve in NO store or archive (of ${report.cited} cited)${RESET}`,
+    );
+    for (const f of report.unresolved) {
+      console.error(`   ${f.id} cited at ${f.file}:${f.line}`);
+    }
+    console.error(
+      "  Fix: restore the vanished ticket file (check tickets/governance/archive, git history of tickets/), or correct the citation in the named memory file if it is a typo.",
+    );
+    return "fatal";
+  }
+  if (report.ambiguous.length > 0) {
+    console.warn(
+      `${YELLOW}⚠️  Step 3.87: ${report.ambiguous.length} cited ticket id(s) resolve in MULTIPLE stores (AMBIGUOUS — provenance problem, not a loss):${RESET}`,
+    );
+    for (const f of report.ambiguous) {
+      const where = f.locations.length > 0 ? f.locations.join(" and ") : "multiple stores";
+      console.warn(`   ${f.id} cited at ${f.file}:${f.line} — exists in BOTH ${f.scope}: ${where}`);
+    }
+    console.warn(
+      "  Fix: qualify the citation with 'governance/<id>' or 'service/<id>' (or de-duplicate the store). Non-fatal — the sync proceeds; every cited ticket exists.",
+    );
+    console.log(
+      `${GREEN}✓ Step 3.87: ticket-store memory-drift check passed (${report.cited} distinct cited id(s); ${report.ambiguous.length} AMBIGUOUS — see warning above)${RESET}`,
+    );
+    return "ambiguous";
+  }
+  console.log(
+    `${GREEN}✓ Step 3.87: ticket-store memory-drift check passed (${report.cited} distinct cited id(s), all resolve)${RESET}`,
+  );
+  return "pass";
 }
