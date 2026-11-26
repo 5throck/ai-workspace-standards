@@ -497,6 +497,12 @@ describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
   const PRUNED = 'scripts/helpers/beta-lifecycle.ts';
 
   test('prune of a retired delivery that carries a marker is MARKER_LOSS and the file is kept; unmarked is pruned', () => {
+    // Two full engine runs inside the test body (one per prune candidate). Under the
+    // widened engine-suite parallelism of 2026-11-26 (the S1/T-3 engine suites), the
+    // windows-latest leg measured >60s against this explicit 60s budget (CI run
+    // 45826913410 — the only failure in the file, ubuntu/macos green), so the budget
+    // follows the PR #1963 precedent: measured CI evidence → explicit per-test ceiling.
+    // Assertions unchanged.
     const run = (content: string): { tmp: string; status: number; out: string } => {
       const tmp = makeTempProject();
       mkdirSync(join(tmp, 'scripts', 'helpers'), { recursive: true });
@@ -521,7 +527,7 @@ describe('E2 MARKER_LOSS — prune and instruction-file MERGE', () => {
     expect(unmarked.status).toBe(0);
     expect(existsSync(join(unmarked.tmp, PRUNED))).toBe(false);
     expect(unmarked.out).toContain(`PRUNE  ${PRUNED}`);
-  }, 60000);
+  }, 120000);
 
   test('instruction-file MERGE: a marker inside a replaced managed zone is MARKER_LOSS and the merge write is skipped', () => {
     // Consolidated ride (spec 2026-11-15-windows-ci-test-speedup-design item 1):
