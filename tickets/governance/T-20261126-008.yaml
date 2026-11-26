@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: T-20261126-008
+kind: manual
+title: >-
+  co-deck skills enforcement dangling reference to nonexistent
+  scripts/audit-variant.ts
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-26T00:00:00.000+09:00'
+history:
+  - at: '2026-11-26T00:00:00.000+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-26T23:56:34.000+09:00'
+    action: reconstruct
+    actor: automation-engineer
+    from: backlog
+    to: backlog
+result: >-
+  Reconstructed 2026-11-26 from session records; original working-tree-only
+  file never committed and lost; adjudicated under DEC-20261126-001; status
+  inferred from session records (no resolution record found — the P1-P8 pair
+  program session listed the file as modified, not resolved).
+  Evidence: memory/2026-11-26.md L407 "T-20261126-008.yaml — created (co-deck
+  skills enforcement dangling reference to nonexistent scripts/audit-variant.ts)";
+  L522 modified in the P1-P8 session. Status best evidence: open (backlog).
+error: null

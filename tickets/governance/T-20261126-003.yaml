@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261126-003
+kind: manual
+title: >-
+  docs(designs): skill-drift structural fixes design — S1-S4 engine changes,
+  legacy stub conversion, pair program (T-20261123-005, T-20261126-003)
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-26T00:00:00.000+09:00'
+history:
+  - at: '2026-11-26T00:00:00.000+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-26T23:56:34.000+09:00'
+    from: backlog
+    to: done
+  - at: '2026-11-26T23:56:34.000+09:00'
+    action: reconstruct
+    actor: automation-engineer
+    from: backlog
+    to: done
+result: >-
+  Reconstructed 2026-11-26 from session records; original working-tree-only
+  file never committed and lost; adjudicated under DEC-20261126-001.
+  Evidence: memory/2026-11-26.md L346 session block "docs(designs):
+  skill-drift structural fixes design — S1-S4 engine changes, legacy stub
+  conversion, pair program (T-20261123-005, T-20261126-003)"; design doc
+  docs/designs/2026-11-26-skill-drift-structural-fixes-design.md landed with
+  its spec registry entry; P1-P8 port landed via PR #2190.
+error: null

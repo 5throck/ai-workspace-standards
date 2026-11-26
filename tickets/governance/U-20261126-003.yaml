@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: U-20261126-003
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-26T23:17:04.254+09:00
+history:
+  - at: 2026-11-26T23:17:04.254+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.30.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: 'scripts/helpers/local-patch-scan.ts LOCAL_PATCH_RE (= /LOCAL-PATCH\(upstream-request:\s*([A-Za-z0-9][A-Za-z0-9-]*)\)/g) scans raw file contents with no comment/string awareness. scripts/detect-backport.ts line 20 contains that exact pattern inside its own docstring as format documentation ("E1 LOCAL_PATCH — LOCAL-PATCH(upstream-request: pending) markers found"), so every sync-detection run reports a spurious E1 template-defect candidate: file=scripts/detect-backport.ts, id=pending/uid=null. The detector flags its own documentation as evidence of an unfiled local patch. No actual marker exists in the project. Consequence: one recurring false candidate per detection run (deduped after first state write, but recorded with uid=null = "pending" forever until fixed), and PM triage noise each sync. Expected: comment/docstring lines (trimmed line starts with * or //) should not produce LOCAL-PATCH findings, or the scanner should exclude the detector''s own doc example.'
+  affected_paths:
+    - scripts/helpers/local-patch-scan.ts
+    - scripts/detect-backport.ts
+  identity_source: self_declared
+  repro: 'In any co-* variant with syncDetection ON (e.g. Projects/co-deck), run the sync detection (bun scripts/detect-backport.ts or via /sync). Output shows an E1 LOCAL_PATCH / template-defect candidate with affected_paths=[scripts/detect-backport.ts] and uid=null (persisted in .git/detect-backport-state.json filed[0], dedupe_token sha256:527e2e38...). Then: grep -n "LOCAL-PATCH(upstream-request" scripts/detect-backport.ts -> the ONLY hit is line 20, inside the file''s own /** ... */ docstring documenting the marker format ("E1 LOCAL_PATCH — LOCAL-PATCH(upstream-request: pending) markers found"). grep -rn across the whole project finds no real marker (only the same docstring example and the procedure text in agents/pm.md:104). upstream_request_status for co-deck shows no open request about this (all done). So the scanner is matching its own documentation example. Same docstring text exists in the workspace-root copy scripts/detect-backport.ts and templates/common/scripts/detect-backport.ts, so root syncs would flag themselves too where detection runs.'
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - info:in_last_delivery scripts/helpers/local-patch-scan.ts=false
+    - info:in_last_delivery scripts/detect-backport.ts=false
+  dedupe_key: 7488782a6296027154916baa6ebb033bd40320e54a4a093940a2b4b5d6ddb7a8
+  duplicates:
+    - project: co-deck
+      at: 2026-11-26T23:17:04.254+09:00
