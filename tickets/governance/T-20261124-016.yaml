@@ -10,7 +10,7 @@ title: >-
   2026-11-24-fleet-test-baseline-design proposes a ticketed 30-day quarantine;
   this ticket is the fix ticket. Action: fix the twelve tests.
 priority: normal
-status: review
+status: done
 attempts: 0
 created_at: '2026-11-24T22:22:23.112+09:00'
 history:
@@ -26,5 +26,18 @@ history:
   - at: '2026-11-26T13:26:57.535+09:00'
     from: running
     to: review
-result: null
+  - at: '2026-11-26T13:36:53.065+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed at the root cause, landed in PR #260 (merged 1c29658): (1) U-005 /W pin
+  — stale expectation corrected: Pretendard upem 2048 makes
+  advanceWidth*1000/upem fractional (14,499/14,716 measured); now pins
+  finite/non-negative/<4000 + density, gids 13205/13252 still asserted (upstream
+  U-20261126-001). (2) VR baseline comparison — code gap fixed: real Chromium
+  launch probe; missing binary now skips with a named reason instead of failing
+  opaque total=0 (upstream U-20261126-002). (3) Footnote-scrim ladder pin passes
+  on the adopted 1.17.0 renderer. Deck suite contained: 527 pass / 0 fail / 4
+  skip. No test deleted or weakened; the 30-day quarantine never shipped locally
+  (co-deck wave-2 manifest not yet declared), so nothing to remove.
 error: null
