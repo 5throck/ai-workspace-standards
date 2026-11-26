@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261126-001
+kind: manual
+title: >-
+  co-safety docs/context.md adjudication — nightly STEP I conflict held as a
+  ticket for owner adjudication
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-26T00:00:00.000+09:00'
+history:
+  - at: '2026-11-26T00:00:00.000+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-26T23:56:34.000+09:00'
+    action: reconstruct
+    actor: automation-engineer
+    from: backlog
+    to: backlog
+result: >-
+  Reconstructed 2026-11-26 from session records; original working-tree-only
+  file never committed and lost; adjudicated under DEC-20261126-001.
+  Evidence: memory/2026-11-26.md L12/L17/L21 — nightly STEP I recorded
+  "co-safety conflict → ticket T-20261126-001"; Open Issues keeps it as an
+  owner open item. Status best evidence: open (backlog).
+error: null
