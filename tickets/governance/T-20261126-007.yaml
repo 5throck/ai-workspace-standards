@@ -1,0 +1,35 @@
+schemaVersion: 1
+id: T-20261126-007
+kind: manual
+title: >-
+  co-newbiz is the only fleet project whose variant audit-variant hook is both
+  present AND declared (Projects/co-newbiz/variant.json script_manifest.local
+  entry {name: audit-variant, path: scripts/co-newbiz/audit-variant.ts};
+  audit.ts §27 resolves and executes it), but the variant has no template
+  source — templates/ carries 16 variants and no co-newbiz — so the active hook
+  exists only project-side with no delivery path: a re-scaffold cannot
+  reproduce it, the template delivery contract cannot track it, and audit.ts
+  §28 (scripts/audit.ts:2383 checkVariantAuditHookRegression) walks
+  templates/co-* only and therefore cannot see or protect co-newbiz's declared
+  hook the way it protects co-safety's. Fleet status: in-fleet member
+  (snapshot-2026-11-23 17/17 coverage; T-20261123-004 resolved the missed
+  2026-11-23 wave, not this structural gap). Decision needed, one of:
+  (a) promote co-newbiz to a first-class template (create templates/co-newbiz
+  via the project-to-variant path, hook included), or (b) ratify it as
+  out-of-tree/adoption-only and add the docs/fleet-membership.json exclusion
+  row (precedent: co-utility, design
+  2026-11-21-co-utility-dedup-and-adoption-role-design §5.7, executed via
+  T-20261124-009 / PR #2172) — membership edits are human-only, so (b)'s row
+  needs owner sign-off either way; until decided, co-newbiz's audit coverage is
+  invisible to template-level governance and its specialization can silently
+  diverge from any future common-script refresh.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-26T20:03:30.000+09:00'
+history:
+  - at: '2026-11-26T20:03:30.000+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

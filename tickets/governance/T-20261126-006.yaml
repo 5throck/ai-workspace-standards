@@ -1,0 +1,39 @@
+schemaVersion: 1
+id: T-20261126-006
+kind: manual
+title: >-
+  Variant audit-variant hook files exist in two projects without the
+  variant.json declaration that activates them, so both are dead code —
+  Projects/co-game/scripts/audit-variant.ts and Projects/co-develop/scripts/audit-variant.ts
+  (v1.0.0, header says adopted from co-game per
+  docs/designs/2026-10-31-variant-asset-adoption-design.md §3a and adds a
+  section-3 CI bun-pins validator spawn) each carry a full hook
+  implementation, but neither variant.json (template nor project copy) declares
+  a script_manifest.local entry named 'audit-variant' (grep: 0 matches in
+  Projects/co-game/variant.json and Projects/co-develop/variant.json), and
+  audit.ts §27 (scripts/audit.ts:2401-2416) treats only that declaration as the
+  activation signal after the same-day false-positive fix recorded at
+  scripts/audit.ts:2406 (the variant_scripts_dir-existence misread that hit
+  co-abap/co-consult/co-game/co-deck) — so the intended variant-specific checks
+  never execute and neither file appears in any delivery contract. Decision
+  needed, one of: (a) declare the hooks — add
+  {name: audit-variant, path: scripts/<variant>/audit-variant.ts} to both
+  variant.json script_manifest.local arrays; note variant.json is
+  template-managed, so the change lands template-side first (adjudicated port
+  per 2026-10-27-sync-overwrite-policy-design §6 or adopt-template with owner
+  sign-off) and §28 (scripts/audit.ts:2383 checkVariantAuditHookRegression)
+  then requires the hook file to exist in templates/<variant>/ at the declared
+  path and to load — i.e. (a) also promotes both files into their template
+  mirrors; or (b) remove the files as dead code. If (a), decide per variant:
+  co-develop's extra section 3 suggests it was written to be active, while
+  co-game's is the older unregistered original.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-26T20:02:10.000+09:00'
+history:
+  - at: '2026-11-26T20:02:10.000+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
