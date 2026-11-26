@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-26T15:59:39.379Z
+**Generated**: 2026-11-26T16:20:09.263Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -51,7 +51,7 @@
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
 | evidence-ledger | 1.1.1 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
 | explain-me | 1.0.1 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
-| finishing-a-development-branch | 1.0.3 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
+| finishing-a-development-branch | 1.1.1 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.2 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | handbook | 0.6.2 | active | templates/common/skills/handbook/SKILL.md | common | make handbook, create handbook, build course site, companion handbook, update handbook, handbook sync, handbook maintenance | pm |
 | handbook-sync-audit | 1.0.5 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | audit handbook, handbook parity check, handbook sync audit, textbook drift check | pm |

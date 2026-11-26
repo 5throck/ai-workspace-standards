@@ -362,7 +362,7 @@
       "gemini_source": ".gemini/skills/finishing-a-development-branch/SKILL.md",
       "agents_source": ".agents/skills/finishing-a-development-branch/SKILL.md",
       "codex_source": ".codex/skills/finishing-a-development-branch/SKILL.md",
-      "version": "1.0.3",
+      "version": "1.1.1",
       "description": "Workspace override — redirects branch completion to /sync pipeline",
       "propagated_to_common": true
     },

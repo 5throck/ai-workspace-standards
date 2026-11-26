@@ -4,8 +4,8 @@ description: Workspace override — redirects all branch completion to /sync pip
 status: active
 owner: pm
 scope: common
-version: 1.0.3
-last_reviewed: 2026-11-08
+version: 1.1.1
+last_reviewed: 2026-11-27
 triggers:
   - "finish branch"
   - "complete work"
