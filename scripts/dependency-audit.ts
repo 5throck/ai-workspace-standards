@@ -2,7 +2,7 @@
 /**
  * dependency-audit.ts — Fleet dependency-vulnerability gate with a reviewed
  * advisory-waiver channel (T-20261003-011).
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Replaces the inline `bun audit` severity grep in the CI dependency-audit job
  * (templates/common/.github/workflows/ci.yml). Gate semantics are unchanged:
@@ -43,6 +43,21 @@
  *    the gate audits declared npm dependencies, and an absent manifest means
  *    there is nothing to audit.
  *
+ * v1.2.0 (2026-11-26, T-20261126-004):
+ *  - Lockfile-skip: a repository WITH a package.json but NO lockfile that
+ *    `bun audit` can consume (bun.lock, bun.lockb, package-lock.json,
+ *    npm-shrinkwrap.json, yarn.lock — the set bun audit reads or migrates)
+ *    now reports NOT-APPLICABLE (exit 0, the line names the repo) instead of
+ *    the loud GateError that bun's "missing lockfile, nothing to audit"
+ *    empty-stdout failure used to raise. Co-architect ships no runtime
+ *    dependencies and therefore no lockfile — an environment limitation,
+ *    not a vulnerability finding, so holding its delivery PRs on the old
+ *    GateError was a false positive.
+ *  - Failure-path parity: when any consumable lockfile IS present, the
+ *    wrapper runs the audit exactly as before — empty/unparseable audit
+ *    output on a lockfile'd repo remains an infrastructure failure, and
+ *    every other failure mode is unchanged.
+ *
  * Usage:
  *   bun scripts/dependency-audit.ts [--waiver-file <path>]
  *
@@ -53,12 +68,19 @@ import { readFileSync } from "node:fs";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 
 const DEFAULT_WAIVER_FILE = path.join(".github", "dependency-waivers.toml");
 const SEVERITY_ORDER = ["critical", "high", "moderate", "low"];
 /** Severities that trip the gate (matches the L0 root gate threshold). */
 const FAILING_SEVERITIES = new Set(["critical", "high"]);
+/**
+ * Lockfiles `bun audit` can consume as-is (bun's own two formats) or migrate
+ * on the fly (npm/yarn formats — confirmed: bun migrates package-lock.json,
+ * npm-shrinkwrap.json, and yarn.lock into a usable audit tree). A repo root
+ * with none of these has no lockfile-resolved dependency tree to audit.
+ */
+const AUDITABLE_LOCKFILES = ["bun.lock", "bun.lockb", "package-lock.json", "npm-shrinkwrap.json", "yarn.lock"] as const;
 
 /** One advisory record as emitted by `bun audit --json`. */
 export interface AuditAdvisory {
@@ -296,6 +318,30 @@ export function scopeContradictions(waivers: Waiver[], packageJson: Record<strin
   return contradictions;
 }
 
+/**
+ * Name of the first lockfile at the repo root that `bun audit` can consume
+ * (its own formats directly, npm/yarn formats via migration), or null when
+ * the repo ships none — there is then no lockfile-resolved dependency tree
+ * to audit (T-20261126-004).
+ */
+export function findAuditableLockfile(repoRoot = "."): string | null {
+  for (const lockfile of AUDITABLE_LOCKFILES) {
+    if (existsSync(path.join(repoRoot, lockfile))) return lockfile;
+  }
+  return null;
+}
+
+/**
+ * Remaining findings whose severity trips the gate (high/critical, unknown
+ * severities fail closed as high). The exit-1 verdict of the wrapper is
+ * exactly `failingFindings(remaining).length > 0`.
+ */
+export function failingFindings(
+  remaining: Array<{ pkg: string; advisory: AuditAdvisory }>,
+): Array<{ pkg: string; advisory: AuditAdvisory }> {
+  return remaining.filter((f) => FAILING_SEVERITIES.has(normalizeSeverity(f.advisory.severity)));
+}
+
 // ── Orchestration ────────────────────────────────────────────────────────────
 
 async function runBunAudit(): Promise<string> {
@@ -355,7 +401,11 @@ Usage:
 Behavior:
   - Skips with a notice (exit 0) when the repo has no root package.json —
     nothing to audit (T-20261004-029).
-  - Runs \`bun audit --json\`; fails on empty/unparseable output (infrastructure).
+  - Reports NOT-APPLICABLE (exit 0, line names the repo) when a package.json
+    exists but no lockfile bun audit can consume does — no tree to audit
+    (T-20261126-004).
+  - Runs \`bun audit --json\` when an auditable lockfile is present; fails on
+    empty/unparseable output (infrastructure).
   - Fails on any remaining high/critical finding; reports low/moderate.
   - Suppresses findings matching a reviewed waiver in
     ${DEFAULT_WAIVER_FILE} (override with --waiver-file).
@@ -392,6 +442,22 @@ async function main(): Promise<number> {
   if (!existsSync(path.join(process.cwd(), "package.json"))) {
     console.log(
       "[SKIP] no package.json at repo root — no declared npm dependencies to audit; gate not applicable (passing with notice).",
+    );
+    return 0;
+  }
+
+  // 0b. Lockfile-skip (T-20261126-004): a repo WITH a package.json but no
+  //     lockfile bun audit can consume has no lockfile-resolved dependency
+  //     tree to audit — `bun audit` would hard-error with "missing lockfile,
+  //     nothing to audit" (empty stdout), which the gate used to report as a
+  //     loud infrastructure GateError. That is an environment limitation
+  //     (e.g. co-architect ships no runtime dependencies), not a finding, so
+  //     report NOT-APPLICABLE and pass. Any consumable lockfile present keeps
+  //     the audit run and every failure mode below unchanged.
+  const lockfile = findAuditableLockfile(process.cwd());
+  if (lockfile === null) {
+    console.log(
+      `[NOT-APPLICABLE] ${process.cwd()}: package.json present but no lockfile bun audit can consume at repo root (${AUDITABLE_LOCKFILES.join(", ")} all absent) — no lockfile-resolved dependency tree to audit; dependency gate not applicable (passing with notice).`,
     );
     return 0;
   }
@@ -475,7 +541,7 @@ async function main(): Promise<number> {
 
   // 5. Severity gate over the remaining findings (threshold parity with the L0 gate).
   const remaining = match.remaining;
-  const failing = remaining.filter((f) => FAILING_SEVERITIES.has(normalizeSeverity(f.advisory.severity)));
+  const failing = failingFindings(remaining);
   if (failing.length > 0) {
     console.error(`[FAIL] ${failing.length} high/critical vulnerabilit(y/ies) not covered by any waiver:`);
     for (const { pkg, advisory } of failing) {

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-26T04:28:13.443Z
+**Generated**: 2026-11-26T05:07:35.073Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -128,7 +128,7 @@
 | compile-tokens.ts | 1.3.0 | scripts/compile-tokens.ts | fs, path |
 | contained-run.ts | 1.1.0 | scripts/contained-run.ts | child_process, fs, os, path |
 | create-l3-scaffold.ts | 1.21.0 | scripts/create-l3-scaffold.ts | child_process, fs, path, url |
-| dependency-audit.ts | 1.1.0 | scripts/dependency-audit.ts | fs, path |
+| dependency-audit.ts | 1.2.0 | scripts/dependency-audit.ts | fs, path |
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.6.0 | scripts/design-lint.ts | fs, js-yaml, path |
 | detect-backport.ts | 1.0.0 | scripts/detect-backport.ts | child_process, crypto, fs, path |
