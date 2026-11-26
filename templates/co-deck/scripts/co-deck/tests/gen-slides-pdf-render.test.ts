@@ -1,3 +1,9 @@
+// @version 1.9.2 — last_updated 2026-11-26. Ported from the co-deck project
+//   fix (U-20261126-001, project commit 80efefa): the U-005(1+2) /W integer pin
+//   compared raw glyph widths, but the dense table holds
+//   advanceWidth × 1000/unitsPerEm (fractional for Pretendard's 2048 upem).
+//   The pin now requires density (>1000 entries) and finite, non-negative,
+//   text-space-scale (<4000) entries.
 // @version 1.9.1 — last_updated 2026-11-25. Ported from the co-deck project
 //   1.8.0 copy (T-20261124-010, adjudicated port): five assertions of the
 //   project's U-20261119-007 pins had no counterpart in 1.9.0 and are ported
@@ -75,7 +81,8 @@
 //   3. U-002(c): isPunchlineSlide decks run the punchline renderer.
 //   4. U-005(7): contactPhone renders.
 //   5. U-005(1+2): /W covers the shaped (calt-alternate) glyph ids of ':' and
-//      '-', and /W entries are integers (PDF 32000-1 §9.7.4.3).
+//      '-', and /W entries are finite non-negative reals at text-space scale
+//      (fractional for a 2048-upem font such as Pretendard).
 //
 // Run: bun test scripts/co-deck/tests/gen-slides-pdf-render.test.ts
 
@@ -249,7 +256,7 @@ describe.skipIf(!haveFonts)('gen-slides-pdf render-path regressions', () => {
     expect(txt).toContain('010-1234-5678');
   });
 
-  test('U-005(1+2): /W covers shaped (calt) gids of : and -, entries are integers', () => {
+  test('U-005(1+2): /W covers shaped (calt) gids of : and -, entries are finite non-negative reals', () => {
     const streams = decompressedStreams(pdfPath);
     const wStream = streams.find((s) => s.includes('/W ['));
     expect(wStream).toBeDefined();
@@ -276,7 +283,19 @@ describe.skipIf(!haveFonts)('gen-slides-pdf render-path regressions', () => {
     // and over-advanced both characters.
     expect(widths.get(13205)).toBeDefined();
     expect(widths.get(13252)).toBeDefined();
-    for (const w of widths.values()) expect(Number.isInteger(w)).toBe(true);
+    // Ported from the co-deck project fix (upstream request U-20261126-001,
+    // project commit 80efefa) — the dense table written by the
+    // U-20261105-005 patch is `advanceWidth * 1000/unitsPerEm` (the same form
+    // as pdf-lib's own computeWidths). Pretendard has unitsPerEm 2048, so nearly
+    // every entry is a fractional real (measured 2026-11-26: 14,499 of 14,716).
+    // /W takes real numbers, so "integers" was a wrong expectation. Pin what the
+    // table must hold: dense, finite, non-negative, text-space scale.
+    expect(widths.size).toBeGreaterThan(1000);
+    for (const w of widths.values()) {
+      expect(Number.isFinite(w)).toBe(true);
+      expect(w).toBeGreaterThanOrEqual(0);
+      expect(w).toBeLessThan(4000);
+    }
   });
 });
 

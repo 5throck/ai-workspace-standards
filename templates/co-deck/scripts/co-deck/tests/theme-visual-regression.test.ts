@@ -1,3 +1,9 @@
+// @version 0.2.1 — last_updated 2026-11-26. Ported from the co-deck project
+//   fix (U-20261126-002, project commit 0c23642): the Playwright package check
+//   never probed the browser binary, so a missing Chromium failed as
+//   total=0 instead of skipping. A real-launch probe in a Node subprocess
+//   (checkBrowserAvailable) now gates the suite, and the skip path is a named
+//   test.skip carrying the probe reason.
 // @version 0.2.0 — compat matrix now derived from theme.json compatible_styles via
 //   loadThemePackage() (single source of truth, no hardcoded pair list); browser
 //   subprocess invoked via execFileSync (no shell string join — safe with paths
@@ -25,7 +31,7 @@
 // because bun has issues with Playwright subprocess handling on Windows.
 
 import { test, describe, expect, beforeAll } from 'bun:test';
-import { execFileSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { loadThemePackage } from '../lib/theme-contract.js';
@@ -102,6 +108,32 @@ function checkPlaywrightAvailable(): boolean {
 
 const playwrightAvailable = checkPlaywrightAvailable();
 
+// Ported from the co-deck project fix (upstream request U-20261126-002,
+// project commit 0c23642) — the npm package alone cannot
+// screenshot: Playwright downloads the browser binary separately
+// (`bunx playwright install chromium`), and the subprocess needs `node` on
+// PATH. Probe both with a real launch in a Node subprocess (public API; never
+// under bun — see the Windows note on the browser script). Without this probe a
+// missing binary surfaced as `expect(result.total).toBeGreaterThan(0)` with
+// received 0 — an opaque failure, not a baseline mismatch (no comparison ran).
+function checkBrowserAvailable(): { ok: boolean; reason?: string } {
+  if (!playwrightAvailable) return { ok: false, reason: 'playwright package not installed' };
+  let res: ReturnType<typeof spawnSync>;
+  try {
+    res = spawnSync('node', ['-e',
+      "import('playwright').then(m => m.chromium.launch()).then(b => b.close()).then(() => 0, () => 3)"],
+      { cwd: root, encoding: 'utf-8', timeout: 60000 });
+  } catch (err: any) {
+    return { ok: false, reason: `node subprocess cannot start: ${err?.message ?? err}` };
+  }
+  if (res.error) return { ok: false, reason: `node subprocess cannot start: ${res.error.message}` };
+  if (res.status !== 0) return { ok: false, reason: 'Playwright Chromium browser is not installed for this Playwright version' };
+  return { ok: true };
+}
+
+const browserProbe = checkBrowserAvailable();
+const browserAvailable = browserProbe.ok;
+
 // ── Baseline existence check ───────────────────────────────────────────
 
 function hasBaseline(theme: string, style: string): boolean {
@@ -172,12 +204,12 @@ function runBrowserSubprocess(mode: string, theme?: string, style?: string): Bro
 
 // ── Skip if Playwright not installed ────────────────────────────────────
 
-if (!playwrightAvailable) {
+if (!browserAvailable) {
   describe('visual regression tests', () => {
-    test('skipped — Playwright not installed', () => {
-      console.log('⚠️  Playwright not installed. Skipping visual regression tests.');
+    // Skipped, not passed: no comparison ran. Fix the environment to execute it.
+    test.skip('skipped — browser unavailable (visual comparison did not run)', () => {
+      console.log(`⚠️  Visual regression skipped: ${browserProbe.reason}.`);
       console.log('   Install with: bun add -d playwright && bunx playwright install chromium');
-      expect(true).toBe(true);
     });
   });
 } else if (updateBaselines) {
