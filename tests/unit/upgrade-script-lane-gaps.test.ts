@@ -9,8 +9,10 @@
  * pattern): a versioned `.py` under scripts/deck/ is delivered; a file no lane
  * places gets UNCLASSIFIED; a delivered script whose row is not updated is
  * REGISTRY_DRIFT (ERROR); a stale row is reconciled to the file's @version.
+ * T-20261126-002: the lib/error-handling.ts and detect-backport.ts rows stay at
+ * their header versions (1.4.0 / 1.0.1) after a delivery.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -21,6 +23,7 @@ import { afterAll, describe, expect, test } from 'bun:test';
 import { escapeRegistryRowPipes, isL0OnlyRegistryRow, registryRowVersion, splitRegistryRow, toPosixPath } from '../../scripts/lib/upgrade-policy.ts';
 import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
 import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
+import { extractScriptVersion } from '../../scripts/helpers/upgrade-versions.ts';
 
 const workspaceRoot = resolve(import.meta.dir, '..', '..');
 const upgradeScript = join(workspaceRoot, 'scripts', 'upgrade-project.ts');
@@ -146,6 +149,31 @@ describe('engine — script lane gaps (design §4.6)', () => {
     // a nested registry file is a registry, not an unclassified script
     expect([...unclassifiedPaths].filter((p) => p.endsWith('/SCRIPTS.md') || p === 'scripts/SCRIPTS.md')).toEqual([]);
   });
+
+  // T-20261126-002 regression: both scripts carry a stray mid-file `// @version`
+  // line (error-handling 1.3.0 under a 1.4.0 header, detect-backport 1.0.0 under
+  // 1.0.1). The row-7 lockstep loop read those and LOWERED the correct rows in
+  // all 7 real upgrade runs on 2026-11-26, failing the project's
+  // lifecycle-sync-audit Check A. The file header is the source of truth.
+  test('rows for lib/error-handling.ts and detect-backport.ts stay at 1.4.0 / 1.0.1 after a delivery', () => {
+    expect(first.status).toBe(0);
+    const registry = readFileSync(join(project, 'scripts', 'SCRIPTS.md'), 'utf8');
+    expect(registryRowVersion(registry, 'lib/error-handling.ts')).toBe('1.4.0');
+    expect(registryRowVersion(registry, 'detect-backport.ts')).toBe('1.0.1');
+    // No row was rewritten to the stray mid-file marker, and no drift row fired.
+    expect(first.out).not.toContain('lib/error-handling.ts → v1.3.0');
+    expect(first.out).not.toContain('detect-backport.ts → v1.0.0');
+    expect(rows.filter((r) => r.verdict === 'REGISTRY_DRIFT' && /error-handling|detect-backport/.test(r.path))).toEqual([]);
+    // The delivered copies' headers agree with their rows.
+    for (const [rel, expected] of [
+      ['lib/error-handling.ts', '1.4.0'],
+      ['detect-backport.ts', '1.0.1'],
+    ] as const) {
+      const file = join(project, 'scripts', rel);
+      if (!existsSync(file)) continue; // an L0-only script is not delivered to a variant target
+      expect(extractScriptVersion(file)).toBe(expected);
+    }
+  }, 60000);
 
   test('(b) a stale registry row is reconciled to the delivered file version', () => {
     const registryPath = join(project, 'scripts', 'SCRIPTS.md');

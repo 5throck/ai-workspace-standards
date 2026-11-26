@@ -3,7 +3,7 @@ id: U-20261123-003
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: waiting
+status: done
 attempts: 0
 created_at: '2026-11-23T14:36:52.434+09:00'
 history:
@@ -13,7 +13,27 @@ history:
   - at: '2026-11-23T20:58:55.243+09:00'
     from: backlog
     to: waiting
-result: null
+  - at: '2026-11-26T13:28:02.410+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-26T13:28:02.430+09:00'
+    from: running
+    to: review
+  - at: '2026-11-26T13:28:35.191+09:00'
+    from: review
+    to: done
+result: >-
+  Root cause identified 2026-11-26: the 2026-11-23 04:18 wave ran against a ROOT
+  working tree carrying an UNTRACKED template twin of
+  skill-graph-fleet-report.ts (fleet-report v2.5.0 batch in development that
+  day, memory/2026-11-23.md:398-405); collectScriptFiles walks the filesystem so
+  untracked template files are deliverable, and the pre-ffed5d8b9 scriptRowGate
+  had no L0-only check - the file landed in Projects/co-security untracked
+  (never committed) and was removed by the same-day hand repair
+  (memory/2026-11-23.md:63). Defect fixed upstream in ffed5d8b9 (machinery row
+  7, L0_ONLY_SKIP); today's dry-runs are clean. Residual unknowns documented:
+  the L0-vs-L3 layer-cell question and the missing 2026-11-23 run log/manifest
+  (adjacent days exist).
 error: null
 upstream:
   project: co-security
@@ -64,3 +84,17 @@ upstream:
   duplicates:
     - project: co-security
       at: '2026-11-23T14:36:52.434+09:00'
+  resolution:
+    outcome: fixed
+    summary: >-
+      Root cause identified 2026-11-26: the 2026-11-23 04:18 wave ran against a
+      ROOT working tree carrying an UNTRACKED template twin of
+      skill-graph-fleet-report.ts (fleet-report v2.5.0 batch in development that
+      day, memory/2026-11-23.md:398-405); collectScriptFiles walks the
+      filesystem so untracked template files are deliverable, and the
+      pre-ffed5d8b9 scriptRowGate had no L0-only check - the file landed in
+      Projects/co-security untracked (never committed) and was removed by the
+      same-day hand repair (memory/2026-11-23.md:63). Defect fixed upstream in
+      ffed5d8b9 (machinery row 7, L0_ONLY_SKIP); today's dry-runs are clean.
+      Residual unknowns documented: the L0-vs-L3 layer-cell question and the
+      missing 2026-11-23 run log/manifest (adjacent days exist).

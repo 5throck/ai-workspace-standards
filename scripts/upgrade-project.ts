@@ -3214,6 +3214,18 @@ function afterRegistrySeparator(lines: string[]): number {
   return -1;
 }
 
+/** v1.122.0 (T-20261126-002): a registry row is never lowered below the
+ *  `@version` of the script file present in the project — that file is the
+ *  source of truth (lifecycle-sync-audit Check A compares row vs project file).
+ *  Returns `proposed`, or the project file's higher version. No project copy or
+ *  an unparsable header → `proposed` unchanged. */
+function floorAtProjectScriptVersion(scriptRelPath: string, proposed: string): string {
+  const projFile = join(projectDir, scriptRelPath);
+  if (!existsSync(projFile)) return proposed;
+  const projVersion = extractScriptVersion(projFile);
+  return projVersion && semverGt(projVersion, proposed) ? projVersion : proposed;
+}
+
 function reconcileScriptRegistry(scriptRelPath: string): void {
   const registryPath = join(projectDir, "scripts", "SCRIPTS.md");
   if (!existsSync(registryPath)) return;
@@ -3257,7 +3269,7 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
     // updated — never duplicated.
     const tplFile = resolveTemplate(scriptRelPath);
     const fileVersion = tplFile && existsSync(tplFile) ? extractScriptVersion(tplFile) : "";
-    const targetVersion = fileVersion || resolution.subVersion;
+    const targetVersion = floorAtProjectScriptVersion(scriptRelPath, fileVersion || resolution.subVersion);
     const content = readFileSync(registryPath, "utf8");
     const rowRe = new RegExp(`^\\| \`${escaped}\` \\| [^|]*\\| ([^|]+) \\|.*\\r?(?:\\n|$)`, "gm");
     let seen = 0;
@@ -3291,15 +3303,18 @@ function reconcileScriptRegistry(scriptRelPath: string): void {
     return;
   }
 
-  const targetVersion = (() => {
-    // Prefer the version of the file actually being delivered (the resolved
-    // template copy) over the registry-lookup version: L0's row can be newer
-    // than the L1 snapshot the project receives, and writing L0's number would
-    // trip lifecycle-sync-audit Check A (@version vs registry row).
-    const tplFile = resolveTemplate(scriptRelPath);
-    const fileVersion = tplFile && existsSync(tplFile) ? extractScriptVersion(tplFile) : "";
-    return fileVersion || resolution.sourceVersion;
-  })();
+  const targetVersion = floorAtProjectScriptVersion(
+    scriptRelPath,
+    (() => {
+      // Prefer the version of the file actually being delivered (the resolved
+      // template copy) over the registry-lookup version: L0's row can be newer
+      // than the L1 snapshot the project receives, and writing L0's number would
+      // trip lifecycle-sync-audit Check A (@version vs registry row).
+      const tplFile = resolveTemplate(scriptRelPath);
+      const fileVersion = tplFile && existsSync(tplFile) ? extractScriptVersion(tplFile) : "";
+      return fileVersion || resolution.sourceVersion;
+    })(),
+  );
 
   const content = readFileSync(registryPath, "utf8");
   // Consume the trailing newline on removal matches so dropped duplicate rows
