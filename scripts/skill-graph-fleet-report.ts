@@ -2,6 +2,34 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.9.0 (2026-11-26, spec
+ *          docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.3 S3):
+ *          the skill-intent registry — new L0-only docs/skill-intent.json in the
+ *          fleet-membership.json house shape (version/_comment/entries with
+ *          capability/project/kind/reason/decided/decision_ref; 5 kinds), consumed
+ *          by classifyConvergence through an OPTIONAL pure intent map
+ *          (`capability@project` → row). Fail-closed validation (lib/fleet.ts
+ *          precedent): malformed schema/unknown kind/bad decision_ref → hard error
+ *          naming the row; a row naming a non-fleet-member project or a capability
+ *          absent from that project's graph this run → the run exits non-zero.
+ *          Fully-covered minority groups report `convergedIntent`; partially
+ *          covered rows stay divergent annotated (`intentCovered`). LOCAL-PATCH
+ *          markers are NOT intent — the mechanisms stack (markerLossBlocks
+ *          untouched; a marker without a registry row keeps surfacing). Seeded
+ *          with the 7 adjudicated KEEP registrations (adjudication rows
+ *          1/5/10/11/12/20/21 of T-20261123-005's report).
+ * @version 2.8.0 (2026-11-26, spec
+ *          docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.4 S4):
+ *          additive top-level `transient[]` on the durable snapshot — one
+ *          {id, branch, head, reason} entry per fleet checkout that
+ *          filterTransientCheckouts skipped (a live `pr/*` branch). The stderr
+ *          WARN and the history-page annotation (v2.5.0) cover the run and the
+ *          page; the durable JSON the weekly analysis reads was the silent
+ *          surface (the 2026-11-26 undercount: co-price/co-architect absent
+ *          with no record). `head` comes from the new lib/git-aware-scan.ts
+ *          checkoutHead() — `git rev-parse --short HEAD` only, fail-open null;
+ *          the PR working tree is NEVER scanned (design non-goal). Legacy
+ *          snapshots without the field parse unchanged (agentGraph AC2 pattern).
  * @version 2.7.0 (2026-11-25, T-20261124-001 — design
  *          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.1):
  *          the root-backfill staleness key is `graphContentSha256` — the SHA-256
@@ -198,15 +226,15 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { checkoutBranch, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
+import { checkoutBranch, checkoutHead, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
 import { gitCleanEnv } from "./lib/git-env.ts";
-import { listFleetProjects } from "./lib/fleet.ts";
+import { isFleetMember, listFleetProjects } from "./lib/fleet.ts";
 import { localDateISO } from "./lib/local-date.ts";
 import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf, upgradeSkillGraph } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.7.0";
+const VERSION = "2.9.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -259,12 +287,52 @@ interface ProjectStats {
   skills: number;
 }
 
+/** v2.8.0 (S4, additive): why a fleet member is absent from `projects` this run. */
+export interface SnapshotTransientEntry {
+  /** Member basename (the Projects/ directory name). */
+  id: string;
+  /** The transient branch the checkout sits on (`pr/*`). */
+  branch: string;
+  /** Short HEAD sha of the checkout (checkoutHead(); null on any git error). */
+  head: string | null;
+  /** Fixed exclusion rationale naming the governing ticket. */
+  reason: string;
+}
+
+/**
+ * v2.8.0 (S4): fixed rationale recorded on every transient[] entry — the
+ * exclusion is T-20261103-004's positive-evidence rule, not an error state.
+ */
+export const TRANSIENT_CHECKOUT_REASON =
+  "transient PR working checkout — excluded from fleet discovery and classification per T-20261103-004; HEAD recorded read-only via git rev-parse, the PR tree is never scanned";
+
+/**
+ * v2.8.0 (S4): build the snapshot's transient[] records from the skipped rows
+ * defaultProjects() already produced (same derivation, no second scan). Pure:
+ * the HEAD read is injected so tests never spawn git for the shape pins.
+ */
+export function buildTransientEntries(
+  skipped: Array<{ name: string; branch: string }>,
+  headOf: (dir: string) => string | null = checkoutHead,
+): SnapshotTransientEntry[] {
+  return skipped.map((s) => ({
+    id: s.name.split(/[\\/]/).pop() ?? s.name,
+    branch: s.branch,
+    head: headOf(s.name),
+    reason: TRANSIENT_CHECKOUT_REASON,
+  }));
+}
+
 interface Snapshot {
   date: string;
   projects: Record<string, ProjectEntry>;
   fleetPresence: Record<string, number>;
   missingFromProjects: Record<string, string[]>;
   jaccard: Record<string, number>;
+  /** v2.8.0 (additive, S4): one record per fleet checkout that discovery skipped
+   *  (a live `pr/*` branch). `head` is rev-parse metadata read under
+   *  gitCleanEnv(), fail-open null; the PR working tree is never scanned. */
+  transient?: SnapshotTransientEntry[];
   /** v2.0.0: capability-keyed convergence classification (threshold = CONVERGENCE_THRESHOLD). */
   convergence?: ConvergenceResult;
   /** v2.2.0 (additive): fan-in classification (skills + agents, threshold = FAN_IN_THRESHOLD),
@@ -294,10 +362,20 @@ export interface ConvergenceResult {
   threshold: number;
   /** Present in >= threshold projects, single content hash across all of them. */
   converged: string[];
-  /** Present in >= threshold projects with >= 2 distinct content hashes. */
-  convergenceWithDivergence: Array<{ capability: string; hashes: Record<string, string[]> }>;
+  /** Present in >= threshold projects with >= 2 distinct content hashes. v2.9.0 (S3):
+   *  rows whose minority members are PARTIALLY intent-covered carry `intentCovered`
+   *  (the covered projects, sorted) — the row stays divergent and annotated. */
+  convergenceWithDivergence: Array<{
+    capability: string;
+    hashes: Record<string, string[]>;
+    intentCovered?: string[];
+  }>;
   /** Present in >= threshold projects but >= 1 project graph (v1) carries no hash. */
   hashUnknown: string[];
+  /** v2.9.0 (S3, additive): capabilities whose EVERY minority-hash-group member is
+   *  covered by an adjudicated docs/skill-intent.json row — divergence by registration,
+   *  not drift. Reported explicitly so silences stay visible (design §7). */
+  convergedIntent: Array<{ capability: string; covered: string[] }>;
 }
 
 /** v2.2.0 (hub-consolidation design §9): fan-in classification over `skill:`/`agent:`
@@ -320,13 +398,205 @@ export function skillCapabilities(graph: SkillGraph): Map<string, Set<string | n
   return out;
 }
 
+// ── v2.9.0 — the skill-intent registry (S3, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.3) ──
+//
+// docs/skill-intent.json is a NEW L0-only registry in the docs/fleet-membership.json
+// house shape (version + _comment + rows), NEVER propagated. Membership and intent are
+// different domains with different consumers — lib/fleet.ts must never parse intent
+// (design §4.3, alternative B rejected). A LOCAL-PATCH marker is NOT intent: markers
+// record "do not overwrite" (markerLossBlocks), the registry records "adjudicated
+// intentional"; both mechanisms stack and a registry row never weakens marker loss.
+
+export const SKILL_INTENT_KINDS = [
+  "variant-override",
+  "hub-promoted",
+  "local-patch",
+  "path-adaptation",
+  "adjudicated-keep",
+] as const;
+
+export type SkillIntentKind = (typeof SKILL_INTENT_KINDS)[number];
+
+export interface SkillIntentEntry {
+  capability: string;
+  project: string;
+  kind: SkillIntentKind;
+  reason: string;
+  decided: string;
+  decision_ref: string;
+}
+
+export interface SkillIntentRegistry {
+  version: 1;
+  entries: SkillIntentEntry[];
+}
+
+export type LoadSkillIntentResult =
+  | { ok: true; registry: SkillIntentRegistry }
+  | { ok: false; error: "absent-file" }
+  | { ok: false; error: "malformed"; detail: string };
+
+export const SKILL_INTENT_PATH = join("docs", "skill-intent.json");
+
+const INTENT_PROJECT_RE = /^co-[a-z0-9-]{1,40}$/;
+/** decision_ref id forms: DEC-YYYYMMDD-NN(,3-4 digits) | T-YYYYMMDD-NNN | legacy UR-N. */
+const INTENT_DECISION_REF_RE = /^(DEC-\d{8}-\d{2,4}|T-\d{8}-\d{2,4}|UR-\d+)$/;
+
+/** Real-calendar check behind the YYYY-MM-DD shape (the lib/fleet.ts precedent). */
+function isIntentCalendarDate(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+
+/**
+ * Validate a parsed docs/skill-intent.json payload (S3 schema, fail-closed — the
+ * lib/fleet.ts precedent). Unknown top-level/row keys are ignored forward-compatibly.
+ * Pure: fleet-membership and capability existence are the RUN's checks (buildIntentMap),
+ * not schema checks.
+ */
+export function validateSkillIntentPayload(
+  payload: unknown,
+): { ok: true; registry: SkillIntentRegistry } | { ok: false; detail: string } {
+  if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {
+    return { ok: false, detail: "top-level payload must be a JSON object" };
+  }
+  const raw = payload as Record<string, unknown>;
+  if (raw.version !== 1) {
+    return { ok: false, detail: `version must be 1, got ${JSON.stringify(raw.version)}` };
+  }
+  if (!Array.isArray(raw.entries)) {
+    return { ok: false, detail: `'entries' must be an array, got ${typeof raw.entries}` };
+  }
+  const seen = new Set<string>();
+  const entries: SkillIntentEntry[] = [];
+  for (let i = 0; i < raw.entries.length; i++) {
+    const row = raw.entries[i] as Record<string, unknown>;
+    const at = `entries[${i}]`;
+    if (typeof row !== "object" || row === null || Array.isArray(row)) {
+      return { ok: false, detail: `${at} must be an object` };
+    }
+    const capability = row.capability;
+    if (typeof capability !== "string" || capability.trim().length === 0) {
+      return { ok: false, detail: `${at}.capability must be a non-empty string` };
+    }
+    const project = row.project;
+    if (typeof project !== "string" || !INTENT_PROJECT_RE.test(project)) {
+      return {
+        ok: false,
+        detail: `${at} (${capability}).project must match ${INTENT_PROJECT_RE.source}, got ${JSON.stringify(project)}`,
+      };
+    }
+    const kind = row.kind;
+    if (typeof kind !== "string" || !SKILL_INTENT_KINDS.includes(kind as SkillIntentKind)) {
+      return {
+        ok: false,
+        detail: `${at} (${capability}@${project}).kind must be one of ${SKILL_INTENT_KINDS.join(" | ")}, got ${JSON.stringify(kind)}`,
+      };
+    }
+    if (typeof row.reason !== "string" || row.reason.trim().length === 0) {
+      return { ok: false, detail: `${at} (${capability}@${project}).reason must be a non-empty string` };
+    }
+    if (typeof row.decided !== "string" || !isIntentCalendarDate(row.decided)) {
+      return {
+        ok: false,
+        detail: `${at} (${capability}@${project}).decided must be a valid YYYY-MM-DD date, got ${JSON.stringify(row.decided)}`,
+      };
+    }
+    if (typeof row.decision_ref !== "string" || !INTENT_DECISION_REF_RE.test(row.decision_ref)) {
+      return {
+        ok: false,
+        detail: `${at} (${capability}@${project}).decision_ref must match DEC-YYYYMMDD-NN | T-YYYYMMDD-NNN | UR-N, got ${JSON.stringify(row.decision_ref)}`,
+      };
+    }
+    const key = `${capability}@${project}`;
+    if (seen.has(key)) return { ok: false, detail: `duplicate intent entry '${key}'` };
+    seen.add(key);
+    entries.push({
+      capability,
+      project,
+      kind: kind as SkillIntentKind,
+      reason: row.reason,
+      decided: row.decided,
+      decision_ref: row.decision_ref,
+    });
+  }
+  return { ok: true, registry: { version: 1, entries } };
+}
+
+/**
+ * Read + validate docs/skill-intent.json under the repo root (L0-only). Absent file
+ * → {ok:false, error:'absent-file'} — the run proceeds with no intent map (the
+ * registry is opt-in state, like the fleet registry). Malformed → 'malformed' with
+ * a detail naming the failing row; the caller MUST hard-fail the run (fail-closed).
+ */
+export function loadSkillIntent(root: string = "."): LoadSkillIntentResult {
+  const path = join(root, SKILL_INTENT_PATH);
+  if (!existsSync(path)) return { ok: false, error: "absent-file" };
+  let payload: unknown;
+  try {
+    payload = JSON.parse(readFileSync(path, "utf-8"));
+  } catch (err) {
+    return {
+      ok: false,
+      error: "malformed",
+      detail: `${path} is not valid JSON (${err instanceof Error ? err.message : String(err)})`,
+    };
+  }
+  const validated = validateSkillIntentPayload(payload);
+  if (!validated.ok) return { ok: false, error: "malformed", detail: validated.detail };
+  return { ok: true, registry: validated.registry };
+}
+
+/**
+ * Existence validation over a schema-valid registry (S3, fail-closed — design §4.3):
+ * every row's project must be a fleet member (lib/fleet.ts isFleetMember) and every
+ * row's capability must exist in that project's graph THIS RUN (projectCaps). Throws
+ * naming the offending row; the run exits non-zero. Returns the intent map keyed
+ * `capability@project`. A row whose pair later re-converges is inert by design —
+ * validation is existence-based, not divergence-based.
+ */
+export function buildIntentMap(
+  registry: SkillIntentRegistry,
+  projectCaps: Map<string, Map<string, Set<string | null>>>,
+): Map<string, SkillIntentEntry> {
+  const map = new Map<string, SkillIntentEntry>();
+  for (const row of registry.entries) {
+    const key = `${row.capability}@${row.project}`;
+    if (!isFleetMember(row.project)) {
+      throw new Error(
+        `skill-intent registry: ${key} names a non-fleet-member project (docs/fleet-membership.json governs membership)`,
+      );
+    }
+    const caps = projectCaps.get(row.project);
+    if (!caps || !caps.has(row.capability)) {
+      throw new Error(
+        `skill-intent registry: ${key} names a capability absent from ${row.project}'s graph this run — fix or remove the row`,
+      );
+    }
+    map.set(key, row);
+  }
+  return map;
+}
+
 /**
  * Classify capabilities by fleet convergence (design §3.3). Pure: input is the per-project
  * capability -> hashes map; only project graphs count (root is the source, not a project).
+ *
+ * v2.9.0 (S3): the optional `intent` map (`capability@project` → row) lifts adjudicated
+ * intentional differences out of the divergence computation — every minority-hash-group
+ * member covered → the capability reports `convergedIntent`; partially covered → the row
+ * stays in `convergenceWithDivergence` annotated with the covered projects. The map is
+ * pure input; VALIDATION is the caller's job (see loadSkillIntent/buildIntentMap).
+ * LOCAL-PATCH markers are NOT intent — the mechanisms stack: a registry row never
+ * weakens the engine's markerLossBlocks, and a marker without a registry row keeps
+ * surfacing here (design §4.3 marker rule).
  */
 export function classifyConvergence(
   projects: Map<string, Map<string, Set<string | null>>>,
   threshold: number = CONVERGENCE_THRESHOLD,
+  intent?: ReadonlyMap<string, unknown>,
 ): ConvergenceResult {
   const carriers = new Map<string, string[]>();
   for (const [project, caps] of projects) {
@@ -335,7 +605,13 @@ export function classifyConvergence(
       carriers.get(cap)!.push(project);
     }
   }
-  const result: ConvergenceResult = { threshold, converged: [], convergenceWithDivergence: [], hashUnknown: [] };
+  const result: ConvergenceResult = {
+    threshold,
+    converged: [],
+    convergenceWithDivergence: [],
+    hashUnknown: [],
+    convergedIntent: [],
+  };
   for (const [cap, list] of [...carriers.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
     if (list.length < threshold) continue;
     const byHash = new Map<string, string[]>();
@@ -351,7 +627,30 @@ export function classifyConvergence(
       }
     }
     if (byHash.size >= 2) {
-      result.convergenceWithDivergence.push({ capability: cap, hashes: Object.fromEntries(byHash) });
+      // S3: majority group = most carriers (tie → lexicographically smallest hash,
+      // deterministic); minority = every carrier outside it. Covered minority members
+      // leave the divergence story; full coverage reports converged-intent.
+      let majority = "";
+      for (const h of byHash.keys()) {
+        const n = byHash.get(h)!.length;
+        const m = majority === "" ? -1 : byHash.get(majority)!.length;
+        // largest group wins; a tie resolves to the lexicographically smallest
+        // hash (deterministic regardless of insertion order).
+        if (majority === "" || n > m || (n === m && h < majority)) majority = h;
+      }
+      const minority = [...byHash.entries()].flatMap(([h, ps]) => (h === majority ? [] : ps)).sort();
+      const covered = intent ? minority.filter((p) => intent.has(`${cap}@${p}`)) : [];
+      if (minority.length > 0 && covered.length === minority.length) {
+        result.convergedIntent.push({ capability: cap, covered: minority });
+      } else if (covered.length > 0) {
+        result.convergenceWithDivergence.push({
+          capability: cap,
+          hashes: Object.fromEntries(byHash),
+          intentCovered: covered,
+        });
+      } else {
+        result.convergenceWithDivergence.push({ capability: cap, hashes: Object.fromEntries(byHash) });
+      }
     } else if (unknown) {
       result.hashUnknown.push(cap);
     } else {
@@ -1339,10 +1638,13 @@ function markdownReport(
   // v2.0.0 — convergence by capability (threshold preserved at 3 project graphs)
   if (convergence) {
     const total =
-      convergence.converged.length + convergence.convergenceWithDivergence.length + convergence.hashUnknown.length;
+      convergence.converged.length +
+      convergence.convergedIntent.length +
+      convergence.convergenceWithDivergence.length +
+      convergence.hashUnknown.length;
     lines.push(`## Skill convergence by capability (>= ${convergence.threshold} projects)`, "");
     lines.push(
-      `${total} capabilities are carried by >= ${convergence.threshold} project graphs: ${convergence.converged.length} converged (single content hash), ${convergence.convergenceWithDivergence.length} convergence-with-divergence (>= 2 hashes), ${convergence.hashUnknown.length} hash-unknown.`,
+      `${total} capabilities are carried by >= ${convergence.threshold} project graphs: ${convergence.converged.length} converged (single content hash), ${convergence.convergenceWithDivergence.length} convergence-with-divergence (>= 2 hashes), ${convergence.convergedIntent.length} converged-intent (adjudicated, docs/skill-intent.json), ${convergence.hashUnknown.length} hash-unknown.`,
     );
     if (v1Projects.length > 0) {
       lines.push(
@@ -1353,6 +1655,13 @@ function markdownReport(
     lines.push("");
     lines.push(
       `- converged (${convergence.converged.length}): ${convergence.converged.length > 0 ? convergence.converged.join(", ") : "—"}`,
+    );
+    lines.push(
+      `- converged-intent (${convergence.convergedIntent.length}): ${
+        convergence.convergedIntent.length > 0
+          ? convergence.convergedIntent.map((c) => `${c.capability} [${c.covered.join(", ")}]`).join("; ")
+          : "—"
+      }`,
     );
     lines.push(
       `- hash-unknown (${convergence.hashUnknown.length}): ${convergence.hashUnknown.length > 0 ? convergence.hashUnknown.join(", ") : "—"}`,
@@ -1367,7 +1676,8 @@ function markdownReport(
         const groups = Object.entries(d.hashes)
           .map(([h, ps]) => `${h.slice(0, 8)}: ${ps.join(", ")}`)
           .join(" · ");
-        lines.push(`| ${d.capability} | ${groups} |`);
+        const annotation = d.intentCovered ? ` — intent-covered (adjudicated): ${d.intentCovered.join(", ")}` : "";
+        lines.push(`| ${d.capability} | ${groups}${annotation} |`);
       }
     }
     lines.push("");
@@ -3128,6 +3438,28 @@ Read-only over all inputs.`);
     process.exit(1);
   }
 
+  // v2.9.0 (S3): load the skill-intent registry (L0-only, opt-in) and validate it
+  // fail-closed BEFORE the classification. Schema violations and existence
+  // violations (non-fleet project, capability absent from that project's graph)
+  // each abort the run naming the row — a silently ignored registry row would be
+  // exactly the false silence the design rejects. Absent file → no intent map.
+  let intentMap: Map<string, SkillIntentEntry> | undefined;
+  const intentLoad = loadSkillIntent(".");
+  if (!intentLoad.ok && intentLoad.error === "malformed") {
+    console.error(
+      `❌ skill-graph-fleet-report: malformed skill-intent registry (${SKILL_INTENT_PATH}): ${intentLoad.detail}`,
+    );
+    process.exit(1);
+  }
+  if (intentLoad.ok) {
+    try {
+      intentMap = buildIntentMap(intentLoad.registry, projectCaps);
+    } catch (err) {
+      console.error(`❌ skill-graph-fleet-report: ${(err as Error).message}`);
+      process.exit(1);
+    }
+  }
+
   // (b) skill x project presence matrix with fleet presence counts
   const presence = new Map<string, string[]>();
   const rootSkills = rootGraph ? skillIds(rootGraph) : new Set<string>();
@@ -3182,7 +3514,7 @@ Read-only over all inputs.`);
     fleetPresence,
     missingFromProjects,
     jaccard,
-    convergence: classifyConvergence(projectCaps),
+    convergence: classifyConvergence(projectCaps, CONVERGENCE_THRESHOLD, intentMap),
     // v2.2.0 (additive): fan-in classification — the hub-selection evidence
     fanIn2: classifyFanIn2(projectFanInKeys),
   };
@@ -3190,6 +3522,15 @@ Read-only over all inputs.`);
   // v1.1.0 — root-graph orphan cross-check
   const orphans = rootGraph ? analyzeRootOrphans(rootGraph) : null;
   if (orphans) snapshot.rootOrphans = orphans;
+
+  // v2.8.0 (S4, additive): record every skipped transient checkout in the
+  // durable snapshot — id, branch, head, reason. The run already warns on
+  // stderr and the history page annotates absentees (v2.5.0); this makes
+  // absence visible in the artifact the weekly analysis reads. HEAD comes
+  // from `git rev-parse` only (fail-open null) — the PR tree is never read.
+  if (fleet.skipped.length > 0) {
+    snapshot.transient = buildTransientEntries(fleet.skipped);
+  }
 
   mkdirSync(snapshotDir, { recursive: true });
   const snapshotFile = join(snapshotDir, `snapshot-${today}.json`);

@@ -1,4 +1,10 @@
-// @version 1.54.0
+// @version 1.56.0
+// v1.55.0 (2026-11-26, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
+//          §4.1 S1): verdict SYNC_TEMPLATE_ADVANCE (INFO) — the equal-version
+//          content-aware gate: project bytes equal the delivered baseline while the
+//          template moved without a version bump → the template copy delivers
+//          (per-file, skills lanes only) instead of stranding the edit as
+//          DRIFT_PRESERVE forever. Severity contract row added.
 // v1.54.0 (2026-11-26, T-20261126-002): stub version backfill — verdict
 //          STUB_VERSION_BACKFILL (INFO) and the pure helper `backfillStubVersion`
 //          (advance a project extends-stub's top-level `version` to a NEWER
@@ -1563,6 +1569,95 @@ export function backfillStubFrontmatter(
   };
 }
 
+// ── Legacy full-body stub conversion (T-20261126-003, design
+//    docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5) ──────
+
+export interface StubShapeConversion {
+  /** Project content after the conversion (identical to the input when no-op/blocked). */
+  content: string;
+  /** True when the project copy was converted to the template stub shape. */
+  changed: boolean;
+  /** Frontmatter-superset violation naming the project-only key(s) when blocked. */
+  blockedBy?: string;
+}
+
+/** Column-0 (top-level) YAML mapping keys of a frontmatter body, in file order. */
+function topLevelFrontmatterKeys(fmBody: string): string[] {
+  return fmBody
+    .split(/\r?\n/)
+    .map((l) => l.match(/^([A-Za-z_][\w-]*):/)?.[1])
+    .filter((k): k is string => typeof k === "string");
+}
+
+/**
+ * Convert a legacy FULL-BODY resolved agent copy to its template counterpart's
+ * extends-stub shape (T-20261126-003). The 2026-11-26 wave 2 needed hand
+ * frontmatter advances in five projects whose `agents/pm.md` bodies were
+ * byte-identical to the template's — the MERGE pass refreshed the managed body
+ * but nothing ever swapped the SHAPE, so a legacy resolved copy stayed resolved
+ * forever and every stub-shape template change re-reported [stale] rows.
+ *
+ * Contract (the caller enforces the clean-merge preconditions — pass === "MERGE",
+ * rel under agents/, no census escalation on either channel, markerLossBlocks
+ * already passed, frontmatter byte-identical through the merge; a DIRTY merge
+ * never converts):
+ *  - the TEMPLATE counterpart must be stub-shaped (isExtendsStub) and both
+ *    frontmatters must parse — otherwise a byte-identical no-op (a resolved
+ *    counterpart never converts);
+ *  - FRONTMATTER-SUPERSET guard: every top-level key in the project frontmatter
+ *    must exist in the counterpart's; any project-only key blocks the conversion
+ *    (`blockedBy` names them) — the shape swap is wholesale, so it inherits
+ *    STUB_VERSION_BACKFILL's philosophy of never destroying frontmatter state it
+ *    does not understand. Design-mechanism refinement (documented per the
+ *    dispatch contract): the variant counterpart is an extends-only stub that
+ *    SHADOWS the marker-rich common file (the merge pass's own composition rule,
+ *    mergeWorkspaceManaged), so "the template counterpart's frontmatter" is
+ *    realized as the stub ∪ common key union when the caller supplies the common
+ *    content — a resolved copy's L1-filled keys (formal_name, tier_semantics,
+ *    session_hosted, color, examples) must not read as project-only;
+ *  - the conversion result is the TEMPLATE stub content verbatim (its `version`
+ *    is already carried by the stub) with an existing top-level `last_updated`
+ *    re-stamped to the delivery date (never injected; nested lifecycle dates
+ *    untouched); CRLF frontmatter preserved; idempotent (a stub-shaped project
+ *    never reaches this helper — the caller's backfill arm owns that path).
+ */
+export function convertLegacyStubShape(
+  projectContent: string,
+  templateContent: string,
+  deliveryDate: string,
+  templateCommonContent?: string,
+): StubShapeConversion {
+  const unchanged: StubShapeConversion = { content: projectContent, changed: false };
+  if (!isExtendsStub(templateContent)) return unchanged; // resolved counterpart — never converts
+  const projFm = frontmatterBody(projectContent);
+  const tplFm = frontmatterBody(templateContent);
+  if (!projFm || !tplFm) return unchanged; // unparsable frontmatter — never touch
+  const tplKeys = new Set(topLevelFrontmatterKeys(tplFm.body));
+  if (templateCommonContent !== undefined) {
+    const commonFm = frontmatterBody(templateCommonContent);
+    if (commonFm) for (const k of topLevelFrontmatterKeys(commonFm.body)) tplKeys.add(k);
+  }
+  const projectOnly = topLevelFrontmatterKeys(projFm.body).filter((k) => !tplKeys.has(k));
+  if (projectOnly.length > 0) {
+    return {
+      content: projectContent,
+      changed: false,
+      blockedBy: `project-only frontmatter key(s) not present in the template counterpart: ${projectOnly.join(", ")}`,
+    };
+  }
+  const lines = tplFm.body.split(tplFm.eol);
+  const stamp = /^\d{4}-\d{2}-\d{2}$/.test(deliveryDate) ? deliveryDate : "";
+  if (stamp) {
+    const li = lines.findIndex((l) => /^last_updated:(?:[ \t].*)?$/.test(l));
+    if (li >= 0) lines[li] = `last_updated: ${stamp}`;
+  }
+  const fmText = `---${tplFm.eol}${lines.join(tplFm.eol)}${tplFm.eol}---`;
+  return {
+    content: templateContent.slice(0, tplFm.start) + fmText + templateContent.slice(tplFm.end),
+    changed: true,
+  };
+}
+
 /** Pipeline-generated paths that never count as hand-authored code in a diff.
  *  (U-20261027-002): `scripts-snapshot.json` and `.claude/last-upgrade-pr-body.md`
  *  join the set — both are regenerated by upgrade-project AFTER
@@ -1706,7 +1801,21 @@ export type DecisionVerdict =
   // script has no row in L0, L1 common, or the variant sub-registry — the copy is
   // SKIPPED (fail-closed) so a delivery can no longer ship an "Unregistered
   // script" audit failure. pendingKindForDecision default → null (no gate kind).
-  | "UNREGISTERED_SCRIPT";
+  | "UNREGISTERED_SCRIPT"
+  // S1 equal-version content-aware gate (2026-11-26, design
+  // docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.1): the
+  // project file's bytes still equal its delivered baseline while the template
+  // moved without a version bump — the template copy is delivered (per-file,
+  // skills lanes only) so an un-bumped template edit is recoverable instead of
+  // permanently stranded (the d82a73649/bdb72db58 strand class). ADR-0085 D3's
+  // protective DRIFT_PRESERVE stays for every unattributable case.
+  | "SYNC_TEMPLATE_ADVANCE"
+  // Legacy full-body stub conversion (2026-11-26, T-20261126-003, design
+  // docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5): after a
+  // CLEAN managed-body merge of a legacy resolved agent copy whose template
+  // counterpart is stub-shaped, the project copy converts to the stub shape
+  // (frontmatter-superset guard; a dirty merge never converts).
+  | "STUB_SHAPE_CONVERSION";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1749,6 +1858,8 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   RECORD_BUMP: "INFO",
   SCRIPT_ROW_SYNTHESIZED: "INFO",
   UNREGISTERED_SCRIPT: "ERROR",
+  SYNC_TEMPLATE_ADVANCE: "INFO",
+  STUB_SHAPE_CONVERSION: "INFO",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */

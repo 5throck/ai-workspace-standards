@@ -1,5 +1,31 @@
 #!/usr/bin/env bun
-// @version 1.122.0
+// @version 1.124.0
+// v1.124.0 (2026-11-26, T-20261126-003 — design
+//           docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5):
+//           STUB SHAPE CONVERSION — sibling arm beside STUB_VERSION_BACKFILL in the
+//           MERGE pass: a legacy FULL-BODY resolved agent copy (agents/*) whose
+//           template counterpart is stub-shaped converts to the stub shape after a
+//           CLEAN managed-body merge (convertLegacyStubShape in lib/upgrade-policy
+//           v1.56.0: frontmatter-superset guard — any project-only top-level key
+//           blocks at INFO with the copy preserved; existing top-level last_updated
+//           re-stamped; a stub-shaped project never enters — the backfill owns that
+//           path; a resolved counterpart never triggers; a dirty merge never
+//           converts). Heals the wave-2 hand-advance class (co-design/co-hr/
+//           co-learning/co-news/co-work agents/pm.md, bodies byte-identical).
+// v1.123.0 (2026-11-26, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
+//           §4.1 S1): the content-aware equal-version gate — shared helper
+//           `resolveEqualVersionDrift` routes every same-version drifted file in BOTH
+//           skills lanes (common `SYNC_IF_NEWER: skills/` and VARIANT SKILLS): project
+//           bytes == delivered baseline → the template copy of that one file delivers
+//           verbatim with verdict SYNC_TEMPLATE_ADVANCE (INFO) and noteDelivered
+//           refreshes the manifest baseline row; no baseline / project-moved keeps
+//           DRIFT_PRESERVE (ADR-0085 D3); markerLossBlocks runs FIRST (UR-2 stays
+//           protected — new guard, since the drift loop never delivered before S1);
+//           uncommitted local modifications keep the CONFLICT (WARN) path. MERGE
+//           MANAGED paths never enter this arm — managed-block merges keep flowing
+//           through the MERGE pass with their own census + marker gates (S1/S3+S4
+//           interaction named in the helper doc). Heals the d82a73649 and bdb72db58
+//           stranded template-edit classes on the next delivery.
 // v1.122.0 (2026-11-26, T-20261126-002): stub version backfill. A MERGE_MANAGED
 //          variant agent stub (agents/pm.md) whose managed-body merge is CLEAN —
 //          no census-blocked escalation, no marker loss, frontmatter untouched
@@ -1613,6 +1639,7 @@ import {
   backfillStubVersion,
   baselineKeyFor,
   classifyProjectState,
+  convertLegacyStubShape,
   escapeRegistryRowPipes,
   isL0OnlyRegistryRow,
   registryRowVersion,
@@ -3748,6 +3775,7 @@ function mergeWorkspaceManaged(
   // A non-clean merge keeps the earlier behaviour — the pin stands and the
   // SYNC_IF_NEWER STUB_VERSION_DIVERGENCE row reports it.
   let stubBackfill: { changed: boolean; oldVersion: string; newVersion: string } | null = null;
+  let stubConversionApplied = false;
   if (pass === "MERGE" && rel.startsWith("agents/") && result.escalated.length === 0 && skeletonEscalated === 0) {
     const fmOf = (text: string): string => text.match(/^---\r?\n[\s\S]*?\r?\n---/)?.[0] ?? "";
     if (fmOf(finalContent) === fmOf(projContent) && isExtendsStub(projContent)) {
@@ -3764,6 +3792,65 @@ function mergeWorkspaceManaged(
           "MERGE",
           "STUB_VERSION_BACKFILL",
           `stub version ${backfill.oldVersion} → ${backfill.newVersion} — template counterpart is newer and the managed-body merge was clean (no conflict, no marker loss, project out-of-zone content preserved); version line and existing top-level last_updated written`,
+          undefined,
+          "INFO",
+        );
+      }
+    }
+    // v1.124.0 (2026-11-26, T-20261126-003): sibling arm — legacy FULL-BODY stub
+    // conversion. The backfill above owns stub-SHAPED project files; a legacy
+    // RESOLVED copy (scaffold-era full body) never converts, so every
+    // stub-shape template change re-reported [stale] rows and wave 2 needed hand
+    // frontmatter advances in five projects whose bodies were byte-identical to
+    // the template's. Same preconditions (clean census on both channels, no
+    // marker loss — a marker-loss-blocked merge returned early above, frontmatter
+    // byte-identical through the merge) plus the shape test: project NOT
+    // stub-shaped and the template counterpart IS. The conversion swaps in the
+    // template stub (frontmatter-superset guard; existing top-level last_updated
+    // re-stamped) — a census-clean body is template-owned text, so the stub shape
+    // carries the same information and nothing is lost. A dirty merge never
+    // converts: the pin stands and the existing CONFLICT rows report. A
+    // stub-shaped project never enters (the backfill above owns it); a resolved
+    // counterpart never triggers (convertLegacyStubShape no-ops).
+    else if (fmOf(finalContent) === fmOf(projContent) && !isExtendsStub(projContent) && isExtendsStub(tplContent)) {
+      const conversion = convertLegacyStubShape(
+        projContent,
+        tplContent,
+        new Date().toISOString().slice(0, 10),
+        commonContent ?? undefined,
+      );
+      if (conversion.changed) {
+        // Marker guard for the in-sync case: an in-sync managed body (finalMerged
+        // false) skips the merge's own markerLossBlocks above, but the shape swap
+        // is WHOLESALE — run the same guard on the exact text the swap would leave
+        // before touching anything (records MARKER_LOSS/ADOPT itself; refused = the
+        // project copy keeps its LOCAL-PATCH prose and no conversion row fires).
+        if (markerLossBlocks(rel, "MERGE_MANAGED", pass, projectFile, conversion.content)) {
+          stubConversionApplied = false;
+        } else {
+          finalContent = conversion.content;
+          stubConversionApplied = true;
+          console.log(
+            `    ${dryTag}STUB SHAPE CONVERSION: ${rel} — legacy resolved copy converted to the template extends-stub shape (clean managed-body merge; frontmatter-superset guard passed; existing top-level last_updated re-stamped)`,
+          );
+          recordDecision(
+            rel,
+            "MERGE_MANAGED",
+            "MERGE",
+            "STUB_SHAPE_CONVERSION",
+            "legacy full-body agent copy converted to the template extends-stub shape — the managed-body merge was clean (no census escalation, no marker loss, frontmatter byte-identical through the merge), so the body is template-owned text and the stub shape carries the same information; version taken from the template counterpart, existing top-level last_updated re-stamped to the delivery date",
+            undefined,
+            "INFO",
+          );
+        }
+      } else if (conversion.blockedBy) {
+        console.log(`    ${dryTag}STUB SHAPE CONVERSION withheld: ${rel} — ${conversion.blockedBy}`);
+        recordDecision(
+          rel,
+          "MERGE_MANAGED",
+          "MERGE",
+          "STUB_SHAPE_CONVERSION",
+          `legacy stub-shape conversion WITHHELD — ${conversion.blockedBy}; the project copy is preserved (the shape swap is wholesale and never destroys frontmatter state it does not understand)`,
           undefined,
           "INFO",
         );
@@ -3816,6 +3903,12 @@ function mergeWorkspaceManaged(
   } else if (!dryRun && stubBackfill) {
     // v1.122.0: an in-sync managed body (finalMerged false) still lands the
     // stub version backfill — the only delta is the frontmatter version line.
+    writeFileSync(projectFile, finalContent, "utf8");
+    noteDelivered(rel);
+  } else if (!dryRun && stubConversionApplied) {
+    // v1.124.0 (T-20261126-003): an in-sync managed body still lands the shape
+    // conversion — the wave-2 shape is exactly this (bodies already byte-identical;
+    // only the shape changes).
     writeFileSync(projectFile, finalContent, "utf8");
     noteDelivered(rel);
   }
@@ -7182,6 +7275,102 @@ const catchUpDir = (srcRoot: string, dstRoot: string): { copied: number; drifted
 };
 const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[] } =>
   catchUpDir(join(tplSkillsDir, skillName), join(projectDir, "skills", skillName));
+/**
+ * S1 — the content-aware equal-version gate (design
+ * docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.1). Both skills
+ * lanes (common `SYNC_IF_NEWER: skills/` and VARIANT SKILLS) route every
+ * same-version drifted file through here INSTEAD of the unconditional
+ * DRIFT_PRESERVE row. Attribution against the delivery baseline:
+ *
+ *  1. isLocallyModified (pre-upgrade dirty set) → CONFLICT (WARN), no delivery:
+ *     an uncommitted edit is by definition project-side (design guard 3; the
+ *     version-gated arms' local-modification conflict semantics). This check runs
+ *     FIRST because the pre-upgrade stash means the bytes ON DISK during the pass
+ *     are the committed state — the dirty set, not the bytes, carries the truth
+ *     about project-side work.
+ *  2. NO baseline row, or project bytes ≠ baseline hash → DRIFT_PRESERVE
+ *     (unchanged): a project-side difference wins, and unknown attribution keeps
+ *     ADR-0085 D3's protective default (design §4.1 decision a). This ordering is
+ *     also what keeps marker-bearing project work safe: a genuinely project-
+ *     authored LOCAL-PATCH marker means the bytes left the baseline, so the file
+ *     never reaches the delivery path at all (UR-2 stays protected — the
+ *     equal-version arm never delivers what it cannot attribute).
+ *  3. Positive attribution + clean tree → markerLossBlocks (design guard 1, run
+ *     before any delivery exactly as the version-gated arms run it), then deliver
+ *     the TEMPLATE copy of that one file verbatim, record SYNC_TEMPLATE_ADVANCE
+ *     (INFO), and noteDelivered(rel) so the manifest flow re-hashes the delivered
+ *     bytes and refreshes the baseline row — that refresh IS the re-stamp for
+ *     equal versions (the version line already matches; design §4.1). Under
+ *     hash-equality attribution the shared guard's UNTOUCHED rule classifies the
+ *     file as carrying no project-authored content (its own doctrine: marker
+ *     prose that came from the template may be dropped by the template), so the
+ *     guard is defense in depth here — adopt grants and future baseline semantics
+ *     still route through its single decision point. MERGE_MANAGED paths never
+ *     enter this arm: managed-block files keep flowing through the MERGE pass,
+ *     whose own markerLossBlocks and census gates are untouched by S1
+ *     (interaction named per the dispatch contract).
+ *
+ * Returns "delivered" (sync accounting) or "preserved" (row recorded here).
+ */
+const resolveEqualVersionDrift = (
+  rel: string,
+  pass: string,
+  tplFile: string,
+  projFile: string,
+): "delivered" | "preserved" => {
+  if (isLocallyModified(projFile)) {
+    console.log(
+      `  ⚠️  CONFLICT ${rel}  (same-version template advance withheld — uncommitted local modifications exist)`,
+    );
+    recordDecision(
+      rel,
+      "SYNC",
+      pass,
+      "CONFLICT",
+      "SYNC_TEMPLATE_ADVANCE withheld — the project file has uncommitted local modifications (project-side by definition); commit/stash and re-run",
+      priorBaselines[rel],
+      "WARN",
+    );
+    return "preserved";
+  }
+  const baseline = priorBaselines[rel];
+  let projectText = "";
+  try {
+    projectText = readFileSync(projFile, "utf8");
+  } catch {
+    /* drifted implies the file exists; unreadable → unattributable */
+  }
+  const attributed = baseline !== undefined && baselineKeyFor(rel, projectText) === baseline.hash;
+  if (!attributed) {
+    console.log(`  ⚠️  DRIFT (preserved) ${rel}  (same-version content differs — left untouched; ADR-0085 D3)`);
+    recordDecision(
+      rel,
+      "SYNC",
+      pass,
+      "DRIFT_PRESERVE",
+      "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+      priorBaselines[rel],
+    );
+    return "preserved";
+  }
+  // Design guard 1 — markerLossBlocks runs before the delivery write, exactly as
+  // the version-gated arms run it (records MARKER_LOSS/ADOPT itself; true = refused).
+  if (markerLossBlocks(rel, "SYNC", pass, projFile, readFileSync(tplFile, "utf8"))) return "preserved";
+  if (!dryRun) copyFileSync(tplFile, projFile);
+  console.log(
+    `  ${dryTag}ADVANCE ${rel}  (same version, project bytes == delivered baseline → template-side edit delivers; SYNC_TEMPLATE_ADVANCE)`,
+  );
+  recordDecision(
+    rel,
+    "SYNC",
+    pass,
+    "SYNC_TEMPLATE_ADVANCE",
+    "same-version content drift attributed TEMPLATE-side — the project file still equals its delivered baseline (hash match), so the un-bumped template edit delivers verbatim; noteDelivered refreshes the manifest baseline row (the equal-version re-stamp)",
+    baseline,
+  );
+  if (!dryRun) noteDelivered(rel);
+  return "delivered";
+};
 if (existsSync(tplSkillsDir)) {
   // v1.115.0: --surfaces claim-class gate — the pass id matches resolveClaim's skills/** branch.
   if (surfacesBlocked("SYNC_IF_NEWER: skills/")) {
@@ -7316,18 +7505,40 @@ if (existsSync(tplSkillsDir)) {
           } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
             console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
           }
-          for (const d of drifted) {
-            console.log(
-              `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
-            );
-            recordDecision(
-              `skills/${skillName}/${d}`,
-              "SYNC",
-              "SYNC_IF_NEWER: skills/",
-              "DRIFT_PRESERVE",
-              "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
-              priorBaselines[`skills/${skillName}/${d}`],
-            );
+          // S1 (design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
+          // §4.1): the content-aware gate owns the EQUAL-VERSION case only. A
+          // project-ahead skill (projVer > tplVer) keeps the unconditional
+          // DRIFT_PRESERVE rows — its version pins newer content, and delivering
+          // the template copy over it would clobber exactly the project work the
+          // PROJECT_AHEAD arm below exists to protect (vintage-pending fixture
+          // regression proof: a seeded 99.0.0 baseline must never advance).
+          if (semverGt(projVer, tplVer)) {
+            for (const d of drifted) {
+              console.log(
+                `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
+              );
+              recordDecision(
+                `skills/${skillName}/${d}`,
+                "SYNC",
+                "SYNC_IF_NEWER: skills/",
+                "DRIFT_PRESERVE",
+                "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+                priorBaselines[`skills/${skillName}/${d}`],
+              );
+            }
+          } else {
+            for (const d of drifted) {
+              if (
+                resolveEqualVersionDrift(
+                  `skills/${skillName}/${d}`,
+                  "SYNC_IF_NEWER: skills/",
+                  join(tplSkillsDir, skillName, d),
+                  join(projectDir, "skills", skillName, d),
+                ) === "delivered"
+              ) {
+                syncChanged++;
+              }
+            }
           }
           // E3 (PR-B): the additive catch-up above still ran; a project-ahead skill also gets the
           // PROJECT_AHEAD row (after the catch-up row).
@@ -7592,18 +7803,37 @@ if (existsSync(variantSkillsSrc)) {
           } else if (drifted.length === 0 && !semverGt(projVer, tplVer)) {
             console.log(`  OK     skills/${skillName}/SKILL.md  ${projVer}`);
           }
-          for (const d of drifted) {
-            console.log(
-              `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
-            );
-            recordDecision(
-              `skills/${skillName}/${d}`,
-              "SYNC",
-              "VARIANT SKILLS",
-              "DRIFT_PRESERVE",
-              "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
-              priorBaselines[`skills/${skillName}/${d}`],
-            );
+          // S1: same content-aware gate as the common skills lane (shared helper) —
+          // equal-version case only; a project-ahead variant skill keeps the
+          // unconditional preserve rows (see the common lane comment).
+          // Pass id differs so the rows stay pass-comparable.
+          if (semverGt(projVer, tplVer)) {
+            for (const d of drifted) {
+              console.log(
+                `  ⚠️  DRIFT (preserved) skills/${skillName}/${d}  (same-version content differs — left untouched; ADR-0085 D3)`,
+              );
+              recordDecision(
+                `skills/${skillName}/${d}`,
+                "SYNC",
+                "VARIANT SKILLS",
+                "DRIFT_PRESERVE",
+                "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+                priorBaselines[`skills/${skillName}/${d}`],
+              );
+            }
+          } else {
+            for (const d of drifted) {
+              if (
+                resolveEqualVersionDrift(
+                  `skills/${skillName}/${d}`,
+                  "VARIANT SKILLS",
+                  join(tplSkillDir, d),
+                  join(projSkillDir, d),
+                ) === "delivered"
+              ) {
+                syncChanged++;
+              }
+            }
           }
           if (semverGt(projVer, tplVer)) {
             recordProjectAhead(

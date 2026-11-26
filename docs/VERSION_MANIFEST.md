@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-26T09:43:02.621Z
+**Generated**: 2026-11-26T13:42:28.467Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -148,7 +148,7 @@
 | generate-raci.ts | 1.2.1 | scripts/generate-raci.ts | fs, js-yaml, path |
 | generate-scripts-mirror.ts | 1.1.1 | scripts/generate-scripts-mirror.ts | fs, path, url |
 | generate-scripts-readme.ts | 1.0.4 | scripts/generate-scripts-readme.ts | fs, path, process |
-| generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
+| generate-skill-graph.ts | 2.1.0 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
 | generate-skill-lifecycle-records.ts | 1.4.0 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
 | generate-version-manifest.ts | 1.12.1 | scripts/generate-version-manifest.ts | bun, child_process, fs, js-yaml, module, path |
 | graph-delta-log.ts | 1.1.0 | scripts/graph-delta-log.ts | child_process, fs, path, url |
@@ -188,7 +188,7 @@
 | run-manifest.ts | 1.2.0 | scripts/run-manifest.ts | child_process, fs, path |
 | setup-github-branch-protection.ts | 1.0.1 | scripts/setup-github-branch-protection.ts | bun, fs, os, path |
 | skill-dependency-analysis.ts | 1.0.2 | scripts/skill-dependency-analysis.ts | fs, path, process |
-| skill-graph-fleet-report.ts | 2.7.0 | scripts/skill-graph-fleet-report.ts | child_process, crypto, fs, path |
+| skill-graph-fleet-report.ts | 2.9.0 | scripts/skill-graph-fleet-report.ts | child_process, crypto, fs, path |
 | skill-lifecycle-audit.ts | 1.15.0 | scripts/skill-lifecycle-audit.ts | fs, path, process |
 | skill-session-review.ts | 1.3.0 | scripts/skill-session-review.ts | bun, fs, path |
 | spec-backfill.ts | 1.0.0 | scripts/spec-backfill.ts | child_process, fs, path |
@@ -217,10 +217,10 @@
 | ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.122.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.124.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.2 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.3.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
-| validate-doc-folder.ts | 1.7.0 | scripts/validate-doc-folder.ts | fs, path |
+| validate-doc-folder.ts | 1.8.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-md-language.ts | 1.16.2 | scripts/validate-md-language.ts | child_process, fs, path |
 | validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | fs, path, url |

@@ -57,7 +57,10 @@ Root-level loose files are allowed only for: the two indexes (`README.md`,
 (`workspace-schema.json`, `self-managed-surfaces.json`, `skill-graph.json`,
 `skill-graph.md`, `skill-graph.overrides.json`, `surface-gaps.json`), the
 fleet membership SSOT (`fleet-membership.json` — L0-only registry,
-DEC-20261107-01), the unified-runner protected-path SSOT
+DEC-20261107-01), the adjudicated skill-intent registry
+(`skill-intent.json` — L0-only registry consumed by
+`scripts/skill-graph-fleet-report.ts` classifyConvergence, design
+2026-11-26-skill-drift-structural-fixes §4.3), the unified-runner protected-path SSOT
 (`protected-paths.json` — L0-only registry, merge-predicate floor,
 ADR-0105), the unified runner's sanctioned-repairs list
 (`expected-gate-failures.json` — L0-only registry, ADR-0105), the unified
