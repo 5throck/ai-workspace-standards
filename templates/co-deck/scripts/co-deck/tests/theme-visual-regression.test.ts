@@ -1,3 +1,8 @@
+// @version 0.2.2 — last_updated 2026-11-26. Fixed the browser-launch probe:
+//   `node -e` does not propagate a promise chain's settled value to the exit
+//   code, so the probe always exited 0 and a missing Chromium passed
+//   undetected (suite failed as total=0 instead of skipping). The rejection
+//   handler now calls process.exit(3); the success path still exits 0.
 // @version 0.2.1 — last_updated 2026-11-26. Ported from the co-deck project
 //   fix (U-20261126-002, project commit 0c23642): the Playwright package check
 //   never probed the browser binary, so a missing Chromium failed as
@@ -121,7 +126,7 @@ function checkBrowserAvailable(): { ok: boolean; reason?: string } {
   let res: ReturnType<typeof spawnSync>;
   try {
     res = spawnSync('node', ['-e',
-      "import('playwright').then(m => m.chromium.launch()).then(b => b.close()).then(() => 0, () => 3)"],
+      "import('playwright').then(m => m.chromium.launch()).then(b => b.close()).then(() => process.exit(0), () => process.exit(3))"],
       { cwd: root, encoding: 'utf-8', timeout: 60000 });
   } catch (err: any) {
     return { ok: false, reason: `node subprocess cannot start: ${err?.message ?? err}` };
