@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.121.0
+// @version 1.122.0
+// v1.122.0 (2026-11-26, T-20261126-002): stub version backfill. A MERGE_MANAGED
+//          variant agent stub (agents/pm.md) whose managed-body merge is CLEAN —
+//          no census-blocked escalation, no marker loss, frontmatter untouched
+//          by the merge — takes the template counterpart's NEWER `version` (and
+//          an existing top-level `last_updated`), logged as STUB_VERSION_BACKFILL
+//          (INFO) old → new. Before this the stub version never advanced, so
+//          verify-delivered-versions reported one stale agents/pm.md row per
+//          project on every run. Non-clean merges keep the pin (the
+//          STUB_VERSION_DIVERGENCE row, message updated to name this contract).
+//          Dry run reports the row and writes nothing.
 // v1.121.0 (2026-11-25, T-20261125-003): tombstone flags are previewable under
 //          --dry-run. (1) The hard refusal ("--tombstone / --clear-tombstone are
 //          apply-mode only") is replaced by a read-only preview: tombstoneSkip reports
@@ -1600,6 +1610,7 @@ import {
   REGION_PROFILES_PASS,
   MERGE_MANAGED_FILES,
   backfillStubFrontmatter,
+  backfillStubVersion,
   baselineKeyFor,
   classifyProjectState,
   escapeRegistryRowPipes,
@@ -3660,6 +3671,7 @@ function mergeWorkspaceManaged(
   let snapshotCount = result.snapshots.length;
   const skeletonLog: string[] = [];
   let skeletonSnapshots: { content: string }[] = [];
+  let skeletonEscalated = 0; // census-blocked skeleton replaces (read by the stub version backfill)
   // D3: the skeleton step widens from CLAUDE.md/GEMINI.md to ALL FIVE
   // instruction files (platform-skeleton-merge v1.2.0). With zero registry
   // entries for a rel the call is a no-op — entries land per adjudicated-port
@@ -3699,12 +3711,49 @@ function mergeWorkspaceManaged(
       );
     }
     skeletonSnapshots = skeleton.snapshots;
+    skeletonEscalated = skeleton.escalated.length;
   }
 
   // E2 (DEC-20261111-01 D4): the merged text must not drop LOCAL-PATCH markers.
   // Runs in dry-run too (parity) and BEFORE any recovery snapshot or write.
   if (finalMerged && markerLossBlocks(rel, "MERGE_MANAGED", pass, projectFile, finalContent)) {
     return { merged: false, snapshotCount: 0, skeletonLog };
+  }
+  // v1.122.0 (2026-11-26, T-20261126-002): stub version backfill. A variant
+  // agent stub (agents/pm.md) is MERGE_MANAGED: this pass refreshed the managed
+  // body on every run but never the frontmatter, so the project stub stayed at
+  // its scaffold `version` while the template ladder advanced, and
+  // verify-delivered-versions reported one stale row per project forever. When
+  // the managed-body merge is CLEAN the template's NEWER `version` is written
+  // into the project stub (lib/upgrade-policy backfillStubVersion: the version
+  // line and an existing top-level last_updated only). CLEAN means: no
+  // census-blocked escalation on either channel, no marker loss, and the
+  // merge left the frontmatter byte-identical (the only zone this step writes;
+  // the managed body is template-owned, everything else is the project's).
+  // A non-clean merge keeps the earlier behaviour — the pin stands and the
+  // SYNC_IF_NEWER STUB_VERSION_DIVERGENCE row reports it.
+  let stubBackfill: { changed: boolean; oldVersion: string; newVersion: string } | null = null;
+  if (pass === "MERGE" && rel.startsWith("agents/") && result.escalated.length === 0 && skeletonEscalated === 0) {
+    const fmOf = (text: string): string => text.match(/^---\r?\n[\s\S]*?\r?\n---/)?.[0] ?? "";
+    if (fmOf(finalContent) === fmOf(projContent) && isExtendsStub(projContent)) {
+      const backfill = backfillStubVersion(finalContent, tplContent, new Date().toISOString().slice(0, 10));
+      if (backfill.changed) {
+        finalContent = backfill.content;
+        stubBackfill = backfill;
+        console.log(
+          `    ${dryTag}STUB VERSION BACKFILL: ${rel} — version ${backfill.oldVersion} → ${backfill.newVersion} (template counterpart newer; clean managed-body merge; frontmatter version line + last_updated only)`,
+        );
+        recordDecision(
+          rel,
+          "MERGE_MANAGED",
+          "MERGE",
+          "STUB_VERSION_BACKFILL",
+          `stub version ${backfill.oldVersion} → ${backfill.newVersion} — template counterpart is newer and the managed-body merge was clean (no conflict, no marker loss, project out-of-zone content preserved); version line and existing top-level last_updated written`,
+          undefined,
+          "INFO",
+        );
+      }
+    }
   }
   // E3 MERGE_DROP (PR-B): DOCS_MERGE only (ci.yml has its own call site).
   const dropped =
@@ -3747,6 +3796,11 @@ function mergeWorkspaceManaged(
         `    SNAPSHOT: replaced unlabeled span(s) of ${rel} saved to ${rel}.pre-reconcile.bak (overwritten per run; gitignored via *.bak)`,
       );
     }
+    writeFileSync(projectFile, finalContent, "utf8");
+    noteDelivered(rel);
+  } else if (!dryRun && stubBackfill) {
+    // v1.122.0: an in-sync managed body (finalMerged false) still lands the
+    // stub version backfill — the only delta is the frontmatter version line.
     writeFileSync(projectFile, finalContent, "utf8");
     noteDelivered(rel);
   }
@@ -6812,7 +6866,7 @@ for (const agentsDir of tplAgentsDirs) {
               "SYNC",
               "SYNC_IF_NEWER: agents/",
               "STUB_VERSION_DIVERGENCE",
-              `stub version ${stubPinnedVersion} pinned vs counterpart ${counterpartVersion} — backfill never overwrites; bump the stub version to re-arm version-gated delivery, or adopt via --disposition adopt-template`,
+              `stub version ${stubPinnedVersion} pinned vs counterpart ${counterpartVersion} — the MERGE pass backfills a NEWER counterpart version after a clean managed-body merge, so a surviving divergence means the merge was not clean or the project pin is ahead; bump the stub version to re-arm version-gated delivery, or adopt via --disposition adopt-template`,
             );
           }
         }

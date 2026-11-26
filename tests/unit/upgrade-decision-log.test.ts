@@ -90,7 +90,10 @@
  * Engine suites spawn scripts/upgrade-project.ts against a temp project and
  * the real workspace templates (the established upgrade-tree-sync pattern).
  *
- * @version 2.2.0
+ * @version 2.3.0
+ * v2.3.0 (2026-11-26: T-20261126-002 — the pinned-stub engine test asserts STUB_VERSION_BACKFILL
+ *         (a clean merge advances the stub version), a project-ahead pin shape keeps the
+ *         divergence row, and a --dry-run rider pins the write gate.)
  * v2.2.0 (2026-11-15, engine-run consolidation — spec
  *         docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1):
  *         the mirror-only VARIANT-SCOPE SKILL PRUNE scene (a registry-foreign
@@ -470,12 +473,24 @@ const SHAPES: Record<string, { args: string[]; setup: (tmp: string) => void }> =
       // ADOPT with a replaced baseline.
       writeFileSync(join(tmp, 'agents', 'designer.md'), STALE_DESIGNER);
       seedPriorDelivery(tmp, 'agents/designer.md', STALE_DESIGNER);
-      // MERGE_MANAGED stub pinned BELOW its counterpart — STUB_VERSION_DIVERGENCE.
+      // MERGE_MANAGED stub pinned BELOW its counterpart — STUB_VERSION_BACKFILL
+      // (T-20261126-002: the clean managed-body merge advances the pin).
       writeFileSync(join(tmp, 'agents', 'pm.md'), makeStub('0.9.0'));
       // Baselines carry-forward seeds.
       seedPriorDelivery(tmp, 'docs/retired-never-shipped.md', 'content of a file the template no longer ships\n');
       seedPriorDelivery(tmp, 'agents/README.md', 'prior readme delivery bytes\n');
       commitAll(tmp, 'chore: agent heal matrix seeds (drift, no-baseline, stale copy, pinned stub)');
+    },
+  },
+  // Members: pm.md stub pinned AHEAD of its counterpart (T-20261126-002) — the
+  // backfill only advances an OLDER pin, so the divergence row survives and
+  // names the contract. One plain run, exit 0.
+  'stub-pin-ahead': {
+    args: [],
+    setup: (tmp: string): void => {
+      mkdirSync(join(tmp, 'agents'), { recursive: true });
+      writeFileSync(join(tmp, 'agents', 'pm.md'), makeStub('99.0.0'));
+      commitAll(tmp, 'chore: stub pinned ahead of the template counterpart');
     },
   },
   // Members: recorded-tombstone honored skip (TOMBSTONED_SKIP INFO) + the
@@ -1286,32 +1301,65 @@ describe('upgrade-project.ts stub FM backfill (T-20261028-010)', () => {
 // ═════════════════════════════════════════════════════════════════════════════
 // STUB_VERSION_DIVERGENCE (2026-10-29-delivery-bookkeeping-engine design D1 —
 // DEC-20261029-01): the stub-frontmatter backfill contract blesses a pinned
-// older stub `version` as deliberate project divergence (never overwritten),
+// older stub `version` as deliberate project divergence (never overwritten by the
+// SYNC_IF_NEWER backfill; since T-20261126-002 the MERGE pass advances it after
+// a clean managed-body merge — STUB_VERSION_BACKFILL),
 // but the divergence was invisible — the decision log showed only the STUB
 // skip. The agents/ STUB skip arm now records an INFO row naming both
 // versions (INFO, not WARN: the pin is sanctioned; repeat-per-run accepted,
 // same as STUB_VERSION_BUMP_ADVICE).
 // ═════════════════════════════════════════════════════════════════════════════
-describe('upgrade-project.ts STUB_VERSION_DIVERGENCE (D1)', () => {
-  test('stub pinned at an older version → STUB_VERSION_DIVERGENCE (INFO) row naming both versions', () => {
+describe('upgrade-project.ts STUB_VERSION_BACKFILL / STUB_VERSION_DIVERGENCE (D1 + T-20261126-002)', () => {
+  test('older pinned stub + clean managed-body merge → STUB_VERSION_BACKFILL (INFO) old → new, version advanced, no divergence row', () => {
     // v2.0.0: rides the agent-heal-matrix run (the shape seeds exactly this
     // pinned stub on the MERGE_MANAGED pm.md path).
-    const shape = useShape('agent-heal-matrix');
-    const { tmp, status, manifest } = shape;
+    const { tmp, status, out, manifest } = useShape('agent-heal-matrix');
     expect(status).toBe(0);
     expect(counterpartVersion.length).toBeGreaterThan(0);
-    // The pin survives: backfill never overwrites the existing version.
-    expect(readFileSync(join(tmp, 'agents', 'pm.md'), 'utf8')).toContain('version: "0.9.0"');
+    const after = readFileSync(join(tmp, 'agents', 'pm.md'), 'utf8');
+    // The pin ADVANCES to the template counterpart (the merge was clean).
+    expect(after).toContain(`version: "${counterpartVersion}"`);
+    expect(after).not.toContain('version: "0.9.0"');
+    expect(after.match(/^last_updated: \d{4}-\d{2}-\d{2}$/m)).toBeTruthy();
+    expect(out).toContain('STUB VERSION BACKFILL: agents/pm.md');
+    const row = manifest.decisions.find((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_VERSION_BACKFILL');
+    expect(row).toBeDefined();
+    expect(row!.severity).toBe('INFO');
+    expect(row!.detail).toContain('stub version 0.9.0');
+    expect(row!.detail).toContain(counterpartVersion);
+    expect(row!.detail).toContain('clean');
+    // The backfilled stub no longer diverges: no STUB_VERSION_DIVERGENCE row.
+    expect(manifest.decisions.some((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_VERSION_DIVERGENCE')).toBe(false);
+  }, 180000);
+
+  test('stub pinned AHEAD of the counterpart → pin kept, STUB_VERSION_DIVERGENCE (INFO) names the backfill contract', () => {
+    // T-20261126-002: the backfill advances an OLDER pin only.
+    const { tmp, status, manifest } = useShape('stub-pin-ahead');
+    expect(status).toBe(0);
+    expect(readFileSync(join(tmp, 'agents', 'pm.md'), 'utf8')).toContain('version: "99.0.0"');
+    expect(manifest.decisions.some((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_VERSION_BACKFILL')).toBe(false);
     const row = manifest.decisions.find((d) => d.path === 'agents/pm.md' && d.verdict === 'STUB_VERSION_DIVERGENCE');
     expect(row).toBeDefined();
     expect(row!.severity).toBe('INFO');
-    expect(row!.detail).toContain('stub version 0.9.0 pinned vs counterpart');
+    expect(row!.detail).toContain('stub version 99.0.0 pinned vs counterpart');
     expect(row!.detail).toContain(counterpartVersion);
-    expect(row!.detail).toContain('backfill never overwrites');
+    expect(row!.detail).toContain('clean managed-body merge');
     // The row rides AFTER the primary skip rows — a consumer reading the
     // path's FIRST decision row still sees the verdict.
     const firstPmRow = manifest.decisions.find((d) => d.path === 'agents/pm.md');
     expect(firstPmRow!.verdict).not.toBe('STUB_VERSION_DIVERGENCE');
+  }, 180000);
+
+  test('--dry-run previews the backfill row and writes nothing', () => {
+    // Own run: the dry-run gate must not land the version.
+    const tmp = makeTempProject();
+    dirCache.set(`stub-dry-${process.pid}`, tmp);
+    mkdirSync(join(tmp, 'agents'), { recursive: true });
+    writeFileSync(join(tmp, 'agents', 'pm.md'), makeStub('0.9.0'));
+    const { status, out } = runUpgrade(tmp, ['--dry-run']);
+    expect(status).toBe(0);
+    expect(out).toContain('[DRY RUN] STUB VERSION BACKFILL: agents/pm.md');
+    expect(readFileSync(join(tmp, 'agents', 'pm.md'), 'utf8')).toContain('version: "0.9.0"');
   }, 180000);
 
   test('stub at the counterpart version → no divergence row', () => {
