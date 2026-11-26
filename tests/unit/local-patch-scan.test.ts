@@ -3,7 +3,7 @@
  * marker scanner finds ticket-tagged patches (including `pending`), skips dependency
  * and non-text trees, and reports deterministically.
  *
- * @version 1.1.0
+ * @version 1.1.1
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
@@ -50,13 +50,22 @@ test('paths are project-relative with forward slashes, in deterministic order', 
   expect(findings.map((f) => f.file).sort()).toEqual(['.claude/skills/x/SKILL.md', 'AGENTS.md']);
 });
 
-describe('noise filter (T-20261013-006)', () => {
-  test('protocol text in backticks, scanner source, and registry rows are not findings', () => {
+describe('noise filter (T-20261013-006, U-20261126-003)', () => {
+  test('protocol text in backticks, scanner source, registry rows, and the detector docstring are not findings', () => {
     mkdirSync(join(root, 'agents'), { recursive: true });
     mkdirSync(join(root, 'scripts', 'hooks'), { recursive: true });
     writeFileSync(join(root, 'agents', 'pm.md'), 'Add the comment `LOCAL-PATCH(upstream-request: <id>)` next to the patch.\n');
     writeFileSync(join(root, 'scripts', 'hooks', 'pre-commit.ts'), '// LOCAL-PATCH(upstream-request: pending) — pattern definition site\n');
     writeFileSync(join(root, 'scripts', 'SCRIPTS.md'), '| row | finds LOCAL-PATCH(upstream-request: id or pending) across files |\n');
+    writeFileSync(
+      join(root, 'scripts', 'detect-backport.ts'),
+      ' *   E1 LOCAL_PATCH        — LOCAL-PATCH(upstream-request: pending) markers found\n',
+    );
+    mkdirSync(join(root, 'templates', 'common', 'scripts'), { recursive: true });
+    writeFileSync(
+      join(root, 'templates', 'common', 'scripts', 'detect-backport.ts'),
+      ' *   E1 LOCAL_PATCH        — LOCAL-PATCH(upstream-request: pending) markers found\n',
+    );
     expect(scanLocalPatches(root)).toEqual([]);
   });
 

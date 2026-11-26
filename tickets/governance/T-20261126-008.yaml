@@ -5,7 +5,7 @@ title: >-
   co-deck skills enforcement dangling reference to nonexistent
   scripts/audit-variant.ts
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-26T00:00:00.000+09:00'
 history:
@@ -17,12 +17,28 @@ history:
     actor: automation-engineer
     from: backlog
     to: backlog
+  - at: '2026-11-27T07:11:48.418+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T07:11:48.437+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-27T07:11:48.454+09:00'
+    from: running
+    to: review
+  - at: '2026-11-27T07:11:48.471+09:00'
+    from: review
+    to: done
 result: >-
-  Reconstructed 2026-11-26 from session records; original working-tree-only
-  file never committed and lost; adjudicated under DEC-20261126-001; status
-  inferred from session records (no resolution record found — the P1-P8 pair
-  program session listed the file as modified, not resolved).
-  Evidence: memory/2026-11-26.md L407 "T-20261126-008.yaml — created (co-deck
-  skills enforcement dangling reference to nonexistent scripts/audit-variant.ts)";
-  L522 modified in the P1-P8 session. Status best evidence: open (backlog).
+  Mechanical remediation complete: the dangling skills-enforcement declaration
+  was removed from Projects/co-deck variant.json (skill_manifest.enforcement
+  pointed at scripts/audit-variant.ts; both candidate paths verified absent; no
+  script consumes the key — grep across root+project script surfaces shows only
+  prose hits). Landed via co-deck dev-sync on PR 5throck/co-deck#264, commit
+  2070ddc0573983661dd8594e7551b94fea657c34, MERGED as
+  c43fdc3ee2d18bf846176c939ca33e626fcd61c0. Battery through containment (root
+  contained-run): audit.ts exit 0, test-runner all 26/26 pass; gitleaks detect:
+  no leaks (323 commits). CI wall: billing-block arm verified on head SHA (4
+  jobs failure, runner_id 0, zero steps, payment-failed annotation — ADR-0105
+  standing disposition) before merge.
 error: null

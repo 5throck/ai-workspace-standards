@@ -10,12 +10,35 @@ title: >-
   dev-sync step-6.5 staging class for tickets/governance; loss adjudicated under
   DEC-20261126-001 (restore-by-reconstruction, provenance-marked)
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-26T23:57:12.427+09:00'
 history:
   - at: '2026-11-26T23:57:12.430+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-27T07:03:38.854+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T07:03:38.875+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-27T07:03:38.891+09:00'
+    from: running
+    to: review
+  - at: '2026-11-27T07:03:38.908+09:00'
+    from: review
+    to: done
+result: >-
+  Remediation complete: all 10 lost governance yamls (T-20261125-002/-003/-004,
+  T-20261126-001/-002/-003/-004/-006/-007/-008) are TRACKED on origin/main —
+  verified 2026-11-27 by git cat-file against
+  origin/main:tickets/governance/<id>.yaml for each (10/10 present;
+  independently re-verified this session). The provenance-marked
+  restore-by-reconstruction is the accepted remediation per the session decision
+  record DEC-20261126-001 (status accepted). Root-cause investigation of the
+  dev-sync staging/ticket-store family (the ticket's step-6.5 follow-up) is
+  tracked under the open defect ticket T-20261127-001 (step-3.87 cross-store
+  ambiguity, same dev-sync staging/ticket-store class, queued for the next
+  machinery batch) — not duplicated here. No residual action on this ticket.
 error: null
