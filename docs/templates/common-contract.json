@@ -371,7 +371,7 @@
       "gemini_source": ".gemini/skills/platform-skill-lifecycle-manager/SKILL.md",
       "agents_source": ".agents/skills/platform-skill-lifecycle-manager/SKILL.md",
       "codex_source": ".codex/skills/platform-skill-lifecycle-manager/SKILL.md",
-      "version": "1.0.3",
+      "version": "1.1.1",
       "description": "Platform skill lifecycle management for .claude/skills/ and .gemini/skills/",
       "propagated_to_common": true
     },
@@ -380,7 +380,7 @@
       "gemini_source": ".gemini/skills/platform-command-lifecycle-manager/SKILL.md",
       "agents_source": ".agents/skills/platform-command-lifecycle-manager/SKILL.md",
       "codex_source": ".codex/skills/platform-command-lifecycle-manager/SKILL.md",
-      "version": "1.0.3",
+      "version": "1.1.1",
       "description": "Platform command lifecycle management for .claude/commands/ and .gemini/commands/",
       "propagated_to_common": true
     },

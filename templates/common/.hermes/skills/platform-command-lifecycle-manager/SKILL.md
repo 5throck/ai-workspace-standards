@@ -1,14 +1,14 @@
 ---
 name: platform-command-lifecycle-manager
 status: active
-version: 1.0.3
+version: 1.1.1
 description: >
   Manages the creation, registration, and propagation of platform commands
   in .claude/commands/ and .gemini/commands/ directories. Use when: adding new commands,
   ensuring parity between Claude and Gemini command directories, or propagating commands to templates/common/.
 owner: pm
 scope: common
-last_reviewed: 2026-09-25
+last_reviewed: 2026-11-27
 metadata:
   type: process
   triggers:

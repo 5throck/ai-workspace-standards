@@ -24,8 +24,8 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `meeting-facilitation` | 1.6.0 | active | pm | 2026-11-21 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.3.2 | active | pm | 2026-10-08 | — | — |
 | `promote-variant` | 1.4.0 | active | pm | 2026-11-08 | — | Workspace operator only — not deployed to L2 |
-| `platform-command-lifecycle-manager` | 1.0.3 | active | pm | 2026-09-25 | — | Mirrored 2026-09-04 from .claude/skills |
-| `platform-skill-lifecycle-manager` | 1.0.3 | active | pm | 2026-11-08 | — | Mirrored 2026-09-04 from .claude/skills |
+| `platform-command-lifecycle-manager` | 1.1.1 | active | pm | 2026-11-27 | — | Mirrored 2026-09-04 from .claude/skills |
+| `platform-skill-lifecycle-manager` | 1.1.1 | active | pm | 2026-11-27 | — | Mirrored 2026-09-04 from .claude/skills |
 | `script-lifecycle-manager` | 1.2.3 | active | pm | 2026-11-26 | — | — |
 | `security-scan` | 1.3.0 | active | pm | 2026-11-04 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |

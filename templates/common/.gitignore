@@ -55,6 +55,10 @@ Desktop.ini
 *.sqlite
 *.db
 
+# --- Machine-local pipeline runtime state (scripts/lib/workspace-hygiene.ts
+# contract: gitignored runtime state lives under .pipeline-state/ — per-run
+# battery logs land here; never committed) ---
+.pipeline-state/
 
 # Antigravity/ZCode session-local state (plans, config — never shared)
 .zcode/
