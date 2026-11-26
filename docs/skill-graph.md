@@ -231,8 +231,8 @@
 | `root/migrate-project` | L0 | 1.0.0 | — | — | root/adopt-project (composes_with), root/upgrade-project (follows) | — | — |
 | `root/model-migration` | L0 | 1.0.0 | — | — | — | — | — |
 | `root/new-project` | L0 | 1.0.0 | — | — | root/adopt-project, root/upgrade-project (follows) | — | — |
-| `root/platform-command-lifecycle-manager` | L0 | 1.0.3 | — | — | — | — | — |
-| `root/platform-skill-lifecycle-manager` | L0 | 1.0.3 | — | — | — | — | — |
+| `root/platform-command-lifecycle-manager` | L0 | 1.1.1 | — | — | — | — | — |
+| `root/platform-skill-lifecycle-manager` | L0 | 1.1.1 | — | — | — | — | — |
 | `root/project-resync` | L0 | 1.11.0 | — | — | root/project-review (composes_with), root/project-to-variant, root/sync (composes_with), root/upgrade-project (follows) | — | — |
 | `root/project-review` | L0 | 1.3.2 | — | — | — | — | — |
 | `root/project-to-variant` | L0 | 1.3.1 | — | — | root/promote-variant (composes_with) | — | — |

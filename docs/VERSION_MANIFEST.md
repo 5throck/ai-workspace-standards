@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-26T16:37:45.987Z
+**Generated**: 2026-11-26T17:10:21.716Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -69,8 +69,8 @@
 | migrate-project | 1.0.0 | active | skills/migrate-project/SKILL.md | workspace | migrate project, adopt and verify migration, run project migration, full project migration flow | scaffolding-expert |
 | model-migration | 1.0.0 | active | skills/model-migration/SKILL.md | workspace | model-migration, change model, model bump, `모델 변경` | lifecycle-manager |
 | new-project | 1.0.0 | active | skills/new-project/SKILL.md | workspace | new project, create project, scaffold project, project from template, start a new engagement | scaffolding-expert |
-| platform-command-lifecycle-manager | 1.0.3 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
-| platform-skill-lifecycle-manager | 1.0.3 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
+| platform-command-lifecycle-manager | 1.1.1 | active | skills/platform-command-lifecycle-manager/SKILL.md | workspace | create platform command, new .claude command, new .gemini command, platform command lifecycle, command parity, propagate command | pm |
+| platform-skill-lifecycle-manager | 1.1.1 | active | skills/platform-skill-lifecycle-manager/SKILL.md | workspace | create platform skill, new .claude skill, new .gemini skill, platform skill version, platform skill lifecycle, update platform skill | pm |
 | project-resync | 1.11.0 | active | skills/project-resync/SKILL.md | workspace | project-resync, resync projects, sync project cycle | pm |
 | project-review | 1.3.2 | active | skills/project-review/SKILL.md | workspace | project review, review project, audit project, quality review | pm |
 | project-to-variant | 1.3.1 | active | skills/project-to-variant/SKILL.md | workspace | convert project to variant, create variant from project, project to template, promote project to variant | scaffolding-expert |

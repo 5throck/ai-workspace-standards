@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: platform-skill-lifecycle-manager
 - **Status**: active
-- **Version**: 1.0.3
+- **Version**: 1.1.1
 - **Created**: 2026-09-04
-- **Last Updated**: 2026-09-04
+- **Last Updated**: 2026-11-27
 
 ## Description
 Guides creation and lifecycle management of platform skills
@@ -14,6 +14,8 @@ Guides creation and lifecycle management of platform skills
 back-sync rules, version pinning, and AGENTS.md §8 lifecycle triggers.
 
 ## Changelog
+
+- **1.1.1** (2026-11-27): version-only bump above the co-architect project copy (1.1.0) — the co-architect zombie sibling (TRUE_DIVERGENCE + PROJECT_AHEAD vs the common base, promoted pre-normalization at bbf2ad2) is un-stuck so the engine delivers normally without a grant; zombie's unique content adjudicated as stale frontmatter styling + empty stub, superseded at the next delivery (spec 2026-11-27-co-architect-platform-zombie-adjudication).
 
 - **1.0.2** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 

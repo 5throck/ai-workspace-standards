@@ -9168,7 +9168,7 @@
       "scope": "root",
       "capability": "platform-command-lifecycle-manager",
       "content_hash": "392bf490b9ef6b44",
-      "version": "1.0.3",
+      "version": "1.1.1",
       "mirrors": [
         "skills/platform-command-lifecycle-manager/SKILL.md",
         "templates/common/skills/platform-command-lifecycle-manager/SKILL.md",
@@ -9187,7 +9187,7 @@
       "scope": "root",
       "capability": "platform-skill-lifecycle-manager",
       "content_hash": "08e425f43401cabc",
-      "version": "1.0.3",
+      "version": "1.1.1",
       "mirrors": [
         "skills/platform-skill-lifecycle-manager/SKILL.md",
         "templates/common/skills/platform-skill-lifecycle-manager/SKILL.md",

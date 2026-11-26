@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: platform-command-lifecycle-manager
 - **Status**: active
-- **Version**: 1.0.3
+- **Version**: 1.1.1
 - **Created**: 2026-09-04
-- **Last Updated**: 2026-09-25
+- **Last Updated**: 2026-11-27
 
 ## Description
 Guides creation and lifecycle management of platform commands
@@ -14,6 +14,8 @@ L0↔L1 propagation rules, parity validation via `scripts/validate-templates.ts`
 and AGENTS.md §8 lifecycle trigger bookkeeping.
 
 ## Changelog
+
+- **1.1.1** (2026-11-27): version-only bump above the co-architect project copy (1.1.0) — the co-architect zombie sibling (TRUE_DIVERGENCE + PROJECT_AHEAD vs the common base, promoted pre-normalization at bbf2ad2) is un-stuck so the engine delivers normally without a grant; zombie's unique content adjudicated as stale frontmatter styling + empty stub, superseded at the next delivery (spec 2026-11-27-co-architect-platform-zombie-adjudication).
 
 - **1.0.3** (2026-09-25): patch bump — `.agents/commands` lockstep note added to the Propagation Rule (spec `2026-09-25-propagation-engine-batch-design` §6-D8/R25, ticket T-20260925-003); last_reviewed refreshed.
 
