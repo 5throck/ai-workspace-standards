@@ -11,7 +11,7 @@ This directory contains variant-specific skills for the `co-design` template.
 | `design-review` | 1.1.0 | active | pm | 2026-11-02 | — | Three-lens review of an IMPLEMENTED UI (conformance, interaction affordance, journey) plus an all-agent critique panel with an evidence-based issue log and a gated remediation loop. L3-ahead canonical conformed at L2 (`## Context` added from the L3 Purpose; 2026-11-01-hub-consolidation follow-up wave); L3 origin `Projects/co-design` v1.1.0 |
 | `service-design` | 1.1.0 | active | pm | 2026-09-27 | — | Migrated to SSOT from `.claude/skills/`-only (no prior `skills/` entry) during a full skill-lifecycle audit |
 | `token-usage-lint` | 1.1.1 | active | pm | 2026-10-08 | — | co-design fork of the root skill (variant-maintained) — binds the lint to the co-design playground SSOT contract, visual-designer palette ownership, and concrete hex examples the generic root copy generalizes away |
-| `ui-ux-design-intelligence` | 1.0.1 | active | pm | 2026-09-06 | — | co-design fork of the root skill (variant-maintained) — adds the `service-design` follow relation for the co-design process chain |
+| `ui-ux-design-intelligence` | 1.0.2 | active | pm | 2026-10-08 | — | co-design fork of the root skill (variant-maintained) — adds the `service-design` follow relation for the co-design process chain; 1.0.2 replaces the stale 1.0.1 placeholder with the real specialized copy from Projects/co-design (pair-program row P7, adjudication row 22) |
 
 All other skills are inherited from `templates/common/skills/`. See the shared skills index for available platform-neutral skills.
 

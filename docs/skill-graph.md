@@ -56,9 +56,10 @@
 | `co-deck/storyline` | variant:co-deck | 1.7.0 | co-deck/storyline | co-deck/phase 2, co-deck/phase 3 | co-deck/design (follows) | research-notes | storyline-outline, slide-deck-draft |
 | `co-deck/theme-authoring` | variant:co-deck | 1.0.1 | — | — | — | — | — |
 | `co-deck/version` | variant:co-deck | 1.3.2 | co-deck/design, co-deck/diagram-specialist, co-deck/handbook-reviewer, co-deck/handbook-writer, co-deck/html-build, co-deck/image-curator, co-deck/measure, co-deck/pdf-export, co-deck/research, co-deck/source-verifier, co-deck/storyline, co-deck/version | co-deck/phase 0, co-deck/phase 1, co-deck/phase 2, co-deck/phase 3, co-deck/phase 4, co-deck/phase 5, co-deck/phase 6 | — | — | — |
-| `co-design/design-foundation` | variant:co-design | 1.3.0 | — | — | co-design/token-usage-lint (composes_with), root/accessibility-audit (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
-| `co-design/design-review` | variant:co-design | 1.1.0 | — | — | co-design/design-foundation (follows), co-design/token-usage-lint (composes_with), root/accessibility-audit (composes_with), root/meeting-facilitation (composes_with), root/project-review (composes_with), root/service-design (composes_with), root/ui-ux-design-intelligence (composes_with) | — | — |
-| `co-design/token-usage-lint` | variant:co-design | 1.1.1 | co-design/prototype-engineer | co-design/phase 4 | root/ui-ux-design-intelligence (follows) | — | — |
+| `co-design/design-foundation` | variant:co-design | 1.3.0 | — | — | co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (enables), root/accessibility-audit (composes_with) | — | — |
+| `co-design/design-review` | variant:co-design | 1.1.0 | — | — | co-design/design-foundation (follows), co-design/token-usage-lint (composes_with), co-design/ui-ux-design-intelligence (composes_with), root/accessibility-audit (composes_with), root/meeting-facilitation (composes_with), root/project-review (composes_with), root/service-design (composes_with) | — | — |
+| `co-design/token-usage-lint` | variant:co-design | 1.1.1 | co-design/prototype-engineer | co-design/phase 4 | co-design/ui-ux-design-intelligence (follows) | — | — |
+| `co-design/ui-ux-design-intelligence` | variant:co-design | 1.0.2 | co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows), root/service-design (follows) | — | — |
 | `co-develop/code-review` | variant:co-develop | 1.1.0 | co-develop/code-writer | co-develop/phase 4 | co-develop/refactoring (composes_with) | — | — |
 | `co-develop/refactoring` | variant:co-develop | 1.2.0 | co-develop/code-writer, co-game/game-debugger, co-game/game-developer | co-develop/phase 4, co-game/phase 3, co-game/phase 5 | co-develop/code-review (composes_with) | — | — |
 | `co-develop/swe-solve` | variant:co-develop | 1.1.1 | — | co-develop/phase 4 | — | — | — |
@@ -191,10 +192,11 @@
 | `co-utility/post-write-check` | variant:co-utility | 1.0.0 | co-utility/backend, co-utility/frontend, co-utility/qa | co-utility/phase 4 | — | — | — |
 | `co-work/i18n-layout` | variant:co-work | 1.1.2 | — | — | — | — | — |
 | `co-work/pptx-export` | variant:co-work | 2.0.2 | co-work/deck-builder | co-work/phase 3 | — | — | — |
+| `co-work/project-review` | variant:co-work | 1.3.3 | — | — | — | — | — |
 | `co-work/svg-quality-gate` | variant:co-work | 1.3.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
 | `co-work/svg-slide-authoring` | variant:co-work | 1.5.1 | co-work/deck-builder | co-work/phase 3 | — | — | — |
-| `common/decision-record` | common | 1.1.0 | — | — | — | — | — |
-| `common/evidence-ledger` | common | 1.1.0 | — | — | — | — | — |
+| `common/decision-record` | common | 1.1.1 | — | — | common/evidence-ledger (composes_with), root/documentation-writing (composes_with) | — | — |
+| `common/evidence-ledger` | common | 1.1.1 | — | — | root/documentation-writing (follows), root/research-analysis (follows) | — | — |
 | `common/gateguard` | common | 1.0.2 | common/automation-engineer | — | — | — | — |
 | `common/handbook` | common | 0.6.2 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
 | `common/handbook-sync-audit` | common | 1.0.5 | — | — | — | — | — |
@@ -210,11 +212,11 @@
 | `common/k-opendata` | common | 1.2.3 | common/public-data-analyst | — | common/k-ecos (composes_with), common/k-kosis | — | — |
 | `common/sync` | common | 1.10.0 | common/automation-engineer | — | — | — | — |
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
-| `root/accessibility-audit` | L0 | 1.1.0 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
+| `root/accessibility-audit` | L0 | 1.1.1 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
 | `root/adopt-project` | L0 | 1.1.2 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
 | `root/agent-lifecycle-manager` | L0 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L0 | 1.0.2 | co-architect/technical-writer, co-work/technical-writer | — | — | — | — |
-| `root/ci-triage` | L0 | 0.2.0 | common/automation-engineer | — | — | — | — |
+| `root/ci-triage` | L0 | 0.2.1 | common/automation-engineer | — | — | — | — |
 | `root/context-commonization-review` | L0 | 1.1.0 | — | — | root/meeting-facilitation (follows), root/promote-variant (follows) | — | — |
 | `root/create-variant` | L0 | 1.4.3 | — | — | root/documentation-writing (follows), root/promote-variant (enables) | — | — |
 | `root/decision-write-integrity` | L0 | 1.0.0 | — | — | root/meeting-facilitation | — | — |
@@ -223,7 +225,7 @@
 | `root/design-token-adoption` | L0 | 1.0.0 | — | — | root/design-foundation, root/token-usage-lint (composes_with) | — | — |
 | `root/documentation-writing` | L0 | 1.0.3 | co-architect/content-writer, co-architect/technical-writer, co-work/content-writer, co-work/technical-writer | — | root/team-builder (composes_with) | — | — |
 | `root/explain-me` | L0 | 1.0.1 | — | — | — | — | — |
-| `root/finishing-a-development-branch` | L0 | 1.0.2 | — | — | — | — | — |
+| `root/finishing-a-development-branch` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/gateguard` | L0 | 1.0.2 | — | — | root/sync | — | — |
 | `root/meeting-facilitation` | L0 | 1.6.0 | — | — | — | — | — |
 | `root/migrate-project` | L0 | 1.0.0 | — | — | root/adopt-project (composes_with), root/upgrade-project (follows) | — | — |
@@ -237,12 +239,12 @@
 | `root/promote-variant` | L0 | 1.4.0 | — | — | root/create-variant (follows), root/sync (follows) | — | — |
 | `root/release-template` | L0 | 1.0.0 | — | — | root/promote-variant | — | — |
 | `root/research-analysis` | L0 | 1.0.2 | co-architect/analyst, co-work/analyst | — | root/documentation-writing (enables) | — | — |
-| `root/script-lifecycle-manager` | L0 | 1.2.2 | common/automation-engineer | — | — | — | — |
+| `root/script-lifecycle-manager` | L0 | 1.2.3 | common/automation-engineer | — | — | — | — |
 | `root/security-scan` | L0 | 1.3.0 | — | — | — | — | — |
 | `root/service-design` | L0 | 1.1.0 | co-architect/design-lead, co-architect/service-designer, co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/simulate-pipeline` | L0 | 1.0.2 | — | — | — | — | — |
 | `root/skill-graph-analytics` | L0 | 1.5.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
-| `root/skill-lifecycle-manager` | L0 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
+| `root/skill-lifecycle-manager` | L0 | 1.5.1 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L0 | 1.1.0 | — | — | — | — | — |
 | `root/sync` | L0 | 1.10.0 | — | — | — | — | — |
@@ -251,7 +253,7 @@
 | `root/token-usage-lint` | L0 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
 | `root/trail` | L0 | 1.2.0 | — | — | — | — | — |
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
-| `root/ui-ux-design-intelligence` | L0 | 1.0.1 | co-architect/design-lead, co-architect/visual-designer, co-design/design-lead, co-design/ux-researcher, co-design/visual-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/documentation-writing (follows) | — | — |
+| `root/ui-ux-design-intelligence` | L0 | 1.0.1 | co-architect/design-lead, co-architect/visual-designer | — | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
 | `root/upgrade-project` | L0 | 1.6.4 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
 | `root/variant-feature` | L0 | 1.0.0 | — | — | root/upgrade-project (composes_with) | — | — |
@@ -277,9 +279,9 @@ Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`);
 - **co-deck/phase 4** (HTML Build + PDF Prep): co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf, co-deck/presenter-mode, co-deck/slide-layout-gate, co-deck/version
 - **co-deck/phase 5** (PDF Export + Publish): co-deck/pdf-export, co-deck/version
 - **co-deck/phase 6** (Retrospective): co-deck/version
-- **co-design/phase 1** (User Research & Narrative Foundation): root/service-design, root/ui-ux-design-intelligence
-- **co-design/phase 2** (Design Direction & Approval): root/accessibility-audit, root/service-design, root/ui-ux-design-intelligence
-- **co-design/phase 3** (Design System & Execution): root/service-design, root/ui-ux-design-intelligence
+- **co-design/phase 1** (User Research & Narrative Foundation): co-design/ui-ux-design-intelligence, root/service-design
+- **co-design/phase 2** (Design Direction & Approval): co-design/ui-ux-design-intelligence, root/accessibility-audit, root/service-design
+- **co-design/phase 3** (Design System & Execution): co-design/ui-ux-design-intelligence, root/service-design
 - **co-design/phase 4** (Prototyping & Handoff): co-design/token-usage-lint, root/accessibility-audit
 - **co-develop/phase 4** (Implementation & QA Gate): co-develop/code-review, co-develop/refactoring, co-develop/swe-solve, co-develop/test-driven-development
 - **co-export/phase 1** (Research / Analysis): co-export/export-control-screening, co-export/foreign-regulation-monitoring, co-export/fta-origin-determination, co-export/halal-certification-workflow, co-export/hs-classification-workflow, co-export/landed-cost-calculation, co-export/market-entry-strategy, co-export/roo-qualification-worksheet
@@ -586,9 +588,9 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-design/docs/co-design.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-design/docs/component-primitives.md` | doc | `co-design/token-usage-lint`, `root/accessibility-audit` | — | — |
 | `doc:co-design/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
-| `doc:co-design/docs/user-guide_ko.md` | doc | `root/meeting-facilitation`, `root/service-design`, `root/ui-ux-design-intelligence` | — | — |
-| `doc:co-design/docs/user-guide.md` | doc | `root/meeting-facilitation`, `root/service-design`, `root/ui-ux-design-intelligence` | — | — |
-| `doc:co-design/README.md` | doc | `co-design/design-foundation`, `co-design/design-review`, `co-design/token-usage-lint`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design`, `root/ui-ux-design-intelligence` | — | — |
+| `doc:co-design/docs/user-guide_ko.md` | doc | `co-design/ui-ux-design-intelligence`, `root/meeting-facilitation`, `root/service-design` | — | — |
+| `doc:co-design/docs/user-guide.md` | doc | `co-design/ui-ux-design-intelligence`, `root/meeting-facilitation`, `root/service-design` | — | — |
+| `doc:co-design/README.md` | doc | `co-design/design-foundation`, `co-design/design-review`, `co-design/token-usage-lint`, `co-design/ui-ux-design-intelligence`, `root/accessibility-audit`, `root/meeting-facilitation`, `root/service-design` | — | — |
 | `doc:co-develop/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-develop/agents/architect.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-develop/agents/code-writer.md` | doc | `root/meeting-facilitation` | — | — |
@@ -729,7 +731,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-utility/agents/qa.md` | doc | `co-utility/post-write-check` | — | — |
 | `doc:co-utility/docs/co-utility.context.md` | doc | `co-utility/post-write-check`, `common/i18n-audit`, `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-utility/README.md` | doc | `co-utility/post-write-check`, `root/adopt-project`, `root/meeting-facilitation`, `root/new-project`, `root/project-to-variant` | — | — |
-| `doc:co-work/AGENTS.md` | doc | `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/project-review`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
+| `doc:co-work/AGENTS.md` | doc | `co-work/project-review`, `common/handbook`, `common/handbook-sync-audit`, `common/k-dart`, `common/k-law`, `common/sync`, `root/agent-lifecycle-manager`, `root/explain-me`, `root/finishing-a-development-branch`, `root/meeting-facilitation`, `root/platform-command-lifecycle-manager`, `root/platform-skill-lifecycle-manager`, `root/security-scan`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-work/agents/analyst.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/agents/content-writer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/agents/deck-builder.md` | doc | `co-work/pptx-export`, `co-work/svg-quality-gate`, `co-work/svg-slide-authoring`, `root/meeting-facilitation` | — | — |
@@ -739,7 +741,7 @@ Catalog table above — not skill references and not yet resolved as graph edges
 | `doc:co-work/agents/technical-writer.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/docs/co-work.context.md` | doc | `root/agent-lifecycle-manager`, `root/skill-lifecycle-manager` | — | — |
 | `doc:co-work/docs/document-style-registry.md` | doc | `co-deck/version`, `co-work/pptx-export`, `co-work/svg-slide-authoring` | — | — |
-| `doc:co-work/docs/phase-definitions.md` | doc | `root/project-review` | — | — |
+| `doc:co-work/docs/phase-definitions.md` | doc | `co-work/project-review` | — | — |
 | `doc:co-work/docs/user-guide_ko.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/docs/user-guide.md` | doc | `root/meeting-facilitation` | — | — |
 | `doc:co-work/README.md` | doc | `root/api-documentation`, `root/documentation-writing`, `root/meeting-facilitation`, `root/research-analysis`, `root/standup-synthesizer` | — | — |
@@ -959,13 +961,14 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `i18n-audit` | skill | divergence | co-price@2.1.0 #6dd3845c; common@1.0.2 #b5259cc8 |
 | `i18n-layout` | skill | divergence | co-work@1.1.2 #55cc9f30; common@1.1.1 #67b31c6f |
 | `pdf-export` | skill | divergence | co-deck@2.2.1 #4250f2a6; co-price@1.1.0 #e11de512 |
-| `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; root@1.3.2 #01931679 |
-| `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.2 #ff4bf06d |
-| `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.0 #883308f6 |
+| `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; co-work@1.3.3 #34041ed9; root@1.3.2 #01931679 |
+| `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.3 #219618bf |
+| `skill-lifecycle-manager` | skill | version-drift | co-safety@1.5.1 #bb1a68cb; root@1.5.1 #0cadfa10 |
 | `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.10.0 #80a9c66a; root@1.10.0 #b0bfef1a |
 | `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.2.0 #c375e7fd |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
 | `translate` | skill | divergence | co-safety@1.0.2 #51f1f071; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
+| `ui-ux-design-intelligence` | skill | divergence | co-design@1.0.2 #576de29c; root@1.0.1 #584f569c |
 
 ## Isolated Nodes (G5)
 
@@ -978,7 +981,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 
 ## Skills Without `used_by` (G6)
 
-134 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+135 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -1017,7 +1020,7 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-26), window 90 days. Skill nodes with usage: 4.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/sync, root/adopt-project, root/sync
-- **unused** (0 sessions in 90 days) (242): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 202 more
+- **unused** (0 sessions in 90 days) (244): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 204 more
 
 ## Ambiguous Name Resolutions
 

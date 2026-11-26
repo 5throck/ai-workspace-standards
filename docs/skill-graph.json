@@ -6775,6 +6775,19 @@
       ]
     },
     {
+      "id": "skill:co-design/ui-ux-design-intelligence",
+      "type": "skill",
+      "layer": "variant:co-design",
+      "name": "ui-ux-design-intelligence",
+      "scope": "co-design",
+      "capability": "ui-ux-design-intelligence",
+      "content_hash": "576de29c925f9b3d",
+      "version": "1.0.2",
+      "mirrors": [
+        "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-develop/code-review",
       "type": "skill",
       "layer": "variant:co-develop",
@@ -8526,6 +8539,19 @@
       ]
     },
     {
+      "id": "skill:co-work/project-review",
+      "type": "skill",
+      "layer": "variant:co-work",
+      "name": "project-review",
+      "scope": "co-work",
+      "capability": "project-review",
+      "content_hash": "34041ed9ad8f1f1c",
+      "version": "1.3.3",
+      "mirrors": [
+        "templates/co-work/skills/project-review/SKILL.md"
+      ]
+    },
+    {
       "id": "skill:co-work/svg-quality-gate",
       "type": "skill",
       "layer": "variant:co-work",
@@ -8558,8 +8584,8 @@
       "name": "decision-record",
       "scope": "common",
       "capability": "decision-record",
-      "content_hash": "af9dd89ccdeec7b2",
-      "version": "1.1.0",
+      "content_hash": "9ab86a0df2bafd06",
+      "version": "1.1.1",
       "mirrors": [
         "templates/common/skills/decision-record/SKILL.md"
       ]
@@ -8571,8 +8597,8 @@
       "name": "evidence-ledger",
       "scope": "common",
       "capability": "evidence-ledger",
-      "content_hash": "8abe418bc3c78854",
-      "version": "1.1.0",
+      "content_hash": "36811a0d5b7d9757",
+      "version": "1.1.1",
       "mirrors": [
         "templates/common/skills/evidence-ledger/SKILL.md"
       ]
@@ -8784,7 +8810,7 @@
       "scope": "root",
       "capability": "accessibility-audit",
       "content_hash": "9e6da04e275eb51c",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "mirrors": [
         "skills/accessibility-audit/SKILL.md",
         "templates/common/skills/accessibility-audit/SKILL.md",
@@ -8863,8 +8889,8 @@
       "name": "ci-triage",
       "scope": "root",
       "capability": "ci-triage",
-      "content_hash": "c10cba25e7560168",
-      "version": "0.2.0",
+      "content_hash": "cbe9a9ebb62132b3",
+      "version": "0.2.1",
       "mirrors": [
         "skills/ci-triage/SKILL.md",
         "templates/common/skills/ci-triage/SKILL.md",
@@ -9031,7 +9057,7 @@
       "scope": "root",
       "capability": "finishing-a-development-branch",
       "content_hash": "7aa95cd39dce01f1",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "mirrors": [
         "skills/finishing-a-development-branch/SKILL.md",
         "templates/common/skills/finishing-a-development-branch/SKILL.md",
@@ -9289,8 +9315,8 @@
       "name": "script-lifecycle-manager",
       "scope": "root",
       "capability": "script-lifecycle-manager",
-      "content_hash": "ff4bf06dcbc99aac",
-      "version": "1.2.2",
+      "content_hash": "219618bff7c66983",
+      "version": "1.2.3",
       "mirrors": [
         "skills/script-lifecycle-manager/SKILL.md",
         "templates/common/skills/script-lifecycle-manager/SKILL.md",
@@ -9383,8 +9409,8 @@
       "name": "skill-lifecycle-manager",
       "scope": "root",
       "capability": "skill-lifecycle-manager",
-      "content_hash": "883308f6fa2d77b7",
-      "version": "1.5.0",
+      "content_hash": "0cadfa104f83e706",
+      "version": "1.5.1",
       "mirrors": [
         "skills/skill-lifecycle-manager/SKILL.md",
         "templates/common/skills/skill-lifecycle-manager/SKILL.md",
@@ -9554,7 +9580,6 @@
       "mirrors": [
         "skills/ui-ux-design-intelligence/SKILL.md",
         "templates/common/skills/ui-ux-design-intelligence/SKILL.md",
-        "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
         ".claude/skills/ui-ux-design-intelligence/SKILL.md",
         ".gemini/skills/ui-ux-design-intelligence/SKILL.md",
         ".agents/skills/ui-ux-design-intelligence/SKILL.md",
@@ -15251,6 +15276,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/docs/user-guide_ko.md",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/docs/user-guide_ko.md",
       "to": "skill:root/meeting-facilitation",
       "source": "workflow-doc"
     },
@@ -15262,8 +15293,8 @@
     },
     {
       "type": "cites_skill",
-      "from": "doc:co-design/docs/user-guide_ko.md",
-      "to": "skill:root/ui-ux-design-intelligence",
+      "from": "doc:co-design/docs/user-guide.md",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "workflow-doc"
     },
     {
@@ -15276,12 +15307,6 @@
       "type": "cites_skill",
       "from": "doc:co-design/docs/user-guide.md",
       "to": "skill:root/service-design",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/docs/user-guide.md",
-      "to": "skill:root/ui-ux-design-intelligence",
       "source": "workflow-doc"
     },
     {
@@ -15305,6 +15330,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-design/README.md",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-design/README.md",
       "to": "skill:root/accessibility-audit",
       "source": "workflow-doc"
     },
@@ -15318,12 +15349,6 @@
       "type": "cites_skill",
       "from": "doc:co-design/README.md",
       "to": "skill:root/service-design",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-design/README.md",
-      "to": "skill:root/ui-ux-design-intelligence",
       "source": "workflow-doc"
     },
     {
@@ -18515,6 +18540,12 @@
     {
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
+      "to": "skill:co-work/project-review",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:co-work/AGENTS.md",
       "to": "skill:common/handbook",
       "source": "workflow-doc"
     },
@@ -18576,12 +18607,6 @@
       "type": "cites_skill",
       "from": "doc:co-work/AGENTS.md",
       "to": "skill:root/platform-skill-lifecycle-manager",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-work/AGENTS.md",
-      "to": "skill:root/project-review",
       "source": "workflow-doc"
     },
     {
@@ -18689,7 +18714,7 @@
     {
       "type": "cites_skill",
       "from": "doc:co-work/docs/phase-definitions.md",
-      "to": "skill:root/project-review",
+      "to": "skill:co-work/project-review",
       "source": "workflow-doc"
     },
     {
@@ -20215,13 +20240,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.design-definition",
-      "to": "skill:root/documentation-writing",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.design-definition",
-      "to": "skill:root/ui-ux-design-intelligence",
+      "to": "skill:root/documentation-writing",
       "source": "procedure_schema"
     },
     {
@@ -20328,13 +20353,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.ux-discovery",
-      "to": "skill:root/service-design",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.ux-discovery",
-      "to": "skill:root/ui-ux-design-intelligence",
+      "to": "skill:root/service-design",
       "source": "procedure_schema"
     },
     {
@@ -20392,13 +20417,13 @@
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.visual-implementation",
-      "to": "skill:root/service-design",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
       "from": "procedure.co-design.visual-implementation",
-      "to": "skill:root/ui-ux-design-intelligence",
+      "to": "skill:root/service-design",
       "source": "procedure_schema"
     },
     {
@@ -26892,6 +26917,23 @@
       "source": "prose"
     },
     {
+      "type": "enables",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-foundation",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "prose"
+    },
+    {
       "type": "composes_with",
       "from": "skill:co-design/design-foundation",
       "to": "skill:root/accessibility-audit",
@@ -26907,23 +26949,6 @@
       "type": "references",
       "from": "skill:co-design/design-foundation",
       "to": "skill:root/accessibility-audit",
-      "source": "prose"
-    },
-    {
-      "type": "enables",
-      "from": "skill:co-design/design-foundation",
-      "to": "skill:root/ui-ux-design-intelligence",
-      "source": "relates_to",
-      "provenance": {
-        "file": "templates/co-design/skills/design-foundation/SKILL.md",
-        "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:co-design/design-foundation",
-      "to": "skill:root/ui-ux-design-intelligence",
       "source": "prose"
     },
     {
@@ -26959,6 +26984,24 @@
       "type": "references",
       "from": "skill:co-design/design-review",
       "to": "skill:co-design/token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/ui-ux-design-intelligence",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/co-design/skills/design-review/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:co-design/design-review",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "prose"
     },
     {
@@ -27034,24 +27077,6 @@
       "source": "prose"
     },
     {
-      "type": "composes_with",
-      "from": "skill:co-design/design-review",
-      "to": "skill:root/ui-ux-design-intelligence",
-      "source": "relates_to",
-      "symmetric": true,
-      "provenance": {
-        "file": "templates/co-design/skills/design-review/SKILL.md",
-        "field": "relates_to",
-        "index": 1
-      }
-    },
-    {
-      "type": "references",
-      "from": "skill:co-design/design-review",
-      "to": "skill:root/ui-ux-design-intelligence",
-      "source": "prose"
-    },
-    {
       "type": "used_by",
       "from": "skill:co-design/token-usage-lint",
       "to": "agent:co-design/prototype-engineer",
@@ -27077,12 +27102,97 @@
     {
       "type": "follows",
       "from": "skill:co-design/token-usage-lint",
-      "to": "skill:root/ui-ux-design-intelligence",
+      "to": "skill:co-design/ui-ux-design-intelligence",
       "source": "relates_to",
       "provenance": {
         "file": "templates/co-design/skills/token-usage-lint/SKILL.md",
         "field": "relates_to",
         "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "agent:co-design/design-lead",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/design-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "agent:co-design/ux-researcher",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/ux-researcher.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "agent:co-design/visual-designer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "templates/co-design/agents/visual-designer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "output_type.design_review_record",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "output_type.discovery_review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "phase:co-design/1",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "phase:co-design/2",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "phase:co-design/3",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "skill:root/documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:co-design/ui-ux-design-intelligence",
+      "to": "skill:root/service-design",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/co-design/skills/ui-ux-design-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 1
       }
     },
     {
@@ -31478,10 +31588,34 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "skill:common/decision-record",
+      "to": "skill:common/evidence-ledger",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/decision-record/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "skill:common/decision-record",
       "to": "skill:common/evidence-ledger",
       "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:common/decision-record",
+      "to": "skill:root/documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/decision-record/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "produces",
@@ -31506,6 +31640,28 @@
       "from": "skill:common/evidence-ledger",
       "to": "skill:common/decision-record",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "skill:common/evidence-ledger",
+      "to": "skill:root/documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/evidence-ledger/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:common/evidence-ledger",
+      "to": "skill:root/research-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/evidence-ledger/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",
@@ -34606,69 +34762,6 @@
         "field": "required_skills",
         "index": 0
       }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "agent:co-design/design-lead",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-design/agents/design-lead.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "agent:co-design/ux-researcher",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-design/agents/ux-researcher.md",
-        "field": "required_skills",
-        "index": 1
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "agent:co-design/visual-designer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "templates/co-design/agents/visual-designer.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
-      "type": "produces",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "output_type.design_review_record",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "output_type.discovery_review",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "phase:co-design/1",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "phase:co-design/2",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "phase",
-      "from": "skill:root/ui-ux-design-intelligence",
-      "to": "phase:co-design/3",
-      "source": "skill_manifest"
     },
     {
       "type": "follows",

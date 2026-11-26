@@ -309,6 +309,30 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "decision-record",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/decision-record/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "decision-record",
+      "to": "evidence-ledger",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/decision-record/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "decision-record",
       "to": "evidence-ledger",
@@ -426,6 +450,28 @@
       "from": "evidence-ledger",
       "to": "decision-record",
       "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "evidence-ledger",
+      "to": "documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/evidence-ledger/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "evidence-ledger",
+      "to": "research-analysis",
+      "source": "relates_to",
+      "provenance": {
+        "file": "templates/common/skills/evidence-ledger/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
     },
     {
       "type": "used_by",

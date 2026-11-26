@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: accessibility-audit
 - **Status**: active
-- **Version**: 1.1.0
+- **Version**: 1.1.1
 - **Created**: 2026-08-06 (co-design); promoted to L0 2026-09-06
-- **Last Updated**: 2026-09-06
+- **Last Updated**: 2026-11-26
 
 ## Description
 Automated WCAG 2.1 Level AA accessibility evaluation rules, DOM audit patterns, and
@@ -14,6 +14,8 @@ Promoted from the co-design variant (L2-as-basis decision, unified design/a11y/U
 user-confirmed) so every scaffolded project receives it via L0→L1 propagation.
 
 ## Changelog
+
+- **1.1.1** (2026-11-26): patch bump — version-only bump making the 2026-11-08 stamp-only template edit (d82a73649, blank-line removal) deliverable to the 15-carrier lagging majority (adjudication row 1; pair-program row P8).
 - 2026-08-06: 1.0.0 — created in co-design
 - 2026-09-06: 1.1.0 — promoted to L0 (scope common); body unchanged
 

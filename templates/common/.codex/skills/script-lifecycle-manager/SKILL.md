@@ -7,8 +7,8 @@ description: >
   across the workspace and templates. Use when: creating new scripts, updating script versions,
   deprecating scripts, or managing script dependencies in SCRIPTS.md.
 owner: pm
-version: 1.2.2
-last_reviewed: 2026-11-08
+version: 1.2.3
+last_reviewed: 2026-11-26
 metadata:
   type: process
   triggers:
@@ -17,6 +17,7 @@ metadata:
     - deprecate script
     - script lifecycle
     - manage scripts
+prerequisites: none
 ---
 
 ## Overview
@@ -74,3 +75,7 @@ Run the `generate-scripts-readme.ts` script to ensure `README.md` is synchronize
 Run `bun scripts/verify-scripts.ts` (if available) to ensure dependencies are valid and no circular dependencies exist.
 
 > **L3 Projects**: When registering a new script in an L3 project's `scripts/SCRIPTS.md`, use `source: L2` (the script's origin layer — the L2 variant template it was scaffolded from) and `layer: L0+L1` (not `L0`). Scripts placed in `scripts/<variant>/` subdirectories should be registered in the sub-registry at `scripts/<variant>/SCRIPTS.md`, not the main registry. See §6.5 Script Lifecycle Management for Tier 3 filtering details.
+
+## Related Skills
+
+<!-- Link related skills here -->

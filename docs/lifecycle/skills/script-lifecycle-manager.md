@@ -39,9 +39,11 @@
 
 ## Changelog
 
+- **1.2.3** (2026-11-26): patch bump — port the `## Related Skills` stub + `prerequisites: none` from the co-architect copy template-side (adjudication row 18; pair-program row P5).
+
 - **1.2.2** (2026-09-21): patch bump — deliver accumulated template content to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 
 - **1.2.1** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 
 - **1.2.1** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
-- **Version**: 1.2.2
+- **Version**: 1.2.3

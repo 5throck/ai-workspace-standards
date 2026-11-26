@@ -18,15 +18,15 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | skill | version | status | owner | last_reviewed | removal-date | notes |
 |-------|---------|--------|-------|---------------|--------------|-------|
 | `agent-lifecycle-manager` | 1.4.0 | active | pm | 2026-11-06 | — | PM-led hiring/firing workflows + skill attach/detach rules |
-| `finishing-a-development-branch` | 1.0.2 | active | pm | 2026-11-08 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
+| `finishing-a-development-branch` | 1.0.3 | active | pm | 2026-11-08 | — | Workspace override — redirects branch completion to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `meeting-facilitation` | 1.6.0 | active | pm | 2026-11-21 | — | Canonical meeting skill; `meeting` is a trigger alias, not a separate skill directory |
 | `project-review` | 1.3.2 | active | pm | 2026-10-08 | — | — |
 | `platform-command-lifecycle-manager` | 1.0.3 | active | pm | 2026-09-25 | — | Mirrored 2026-09-04 from .claude/skills |
 | `platform-skill-lifecycle-manager` | 1.0.3 | active | pm | 2026-11-08 | — | Mirrored 2026-09-04 from .claude/skills |
-| `script-lifecycle-manager` | 1.2.2 | active | pm | 2026-11-08 | — | — |
+| `script-lifecycle-manager` | 1.2.3 | active | pm | 2026-11-26 | — | — |
 | `security-scan` | 1.3.0 | active | pm | 2026-11-04 | — | Reassigned from security-expert — not defined in templates/common/agents/ or any variant, caused orphan on every propagated variant |
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
-| `skill-lifecycle-manager` | 1.5.0 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
+| `skill-lifecycle-manager` | 1.5.1 | active | pm | 2026-09-21 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
 | `sync` | 1.10.0 | active | automation-engineer | 2026-11-18 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan. 1.10.0: conditional opt-in detection steps (gate check, detect-backport filing, §5.8 warning, §5.6 auto-merge close-out; design 2026-11-17-sync-auto-detection) |
 | `team-builder` | 1.2.0 | active | pm | 2026-11-08 | — | — |
 | `translate` | 1.0.3 | active | pm | 2026-11-08 | — | — |
@@ -36,15 +36,15 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `standup-synthesizer` | 1.1.0 | active | pm | 2026-11-06 | — | Daily standup digest synthesizer aggregating commits, issues, PRs, and blockers |
 | `api-documentation` | 1.0.2 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic REST/GraphQL/SDK documentation generation, not domain-specific |
 | `documentation-writing` | 1.0.3 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic guide/manual/tutorial writing, not domain-specific |
-| `accessibility-audit` | 1.1.0 | active | pm | 2026-11-08 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
+| `accessibility-audit` | 1.1.1 | active | pm | 2026-11-08 | — | Promoted from co-design (L2-as-basis per ADR-0068 plan): automated WCAG 2.1 AA audits via axe-core |
 | `token-usage-lint` | 1.1.0 | active | pm | 2026-09-06 | — | Promoted from co-design: token SSOT compliance lint; delegates to scripts/design-lint.ts (L0+L1) |
 | `ui-ux-design-intelligence` | 1.0.1 | active | pm | 2026-09-06 | — | Promoted from co-design: component design, visual hierarchy, WCAG checklist; enabled by design-foundation |
 | `research-analysis` | 1.0.2 | active | pm | 2026-11-08 | — | Promoted from co-work/co-safety duplicate copies — generic research synthesis and evidence gathering, not domain-specific |
 | `gateguard` | 1.0.2 | active | pm | 2026-11-08 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
-| `ci-triage` | 0.2.0 | active | pm | 2026-10-04 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
-| `decision-record` | 1.1.0 | active | pm | 2026-08-25 | — | Decision record format for gate-moment rulings (Design Gate Row 0) captured as docs/decisions/DEC-YYYYMMDD-NN.md files |
-| `evidence-ledger` | 1.1.0 | active | pm | 2026-08-25 | — | Fixed-column evidence ledger tracing every claim a decision depends on to a source, reference, and verification state |
+| `ci-triage` | 0.2.1 | active | pm | 2026-11-26 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
+| `decision-record` | 1.1.1 | active | pm | 2026-11-26 | — | Decision record format for gate-moment rulings (Design Gate Row 0) captured as docs/decisions/DEC-YYYYMMDD-NN.md files |
+| `evidence-ledger` | 1.1.1 | active | pm | 2026-11-26 | — | Fixed-column evidence ledger tracing every claim a decision depends on to a source, reference, and verification state |
 | `handbook` | 0.6.2 | active | pm | 2026-09-20 | — | Document Production Workflow — searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and course modes |
 | `handbook-sync-audit` | 1.0.5 | active | pm | 2026-08-29 | — | Verifies generated handbooks stay aligned with their sources: upstream content reflection, structural linkage, freshness |
 | `i18n-audit` | 1.0.2 | active | i18n-specialist | 2026-11-19 | — | Locale parity and glossary audit across locale files, with drift reporting and a parity certificate on success |
