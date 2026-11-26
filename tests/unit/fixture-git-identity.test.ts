@@ -58,6 +58,7 @@
  *          the fail-closed direction (a differently-styled leak still refuses), and the
  *          both-sides seam wiring of both probes.
  *
+ * @version 1.4.0 (2026-11-26: registry gains skill-graph-transient-snapshot.test.ts — the S4 transient[] snapshot tests spawn git for the fixture pr/* checkout, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.4)
  * @version 1.3.9 (2026-11-25: registry gains upgrade-script-lane-gaps.test.ts — the script-lane gap engine tests spawn git via the upgrade engine)
  * v1.3.8 (2026-11-25: registry gains contained-run-manifest-dir.test.ts — the manifest-dir tests spawn git for the dirty-tree assertion)
  * v1.3.7 (2026-11-25: registry gains upgrade-policy-content-equivalent.test.ts — the content-identity fast-path engine tests spawn git via the upgrade engine)
@@ -103,6 +104,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "project-target-guards.test.ts",
   "remote-collision.test.ts",
   "repo-integrity.test.ts",
+  "skill-graph-transient-snapshot.test.ts",
   "template-vintage.test.ts",
   "upgrade-decision-log.test.ts",
   "upgrade-core-locked-fork.test.ts",

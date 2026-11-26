@@ -2,6 +2,18 @@
 /**
  * skill-graph-fleet-report.ts — Read-only fleet analytics over per-project skill graphs
  * (skill-graph-analytics skill Step 1).
+ * @version 2.8.0 (2026-11-26, spec
+ *          docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.4 S4):
+ *          additive top-level `transient[]` on the durable snapshot — one
+ *          {id, branch, head, reason} entry per fleet checkout that
+ *          filterTransientCheckouts skipped (a live `pr/*` branch). The stderr
+ *          WARN and the history-page annotation (v2.5.0) cover the run and the
+ *          page; the durable JSON the weekly analysis reads was the silent
+ *          surface (the 2026-11-26 undercount: co-price/co-architect absent
+ *          with no record). `head` comes from the new lib/git-aware-scan.ts
+ *          checkoutHead() — `git rev-parse --short HEAD` only, fail-open null;
+ *          the PR working tree is NEVER scanned (design non-goal). Legacy
+ *          snapshots without the field parse unchanged (agentGraph AC2 pattern).
  * @version 2.7.0 (2026-11-25, T-20261124-001 — design
  *          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.1):
  *          the root-backfill staleness key is `graphContentSha256` — the SHA-256
@@ -198,7 +210,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { checkoutBranch, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
+import { checkoutBranch, checkoutHead, filterTransientCheckouts } from "./lib/git-aware-scan.ts";
 import { gitCleanEnv } from "./lib/git-env.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
 import { localDateISO } from "./lib/local-date.ts";
@@ -206,7 +218,7 @@ import { PLATFORM_MIRROR_DIRS } from "./lib/platforms.ts";
 import { capabilityOf, loadSkillGraph, nameOf, upgradeSkillGraph } from "./lib/skill-graph-compat.ts";
 import type { SkillGraphNodeV2, SkillGraphV2 } from "./lib/skill-graph-compat.ts";
 
-const VERSION = "2.7.0";
+const VERSION = "2.8.0";
 
 /** Convergence threshold: a capability carried by >= this many project graphs is a candidate. */
 export const CONVERGENCE_THRESHOLD = 3;
@@ -259,12 +271,52 @@ interface ProjectStats {
   skills: number;
 }
 
+/** v2.8.0 (S4, additive): why a fleet member is absent from `projects` this run. */
+export interface SnapshotTransientEntry {
+  /** Member basename (the Projects/ directory name). */
+  id: string;
+  /** The transient branch the checkout sits on (`pr/*`). */
+  branch: string;
+  /** Short HEAD sha of the checkout (checkoutHead(); null on any git error). */
+  head: string | null;
+  /** Fixed exclusion rationale naming the governing ticket. */
+  reason: string;
+}
+
+/**
+ * v2.8.0 (S4): fixed rationale recorded on every transient[] entry — the
+ * exclusion is T-20261103-004's positive-evidence rule, not an error state.
+ */
+export const TRANSIENT_CHECKOUT_REASON =
+  "transient PR working checkout — excluded from fleet discovery and classification per T-20261103-004; HEAD recorded read-only via git rev-parse, the PR tree is never scanned";
+
+/**
+ * v2.8.0 (S4): build the snapshot's transient[] records from the skipped rows
+ * defaultProjects() already produced (same derivation, no second scan). Pure:
+ * the HEAD read is injected so tests never spawn git for the shape pins.
+ */
+export function buildTransientEntries(
+  skipped: Array<{ name: string; branch: string }>,
+  headOf: (dir: string) => string | null = checkoutHead,
+): SnapshotTransientEntry[] {
+  return skipped.map((s) => ({
+    id: s.name.split(/[\\/]/).pop() ?? s.name,
+    branch: s.branch,
+    head: headOf(s.name),
+    reason: TRANSIENT_CHECKOUT_REASON,
+  }));
+}
+
 interface Snapshot {
   date: string;
   projects: Record<string, ProjectEntry>;
   fleetPresence: Record<string, number>;
   missingFromProjects: Record<string, string[]>;
   jaccard: Record<string, number>;
+  /** v2.8.0 (additive, S4): one record per fleet checkout that discovery skipped
+   *  (a live `pr/*` branch). `head` is rev-parse metadata read under
+   *  gitCleanEnv(), fail-open null; the PR working tree is never scanned. */
+  transient?: SnapshotTransientEntry[];
   /** v2.0.0: capability-keyed convergence classification (threshold = CONVERGENCE_THRESHOLD). */
   convergence?: ConvergenceResult;
   /** v2.2.0 (additive): fan-in classification (skills + agents, threshold = FAN_IN_THRESHOLD),
@@ -3190,6 +3242,15 @@ Read-only over all inputs.`);
   // v1.1.0 — root-graph orphan cross-check
   const orphans = rootGraph ? analyzeRootOrphans(rootGraph) : null;
   if (orphans) snapshot.rootOrphans = orphans;
+
+  // v2.8.0 (S4, additive): record every skipped transient checkout in the
+  // durable snapshot — id, branch, head, reason. The run already warns on
+  // stderr and the history page annotates absentees (v2.5.0); this makes
+  // absence visible in the artifact the weekly analysis reads. HEAD comes
+  // from `git rev-parse` only (fail-open null) — the PR tree is never read.
+  if (fleet.skipped.length > 0) {
+    snapshot.transient = buildTransientEntries(fleet.skipped);
+  }
 
   mkdirSync(snapshotDir, { recursive: true });
   const snapshotFile = join(snapshotDir, `snapshot-${today}.json`);

@@ -1,5 +1,12 @@
 #!/usr/bin/env bun
-// @version 1.0.1
+// @version 1.1.0
+// v1.1.0 (2026-11-26, spec docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
+//          §4.4 S4): checkoutHead() added — `git -C <dir> rev-parse --short HEAD`
+//          under gitCleanEnv(), fail-open null (same contract as checkoutBranch).
+//          Read-only identity of a checkout's HEAD; consumed by the fleet report's
+//          snapshot `transient[]` records so a skipped PR working copy is visible in
+//          the durable artifact WITHOUT its tree ever being scanned (S4 non-goal:
+//          rev-parse metadata only, no tree reads).
 // v1.0.1 (2026-11-09, rogue-commit incident): both git spawns run under
 //          scripts/lib/git-env.ts gitCleanEnv(). `-C <dir>` does not defeat an
 //          inherited GIT_DIR, so a hook context made this scan report the
@@ -76,6 +83,24 @@ export function checkoutBranch(dir: string): string | null {
 /** `pr/*` = a transient PR working checkout per the landing convention. */
 export function isTransientCheckoutBranch(branch: string): boolean {
   return branch.startsWith("pr/");
+}
+
+/**
+ * Short HEAD sha of a checkout via `git -C <dir> rev-parse --short HEAD`, or
+ * null on any git error / empty output (non-git dir, unborn HEAD) — fail-open,
+ * the checkoutBranch() contract. v1.1.0 (S4): read-only metadata for the fleet
+ * snapshot's transient[] records; the checkout's working tree is never read.
+ */
+export function checkoutHead(dir: string): string | null {
+  // gitCleanEnv(): same reason as checkoutBranch — never let an inherited
+  // GIT_DIR answer "which commit is this checkout at" for another repo.
+  const res = spawnSync("git", ["-C", dir, "rev-parse", "--short", "HEAD"], {
+    encoding: "utf8",
+    env: gitCleanEnv() as NodeJS.ProcessEnv,
+  });
+  if (res.status !== 0) return null;
+  const head = (res.stdout || "").trim();
+  return head || null;
 }
 
 /**
