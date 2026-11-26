@@ -1,6 +1,22 @@
 #!/usr/bin/env bun
 /**
  * Skill Relationship Graph Generator
+ * @version 2.2.0 (2026-11-27, defect fix to §4.2 S2 — standalone-checkout hash
+ *           stability): VARIANT_NAME derivation moved into exported
+ *           resolveVariantName(): a fleet-project checkout is now identified by
+ *           its OWN variant.json (which travels with the checkout) before the
+ *           nested-membership probe. The probe alone (isFleetProjectPath
+ *           against the workspace root inferred two levels up) silently
+ *           returns false in a standalone checkout — a hosted-runner clone
+ *           checked out two levels deep (work/name/name under the runner
+ *           workspace) has no <root>/Projects layout and
+ *           no docs/fleet-membership.json up-tree — so a committed
+ *           docs/skill-graph.json generated inside a workspace checkout (hashes
+ *           WITH compensation) failed verify-skill-graph on CI for every file
+ *           whose body carries a rendered backtick slug (observed: co-abap PR
+ *           #256, exactly the 3 slug-bearing nodes agent read-only-analyst,
+ *           skills abap-code-review / abap-dev). Pinned by
+ *           tests/unit/variant-name-cwd-stability.test.ts.
  * @version 2.1.0 (2026-11-26, spec docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
  *           §4.2 S2): variant-token hash compensation — VARIANT_NAME is derived once
  *           (`basename(ROOT)` when ROOT is a fleet project path, via lib/fleet.ts
@@ -182,7 +198,29 @@ const templatesDir = join(ROOT, "templates");
 // collision rule iv). The registry exclusions SSOT is honored because
 // isFleetProjectPath reads <inferred-root>/docs/fleet-membership.json.
 const ROOT_TWO_UP = resolve(ROOT, "..", "..");
-const VARIANT_NAME = isFleetProjectPath(ROOT, ROOT_TWO_UP) ? basename(ROOT) : undefined;
+
+/**
+ * S2 drift fix (2026-11-27, v2.2.0): variant-token hash compensation is only
+ * correct when the SAME variantName is derived in EVERY checkout of the same
+ * project. The nested-membership probe alone (isFleetProjectPath against the
+ * workspace root inferred two levels up) silently returns false in a
+ * standalone checkout — a hosted-runner clone checked out two levels deep
+ * (work/name/name under the runner workspace) has no
+ * <root>/Projects layout and no docs/fleet-membership.json up-tree — so a
+ * committed docs/skill-graph.json generated inside a workspace checkout (hashes
+ * WITH compensation) failed verify-skill-graph on CI for exactly the
+ * slug-bearing files. A fleet project (and a variant template dir) is
+ * identified by its OWN variant.json, which travels with the checkout; the
+ * membership probe stays as the fallback for a nested project that somehow
+ * lacks the file. Root scope (no variant.json, no Projects/<name> path)
+ * derives undefined — unchanged no-op behavior.
+ */
+export function resolveVariantName(root: string, rootTwoUp = resolve(root, "..", "..")): string | undefined {
+  if (existsSync(join(root, "variant.json"))) return basename(root);
+  return isFleetProjectPath(root, rootTwoUp) ? basename(root) : undefined;
+}
+
+const VARIANT_NAME = resolveVariantName(ROOT, ROOT_TWO_UP);
 // Run-context detection: the workspace root is the only context that has a
 // templates/common (platform template layer) directory. Scaffolded projects may
 // carry their own content template dirs (e.g. templates/deliverables/) without
