@@ -87,13 +87,13 @@
     },
     "co-security": {
       "nodes": 92,
-      "edges": 198,
+      "edges": 202,
       "skills": 43,
       "agentGraph": {"n":[["agent:root/automation-engineer","60bea1c363d770c6"],["agent:root/contract-gate-engineer","e438d380cef846a6"],["agent:root/design-system-lead","ee9c9e5ae43d5705"],["agent:root/i18n-specialist","fdeb4a03733e932c"],["agent:root/patch-engineer","c0d9b53fa0eeeb2f"],["agent:root/pentester","8d625c2b86fa5fa6"],["agent:root/pm","18d879c724929be9"],["agent:root/red-team-lead","99c0eb2fa6acf33f"],["agent:root/report-writer","9a3a4fa88415ce9e"],["agent:root/threat-modeler","d0ac467994583240"],["skill:root/meeting-facilitation",null],["skill:root/sync",null],["skill:root/zod-contract-gate",null],["skill:root/accessibility-audit",null],["skill:root/design-foundation",null],["skill:root/token-usage-lint",null],["skill:root/ui-ux-design-intelligence",null],["skill:root/i18n-audit",null],["skill:root/i18n-formatting",null],["skill:root/i18n-layout",null],["skill:root/i18n-locale-config",null],["skill:root/translate",null],["skill:root/verify-authorization",null],["skill:root/agent-lifecycle-manager",null],["skill:root/decision-record",null],["skill:root/skill-lifecycle-manager",null],["procedure.co-security.engagement-planning",null],["procedure.co-security.post-engagement-hardening",null],["procedure.co-security.remediation-support",null],["procedure.co-security.security-reporting",null],["procedure.co-security.threat-analysis",null],["procedure.co-security.threat-model-and-report",null],["skill:root/ci-triage",null],["skill:root/finding-reconciliation",null],["skill:root/gateguard",null],["skill:root/samm-maturity",null],["skill:root/sarif-exporter",null],["skill:root/script-lifecycle-manager",null],["skill:root/spdx-sbom",null],["skill:root/stride-threat-matrix",null]],"t":["references","step_by_agent","used_by"],"e":[[0,10,0],[0,11,0],[1,10,0],[1,12,0],[2,13,0],[2,14,0],[2,10,0],[2,15,0],[2,16,0],[3,17,0],[3,18,0],[3,19,0],[3,20,0],[3,10,0],[3,21,0],[4,10,0],[4,22,0],[5,10,0],[5,22,0],[6,23,0],[6,24,0],[6,10,0],[6,25,0],[7,10,0],[7,22,0],[8,10,0],[8,22,0],[9,10,0],[9,22,0],[7,26,1],[9,26,1],[4,27,1],[5,27,1],[8,27,1],[4,28,1],[8,29,1],[7,30,1],[9,30,1],[5,31,1],[7,31,1],[8,31,1],[9,31,1],[0,32,2],[2,14,2],[5,33,2],[8,33,2],[0,34,2],[3,17,2],[3,18,2],[3,19,2],[3,20,2],[9,35,2],[5,36,2],[8,36,2],[0,37,2],[4,38,2],[8,38,2],[9,39,2],[0,11,2],[5,22,2],[7,22,2],[1,12,2]]}
     },
     "co-work": {
       "nodes": 78,
-      "edges": 142,
+      "edges": 146,
       "skills": 42,
       "agentGraph": {"n":[["agent:root/analyst","254f5792266ef611"],["agent:root/automation-engineer","caa86f7a24114a00"],["agent:root/content-writer","a3c36eb4eb9a00cd"],["agent:root/contract-gate-engineer","7c90aa5c2e3114aa"],["agent:root/deck-builder","e73e91c9905b9878"],["agent:root/design-system-lead","6d1f7eab4b170471"],["agent:root/i18n-specialist","5f08ecd5193bcb14"],["agent:root/ms365-expert","db62380ef07dccb9"],["agent:root/pm","523cae52ad9a3924"],["agent:root/project-coordinator","69d9c4207b3635d1"],["agent:root/public-data-analyst","15d4c389dc740633"],["agent:root/storyteller","64d7e5c7016d91bc"],["agent:root/technical-writer","96a2b028373f95eb"],["skill:root/meeting-facilitation",null],["skill:root/sync",null],["skill:root/zod-contract-gate",null],["skill:root/pptx-export",null],["skill:root/svg-quality-gate",null],["skill:root/svg-slide-authoring",null],["skill:root/accessibility-audit",null],["skill:root/design-foundation",null],["skill:root/token-usage-lint",null],["skill:root/ui-ux-design-intelligence",null],["skill:root/i18n-audit",null],["skill:root/i18n-formatting",null],["skill:root/i18n-layout",null],["skill:root/i18n-locale-config",null],["skill:root/translate",null],["skill:root/agent-lifecycle-manager",null],["skill:root/decision-record",null],["skill:root/skill-lifecycle-manager",null],["procedure.co-work.deck-source-verification",null],["procedure.co-work.distribution-integration",null],["procedure.co-work.document-production",null],["procedure.co-work.narrative-design",null],["procedure.co-work.project-intake-analysis",null],["skill:root/api-documentation",null],["skill:root/ci-triage",null],["skill:root/documentation-writing",null],["skill:root/gateguard",null],["skill:root/research-analysis",null],["skill:root/script-lifecycle-manager",null]],"t":["references","step_by_agent","used_by"],"e":[[0,13,0],[1,13,0],[1,14,0],[2,13,0],[3,13,0],[3,15,0],[4,13,0],[4,16,0],[4,17,0],[4,18,0],[5,19,0],[5,20,0],[5,13,0],[5,21,0],[5,22,0],[6,23,0],[6,24,0],[6,25,0],[6,26,0],[6,13,0],[6,27,0],[7,13,0],[8,28,0],[8,29,0],[8,13,0],[8,30,0],[9,13,0],[10,13,0],[11,13,0],[12,13,0],[0,31,1],[2,31,1],[7,32,1],[9,32,1],[0,33,1],[2,33,1],[11,33,1],[12,33,1],[11,34,1],[0,35,1],[11,35,1],[12,36,2],[1,37,2],[5,20,2],[2,38,2],[12,38,2],[1,39,2],[6,23,2],[6,24,2],[6,25,2],[6,26,2],[4,16,2],[0,40,2],[1,41,2],[4,17,2],[4,18,2],[1,14,2],[3,15,2]]}
     }
@@ -3367,6 +3367,7 @@
       "api-documentation",
       "documentation-writing",
       "explain-me",
+      "finishing-a-development-branch",
       "gateguard",
       "handbook",
       "handbook-sync-audit",
@@ -3399,13 +3400,13 @@
             "co-learning",
             "co-news",
             "co-price",
-            "co-safety"
+            "co-safety",
+            "co-security",
+            "co-work"
           ],
           "aa244933ce706aa7": [
             "co-deck",
-            "co-newbiz",
-            "co-security",
-            "co-work"
+            "co-newbiz"
           ]
         }
       },
@@ -3424,15 +3425,13 @@
             "co-learning",
             "co-news",
             "co-price",
-            "co-safety"
+            "co-safety",
+            "co-security",
+            "co-work"
           ],
           "c10cba25e7560168": [
             "co-deck",
-            "co-newbiz",
-            "co-work"
-          ],
-          "ec264d271a535f41": [
-            "co-security"
+            "co-newbiz"
           ]
         }
       },
@@ -3451,12 +3450,12 @@
             "co-learning",
             "co-news",
             "co-price",
-            "co-safety"
-          ],
-          "af9dd89ccdeec7b2": [
-            "co-deck",
+            "co-safety",
             "co-security",
             "co-work"
+          ],
+          "af9dd89ccdeec7b2": [
+            "co-deck"
           ],
           "f97306e933b308c0": [
             "co-newbiz"
@@ -3479,7 +3478,6 @@
             "co-news",
             "co-price",
             "co-safety",
-            "co-security",
             "co-work"
           ],
           "bb0f0dd8e0a47371": [
@@ -3487,6 +3485,9 @@
           ],
           "565f7401b6479d45": [
             "co-develop"
+          ],
+          "4233b917a1c14cfd": [
+            "co-security"
           ]
         }
       },
@@ -3505,38 +3506,15 @@
             "co-learning",
             "co-news",
             "co-price",
-            "co-safety"
-          ],
-          "7c15e880b454b203": [
-            "co-deck",
-            "co-security",
-            "co-work"
-          ],
-          "ae4297fc669e81d8": [
-            "co-newbiz"
-          ]
-        }
-      },
-      {
-        "capability": "finishing-a-development-branch",
-        "hashes": {
-          "7aa95cd39dce01f1": [
-            "co-abap",
-            "co-consult",
-            "co-design",
-            "co-develop",
-            "co-export",
-            "co-game",
-            "co-hr",
-            "co-learning",
-            "co-newbiz",
-            "co-news",
             "co-safety",
             "co-security",
             "co-work"
           ],
-          "1be6db98a8d85203": [
-            "co-architect"
+          "7c15e880b454b203": [
+            "co-deck"
+          ],
+          "ae4297fc669e81d8": [
+            "co-newbiz"
           ]
         }
       },
@@ -3710,7 +3688,7 @@
           "f22c2b791465cf40": [
             "co-safety"
           ],
-          "09968306e57716cb": [
+          "34041ed9ad8f1f1c": [
             "co-work"
           ]
         },
@@ -3746,15 +3724,13 @@
             "co-learning",
             "co-news",
             "co-price",
-            "co-safety"
+            "co-safety",
+            "co-security",
+            "co-work"
           ],
           "ff4bf06dcbc99aac": [
             "co-deck",
-            "co-newbiz",
-            "co-security"
-          ],
-          "e17ebb10070732ed": [
-            "co-work"
+            "co-newbiz"
           ]
         }
       },
@@ -3772,13 +3748,13 @@
             "co-hr",
             "co-learning",
             "co-news",
-            "co-price"
+            "co-price",
+            "co-security",
+            "co-work"
           ],
           "883308f6fa2d77b7": [
             "co-deck",
-            "co-newbiz",
-            "co-security",
-            "co-work"
+            "co-newbiz"
           ],
           "bb1a68cbd7b84047": [
             "co-safety"
@@ -3830,11 +3806,13 @@
             "co-news",
             "co-price",
             "co-safety",
-            "co-security",
-            "co-work"
+            "co-security"
           ],
           "95b99028dbccb0fc": [
             "co-architect"
+          ],
+          "2019fa3f1c3b58e8": [
+            "co-work"
           ]
         }
       },
