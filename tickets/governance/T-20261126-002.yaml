@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: T-20261126-002
+kind: manual
+title: >-
+  fix(upgrade): stub version backfill for MERGE_MANAGED agent stubs; registry
+  rows never lowered
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-26T00:00:00.000+09:00'
+history:
+  - at: '2026-11-26T00:00:00.000+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-26T23:56:34.000+09:00'
+    from: backlog
+    to: done
+  - at: '2026-11-26T23:56:34.000+09:00'
+    action: reconstruct
+    actor: automation-engineer
+    from: backlog
+    to: done
+result: >-
+  Reconstructed 2026-11-26 from session records; original working-tree-only
+  file never committed and lost; adjudicated under DEC-20261126-001.
+  Evidence: memory/2026-11-26.md L182 session block "fix(upgrade): stub
+  version backfill for MERGE_MANAGED agent stubs (T-20261126-002)" and the
+  follow-up block "script header is the source of truth for @version; registry
+  rows never lowered (T-20261126-002)"; landed via PR #2185 per the U-20261126-001/-002
+  done-moves closeout block (L314).
+error: null

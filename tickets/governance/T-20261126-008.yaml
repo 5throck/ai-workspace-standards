@@ -2,28 +2,27 @@ schemaVersion: 1
 id: T-20261126-008
 kind: manual
 title: >-
-  Projects/co-deck/variant.json skills configuration sets enforcement:
-  "scripts/audit-variant.ts" but the referenced file does not exist in the
-  project (neither scripts/audit-variant.ts nor scripts/co-deck/audit-variant.ts;
-  audit-variant is also NOT declared in co-deck's script_manifest.local — the
-  §27 candidate scan deliberately ignores such files after the false-positive
-  fix, so nothing activates it), and a workspace-wide grep found no script
-  consuming the enforcement field (grep '"enforcement"|.enforcement' over
-  scripts/*.ts: zero matches outside comments; the consuming mechanism could
-  not be confirmed — if it is agent/prompt-level documentation, the pointer is
-  still dangling and misleading, implying a variant audit gate co-deck does not
-  have). Fix: first establish whether any consumer exists (search
-  templates/co-deck tooling and agent docs for 'enforcement'); then point the
-  field at a real path (e.g. the actual skills allowlist enforcement source, if
-  different) or remove/annotate the field. Low priority: no runtime failure
-  observed — this is a documentation/contract integrity fix.
-priority: low
+  co-deck skills enforcement dangling reference to nonexistent
+  scripts/audit-variant.ts
+priority: normal
 status: backlog
 attempts: 0
-created_at: '2026-11-26T20:04:05.000+09:00'
+created_at: '2026-11-26T00:00:00.000+09:00'
 history:
-  - at: '2026-11-26T20:04:05.000+09:00'
+  - at: '2026-11-26T00:00:00.000+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-26T23:56:34.000+09:00'
+    action: reconstruct
+    actor: automation-engineer
+    from: backlog
+    to: backlog
+result: >-
+  Reconstructed 2026-11-26 from session records; original working-tree-only
+  file never committed and lost; adjudicated under DEC-20261126-001; status
+  inferred from session records (no resolution record found — the P1-P8 pair
+  program session listed the file as modified, not resolved).
+  Evidence: memory/2026-11-26.md L407 "T-20261126-008.yaml — created (co-deck
+  skills enforcement dangling reference to nonexistent scripts/audit-variant.ts)";
+  L522 modified in the P1-P8 session. Status best evidence: open (backlog).
 error: null
