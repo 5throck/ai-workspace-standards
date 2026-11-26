@@ -13,12 +13,64 @@ title: >-
   (no template source) and i18n-layout v1.1.2@co-work to the delivery source
   first or redelivery regresses them
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-23T10:52:51.151+09:00'
 history:
   - at: '2026-11-23T10:52:51.151+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-27T02:42:03.345+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T02:42:03.365+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T02:42:12.875+09:00'
+    from: review
+    to: done
+result: >-
+  Convergence close-out 2026-11-27 (fresh fleet report: converged 22, divergence
+  families 19, hashUnknown 0, convergedIntent 6 rows / 4 capabilities shown,
+  transient[] empty — all 16 project checkouts on main). Every residual family
+  carries an explicit disposition: (1) out-of-scope co-deck/co-newbiz
+  minorities: accessibility-audit, ci-triage, decision-record, evidence-ledger,
+  k-law, meeting-facilitation, script-lifecycle-manager,
+  skill-lifecycle-manager, project-review co-newbiz minority. (2)
+  converged-intent registry rows (docs/skill-intent.json): project-review
+  [co-abap UR-2 local-patch, co-safety variant-override, co-work
+  path-adaptation], skill-lifecycle-manager [co-safety variant-override],
+  i18n-audit [co-price], design-foundation + token-usage-lint +
+  ui-ux-design-intelligence [co-design]. (3) registered variant override:
+  i18n-layout@co-work (templates/co-work 1.1.2, P==T verified 2026-11-27). (4)
+  adjudicated variant-borne fork families, all P==T: graft (co-develop 1.1.0 vs
+  1.0.0 x4, no delivery source — nothing can regress it), refactoring 1.2.0
+  (co-develop/co-game, each equals its own variant template),
+  test-driven-development 1.2.0 (same). (5) classified this wave with evidence:
+  delegate-to-hub {co-design,co-develop,co-security} and k-opendata@co-export =
+  stale per-project skill-graph.json (SKILL.md verified byte-identical to
+  majority carrier 2026-11-27; heal at those projects' next dev-sync graph
+  regen). (6) standup-synthesizer {co-architect,co-work} = S2 example-slug
+  compensation artifact — all 16 copies byte-identical (verified 2026-11-27);
+  the prose example line "(e.g. co-work, co-architect)" collides with
+  VARIANT_NAME hash compensation; machinery follow-up belongs to the next
+  machinery batch (T-20261127-001 lane). (7) co-architect stale
+  pre-normalization styling copies, equal-version, unbaselined -> DRIFT_PRESERVE
+  by ADR-0085 D3 (engine-verified preserved in the 2026-11-27 delivery dry-run):
+  source-command-commit-push-pr, translate, update-bun-packages — content is
+  template-minus-styling (trailing-space metadata block, prerequisites: none,
+  empty Related Skills stub); heal via a future version-only common-base bump
+  wave (the #2194/#2196 pattern), NOT copied by hand. Also this program: the two
+  platform lifecycle-manager zombies un-stuck (spec
+  2026-11-27-co-architect-platform-zombie-adjudication, workspace PR #2196,
+  delivery 5throck/co-architect#417 — both pairs now CONVERGED), finishing pair
+  un-stuck earlier (#2194/#2195), P1-P8 ports landed (aed2b08d5) with
+  ci-triage@co-develop+co-security reconcile verified in the majority hash.
+  Original asks verified: 19-drift STEP I redelivery converged the majority
+  lanes; graft/i18n-layout regression risk resolved (no common source exists /
+  override lane P==T). Fleet-wide engine-lane note: 5 fleet-uniform
+  equal-version template-pending strands (gateguard, team-builder,
+  api-documentation, research-analysis, documentation-writing — template 4 lines
+  ahead at equal version, all project copies uniform) preserved by D3, invisible
+  as divergence pairs; belongs to the S1-baseline machinery batch.
 error: null
