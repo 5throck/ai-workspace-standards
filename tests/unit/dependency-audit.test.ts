@@ -1,6 +1,6 @@
 /**
  * Dependency-audit waiver-gate tests (T-20261003-011)
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Covers the pure logic of scripts/dependency-audit.ts:
  * - strict waiver-file parsing (fail-closed schema)
@@ -9,6 +9,9 @@
  * - scope contradiction detection
  * - bun audit --json parsing tolerance
  * - manifest-skip: no root package.json passes with a notice (T-20261004-029)
+ * - lockfile-skip: package.json without an auditable lockfile reports
+ *   NOT-APPLICABLE exit 0 naming the repo (T-20261126-004); the severity
+ *   gate's exit-1 verdict stays intact on a fixture vulnerable tree
  * - L0 ↔ L1 script pair stays in sync (mirror identity)
  */
 
@@ -21,6 +24,8 @@ import {
   GateError,
   expiredWaivers,
   extractGhsa,
+  failingFindings,
+  findAuditableLockfile,
   installedVersion,
   matchWaivers,
   normalizeSeverity,
@@ -304,18 +309,58 @@ describe('manifest-skip (T-20261004-029)', () => {
     expect(proc.exitCode).toBe(0);
     expect(stdout).toContain('[SKIP] no package.json at repo root');
   });
+});
 
-  test('a repo with a package.json does not take the skip path', async () => {
-    const withPkg = mkdtempSync(join(tmpdir(), 'dep-audit-pkg-'));
-    writeFileSync(join(withPkg, 'package.json'), JSON.stringify({ name: 'probe', version: '1.0.0' }));
+describe('lockfile-skip (T-20261126-004)', () => {
+  test('a repo with a package.json but no lockfile exits 0 with NOT-APPLICABLE naming the repo', async () => {
+    const noLock = mkdtempSync(join(tmpdir(), 'dep-audit-nolock-'));
+    writeFileSync(join(noLock, 'package.json'), JSON.stringify({ name: 'no-runtime-deps', version: '1.0.0' }));
     const proc = Bun.spawn(['bun', join(workspaceRoot, 'scripts', 'dependency-audit.ts')], {
-      cwd: withPkg,
+      cwd: noLock,
       stdout: 'pipe',
       stderr: 'pipe',
     });
     const stdout = await new Response(proc.stdout).text();
     await proc.exited;
-    expect(stdout).not.toContain('[SKIP]');
+    expect(proc.exitCode).toBe(0);
+    expect(stdout).toContain('[NOT-APPLICABLE]');
+    expect(stdout).toContain(noLock);
+    // the manifest-skip line must NOT be the verdict here (package.json exists)
+    expect(stdout).not.toContain('[SKIP] no package.json');
+  });
+
+  test('findAuditableLockfile resolves each lockfile bun audit consumes', () => {
+    for (const lockfile of ['bun.lock', 'bun.lockb', 'package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock']) {
+      const repo = mkdtempSync(join(tmpdir(), 'dep-audit-lock-'));
+      writeFileSync(join(repo, 'package.json'), JSON.stringify({ name: 'probe', version: '1.0.0' }));
+      writeFileSync(join(repo, lockfile), 'fixture');
+      expect(findAuditableLockfile(repo)).toBe(lockfile);
+    }
+  });
+
+  test('findAuditableLockfile is null for a lockfile-less repo (the NOT-APPLICABLE discriminator)', () => {
+    const noLock = mkdtempSync(join(tmpdir(), 'dep-audit-nolock-'));
+    writeFileSync(join(noLock, 'package.json'), JSON.stringify({ name: 'probe', version: '1.0.0' }));
+    expect(findAuditableLockfile(noLock)).toBeNull();
+  });
+
+  test('failure path intact (fixture, no real audit run): a vulnerable tree behind an auditable lockfile still trips the exit-1 gate', () => {
+    const vulnerableFixture = `{"braces":[{"id":1240992,"url":"https://github.com/advisories/GHSA-vfj7-8cjw-p6xm","title":"braces DoS","severity":"high","vulnerable_versions":"<=3.0.3"}]}`;
+    const findings = parseAuditJson(vulnerableFixture);
+    const match = matchWaivers(findings, [], mkdtempSync(join(tmpdir(), 'dep-audit-gate-')));
+    const failing = failingFindings(match.remaining);
+    // the wrapper's exit-1 verdict is exactly failingFindings(remaining).length > 0
+    expect(failing).toHaveLength(1);
+    expect(failing[0].pkg).toBe('braces');
+    expect(normalizeSeverity(failing[0].advisory.severity)).toBe('high');
+  });
+
+  test('low/moderate-only trees keep reporting without failing (informational)', () => {
+    const moderateFixture = `{"some-pkg":[{"id":42,"url":"https://github.com/advisories/GHSA-aaaa-bbbb-cccc","title":"moderate finding","severity":"moderate"}]}`;
+    const findings = parseAuditJson(moderateFixture);
+    const match = matchWaivers(findings, [], mkdtempSync(join(tmpdir(), 'dep-audit-gate-')));
+    expect(failingFindings(match.remaining)).toHaveLength(0);
+    expect(match.remaining).toHaveLength(1);
   });
 });
 
