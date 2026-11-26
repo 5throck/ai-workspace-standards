@@ -3377,6 +3377,8 @@
       "k-ecos",
       "k-kosis",
       "k-krx",
+      "platform-command-lifecycle-manager",
+      "platform-skill-lifecycle-manager",
       "research-analysis",
       "security-scan",
       "service-design",
@@ -3613,52 +3615,6 @@
           ],
           "5002c7ad0b26a7a8": [
             "co-newbiz"
-          ]
-        }
-      },
-      {
-        "capability": "platform-command-lifecycle-manager",
-        "hashes": {
-          "392bf490b9ef6b44": [
-            "co-abap",
-            "co-consult",
-            "co-design",
-            "co-develop",
-            "co-export",
-            "co-game",
-            "co-hr",
-            "co-learning",
-            "co-newbiz",
-            "co-news",
-            "co-safety",
-            "co-security",
-            "co-work"
-          ],
-          "1fe6ab4bf6e2b73a": [
-            "co-architect"
-          ]
-        }
-      },
-      {
-        "capability": "platform-skill-lifecycle-manager",
-        "hashes": {
-          "08e425f43401cabc": [
-            "co-abap",
-            "co-consult",
-            "co-design",
-            "co-develop",
-            "co-export",
-            "co-game",
-            "co-hr",
-            "co-learning",
-            "co-newbiz",
-            "co-news",
-            "co-safety",
-            "co-security",
-            "co-work"
-          ],
-          "c39180570b6b0f0f": [
-            "co-architect"
           ]
         }
       },

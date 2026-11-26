@@ -3,14 +3,34 @@ id: U-20261126-004
 kind: manual
 title: Upstream request from co-security
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-26T23:37:15.614+09:00
+created_at: '2026-11-26T23:37:15.614+09:00'
 history:
-  - at: 2026-11-26T23:37:15.614+09:00
+  - at: '2026-11-26T23:37:15.614+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-27T02:41:04.655+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T02:41:04.655+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T02:41:04.655+09:00'
+    from: review
+    to: done
+result: >-
+  templates/common/.gitignore now carries the .pipeline-state/ entry (+
+  machine-local pipeline runtime state comment, mirroring root .gitignore:28 and
+  the scripts/lib/workspace-hygiene.ts:22 contract). Landed workspace-side in PR
+  #2196 (commit 3880fde5b, merged 627eeae2e, 2026-11-27); managed-block parity
+  for templates/co-abap and templates/co-price .gitignore updated in the same
+  landing (validate-templates: 0 errors, audit green). Delivery to variant
+  projects rides the managed-block merge (MERGE_MANAGED_FILES,
+  scripts/lib/upgrade-policy.ts) at each project's next upgrade wave — no
+  hand-copying; first recipient already verified: co-architect wave PR
+  5throck/co-architect#417 (merged aabe32b) received the entry via the upgrade's
+  managed-block merge.
 error: null
 upstream:
   project: co-security
@@ -19,11 +39,32 @@ upstream:
   source: project/co-security
   trust: untrusted
   suspected_layer: L1
-  symptom: 'templates/common/.gitignore lacks a .pipeline-state/ entry while the same wave delivers scripts/lib/pipeline-state.ts and workspace-hygiene.ts whose documented contract (workspace-hygiene.ts:22 "gitignored runtime state lives under .pipeline-state/") requires that directory to be gitignored — the workspace root''s own .gitignore:28 has it plus a state-directories comment block (:162), but variants never receive it, leaving machine-local battery logs as untracked noise with accidental-commit risk. Expected: add .pipeline-state/ (and the state-directories comment block) to templates/common/.gitignore so delivered variants match the documented intent.'
+  symptom: >-
+    templates/common/.gitignore lacks a .pipeline-state/ entry while the same
+    wave delivers scripts/lib/pipeline-state.ts and workspace-hygiene.ts whose
+    documented contract (workspace-hygiene.ts:22 "gitignored runtime state lives
+    under .pipeline-state/") requires that directory to be gitignored — the
+    workspace root's own .gitignore:28 has it plus a state-directories comment
+    block (:162), but variants never receive it, leaving machine-local battery
+    logs as untracked noise with accidental-commit risk. Expected: add
+    .pipeline-state/ (and the state-directories comment block) to
+    templates/common/.gitignore so delivered variants match the documented
+    intent.
   affected_paths:
     - templates/common/.gitignore
   identity_source: cwd
-  repro: '1. The 0.30.0 wave delivered scripts/lib/workspace-hygiene.ts + scripts/lib/pipeline-state.ts to variant projects; the libs write per-run battery logs to a repo-root .pipeline-state/ directory. 2. The libs'' own doc (workspace-hygiene.ts:22) states "gitignored runtime state lives under .pipeline-state/" — and the workspace root .gitignore:28 carries .pipeline-state/ plus a state-directories comment block at :162. 3. templates/common/.gitignore has NO .pipeline-state/ entry (grep: zero hits), so delivered variant projects show the dir as untracked (double-question-mark) noise with accidental-commit risk. 4. Real case: co-security after the 2026-11-23 upgrade — .pipeline-state/battery-2026-11-26.jsonl untracked.'
+  repro: >-
+    1. The 0.30.0 wave delivered scripts/lib/workspace-hygiene.ts +
+    scripts/lib/pipeline-state.ts to variant projects; the libs write per-run
+    battery logs to a repo-root .pipeline-state/ directory. 2. The libs' own doc
+    (workspace-hygiene.ts:22) states "gitignored runtime state lives under
+    .pipeline-state/" — and the workspace root .gitignore:28 carries
+    .pipeline-state/ plus a state-directories comment block at :162. 3.
+    templates/common/.gitignore has NO .pipeline-state/ entry (grep: zero hits),
+    so delivered variant projects show the dir as untracked
+    (double-question-mark) noise with accidental-commit risk. 4. Real case:
+    co-security after the 2026-11-23 upgrade —
+    .pipeline-state/battery-2026-11-26.jsonl untracked.
   triage: inbox
   flagged: false
   triage_reasons:
@@ -32,4 +73,21 @@ upstream:
   dedupe_key: c874716c42bb7102e52c7540d39eb2f87919ae938e23fdeff07f39cfec027225
   duplicates:
     - project: co-security
-      at: 2026-11-26T23:37:15.614+09:00
+      at: '2026-11-26T23:37:15.614+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2196
+    template_version: 0.30.0
+    summary: >-
+      templates/common/.gitignore now carries the .pipeline-state/ entry (+
+      machine-local pipeline runtime state comment, mirroring root .gitignore:28
+      and the scripts/lib/workspace-hygiene.ts:22 contract). Landed
+      workspace-side in PR #2196 (commit 3880fde5b, merged 627eeae2e,
+      2026-11-27); managed-block parity for templates/co-abap and
+      templates/co-price .gitignore updated in the same landing
+      (validate-templates: 0 errors, audit green). Delivery to variant projects
+      rides the managed-block merge (MERGE_MANAGED_FILES,
+      scripts/lib/upgrade-policy.ts) at each project's next upgrade wave — no
+      hand-copying; first recipient already verified: co-architect wave PR
+      5throck/co-architect#417 (merged aabe32b) received the entry via the
+      upgrade's managed-block merge.
