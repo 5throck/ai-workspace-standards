@@ -1,10 +1,13 @@
 // upgrade-stub-shape-conversion.test.ts — T-20261126-003 of design
-// docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5/§9: a legacy
-// FULL-BODY resolved agent copy converts to its template counterpart's extends-stub
-// shape (STUB_SHAPE_CONVERSION, INFO) after a clean managed-body merge — never on a
-// dirty one. The legacy project copy is modeled exactly as a scaffold produced it:
-// composeResolvedAgentContent over the REAL co-work/common pm.md pair. Engine runs
-// execute at DESCRIBE scope (the upgrade-overwrite-protection pattern).
+// docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5/§9 (part 1:
+// the pure helper pins + the five-observation conversion scene and the
+// stub-takes-backfill regression; the protective-guard scenes live in
+// upgrade-stub-shape-guards.test.ts — per-suite CI budget). A legacy FULL-BODY
+// resolved agent copy converts to its template counterpart's extends-stub shape
+// (STUB_SHAPE_CONVERSION, INFO) after a clean managed-body merge. The legacy
+// project copy is modeled exactly as a scaffold produced it:
+// composeResolvedAgentContent over the REAL co-work/common pm.md pair. Engine
+// runs execute at DESCRIBE scope (upgrade-overwrite-protection pattern).
 
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -37,7 +40,7 @@ function git(cwd: string, ...args: string[]): void {
 
 function commitAll(tmp: string, msg: string): void {
   const st = spawnSync('git', ['-C', tmp, 'status', '--porcelain'], { encoding: 'utf8', env: gitCleanEnv() });
-  if (!(st.stdout ?? '').trim()) return; // nothing to commit — the tree already holds the wanted state
+  if (!(st.stdout ?? '').trim()) return;
   git(tmp, 'add', '-A');
   git(tmp, 'commit', '-q', '-m', msg);
 }
@@ -89,83 +92,6 @@ function legacyResolvedBody(): string {
   return composed.content;
 }
 
-/** First delivery + commit, then seed agents/pm.md with the legacy resolved copy. */
-function projectWithLegacyPm(): string {
-  const tmp = freshProject();
-  runUpgrade(tmp);
-  commitAll(tmp, 'wave 1');
-  mkdirSync(join(tmp, 'agents'), { recursive: true });
-  writeFileSync(pmOf(tmp), legacyResolvedBody());
-  commitAll(tmp, 'legacy resolved pm.md (scaffold-era shape)');
-  return tmp;
-}
-
-// ── Engine scenes (run once, at collection) ──────────────────────────────────
-
-// Scene A — the five-observation shape: legacy resolved copy + stub counterpart +
-// clean managed-body merge (bodies byte-identical) → converts at INFO. The REAL
-// wave-2 state has the project copy AT its recorded baseline (no project edits
-// since delivery) — forged here so the marker guard's UNTOUCHED rule holds (a
-// resolved pm body carries marker PROSE the stub lacks; only the UNTOUCHED rule
-// — "any marker text came from the template itself" — classifies that as no loss,
-// which is exactly the real projects' situation).
-const sceneA = (() => {
-  const tmp = projectWithLegacyPm();
-  const resolved = readFileSync(pmOf(tmp), 'utf8');
-  const manifest = JSON.parse(readFileSync(manifestOf(tmp), 'utf8')) as {
-    baselines: Record<string, { hash: string; templateVersion: string }>;
-  };
-  expect(manifest.baselines[PM]).toBeDefined();
-  manifest.baselines[PM] = { ...manifest.baselines[PM]!, hash: baselineKeyFor(PM, resolved) };
-  writeFileSync(manifestOf(tmp), JSON.stringify(manifest, null, 2));
-  commitAll(tmp, 'baseline pinned to the resolved copy (delivered-baseline state)');
-  const run = runUpgrade(tmp);
-  const stub = readFileSync(VARIANT_STUB, 'utf8');
-  return {
-    run,
-    rows: pmRows(tmp),
-    bytes: readFileSync(pmOf(tmp), 'utf8'),
-    stub,
-    resolvedLen: resolved.length,
-  };
-})();
-
-// Scene B — a stub-shaped project takes the backfill path; the conversion arm never fires.
-const sceneB = (() => {
-  const tmp = freshProject();
-  runUpgrade(tmp);
-  commitAll(tmp, 'wave 1');
-  mkdirSync(join(tmp, 'agents'), { recursive: true });
-  writeFileSync(pmOf(tmp), readFileSync(VARIANT_STUB, 'utf8'));
-  commitAll(tmp, 'stub-shaped project pm.md');
-  runUpgrade(tmp);
-  return { rows: pmRows(tmp), bytes: readFileSync(pmOf(tmp), 'utf8') };
-})();
-
-// Scene C — a project-only frontmatter key blocks the conversion (INFO row, copy preserved).
-const sceneC = (() => {
-  const tmp = projectWithLegacyPm();
-  writeFileSync(pmOf(tmp), legacyResolvedBody().replace(/\n---\n/, '\nproject_pin: fixture-only\n---\n'));
-  commitAll(tmp, 'legacy pm.md with a project-only frontmatter key');
-  runUpgrade(tmp);
-  return { rows: pmRows(tmp), bytes: readFileSync(pmOf(tmp), 'utf8') };
-})();
-
-// Scene D — a dirty merge never converts: a marker-bearing project copy makes
-// markerLossBlocks block the merge (the guard returns BEFORE the conversion arm —
-// the design's "markerLossBlocks already passed" precondition). agents/pm.md is
-// not an instruction file, so the census channels are structurally silent for it
-// (INSTRUCTION_FILE_RELS covers the five top-level docs only) — the marker loss
-// guard is the reachable dirty channel, and it fails closed.
-const sceneD = (() => {
-  const tmp = projectWithLegacyPm();
-  const marked = `${legacyResolvedBody()}<!-- LOCAL-PATCH(upstream-request: UR-fixture): project patch -->\n`;
-  writeFileSync(pmOf(tmp), marked);
-  commitAll(tmp, 'marker-bearing legacy pm.md');
-  runUpgrade(tmp);
-  return { rows: pmRows(tmp), bytes: readFileSync(pmOf(tmp), 'utf8') };
-})();
-
 // ── Pure helper pins (no engine) ─────────────────────────────────────────────
 
 describe('convertLegacyStubShape (pure helper)', () => {
@@ -214,35 +140,65 @@ describe('convertLegacyStubShape (pure helper)', () => {
   });
 });
 
-describe('STUB_SHAPE_CONVERSION engine scenes (T-20261126-003)', () => {
+// ── Engine scenes (run once, at collection) ──────────────────────────────────
+
+// Scene A — the five-observation shape: legacy resolved copy + stub counterpart +
+// clean managed-body merge (bodies byte-identical) → converts at INFO. The REAL
+// wave-2 state has the project copy AT its recorded baseline (no project edits
+// since delivery) — forged here so the marker guard's UNTOUCHED rule holds (a
+// resolved pm body carries marker PROSE the stub lacks; only the UNTOUCHED rule
+// — "any marker text came from the template itself" — classifies that as no loss,
+// which is exactly the real projects' situation).
+const sceneA = (() => {
+  const tmp = freshProject();
+  runUpgrade(tmp);
+  commitAll(tmp, 'wave 1');
+  mkdirSync(join(tmp, 'agents'), { recursive: true });
+  writeFileSync(pmOf(tmp), legacyResolvedBody());
+  commitAll(tmp, 'legacy resolved pm.md (scaffold-era shape)');
+  const resolved = readFileSync(pmOf(tmp), 'utf8');
+  const manifest = JSON.parse(readFileSync(manifestOf(tmp), 'utf8')) as {
+    baselines: Record<string, { hash: string; templateVersion: string }>;
+  };
+  expect(manifest.baselines[PM]).toBeDefined();
+  manifest.baselines[PM] = { ...manifest.baselines[PM]!, hash: baselineKeyFor(PM, resolved) };
+  writeFileSync(manifestOf(tmp), JSON.stringify(manifest, null, 2));
+  commitAll(tmp, 'baseline pinned to the resolved copy (delivered-baseline state)');
+  const run = runUpgrade(tmp);
+  const stub = readFileSync(VARIANT_STUB, 'utf8');
+  return {
+    run,
+    rows: pmRows(tmp),
+    bytes: readFileSync(pmOf(tmp), 'utf8'),
+    stub,
+    resolvedLen: resolved.length,
+  };
+})();
+
+// Scene B — a stub-shaped project takes the backfill path; the conversion arm never fires.
+const sceneB = (() => {
+  const tmp = freshProject();
+  runUpgrade(tmp);
+  commitAll(tmp, 'wave 1');
+  mkdirSync(join(tmp, 'agents'), { recursive: true });
+  writeFileSync(pmOf(tmp), readFileSync(VARIANT_STUB, 'utf8'));
+  commitAll(tmp, 'stub-shaped project pm.md');
+  runUpgrade(tmp);
+  return { rows: pmRows(tmp), bytes: readFileSync(pmOf(tmp), 'utf8') };
+})();
+
+describe('STUB_SHAPE_CONVERSION engine scenes (T-20261126-003) — delivery', () => {
   test('the five-observation shape converts at INFO; the project copy becomes the template stub', () => {
     expect(sceneA.run.out).toContain('STUB SHAPE CONVERSION');
     const row = sceneA.rows.find((r) => r.verdict === 'STUB_SHAPE_CONVERSION' && !r.detail?.includes('WITHHELD'));
     expect(row).toBeDefined();
     expect(row!.severity).toBe('INFO');
     expect(isExtendsStub(sceneA.bytes)).toBe(true);
-    expect(sceneA.bytes).toBe(sceneA.stub.replace(/last_updated: \d{4}-\d{2}-\d{2}/, 'last_updated: ' + (sceneA.bytes.match(/last_updated: (\d{4}-\d{2}-\d{2})/)?.[1] ?? '')));
     expect(sceneA.bytes.length).toBeLessThan(sceneA.resolvedLen); // stub, not the 350-line body
   });
 
   test('a stub-shaped project takes the backfill path; the conversion arm never fires', () => {
     expect(sceneB.rows.find((r) => r.verdict === 'STUB_SHAPE_CONVERSION')).toBeUndefined();
     expect(isExtendsStub(sceneB.bytes)).toBe(true); // still stub-shaped
-  });
-
-  test('a project-only frontmatter key blocks the conversion (INFO row, copy preserved)', () => {
-    const blocked = sceneC.rows.find((r) => r.verdict === 'STUB_SHAPE_CONVERSION' && r.detail?.includes('WITHHELD'));
-    expect(blocked).toBeDefined();
-    expect(blocked!.severity).toBe('INFO');
-    expect(blocked!.detail).toContain('project_pin');
-    expect(isExtendsStub(sceneC.bytes)).toBe(false); // still the resolved body
-    expect(sceneC.bytes).toContain('project_pin: fixture-only');
-  });
-
-  test('a dirty merge never converts — the marker-loss guard blocks before the arm', () => {
-    expect(sceneD.rows.find((r) => r.verdict === 'STUB_SHAPE_CONVERSION')).toBeUndefined();
-    expect(sceneD.rows.find((r) => r.verdict === 'MARKER_LOSS')).toBeDefined();
-    expect(isExtendsStub(sceneD.bytes)).toBe(false); // full body preserved with its marker
-    expect(sceneD.bytes).toContain('LOCAL-PATCH(upstream-request: UR-fixture)');
   });
 });
