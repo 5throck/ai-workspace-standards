@@ -143,6 +143,11 @@
       "layer": "variant:co-work"
     },
     {
+      "id": "project-review",
+      "type": "skill",
+      "layer": "variant:co-work"
+    },
+    {
       "id": "research-analysis",
       "type": "skill",
       "layer": "L0"

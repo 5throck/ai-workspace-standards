@@ -6,11 +6,16 @@ description: >
   docs/decisions/DEC-YYYYMMDD-NN.md files with rule and evidence citations.
   Use when: a gate ruling was made, an escalation was resolved, or a go/no-go
   decision was reached (ADR-0061).
-version: 1.1.0
+version: 1.1.1
 owner: pm
 status: active
-last_reviewed: 2026-08-25
+last_reviewed: 2026-11-26
 scope: common
+relates_to:
+  - skill: evidence-ledger
+    type: composes_with
+  - skill: documentation-writing
+    type: composes_with
 metadata:
   type: process
   triggers:
@@ -91,3 +96,7 @@ Record the ruling where the gate fires; do not batch records to the end of the s
 ## Linking Evidence
 
 `evidence_refs[]` is the downward link into the Evidence layer: every entry resolves to a row of an `evidence-ledger` table (claim | source | url/ref | verification | status) or a finding file under `docs/evidence/findings/`. A record should read as "these rules (`rules_applied[]`), applied to this evidence (`evidence_refs[]`), produced this ruling" without re-deriving either from prose.
+
+## Related Skills
+
+<!-- Link related skills here -->

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-26T13:42:28.467Z
+**Generated**: 2026-11-26T14:25:12.501Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -36,22 +36,22 @@
 
 | Name | Version | Status | Location | Platform | Triggers | Owner |
 |------|---------|--------|----------|----------|----------|-------|
-| accessibility-audit | 1.1.0 | active | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
+| accessibility-audit | 1.1.1 | active | skills/accessibility-audit/SKILL.md | workspace | accessibility-audit, /accessibility-audit, axe-core audit, wcag accessibility check, wcag 2.1 aa | pm |
 | adopt-project | 1.1.2 | active | skills/adopt-project/SKILL.md | workspace | adopt external project, adopt project to standard, convert external project to workspace standard, onboard existing project | scaffolding-expert |
 | agent-lifecycle-manager | 1.4.0 | active | skills/agent-lifecycle-manager/SKILL.md | workspace | create agent, new agent, validate agents, agent lifecycle, manage agents, hire agent, fire agent, deprecate agent | pm |
 | api-documentation | 1.0.2 | active | skills/api-documentation/SKILL.md | workspace | api documentation, document api, api reference, developer documentation, rest api docs, graphql docs, sdk documentation | pm |
-| ci-triage | 0.2.0 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
+| ci-triage | 0.2.1 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
 | context-commonization-review | 1.1.0 | active | skills/context-commonization-review/SKILL.md | workspace | context commonization review, variant context duplication, commonization review, context.md duplication review, context.md commonization | architect |
 | create-variant | 1.4.3 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, variant creation, scaffold new variant, new co- project | pm |
-| decision-record | 1.1.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
+| decision-record | 1.1.1 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
 | decision-write-integrity | 1.0.0 | active | skills/decision-write-integrity/SKILL.md | workspace | decision write integrity, gate integrity, approval gate, hard block, maker checker, countersign, snapshot hash, decision audit | pm |
 | delegate-to-hub | 1.0.1 | active | skills/delegate-to-hub/SKILL.md | workspace | delegate to hub, delegation ticket, hub delegation, escalate to hub, file delegation | pm |
 | design-foundation | 1.1.1 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | design-system-lead |
 | design-token-adoption | 1.0.0 | active | skills/design-token-adoption/SKILL.md | workspace | token retrofit, design token adoption, allowlist reduction, adopt design tokens in existing UI, brownfield design tokens | pm |
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
-| evidence-ledger | 1.1.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
+| evidence-ledger | 1.1.1 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
 | explain-me | 1.0.1 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
-| finishing-a-development-branch | 1.0.2 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
+| finishing-a-development-branch | 1.0.3 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.2 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | handbook | 0.6.2 | active | templates/common/skills/handbook/SKILL.md | common | make handbook, create handbook, build course site, companion handbook, update handbook, handbook sync, handbook maintenance | pm |
 | handbook-sync-audit | 1.0.5 | active | templates/common/skills/handbook-sync-audit/SKILL.md | common | audit handbook, handbook parity check, handbook sync audit, textbook drift check | pm |
@@ -77,12 +77,12 @@
 | promote-variant | 1.4.0 | active | skills/promote-variant/SKILL.md | workspace | promote variant, Phase B, variant promotion, promote to template, create template from prototype | pm |
 | release-template | 1.0.0 | active | skills/release-template/SKILL.md | workspace | release template, template release, bump templates version, tag template, publish template version | pm |
 | research-analysis | 1.0.2 | active | skills/research-analysis/SKILL.md | workspace | research, analyze, investigate, synthesize, evidence gathering, data analysis, literature review | pm |
-| script-lifecycle-manager | 1.2.2 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
+| script-lifecycle-manager | 1.2.3 | active | skills/script-lifecycle-manager/SKILL.md | workspace | create script, update script, deprecate script, script lifecycle, manage scripts | pm |
 | security-scan | 1.3.0 | active | skills/security-scan/SKILL.md | workspace | security scan, scan for vulnerabilities, security check, run security | pm |
 | service-design | 1.1.0 | active | skills/service-design/SKILL.md | workspace | service design, customer journey, service blueprint, touchpoint design, customer experience, service innovation, operational alignment | pm |
 | simulate-pipeline | 1.0.2 | active | skills/simulate-pipeline/SKILL.md | workspace | simulate pipeline, simulate project, test scaffolding, dry run project creation, simulate l3 promotion, test l3 pipeline, dry run variant promotion | automation-engineer |
 | skill-graph-analytics | 1.5.0 | active | skills/skill-graph-analytics/SKILL.md | workspace | skill-graph analytics, fleet skill graph, skill graph report, skill graph fleet report, skill convergence triage, orphan agent check, orphan skill check | pm |
-| skill-lifecycle-manager | 1.5.0 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
+| skill-lifecycle-manager | 1.5.1 | active | skills/skill-lifecycle-manager/SKILL.md | workspace | create skill, new skill, validate skills, skill lifecycle, manage skills, skill request, deprecate skill, remove skill | pm |
 | source-command-commit-push-pr | 1.0.3 | active | skills/source-command-commit-push-pr/SKILL.md | workspace | commit-push-pr, commit and push, create PR | pm |
 | standup-synthesizer | 1.1.0 | active | skills/standup-synthesizer/SKILL.md | workspace | standup digest, daily standup, synthesize standup, work summary | pm |
 | sync | 1.10.0 | active | skills/sync/SKILL.md | workspace | sync, /sync, commit and push, create PR | automation-engineer |

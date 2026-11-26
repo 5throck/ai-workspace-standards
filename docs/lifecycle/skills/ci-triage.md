@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: ci-triage
 - **Status**: active
-- **Version**: 0.2.0
+- **Version**: 0.2.1
 - **Created**: 2026-09-08
-- **Last Updated**: 2026-10-04
+- **Last Updated**: 2026-11-26
 
 ## Description
 Lightweight CI / audit / scaffold failure triage loop: deterministic reproduction,
@@ -14,6 +14,8 @@ validator-hardening ratchet. Pilot from the 2026-09-08 project-review ecosystem
 gap analysis (design: docs/designs/2026-09-08-ci-triage-skill-design.md).
 
 ## Changelog
+
+- **0.2.1** (2026-11-26): patch bump — port the canonical L0-only ticket.ts note (co-develop wording, adjudication rows 2-3) template-side so both divergent project wordings converge (pair-program row P1, design 2026-11-26-skill-drift-structural-fixes-design.md).
 
 - **0.2.0** (2026-10-04): minor bump — adds Step 6 "Merge with CI watch" merge-time healing loop (T-20261004-006).
 
@@ -48,7 +50,7 @@ gap analysis (design: docs/designs/2026-09-08-ci-triage-skill-design.md).
 
 ## Metadata
 - **Current Phase**: production
-- **Version**: 0.2.0
+- **Version**: 0.2.1
 - **Owner**: pm
-- **Last Updated**: 2026-10-04
+- **Last Updated**: 2026-11-26
 - **Last Reviewer**: pm

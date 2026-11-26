@@ -106,7 +106,7 @@
     },
     "skill-lifecycle-manager": {
       "source": "skills/skill-lifecycle-manager/SKILL.md",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "overridable": false,
       "description": "Skill lifecycle management"
     },
@@ -118,7 +118,7 @@
     },
     "script-lifecycle-manager": {
       "source": "skills/script-lifecycle-manager/SKILL.md",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "overridable": false,
       "description": "Script lifecycle management — tracks script health and deprecation"
     },
@@ -142,13 +142,13 @@
     },
     "evidence-ledger": {
       "source": "skills/evidence-ledger/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "overridable": false,
       "description": "Fixed-column evidence ledger with variant overlays (ADR-0061)"
     },
     "decision-record": {
       "source": "skills/decision-record/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "overridable": false,
       "description": "Decision record format for gate-moment rulings (ADR-0061)"
     },
@@ -226,13 +226,13 @@
     },
     "accessibility-audit": {
       "source": "skills/accessibility-audit/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "overridable": false,
       "description": "Automated WCAG 2.1 Level AA accessibility evaluation rules and axe-core DOM audit patterns"
     },
     "ci-triage": {
       "source": "skills/ci-triage/SKILL.md",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "overridable": false,
       "description": "Triages CI / audit / scaffold failures: deterministic reproduction, provenance tracing, root-cause fix, re-verification"
     },
@@ -362,7 +362,7 @@
       "gemini_source": ".gemini/skills/finishing-a-development-branch/SKILL.md",
       "agents_source": ".agents/skills/finishing-a-development-branch/SKILL.md",
       "codex_source": ".codex/skills/finishing-a-development-branch/SKILL.md",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "Workspace override — redirects branch completion to /sync pipeline",
       "propagated_to_common": true
     },
@@ -398,7 +398,7 @@
       "gemini_source": ".gemini/skills/decision-record/SKILL.md",
       "agents_source": ".agents/skills/decision-record/SKILL.md",
       "codex_source": ".codex/skills/decision-record/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "Decision record format for gate-moment rulings — Design Gate Row 0 determinations, escalations, and go/no-go calls as durable docs/decisions/DEC-YYYYMMDD-NN.md files (ADR-0061)",
       "propagated_to_common": true
     },
@@ -407,7 +407,7 @@
       "gemini_source": ".gemini/skills/evidence-ledger/SKILL.md",
       "agents_source": ".agents/skills/evidence-ledger/SKILL.md",
       "codex_source": ".codex/skills/evidence-ledger/SKILL.md",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "Fixed-column evidence ledger tracing every claim a decision depends on to a source, a reference, and a verification state",
       "propagated_to_common": true
     },

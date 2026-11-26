@@ -5,11 +5,16 @@ description: >
   to a source, a reference, and a verification state. Use when: building or
   updating an evidence or citation ledger, verifying claims ahead of a gate
   ruling, or linking evidence into a decision record (ADR-0061).
-version: 1.1.0
+version: 1.1.1
 owner: pm
 status: active
-last_reviewed: 2026-08-25
+last_reviewed: 2026-11-26
 scope: common
+relates_to:
+  - skill: documentation-writing
+    type: follows
+  - skill: research-analysis
+    type: follows
 metadata:
   type: process
   triggers:

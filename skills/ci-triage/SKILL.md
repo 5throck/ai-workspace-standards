@@ -11,8 +11,8 @@ description: >
   a scaffold or upgrade command errors; a weekly-health-check ci-failure
   issue needs triage.
 owner: pm
-version: 0.2.0
-last_reviewed: 2026-10-04
+version: 0.2.1
+last_reviewed: 2026-11-26
 prerequisites: []
 metadata:
   type: process
@@ -87,6 +87,8 @@ execute). Never `--no-verify`, never gate bypasses.
 2. **Ratchet rule**: if this failure class could recur unnoticed, create a
    validator-hardening ticket:
    `bun scripts/ticket.ts create --manual "validator-hardening: <one-sentence check>" --priority normal`
+   > Note: `bun scripts/ticket.ts` is workspace-root only (L0); in variant projects, record the
+   > hardening item in the session memory log instead and file it from the workspace root.
 3. Clean up scratch artifacts (`rm -rf` the scratch project; `git status` clean).
 4. Land the fix via the standard `/sync` pipeline.
 

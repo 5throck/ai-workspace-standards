@@ -57,6 +57,14 @@
       "reason": "Three-line deliverables-convention redirect (docs/reports/ -> deliverables/reports/, commit a8f7482, 2026-11-05) per co-work's deliverables layout; pair-program row P4 lands the templates/co-work/skills/project-review/ override so the pair converges with delivery intact — the row is valid on registration (the capability exists in co-work's graph) and inert once the override converges the pair. Adjudication row 12.",
       "decided": "2026-11-26",
       "decision_ref": "T-20261123-005"
+    },
+    {
+      "capability": "ui-ux-design-intelligence",
+      "project": "co-design",
+      "kind": "variant-override",
+      "reason": "Registered co-design variant override populated by pair-program row P7 (adjudication row 22): the 11-01 promotion left the override file a stale placeholder byte-identical to common, and the real specialized copy (scope: co-design, relates_to service-design follows, 1.0.2) now lives template-side, so P == T with zero delivery — but the specialized copy stays a permanent single-member minority hash group against the 15 generic common-form carriers, the same registered-override shape as project-review@co-safety (row 11). This row is what makes the weekly report say converged-intent instead of surfacing the pair forever.",
+      "decided": "2026-11-26",
+      "decision_ref": "T-20261123-005"
     }
   ]
 }

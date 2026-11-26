@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: finishing-a-development-branch
 - **Status**: active
-- **Version**: 1.0.2
+- **Version**: 1.0.3
 - **Created**: 2026-09-04
-- **Last Updated**: 2026-09-04
+- **Last Updated**: 2026-11-26
 
 ## Description
 Guides clean completion of a development branch: verify tests/audits, update
@@ -14,6 +14,8 @@ Superpowers finishing-a-development-branch workflow for this workspace's
 PR-based flow.
 
 ## Changelog
+
+- **1.0.3** (2026-11-26): patch bump — version-only bump making the 2026-11-08 frontmatter restructure (d82a73649) deliverable, healing the co-design equal-but-stuck pair (adjudication row 8; pair-program row P8; A1's adopt grant rides this bump).
 
 - **1.0.2** (2026-09-21): patch bump — deliver accumulated template content that predated this version to the fleet (equal-version content drift measured 2026-09-21; upgrade-project 1.37 UPDATE delivery).
 
