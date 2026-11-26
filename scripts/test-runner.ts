@@ -1,6 +1,26 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.19.0
+ * @version 1.20.0
+ *
+ * v1.20.0 (2026-11-27, T-20261127-002 — spec
+ *          docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §5):
+ *          windows-latest rebudget from MEASURED per-file durations parsed out of
+ *          the cited runs' CI logs (5 healthy windows legs + the failure logs:
+ *          PRs #2189/#2190/#2194/#2196/#2198 reruns and main post-merge runs
+ *          45864068389 / 45905810289). Five first-time FILE_TIME_BUDGETS rows for
+ *          the engine-spawn family members that keep hitting the 120s default
+ *          wall (upgrade-template-advance-guards — measured healthy max 114.6s =
+ *          96% of the wall, timed out at 120000ms TWICE on main; upgrade-template-
+ *          advance 83.5s max, one 120s timeout; upgrade-stub-shape-conversion
+ *          70.6s max, one 120s timeout; upgrade-stub-shape-guards 70.7s max —
+ *          same max as the flaked sibling; upgrade-prune-removed 79.2s max), each
+ *          at the family budget 300s suite / 60s test with the measured numbers
+ *          pinned in the row comments; plus a TEST-ceiling raise on
+ *          upgrade-overwrite-protection 60s → 120s (an individual engine-spawn
+ *          test overran the 60s ceiling on attempt 45826913410 while the file's
+ *          healthy total is 117-156s — its 300s suite budget was never the
+ *          binding constraint). No test deleted or loosened; budgets only.
+ *          Measured table: spec §5.
  *
  * v1.19.0 (2026-11-25, T-20261124-017 — spec
  *          docs/designs/2026-11-24-fleet-test-baseline-design.md, ADR-0106): the
@@ -376,7 +396,13 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   "co-workspace-composer-wire-regression.test.ts": { suite: 300000, test: 45000 },
   // PR #1963 (windows-latest run 43074272486): engine-spawn-heavy overwrite-protection suite
   // hit the 120s per-file wall on win32 (macOS ~9s). Family budget 300s; test 60s.
-  "upgrade-overwrite-protection.test.ts": { suite: 300000, test: 60000 },
+  // T-20261127-002 TEST-ceiling raise 60s → 120s (suite unchanged): PR #2189 attempt
+  // 45826913410 killed an individual engine-spawn test at 60000ms on win32 while the
+  // file's healthy totals measured 117542-156280 ms across the five cited runs (spec
+  // §5) — the 300s suite budget was never the binding constraint, the per-test
+  // ceiling was. 120s = ~2x the observed worst single-test shape; no assertion
+  // loosened, ceiling only.
+  "upgrade-overwrite-protection.test.ts": { suite: 300000, test: 120000 },
   // Core-locked fork arm replay: two full engine spawns (one dry-run, one apply) per file run.
   "upgrade-core-locked-fork.test.ts": { suite: 300000, test: 60000 },
   // Overwrite-protection PR-B replay: three engine spawns (dry-run, apply, apply + grant) per file run.
@@ -385,6 +411,34 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // grant, scene B, AC-5 rerun + vintage) + three cheap --audit-core-deltas
   // report spawns per file run.
   "upgrade-policy-eviction.test.ts": { suite: 300000, test: 60000 },
+  // T-20261127-002 (windows-latest, MEASURED from the cited runs' CI logs — table in
+  // spec docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §5): the four
+  // files below + upgrade-prune-removed are the engine-spawn family members still
+  // running against the 120s default wall. Measured healthy win32 maxima (5 runs:
+  // 45831855690 / 45839104906 / 45858038084 / 45865640842 / 45876997661) vs their
+  // observed 120000ms timeouts:
+  //   upgrade-template-advance-guards: 114568 / 88942 / 83476 / 86280 / 112658 ms
+  //     — healthy max 114.6s = 96% of the 120s wall; killed at 120000ms twice on
+  //     main (runs 45864068389 + 45905810289, "Test timed out after 120000ms").
+  //   upgrade-template-advance: 63455 / 65739 / 64190 / 65064 / 83525 ms — max
+  //     83.5s; killed at 120000ms once (PR #2189 attempt 45817806959) — a ~1.4-1.9x
+  //     FS-pressure spike, the family's characteristic failure shape.
+  //   upgrade-stub-shape-conversion: 57804 / 68839 / 63659 / 64247 / 70573 ms — max
+  //     70.6s; killed at 120000ms once (attempt 45822606148) — a ~1.7x spike.
+  //   upgrade-stub-shape-guards: 59608 / 67193 / 64378 / 66284 / 70733 ms — max
+  //     70.7s, never flaked; same measured max as the flaked sibling above, same
+  //     engine family — pinned before it becomes the next rerun.
+  // Family budget 300s / test 60s (headroom ≥1.9x over healthy max; ≥2.6x for the
+  // twice-flaked guards file).
+  "upgrade-template-advance-guards.test.ts": { suite: 300000, test: 60000 },
+  "upgrade-template-advance.test.ts": { suite: 300000, test: 60000 },
+  "upgrade-stub-shape-conversion.test.ts": { suite: 300000, test: 60000 },
+  "upgrade-stub-shape-guards.test.ts": { suite: 300000, test: 60000 },
+  // T-20261127-002 (same measured table): upgrade-prune-removed healthy max
+  // 79220 ms on run 45865640842 (44-49s on the other four legs) — no timeout
+  // observed yet, but the win32 spike band is ~1.5-2x and 79.2s sits above the
+  // 2/3-of-wall burn-in line; pinned at the family budget preventively.
+  "upgrade-prune-removed.test.ts": { suite: 300000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {

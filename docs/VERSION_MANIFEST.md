@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-26T22:25:20.118Z
+**Generated**: 2026-11-26T23:29:35.383Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -132,7 +132,7 @@
 | design-gate-coverage.ts | 1.1.0 | scripts/design-gate-coverage.ts | fs, path |
 | design-lint.ts | 2.6.0 | scripts/design-lint.ts | fs, js-yaml, path |
 | detect-backport.ts | 1.0.0 | scripts/detect-backport.ts | child_process, crypto, fs, path |
-| dev-sync.ts | 1.53.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
+| dev-sync.ts | 1.54.0 | scripts/dev-sync.ts | bun, crypto, fs, path |
 | dispatch-parallel.ts | 1.1.1 | scripts/dispatch-parallel.ts | N/A |
 | dispatch-serial.ts | 1.1.2 | scripts/dispatch-serial.ts | url |
 | dispatch.ts | 1.1.1 | scripts/dispatch.ts | path |
@@ -163,7 +163,7 @@
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | fs, path |
 | list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun, path |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | child_process, fs, path, readline, url |
-| mcp-upstream-server.ts | 1.15.1 | scripts/mcp-upstream-server.ts | crypto, fs, js-yaml, path, readline, url |
+| mcp-upstream-server.ts | 1.16.0 | scripts/mcp-upstream-server.ts | crypto, fs, js-yaml, path, readline, url |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
 | migrate-project.ts | 1.1.0 | scripts/migrate-project.ts | child_process, fs, path |
 | migrate-quality-gates.ts | 1.1.0 | scripts/migrate-quality-gates.ts | fs, js-yaml, path |
@@ -211,10 +211,10 @@
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
 | test-new-project.ts | 1.13.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.19.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.20.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | child_process, fs, os, path |
-| ticket.ts | 1.16.0 | scripts/ticket.ts | js-yaml, path |
+| ticket.ts | 1.17.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
 | upgrade-project.ts | 1.124.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
