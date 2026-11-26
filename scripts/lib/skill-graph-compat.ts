@@ -1,5 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
+// v1.2.0 (2026-11-26, spec docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
+//           §4.2 S2): normalizeForHash(content, variantName?) and contentHash(content,
+//           variantName?) gain an optional variant-name parameter — the reverse of the
+//           scaffold's applySubstitutions backtick rule. When set, every occurrence of
+//           the variant slug INSIDE a backtick span is rewritten to the `<variant>`
+//           token form before stamp stripping, so a scaffold-rendered skill hashes
+//           equal to its template source (the five cosmetic script-lifecycle-manager
+//           hash groups collapse). Collision safety: backtick-span shape only, exact
+//           slug boundaries (the slug alphabet [a-z0-9-] is the boundary set, so
+//           `scripts/co-newsletter/` never matches variantName "co-news"), the fleet
+//           slug vocabulary ^co-[a-z0-9-]+$ cannot contain the literal `<variant>`
+//           token, and only a project's own slug is applied to that project's files
+//           (template-side hashes pass no parameter). Prose outside backticks is
+//           never rewritten.
 // v1.1.0 (2026-10-09, T-20261008-009, design docs/designs/2026-10-09-skill-graph-triage-hardening-design.md D5):
 //           normalizeForHash() strips the ADR-0033 extends-stub `variant:` token alongside
 //           `scope:` — stub agent families (i18n-specialist ×14, pm ×15) differing only by
@@ -92,21 +106,51 @@ export function capabilityOf(node: Pick<SkillGraphNodeV2, "id" | "name" | "capab
 }
 
 /**
+ * S2 (design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.2):
+ * the reverse of the scaffold's backtick substitution (helpers/substitute-placeholders.ts:
+ * `` `…<variant>…` `` → `` `…<slug>…` ``). When `variantName` is set, every occurrence
+ * of that exact slug INSIDE a backtick span is rewritten back to the `<variant>` token
+ * form. Boundaries use the slug alphabet itself: a match must not be preceded or
+ * followed by [a-z0-9-], so `scripts/co-newsletter/` never matches `co-news`. Spans
+ * are single-backtick (no newline) — the same shape applySubstitutions writes; text
+ * outside backticks is never rewritten. Fleet slugs match ^co-[a-z0-9-]+$, which cannot
+ * contain the literal `<variant>` token, so a re-render of the normalized text can
+ * never re-trigger the forward substitution (idempotent pairing).
+ */
+function reverseVariantSpans(content: string, variantName: string): string {
+  if (!variantName) return content;
+  const escaped = variantName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const slugRe = new RegExp(`(?<![a-z0-9-])${escaped}(?![a-z0-9-])`, "g");
+  // Split into backtick spans and non-span text; rewrite spans only.
+  return content
+    .split(/(`[^`\n]*`)/)
+    .map((seg) => (seg.startsWith("`") && seg.endsWith("`") ? seg.replace(slugRe, "<variant>") : seg))
+    .join("");
+}
+
+/**
  * Normalize SKILL.md / agent .md content for hashing: CRLF -> LF, drop the frontmatter metadata
  * stamps `version:`, `last_updated:`, `last_reviewed:` and `scope:` (the propagation engine rewrites
  * `scope:` per delivery layer), strip trailing whitespace per line and at EOF. Mirrors that differ
  * only by a metadata stamp therefore collapse to one node.
+ *
+ * v1.2.0 (S2): `variantName` (the rendered fleet slug of the project the content lives
+ * in) reverse-substitutes the scaffold's backtick rendering BEFORE stamp stripping, so
+ * a rendered project copy hashes equal to its template source. Root/template-scope
+ * hashing passes no parameter — a no-op. Source of the name: the generator run's ROOT
+ * (generate-skill-graph.ts derives `basename(ROOT)` when ROOT is a fleet project path
+ * and forwards it through readCopy; see that file's VARIANT_NAME derivation).
  */
-export function normalizeForHash(content: string): string {
+export function normalizeForHash(content: string, variantName?: string): string {
   const lf = content.replace(/\r\n/g, "\n");
-  let out = lf;
-  const m = lf.match(/^---\n([\s\S]*?)\n---/);
+  let out = variantName ? reverseVariantSpans(lf, variantName) : lf;
+  const m = out.match(/^---\n([\s\S]*?)\n---/);
   if (m) {
     const fm = m[1]
       .split("\n")
       .filter((l) => !/^(version|last_updated|last_reviewed|scope|variant)\s*:/.test(l))
       .join("\n");
-    out = `---\n${fm}\n---${lf.slice(m[0].length)}`;
+    out = `---\n${fm}\n---${out.slice(m[0].length)}`;
   }
   return out
     .split("\n")
@@ -116,8 +160,8 @@ export function normalizeForHash(content: string): string {
 }
 
 /** sha256 (first 16 hex chars) of the normalized content. */
-export function contentHash(content: string): string {
-  return createHash("sha256").update(normalizeForHash(content)).digest("hex").slice(0, 16);
+export function contentHash(content: string, variantName?: string): string {
+  return createHash("sha256").update(normalizeForHash(content, variantName)).digest("hex").slice(0, 16);
 }
 
 /** Read the frontmatter `version:` of a markdown file's content as a string, or null. */
