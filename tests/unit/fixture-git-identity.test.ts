@@ -58,6 +58,7 @@
  *          the fail-closed direction (a differently-styled leak still refuses), and the
  *          both-sides seam wiring of both probes.
  *
+ * @version 1.6.0 (2026-11-26: registry gains upgrade-stub-shape-conversion.test.ts — the T-20261126-003 stub-conversion engine tests spawn git for the fixture project checkouts, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5)
  * @version 1.5.0 (2026-11-26: registry gains upgrade-template-advance.test.ts — the S1 equal-version gate engine tests spawn git for the fixture project checkouts, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.1)
  * @version 1.4.0 (2026-11-26: registry gains skill-graph-transient-snapshot.test.ts — the S4 transient[] snapshot tests spawn git for the fixture pr/* checkout, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.4)
  * @version 1.3.9 (2026-11-25: registry gains upgrade-script-lane-gaps.test.ts — the script-lane gap engine tests spawn git via the upgrade engine)
@@ -117,6 +118,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "upgrade-project-adoption-gate.test.ts",
   "upgrade-project-disposition-grants.test.ts",
   "upgrade-project-tenant-guard.test.ts",
+  "upgrade-stub-shape-conversion.test.ts",
   "upgrade-template-advance.test.ts",
   "upgrade-variant-scripts-walk.test.ts",
   "upgrade-dry-run-tombstone.test.ts",

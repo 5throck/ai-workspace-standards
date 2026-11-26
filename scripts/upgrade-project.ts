@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.123.0
+// @version 1.124.0
+// v1.124.0 (2026-11-26, T-20261126-003 — design
+//           docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5):
+//           STUB SHAPE CONVERSION — sibling arm beside STUB_VERSION_BACKFILL in the
+//           MERGE pass: a legacy FULL-BODY resolved agent copy (agents/*) whose
+//           template counterpart is stub-shaped converts to the stub shape after a
+//           CLEAN managed-body merge (convertLegacyStubShape in lib/upgrade-policy
+//           v1.56.0: frontmatter-superset guard — any project-only top-level key
+//           blocks at INFO with the copy preserved; existing top-level last_updated
+//           re-stamped; a stub-shaped project never enters — the backfill owns that
+//           path; a resolved counterpart never triggers; a dirty merge never
+//           converts). Heals the wave-2 hand-advance class (co-design/co-hr/
+//           co-learning/co-news/co-work agents/pm.md, bodies byte-identical).
 // v1.123.0 (2026-11-26, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
 //           §4.1 S1): the content-aware equal-version gate — shared helper
 //           `resolveEqualVersionDrift` routes every same-version drifted file in BOTH
@@ -1627,6 +1639,7 @@ import {
   backfillStubVersion,
   baselineKeyFor,
   classifyProjectState,
+  convertLegacyStubShape,
   escapeRegistryRowPipes,
   isL0OnlyRegistryRow,
   registryRowVersion,
@@ -3762,6 +3775,7 @@ function mergeWorkspaceManaged(
   // A non-clean merge keeps the earlier behaviour — the pin stands and the
   // SYNC_IF_NEWER STUB_VERSION_DIVERGENCE row reports it.
   let stubBackfill: { changed: boolean; oldVersion: string; newVersion: string } | null = null;
+  let stubConversionApplied = false;
   if (pass === "MERGE" && rel.startsWith("agents/") && result.escalated.length === 0 && skeletonEscalated === 0) {
     const fmOf = (text: string): string => text.match(/^---\r?\n[\s\S]*?\r?\n---/)?.[0] ?? "";
     if (fmOf(finalContent) === fmOf(projContent) && isExtendsStub(projContent)) {
@@ -3778,6 +3792,65 @@ function mergeWorkspaceManaged(
           "MERGE",
           "STUB_VERSION_BACKFILL",
           `stub version ${backfill.oldVersion} → ${backfill.newVersion} — template counterpart is newer and the managed-body merge was clean (no conflict, no marker loss, project out-of-zone content preserved); version line and existing top-level last_updated written`,
+          undefined,
+          "INFO",
+        );
+      }
+    }
+    // v1.124.0 (2026-11-26, T-20261126-003): sibling arm — legacy FULL-BODY stub
+    // conversion. The backfill above owns stub-SHAPED project files; a legacy
+    // RESOLVED copy (scaffold-era full body) never converts, so every
+    // stub-shape template change re-reported [stale] rows and wave 2 needed hand
+    // frontmatter advances in five projects whose bodies were byte-identical to
+    // the template's. Same preconditions (clean census on both channels, no
+    // marker loss — a marker-loss-blocked merge returned early above, frontmatter
+    // byte-identical through the merge) plus the shape test: project NOT
+    // stub-shaped and the template counterpart IS. The conversion swaps in the
+    // template stub (frontmatter-superset guard; existing top-level last_updated
+    // re-stamped) — a census-clean body is template-owned text, so the stub shape
+    // carries the same information and nothing is lost. A dirty merge never
+    // converts: the pin stands and the existing CONFLICT rows report. A
+    // stub-shaped project never enters (the backfill above owns it); a resolved
+    // counterpart never triggers (convertLegacyStubShape no-ops).
+    else if (fmOf(finalContent) === fmOf(projContent) && !isExtendsStub(projContent) && isExtendsStub(tplContent)) {
+      const conversion = convertLegacyStubShape(
+        projContent,
+        tplContent,
+        new Date().toISOString().slice(0, 10),
+        commonContent ?? undefined,
+      );
+      if (conversion.changed) {
+        // Marker guard for the in-sync case: an in-sync managed body (finalMerged
+        // false) skips the merge's own markerLossBlocks above, but the shape swap
+        // is WHOLESALE — run the same guard on the exact text the swap would leave
+        // before touching anything (records MARKER_LOSS/ADOPT itself; refused = the
+        // project copy keeps its LOCAL-PATCH prose and no conversion row fires).
+        if (markerLossBlocks(rel, "MERGE_MANAGED", pass, projectFile, conversion.content)) {
+          stubConversionApplied = false;
+        } else {
+          finalContent = conversion.content;
+          stubConversionApplied = true;
+          console.log(
+            `    ${dryTag}STUB SHAPE CONVERSION: ${rel} — legacy resolved copy converted to the template extends-stub shape (clean managed-body merge; frontmatter-superset guard passed; existing top-level last_updated re-stamped)`,
+          );
+          recordDecision(
+            rel,
+            "MERGE_MANAGED",
+            "MERGE",
+            "STUB_SHAPE_CONVERSION",
+            "legacy full-body agent copy converted to the template extends-stub shape — the managed-body merge was clean (no census escalation, no marker loss, frontmatter byte-identical through the merge), so the body is template-owned text and the stub shape carries the same information; version taken from the template counterpart, existing top-level last_updated re-stamped to the delivery date",
+            undefined,
+            "INFO",
+          );
+        }
+      } else if (conversion.blockedBy) {
+        console.log(`    ${dryTag}STUB SHAPE CONVERSION withheld: ${rel} — ${conversion.blockedBy}`);
+        recordDecision(
+          rel,
+          "MERGE_MANAGED",
+          "MERGE",
+          "STUB_SHAPE_CONVERSION",
+          `legacy stub-shape conversion WITHHELD — ${conversion.blockedBy}; the project copy is preserved (the shape swap is wholesale and never destroys frontmatter state it does not understand)`,
           undefined,
           "INFO",
         );
@@ -3830,6 +3903,12 @@ function mergeWorkspaceManaged(
   } else if (!dryRun && stubBackfill) {
     // v1.122.0: an in-sync managed body (finalMerged false) still lands the
     // stub version backfill — the only delta is the frontmatter version line.
+    writeFileSync(projectFile, finalContent, "utf8");
+    noteDelivered(rel);
+  } else if (!dryRun && stubConversionApplied) {
+    // v1.124.0 (T-20261126-003): an in-sync managed body still lands the shape
+    // conversion — the wave-2 shape is exactly this (bodies already byte-identical;
+    // only the shape changes).
     writeFileSync(projectFile, finalContent, "utf8");
     noteDelivered(rel);
   }
