@@ -9,7 +9,7 @@
 // composeResolvedAgentContent over the REAL co-work/common pm.md pair. Engine
 // runs execute at DESCRIBE scope (upgrade-overwrite-protection pattern).
 
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -43,6 +43,14 @@ function commitAll(tmp: string, msg: string): void {
   if (!(st.stdout ?? '').trim()) return;
   git(tmp, 'add', '-A');
   git(tmp, 'commit', '-q', '-m', msg);
+}
+
+function cloneFixture(source: string): string {
+  const tmp = mkdtempSync(join(tmpdir(), 'upgrade-stub-shape-c-'));
+  tmpDirs.push(tmp);
+  rmSync(tmp, { recursive: true, force: true });
+  cpSync(source, tmp, { recursive: true });
+  return tmp;
 }
 
 function freshProject(): string {
@@ -142,6 +150,16 @@ describe('convertLegacyStubShape (pure helper)', () => {
 
 // ── Engine scenes (run once, at collection) ──────────────────────────────────
 
+// One delivered wave-1 base (agents/pm.md delivered as the variant stub); scenes
+// CLONE it — three engine runs total (windows CI per-suite budget: this file ran
+// at 100% of its 120s budget with four).
+const base = (() => {
+  const tmp = freshProject();
+  runUpgrade(tmp);
+  commitAll(tmp, 'wave 1');
+  return tmp;
+})();
+
 // Scene A — the five-observation shape: legacy resolved copy + stub counterpart +
 // clean managed-body merge (bodies byte-identical) → converts at INFO. The REAL
 // wave-2 state has the project copy AT its recorded baseline (no project edits
@@ -150,9 +168,7 @@ describe('convertLegacyStubShape (pure helper)', () => {
 // — "any marker text came from the template itself" — classifies that as no loss,
 // which is exactly the real projects' situation).
 const sceneA = (() => {
-  const tmp = freshProject();
-  runUpgrade(tmp);
-  commitAll(tmp, 'wave 1');
+  const tmp = cloneFixture(base);
   mkdirSync(join(tmp, 'agents'), { recursive: true });
   writeFileSync(pmOf(tmp), legacyResolvedBody());
   commitAll(tmp, 'legacy resolved pm.md (scaffold-era shape)');
@@ -175,14 +191,11 @@ const sceneA = (() => {
   };
 })();
 
-// Scene B — a stub-shaped project takes the backfill path; the conversion arm never fires.
+// Scene B — a stub-shaped project takes the backfill path; the conversion arm
+// never fires. Wave 1 already delivered pm.md as the stub; the clone's second run
+// is the idempotent in-sync state.
 const sceneB = (() => {
-  const tmp = freshProject();
-  runUpgrade(tmp);
-  commitAll(tmp, 'wave 1');
-  mkdirSync(join(tmp, 'agents'), { recursive: true });
-  writeFileSync(pmOf(tmp), readFileSync(VARIANT_STUB, 'utf8'));
-  commitAll(tmp, 'stub-shaped project pm.md');
+  const tmp = cloneFixture(base);
   runUpgrade(tmp);
   return { rows: pmRows(tmp), bytes: readFileSync(pmOf(tmp), 'utf8') };
 })();
