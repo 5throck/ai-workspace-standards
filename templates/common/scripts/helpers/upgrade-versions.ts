@@ -1,4 +1,4 @@
-// @version 1.2.0
+// @version 1.3.0
 // scripts/helpers/upgrade-versions.ts
 // Pure version-extraction and frontmatter-merge helpers for upgrade-project.ts.
 // Extracted so the version-detection logic is unit-testable (the CLI script's
@@ -6,6 +6,15 @@
 //
 // Usage (in upgrade-project.ts):
 //   import { extractScriptVersion, preserveLifecycleFrontmatter, bumpFrontmatterLastUpdated } from "./helpers/upgrade-versions.ts";
+//
+// v1.3.0 (2026-11-26, T-20261126-002): extractScriptVersion reads the FILE
+//          HEADER as the source of truth — the first `@version X.Y.Z` inside
+//          the leading comment block, either comment form. Before this any
+//          `// @version` line anywhere won over the header, so two scripts with
+//          a stray mid-file marker (lib/error-handling.ts, detect-backport.ts)
+//          read one version low and the upgrade engine's registry lockstep
+//          lowered correct SCRIPTS.md rows in every fleet project. New pure
+//          export extractScriptVersionFromContent (text in, version out).
 //
 // v1.2.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-
 //          design.md, DEC-20261029-01): two additions. (A1)
@@ -34,19 +43,91 @@ import { existsSync, readFileSync } from "node:fs";
 
 /**
  * Extract a script's version from its header.
- * Priority: `// @version X.Y.Z` line comment (established convention), then any
- * other `@version X.Y.Z` occurrence — JSDoc block (` * @version 1.1.0`),
- * inline JSDoc, or mid-line header (` * Level: L0 | Status: active | @version 1.1.0`).
- * Files using these styles (e.g. security-validator.ts, qa-gate.ts,
- * validate-model-registry.ts) were silently treated as "no version" and never
- * synced — see docs/designs/upgrade-project-content-sync-plan.md, Known Limitations.
+ *
+ * The FILE HEADER is the source of truth: the first `@version X.Y.Z` inside the
+ * leading comment block (shebang, line comments and block comments, with
+ * import statements stepped over) before the first real statement, in either
+ * form — `// @version 1.1.0` or a
+ * JSDoc ` * @version 1.1.1` (also a mid-line header such as
+ * ` * Level: L0 | Status: active | @version 1.1.0`). Files using these styles
+ * (e.g. security-validator.ts, qa-gate.ts, validate-model-registry.ts) were
+ * silently treated as "no version" and never synced — see
+ * docs/designs/upgrade-project-content-sync-plan.md, Known Limitations.
+ *
+ * T-20261126-002 (2026-11-26): before this, ANY `// @version` line anywhere in
+ * the file won over the header. Two scripts carry a stray mid-file line-form
+ * marker (lib/error-handling.ts `// @version 1.3.0` at its real 1.4.0 header;
+ * detect-backport.ts `// @version 1.0.0` under a 1.0.1 header), so the engine
+ * read 1.3.0 / 1.0.0 and the machinery-batch row-7 registry lockstep LOWERED
+ * the projects' correct SCRIPTS.md rows to those numbers (7 real upgrade runs,
+ * 2026-11-26). A file whose header block carries no `@version` returns "".
+ * Header block = everything before the first statement that is neither a
+ * comment nor an import (some scripts put a JSDoc header after their imports —
+ * dispatch-serial.ts); a `@version` on an inner function or section is never
+ * the script version.
  */
 export function extractScriptVersion(filePath: string): string {
   if (!existsSync(filePath)) return "";
   const content = readFileSync(filePath, "utf8");
-  const lineVersion = content.split("\n").find((l) => /^\s*\/\/\s*@version\s+\d/.test(l));
-  if (lineVersion) return lineVersion.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
-  return content.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? "";
+  return extractScriptVersionFromContent(content);
+}
+
+/**
+ * Pure form of extractScriptVersion over file CONTENT: the first
+ * `@version X.Y.Z` in the header comment block, "" when the header has none.
+ * Exported for unit tests and callers that already hold the text.
+ */
+export function extractScriptVersionFromContent(content: string): string {
+  const VERSION_RE = /@version\s+(\d+\.\d+\.\d+)/;
+  // Python scripts (shebang names python) may carry their header in a module
+  // docstring (`r"""` … `"""`) — templates/co-work/scripts/deck/*.py.
+  const isPython = /^#!.*python/.test(content);
+  let inBlock = false;
+  let inDocstring = false;
+  let inImport = false;
+  for (const raw of content.split("\n")) {
+    const line = raw.trim();
+    if (line === "") continue;
+    if (inBlock) {
+      const hit = line.match(VERSION_RE);
+      if (hit) return hit[1]!;
+      if (line.includes("*/")) inBlock = false;
+      continue;
+    }
+    if (inDocstring) {
+      const hit = line.match(VERSION_RE);
+      if (hit) return hit[1]!;
+      if (/("""|''')/.test(line)) inDocstring = false;
+      continue;
+    }
+    if (inImport) {
+      if (line.endsWith(";") || line.includes(' from "')) inImport = false;
+      continue;
+    }
+    if (line.startsWith("#")) {
+      const hit = line.match(VERSION_RE); // `# @version` (a shebang carries none)
+      if (hit) return hit[1]!;
+      continue;
+    }
+    if (line.startsWith("//") || line.startsWith("/*") || line.startsWith("*")) {
+      const hit = line.match(VERSION_RE);
+      if (hit) return hit[1]!;
+      if (line.startsWith("/*") && !line.includes("*/")) inBlock = true;
+      continue;
+    }
+    if (isPython && /^(r|R)?("""|''')/.test(line)) {
+      const hit = line.match(VERSION_RE);
+      if (hit) return hit[1]!;
+      if (!/("""|''')/.test(line.slice(3))) inDocstring = true;
+      continue;
+    }
+    if (line.startsWith("import ")) {
+      if (!line.endsWith(";")) inImport = true;
+      continue;
+    }
+    break; // first real statement — the header block is over
+  }
+  return "";
 }
 
 /**

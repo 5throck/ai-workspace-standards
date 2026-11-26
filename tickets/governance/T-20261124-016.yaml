@@ -10,12 +10,21 @@ title: >-
   2026-11-24-fleet-test-baseline-design proposes a ticketed 30-day quarantine;
   this ticket is the fix ticket. Action: fix the twelve tests.
 priority: normal
-status: backlog
+status: review
 attempts: 0
 created_at: '2026-11-24T22:22:23.112+09:00'
 history:
   - at: '2026-11-24T22:22:23.112+09:00'
     from: null
     to: backlog
+  - at: '2026-11-26T13:26:50.153+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-26T13:26:50.180+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-26T13:26:57.535+09:00'
+    from: running
+    to: review
 result: null
 error: null

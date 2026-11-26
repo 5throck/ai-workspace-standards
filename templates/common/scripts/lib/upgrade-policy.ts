@@ -1,4 +1,9 @@
-// @version 1.53.0
+// @version 1.54.0
+// v1.54.0 (2026-11-26, T-20261126-002): stub version backfill — verdict
+//          STUB_VERSION_BACKFILL (INFO) and the pure helper `backfillStubVersion`
+//          (advance a project extends-stub's top-level `version` to a NEWER
+//          template counterpart; existing `last_updated` re-stamped). The MERGE
+//          pass calls it only after a CLEAN managed-body merge.
 // v1.52.0 (2026-11-25, T-20261124-007 — design
 //          docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.7):
 //          `.github/gitleaks-full.toml` joins LOCKED_FILES — the full-scan
@@ -1406,6 +1411,77 @@ export function normalizeAgentTierFrontmatter(projectContent: string, templateCo
   };
 }
 
+// ── Stub version backfill (T-20261126-002) ────────────────────────────────────
+
+export interface StubVersionBackfill {
+  /** Project content after the backfill (identical to the input when nothing changed). */
+  content: string;
+  /** True when the version line was rewritten. */
+  changed: boolean;
+  oldVersion: string;
+  newVersion: string;
+}
+
+/**
+ * Advance the top-level `version` of a project extends-stub to its template
+ * counterpart's version when the counterpart is NEWER (T-20261126-002).
+ *
+ * Before this, the stub version was a permanent pin: the MERGE pass refreshed the
+ * managed body on every run but never the frontmatter, so every project stub
+ * stayed at its scaffold version while the template ladder moved on, and
+ * verify-delivered-versions reported one stale `agents/pm.md` row per project
+ * forever.
+ *
+ * Contract:
+ *  - the PROJECT content must be stub-shaped (a column-0 `extends:` in the
+ *    frontmatter) — a resolved agent body is never touched;
+ *  - only the top-level `version:` line is rewritten, and only when BOTH sides
+ *    parse as X.Y.Z and the template's is strictly greater (three numeric parts).
+ *    Equal, newer-on-project or unparsable values leave the content byte-identical;
+ *  - the template scalar is copied verbatim (quotes preserved);
+ *  - an existing top-level `last_updated:` is set to deliveryDate (never
+ *    injected; nested lifecycle dates are never touched — the delivered-agent
+ *    re-stamp convention). CRLF frontmatter is preserved; idempotent.
+ * The CALLER decides whether the managed-body merge was clean — this helper is
+ * the pure rewrite.
+ */
+export function backfillStubVersion(
+  projectContent: string,
+  templateContent: string,
+  deliveryDate: string,
+): StubVersionBackfill {
+  const unchanged: StubVersionBackfill = { content: projectContent, changed: false, oldVersion: "", newVersion: "" };
+  const projFm = frontmatterBody(projectContent);
+  if (!projFm || !/^extends:[ \t]*\S/m.test(projFm.body)) return unchanged; // not a stub — never touch
+  const tplFm = frontmatterBody(templateContent);
+  if (!tplFm) return unchanged;
+  const SEMVER = "(\\d+\\.\\d+\\.\\d+)";
+  const projRe = new RegExp(`^version:[ \t]*["']?` + SEMVER + `["']?[ \t]*$`, "m");
+  const tplRe = new RegExp(`^version:[ \t]*(["']?` + SEMVER + `["']?)[ \t]*$`, "m");
+  const projLine = projFm.body.match(projRe);
+  const tplLine = tplFm.body.match(tplRe);
+  if (!projLine || !tplLine) return unchanged;
+  const oldVersion = projLine[1]!;
+  const newVersion = tplLine[2]!;
+  const [om, on, op] = oldVersion.split(".").map(Number);
+  const [nm, nn, np] = newVersion.split(".").map(Number);
+  const newer = om !== nm ? om < nm : on !== nn ? on < nn : op < np;
+  if (!newer) return { ...unchanged, oldVersion, newVersion };
+  const lines = projFm.body.split(projFm.eol);
+  const idx = lines.findIndex((l) => l === projLine[0]);
+  lines[idx] = `version: ${tplLine[1]}`;
+  const stamp = /^\d{4}-\d{2}-\d{2}$/.test(deliveryDate) ? deliveryDate : "";
+  const li = lines.findIndex((l) => /^last_updated:(?:[ \t].*)?$/.test(l));
+  if (stamp && li >= 0) lines[li] = `last_updated: ${stamp}`;
+  const fmText = `---${projFm.eol}${lines.join(projFm.eol)}${projFm.eol}---`;
+  return {
+    content: projectContent.slice(0, projFm.start) + fmText + projectContent.slice(projFm.end),
+    changed: true,
+    oldVersion,
+    newVersion,
+  };
+}
+
 // ── Stub frontmatter scalar backfill (T-20261028-010) ─────────────────────────
 
 export interface StubFrontmatterBackfill {
@@ -1570,6 +1646,10 @@ export type DecisionVerdict =
   | "STUB_FM_BACKFILL"
   | "STUB_VERSION_BUMP_ADVICE"
   | "STUB_VERSION_DIVERGENCE"
+  // Stub-version backfill (2026-11-26, T-20261126-002): the MERGE pass wrote the
+  // template's newer `version` into a project extends-stub after a CLEAN
+  // managed-body merge — names old → new.
+  | "STUB_VERSION_BACKFILL"
   | "REGION_IN_SYNC"
   | "EVOLVED_REGION"
   | "TEMPLATE_AHEAD_REGION"
@@ -1640,6 +1720,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   STUB_FM_BACKFILL: "INFO",
   STUB_VERSION_BUMP_ADVICE: "INFO",
   STUB_VERSION_DIVERGENCE: "INFO",
+  STUB_VERSION_BACKFILL: "INFO",
   REGION_IN_SYNC: "INFO",
   EVOLVED_REGION: "WARN",
   TEMPLATE_AHEAD_REGION: "WARN",

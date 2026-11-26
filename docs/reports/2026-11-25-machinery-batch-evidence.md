@@ -185,3 +185,77 @@ Design: `docs/designs/2026-11-25-agent-lifecycle-extends-and-dry-run-tombstone-d
 - **Tests**: `tests/unit/upgrade-dry-run-tombstone.test.ts` (5 engine runs): dry-run emits the TOMBSTONED row at ERROR with resolution text and persists nothing (byte-identical manifest); previewed grant resolves the ERROR to exit 0 while persisting nothing; unmatched glob WARNs and the refusal stands; apply still refuses without the flag; apply with `--tombstone` records the entry and exits 0. `tests/unit/upgrade-decision-log.test.ts`: the old refusal expectation flipped to the preview contract (ordered before the mutating-grant rider on the shared fixture). Suite registered in `FIXTURE_GIT_ADOPTED_SUITES` (#2178 census).
 - **Canaries (read-only, via `bun scripts/contained-run.ts`)**: co-deck exit 1 WITH the row `⏭️ TOMBSTONE (SKIP): .mcp.json — project deleted a previously delivered file; delivery refused (severity ERROR)`; co-safety exit 1, no tombstone row; co-architect exit 0, no tombstone row. No project tree mutated in any run (contained-run post-run porcelain assertion clean).
 - **Gate exits**: same battery as above — `bun test tests/unit` 0 failures including the new suites; `scripts/SCRIPTS.md` + `templates/common/scripts/SCRIPTS.md` registry rows and `docs/lifecycle/scripts/upgrade-project.md` updated; `docs/VERSION_MANIFEST.md` / `docs/skill-graph.json` regenerated.
+
+## Follow-up 2026-11-26: stub-version backfill and registry-normaliser regression
+
+Two defects observed in all 7 real upgrade runs of this batch (row 7
+`ffed5d8b9` / T-20261124-013 is implicated in the second). Fixes landed under spec
+`2026-11-26-stub-version-backfill-and-registry-row-floor-design` (T-20261126-002;
+upstream reports `U-20261126-001` / `U-20261126-002`).
+
+### Defect 1 — `agents/pm.md` version never advances (STUB_VERSION_DIVERGENCE)
+
+- **Symptom**: every run reports `STUB_VERSION_DIVERGENCE (INFO)` for
+  `agents/pm.md` and `verify-delivered-versions` reports one
+  `[stale] agents/pm.md` row per project forever (project stubs 1.0.0/1.1.0 vs
+  template 1.1.2–1.2.3 after root #2181).
+- **Root cause**: MERGE_MANAGED stubs — the MERGE pass refreshes the managed body
+  but never the frontmatter, and the v1.24.0 backfill contract pins the existing
+  `version` permanently.
+- **Fix**: `backfillStubVersion` (lib/upgrade-policy v1.54.0) + verdict
+  `STUB_VERSION_BACKFILL` (INFO); the MERGE pass calls it only after a CLEAN
+  managed-body merge (no census escalation, no marker loss, frontmatter untouched
+  by the merge). Non-clean merges keep the pin.
+- **Tests**: `upgrade-policy-decisions.test.ts` backfillStubVersion (6);
+  `upgrade-decision-log.test.ts` backfill / project-ahead pin / dry-run gate.
+
+### Defect 2 — registry rows lowered below the scripts' own `@version`
+
+- **Symptom**: the engine rewrote `lib/error-handling.ts` 1.4.0 → 1.3.0 and
+  `detect-backport.ts` 1.0.1 → 1.0.0 in every project's `scripts/SCRIPTS.md`
+  (`📝 ... → v1.3.0` / `→ v1.0.0` in the run logs), failing the project
+  lifecycle-sync-audit Check A.
+- **Root cause**: NOT a stale registry — root, the L1 mirror and delivered
+  projects all carried the correct 1.4.0 / 1.0.1. Both scripts carry a stray
+  mid-file line-form marker (`// @version 1.3.0` at error-handling.ts:298;
+  `// @version 1.0.0` at detect-backport.ts:82) and `extractScriptVersion` gave
+  ANY `// @version` line priority over the header; the v1.118.0 row-7 lockstep
+  loop reconciled correct rows to the stray numbers.
+- **Fix**: header-first parsing (helpers/upgrade-versions v1.3.0, new pure
+  `extractScriptVersionFromContent`; header block = shebang/`//`/JSDoc/`#`/Python
+  docstring, imports stepped over) + `floorAtProjectScriptVersion` in
+  `reconcileScriptRegistry` — a row is never lowered below the project file's own
+  header. Verified scope: old-vs-new parser over 600 script files changes exactly
+  the 4 intended files.
+- **Tests**: `upgrade-versions.test.ts` (+4), `upgrade-script-lane-gaps.test.ts`
+  delivery regression (fails 1.3.0 without the fix).
+
+### Gates and canary
+
+- `bun test tests/unit` all green; `bun scripts/typecheck.ts` 0 errors;
+  `bun scripts/audit.ts` PASS; `bun scripts/validate-templates.ts` PASS;
+  `bun scripts/lifecycle-sync-audit.ts` PASS (after
+  `bun scripts/generate-scripts-mirror.ts` regenerated the L1 registry span and
+  `bun scripts/generate-version-manifest.ts` refreshed the manifest).
+- Canary on a TEMP COPY (`cp -R Projects/co-consult /tmp/wave-canary/co-consult`,
+  real project untouched at `50db72d`):
+  `bun scripts/upgrade-project.ts /tmp/wave-canary/co-consult --prune-removed --yes`
+  exit 0 (engine accepts the non-`Projects/` path). Results:
+  `agents/pm.md` `version: "1.0.0"` → `"1.1.2"` with `last_updated` re-stamped
+  (out-of-zone body and nested lifecycle block byte-preserved; manifest row
+  `STUB_VERSION_BACKFILL | INFO | stub version 1.0.0 → 1.1.2 — ... clean`);
+  `lib/error-handling.ts` row unchanged at 1.4.0, `detect-backport.ts` row
+  unchanged at 1.0.1 (the run PRINTS `OK detect-backport.ts 1.0.1` /
+  `OK lib/error-handling.ts 1.4.0` — the pre-fix runs printed 1.0.0 / 1.3.0 and
+  lowered the rows); zero REGISTRY_DRIFT rows;
+  `bun scripts/verify-delivered-versions.ts --project <copy> --template
+  templates/co-consult` → exit 0, `11 path(s) checked ... 0 findings` (pre-fix
+  state on the same copy: `✗ 1 finding(s) — [stale] agents/pm.md — project 1.0.0
+  < template 1.1.2`); the project's own
+  `bun scripts/lifecycle-sync-audit.ts` ran through
+  `bun scripts/contained-run.ts --project <copy>` → exit 0 (`All lifecycle sync
+  checks passed`). `/tmp/wave-canary` deleted afterwards.
+- Not verified: a second apply run on the canary copy (idempotence at engine
+  level) — the copy's own pre-commit hook refuses the intermediate commit and
+  hooks are not bypassed in this workspace; helper-level idempotence is
+  unit-pinned instead.

@@ -22,7 +22,8 @@
  * All assertions are byte-verbatim from tests/unit/upgrade-decision-log.test.ts
  * v1.4.0 (the extraction moves describes, never expectations).
  *
- * @version 1.4.0 (2026-11-16: T-20261114-005 — globToRegExp {a,b} alternation, expandGrantGlobs, grant named in the ADOPT detail)
+ * @version 1.5.0 (2026-11-26: T-20261126-002 — backfillStubVersion, the stub version backfill pure helper)
+ * v1.4.0 (2026-11-16: T-20261114-005 — globToRegExp {a,b} alternation, expandGrantGlobs, grant named in the ADOPT detail)
  * v1.3.0 (2026-11-12: overwrite-protection PR-B — E3 resolveEqualVersionDisposition table, vintage UNBASELINED row, PROJECT_AHEAD verdict, E4 pendingKindForDecision / mergePendingBackport)
  * v1.2.0 (2026-11-11: overwrite-protection PR-A — E1 EVOLVED_PRESERVE verdict matrix, E2 marker counting/markerLoss, supersetCheck)
  * v1.1.0 (2026-11-11: resolveUnbaselinedDisposition four-cell matrix + new verdict severities — T-20261110-009/012)
@@ -32,6 +33,7 @@ import { describe, test, expect } from 'bun:test';
 import {
   DECISION_SEVERITY_CONTRACT,
   backfillStubFrontmatter,
+  backfillStubVersion,
   baselineKeyFor,
   LOCAL_PATCH_MARKER_RE,
   classifyProjectState,
@@ -293,6 +295,100 @@ describe('backfillStubFrontmatter (T-20261028-010 stub FM backfill)', () => {
     const badDate = backfillStubFrontmatter(stub, counterpart, '2026-10-28T00:00:00Z');
     expect(badDate.filled).toEqual(['tier', 'version']);
     expect(badDate.content).not.toContain('last_updated:');
+  });
+});
+
+// T-20261126-002 (ticket follow-up, stub version backfill): the pure rewrite
+// behind the MERGE pass's STUB_VERSION_BACKFILL row.
+describe('backfillStubVersion (T-20261126-002 stub version backfill)', () => {
+  const DATE = '2026-11-26';
+  const counterpart = [
+    '---',
+    'extends: ../../common/agents/pm.md',
+    'name: pm',
+    'version: "1.1.2"',
+    'last_updated: 2026-11-26',
+    'tier: medium',
+    '---',
+    'template stub body',
+    '',
+  ].join('\n');
+  const BODY =
+    '\n<!-- WORKSPACE-MANAGED: PM agent body -->\nproject body\n<!-- /WORKSPACE-MANAGED -->\n\n## Out-of-zone\nproject-authored\n';
+  const stub = (version: string): string =>
+    [
+      '---',
+      'extends: ../../../agents/pm.md',
+      'name: pm',
+      'variant: co-develop',
+      'status: active',
+      `version: ${version}`,
+      'last_updated: 2026-11-18',
+      'tier: medium',
+      'lifecycle:',
+      '  phase: production',
+      '  last_updated: 2026-11-18',
+      '---',
+    ].join('\n') + BODY;
+
+  test('older pin + newer counterpart → version line takes the counterpart scalar verbatim, existing last_updated = delivery date', () => {
+    const out = backfillStubVersion(stub('"1.0.0"'), counterpart, DATE);
+    expect(out.changed).toBe(true);
+    expect(out.oldVersion).toBe('1.0.0');
+    expect(out.newVersion).toBe('1.1.2');
+    const fm = out.content.match(/^---\n[\s\S]*?\n---/)![0]!;
+    expect(fm).toContain('version: "1.1.2"');
+    expect(fm).toContain(`last_updated: ${DATE}`);
+    // Key order, variant line, tier and the nested lifecycle date are untouched.
+    expect(fm.split('\n').slice(0, 3)).toEqual(['---', 'extends: ../../../agents/pm.md', 'name: pm']);
+    expect(fm).toContain('variant: co-develop');
+    expect(fm).toContain('tier: medium');
+    expect(fm).toContain('  last_updated: 2026-11-18');
+    // Body bytes (managed zone and out-of-zone) are untouched.
+    expect(out.content.endsWith(BODY)).toBe(true);
+    expect(DECISION_SEVERITY_CONTRACT.STUB_VERSION_BACKFILL).toBe('INFO');
+  });
+
+  test('semver order, not string order (1.9.0 → 1.10.0); an unquoted counterpart scalar is copied verbatim', () => {
+    const out = backfillStubVersion(stub('1.9.0'), counterpart.replace('version: "1.1.2"', 'version: 1.10.0'), DATE);
+    expect(out.changed).toBe(true);
+    expect(out.content).toContain('\nversion: 1.10.0\n');
+  });
+
+  test('equal or project-ahead pin → byte-identical no-op', () => {
+    expect(backfillStubVersion(stub('"1.1.2"'), counterpart, DATE)).toEqual({
+      content: stub('"1.1.2"'),
+      changed: false,
+      oldVersion: '1.1.2',
+      newVersion: '1.1.2',
+    });
+    const ahead = stub('2.0.0');
+    expect(backfillStubVersion(ahead, counterpart, DATE)).toEqual({ content: ahead, changed: false, oldVersion: '2.0.0', newVersion: '1.1.2' });
+  });
+
+  test('non-stub (a resolved mirror such as .claude/agents/pm.md) and unparsable versions are never touched', () => {
+    const resolved = stub('1.0.0').replace('extends: ../../../agents/pm.md\n', '');
+    expect(backfillStubVersion(resolved, counterpart, DATE).changed).toBe(false);
+    expect(backfillStubVersion(stub('1.0'), counterpart, DATE).changed).toBe(false);
+    expect(backfillStubVersion(stub('"1.0.0"'), counterpart.replace('version: "1.1.2"', 'version: next'), DATE).changed).toBe(false);
+  });
+
+  test('no existing last_updated → never injected; CRLF preserved; invalid date leaves the date alone', () => {
+    const noDate = stub('1.0.0').replace('last_updated: 2026-11-18\n', '');
+    const out = backfillStubVersion(noDate, counterpart, DATE);
+    expect(out.changed).toBe(true);
+    expect(out.content.match(/^last_updated:/m)).toBeNull();
+    const crlf = stub('1.0.0').replace(/\n/g, '\r\n');
+    const crlfOut = backfillStubVersion(crlf, counterpart, DATE);
+    expect(crlfOut.content).toContain('version: "1.1.2"\r\nlast_updated: 2026-11-26\r\n');
+    expect(crlfOut.content).not.toMatch(/[^\r]\n/);
+    const badDate = backfillStubVersion(stub('1.0.0'), counterpart, '20261126');
+    expect(badDate.content).toContain('last_updated: 2026-11-18');
+  });
+
+  test('idempotent — a second pass over the backfilled content changes nothing', () => {
+    const once = backfillStubVersion(stub('"1.0.0"'), counterpart, DATE).content;
+    expect(backfillStubVersion(once, counterpart, DATE)).toEqual({ content: once, changed: false, oldVersion: '1.1.2', newVersion: '1.1.2' });
   });
 });
 
