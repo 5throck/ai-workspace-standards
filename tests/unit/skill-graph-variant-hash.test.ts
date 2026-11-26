@@ -50,9 +50,13 @@ describe("normalizeForHash variant-token compensation (S2)", () => {
 });
 
 describe("contentHash variant compensation (S2 AC: the real pair collapses)", () => {
-  test("template and rendered script-lifecycle-manager copies hash equal under the same variantName", () => {
+  // The rendered side lives in the gitignored Projects/ checkout — absent on CI.
+  // Local evidence only; the normalization pins above are universal.
+  const hasLocalPair = existsSync(RENDERED_SKILL);
+  const pairTest = hasLocalPair ? test : test.skip;
+
+  pairTest("template and rendered script-lifecycle-manager copies hash equal under the same variantName", () => {
     expect(existsSync(TEMPLATE_SKILL)).toBe(true);
-    expect(existsSync(RENDERED_SKILL)).toBe(true);
     const tpl = readFileSync(TEMPLATE_SKILL, "utf8");
     const rendered = readFileSync(RENDERED_SKILL, "utf8");
     // The pair genuinely differed before S2 (the rendered copy carries
@@ -63,7 +67,7 @@ describe("contentHash variant compensation (S2 AC: the real pair collapses)", ()
     expect(contentHash(tpl, "co-news")).toBe(contentHash(rendered, "co-news")); // S2 AC
   });
 
-  test("an unrelated slug does not collapse the real pair", () => {
+  pairTest("an unrelated slug does not collapse the real pair", () => {
     const tpl = readFileSync(TEMPLATE_SKILL, "utf8");
     const rendered = readFileSync(RENDERED_SKILL, "utf8");
     expect(contentHash(tpl, "co-price")).not.toBe(contentHash(rendered, "co-price"));

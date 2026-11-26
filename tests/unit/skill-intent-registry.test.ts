@@ -195,6 +195,8 @@ describe("the seeded docs/skill-intent.json registry (read-only shape pin)", () 
     expect(load.registry.entries.length).toBeGreaterThanOrEqual(7);
     // The real project graphs must satisfy every seeded row (the fleet-report run
     // hard-fails otherwise); co-* members map to Projects/<name> graphs on disk.
+    // Projects/ is gitignored — absent on CI, where the schema-load assertion
+    // above is the whole contract and the graph-existence acceptance runs locally.
     const { readFileSync, existsSync } = require("node:fs") as typeof import("node:fs");
     const projectCaps = new Map<string, Map<string, Set<string | null>>>();
     for (const p of ["co-abap", "co-design", "co-price", "co-safety", "co-work"]) {
@@ -209,9 +211,19 @@ describe("the seeded docs/skill-intent.json registry (read-only shape pin)", () 
         const cap = typeof n.capability === "string" && n.capability ? n.capability : (n.id ?? "").split("/").pop() ?? "";
         if (cap) caps.add(cap);
       }
-      projectCaps.set(p, new Map([...caps].map((c) => [c, new Set(["fixture"])] as Set<string | null>)));
+      projectCaps.set(p, new Map([...caps].map((c) => [c, new Set(["fixture"])] as [string, Set<string | null>])));
     }
-    const map = buildIntentMap(load.registry, projectCaps);
-    expect(map.size).toBe(load.registry.entries.length);
+    if (projectCaps.size === 0) {
+      return; // CI shape: no local fleet state at all — the schema assertions above are the contract
+    }
+    // Local (or partial) shape: every seeded row whose project graph exists must
+    // pass existence validation; rows for absent graphs are not checkable here.
+    const available = {
+      version: 1 as const,
+      entries: load.registry.entries.filter((e) => projectCaps.has(e.project)),
+    };
+    const map = buildIntentMap(available, projectCaps);
+    expect(map.size).toBe(available.entries.length);
+    expect(available.entries.length).toBe(load.registry.entries.length); // full local fleet → all 7 validated
   });
 });
