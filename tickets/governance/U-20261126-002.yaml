@@ -3,14 +3,38 @@ id: U-20261126-002
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-26T08:08:47.045+09:00
+created_at: '2026-11-26T08:08:47.045+09:00'
 history:
-  - at: 2026-11-26T08:08:47.045+09:00
+  - at: '2026-11-26T08:08:47.045+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-26T14:58:02.157+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-26T14:58:02.193+09:00'
+    from: waiting
+    to: running
+  - at: '2026-11-26T14:58:02.210+09:00'
+    from: running
+    to: review
+  - at: '2026-11-26T14:58:27.855+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed: template-side port landed in root PR #2185, commit 1ac56597e (merged to
+  main as 3795f4fc8) —
+  templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts bumped
+  0.2.0→0.2.1; checkBrowserAvailable() real-launch probe (Chromium launch +
+  close in a Node subprocess) gates the suite and the skip path is a named
+  test.skip with the probe reason, byte-consistent with project fix 0c23642;
+  validate-templates.ts + audit.ts pass at root. RESIDUAL DEFECT (follow-up
+  needed, both copies): the probe one-liner always exits 0 — node -e does not
+  propagate the promise chain's resolved value to the exit code and the
+  rejection is handled — so a missing Chromium binary is NOT detected by
+  res.status (observed at root: suite proceeds to total=0); package-missing and
+  node-missing paths still gate correctly
 error: null
 upstream:
   project: co-deck
@@ -19,19 +43,58 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'In templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts (0.2.0), the suite fails with an opaque assertion when the Playwright npm package is installed but its Chromium browser binary is not. Observed on a macOS machine with playwright 1.63.0 in node_modules and no ms-playwright cache: `compare 27 pairs with existing baselines` fails `expect(result.total).toBeGreaterThan(0)` (received 0), because the browser subprocess prints "Failed to launch Chromium: Executable doesn''t exist at .../chromium_headless_shell-1243/..." and exits 1 without a RESULT payload. Expected: an explicit skip naming the missing dependency, as the sibling render tests do for pdftoppm/pdftotext. Root cause: `checkPlaywrightAvailable()` only calls `require.resolve(''playwright'')`; it never checks that a browser executable exists. The co-deck project copy is byte-identical to the template and fails the same way. Note this is not a baseline mismatch: the comparison never ran.'
+  symptom: >-
+    In templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts
+    (0.2.0), the suite fails with an opaque assertion when the Playwright npm
+    package is installed but its Chromium browser binary is not. Observed on a
+    macOS machine with playwright 1.63.0 in node_modules and no ms-playwright
+    cache: `compare 27 pairs with existing baselines` fails
+    `expect(result.total).toBeGreaterThan(0)` (received 0), because the browser
+    subprocess prints "Failed to launch Chromium: Executable doesn't exist at
+    .../chromium_headless_shell-1243/..." and exits 1 without a RESULT payload.
+    Expected: an explicit skip naming the missing dependency, as the sibling
+    render tests do for pdftoppm/pdftotext. Root cause:
+    `checkPlaywrightAvailable()` only calls `require.resolve('playwright')`; it
+    never checks that a browser executable exists. The co-deck project copy is
+    byte-identical to the template and fails the same way. Note this is not a
+    baseline mismatch: the comparison never ran.
   affected_paths:
     - templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts
   identity_source: self_declared
-  repro: 'On a machine without `playwright install chromium` having been run for the installed Playwright version, run `bun test scripts/co-deck/tests/theme-visual-regression.test.ts`. Result: 1 fail with total=0.'
-  triage: inbox
+  repro: >-
+    On a machine without `playwright install chromium` having been run for the
+    installed Playwright version, run `bun test
+    scripts/co-deck/tests/theme-visual-regression.test.ts`. Result: 1 fail with
+    total=0.
+  triage: ready
   flagged: true
   triage_reasons:
     - needs_human_review
     - identity:self_declared
-    - 'path_not_template_managed: templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts'
-    - info:in_last_delivery templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts=false
+    - >-
+      path_not_template_managed:
+      templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts
+    - >-
+      info:in_last_delivery
+      templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts=false
   dedupe_key: e96e59bbafb24bc16db32ce23b26a00ae2d21a6927a2364683d9aee13aeff4df
   duplicates:
     - project: co-deck
-      at: 2026-11-26T08:08:47.045+09:00
+      at: '2026-11-26T08:08:47.045+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2185
+    template_version: 0.30.0
+    summary: >-
+      Fixed: template-side port landed in root PR #2185, commit 1ac56597e
+      (merged to main as 3795f4fc8) —
+      templates/co-deck/scripts/co-deck/tests/theme-visual-regression.test.ts
+      bumped 0.2.0→0.2.1; checkBrowserAvailable() real-launch probe (Chromium
+      launch + close in a Node subprocess) gates the suite and the skip path is
+      a named test.skip with the probe reason, byte-consistent with project fix
+      0c23642; validate-templates.ts + audit.ts pass at root. RESIDUAL DEFECT
+      (follow-up needed, both copies): the probe one-liner always exits 0 — node
+      -e does not propagate the promise chain's resolved value to the exit code
+      and the rejection is handled — so a missing Chromium binary is NOT
+      detected by res.status (observed at root: suite proceeds to total=0);
+      package-missing and node-missing paths still gate correctly
