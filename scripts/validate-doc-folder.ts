@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Validate docs/ folder structure compliance
- * @version 1.7.0
+ * @version 1.8.0
  * v1.7.0 (2026-11-23, spec
  *           docs/designs/2026-11-23-skill-graph-observability-design.md
  *           §5.5/AC10-AC11): allowlist gains `skill-graph-structure.html` —
@@ -108,6 +108,7 @@ const ALLOWED_ROOT_FILES: ReadonlySet<string> = new Set([
   "variant-roadmap-2026-q3-q4.md",
   "variant-benchmark-backlog.md",
   "fleet-membership.json",
+  "skill-intent.json",
   "protected-paths.json",
   "expected-gate-failures.json",
   "runner-exec-allowlist.json",
