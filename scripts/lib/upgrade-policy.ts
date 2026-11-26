@@ -1,4 +1,10 @@
-// @version 1.54.0
+// @version 1.55.0
+// v1.55.0 (2026-11-26, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
+//          §4.1 S1): verdict SYNC_TEMPLATE_ADVANCE (INFO) — the equal-version
+//          content-aware gate: project bytes equal the delivered baseline while the
+//          template moved without a version bump → the template copy delivers
+//          (per-file, skills lanes only) instead of stranding the edit as
+//          DRIFT_PRESERVE forever. Severity contract row added.
 // v1.54.0 (2026-11-26, T-20261126-002): stub version backfill — verdict
 //          STUB_VERSION_BACKFILL (INFO) and the pure helper `backfillStubVersion`
 //          (advance a project extends-stub's top-level `version` to a NEWER
@@ -1706,7 +1712,15 @@ export type DecisionVerdict =
   // script has no row in L0, L1 common, or the variant sub-registry — the copy is
   // SKIPPED (fail-closed) so a delivery can no longer ship an "Unregistered
   // script" audit failure. pendingKindForDecision default → null (no gate kind).
-  | "UNREGISTERED_SCRIPT";
+  | "UNREGISTERED_SCRIPT"
+  // S1 equal-version content-aware gate (2026-11-26, design
+  // docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.1): the
+  // project file's bytes still equal its delivered baseline while the template
+  // moved without a version bump — the template copy is delivered (per-file,
+  // skills lanes only) so an un-bumped template edit is recoverable instead of
+  // permanently stranded (the d82a73649/bdb72db58 strand class). ADR-0085 D3's
+  // protective DRIFT_PRESERVE stays for every unattributable case.
+  | "SYNC_TEMPLATE_ADVANCE";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
   NEW: "INFO",
@@ -1749,6 +1763,7 @@ export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverit
   RECORD_BUMP: "INFO",
   SCRIPT_ROW_SYNTHESIZED: "INFO",
   UNREGISTERED_SCRIPT: "ERROR",
+  SYNC_TEMPLATE_ADVANCE: "INFO",
 };
 
 /** One decision entry of the unified decision log (design §7 schema). */
