@@ -225,7 +225,7 @@
 | `root/design-token-adoption` | L0 | 1.0.0 | — | — | root/design-foundation, root/token-usage-lint (composes_with) | — | — |
 | `root/documentation-writing` | L0 | 1.0.3 | co-architect/content-writer, co-architect/technical-writer, co-work/content-writer, co-work/technical-writer | — | root/team-builder (composes_with) | — | — |
 | `root/explain-me` | L0 | 1.0.1 | — | — | — | — | — |
-| `root/finishing-a-development-branch` | L0 | 1.0.3 | — | — | — | — | — |
+| `root/finishing-a-development-branch` | L0 | 1.1.1 | — | — | — | — | — |
 | `root/gateguard` | L0 | 1.0.2 | — | — | root/sync | — | — |
 | `root/meeting-facilitation` | L0 | 1.6.0 | — | — | — | — | — |
 | `root/migrate-project` | L0 | 1.0.0 | — | — | root/adopt-project (composes_with), root/upgrade-project (follows) | — | — |

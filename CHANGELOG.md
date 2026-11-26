@@ -2081,9 +2081,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `docs/context.md` = single source of truth for ALL AI tools; project-level `CLAUDE.md`/`GEMINI.md` = platform-specific overrides only
 
 ---
+- **[2026-11-27]**: fix(skills): **finishing-a-development-branch common base 1.0.3 → 1.1.1 — co-architect zombie pair un-stuck (spec `2026-11-27-co-architect-finishing-zombie-adjudication`).** Version-only bump above the co-architect project copy (1.1.0, promoted pre-normalization at bbf2ad2 2026-11-02): the engine's PROJECT_AHEAD protection refused the wave's adopt grant (downgrade), and the zombie's unique content adjudicated as stale pre-normalization frontmatter styling (`metadata:` nested block, `prerequisites`, `gemini-parity`, `last_reviewed: 2026-09-09`) plus an empty `## Related Skills` stub — doctrine body identical to the template. The engine now delivers normally WITHOUT a grant and the project copy supersedes at the next delivery; disclosed cost: every common-delivered project holding 1.0.3 sees a content-identical SYNC_TEMPLATE_ADVANCE row at its next upgrade (a co-architect variant override was rejected — it would wholesale-shadow a common file, T-20261114-012/T-20261116-003 drift class). Also this landing: #2193's conclude-merge session block carryover (S2 CI-stability fix merge), and the 3.87 cross-store ambiguity environmental clear (7 done service tickets double-resident with #2191-reconstructed governance ids moved to the archive path; code-side fix remains open on T-20261127-001).
 
-*Last Updated: 2026-11-23*
-*Last Updated: 2026-11-23*
+*Last Updated: 2026-11-27*
+*Last Updated: 2026-11-27*
 
 ### Changed
 - **[2026-06-06]**: chore: update validate-templates.ts and SKILLS.md - improve template validation checks and skill registration consistency

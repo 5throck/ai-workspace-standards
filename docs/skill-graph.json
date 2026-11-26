@@ -9057,7 +9057,7 @@
       "scope": "root",
       "capability": "finishing-a-development-branch",
       "content_hash": "7aa95cd39dce01f1",
-      "version": "1.0.3",
+      "version": "1.1.1",
       "mirrors": [
         "skills/finishing-a-development-branch/SKILL.md",
         "templates/common/skills/finishing-a-development-branch/SKILL.md",

@@ -3,9 +3,9 @@
 ## Metadata
 - **Skill**: finishing-a-development-branch
 - **Status**: active
-- **Version**: 1.0.3
+- **Version**: 1.1.1
 - **Created**: 2026-09-04
-- **Last Updated**: 2026-11-26
+- **Last Updated**: 2026-11-27
 
 ## Description
 Guides clean completion of a development branch: verify tests/audits, update
@@ -14,6 +14,8 @@ Superpowers finishing-a-development-branch workflow for this workspace's
 PR-based flow.
 
 ## Changelog
+
+- **1.1.1** (2026-11-27): version-only bump above the co-architect project copy (1.1.0) — the co-architect zombie pair (TRUE_DIVERGENCE + PROJECT_AHEAD vs the common base, promoted pre-normalization at bbf2ad2) is un-stuck so the engine delivers normally without a grant; zombie's unique content adjudicated as stale frontmatter styling + empty stub, superseded at the next delivery (spec 2026-11-27-co-architect-finishing-zombie-adjudication).
 
 - **1.0.3** (2026-11-26): patch bump — version-only bump making the 2026-11-08 frontmatter restructure (d82a73649) deliverable, healing the co-design equal-but-stuck pair (adjudication row 8; pair-program row P8; A1's adopt grant rides this bump).
 
