@@ -6,7 +6,7 @@
 
 | Date | Summary |
 |------|---------|
-| [2026-11-27](2026-11-27.md) | fix(skills): S2 variant-hash standalone-checkout stability — resolveVariantName derives from the checkout's own variant.json (wave-3 CI drift fix) |
+| [2026-11-27](2026-11-27.md) | nightly(unified-2026-11-27 continuation): S1 fleet-wide common-skills 1.1.1 delivery — 14 PRs merged (orders 10–23), convergence end-state |
 | [2026-11-26](2026-11-26.md) | chore(runner): 2026-11-26 nightly closeout — daily reports, orphan-sweep artifacts, memory block |
 | [2026-11-25](2026-11-25.md) | chore(runner): 2026-11-25 nightly — 0.30.0 wave to 4 more projects (co-abap merged CLEAN on real CI), 3 staged+held, 8 skipped with reasons |
 | [2026-11-25](2026-11-25.md) | chore(runner): land the 2026-11-24 interactive session records (DEC-20261124-02, tickets T-20261124-014 to 017, fleet test baseline design proposed) |
