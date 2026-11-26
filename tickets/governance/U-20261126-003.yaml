@@ -3,14 +3,38 @@ id: U-20261126-003
 kind: manual
 title: Upstream request from co-deck
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-26T23:17:04.254+09:00
+created_at: '2026-11-26T23:17:04.254+09:00'
 history:
-  - at: 2026-11-26T23:17:04.254+09:00
+  - at: '2026-11-26T23:17:04.254+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-27T07:24:59.824+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T07:24:59.824+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T07:24:59.824+09:00'
+    from: review
+    to: done
+result: >-
+  templates/common/scripts/helpers/local-patch-scan.ts (and the root twin)
+  v1.1.1: SKIP_FILES now carries scripts/detect-backport.ts and
+  templates/common/scripts/detect-backport.ts — the detector's own
+  evidence-class docstring documents the marker format with a concrete pending
+  example, so every detection run filed a spurious E1 template-defect candidate
+  (file=scripts/detect-backport.ts, uid=null) against the detector's
+  documentation. Verified: scanLocalPatches over the workspace root returns 0
+  findings for both copies; noise-filter unit test extended to pin both paths
+  (5/5 pass); detect-backport suite 26/26; mirror + fleet-script-parity green.
+  Landed workspace-side in PR #2199 (commit 997624f8c, merged
+  b2efe4cc3693911c9fef61cfa59f804971424db4, 2026-11-27); delivery to variants
+  rides the next upgrade wave (co-deck currently carries the 1.1.0 copy — its
+  stale .git/detect-backport-state.json token stops regenerating once
+  delivered). SCRIPTS.md registry rows (root + template) bumped to 1.1.1 in the
+  same landing.
 error: null
 upstream:
   project: co-deck
@@ -19,12 +43,42 @@ upstream:
   source: project/co-deck
   trust: untrusted
   suspected_layer: L2
-  symptom: 'scripts/helpers/local-patch-scan.ts LOCAL_PATCH_RE (= /LOCAL-PATCH\(upstream-request:\s*([A-Za-z0-9][A-Za-z0-9-]*)\)/g) scans raw file contents with no comment/string awareness. scripts/detect-backport.ts line 20 contains that exact pattern inside its own docstring as format documentation ("E1 LOCAL_PATCH — LOCAL-PATCH(upstream-request: pending) markers found"), so every sync-detection run reports a spurious E1 template-defect candidate: file=scripts/detect-backport.ts, id=pending/uid=null. The detector flags its own documentation as evidence of an unfiled local patch. No actual marker exists in the project. Consequence: one recurring false candidate per detection run (deduped after first state write, but recorded with uid=null = "pending" forever until fixed), and PM triage noise each sync. Expected: comment/docstring lines (trimmed line starts with * or //) should not produce LOCAL-PATCH findings, or the scanner should exclude the detector''s own doc example.'
+  symptom: >-
+    scripts/helpers/local-patch-scan.ts LOCAL_PATCH_RE (=
+    /LOCAL-PATCH\(upstream-request:\s*([A-Za-z0-9][A-Za-z0-9-]*)\)/g) scans raw
+    file contents with no comment/string awareness. scripts/detect-backport.ts
+    line 20 contains that exact pattern inside its own docstring as format
+    documentation ("E1 LOCAL_PATCH — LOCAL-PATCH(upstream-request: pending)
+    markers found"), so every sync-detection run reports a spurious E1
+    template-defect candidate: file=scripts/detect-backport.ts,
+    id=pending/uid=null. The detector flags its own documentation as evidence of
+    an unfiled local patch. No actual marker exists in the project. Consequence:
+    one recurring false candidate per detection run (deduped after first state
+    write, but recorded with uid=null = "pending" forever until fixed), and PM
+    triage noise each sync. Expected: comment/docstring lines (trimmed line
+    starts with * or //) should not produce LOCAL-PATCH findings, or the scanner
+    should exclude the detector's own doc example.
   affected_paths:
     - scripts/helpers/local-patch-scan.ts
     - scripts/detect-backport.ts
   identity_source: self_declared
-  repro: 'In any co-* variant with syncDetection ON (e.g. Projects/co-deck), run the sync detection (bun scripts/detect-backport.ts or via /sync). Output shows an E1 LOCAL_PATCH / template-defect candidate with affected_paths=[scripts/detect-backport.ts] and uid=null (persisted in .git/detect-backport-state.json filed[0], dedupe_token sha256:527e2e38...). Then: grep -n "LOCAL-PATCH(upstream-request" scripts/detect-backport.ts -> the ONLY hit is line 20, inside the file''s own /** ... */ docstring documenting the marker format ("E1 LOCAL_PATCH — LOCAL-PATCH(upstream-request: pending) markers found"). grep -rn across the whole project finds no real marker (only the same docstring example and the procedure text in agents/pm.md:104). upstream_request_status for co-deck shows no open request about this (all done). So the scanner is matching its own documentation example. Same docstring text exists in the workspace-root copy scripts/detect-backport.ts and templates/common/scripts/detect-backport.ts, so root syncs would flag themselves too where detection runs.'
+  repro: >-
+    In any co-* variant with syncDetection ON (e.g. Projects/co-deck), run the
+    sync detection (bun scripts/detect-backport.ts or via /sync). Output shows
+    an E1 LOCAL_PATCH / template-defect candidate with
+    affected_paths=[scripts/detect-backport.ts] and uid=null (persisted in
+    .git/detect-backport-state.json filed[0], dedupe_token sha256:527e2e38...).
+    Then: grep -n "LOCAL-PATCH(upstream-request" scripts/detect-backport.ts ->
+    the ONLY hit is line 20, inside the file's own /** ... */ docstring
+    documenting the marker format ("E1 LOCAL_PATCH —
+    LOCAL-PATCH(upstream-request: pending) markers found"). grep -rn across the
+    whole project finds no real marker (only the same docstring example and the
+    procedure text in agents/pm.md:104). upstream_request_status for co-deck
+    shows no open request about this (all done). So the scanner is matching its
+    own documentation example. Same docstring text exists in the workspace-root
+    copy scripts/detect-backport.ts and
+    templates/common/scripts/detect-backport.ts, so root syncs would flag
+    themselves too where detection runs.
   triage: inbox
   flagged: true
   triage_reasons:
@@ -35,4 +89,24 @@ upstream:
   dedupe_key: 7488782a6296027154916baa6ebb033bd40320e54a4a093940a2b4b5d6ddb7a8
   duplicates:
     - project: co-deck
-      at: 2026-11-26T23:17:04.254+09:00
+      at: '2026-11-26T23:17:04.254+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2199
+    template_version: unreleased
+    summary: >-
+      templates/common/scripts/helpers/local-patch-scan.ts (and the root twin)
+      v1.1.1: SKIP_FILES now carries scripts/detect-backport.ts and
+      templates/common/scripts/detect-backport.ts — the detector's own
+      evidence-class docstring documents the marker format with a concrete
+      pending example, so every detection run filed a spurious E1
+      template-defect candidate (file=scripts/detect-backport.ts, uid=null)
+      against the detector's documentation. Verified: scanLocalPatches over the
+      workspace root returns 0 findings for both copies; noise-filter unit test
+      extended to pin both paths (5/5 pass); detect-backport suite 26/26; mirror
+      + fleet-script-parity green. Landed workspace-side in PR #2199 (commit
+      997624f8c, merged b2efe4cc3693911c9fef61cfa59f804971424db4, 2026-11-27);
+      delivery to variants rides the next upgrade wave (co-deck currently
+      carries the 1.1.0 copy — its stale .git/detect-backport-state.json token
+      stops regenerating once delivered). SCRIPTS.md registry rows (root +
+      template) bumped to 1.1.1 in the same landing.
