@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.1.1
+// v1.1.1 (2026-11-27, U-20261126-003): skip scripts/detect-backport.ts — its
+//          evidence-class docstring documents the marker format with a concrete
+//          `pending` example, so every detection run flagged the detector's own
+//          documentation as an E1 template-defect candidate (uid=null forever).
 // v1.1.0 (2026-10-13, T-20261013-006): noise filter — inline-code spans (`…`) are
 //          stripped before matching and the marker's defining/registry surfaces are
 //          skipped (scripts/hooks/pre-commit.ts, this file, scripts/upgrade-project.ts,
@@ -70,12 +74,18 @@ const MAX_FILE_BYTES = 1_000_000;
 /** Marker-definition/registry surfaces whose own text legitimately contains the
  * marker string — skipped so protocol documentation never drowns real patches
  * (co-abap reported 27 markers, instruction-text class dominated, and the noise
- * is how real patches got dismissed during the 0.18.0 wave — T-20261013-006). */
+ * is how real patches got dismissed during the 0.18.0 wave — T-20261013-006).
+ * detect-backport.ts documents the marker format in its evidence-class docstring
+ * (U-20261126-003): without the skip, every detection run files a spurious E1
+ * template-defect candidate against the detector's own documentation (delivered
+ * copy and template source both skipped). */
 const SKIP_FILES = new Set([
   "scripts/hooks/pre-commit.ts",
   "scripts/helpers/local-patch-scan.ts",
   "scripts/upgrade-project.ts",
   "scripts/SCRIPTS.md",
+  "scripts/detect-backport.ts",
+  "templates/common/scripts/detect-backport.ts",
 ]);
 
 /** Inline-code spans (`…`) carry protocol documentation, never live markers —
