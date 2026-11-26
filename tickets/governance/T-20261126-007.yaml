@@ -1,10 +1,9 @@
 schemaVersion: 1
 id: T-20261126-007
 kind: manual
-title: >-
-  co-newbiz active hook without template: promote-or-out-of-tree decision
+title: 'co-newbiz active hook without template: promote-or-out-of-tree decision'
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-26T00:00:00.000+09:00'
 history:
@@ -16,11 +15,29 @@ history:
     actor: automation-engineer
     from: backlog
     to: backlog
+  - at: '2026-11-27T07:57:02.472+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T07:57:02.497+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T07:57:02.520+09:00'
+    from: review
+    to: done
 result: >-
-  Reconstructed 2026-11-26 from session records; original working-tree-only
-  file never committed and lost; adjudicated under DEC-20261126-001.
-  Evidence: memory/2026-11-26.md L406 "T-20261126-007.yaml — created
-  (co-newbiz active hook without template: promote-or-out-of-tree decision)";
-  L413 "decision-class (owner): co-newbiz template promotion vs out-of-tree
-  exclusion row". Status best evidence: open (backlog).
+  Owner 2026-11-26 ruling (verbatim intent): no co-newbiz template creation at
+  this stage; do NOT exclude co-newbiz from fleet-membership; the declared local
+  hook stays as the only correctly-declared variant audit hook; state remains
+  as-is. Premises verified 2026-11-27:
+  Projects/co-newbiz/scripts/co-newbiz/audit-variant.ts present (v1.13.1) AND
+  declared (variant.json script_manifest.local, path
+  scripts/co-newbiz/audit-variant.ts with variant_scripts_dir);
+  docs/fleet-membership.json excluded[] does NOT list co-newbiz itself (only the
+  defunct co-newbiz-worktrees husk, defensive row, DEC-20261107-01);
+  templates/co-newbiz does not exist (15 templates, none named co-newbiz;
+  variant.json promotionHold cites the standing 2026-08-29 directive requiring
+  explicit user permission for promotion). Note: the co-newbiz checkout shows
+  foreign-session activity (branch chore/s8-cleanup-leftovers checked out) -
+  fleet steps continue to treat it as transient/excluded at run time. No state
+  changes made; neither promoted nor excluded. Decided_by: owner instruction.
 error: null
