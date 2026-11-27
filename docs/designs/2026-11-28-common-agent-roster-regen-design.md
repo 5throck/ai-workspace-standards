@@ -112,6 +112,27 @@ Fix (same landing):
   tests: `tests/unit/country-scoped-agents.test.ts` v1.0.0 → v1.1.0
   (scrubAgentDetailBlocks pins).
 
+## CI follow-up: PHASE 3.5 resolver delivery semantics
+
+CI's scripts E2E suite failed on the first PR head:
+`test-l3-to-variant-promotion.ts` Test 8b — the promotion pipeline's PHASE 3.5
+pre-flight refused the fixture AGENTS.md with "unresolvable agent links"
+naming exactly the 5 common agents. Mechanism: Test 2.5 regenerates the
+fixture AGENTS.md through a staging dir, and the v1.6.0 roster superset links
+the common agents; PHASE 3.5 resolved every `agents/*.md` ref against the L3
+source ONLY — but an L3 source's stub-generated agents/ tree deliberately
+does NOT carry the common agents (scaffold-markers L3_COMMON_OVERLAY_EXCLUDE:
+they reach real projects via the common copy at instantiation). The resolver
+was the piece out of step with the delivery semantics.
+
+Fix (same PR, commit 3): `scripts/l3-to-variant-pipeline.ts` v1.23.1 → v1.23.2
+— PHASE 3.5 roster-link resolution gains the common-agent delivery fallback
+(a ref also resolves under `templates/common/agents/`); a ref resolving in
+neither the L3 source nor the common tree is still a refusal (the co-safety
+drift class the check exists for stays covered). SCRIPTS.md row bumped;
+verified locally: `test-l3-to-variant-promotion.ts` 25/25 and the full
+scripts E2E suite 7/7.
+
 ## Acceptance
 
 - Fresh scaffold agent-lifecycle-audit Check 5: 0 warnings for the flat-tree

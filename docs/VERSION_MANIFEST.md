@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-27T22:19:22.347Z
+**Generated**: 2026-11-27T22:27:33.975Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -158,7 +158,7 @@
 | ingest-external-skills.ts | 1.1.0 | scripts/ingest-external-skills.ts | fs, path |
 | ingest-security-frameworks.ts | 1.1.0 | scripts/ingest-security-frameworks.ts | fs, path |
 | install-upstream-mcp.ts | 2.2.1 | scripts/install-upstream-mcp.ts | child_process, fs, os, path, url |
-| l3-to-variant-pipeline.ts | 1.23.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
+| l3-to-variant-pipeline.ts | 1.23.2 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.23.0 | scripts/lifecycle-sync-audit.ts | child_process, crypto, fs, js-yaml, path, process |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | fs, path |
 | list-template-versions.ts | 1.2.0 | scripts/list-template-versions.ts | bun, path |
