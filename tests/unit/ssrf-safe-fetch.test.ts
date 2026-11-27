@@ -10,11 +10,23 @@
  * counting lookup invocations and asserting the connection target is
  * exactly the validated address, never a fresh resolution.
  *
- * @version 1.0.0
+ * @version 1.1.0
+ * v1.1.0 (2026-11-27, spec docs/designs/2026-11-27-safefetch-headers-design.md,
+ *         U-20261127-003): init.headers passthrough pins — deny-list (exact +
+ *         prefix) with case-insensitivity, CRLF/control-char rejection in
+ *         names and values, allowed auth/UA/custom pass-through observed by a
+ *         local test server with Host still the URL hostname, unchanged
+ *         behaviour when init.headers is absent / {signal}-only.
  */
 import { describe, test, expect } from 'bun:test';
 import * as http from 'node:http';
-import { safeFetch, SSRFBlockedError, isBlockedIp } from '../../scripts/lib/ssrf.ts';
+import {
+    safeFetch,
+    fetchPinned,
+    SSRFBlockedError,
+    SSRFHeaderBlockedError,
+    isBlockedIp,
+} from '../../scripts/lib/ssrf.ts';
 
 function startLocalServer(handler: http.RequestListener): Promise<{ server: http.Server; port: number }> {
     return new Promise((resolve) => {
@@ -123,5 +135,166 @@ describe('isBlockedIp CIDR pins (U-20261031-003)', () => {
         expect(isBlockedIp('127.0.0.1')).toBe('loopback');
         expect(isBlockedIp('169.254.169.254')).toBe('link-local-metadata');
         expect(isBlockedIp('100.64.0.1')).toBe('carrier-grade-nat');
+    });
+});
+
+describe('safeFetch init.headers passthrough policy (U-20261127-003)', () => {
+    // Spec docs/designs/2026-11-27-safefetch-headers-design.md — headers are
+    // routed through http(s).request()'s structured `headers` option after a
+    // case-insensitive deny-list (destination/framing/hop-by-hop control
+    // headers) and a CR/LF/control-char regex on names and values. Header
+    // validation must run before validateUrl(): a rejected header costs zero
+    // DNS or network activity.
+
+    test.each([
+        'host',
+        'content-length',
+        'transfer-encoding',
+        'connection',
+        'upgrade',
+        'te',
+        'trailer',
+        'expect',
+        'via',
+        // prefix classes
+        'proxy-authorization',
+        'proxy-connection',
+        'forwarded',
+        'forward-host',
+    ])('denies exact/prefix deny-list header %s', async (header) => {
+        try {
+            await safeFetch('http://example.invalid/', { headers: { [header]: 'x' } });
+            throw new Error(`expected header "${header}" to be rejected`);
+        } catch (err) {
+            expect(err).toBeInstanceOf(SSRFHeaderBlockedError);
+            expect((err as SSRFHeaderBlockedError).header).toBe(header);
+            expect((err as SSRFHeaderBlockedError).reason).toBe('denied-header');
+            expect((err as Error).name).toBe('SSRFHeaderBlockedError');
+        }
+    });
+
+    test.each(['HOST', 'hOsT', 'Content-Length', 'TRANSFER-ENCODING', 'CONNECTION', 'Proxy-Authorization', 'FORWARDED'])(
+        'deny-list is case-insensitive: %s',
+        async (header) => {
+            try {
+                await safeFetch('http://example.invalid/', { headers: { [header]: 'x' } });
+                throw new Error(`expected header "${header}" to be rejected`);
+            } catch (err) {
+                expect(err).toBeInstanceOf(SSRFHeaderBlockedError);
+                expect((err as SSRFHeaderBlockedError).header).toBe(header);
+                expect((err as SSRFHeaderBlockedError).reason).toBe('denied-header');
+            }
+        },
+    );
+
+    test('header validation runs BEFORE validateUrl() — a denied header on an SSRF-blocked target fails as a header error', async () => {
+        try {
+            await safeFetch('http://127.0.0.1:1/', { headers: { host: 'x' } });
+            throw new Error('expected the header policy to fire first');
+        } catch (err) {
+            expect(err).toBeInstanceOf(SSRFHeaderBlockedError);
+            expect(err).not.toBeInstanceOf(SSRFBlockedError);
+        }
+    });
+
+    test('rejects CRLF in a header value (smuggling injection)', async () => {
+        try {
+            await safeFetch('http://example.invalid/', {
+                headers: { authorization: 'Bearer x\r\nHost: evil.test' },
+            });
+            throw new Error('expected CRLF value to be rejected');
+        } catch (err) {
+            expect(err).toBeInstanceOf(SSRFHeaderBlockedError);
+            expect((err as SSRFHeaderBlockedError).header).toBe('authorization');
+            expect((err as SSRFHeaderBlockedError).reason).toBe('invalid-header-value');
+        }
+    });
+
+    test('rejects control characters in a header value (NUL, VT, DEL)', async () => {
+        for (const value of ['tok\x00en', 'tok\x0ben', 'tok\x7fen']) {
+            try {
+                await safeFetch('http://example.invalid/', { headers: { 'x-api-key': value } });
+                throw new Error(`expected control-char value to be rejected: ${JSON.stringify(value)}`);
+            } catch (err) {
+                expect(err).toBeInstanceOf(SSRFHeaderBlockedError);
+                expect((err as SSRFHeaderBlockedError).header).toBe('x-api-key');
+                expect((err as SSRFHeaderBlockedError).reason).toBe('invalid-header-value');
+            }
+        }
+    });
+
+    test('rejects CRLF smuggled into a header NAME', async () => {
+        try {
+            await safeFetch('http://example.invalid/', { headers: { 'x-ok\r\nX-Evil: y': 'v' } });
+            throw new Error('expected CRLF name to be rejected');
+        } catch (err) {
+            expect(err).toBeInstanceOf(SSRFHeaderBlockedError);
+            expect((err as SSRFHeaderBlockedError).reason).toBe('invalid-header-name');
+        }
+    });
+
+    test('allowed auth/UA/custom headers pass through verbatim; Host stays the URL hostname', async () => {
+        const seen: Array<{ headers: http.IncomingHttpHeaders }> = [];
+        const { server, port } = await startLocalServer((req, res) => {
+            seen.push({ headers: req.headers });
+            res.writeHead(200, { 'content-type': 'text/plain' });
+            res.end('ok');
+        });
+        try {
+            const response = await fetchPinned('http://header-capture-test.invalid', ['127.0.0.1'], port, {
+                headers: {
+                    authorization: 'Bearer tok123',
+                    'user-agent': 'safefetch-test/1.0',
+                    'x-custom-trace': 'abc',
+                },
+            });
+            expect(response.status).toBe(200);
+            expect(seen).toHaveLength(1);
+            expect(seen[0].headers.authorization).toBe('Bearer tok123');
+            expect(seen[0].headers['user-agent']).toBe('safefetch-test/1.0');
+            expect(seen[0].headers['x-custom-trace']).toBe('abc');
+            // pin contract intact: the validated hostname stays the Host header
+            // (Node appends the non-default connection port — hostname part is what's pinned)
+            expect(seen[0].headers.host).toStartWith('header-capture-test.invalid');
+        } finally {
+            server.close();
+        }
+    });
+
+    test('unchanged behaviour when init.headers is absent — no custom headers reach the server', async () => {
+        const seen: Array<{ headers: http.IncomingHttpHeaders }> = [];
+        const { server, port } = await startLocalServer((req, res) => {
+            seen.push({ headers: req.headers });
+            res.writeHead(200, {});
+            res.end('ok');
+        });
+        try {
+            const response = await fetchPinned('http://header-capture-test.invalid', ['127.0.0.1'], port);
+            expect(response.status).toBe(200);
+            expect(seen).toHaveLength(1);
+            expect(seen[0].headers.authorization).toBeUndefined();
+            expect(seen[0].headers['x-custom-trace']).toBeUndefined();
+        } finally {
+            server.close();
+        }
+    });
+
+    test('unchanged behaviour with the { signal }-only shape every existing caller uses', async () => {
+        const seen: Array<{ headers: http.IncomingHttpHeaders }> = [];
+        const { server, port } = await startLocalServer((req, res) => {
+            seen.push({ headers: req.headers });
+            res.writeHead(200, {});
+            res.end('ok');
+        });
+        try {
+            const response = await fetchPinned('http://header-capture-test.invalid', ['127.0.0.1'], port, {
+                signal: AbortSignal.timeout(5000),
+            });
+            expect(response.status).toBe(200);
+            expect(seen[0].headers.authorization).toBeUndefined();
+            expect(seen[0].headers.host).toStartWith('header-capture-test.invalid');
+        } finally {
+            server.close();
+        }
     });
 });

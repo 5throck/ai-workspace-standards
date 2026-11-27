@@ -25,7 +25,23 @@
  * instead (verified empirically: fetch()'s `dns` init option is silently
  * ignored, while http(s).request()'s `lookup` option is honored).
  *
- * @version 1.1.1
+ * @version 1.2.0
+ * v1.2.0 (2026-11-27, spec docs/designs/2026-11-27-safefetch-headers-design.md,
+ *          U-20261127-003): structured header passthrough — safeFetch()/fetchPinned()
+ *          gain optional `init.headers?: Record<string, string>` routed through
+ *          http(s).request()'s structured `headers` option object (never string
+ *          concatenation). Case-insensitive deny-list rejects destination/protocol
+ *          control headers (exact: host, content-length, transfer-encoding,
+ *          connection, upgrade, te, trailer, expect, via; prefix: proxy-*, forward*)
+ *          with a typed SSRFHeaderBlockedError naming the offending header;
+ *          defense-in-depth regex rejects CR/LF/control chars in header names and
+ *          values before the runtime check (Node/Bun reject invalid header chars
+ *          with ERR_INVALID_CHAR — that runtime line is retained beneath ours).
+ *          Header validation runs before validateUrl(): a denied header fails with
+ *          zero DNS/network activity. Headers NEVER influence destination
+ *          resolution; the SSRF guard core (destination pinning, CIDR checks,
+ *          redirect refusal, SNI/Host pinning) is byte-for-byte unchanged, and
+ *          behaviour with init.headers absent is identical to v1.1.1.
  * v1.1.1 (2026-10-31, spec docs/designs/2026-10-31-template-security-hardening-design.md
  *          R2.3, U-20261031-003): BLOCKED_CIDRS corrections — current-network ends at
  *          0x00ffffffn (0.0.0.0/8, was 0x0fffffffn) and private-10 ends at 0x0affffffn
@@ -76,6 +92,55 @@ const BLOCKED_CIDRS: ReadonlyArray<{ start: bigint; end: bigint; reason: string 
   // IPv4-mapped IPv6 loopback (::ffff:127.0.0.0/104)
   { start: 0xffff7f000000n, end: 0xffff7fffffffn, reason: "ipv6-mapped-loopback" },
 ];
+
+// ============================================================================
+// HEADER PASSTHROUGH POLICY (v1.2.0, spec
+// docs/designs/2026-11-27-safefetch-headers-design.md)
+// ============================================================================
+
+/**
+ * Case-insensitive deny-list for caller-supplied headers (U-20261127-003).
+ *
+ * Exact matches — headers that alter destination, framing, or hop-by-hop
+ * connection semantics the SSRF guard owns:
+ * - `host`           : the validated hostname must stay the Host header and
+ *                      (https) the TLS SNI — the module's pin contract
+ *                      (see fetchPinned doc comment). A caller-supplied Host
+ *                      would rename the virtual host at the pinned target.
+ * - `content-length`, `transfer-encoding`, `te`, `trailer`
+ *                    : request-framing control (smuggling primitives; the
+ *                      library sends no body — framing is never caller-owned).
+ * - `connection`, `upgrade`, `expect`
+ *                    : hop-by-hop connection semantics / protocol upgrade /
+ *                      100-continue interaction.
+ * - `via`            : proxy-chain description header.
+ *
+ * Prefix matches (case-insensitive):
+ * - `proxy-`         : proxy-authorization, proxy-connection, … hop-by-hop
+ *                      proxy control and proxy credentials.
+ * - `forward`        : forwarded, forward-*, … proxy-chain injection.
+ */
+const DENIED_HEADER_EXACT: ReadonlySet<string> = new Set([
+  "host",
+  "content-length",
+  "transfer-encoding",
+  "connection",
+  "upgrade",
+  "te",
+  "trailer",
+  "expect",
+  "via",
+]);
+const DENIED_HEADER_PREFIXES: ReadonlyArray<string> = ["proxy-", "forward"];
+
+/**
+ * Defense-in-depth: CR/LF and all other control characters are rejected in
+ * header names and values before the runtime check. Node/Bun already reject
+ * invalid header characters with ERR_INVALID_CHAR — this regex guarantees the
+ * property holds even if a future runtime relaxes validation, and covers
+ * header names that would otherwise smuggle a newline past the deny-list.
+ */
+const FORBIDDEN_HEADER_CHARS = /[\u0000-\u001f\u007f]/;
 
 // ============================================================================
 // TYPES
@@ -165,6 +230,57 @@ export class SSRFBlockedError extends Error {
 }
 
 /**
+ * Thrown by safeFetch()/fetchPinned() when a caller-supplied header is
+ * rejected by the passthrough policy (U-20261127-003): a deny-list match, or
+ * a control character in the name/value. Always names the offending header.
+ */
+export class SSRFHeaderBlockedError extends Error {
+  constructor(
+    public readonly header: string,
+    public readonly reason: "denied-header" | "invalid-header-name" | "invalid-header-value",
+  ) {
+    super(`SSRF header policy rejected "${header}": ${reason}`);
+    this.name = "SSRFHeaderBlockedError";
+  }
+}
+
+/**
+ * Optional init for safeFetch()/fetchPinned().
+ * - `signal`: abort handle (unchanged since v1.1.1).
+ * - `headers`: optional caller headers (v1.2.0) — routed through
+ *   http(s).request()'s structured `headers` option after deny-list and
+ *   control-character validation. Never influences destination resolution.
+ */
+export interface SafeFetchInit {
+  signal?: AbortSignal;
+  headers?: Record<string, string>;
+}
+
+/**
+ * Validate a caller-supplied header map against the passthrough policy and
+ * return it unchanged when clean. Deny-list matches and control characters in
+ * names/values throw SSRFHeaderBlockedError naming the offending header.
+ */
+function resolveSafeHeaders(headers: Record<string, string> | undefined): Record<string, string> | undefined {
+  if (!headers) return undefined;
+  const entries = Object.entries(headers);
+  if (entries.length === 0) return undefined;
+  for (const [name, value] of entries) {
+    const lower = name.toLowerCase();
+    if (DENIED_HEADER_EXACT.has(lower) || DENIED_HEADER_PREFIXES.some((prefix) => lower.startsWith(prefix))) {
+      throw new SSRFHeaderBlockedError(name, "denied-header");
+    }
+    if (FORBIDDEN_HEADER_CHARS.test(name)) {
+      throw new SSRFHeaderBlockedError(name, "invalid-header-name");
+    }
+    if (FORBIDDEN_HEADER_CHARS.test(value)) {
+      throw new SSRFHeaderBlockedError(name, "invalid-header-value");
+    }
+  }
+  return headers;
+}
+
+/**
  * Connects directly to one of `pinnedAddresses` — never re-resolves
  * `targetUrl`'s hostname — using http(s).request()'s `lookup` override. The
  * original hostname is still used for the Host header and (on https) the
@@ -173,19 +289,31 @@ export class SSRFBlockedError extends Error {
  * Does not follow redirects (rejects instead) — matching the `redirect:
  * 'error'` behavior the previous fetch()-based call sites relied on.
  *
+ * Optional `init.headers` (v1.2.0, U-20261127-003) are passed to
+ * http(s).request()'s structured `headers` option — never string
+ * concatenation — after deny-list and control-character validation
+ * (resolveSafeHeaders). The validated hostname keeps being sent as the Host
+ * header and the TLS SNI regardless of the header set: headers never
+ * influence destination resolution or connection semantics. Absent
+ * `init.headers` means the `headers` option is not set at all (v1.1.1
+ * behaviour, byte-identical).
+ *
  * @param portOverride - Test-only seam: connect to this port instead of the
  *   URL's own port, while keeping the original hostname for Host/SNI. Lets
  *   tests point a fake, non-resolvable hostname at a real local test server.
+ * @throws {SSRFHeaderBlockedError} if init.headers contains a denied header
+ *   or a control character in a name/value.
  */
 export async function fetchPinned(
   targetUrl: string,
   pinnedAddresses: string[],
   portOverride?: number,
-  init: { signal?: AbortSignal } = {},
+  init: SafeFetchInit = {},
 ): Promise<Response> {
   const parsed = new URL.URL(targetUrl);
   const isHttps = parsed.protocol === "https:";
   const requestFn = isHttps ? https.request : http.request;
+  const safeHeaders = resolveSafeHeaders(init.headers);
 
   const lookup: net.LookupFunction = (_hostname, options, callback) => {
     const results = pinnedAddresses.map((address) => ({
@@ -208,6 +336,10 @@ export async function fetchPinned(
         path: `${parsed.pathname}${parsed.search}`,
         method: "GET",
         lookup,
+        // v1.2.0: caller headers via the structured `headers` option — only
+        // when supplied, so absent-init behaviour stays byte-identical to
+        // v1.1.1. The Host option (from `hostname` above) is never overridden.
+        ...(safeHeaders ? { headers: safeHeaders } : {}),
         // TLS: keep servername/cert validation pinned to the original hostname.
         ...(isHttps ? { servername: parsed.hostname } : {}),
       },
@@ -269,9 +401,20 @@ export async function fetchPinned(
  * closing the TOCTOU window that a bare `validateUrl()` + `fetch()` pair
  * leaves open (see module doc comment).
  *
+ * Optional `init.headers` (v1.2.0, U-20261127-003) let callers send auth /
+ * user-agent / custom application headers through the guarded path. They are
+ * validated (case-insensitive deny-list + control-character regex, throwing
+ * SSRFHeaderBlockedError naming the offending header) BEFORE validateUrl() —
+ * a rejected header costs zero DNS or network activity — then routed through
+ * http(s).request()'s structured `headers` option. Headers never influence
+ * destination resolution; with `init.headers` absent, behaviour is identical
+ * to v1.1.1. The method stays GET in v1 (spec section 1).
+ *
+ * @throws {SSRFHeaderBlockedError} if init.headers violates the header policy.
  * @throws {SSRFBlockedError} if validateUrl() rejects the target.
  */
-export async function safeFetch(targetUrl: string, init: { signal?: AbortSignal } = {}): Promise<Response> {
+export async function safeFetch(targetUrl: string, init: SafeFetchInit = {}): Promise<Response> {
+  resolveSafeHeaders(init.headers); // fail fast, before any DNS/network
   const check = await validateUrl(targetUrl);
   if (!check.allowed) {
     throw new SSRFBlockedError(check.reason ?? "blocked", check.hostname);

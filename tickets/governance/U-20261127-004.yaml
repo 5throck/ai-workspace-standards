@@ -3,14 +3,29 @@ id: U-20261127-004
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-27T19:44:19.707+09:00
+created_at: '2026-11-27T19:44:19.707+09:00'
 history:
-  - at: 2026-11-27T19:44:19.707+09:00
+  - at: '2026-11-27T19:44:19.707+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-27T21:30:23.297+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T21:30:23.297+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #2208 (merged a67a4a5f4): scripts/validate-md-language.ts +
+  template twin v1.17.0 — the six zones (docs/architecture, docs/manuals,
+  docs/runbooks, docs/security, docs/dd, docs/planning, .md/.yaml) join
+  officialPatterns with the co-newbiz v1.17.0 provenance credit. L0 pre-publish
+  scan confirmed zero new findings (only docs/architecture + docs/security exist
+  at root, both clean; scan green across 2995 files). Tests:
+  validate-md-language-perimeter.test.ts extended with 6 zone cases (all zones,
+  nested dirs, .yaml/.yml form, real root zone files clean, non-zone paths stay
+  outside).
 error: null
 upstream:
   project: co-newbiz
@@ -19,11 +34,26 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: scripts/validate-md-language.ts isOfficialDocument allowlist skips the zones docs/architecture, docs/manuals, docs/runbooks, docs/security, docs/dd, docs/planning — policy-shaded Korean prose outside code spans is invisible to the gate in those zones (co-newbiz found 10 violations there once the zones were added; all remedied with the established backtick remedy). co-newbiz v1.17.0 carries the fix, recorded PROJECT_AHEAD in the 0.30.0 delivery.
+  symptom: >-
+    scripts/validate-md-language.ts isOfficialDocument allowlist skips the zones
+    docs/architecture, docs/manuals, docs/runbooks, docs/security, docs/dd,
+    docs/planning — policy-shaded Korean prose outside code spans is invisible
+    to the gate in those zones (co-newbiz found 10 violations there once the
+    zones were added; all remedied with the established backtick remedy).
+    co-newbiz v1.17.0 carries the fix, recorded PROJECT_AHEAD in the 0.30.0
+    delivery.
   affected_paths:
     - scripts/validate-md-language.ts
   identity_source: cwd
-  repro: '1. co-newbiz v1.17.0 extends isOfficialDocument''s allowlist with six zones (docs/architecture, docs/manuals, docs/runbooks, docs/security, docs/dd, docs/planning — .md/.yaml), raising the scan from 753 to 791 files with zero violations after established backtick remedies. 2. The zone extension is fleet-safe (the same backtick-stripping logic applies) and catches policy-shaded Korean prose the current perimeter misses. 3. Request: adopt the six-zone perimeter into the delivered validate-md-language.ts so all variants get the wider scan by default.'
+  repro: >-
+    1. co-newbiz v1.17.0 extends isOfficialDocument's allowlist with six zones
+    (docs/architecture, docs/manuals, docs/runbooks, docs/security, docs/dd,
+    docs/planning — .md/.yaml), raising the scan from 753 to 791 files with zero
+    violations after established backtick remedies. 2. The zone extension is
+    fleet-safe (the same backtick-stripping logic applies) and catches
+    policy-shaded Korean prose the current perimeter misses. 3. Request: adopt
+    the six-zone perimeter into the delivered validate-md-language.ts so all
+    variants get the wider scan by default.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +61,17 @@ upstream:
   dedupe_key: f773801da85916854fc7e65d2ba32ac57f18d8e9c747d19d0f0e237636a324bd
   duplicates:
     - project: co-newbiz
-      at: 2026-11-27T19:44:19.707+09:00
+      at: '2026-11-27T19:44:19.707+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2208
+    summary: >-
+      Fixed in PR #2208 (merged a67a4a5f4): scripts/validate-md-language.ts +
+      template twin v1.17.0 — the six zones (docs/architecture, docs/manuals,
+      docs/runbooks, docs/security, docs/dd, docs/planning, .md/.yaml) join
+      officialPatterns with the co-newbiz v1.17.0 provenance credit. L0
+      pre-publish scan confirmed zero new findings (only docs/architecture +
+      docs/security exist at root, both clean; scan green across 2995 files).
+      Tests: validate-md-language-perimeter.test.ts extended with 6 zone cases
+      (all zones, nested dirs, .yaml/.yml form, real root zone files clean,
+      non-zone paths stay outside).
