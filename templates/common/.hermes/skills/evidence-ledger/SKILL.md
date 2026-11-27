@@ -3,14 +3,18 @@ name: evidence-ledger
 description: >
   Fixed-column evidence ledger that traces every claim a decision depends on
   to a source, a reference, and a verification state. Use when: building or
-  updating an evidence or citation ledger, verifying claims ahead of a gate
-  ruling, or linking evidence into a decision record (ADR-0061).
-version: 1.1.1
+  updating an evidence or citation ledger, adding or superseding a ledger row,
+  or resolving a decision record's evidence_refs to ledger rows (ADR-0061).
+  Owns the claim-to-source rows only; the ruling itself is the decision-record
+  skill.
+version: 1.2.0
 owner: pm
 status: active
-last_reviewed: 2026-11-26
+last_reviewed: 2026-11-27
 scope: common
 relates_to:
+  - skill: decision-record
+    type: composes_with
   - skill: documentation-writing
     type: follows
   - skill: research-analysis
@@ -20,9 +24,9 @@ metadata:
   triggers:
     - evidence ledger
     - citation ledger
-    - claim verification
-    - source verification
-    - evidence tracking
+    - ledger row
+    - claim-to-source trace
+    - supersede a ledger row
 ---
 
 ## Purpose
@@ -72,4 +76,4 @@ Some registry-backed variants carry their evidence plane as FORMAL VARIABLES ins
 
 ## Linking Evidence to Decision Records
 
-Decision records (see the `decision-record` skill) cite evidence through their `evidence_refs[]` frontmatter. Every entry must resolve to a ledger row (quote the claim text or a stable line ID) or a finding file under `docs/evidence/findings/`. A ruling that cites no evidence is incomplete; evidence that no ruling cites is unexamined background.
+Decision records (see the `decision-record` skill) cite evidence through their `evidence_refs[]` frontmatter. Every entry must resolve to an `EV-YYYYMMDD-NN` ledger-row ID in `docs/evidence/ledger.md` — that is the shape `scripts/validate-decisions.ts` enforces (finding files are cited in the record's body prose instead). A ruling that cites no evidence is incomplete; evidence that no ruling cites is unexamined background.

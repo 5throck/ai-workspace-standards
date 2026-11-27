@@ -1,4 +1,13 @@
-// @version 1.12.1
+// @version 1.13.0
+// v1.13.0 (2026-11-28, T-20261127-009): COMMAND_SKILL_EXEMPT gains
+//          "security-check" — the variant-specific security-check command
+//          (templates/co-develop/.claude/commands/security-check.md, also
+//          carried by co-game/co-security) is an intentionally command-only
+//          surface: it dispatches agents/security-monitor.md directly and has
+//          no orchestration logic of its own beyond the two workflow modes,
+//          so a same-name SKILL.md would duplicate the command (the drift rule
+//          needs the sanctioned exemption shape per the ticket, not a new
+//          skill). Fleet-level exemption; no per-project config.
 // v1.12.1 (2026-11-12, U-20261112-009): collectAgents no longer counts locale READMEs (agents/README_ko.md etc.)
 //          as agents — same filter as validate-agents.ts isAgentFile (/^README(_\w+)?\.md$/, `_`-prefixed excluded),
 //          exported as isAgentFileName for unit pinning.
@@ -480,7 +489,17 @@ export function trackedFilterForRoot(tracked: Set<string> | null, root: string):
   return (filePath) => tracked.has(normalizePath(filePath));
 }
 
-const COMMAND_SKILL_EXEMPT = new Set(["changelog", "meeting", "memlog", "new-task", "commit-push-pr"]);
+// T-20261127-009: "security-check" joins the exempt set — the variant-specific
+// command dispatches agents/security-monitor.md and is command-only by design
+// (no same-name skill; a SKILL.md would duplicate the command surface).
+const COMMAND_SKILL_EXEMPT = new Set([
+  "changelog",
+  "meeting",
+  "memlog",
+  "new-task",
+  "commit-push-pr",
+  "security-check",
+]);
 // Empty since the ADR-0076 amendment moved graft (its only entry) into the skills/ SSOT with
 // full workspace lifecycle frontmatter. Kept as the mechanism for a future tool-owned skill.
 const SKILL_METADATA_EXEMPT = new Set<string>();

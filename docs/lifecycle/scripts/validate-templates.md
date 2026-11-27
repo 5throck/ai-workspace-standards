@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.87.0
+- **Version**: 1.88.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-21
+- **Last Updated**: 2026-11-28 (v1.88.0 — T-20261127-009: variant-specific command allowlist admits security-check.toml beside security-check.md — the rendered Gemini counterpart required by the audit Command parity check; templates/co-develop ships the rendered .toml, hand-written .md retired. Prior: 2026-11-21
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -19,6 +19,7 @@ Template lifecycle validation gate: scaffold-identity, package contract, command
 
 ## Phase History
 
+- **1.88.0** (2026-11-28, T-20261127-009): variant command allowlist + security-check.toml (rendered Gemini counterpart).
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
 | 2026-11-21 | production | production | v1.86.0 → v1.87.0 (design docs/designs/2026-11-21-humanize-seed-country-profiles-design.md Part C, T-20261121-002): new WARN-only check `market-scope-country` (B-10) — the market_scope(deps) ↔ country_config(variant) advisory consistency rule: a seed entry whose market_scope includes "KR" requires KR in the carrying variant's country_config.supported, else one WARN row naming the dep id. Rulings: ko-language categorically exempt both directions (language never implies country, ADR-0057 §5 — the doctrine pin lives in tests/unit/validate-templates-market-scope-country.test.ts); unknown values skipped (verify V10 owns them, T-20261121-001 §5.2); one-way dep → variant; WARN never FAIL (advisory phase-1 posture); template seeds only; NOT behavioral gating (fetch/install filtering stays T-20261121-001 N1). Pure exported helper collectMarketScopeCountryIssues (country-scoped-agents.ts precedent); lib/external-deps.ts untouched (zero L1 lib churn, design G5). L1 mirror in lockstep. | automation-engineer |

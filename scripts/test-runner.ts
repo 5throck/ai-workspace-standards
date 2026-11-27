@@ -1,7 +1,23 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.22.0
+ * @version 1.23.0
  *
+ * v1.23.0 (2026-11-28, T-20261128-001): FILE_TIME_BUDGETS gains
+ *          project-target-guards.test.ts (suite 300s / test 60s, engine-spawn
+ *          family). Measured evidence — windows-latest main run 46003145206
+ *          (2026-11-27T12:58Z): the "new-project.ts resolves bare names under
+ *          Projects/ (existence pre-flight path)" test was killed by its own
+ *          inline 30000ms ceiling at 30018.44ms (the spawned new-project.ts
+ *          full pipeline — bun install + graft index + post-scaffold audit —
+ *          did not finish inside 30s on the loaded 2-core runner); PR #2212's
+ *          windows leg recorded the same kill signature at 30005.04ms, and the
+ *          ticket records a rerun reaching the 120000ms unit file wall. Healthy
+ *          windows file totals: 6773ms (run 46030252124) / 18330ms (run
+ *          46012256221). The companion inline per-test raise in the test file
+ *          (30000 → 60000, v1.2.0) is required because bun gives the inline
+ *          per-test third argument precedence over the runner's --timeout, so
+ *          the budget row's test value alone would not lift this file's
+ *          ceiling. Budgets only; no assertion loosened.
  * v1.22.0 (2026-11-27, T-20261127-003 — spec
  *          docs/designs/2026-11-27-fork-sync-blockers-design.md §4):
  *          FILE_TIME_BUDGETS gains validate-templates-cv02.test.ts (suite 300s /
@@ -373,6 +389,17 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // green shape as the rows above.
   "co-workspace-admin-console-r2.test.ts": { suite: 300000, test: 45000 },
   "co-workspace-admin-page.test.ts": { suite: 300000, test: 45000 },
+  // T-20261128-001 (windows-latest main run 46003145206, 2026-11-27T12:58Z):
+  // the file spawns new-project.ts / upgrade-project.ts full pipelines in
+  // subprocesses (each with its own 60s spawnSync kill budget); on a loaded
+  // 2-core windows runner the existence pre-flight test exceeded its inline
+  // 30000ms per-test ceiling at 30018.44ms (PR #2212 recorded the same
+  // signature at 30005.04ms; ticket records a rerun at the 120s unit file
+  // wall). Healthy windows file totals 6.8-18.3s (runs 46030252124 /
+  // 46012256221). Engine-spawn family budget (suite 300s / test 60s, same as
+  // upgrade-overwrite-protection); the in-file per-test budgets were raised
+  // 30000 → 60000 in the same change (bun prefers the inline third argument).
+  "project-target-guards.test.ts": { suite: 300000, test: 60000 },
   "mcp-upstream-server.test.ts": { suite: 300000, test: 30000 },
   "upgrade-tree-sync.test.ts": { suite: 300000, test: 60000 },
   // v1.9.0 (T-20261030-002 stage 2): 600s → 300s on the design's evidence
