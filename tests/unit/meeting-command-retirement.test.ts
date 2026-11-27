@@ -156,13 +156,17 @@ describe("meeting command retirement pin (spec 2026-11-10-meeting-lineage-hygien
   });
 
   test(
-    "Projects/co-safety SKILL.md is byte-identical to the template copy (skipped when Projects/ is absent)",
+    "Projects/co-safety SKILL.md is byte-identical to the template copy (skipped when Projects/co-safety is absent)",
     () => {
       const projectCopy = "Projects/co-safety/skills/meeting-facilitation/SKILL.md";
       const templateCopy = "templates/co-safety/skills/meeting-facilitation/SKILL.md";
       if (!existsSync(join(REPO_ROOT, "Projects", "co-safety"))) {
         // CI / worktree checkouts carry only tracked files; the leg is inert.
-        expect(existsSync(join(REPO_ROOT, "Projects"))).toBe(false);
+        // Fork-hostile assertion removed (issue #2192 blocker 3): the old
+        // `expect(existsSync(Projects)).toBe(false)` failed any fork that
+        // keeps its own gitignored Projects/ tree without co-safety. The
+        // environment shape is not what this leg protects — the byte-identity
+        // below is, and it is unchanged.
         return;
       }
       expect(existsSync(join(REPO_ROOT, projectCopy))).toBe(true);

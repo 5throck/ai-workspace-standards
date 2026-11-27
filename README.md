@@ -1,6 +1,6 @@
 ---
 sync_version: 4
-content_hash: b8bb7cfcc199482da0592c3abe371f081e9560bdcba81bfeab603294dcd4afa3
+content_hash: f6b27e586562a106255c2351d1f89a6b60b0ef64e20b2c4c77f4fff5a393349d
 ---
 
 **Languages**: [English](README.md) · [한국어](README_ko.md) · [Español](README_es.md) · [日本語](README_ja.md)
@@ -74,6 +74,17 @@ gh --version     # Optional: PR automation
 ```
 
 **Install missing tools**: See [Getting Started](docs/guides/getting-started.md#-essential-software-must-have) for detailed installation instructions.
+
+### Windows Prerequisites (running the test suite)
+
+Running the unit suite (`bun scripts/test-runner.ts unit`) on Windows has three
+environment requirements beyond the tools above (issue #2192 blocker 5):
+
+| Requirement | Why |
+|-------------|-----|
+| **Developer Mode** (Settings → System → For developers), or an elevated shell | 10+ unit test files call `symlinkSync` directly with no capability guard; without Developer Mode they fail with `EPERM` on the symlink calls. |
+| **Git's `usr\bin` directory on PATH** (e.g. `C:\Program Files\Git\usr\bin`) | `tests/unit/commit-msg-hook.test.ts` spawns `bash`, and `tests/unit/automation-lock.test.ts` spawns `true` as a process-liveness probe. The Git for Windows installer does not add `usr\bin` to `PATH` by default — only the main `Git\bin`. |
+| **Bun 1.4.x** | CI pins `bun-version: 1.4.4` (`.github/workflows/test.yml`); `package.json` engines require `bun >= 1.0.0`. Node.js is **not** required to run the suite — Bun is the only runtime (the CI `node-version` matrix value exists only to name the branch-protection check contexts). |
 
 ---
 
@@ -412,4 +423,4 @@ AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-19*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-27*

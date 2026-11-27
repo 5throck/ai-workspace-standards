@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-27T03:06:21.314Z
+**Generated**: 2026-11-27T05:11:37.343Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -161,7 +161,7 @@
 | l3-to-variant-pipeline.ts | 1.23.1 | scripts/l3-to-variant-pipeline.ts | child_process, fs, path, process, url |
 | lifecycle-sync-audit.ts | 1.23.0 | scripts/lifecycle-sync-audit.ts | child_process, crypto, fs, js-yaml, path, process |
 | lint-instructions.ts | 1.0.0 | scripts/lint-instructions.ts | fs, path |
-| list-template-versions.ts | 1.1.0 | scripts/list-template-versions.ts | bun, path |
+| list-template-versions.ts | 1.2.0 | scripts/list-template-versions.ts | bun, path |
 | mcp-governance-server.ts | 1.1.0 | scripts/mcp-governance-server.ts | child_process, fs, path, readline, url |
 | mcp-upstream-server.ts | 1.16.0 | scripts/mcp-upstream-server.ts | crypto, fs, js-yaml, path, readline, url |
 | md-to-ooxml.ts | 1.2.0 | scripts/md-to-ooxml.ts | fs, path |
@@ -211,7 +211,7 @@
 | test-l3-to-variant-promotion.ts | 1.7.0 | scripts/test-l3-to-variant-promotion.ts | bun, child_process, fs, path, url |
 | test-new-project.ts | 1.13.0 | scripts/test-new-project.ts | bun, fs, js-yaml, path, process |
 | test-platform-parity.ts | 0.5.0 | scripts/test-platform-parity.ts | fs, path |
-| test-runner.ts | 1.21.0 | scripts/test-runner.ts | fs, os, path |
+| test-runner.ts | 1.22.0 | scripts/test-runner.ts | fs, os, path |
 | test-scaffold-delivery-parity.ts | 1.0.0 | scripts/test-scaffold-delivery-parity.ts | path, url |
 | test-variant-readiness.ts | 1.0.0 | scripts/test-variant-readiness.ts | child_process, fs, os, path |
 | ticket.ts | 1.17.0 | scripts/ticket.ts | js-yaml, path |

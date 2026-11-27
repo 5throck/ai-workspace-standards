@@ -1,6 +1,14 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.21.0
+ * @version 1.22.0
+ *
+ * v1.22.0 (2026-11-27, T-20261127-003 — spec
+ *          docs/designs/2026-11-27-fork-sync-blockers-design.md §4):
+ *          FILE_TIME_BUDGETS gains validate-templates-cv02.test.ts (suite 300s /
+ *          test 60s, engine-spawn family) — the CV-02 e2e leg spawns the full
+ *          validate-templates.ts (~55s on a typical Windows laptop, issue #2192
+ *          blocker 4; in-test budget now explicit at 60s). Preventive
+ *          first-time entry per the v1.6.0/v1.20.0 convention; no test loosened.
  *
  * v1.21.0 (2026-11-27, T-20261127-006 — spec
  *          docs/designs/2026-11-27-version-advance-lane-coverage-design.md §13):
@@ -456,6 +464,16 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // cohort; macOS ~21-25s. First-time entry at the family budget 300s/60s per the
   // v1.6.0/v1.20.0 convention; no assertion loosened.
   "upgrade-lane-coverage.test.ts": { suite: 300000, test: 60000 },
+  // v1.22.0 (T-20261127-003, design docs/designs/2026-11-27-fork-sync-blockers-design.md §4):
+  // validate-templates-cv02.test.ts joins the engine-spawn family — its e2e leg
+  // spawns the FULL validate-templates.ts (issue #2192 blocker 4: ~55s measured on
+  // a typical Windows laptop, reported by the fork maintainer; the in-test budget
+  // is now explicit at 60s). Preventive pin — no CI kill observed for this file
+  // yet, but the win32 spike band for engine spawns is ~1.5-2x and 55s sits above
+  // the 2/3-of-wall burn-in line against the default 120s suite wall (same shape
+  // as the v1.21.0 preventive upgrade-prune-removed entry). First-time entry;
+  // no test loosened.
+  "validate-templates-cv02.test.ts": { suite: 300000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {

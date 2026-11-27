@@ -1,5 +1,5 @@
 ---
-translated_from_hash: b8bb7cfcc199482da0592c3abe371f081e9560bdcba81bfeab603294dcd4afa3
+translated_from_hash: f6b27e586562a106255c2351d1f89a6b60b0ef64e20b2c4c77f4fff5a393349d
 sync_version: 4
 lang: ko
 lang_reason: source-material
@@ -75,6 +75,17 @@ gh --version     # 선택 사항: PR 자동화
 ```
 
 **설치 안내**: 자세한 설치 지침은 [시작 가이드](docs/guides/getting-started.md#-essential-software-must-have)를 참조하세요.
+
+### Windows 사전 요구 사항 (테스트 스위트 실행)
+
+Windows에서 단위 테스트 스위트(`bun scripts/test-runner.ts unit`)를 실행하려면
+위의 도구 외에 세 가지 환경 요구 사항이 있습니다 (issue #2192 블로커 5):
+
+| 요구 사항 | 이유 |
+|-------------|-----|
+| **개발자 모드** (설정 → 시스템 → 개발자용), 또는 관리자 권한 셸 | 10개 이상의 단위 테스트 파일이 `symlinkSync`를 직접 호출하며 기능 가드가 없습니다. 개발자 모드가 없으면 symlink 호출에서 `EPERM`으로 실패합니다. |
+| **Git의 `usr\bin` 디렉터리를 PATH에 추가** (예: `C:\Program Files\Git\usr\bin`) | `tests/unit/commit-msg-hook.test.ts`는 `bash`를, `tests/unit/automation-lock.test.ts`는 프로세스 생존 확인용으로 `true`를 spawn합니다. Windows용 Git 설치 관리자는 기본적으로 메인 `Git\bin`만 PATH에 추가합니다. |
+| **Bun 1.4.x** | CI는 `bun-version: 1.4.4`를 고정합니다 (`.github/workflows/test.yml`); `package.json` engines는 `bun >= 1.0.0`을 요구합니다. 스위트 실행에 Node.js는 **필요하지 않습니다** — Bun이 유일한 런타임입니다 (CI의 `node-version` 매트릭스 값은 브랜치 보호 체크 컨텍스트 이름 지정용일 뿐입니다). |
 
 ---
 
@@ -409,4 +420,4 @@ AGPL-3.0 - [LICENSE](LICENSE) 파일 참조
 
 ---
 
-*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-19*
+*Maintained by [@5throck](https://github.com/5throck) · Last Updated: 2026-11-27*
