@@ -1,6 +1,16 @@
 #!/usr/bin/env bun
-// @version 1.1.0
-// v1.1.0 (2026-11-21, T-20261121-003, spec docs/designs/2026-11-21-imnotai-retirement-design.md):
+// @version 1.1.1
+// v1.1.1 (2026-11-27, T-20261127-004): Humanize upstream v1.0.1 relocated the
+//          rule engine from the clone root into engine/ (rules.js → engine/rules.js,
+//          prompt.js → engine/prompt.js, chunking.js → engine/chunking.js; adds
+//          engine/lexicon.js, engine/lexicon-data.js, engine/fidelity.js; serve.ts
+//          unchanged at the clone root). KEY_FILES follows the new layout
+//          (rules.js → engine/rules.js); paths/selftest derive from KEY_FILES and
+//          need no further change. Pin moved v1.0.0 → v1.0.1 in the same
+//          wave after the compat gate re-ran green (upstream test.mjs + this
+//          selftest + the ppt-master svg_check gate). Path adaptation only — no
+//          behaviour change. v1.1.0 (2026-11-21, T-20261121-003, spec
+//          docs/designs/2026-11-21-imnotai-retirement-design.md):
 //          im-not-ai arms retired per the 2026-11-21 owner ruling — epoko77-ai/im-not-ai is
 //          NEVER installed as a project dependency (its rulebook and prompt are already
 //          ported inside Humanize's rules.js/prompt.js), so the adapter couples to
@@ -16,7 +26,7 @@
  * 2026-11-21 owner ruling per docs/designs/2026-11-21-imnotai-retirement-design.md).
  *
  * Clone (project-local, gitignored, delivered by the external-deps machinery):
- *   external/humanize/   — https://github.com/5throck/Humanize (MIT) lint server + rules.js
+ *   external/humanize/   — https://github.com/5throck/Humanize (MIT) lint server + engine/rules.js
  * Consumed AS-IS; agents call this adapter and never touch clone files.
  *
  * Usage:
@@ -40,7 +50,7 @@ export const HUMANIZE_DIR = "external/humanize";
 /** Key files the adapter relies on, relative to the project root. */
 export const KEY_FILES: ReadonlyArray<{ clone: string; path: string }> = [
   { clone: "humanize", path: `${HUMANIZE_DIR}/serve.ts` },
-  { clone: "humanize", path: `${HUMANIZE_DIR}/rules.js` },
+  { clone: "humanize", path: `${HUMANIZE_DIR}/engine/rules.js` },
 ];
 
 export const DEFAULT_PORT = 8765;
@@ -53,7 +63,7 @@ export interface Finding {
   severity: number;
   count: number;
 }
-/** Response shape of Humanize `POST /api/analyze` (rules.js analyze()). */
+/** Response shape of Humanize `POST /api/analyze` (engine/rules.js analyze()). */
 export interface AnalyzeResult {
   findings: Finding[];
   s1: number;

@@ -153,7 +153,7 @@ The external clone declared in `external-deps.json` (spec `docs/designs/2026-11-
 
 | id | upstream | pin | provides |
 |----|----------|-----|----------|
-| `humanize` | `5throck/Humanize` (MIT) | `v1.0.0` | local lint server (`serve.ts`, `rules.js`) that detects Korean AI-tell patterns |
+| `humanize` | `5throck/Humanize` (MIT) | `v1.0.2` | local lint server (`serve.ts`, `engine/rules.js`) that detects Korean AI-tell patterns |
 
 It installs into the gitignored `external/<id>/` directory.
 
@@ -167,7 +167,7 @@ bun scripts/humanize/humanize-adapter.ts selftest
 
 - Agents call `scripts/humanize/humanize-adapter.ts` only — never a clone file directly — and never edit files inside `external/`.
 - `analyze` is advisory: when the server is unreachable it prints "humanize: lint unavailable (server unreachable)" and exits 0, so it never blocks a build.
-- The `humanize` pin `v1.0.0` was tagged upstream on 2026-11-16 (commit `4860b0e`).
+- The `humanize` pin `v1.0.2` (commit `051fa7a`, 2026-11-27; README-only delta over v1.0.1) carries upstream v1.0.1's rule-engine relocation into `engine/` (`rules.js` → `engine/rules.js`, `prompt.js` → `engine/prompt.js`, `chunking.js` → `engine/chunking.js`; adds `engine/lexicon.js`, `engine/lexicon-data.js`, `engine/fidelity.js`) — the adapter's selftest contract follows the new layout.
 
 ---
 
@@ -243,4 +243,4 @@ Key rules:
 
 ---
 
-*co-work.context.md version: 1.6 — Humanize External section: im-not-ai dependency retired per the 2026-11-21 owner ruling (adapter = sole Humanize coupling; docs/designs/2026-11-21-cowork-imnotai-retirement-design.md); prior: 1.5 — Humanize External section added (humanize + im-not-ai external deps, spec 2026-11-16-humanize-external-design); prior: 1.4 — Automation Runbook section added + Domain Rule 6 [WORK-R3] (when to script vs when to hand off; backlog §8 Open row 14, closed 2026-08-26); connector-schemas referenced (Domain Rule 5)*
+*co-work.context.md version: 1.7 — Humanize External section: pin v1.0.0 → v1.0.2 and the rule-engine relocation (rules.js → engine/rules.js; adapter selftest contract follows the new layout; T-20261127-004); prior: 1.6 — Humanize External section: im-not-ai dependency retired per the 2026-11-21 owner ruling (adapter = sole Humanize coupling; docs/designs/2026-11-21-cowork-imnotai-retirement-design.md); prior: 1.5 — Humanize External section added (humanize + im-not-ai external deps, spec 2026-11-16-humanize-external-design); prior: 1.4 — Automation Runbook section added + Domain Rule 6 [WORK-R3] (when to script vs when to hand off; backlog §8 Open row 14, closed 2026-08-26); connector-schemas referenced (Domain Rule 5)*
