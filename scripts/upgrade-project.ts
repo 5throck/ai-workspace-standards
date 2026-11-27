@@ -1,5 +1,17 @@
 #!/usr/bin/env bun
-// @version 1.125.0
+// @version 1.126.0
+// v1.126.0 (2026-11-28, T-20261127-010 follow-up — design
+//           docs/designs/2026-11-28-common-agent-roster-regen-design.md):
+//           DOCS_MERGE country-aware agent scrub — after the AGENTS.md
+//           managed-zone merge, roster rows for country-scoped common agents
+//           (registry: country_scoped_assets.agents) are scrubbed for a
+//           non-matching detectedCountry (link lines + the managed details/
+//           phase-gate forms, lib/country-scoped-agents.ts v1.2.0). Without
+//           it, the v1.6.0 regenerated template roster (which ships the
+//           superset incl. public-data-analyst) would dangle on
+//           region-neutral/mismatched projects — the v1.10.1 skill
+//           re-injection class, agents edition. The pre-delivery file guard
+//           (v1.105.0 R2) already withholds the agent file/lifecycle record.
 // v1.125.0 (2026-11-27, T-20261127-006 — design
 //           docs/designs/2026-11-27-version-advance-lane-coverage-design.md §4.1):
 //           version-advance lane coverage — S1's content-aware equal-version
@@ -1593,6 +1605,7 @@ import {
   agentPrunePaths,
   loadCountryScopedAgents,
   scrubAgentReferenceLines,
+  scrubAgentDetailBlocks,
 } from "./lib/country-scoped-agents.ts";
 import {
   adoptSeedEntries,
@@ -5698,6 +5711,38 @@ for (const rel of DOCS_MERGE_FILES) {
       undefined,
       mergeResult.snapshotCount > 0 || (mergeResult.dropped ?? 0) > 0 ? "WARN" : undefined,
     );
+  }
+  // v1.126.0 (T-20261127-010 follow-up): country-aware agent scrub on the
+  // merged AGENTS.md. The regenerated template roster carries the
+  // country-scoped common agents (public-data-analyst); the pre-delivery
+  // guards withhold the agent FILE for a non-matching detectedCountry
+  // (v1.105.0 R2), so without this scrub the merged roster rows would dangle
+  // on region-neutral/KR-mismatched projects (v1.10.1 skill re-injection
+  // class). Same pure helpers the scaffold-time prune uses
+  // (lib/country-scoped-agents.ts v1.2.0). Recorded AFTER the merge row so
+  // the merge's own MERGE verdict stays the first MERGE row for this path
+  // (decision-log consumers key on first-row semantics).
+  if (rel === "AGENTS.md") {
+    const prunedAgents = agentsToPrune(loadCountryScopedAgents(), detectedCountry).map((a) => a.name);
+    if (prunedAgents.length > 0 && existsSync(dest)) {
+      const before = readFileSync(dest, "utf8");
+      const linkScrub = scrubAgentReferenceLines(before, prunedAgents);
+      const detailScrub = scrubAgentDetailBlocks(linkScrub.output, prunedAgents);
+      if (detailScrub.output !== before) {
+        if (!dryRun) writeFileSync(dest, detailScrub.output, "utf8");
+        const scrubbed = linkScrub.removed + detailScrub.removed;
+        recordDecision(
+          rel,
+          "MERGE_MANAGED",
+          "DOCS_MERGE",
+          "MERGE",
+          `country-scoped agent roster rows scrubbed post-merge (${prunedAgents.join(", ")}; ${scrubbed} line(s), detectedCountry: ${detectedCountry})`,
+          undefined,
+          "INFO",
+        );
+        console.log(`  ✂️  AGENTS.md: scrubbed ${scrubbed} country-scoped agent row(s) (${prunedAgents.join(", ")})`);
+      }
+    }
   }
   swapDeliveredEraBlocks(rel, src, dest, "DOCS_MERGE");
   mergeChanged++;

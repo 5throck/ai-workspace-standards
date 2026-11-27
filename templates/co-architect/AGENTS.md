@@ -31,29 +31,33 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
 
 <!-- VARIANT-AGENTS-START -->
-| **technical-writer** | [`agents/technical-writer.md`](agents/technical-writer.md) | Medium | Technical writer - creates API documentation, technical guides, and developer resources. Use when: documenting APIs, wri |
-| **design-lead** | [`agents/design-lead.md`](agents/design-lead.md) | High | Design system architect - defines visual language, design tokens, and component architecture. Use when: establishing des |
+| **technical-writer** | [`agents/technical-writer.md`](agents/technical-writer.md) | Medium | API documentation, technical guides, and developer resources creator |
+| **design-lead** | [`agents/design-lead.md`](agents/design-lead.md) | High | Design direction, design system architecture, and creative strategy owner |
+| **zwcad-drafter** | [`agents/zwcad-drafter.md`](agents/zwcad-drafter.md) | Medium | ZWCAD technical drawing specialist and 2D documentation engineer |
+| **content-writer** | [`agents/content-writer.md`](agents/content-writer.md) | Medium | Research-to-documentation transformation and communications specialist |
+| **architect** | [`agents/architect.md`](agents/architect.md) | High | Technical architecture and implementation-plan specialist |
+| **analyst** | [`agents/analyst.md`](agents/analyst.md) | Medium | Systematic investigation, data synthesis, and evidence gathering specialist |
+| **project-coordinator** | [`agents/project-coordinator.md`](agents/project-coordinator.md) | Low | Schedule management, stakeholder communication, and delivery logistics specialist |
+| **mep-engineer** | [`agents/mep-engineer.md`](agents/mep-engineer.md) | Medium | Mechanical, Electrical, Plumbing (MEP) and building services specialist |
+| **drafting-architect** | [`agents/drafting-architect.md`](agents/drafting-architect.md) | Medium | Architectural drafting standards lead and detail drawing specialist |
+| **design-storyteller** | [`agents/design-storyteller.md`](agents/design-storyteller.md) | Medium | Philosophical foundation, meaning, and narrative coherence for design systems |
+| **sketchup-modeler** | [`agents/sketchup-modeler.md`](agents/sketchup-modeler.md) | Medium | 3D architectural modeling specialist and Engineering Team lead |
+| **ux-researcher** | [`agents/ux-researcher.md`](agents/ux-researcher.md) | Medium | User research, needs analysis, and UX insights specialist |
+| **bylaw-expert** | [`agents/bylaw-expert.md`](agents/bylaw-expert.md) | Medium | Building code, zoning regulation, and compliance specialist |
+| **typography-expert** | [`agents/typography-expert.md`](agents/typography-expert.md) | Medium | Font selection, type systems, and visual hierarchy specialist |
+| **visualization-expert** | [`agents/visualization-expert.md`](agents/visualization-expert.md) | Medium | Architectural 3D rendering and bird's-eye view visualization specialist |
+| **storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Organizational culture, change narratives, and institutional knowledge specialist |
+| **prototype-engineer** | [`agents/prototype-engineer.md`](agents/prototype-engineer.md) | Medium | Interactive prototypes and design handoff artifacts builder |
+| **interior-designer** | [`agents/interior-designer.md`](agents/interior-designer.md) | Medium | Interior architecture, space planning, and material finish specialist |
+| **visual-designer** | [`agents/visual-designer.md`](agents/visual-designer.md) | Medium | Visual designs, design tokens, and component specifications producer |
+| **structural-engineer** | [`agents/structural-engineer.md`](agents/structural-engineer.md) | Medium | Structural engineering and load-bearing system specialist |
+| **ms365-expert** | [`agents/ms365-expert.md`](agents/ms365-expert.md) | Low | Microsoft 365 platform expertise for productivity and collaboration tools |
+| **service-designer** | [`agents/service-designer.md`](agents/service-designer.md) | Medium | End-to-end service experience and customer journey designer |
 | **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
-| **zwcad-drafter** | [`agents/zwcad-drafter.md`](agents/zwcad-drafter.md) | Medium | ZWCAD technical drawing specialist. Converts SketchUp 3D models from the sketchup-modeler into 2D technical drawings usi |
-| **content-writer** | [`agents/content-writer.md`](agents/content-writer.md) | Medium | Content writer - transforms research into clear, accessible documentation and communications. Use when: creating documen |
-| **architect** | [`agents/architect.md`](agents/architect.md) | High | Produces implementation plans and design docs for co-architect's software/platform layer (MCP servers, ZWCAD COM automat |
-| **analyst** | [`agents/analyst.md`](agents/analyst.md) | Medium | Research analyst - conducts systematic investigation, data synthesis, and evidence gathering. Use when: analyzing topics |
-| **project-coordinator** | [`agents/project-coordinator.md`](agents/project-coordinator.md) | Low | Project coordinator - manages schedules, stakeholder communication, and delivery logistics. Use when: scheduling meeting |
-| **mep-engineer** | [`agents/mep-engineer.md`](agents/mep-engineer.md) | Medium | Mechanical, Electrical, Plumbing (MEP) and building services specialist. Plans HVAC duct routes, piping risers, electric |
-| **drafting-architect** | [`agents/drafting-architect.md`](agents/drafting-architect.md) | Medium | Architectural drafting standards lead and detail drawing specialist. Defines 2D CAD drafting conventions, section detail |
-| **design-storyteller** | [`agents/design-storyteller.md`](agents/design-storyteller.md) | Medium | Design storyteller - provides philosophical foundation, meaning, and narrative coherence to design systems. Use when: es |
-| **sketchup-modeler** | [`agents/sketchup-modeler.md`](agents/sketchup-modeler.md) | Medium | Engineering Team lead and 3D architectural modeling specialist. Converts Design Team concept mockups and handoff package |
-| **ux-researcher** | [`agents/ux-researcher.md`](agents/ux-researcher.md) | Medium | User research specialist - conducts user interviews, usability testing, and research synthesis. Use when: validating use |
-| **bylaw-expert** | [`agents/bylaw-expert.md`](agents/bylaw-expert.md) | Medium | Building code, zoning ordinance, and regulatory compliance specialist. Evaluates site zoning limits (BCR, FAR, setback,  |
-| **typography-expert** | [`agents/typography-expert.md`](agents/typography-expert.md) | Medium | Typography expert - specializes in font selection, type systems, and visual hierarchy through typography. Use when: choo |
-| **visualization-expert** | [`agents/visualization-expert.md`](agents/visualization-expert.md) | Medium | Architectural 3D rendering and visual presentation specialist. Transforms 3D mass models from sketchup-modeler into phot |
-| **storyteller** | [`agents/storyteller.md`](agents/storyteller.md) | Medium | Organizational storyteller - shapes organizational culture, manages change narratives, and preserves institutional knowl |
-| **prototype-engineer** | [`agents/prototype-engineer.md`](agents/prototype-engineer.md) | Medium | Interactive prototyping specialist - creates functional prototypes for testing and communication. Use when: building int |
-| **interior-designer** | [`agents/interior-designer.md`](agents/interior-designer.md) | Medium | Interior architecture, space planning, and finish material specialist. Designs interior circulation, furniture layouts,  |
-| **visual-designer** | [`agents/visual-designer.md`](agents/visual-designer.md) | Medium | Visual design execution - creates UI designs, mockups, and design specifications. Use when: designing screens and flows, |
-| **structural-engineer** | [`agents/structural-engineer.md`](agents/structural-engineer.md) | Medium | Structural engineering and load-bearing system specialist. Evaluates structural feasibility, load paths, bearing wall vs |
-| **ms365-expert** | [`agents/ms365-expert.md`](agents/ms365-expert.md) | Low | Microsoft 365 expert - provides guidance on Outlook, Word, Excel, PowerPoint, SharePoint, Teams, and other M365 apps for |
-| **service-designer** | [`agents/service-designer.md`](agents/service-designer.md) | Medium | Service designer - designs end-to-end service experiences, customer journeys, and operational processes. Use when: mappi |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -69,7 +73,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/technical-writer.md`](agents/technical-writer.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Technical writer - creates API documentation, technical guides, and developer resources. Use when: documenting APIs, writing technical tutorials, creating developer guides, or translating complex technical concepts for developer audiences. |
+| **Role** | API documentation, technical guides, and developer resources creator |
 
 ### design-lead
 
@@ -78,16 +82,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/design-lead.md`](agents/design-lead.md) |
 | **Tier** | high |
 | **Phases** | 0, 2 |
-| **Role** | Design system architect - defines visual language, design tokens, and component architecture. Use when: establishing design direction, creating design systems, defining component patterns, or ensuring visual consistency. |
-
-### automation-engineer
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
-| **Tier** | medium |
-| **Phases** | 3, 4 |
-| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests. Use when: running /sync, creating or changing scripts and automation, or implementing an approved plan for tool handlers, data models, or integration bridges. |
+| **Role** | Design direction, design system architecture, and creative strategy owner |
 
 ### zwcad-drafter
 
@@ -96,7 +91,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/zwcad-drafter.md`](agents/zwcad-drafter.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | ZWCAD technical drawing specialist. Converts SketchUp 3D models from the sketchup-modeler into 2D technical drawings using ZWCAD: floor plans, elevations, sections, and detail drawings. Manages DWG file versioning through the file_curator system. Use when: SketchUp model is confirmed and 2D technical drawing production is required for client deliverables, permit applications, or construction documentation. |
+| **Role** | ZWCAD technical drawing specialist and 2D documentation engineer |
 
 ### content-writer
 
@@ -105,7 +100,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/content-writer.md`](agents/content-writer.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Content writer - transforms research into clear, accessible documentation and communications. Use when: creating documentation, writing guides, drafting communications, or synthesizing complex information for diverse audiences. |
+| **Role** | Research-to-documentation transformation and communications specialist |
 
 ### architect
 
@@ -114,7 +109,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/architect.md`](agents/architect.md) |
 | **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Produces implementation plans and design docs for co-architect's software/platform layer (MCP servers, ZWCAD COM automation, Python backend, cross-cutting technical specs) — distinct from design-lead's visual/design-system architecture. Never writes implementation code directly; output is always a plan or spec for automation-engineer to execute. Use when: a spec requires a design doc (docs/designs/<spec-id>-design.md), a technical decision needs an ADR, or a feature touches 2+ files/modules in src/. |
+| **Role** | Technical architecture and implementation-plan specialist |
 
 ### analyst
 
@@ -123,7 +118,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/analyst.md`](agents/analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Research analyst - conducts systematic investigation, data synthesis, and evidence gathering. Use when: analyzing topics, synthesizing research, evaluating sources, or producing findings reports. Read-only specialist: gathers and analyzes information but never creates final publications. |
+| **Role** | Systematic investigation, data synthesis, and evidence gathering specialist |
 
 ### project-coordinator
 
@@ -132,7 +127,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/project-coordinator.md`](agents/project-coordinator.md) |
 | **Tier** | low |
 | **Phases** | 4 |
-| **Role** | Project coordinator - manages schedules, stakeholder communication, and delivery logistics. Use when: scheduling meetings, coordinating reviews, tracking milestones, or managing stakeholder feedback loops. |
+| **Role** | Schedule management, stakeholder communication, and delivery logistics specialist |
 
 ### mep-engineer
 
@@ -141,7 +136,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/mep-engineer.md`](agents/mep-engineer.md) |
 | **Tier** | medium |
 | **Phases** | 3, 4 |
-| **Role** | Mechanical, Electrical, Plumbing (MEP) and building services specialist. Plans HVAC duct routes, piping risers, electrical shaft layouts, ceiling plenum clearance, and RCP (Reflected Ceiling Plan) integration. Performs clash detection between MEP services and structural elements. Use when: Planning building service shafts, routing HVAC/plumbing lines, designing reflected ceiling plans (RCP), or reviewing MEP space requirements during design development. |
+| **Role** | Mechanical, Electrical, Plumbing (MEP) and building services specialist |
 
 ### drafting-architect
 
@@ -150,7 +145,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/drafting-architect.md`](agents/drafting-architect.md) |
 | **Tier** | medium |
 | **Phases** | 3, 4 |
-| **Role** | Architectural drafting standards lead and detail drawing specialist. Defines 2D CAD drafting conventions, section details, layer standards, line weights, dimensioning rules, and title block setups. Directs and audits technical drawings generated by zwcad-drafter. Use when: Establishing drawing standards, producing detailed section drawings, auditing DWG drawing sets for permit applications or construction deliverable packages. |
+| **Role** | Architectural drafting standards lead and detail drawing specialist |
 
 ### design-storyteller
 
@@ -159,7 +154,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/design-storyteller.md`](agents/design-storyteller.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2 |
-| **Role** | Design storyteller - provides philosophical foundation, meaning, and narrative coherence to design systems. Use when: establishing design philosophy, creating brand identity, defining system principles, or synthesizing cross-pattern meaning. |
+| **Role** | Philosophical foundation, meaning, and narrative coherence for design systems |
 
 ### sketchup-modeler
 
@@ -168,7 +163,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/sketchup-modeler.md`](agents/sketchup-modeler.md) |
 | **Tier** | medium |
 | **Phases** | 3, 4 |
-| **Role** | Engineering Team lead and 3D architectural modeling specialist. Converts Design Team concept mockups and handoff packages into SketchUp 3D models: mass studies, spatial volume studies, and design development models. Triggers ZWCAD Drafter for 2D technical drawing production. Use when: Design Team phase 2 gate is approved and 3D model production is required, or when preliminary mass study is needed for a project acquisition proposal. |
+| **Role** | 3D architectural modeling specialist and Engineering Team lead |
 
 ### ux-researcher
 
@@ -177,7 +172,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/ux-researcher.md`](agents/ux-researcher.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | User research specialist - conducts user interviews, usability testing, and research synthesis. Use when: validating user needs, conducting usability tests, analyzing user behavior, or synthesizing research findings. |
+| **Role** | User research, needs analysis, and UX insights specialist |
 
 ### bylaw-expert
 
@@ -186,7 +181,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/bylaw-expert.md`](agents/bylaw-expert.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2, 4 |
-| **Role** | Building code, zoning ordinance, and regulatory compliance specialist. Evaluates site zoning limits (BCR, FAR, setback, height restrictions, parking quotas, fire safety, evacuation paths) using national building codes and municipal bylaws via legislative MCP servers and compliance tools. Use when: Assessing site feasibility, verifying legal compliance of massing/floor plans, or conducting code check audits during project acquisition and design delivery phases. |
+| **Role** | Building code, zoning regulation, and compliance specialist |
 
 ### typography-expert
 
@@ -195,7 +190,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/typography-expert.md`](agents/typography-expert.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Typography expert - specializes in font selection, type systems, and visual hierarchy through typography. Use when: choosing typefaces, designing type scales, establishing typographic systems, or solving complex layout and hierarchy challenges. |
+| **Role** | Font selection, type systems, and visual hierarchy specialist |
 
 ### visualization-expert
 
@@ -204,7 +199,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/visualization-expert.md`](agents/visualization-expert.md) |
 | **Tier** | medium |
 | **Phases** | 1, 3, 4 |
-| **Role** | Architectural 3D rendering and visual presentation specialist. Transforms 3D mass models from sketchup-modeler into photorealistic exterior perspectives, bird's-eye views, day/night lighting studies, and visual proposal packages for client pitches. Use when: High-quality visual presentation, bird's-eye view generation, or photorealistic rendering is required for RFP proposals, client presentations, or design exploration. |
+| **Role** | Architectural 3D rendering and bird's-eye view visualization specialist |
 
 ### storyteller
 
@@ -213,7 +208,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/storyteller.md`](agents/storyteller.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2 |
-| **Role** | Organizational storyteller - shapes organizational culture, manages change narratives, and preserves institutional knowledge. Use when: defining team culture, managing organizational change, preserving institutional knowledge, or synthesizing cross-functional insights. |
+| **Role** | Organizational culture, change narratives, and institutional knowledge specialist |
 
 ### prototype-engineer
 
@@ -222,7 +217,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/prototype-engineer.md`](agents/prototype-engineer.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | Interactive prototyping specialist - creates functional prototypes for testing and communication. Use when: building interactive prototypes, simulating user flows, demonstrating interactions, or conducting usability tests. |
+| **Role** | Interactive prototypes and design handoff artifacts builder |
 
 ### interior-designer
 
@@ -231,7 +226,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/interior-designer.md`](agents/interior-designer.md) |
 | **Tier** | medium |
 | **Phases** | 2, 3, 4 |
-| **Role** | Interior architecture, space planning, and finish material specialist. Designs interior circulation, furniture layouts, wall/floor finish material schedules, lighting concepts, and room-by-room interior elevations. Use when: Developing detailed room layouts, furniture placement, interior finish schedules, or room elevation specifications during design exploration and delivery phases. |
+| **Role** | Interior architecture, space planning, and material finish specialist |
 
 ### visual-designer
 
@@ -240,7 +235,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/visual-designer.md`](agents/visual-designer.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Visual design execution - creates UI designs, mockups, and design specifications. Use when: designing screens and flows, creating visual comps, producing design specifications, or executing design system components. |
+| **Role** | Visual designs, design tokens, and component specifications producer |
 
 ### structural-engineer
 
@@ -249,7 +244,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/structural-engineer.md`](agents/structural-engineer.md) |
 | **Tier** | medium |
 | **Phases** | 2, 3, 4 |
-| **Role** | Structural engineering and load-bearing system specialist. Evaluates structural feasibility, load paths, bearing wall vs. partition wall classification, column grid layouts, beam depths, and slab spans across the Architecture Graph and 3D models. Use when: Validating structural integrity, establishing column grids, classifying load-bearing elements, or assessing structural feasibility during schematic design and design delivery. |
+| **Role** | Structural engineering and load-bearing system specialist |
 
 ### ms365-expert
 
@@ -258,7 +253,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/ms365-expert.md`](agents/ms365-expert.md) |
 | **Tier** | low |
 | **Phases** | 4 |
-| **Role** | Microsoft 365 expert - provides guidance on Outlook, Word, Excel, PowerPoint, SharePoint, Teams, and other M365 apps for organizational collaboration. Use when: optimizing M365 workflows, creating templates, automating Office tasks, or solving M365-specific collaboration challenges. |
+| **Role** | Microsoft 365 platform expertise for productivity and collaboration tools |
 
 ### service-designer
 
@@ -267,7 +262,52 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/service-designer.md`](agents/service-designer.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Service designer - designs end-to-end service experiences, customer journeys, and operational processes. Use when: mapping customer journeys, designing service blueprints, optimizing touchpoints, or aligning frontstage and backstage experiences. |
+| **Role** | End-to-end service experience and customer journey designer |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -320,55 +360,67 @@ When a specialist agent's required tool is denied, PM applies the [Permission De
 *Role boundaries: [`agents/pm.md`](agents/pm.md); dispatch-communication templates and specialist-roster detail are workspace-root-only (L0).*
 
 <!-- VARIANT-DISPATCH-TRIGGERS-START -->
-| `technical-writer` | Phase 3 | "technical-writer task needed", "technical-writer work required" |
-| `design-lead` | Phase 0, Phase 2 | "design-lead task needed", "design-lead work required" |
-| `automation-engineer` | Phase 3, Phase 4 | "automation-engineer task needed", "automation-engineer work required" |
-| `zwcad-drafter` | Phase 4 | "zwcad-drafter task needed", "zwcad-drafter work required" |
-| `content-writer` | Phase 3 | "content-writer task needed", "content-writer work required" |
-| `architect` | Phase 1, Phase 2 | "architect task needed", "architect work required" |
-| `analyst` | Phase 1 | "analyst task needed", "analyst work required" |
-| `project-coordinator` | Phase 4 | "project-coordinator task needed", "project-coordinator work required" |
-| `mep-engineer` | Phase 3, Phase 4 | "mep-engineer task needed", "mep-engineer work required" |
-| `drafting-architect` | Phase 3, Phase 4 | "drafting-architect task needed", "drafting-architect work required" |
-| `design-storyteller` | Phase 1, Phase 2 | "design-storyteller task needed", "design-storyteller work required" |
-| `sketchup-modeler` | Phase 3, Phase 4 | "sketchup-modeler task needed", "sketchup-modeler work required" |
-| `ux-researcher` | Phase 1 | "ux-researcher task needed", "ux-researcher work required" |
-| `bylaw-expert` | Phase 1, Phase 2, Phase 4 | "bylaw-expert task needed", "bylaw-expert work required" |
-| `typography-expert` | Phase 3 | "typography-expert task needed", "typography-expert work required" |
-| `visualization-expert` | Phase 1, Phase 3, Phase 4 | "visualization-expert task needed", "visualization-expert work required" |
-| `storyteller` | Phase 1, Phase 2 | "storyteller task needed", "storyteller work required" |
-| `prototype-engineer` | Phase 4 | "prototype-engineer task needed", "prototype-engineer work required" |
-| `interior-designer` | Phase 2, Phase 3, Phase 4 | "interior-designer task needed", "interior-designer work required" |
-| `visual-designer` | Phase 3 | "visual-designer task needed", "visual-designer work required" |
-| `structural-engineer` | Phase 2, Phase 3, Phase 4 | "structural-engineer task needed", "structural-engineer work required" |
-| `ms365-expert` | Phase 4 | "ms365-expert task needed", "ms365-expert work required" |
-| `service-designer` | Phase 3 | "service-designer task needed", "service-designer work required" |
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|------------------|
+| `technical-writer` | Phase 3 | "technical writer", "write", "document", "draft" |
+| `design-lead` | Phase 0 | "design lead", "design", "create design", "strategy", "strategic analysis" |
+| `zwcad-drafter` | Phase 4 | "zwcad drafter", "write", "document", "draft" |
+| `content-writer` | Phase 3 | "content writer", "research", "analyze", "investigate", "write" |
+| `architect` | Phase 1 | "architect", "solution design", "architecture", "technical solution" |
+| `analyst` | Phase 1 | "analyst", "research", "analyze", "investigate", "data analysis" |
+| `project-coordinator` | Phase 4 | "project coordinator", "communicate", "presentation", "narrative", "schedule" |
+| `mep-engineer` | Phase 3 | "mep engineer", "prototype", "build" |
+| `drafting-architect` | Phase 3 | "drafting architect" |
+| `design-storyteller` | Phase 1 | "design storyteller", "design", "create design", "communicate", "presentation" |
+| `sketchup-modeler` | Phase 3 | "sketchup modeler", "data analysis", "statistics", "data model" |
+| `ux-researcher` | Phase 1 | "ux researcher", "research", "analyze", "investigate", "user research" |
+| `bylaw-expert` | Phase 1 | "bylaw expert", "prototype", "build" |
+| `typography-expert` | Phase 3 | "typography expert", "visual", "typography", "font" |
+| `visualization-expert` | Phase 1 | "visualization expert", "visual", "typography", "font" |
+| `storyteller` | Phase 1 | "storyteller", "communicate", "presentation", "narrative" |
+| `prototype-engineer` | Phase 4 | "prototype engineer", "design", "create design", "prototype", "build" |
+| `interior-designer` | Phase 2 | "interior designer", "solution design", "architecture", "technical solution" |
+| `visual-designer` | Phase 3 | "visual designer", "design", "create design", "visual", "typography" |
+| `structural-engineer` | Phase 2 | "structural engineer" |
+| `ms365-expert` | Phase 4 | "ms365 expert", "microsoft 365", "sharepoint", "teams", "outlook" |
+| `service-designer` | Phase 3 | "service designer", "design", "create design", "service design", "customer journey" |
+| `automation-engineer` | — | "automation engineer" |
+| `contract-gate-engineer` | — | "contract gate engineer" |
+| `design-system-lead` | — | "design system lead", "design", "create design", "solution design", "architecture" |
+| `i18n-specialist` | — | "i18n specialist" |
+| `public-data-analyst` | — | "public data analyst", "data analysis", "statistics", "data model" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 
 <!-- VARIANT-PHASE-GATE-START -->
-| Technical writer - creates API documentation, technical guides, and developer re | Phase 3 | `technical-writer` | medium | |
-| Design system architect - defines visual language, design tokens, and component  | Phase 0 | `design-lead` | high | |
-| Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests | Phase 3 | `automation-engineer` | medium | |
-| ZWCAD technical drawing specialist | Phase 4 | `zwcad-drafter` | medium | |
-| Content writer - transforms research into clear, accessible documentation and co | Phase 3 | `content-writer` | medium | |
-| Produces implementation plans and design docs for co-architect's software/platfo | Phase 1 | `architect` | high | |
-| Research analyst - conducts systematic investigation, data synthesis, and eviden | Phase 1 | `analyst` | medium | |
-| Project coordinator - manages schedules, stakeholder communication, and delivery | Phase 4 | `project-coordinator` | low | |
-| Mechanical, Electrical, Plumbing (MEP) and building services specialist | Phase 3 | `mep-engineer` | medium | |
-| Architectural drafting standards lead and detail drawing specialist | Phase 3 | `drafting-architect` | medium | |
-| Design storyteller - provides philosophical foundation, meaning, and narrative c | Phase 1 | `design-storyteller` | medium | |
-| Engineering Team lead and 3D architectural modeling specialist | Phase 3 | `sketchup-modeler` | medium | |
-| User research specialist - conducts user interviews, usability testing, and rese | Phase 1 | `ux-researcher` | medium | |
-| Building code, zoning ordinance, and regulatory compliance specialist | Phase 1 | `bylaw-expert` | medium | |
-| Typography expert - specializes in font selection, type systems, and visual hier | Phase 3 | `typography-expert` | medium | |
-| Architectural 3D rendering and visual presentation specialist | Phase 1 | `visualization-expert` | medium | |
-| Organizational storyteller - shapes organizational culture, manages change narra | Phase 1 | `storyteller` | medium | |
-| Interactive prototyping specialist - creates functional prototypes for testing a | Phase 4 | `prototype-engineer` | medium | |
-| Interior architecture, space planning, and finish material specialist | Phase 2 | `interior-designer` | medium | |
-| Visual design execution - creates UI designs, mockups, and design specifications | Phase 3 | `visual-designer` | medium | |
-| Structural engineering and load-bearing system specialist | Phase 2 | `structural-engineer` | medium | |
-| Microsoft 365 expert - provides guidance on Outlook, Word, Excel, PowerPoint, Sh | Phase 4 | `ms365-expert` | low | |
-| Service designer - designs end-to-end service experiences, customer journeys, an | Phase 3 | `service-designer` | medium | |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| API documentation | Phase 3 | `technical-writer` | Medium | |
+| Design direction | Phase 0, 2 | `design-lead` | High | |
+| ZWCAD technical drawing specialist and 2D documentation engineer | Phase 4 | `zwcad-drafter` | Medium | |
+| Research-to-documentation transformation and communications specialist | Phase 3 | `content-writer` | Medium | |
+| Technical architecture and implementation-plan specialist | Phase 1, 2 | `architect` | High | |
+| Systematic investigation | Phase 1 | `analyst` | Medium | |
+| Schedule management | Phase 4 | `project-coordinator` | Low | |
+| Mechanical | Phase 3, 4 | `mep-engineer` | Medium | |
+| Architectural drafting standards lead and detail drawing specialist | Phase 3, 4 | `drafting-architect` | Medium | |
+| Philosophical foundation | Phase 1, 2 | `design-storyteller` | Medium | |
+| 3D architectural modeling specialist and Engineering Team lead | Phase 3, 4 | `sketchup-modeler` | Medium | |
+| User research | Phase 1 | `ux-researcher` | Medium | |
+| Building code | Phase 1, 2, 4 | `bylaw-expert` | Medium | |
+| Font selection | Phase 3 | `typography-expert` | Medium | |
+| Architectural 3D rendering and bird's-eye view visualization specialist | Phase 1, 3, 4 | `visualization-expert` | Medium | |
+| Organizational culture | Phase 1, 2 | `storyteller` | Medium | |
+| Interactive prototypes and design handoff artifacts builder | Phase 4 | `prototype-engineer` | Medium | |
+| Interior architecture | Phase 2, 3, 4 | `interior-designer` | Medium | |
+| Visual designs | Phase 3 | `visual-designer` | Medium | |
+| Structural engineering and load-bearing system specialist | Phase 2, 3, 4 | `structural-engineer` | Medium | |
+| Microsoft 365 platform expertise for productivity and collaboration tools | Phase 4 | `ms365-expert` | Low | |
+| End-to-end service experience and customer journey designer | Phase 3 | `service-designer` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 ### §3.6 3-Tier Strategy
@@ -461,55 +513,63 @@ Hubs (co-develop, co-design, co-security, co-work) own their domain doctrine and
 **Thin-dispatcher section (ADR-0090)**: subagent dispatch protocol, role boundary matrix, harness engineering workflow, and the lifecycle/skill-review schedules live in [`docs/governance/agents/workflows.md`](docs/governance/agents/workflows.md) — **Read it before orchestrating multi-step or multi-agent work.**
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
-| technical-writer | `agents/technical-writer.md` | Medium | ⚠️ sequential preferred | project files |
-| design-lead | `agents/design-lead.md` | High | ⚠️ sequential preferred | orchestrates only |
-| automation-engineer | `agents/automation-engineer.md` | Medium | ⚠️ sequential preferred | project files |
-| zwcad-drafter | `agents/zwcad-drafter.md` | Medium | ⚠️ sequential preferred | project files |
-| content-writer | `agents/content-writer.md` | Medium | ⚠️ sequential preferred | project files |
-| architect | `agents/architect.md` | High | ⚠️ sequential preferred | orchestrates only |
-| analyst | `agents/analyst.md` | Medium | ⚠️ sequential preferred | project files |
-| project-coordinator | `agents/project-coordinator.md` | Low | ✅ | project files |
-| mep-engineer | `agents/mep-engineer.md` | Medium | ⚠️ sequential preferred | project files |
-| drafting-architect | `agents/drafting-architect.md` | Medium | ⚠️ sequential preferred | project files |
-| design-storyteller | `agents/design-storyteller.md` | Medium | ⚠️ sequential preferred | project files |
-| sketchup-modeler | `agents/sketchup-modeler.md` | Medium | ⚠️ sequential preferred | project files |
-| ux-researcher | `agents/ux-researcher.md` | Medium | ⚠️ sequential preferred | project files |
-| bylaw-expert | `agents/bylaw-expert.md` | Medium | ⚠️ sequential preferred | project files |
-| typography-expert | `agents/typography-expert.md` | Medium | ⚠️ sequential preferred | project files |
-| visualization-expert | `agents/visualization-expert.md` | Medium | ⚠️ sequential preferred | project files |
-| storyteller | `agents/storyteller.md` | Medium | ⚠️ sequential preferred | project files |
-| prototype-engineer | `agents/prototype-engineer.md` | Medium | ⚠️ sequential preferred | project files |
-| interior-designer | `agents/interior-designer.md` | Medium | ⚠️ sequential preferred | project files |
-| visual-designer | `agents/visual-designer.md` | Medium | ⚠️ sequential preferred | project files |
-| structural-engineer | `agents/structural-engineer.md` | Medium | ⚠️ sequential preferred | project files |
-| ms365-expert | `agents/ms365-expert.md` | Low | ✅ | project files |
-| service-designer | `agents/service-designer.md` | Medium | ⚠️ sequential preferred | project files |
+| technical-writer | `agents/technical-writer.md` | Medium | ❌ serial | ✅ within phase scope |
+| design-lead | `agents/design-lead.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| zwcad-drafter | `agents/zwcad-drafter.md` | Medium | ❌ serial | ✅ within phase scope |
+| content-writer | `agents/content-writer.md` | Medium | ❌ serial | ✅ within phase scope |
+| architect | `agents/architect.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| analyst | `agents/analyst.md` | Medium | ❌ serial | ✅ within phase scope |
+| project-coordinator | `agents/project-coordinator.md` | Low | ❌ serial | ✅ within phase scope |
+| mep-engineer | `agents/mep-engineer.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| drafting-architect | `agents/drafting-architect.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| design-storyteller | `agents/design-storyteller.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| sketchup-modeler | `agents/sketchup-modeler.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| ux-researcher | `agents/ux-researcher.md` | Medium | ❌ serial | ✅ within phase scope |
+| bylaw-expert | `agents/bylaw-expert.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| typography-expert | `agents/typography-expert.md` | Medium | ❌ serial | ✅ within phase scope |
+| visualization-expert | `agents/visualization-expert.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| storyteller | `agents/storyteller.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| prototype-engineer | `agents/prototype-engineer.md` | Medium | ❌ serial | ✅ within phase scope |
+| interior-designer | `agents/interior-designer.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| visual-designer | `agents/visual-designer.md` | Medium | ❌ serial | ✅ within phase scope |
+| structural-engineer | `agents/structural-engineer.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| ms365-expert | `agents/ms365-expert.md` | Low | ❌ serial | ✅ within phase scope |
+| service-designer | `agents/service-designer.md` | Medium | ❌ serial | ✅ within phase scope |
+| automation-engineer | `agents/automation-engineer.md` | Medium | ❌ serial | ✅ within phase scope |
+| contract-gate-engineer | `agents/contract-gate-engineer.md` | Medium | ❌ serial | ✅ within phase scope |
+| design-system-lead | `agents/design-system-lead.md` | Medium | ❌ serial | ✅ within phase scope |
+| i18n-specialist | `agents/i18n-specialist.md` | Medium | ❌ serial | ✅ within phase scope |
+| public-data-analyst | `agents/public-data-analyst.md` | Medium | ❌ serial | ✅ within phase scope |
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
 
 <!-- VARIANT-ROLE-BOUNDARY-START -->
-| Technical writer - creates API documentation, technical guides, and developer re | `technical-writer` | `pm` |
-| Design system architect - defines visual language, design tokens, and component  | `design-lead` | `pm` |
-| Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests | `automation-engineer` | `pm` |
-| ZWCAD technical drawing specialist | `zwcad-drafter` | `pm` |
-| Content writer - transforms research into clear, accessible documentation and co | `content-writer` | `pm` |
-| Produces implementation plans and design docs for co-architect's software/platfo | `architect` | `pm` |
-| Research analyst - conducts systematic investigation, data synthesis, and eviden | `analyst` | `pm` |
-| Project coordinator - manages schedules, stakeholder communication, and delivery | `project-coordinator` | `pm` |
+| API documentation, technical guides, and developer resources creator | `technical-writer` | `pm` |
+| Design direction, design system architecture, and creative strategy owner | `design-lead` | `pm` |
+| ZWCAD technical drawing specialist and 2D documentation engineer | `zwcad-drafter` | `pm` |
+| Research-to-documentation transformation and communications specialist | `content-writer` | `pm` |
+| Technical architecture and implementation-plan specialist | `architect` | `pm` |
+| Systematic investigation, data synthesis, and evidence gathering specialist | `analyst` | `pm` |
+| Schedule management, stakeholder communication, and delivery logistics specialist | `project-coordinator` | `pm` |
 | Mechanical, Electrical, Plumbing (MEP) and building services specialist | `mep-engineer` | `pm` |
 | Architectural drafting standards lead and detail drawing specialist | `drafting-architect` | `pm` |
-| Design storyteller - provides philosophical foundation, meaning, and narrative c | `design-storyteller` | `pm` |
-| Engineering Team lead and 3D architectural modeling specialist | `sketchup-modeler` | `pm` |
-| User research specialist - conducts user interviews, usability testing, and rese | `ux-researcher` | `pm` |
-| Building code, zoning ordinance, and regulatory compliance specialist | `bylaw-expert` | `pm` |
-| Typography expert - specializes in font selection, type systems, and visual hier | `typography-expert` | `pm` |
-| Architectural 3D rendering and visual presentation specialist | `visualization-expert` | `pm` |
-| Organizational storyteller - shapes organizational culture, manages change narra | `storyteller` | `pm` |
-| Interactive prototyping specialist - creates functional prototypes for testing a | `prototype-engineer` | `pm` |
-| Interior architecture, space planning, and finish material specialist | `interior-designer` | `pm` |
-| Visual design execution - creates UI designs, mockups, and design specifications | `visual-designer` | `pm` |
+| Philosophical foundation, meaning, and narrative coherence for design systems | `design-storyteller` | `pm` |
+| 3D architectural modeling specialist and Engineering Team lead | `sketchup-modeler` | `pm` |
+| User research, needs analysis, and UX insights specialist | `ux-researcher` | `pm` |
+| Building code, zoning regulation, and compliance specialist | `bylaw-expert` | `pm` |
+| Font selection, type systems, and visual hierarchy specialist | `typography-expert` | `pm` |
+| Architectural 3D rendering and bird's-eye view visualization specialist | `visualization-expert` | `pm` |
+| Organizational culture, change narratives, and institutional knowledge specialist | `storyteller` | `pm` |
+| Interactive prototypes and design handoff artifacts builder | `prototype-engineer` | `pm` |
+| Interior architecture, space planning, and material finish specialist | `interior-designer` | `pm` |
+| Visual designs, design tokens, and component specifications producer | `visual-designer` | `pm` |
 | Structural engineering and load-bearing system specialist | `structural-engineer` | `pm` |
-| Microsoft 365 expert - provides guidance on Outlook, Word, Excel, PowerPoint, Sh | `ms365-expert` | `pm` |
-| Service designer - designs end-to-end service experiences, customer journeys, an | `service-designer` | `pm` |
+| Microsoft 365 platform expertise for productivity and collaboration tools | `ms365-expert` | `pm` |
+| End-to-end service experience and customer journey designer | `service-designer` | `pm` |
+| Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests | `automation-engineer` | `pm` |
+| Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them | `contract-gate-engineer` | `pm` |
+| Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral | `design-system-lead` | `pm` |
+| Owns locale configuration, locale-specific formatting, and text layout guidance | `i18n-specialist` | `pm` |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data | `public-data-analyst` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ## §5: Execution Plan Templates

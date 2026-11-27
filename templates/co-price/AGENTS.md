@@ -33,24 +33,28 @@ Detailed personas live in [`agents/*.md`](agents/); reusable workflows in [`skil
 
 | Agent | File | Tier | Subdomain | Role |
 |-------|------|------|-----------|------|
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | i18n | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 | **PM — Pricing Consulting Orchestrator** | [`agents/pm.md`](agents/pm.md) | Medium | orchestration | Runs the build lifecycle (5-phase) and consulting engagement lifecycle; sole dispatcher; enforces Harness order and PR-only sync |
 
 <!-- VARIANT-AGENTS-START -->
-| **Finance Strategy & Channel Lead** | [`agents/finance-strategy-lead.md`](agents/finance-strategy-lead.md) | High | strategy | Multi-industry pricing/P&L LaTeX spec authorship — revenue engine, waterfall, dual pricing, discount timing, scorecard weights — margin floors & price-waterfall governance |
-| **Cost & Asset Management** | [`agents/cost-asset-mgmt.md`](agents/cost-asset-mgmt.md) | High | cost | OPEX/CAPEX, depreciation schedules, BOM cost roll-ups, labor scaling, raw-material shock bands |
-| **P&L Engine Auditor (CPA)** | [`agents/cpa-auditor.md`](agents/cpa-auditor.md) | High | audit | Double-entry integrity (A=L+E $0.00), `[Ref:]`-tagged Vitest harness, Harness Pass Certificates — exception log & double-entry guardrails |
-| **Pricing Strategist** | [`agents/pricing-strategist.md`](agents/pricing-strategist.md) | High | strategy | Applies diagnostics/elasticity to F/T/S recommendations, discount ladders, price corridors — ledger-traced figures only — discount governance, corridors, MAP stance |
-| **Market Intelligence Analyst** | [`agents/market-intelligence-analyst.md`](agents/market-intelligence-analyst.md) | High | research | Benchmarks curation, competitor prices, VW/GG survey analytics, provenance discipline — TPM ROI gates (stage 8) |
-| **Engagement Director** | [`agents/engagement-director.md`](agents/engagement-director.md) | High | delivery | Diagnose→Design→Validate→Deliver orchestration; deliverable register; human approval gates — channel strategy & Deal Desk process, governance cadence |
-| **Lead Architect & Data Guard** | [`agents/lead-architect.md`](agents/lead-architect.md) | High | architecture | Prisma modeling, v10.1 batch schema design, migration safety, AI-infrastructure contracts |
-| **Core Engine Developer** | [`agents/core-engine-dev.md`](agents/core-engine-dev.md) | High | engine | BIZ_LOGIC → drift-free TypeScript engine modules + on-rails AI transport implementation |
-| **Security Auditor** | [`agents/security-auditor.md`](agents/security-auditor.md) | High | security | Zod guardrails, API boundary audits, PRICE_* env schema, prompt-injection defenses |
-| **UX & Visual Specialist** | [`agents/ux-specialist.md`](agents/ux-specialist.md) | High | interface | Onyx 2.0 components, v10.1 surfaces, copilot panel, bilingual user guides — Governance tab / policy UI surfaces |
-| **Global Strategy & L10N Auditor** | [`agents/l10n-auditor.md`](agents/l10n-auditor.md) | Medium | localization | 16-locale parity, glossary adherence, RTL safety |
-| **Security Monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Medium | monitoring | Vuln/advisory scans, gitleaks, findings register, dependency policy |
-| **End-to-End QA Engineer** | [`agents/qa-tester.md`](agents/qa-tester.md) | High | testing | Component mounting, browser assertions, streaming-state checks |
-| **DevOps & CI/CD Admin** | [`agents/devops-admin.md`](agents/devops-admin.md) | High | infrastructure | bun toolchain, Docker stages, git hooks, deploy standards |
+| **core-engine-dev** | [`agents/core-engine-dev.md`](agents/core-engine-dev.md) | High | simulation engine, deterministic diagnostics modules, and AI transport infrastructure implementation |
+| **cost-asset-mgmt** | [`agents/cost-asset-mgmt.md`](agents/cost-asset-mgmt.md) | High | cost structures, depreciation schedules, asset lifecycle rules, and OPEX/CAPEX modeling |
+| **cpa-auditor** | [`agents/cpa-auditor.md`](agents/cpa-auditor.md) | High | double-entry integrity verification, Vitest harness authorship, and BIZ_LOGIC traceability enforcement |
+| **devops-admin** | [`agents/devops-admin.md`](agents/devops-admin.md) | High | build pipelines, Docker deployment, git hooks, bun toolchain, and infrastructure operations |
+| **engagement-director** | [`agents/engagement-director.md`](agents/engagement-director.md) | High | client-engagement lifecycle management, deliverable orchestration, and trade-line scorecard governance |
+| **finance-strategy-lead** | [`agents/finance-strategy-lead.md`](agents/finance-strategy-lead.md) | High | P&L strategy, channel logic, pricing business rules, and LaTeX specification authorship across industries |
+| **l10n-auditor** | [`agents/l10n-auditor.md`](agents/l10n-auditor.md) | Medium | translation key parity, i18n harness enforcement, glossary consistency across 16 locales |
+| **lead-architect** | [`agents/lead-architect.md`](agents/lead-architect.md) | High | database design, Prisma schema modeling, API boundaries, and system architecture |
+| **market-intelligence-analyst** | [`agents/market-intelligence-analyst.md`](agents/market-intelligence-analyst.md) | High | competitive price intelligence, survey analytics (Van Westendorp / Gabor-Granger), and benchmark curation |
+| **pricing-strategist** | [`agents/pricing-strategist.md`](agents/pricing-strategist.md) | High | price-setting methodology design — elasticity application, floor/target/stretch guidance, discount policy architecture, dual-market pricing strategy |
+| **qa-tester** | [`agents/qa-tester.md`](agents/qa-tester.md) | High | E2E flows, React component mounting, browser assertions, and cross-feature regression |
+| **security-auditor** | [`agents/security-auditor.md`](agents/security-auditor.md) | High | Zod runtime guardrails, API boundary safety, AI route protection, and env schema validation |
+| **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Medium | vulnerability scanning, advisory watch, secret-leak prevention, and dependency policy enforcement |
+| **ux-specialist** | [`agents/ux-specialist.md`](agents/ux-specialist.md) | High | Onyx 2.0 UI components, dashboard visualization, user guides, and copilot panel experience |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 
 ## §2: Individual Agent Definitions
@@ -61,16 +65,176 @@ Role / Responsibilities / Output Format / Non-Negotiable Boundaries / Three-Stag
 ⚠️ PM-ONLY INVOCATION / Constraints.
 
 <!-- VARIANT-AGENT-DETAILS-START -->
-| Group | Agents |
-|-------|--------|
-| Lead & Coordination | `pm` |
-| Financial Intelligence Group | `finance-strategy-lead`, `cost-asset-mgmt`, `cpa-auditor`, `pricing-strategist`, `market-intelligence-analyst`, `engagement-director` |
-| Technical Architecture & Dev Group | `lead-architect`, `core-engine-dev`, `security-auditor` |
-| UX & Visualization Group | `ux-specialist`, `l10n-auditor`, `i18n-specialist` |
-| Quality & Infrastructure Group | `security-monitor`, `qa-tester`, `devops-admin` |
+### core-engine-dev
 
-Validation: run workspace validators against this roster after any change
-(`bun scripts/validate-agents.ts Projects/co-price` from the ai_workspace root).
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/core-engine-dev.md`](agents/core-engine-dev.md) |
+| **Tier** | high |
+| **Phases** | 3 |
+| **Role** | simulation engine, deterministic diagnostics modules, and AI transport infrastructure implementation |
+
+### cost-asset-mgmt
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/cost-asset-mgmt.md`](agents/cost-asset-mgmt.md) |
+| **Tier** | high |
+| **Phases** | 3, 4 |
+| **Role** | cost structures, depreciation schedules, asset lifecycle rules, and OPEX/CAPEX modeling |
+
+### cpa-auditor
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/cpa-auditor.md`](agents/cpa-auditor.md) |
+| **Tier** | high |
+| **Phases** | 4 |
+| **Role** | double-entry integrity verification, Vitest harness authorship, and BIZ_LOGIC traceability enforcement |
+
+### devops-admin
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/devops-admin.md`](agents/devops-admin.md) |
+| **Tier** | high |
+| **Phases** | 4 |
+| **Role** | build pipelines, Docker deployment, git hooks, bun toolchain, and infrastructure operations |
+
+### engagement-director
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/engagement-director.md`](agents/engagement-director.md) |
+| **Tier** | high |
+| **Phases** | 4, 5 |
+| **Role** | client-engagement lifecycle management, deliverable orchestration, and trade-line scorecard governance |
+
+### finance-strategy-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/finance-strategy-lead.md`](agents/finance-strategy-lead.md) |
+| **Tier** | high |
+| **Phases** | 2, 4 |
+| **Role** | P&L strategy, channel logic, pricing business rules, and LaTeX specification authorship across industries |
+
+### l10n-auditor
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/l10n-auditor.md`](agents/l10n-auditor.md) |
+| **Tier** | medium |
+| **Phases** | 4 |
+| **Role** | translation key parity, i18n harness enforcement, glossary consistency across 16 locales |
+
+### lead-architect
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/lead-architect.md`](agents/lead-architect.md) |
+| **Tier** | high |
+| **Phases** | 2, 3 |
+| **Role** | database design, Prisma schema modeling, API boundaries, and system architecture |
+
+### market-intelligence-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/market-intelligence-analyst.md`](agents/market-intelligence-analyst.md) |
+| **Tier** | high |
+| **Phases** | 1 |
+| **Role** | competitive price intelligence, survey analytics (Van Westendorp / Gabor-Granger), and benchmark curation |
+
+### pricing-strategist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/pricing-strategist.md`](agents/pricing-strategist.md) |
+| **Tier** | high |
+| **Phases** | 1, 2, 3 |
+| **Role** | price-setting methodology design — elasticity application, floor/target/stretch guidance, discount policy architecture, dual-market pricing strategy |
+
+### qa-tester
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/qa-tester.md`](agents/qa-tester.md) |
+| **Tier** | high |
+| **Phases** | 4 |
+| **Role** | E2E flows, React component mounting, browser assertions, and cross-feature regression |
+
+### security-auditor
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/security-auditor.md`](agents/security-auditor.md) |
+| **Tier** | high |
+| **Phases** | 2, 5 |
+| **Role** | Zod runtime guardrails, API boundary safety, AI route protection, and env schema validation |
+
+### security-monitor
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/security-monitor.md`](agents/security-monitor.md) |
+| **Tier** | medium |
+| **Phases** | 0, 5 |
+| **Role** | vulnerability scanning, advisory watch, secret-leak prevention, and dependency policy enforcement |
+
+### ux-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/ux-specialist.md`](agents/ux-specialist.md) |
+| **Tier** | high |
+| **Phases** | 2, 3 |
+| **Role** | Onyx 2.0 UI components, dashboard visualization, user guides, and copilot panel experience |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 
 ## §3: Engineering Workflows
@@ -105,46 +269,27 @@ files): `docs/channel-pricing-promotion-policy.md`, `docs/pricing-governance-rul
 ```
 
 <!-- VARIANT-PHASE-GATE-START -->
-### Dual Lifecycle Phase Gates
-
-**Build lifecycle (AIG 5-phase)**
-
-| Phase | Gate to advance |
-|---|---|
-| 1. Triage & Strategy | parallel finance/cost analysis complete |
-| 2. Technical Design | user approval recorded (mandatory for DB/core changes) |
-| 3. Implementation Chain | engine → UI, serial, no file-lock conflicts |
-| 4. Verification & Audit | cpa + security-auditor + l10n (+ qa after UI) all PASS |
-| 5. Finalization | memlog written, CHANGELOG updated, `/sync` PR opened |
-
-**Consulting engagement lifecycle**
-
-| Stage | Exit criteria |
-|---|---|
-| Diagnose | diagnostics + market intel complete, ledger IDs issued |
-| Design | strategy options drafted with guardrail citations |
-| Validate | simulation scenarios green + Harness Pass Certificate |
-| Deliver | human approval entry per artifact; disclaimers verified |
-
-Stage advances require `engagement-director` sign-off and are logged in the engagement
-state file. Client-facing export additionally requires explicit user approval.
-
-**Commercial Operating Cycle gates** (business loop — see §3 diagram)
-
-| Stage | Entry condition | Owner | Artifact |
-|---|---|---|---|
-| 0 | Objectives & Constraints | user objective + budget cap recorded | pm | goal declaration |
-| 1 | Diagnose | CompetitorPrice/Survey sample ≥ minimum | market-intelligence-analyst | ledger-registered diagnostic report |
-| 2 | Select | scorecard re-scored | pricing-strategist (review) | portfolio decision |
-| 3 | Allocate | capacity & mixRatio constraints met | core-engine-dev (verify) | allocation table |
-| 4 | Terms Design | wholesaleParamsSchema pass | finance-strategy-lead | TradeTerm draft |
-| 5 | Price Path | consumerParamsSchema pass | pricing-strategist | ConsumerPricePlan draft |
-| 6 | Validate | tri-view approved (**user gate**) | cpa-auditor | approved snapshot pair |
-| 7 | Execute | paths injected + settlement mode set | engagement-director | active policies |
-| 8 | Review | netROI(8w) + classification + re-score | engagement-director | review memo → next cycle 0–2 |
-
-Stage-8 output is a **mandatory input** to stages 0–2 of the following cycle —
-closing this loop is what distinguishes TPO from decorated guesswork.
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| simulation engine | Phase 3 | `core-engine-dev` | High | |
+| cost structures | Phase 3, 4 | `cost-asset-mgmt` | High | |
+| double-entry integrity verification | Phase 4 | `cpa-auditor` | High | |
+| build pipelines | Phase 4 | `devops-admin` | High | |
+| client-engagement lifecycle management | Phase 4, 5 | `engagement-director` | High | |
+| P&L strategy | Phase 2, 4 | `finance-strategy-lead` | High | |
+| translation key parity | Phase 4 | `l10n-auditor` | Medium | |
+| database design | Phase 2, 3 | `lead-architect` | High | |
+| competitive price intelligence | Phase 1 | `market-intelligence-analyst` | High | |
+| price-setting methodology design — elasticity application | Phase 1, 2, 3 | `pricing-strategist` | High | |
+| E2E flows | Phase 4 | `qa-tester` | High | |
+| Zod runtime guardrails | Phase 2, 5 | `security-auditor` | High | |
+| vulnerability scanning | Phase 0, 5 | `security-monitor` | Medium | |
+| Onyx 2.0 UI components | Phase 2, 3 | `ux-specialist` | High | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 ### Governance Operating Model (policy → rules → manual → agents)
@@ -183,79 +328,73 @@ When leading execution and improvement tasks, PM MUST use the 3-Tier model strat
 ## §4: PM Subagent Dispatch Protocol
 
 <!-- VARIANT-SUBAGENT-ROSTER-START -->
-### Parallel Research & Strategy (Read-Only)
-
-| Subagent | Prompt file | Parallelizable | Write Allowed? |
-|----------|-------------|:--------------:|:--------------:|
-| `finance-strategy-lead` | `agents/finance-strategy-lead.md` | ✅ Always | ❌ No |
-| `cost-asset-mgmt` | `agents/cost-asset-mgmt.md` | ✅ Always | ❌ No |
-| `pricing-strategist` | `agents/pricing-strategist.md` | ✅ Analysis | ❌ No |
-| `market-intelligence-analyst` | `agents/market-intelligence-analyst.md` | ✅ Research | ❌ No |
-| `engagement-director` | `agents/engagement-director.md` | ✅ Planning | ❌ No |
-| `lead-architect` (Design) | `agents/lead-architect.md` | ✅ Design only | ❌ No |
-
-### Serial Execution & Verification (Write-Capable)
-
-| Subagent | Prompt file | Parallelizable | Write Allowed? |
-|----------|-------------|:--------------:|:--------------:|
-| `core-engine-dev` | `agents/core-engine-dev.md` | ❌ Never (Serial) | ✅ Yes |
-| `ux-specialist` | `agents/ux-specialist.md` | ❌ Never (Serial) | ✅ Yes |
-| `security-monitor` | `agents/security-monitor.md` | ❌ After write | ✅ Yes (Findings) |
-| `cpa-auditor` | `agents/cpa-auditor.md` | ❌ After write | ✅ Yes (Tests) |
-| `security-auditor` | `agents/security-auditor.md` | ❌ After write | ✅ Yes (Schemas) |
-| `l10n-auditor` | `agents/l10n-auditor.md` | ❌ After write | ✅ Yes (Locales) |
-| `qa-tester` | `agents/qa-tester.md` | ❌ After UI write | ✅ Yes (Tests) |
-| `devops-admin` | `agents/devops-admin.md` | ❌ Infrastructure | ✅ Yes (CI/CD) |
+| core-engine-dev | `agents/core-engine-dev.md` | High | ❌ serial | ✅ within phase scope |
+| cost-asset-mgmt | `agents/cost-asset-mgmt.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| cpa-auditor | `agents/cpa-auditor.md` | High | ❌ serial | ✅ within phase scope |
+| devops-admin | `agents/devops-admin.md` | High | ❌ serial | ✅ within phase scope |
+| engagement-director | `agents/engagement-director.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| finance-strategy-lead | `agents/finance-strategy-lead.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| l10n-auditor | `agents/l10n-auditor.md` | Medium | ❌ serial | ✅ within phase scope |
+| lead-architect | `agents/lead-architect.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| market-intelligence-analyst | `agents/market-intelligence-analyst.md` | High | ❌ serial | ✅ within phase scope |
+| pricing-strategist | `agents/pricing-strategist.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| qa-tester | `agents/qa-tester.md` | High | ❌ serial | ✅ within phase scope |
+| security-auditor | `agents/security-auditor.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| security-monitor | `agents/security-monitor.md` | Medium | sequential (phase-ordered) | ✅ within phase scope |
+| ux-specialist | `agents/ux-specialist.md` | High | sequential (phase-ordered) | ✅ within phase scope |
+| i18n-specialist | `agents/i18n-specialist.md` | Medium | ❌ serial | ✅ within phase scope |
+| automation-engineer | `agents/automation-engineer.md` | Medium | ❌ serial | ✅ within phase scope |
+| contract-gate-engineer | `agents/contract-gate-engineer.md` | Medium | ❌ serial | ✅ within phase scope |
+| design-system-lead | `agents/design-system-lead.md` | Medium | ❌ serial | ✅ within phase scope |
+| public-data-analyst | `agents/public-data-analyst.md` | Medium | ❌ serial | ✅ within phase scope |
 <!-- VARIANT-SUBAGENT-ROSTER-END -->
 
 <!-- VARIANT-DISPATCH-TRIGGERS-START -->
-### Dispatch Triggers
-
-| Trigger phrases (examples) | Dispatch to |
-|---|---|
-| "design pricing strategy", "define P&L rules", "waterfall/dual-pricing spec" | `finance-strategy-lead` |
-| "define depreciation", "fixed costs", "cost shock bands" | `cost-asset-mgmt` |
-| "recommend a price", "discount ladder", "F/T/S guidance" | `pricing-strategist` |
-| "competitor prices", "run Van Westendorp / Gabor-Granger", "benchmark check" | `market-intelligence-analyst` |
-| "client engagement", "deliverable review", "scorecard session" | `engagement-director` |
-| "design DB", "modify Prisma schema", "AI transport contracts" | `lead-architect` |
-| "implement math logic", "build AI adapter", "engine module" | `core-engine-dev` |
-| "create zod schemas", "audit API boundary", "copilot route guards" | `security-auditor` |
-| "verify accounting logic", "check A=L+E", "harness certificate" | `cpa-auditor` |
-| "build UI component", "style dashboard", "user guide update" | `ux-specialist` |
-| "audit translations", "add locale strings", "glossary sync" | `l10n-auditor` |
-| "scan secrets/advisories", "pre-PR security check" | `security-monitor` |
-| "test UI", "E2E check", "streaming badge behavior" | `qa-tester` |
-| "setup CI/CD", "Docker/hook changes", "bun pipeline" | `devops-admin` |
-| "price waterfall", "pocket margin analysis", "leakage diagnostic" | `finance-strategy-lead` |
-| "discount governance", "authority matrix", "exception log" | `pricing-strategist` |
-| "MAP policy", "channel conflict", "3-strikes enforcement" | `pricing-strategist` + `security-auditor` |
-| "promotion ROI gate", "TPM evaluation", "netROI review" | `market-intelligence-analyst` |
-| "governance cadence", "weekly price review" | `engagement-director` |
+| Agent | Phase | Dispatch Trigger |
+|-------|-------|------------------|
+| `core-engine-dev` | Phase 3 | "core engine dev" |
+| `cost-asset-mgmt` | Phase 3 | "cost asset mgmt", "schedule", "coordinate", "track progress", "data analysis" |
+| `cpa-auditor` | Phase 4 | "cpa auditor" |
+| `devops-admin` | Phase 4 | "devops admin", "prototype", "build" |
+| `engagement-director` | Phase 4 | "engagement director" |
+| `finance-strategy-lead` | Phase 2 | "finance strategy lead", "strategy", "strategic analysis" |
+| `l10n-auditor` | Phase 4 | "l10n auditor" |
+| `lead-architect` | Phase 2 | "lead architect", "design", "create design", "solution design", "architecture" |
+| `market-intelligence-analyst` | Phase 1 | "market intelligence analyst", "industry", "market landscape", "competitive analysis" |
+| `pricing-strategist` | Phase 1 | "pricing strategist", "design", "create design", "strategy", "strategic analysis" |
+| `qa-tester` | Phase 4 | "qa tester" |
+| `security-auditor` | Phase 2 | "security auditor" |
+| `security-monitor` | Phase 0 | "security monitor", "security", "pentest", "vulnerability" |
+| `ux-specialist` | Phase 2 | "ux specialist", "visual", "typography", "font" |
+| `i18n-specialist` | — | "i18n specialist" |
+| `automation-engineer` | — | "automation engineer" |
+| `contract-gate-engineer` | — | "contract gate engineer" |
+| `design-system-lead` | — | "design system lead", "design", "create design", "solution design", "architecture" |
+| `public-data-analyst` | — | "public data analyst", "data analysis", "statistics", "data model" |
 <!-- VARIANT-DISPATCH-TRIGGERS-END -->
 
 ## §5: Agent Role Boundary Matrix
 
 <!-- VARIANT-ROLE-BOUNDARY-START -->
-| Task / Scenario | Use | Do NOT use |
-|-----------------|-----|------------|
-| Design Database Models (Prisma), AI-layer contracts, or overall architecture | `lead-architect` | `core-engine-dev` |
-| Write Next.js UI components, CSS styling, or user guides | `ux-specialist` | `core-engine-dev` |
-| Implement mathematical logic or AI transport in TypeScript | `core-engine-dev` | `cpa-auditor` |
-| Verify TS logic precisely matches `biz_logic.md` formulas | `cpa-auditor` | `security-auditor` |
-| Define P&L strategy or pricing business rules | `finance-strategy-lead` | `lead-architect` |
-| Apply diagnostics into concrete price recommendations | `pricing-strategist` | `finance-strategy-lead` |
-| Curate benchmarks, competitor data, VW/GG survey analysis | `market-intelligence-analyst` | `pricing-strategist` |
-| Gate client-facing deliverables and engagement stages | `engagement-director` | `pm` (direct) |
-| Audit Zod runtime guardrails or API boundary safety | `security-auditor` | `cpa-auditor` |
-| Prevent secret leaks and enforce package policies | `security-monitor` | `security-auditor` |
-| Verify translation keys across 16 locales and formatting | `l10n-auditor` | `ux-specialist` |
-| Execute E2E UI tests, React component mounting checks | `qa-tester` | `cpa-auditor` |
-| Configure Docker, GitHub Actions, hooks, or bun pipelines | `devops-admin` | `lead-architect` |
-| Own distribution channel strategy / rules of engagement | `engagement-director` | `finance-strategy-lead` |
-| Build/audit price waterfall & pocket margin | `finance-strategy-lead` | `pricing-strategist` |
-| Define discount governance / authority matrix / exception log | `pricing-strategist` | `finance-strategy-lead` |
-| Define MAP policy / channel-conflict enforcement | `pricing-strategist` | `security-auditor` |
+| simulation engine, deterministic diagnostics modules, and AI transport infrastructure implementation | `core-engine-dev` | `pm` |
+| cost structures, depreciation schedules, asset lifecycle rules, and OPEX/CAPEX modeling | `cost-asset-mgmt` | `pm` |
+| double-entry integrity verification, Vitest harness authorship, and BIZ_LOGIC traceability enforcement | `cpa-auditor` | `pm` |
+| build pipelines, Docker deployment, git hooks, bun toolchain, and infrastructure operations | `devops-admin` | `pm` |
+| client-engagement lifecycle management, deliverable orchestration, and trade-line scorecard governance | `engagement-director` | `pm` |
+| P&L strategy, channel logic, pricing business rules, and LaTeX specification authorship across industries | `finance-strategy-lead` | `pm` |
+| translation key parity, i18n harness enforcement, glossary consistency across 16 locales | `l10n-auditor` | `pm` |
+| database design, Prisma schema modeling, API boundaries, and system architecture | `lead-architect` | `pm` |
+| competitive price intelligence, survey analytics (Van Westendorp / Gabor-Granger), and benchmark curation | `market-intelligence-analyst` | `pm` |
+| price-setting methodology design — elasticity application, floor/target/stretch guidance, discount policy architecture, dual-market pricing strategy | `pricing-strategist` | `pm` |
+| E2E flows, React component mounting, browser assertions, and cross-feature regression | `qa-tester` | `pm` |
+| Zod runtime guardrails, API boundary safety, AI route protection, and env schema validation | `security-auditor` | `pm` |
+| vulnerability scanning, advisory watch, secret-leak prevention, and dependency policy enforcement | `security-monitor` | `pm` |
+| Onyx 2 | `ux-specialist` | `pm` |
+| Owns locale configuration, locale-specific formatting, and text layout guidance | `i18n-specialist` | `pm` |
+| Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests | `automation-engineer` | `pm` |
+| Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them | `contract-gate-engineer` | `pm` |
+| Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral | `design-system-lead` | `pm` |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data | `public-data-analyst` | `pm` |
 <!-- VARIANT-ROLE-BOUNDARY-END -->
 
 ## §6: Skills

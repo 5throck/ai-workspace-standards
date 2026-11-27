@@ -1,15 +1,22 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // regenerate-agents-md.test.ts — U-20261111-003 regression (tier, role, in-place mode)
+// v1.1.0 (2026-11-28, T-20261127-010): common-agent roster merge (scan + merge rules)
 
 import { describe, expect, test } from "bun:test";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
+  buildVariantRoster,
   cleanDescription,
   injectBlocks,
   parseSimpleFrontmatter,
   presentVariantMarkers,
   resolveRole,
   resolveTier,
+  scanCommonAgentNames,
+  scanVariantTreeAgentFiles,
   selectBase,
 } from "../../scripts/regenerate-agents-md.ts";
 
@@ -77,5 +84,111 @@ describe("selectBase / injectBlocks (U-20261111-003 defect 3)", () => {
   test("presentVariantMarkers lists only complete START/END pairs", () => {
     expect(presentVariantMarkers(existing)).toEqual(["VARIANT-AGENTS"]);
     expect(presentVariantMarkers("<!-- VARIANT-AGENTS-START -->")).toEqual([]);
+  });
+});
+
+describe("scanCommonAgentNames (T-20261127-010)", () => {
+  function fixtureDir(): string {
+    const dir = mkdtempSync(join(tmpdir(), "regen-agents-test-"));
+    mkdirSync(dir, { recursive: true });
+    for (const f of ["pm.md", "_COMMON.md", "automation-engineer.md", "design-system-lead.md", "contract-gate-engineer.md", "public-data-analyst.md", "README.txt"]) {
+      writeFileSync(join(dir, f), "---\nname: x\n---\n");
+    }
+    return dir;
+  }
+
+  test("lists every agent file except pm.md and _-prefixed partials, sorted", () => {
+    const names = scanCommonAgentNames(fixtureDir());
+    expect(names).toEqual(["automation-engineer", "contract-gate-engineer", "design-system-lead", "public-data-analyst"]);
+  });
+
+  test("a missing directory yields an empty list (not a throw)", () => {
+    expect(scanCommonAgentNames(join(tmpdir(), "does-not-exist-regen-agents"))).toEqual([]);
+  });
+});
+
+describe("scanVariantTreeAgentFiles (T-20261127-010)", () => {
+  function treeFixtureDir(): string {
+    const dir = mkdtempSync(join(tmpdir(), "regen-agents-tree-"));
+    mkdirSync(join(dir, "domains", "functional", "msds"), { recursive: true });
+    mkdirSync(join(dir, "_shared"), { recursive: true });
+    writeFileSync(join(dir, "design.md"), "---\nname: design\n---\n");
+    writeFileSync(join(dir, "pm.md"), "---\nname: pm\n---\n");
+    writeFileSync(join(dir, "README.md"), "# docs\n");
+    writeFileSync(join(dir, "domains", "functional", "msds", "msds-agent.md"), "---\nname: msds-agent\n---\n");
+    writeFileSync(join(dir, "_shared", "audit-agent.md"), "---\nname: audit-agent\n---\n");
+    return dir;
+  }
+
+  test("recursive scan keeps nested relpaths, drops pm.md and README*, sorted", () => {
+    expect(scanVariantTreeAgentFiles(treeFixtureDir())).toEqual([
+      "_shared/audit-agent",
+      "design",
+      "domains/functional/msds/msds-agent",
+    ]);
+  });
+});
+
+describe("buildVariantRoster (T-20261127-010)", () => {
+  test("variant + common agents both make the roster; variant order first, common appended sorted", () => {
+    const roster = buildVariantRoster(
+      ["html-build", "design", "research"],
+      ["html-build", "design", "research"],
+      ["automation-engineer", "contract-gate-engineer", "design-system-lead", "public-data-analyst"],
+    );
+    expect(roster.map((e) => e.rel)).toEqual([
+      "html-build",
+      "design",
+      "research",
+      "automation-engineer",
+      "contract-gate-engineer",
+      "design-system-lead",
+      "public-data-analyst",
+    ]);
+    expect(roster.every((e) => e.source === "variant" || e.source === "common")).toBe(true);
+  });
+
+  test("a common agent the variant itself ships dedupes to the variant entry (overlay-wins)", () => {
+    const roster = buildVariantRoster(["design", "i18n-specialist"], ["design", "i18n-specialist"], [
+      "automation-engineer",
+      "i18n-specialist",
+    ]);
+    expect(roster.map((e) => e.rel)).toEqual(["design", "i18n-specialist", "automation-engineer"]);
+    expect(roster.filter((e) => e.name === "i18n-specialist")).toHaveLength(1);
+  });
+
+  test("nested tree agents not declared in variant.json join the roster with their relpath (AGENTS.md index contract)", () => {
+    const roster = buildVariantRoster(
+      ["safety-governance-manager", "safety-workflow-manager", "i18n-specialist"],
+      ["_shared/audit-agent", "domains/functional/msds/msds-agent", "i18n-specialist",
+        "safety-governance-manager", "safety-workflow-manager"],
+      ["automation-engineer"],
+    );
+    expect(roster.map((e) => e.rel)).toEqual([
+      "safety-governance-manager",
+      "safety-workflow-manager",
+      "i18n-specialist",
+      "_shared/audit-agent",
+      "domains/functional/msds/msds-agent",
+      "automation-engineer",
+    ]);
+    const nested = roster.find((e) => e.rel === "domains/functional/msds/msds-agent");
+    expect(nested).toEqual({ name: "msds-agent", rel: "domains/functional/msds/msds-agent", source: "variant" });
+  });
+
+  test("a nested basename colliding with a common agent keeps the variant copy only", () => {
+    const roster = buildVariantRoster([], ["_shared/i18n-specialist"], ["i18n-specialist", "pm"]);
+    expect(roster).toEqual([{ name: "i18n-specialist", rel: "_shared/i18n-specialist", source: "variant" }]);
+  });
+
+  test("pm never enters the roster from any side (roster convention)", () => {
+    const roster = buildVariantRoster(["pm", "design"], ["pm", "design"], ["pm", "automation-engineer"]);
+    expect(roster.map((e) => e.name)).toEqual(["design", "automation-engineer"]);
+  });
+
+  test("pure function — same inputs, same output (stable ordering)", () => {
+    const a = buildVariantRoster(["b", "a"], ["b", "a"], ["z", "y"]);
+    const b = buildVariantRoster(["b", "a"], ["b", "a"], ["z", "y"]);
+    expect(a).toEqual(b);
   });
 });

@@ -29,15 +29,19 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **architect** | [`agents/architect.md`](agents/architect.md) | High | Design agent - produces implementation plans and technical specs. Use when: planning a new feature, evaluating architect |
-| **code-writer** | [`agents/code-writer.md`](agents/code-writer.md) | Low | Implementation agent - writes code from an approved plan. Use when: an architect plan has been approved and it is time t |
-| **designer** | [`agents/designer.md`](agents/designer.md) | Medium | UI/UX design agent - produces wireframes, component specs, and design tokens. Use when: designing new screens or flows,  |
-| **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Medium | Security monitor - scans for vulnerabilities, advisories, and secret leaks. Use for: daily security scans, pre-PR adviso |
-| **stack-setup** | [`agents/stack-setup.md`](agents/stack-setup.md) | Low | Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization" |
-| **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Medium | QA and verification agent - runs tests and validates acceptance criteria. Use when: code has been written and needs to b |
+| **architect** | [`agents/architect.md`](agents/architect.md) | High | Implementation plans, ADRs, and system architecture design specialist |
+| **code-writer** | [`agents/code-writer.md`](agents/code-writer.md) | Low | Approved plan implementation with surgical, minimal code changes |
+| **designer** | [`agents/designer.md`](agents/designer.md) | Medium | UI/UX specs, wireframes, and component definition producer |
+| **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Medium | Security policy enforcement and secrets leak prevention specialist |
+| **stack-setup** | [`agents/stack-setup.md`](agents/stack-setup.md) | Low | Unknown stack identification and secure setup procedure specialist |
+| **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Medium | Test execution and acceptance criteria verification specialist |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -53,7 +57,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/architect.md`](agents/architect.md) |
 | **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Design agent - produces implementation plans and technical specs. Use when: planning a new feature, evaluating architectural trade-offs, or generating an ADR before implementation starts. |
+| **Role** | Implementation plans, ADRs, and system architecture design specialist |
 
 ### code-writer
 
@@ -62,7 +66,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/code-writer.md`](agents/code-writer.md) |
 | **Tier** | low |
 | **Phases** | 4 |
-| **Role** | Implementation agent - writes code from an approved plan. Use when: an architect plan has been approved and it is time to write, modify, or delete source files. |
+| **Role** | Approved plan implementation with surgical, minimal code changes |
 
 ### designer
 
@@ -71,7 +75,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/designer.md`](agents/designer.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | UI/UX design agent - produces wireframes, component specs, and design tokens. Use when: designing new screens or flows, defining visual language, specifying component behaviour before implementation, or reviewing design consistency. |
+| **Role** | UI/UX specs, wireframes, and component definition producer |
 
 ### security-monitor
 
@@ -80,7 +84,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/security-monitor.md`](agents/security-monitor.md) |
 | **Tier** | medium |
 | **Phases** | 0, 5 |
-| **Role** | Security monitor - scans for vulnerabilities, advisories, and secret leaks. Use for: daily security scans, pre-PR advisory checks, post-scaffold baseline scans. |
+| **Role** | Security policy enforcement and secrets leak prevention specialist |
 
 ### stack-setup
 
@@ -89,7 +93,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/stack-setup.md`](agents/stack-setup.md) |
 | **Tier** | low |
 | **Phases** | 0, 1 |
-| **Role** | Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization" |
+| **Role** | Unknown stack identification and secure setup procedure specialist |
 
 ### test-runner
 
@@ -98,7 +102,52 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/test-runner.md`](agents/test-runner.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | QA and verification agent - runs tests and validates acceptance criteria. Use when: code has been written and needs to be verified, or when the QA gate needs to be run before a PR. |
+| **Role** | Test execution and acceptance criteria verification specialist |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | 5 |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 
 ### i18n-specialist (common extends-stub)
@@ -132,16 +181,19 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-### Phase Gate (co-develop)
-
-| Deliverable Type | Phase | Agent | Tier | Notes |
-|-------------------|-------|-------|------|-------|
-| Unknown stack identification, risk-assessed environment setup | Phase 0-1 | `stack-setup` | Low | Optional — skip when the stack is already configured; requires explicit user approval before executing any setup command |
-| Security baseline scan, pre-PR advisory check | Phase 0, Phase 5 | `security-monitor` | Medium | Detection/reporting only — never modifies source or dependency files |
-| Implementation plan, ADR, data model / API surface design | Phase 1-2 | `architect` | High | Must precede implementation; produces plans only, never application code |
-| UI/UX spec, wireframe, component/design tokens | Phase 3 | `designer` | Medium | Optional — skip when no UI/UX component is in scope |
-| Source file creation/modification per approved plan | Phase 4 | `code-writer` | Low | Implements exactly what the approved plan specifies — no scope creep |
-| Test suite execution, acceptance criteria verification, QA gate | Phase 4 | `test-runner` | Medium | QA gate passes only when audit script exits 0 and all acceptance criteria are met |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Implementation plans | Phase 1, 2 | `architect` | High | |
+| Approved plan implementation with surgical | Phase 4 | `code-writer` | Low | |
+| UI/UX specs | Phase 3 | `designer` | Medium | |
+| Security policy enforcement and secrets leak prevention specialist | Phase 0, 5 | `security-monitor` | Medium | |
+| Unknown stack identification and secure setup procedure specialist | Phase 0, 1 | `stack-setup` | Low | |
+| Test execution and acceptance criteria verification specialist | Phase 4 | `test-runner` | Medium | |
+| Owns locale configuration | Phase 5 | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 ### §3.6 3-Tier Strategy

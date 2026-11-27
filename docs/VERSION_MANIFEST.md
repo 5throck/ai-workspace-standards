@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-27T19:10:28.554Z
+**Generated**: 2026-11-27T22:16:55.898Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -175,7 +175,7 @@
 | propagate-to-templates.ts | 2.23.0 | scripts/propagate-to-templates.ts | child_process, crypto, fs, js-yaml, path |
 | qa-gate.ts | 1.3.0 | scripts/qa-gate.ts | bun, crypto |
 | readme-lifecycle-audit.ts | 1.1.0 | scripts/readme-lifecycle-audit.ts | fs, path, process |
-| regenerate-agents-md.ts | 1.5.0 | scripts/regenerate-agents-md.ts | fs, path |
+| regenerate-agents-md.ts | 1.6.0 | scripts/regenerate-agents-md.ts | fs, path |
 | release-template.ts | 1.0.0 | scripts/release-template.ts | child_process, fs, path |
 | remove-project.ts | 1.0.1 | scripts/remove-project.ts | child_process, fs, path, readline |
 | render-commands.ts | 1.1.0 | scripts/render-commands.ts | fs, path |
@@ -217,7 +217,7 @@
 | ticket.ts | 1.17.0 | scripts/ticket.ts | js-yaml, path |
 | translate-readme.ts | 1.0.0 | scripts/translate-readme.ts | bun, crypto, fs, path, url |
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
-| upgrade-project.ts | 1.125.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
+| upgrade-project.ts | 1.126.0 | scripts/upgrade-project.ts | child_process, crypto, fs, path |
 | validate-agents.ts | 1.4.2 | scripts/validate-agents.ts | fs, path, process |
 | validate-decisions.ts | 1.3.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.8.0 | scripts/validate-doc-folder.ts | fs, path |

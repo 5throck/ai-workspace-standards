@@ -3,7 +3,10 @@
  * country-scoped common agents (public-data-analyst) from non-KR scaffolds (design
  * 2026-11-12-common-agents-for-common-skills, Q4). No filesystem access.
  *
- * @version 1.0.0
+ * @version 1.1.0
+ * v1.1.0 (2026-11-28, T-20261127-010 follow-up): scrubAgentDetailBlocks pin —
+ *         details-section + backticked-row scrub for the regenerated roster's
+ *         non-link forms.
  */
 import { describe, expect, test } from "bun:test";
 import {
@@ -12,6 +15,7 @@ import {
   agentsToPrune,
   isPrunedForCountry,
   scrubAgentReferenceLines,
+  scrubAgentDetailBlocks,
 } from "../../scripts/lib/country-scoped-agents.ts";
 
 const REGISTRY = { "public-data-analyst": "KR" };
@@ -87,5 +91,61 @@ describe("scrubAgentReferenceLines", () => {
   });
   test("no pruned names leaves the text untouched", () => {
     expect(scrubAgentReferenceLines(md, [])).toEqual({ output: md, removed: 0 });
+  });
+});
+
+describe("scrubAgentDetailBlocks (T-20261127-010 follow-up)", () => {
+  const md = [
+    "<!-- VARIANT-AGENT-DETAILS-START -->",
+    "### design",
+    "",
+    "| Field | Value |",
+    "|-------|-------|",
+    "| **File** | [`agents/design.md`](agents/design.md) |",
+    "| **Tier** | medium |",
+    "",
+    "### public-data-analyst",
+    "",
+    "| Field | Value |",
+    "|-------|-------|",
+    "| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |",
+    "| **Tier** | medium |",
+    "| **Role** | KR public-data gateway maintenance |",
+    "",
+    "### i18n-specialist",
+    "",
+    "| Field | Value |",
+    "|-------|-------|",
+    "| **Tier** | medium |",
+    "<!-- VARIANT-AGENT-DETAILS-END -->",
+    "",
+    "<!-- VARIANT-PHASE-GATE-START -->",
+    "| Deliverable | Phase | Agent | Tier |",
+    "|-------------|-------|-------|------|",
+    "| slide deck | Phase — | `public-data-analyst` | Medium | |",
+    "| lecture deck | Phase 5 | `html-build` | Low | |",
+    "<!-- VARIANT-PHASE-GATE-END -->",
+  ].join("\n");
+
+  test("removes the pruned agent's details section and backticked rows, keeps the rest", () => {
+    const { output, removed } = scrubAgentDetailBlocks(md, ["public-data-analyst"]);
+    expect(output).toContain("### design");
+    expect(output).toContain("### i18n-specialist");
+    expect(output).toContain("| **Tier** | medium |"); // design + i18n rows survive
+    expect(output).not.toContain("public-data-analyst");
+    expect(output).toContain("`html-build`");
+    // heading + blank + 2 table-header rows + 3 field rows + trailing blank +
+    // 1 phase-gate row
+    expect(removed).toBe(9);
+  });
+
+  test("section removal stops at the next heading and at VARIANT markers", () => {
+    const { output } = scrubAgentDetailBlocks(md, ["public-data-analyst"]);
+    expect(output).toContain("### i18n-specialist");
+    expect(output).toContain("VARIANT-PHASE-GATE-START");
+  });
+
+  test("no pruned names leaves the text untouched", () => {
+    expect(scrubAgentDetailBlocks(md, [])).toEqual({ output: md, removed: 0 });
   });
 });

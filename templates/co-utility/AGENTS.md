@@ -29,13 +29,17 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, locale-matrix parity output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **Backend Agent** | [`agents/backend.md`](agents/backend.md) | High | Core service, HTTP API, and CLI implementation. Use when: implementing or fixing application logic, API endpoints, CLI flags, installers |
-| **Frontend Agent** | [`agents/frontend.md`](agents/frontend.md) | Medium | Web UI and desktop-shell integration. Use when: UI logic, API wiring, i18n in templates, desktop shell behavior |
-| **QA Agent** | [`agents/qa.md`](agents/qa.md) | Medium | Test suite ownership and validation. Use when: writing/running tests, reproducing bugs, verifying acceptance criteria |
-| **Security Agent** | [`agents/security.md`](agents/security.md) | High | External-input security audits (read-only) and ongoing dependency/secret monitoring. Use when: auditing new input surfaces, dependency CVEs, secret sweeps |
+| **backend** | [`agents/backend.md`](agents/backend.md) | High | Core service, HTTP API, and CLI implementation for the utility application |
+| **frontend** | [`agents/frontend.md`](agents/frontend.md) | Medium | Web UI and desktop-shell integration over the shared core service |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **qa** | [`agents/qa.md`](agents/qa.md) | Medium | Test suite ownership and validation for the utility application |
+| **security** | [`agents/security.md`](agents/security.md) | High | External-input security audits (read-only) and ongoing dependency/secret monitoring |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -50,8 +54,8 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/backend.md`](agents/backend.md) |
 | **Tier** | high |
-| **Phases** | 3 |
-| **Role** | Core service, HTTP API, and CLI implementation — one service module, every interface an adapter over it. |
+| **Phases** | — |
+| **Role** | Core service, HTTP API, and CLI implementation for the utility application |
 
 ### frontend
 
@@ -59,8 +63,17 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/frontend.md`](agents/frontend.md) |
 | **Tier** | medium |
-| **Phases** | 3 |
-| **Role** | Web UI and desktop-shell integration — vanilla, dependency-free UI calling the core service. |
+| **Phases** | — |
+| **Role** | Web UI and desktop-shell integration over the shared core service |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | 5 |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
 
 ### qa
 
@@ -68,8 +81,8 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/qa.md`](agents/qa.md) |
 | **Tier** | medium |
-| **Phases** | 1, 4 |
-| **Role** | Test suite ownership and validation — the full suite is the acceptance bar. |
+| **Phases** | — |
+| **Role** | Test suite ownership and validation for the utility application |
 
 ### security
 
@@ -77,8 +90,44 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/security.md`](agents/security.md) |
 | **Tier** | high |
-| **Phases** | 1, 4 |
-| **Role** | External-input security audits (read-only) plus ongoing dependency/secret monitoring; SEV-classified findings escalate to PM. |
+| **Phases** | — |
+| **Role** | External-input security audits (read-only) and ongoing dependency/secret monitoring |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 
 ### i18n-specialist (common extends-stub)
@@ -112,12 +161,17 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-### Phase Gate (co-utility)
-
-| Deliverable Type | Phase | Agent | Tier | Notes |
-|-------------------|-------|-------|------|-------|
-| New external-input surface (URL, path, subprocess) | Phase 1 + 4 | `security` | High | Audited at triage and re-audited pre-merge; SEV1/SEV2 block pushes |
-| Runtime-output path changes | Phase 3 | `backend` | High | Output root stays repo-level and gitignored — never `__file__`-relative |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Core service | Phase — | `backend` | High | |
+| Web UI and desktop-shell integration over the shared core service | Phase — | `frontend` | Medium | |
+| Owns locale configuration | Phase 5 | `i18n-specialist` | Medium | |
+| Test suite ownership and validation for the utility application | Phase — | `qa` | Medium | |
+| External-input security audits (read-only) and ongoing dependency/secret monitoring | Phase — | `security` | High | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 ### §3.6 3-Tier Strategy

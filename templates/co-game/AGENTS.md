@@ -29,21 +29,25 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **arcade-designer** | [`agents/arcade-designer.md`](agents/arcade-designer.md) | High | Arcade game design specialist. Produces entity AI patterns, wave/stage systems, item/power-up mechanics, scoring systems |
-| **architect** | [`agents/architect.md`](agents/architect.md) | High | Design agent - produces implementation plans and technical specs. Use when: planning a new feature, evaluating architect |
-| **designer** | [`agents/designer.md`](agents/designer.md) | Medium | UI/UX design agent - produces wireframes, component specs, and design tokens. Use when: designing new screens or flows,  |
-| **game-debugger** | [`agents/game-debugger.md`](agents/game-debugger.md) | Medium | Game debugger agent - analyzes bug reports, identifies root causes in game engine code, proposes targeted fixes, writes  |
-| **game-designer** | [`agents/game-designer.md`](agents/game-designer.md) | High | Universal game design agent - produces core game loop specifications, difficulty curves, reward systems, tutorial/onboar |
-| **game-developer** | [`agents/game-developer.md`](agents/game-developer.md) | Low | Game implementation agent - implements Canvas rendering engine, game loop, collision detection, entity systems, sprite r |
-| **puzzle-designer** | [`agents/puzzle-designer.md`](agents/puzzle-designer.md) | High | Puzzle and board game design specialist. Produces matching/link logic, turn-based systems, difficulty generation algorit |
-| **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Medium | Security monitor - scans for vulnerabilities, advisories, and secret leaks. Use for: daily security scans, pre-PR adviso |
-| **sound-designer** | [`agents/sound-designer.md`](agents/sound-designer.md) | Medium | Procedural audio design specialist. Produces sound effect specifications, BGM loop structures, audio effect chains, and  |
-| **stack-setup** | [`agents/stack-setup.md`](agents/stack-setup.md) | Low | Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization" |
-| **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Medium | QA and verification agent - runs tests and validates acceptance criteria. Use when: code has been written and needs to b |
-| **visual-artist** | [`agents/visual-artist.md`](agents/visual-artist.md) | Medium | Visual asset specification agent - produces sprite sheet layouts, animation frame specs, procedural rendering instructio |
+| **arcade-designer** | [`agents/arcade-designer.md`](agents/arcade-designer.md) | High | Retro arcade game design specialist — entity AI, wave systems, scoring, level layout |
+| **architect** | [`agents/architect.md`](agents/architect.md) | High | Implementation plans, ADRs, and system architecture design specialist |
+| **designer** | [`agents/designer.md`](agents/designer.md) | Medium | UI/UX specs, wireframes, and component definition producer |
+| **game-debugger** | [`agents/game-debugger.md`](agents/game-debugger.md) | Medium | Bug root cause analysis, fix proposals, and bug pattern documentation specialist for game engine |
+| **game-designer** | [`agents/game-designer.md`](agents/game-designer.md) | High | Universal game design agent — core loop, difficulty curves, reward systems, tutorial/onboarding across all genres |
+| **game-developer** | [`agents/game-developer.md`](agents/game-developer.md) | Low | Canvas rendering engine, game loop, collision detection, and entity implementation specialist |
+| **puzzle-designer** | [`agents/puzzle-designer.md`](agents/puzzle-designer.md) | High | Puzzle/board game design specialist — matching logic, turn systems, difficulty generation |
+| **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Medium | Security policy enforcement and secrets leak prevention specialist |
+| **sound-designer** | [`agents/sound-designer.md`](agents/sound-designer.md) | Medium | Procedural audio design specialist — sound effects, BGM loops, audio architecture |
+| **stack-setup** | [`agents/stack-setup.md`](agents/stack-setup.md) | Low | Unknown stack identification and secure setup procedure specialist |
+| **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Medium | Test execution and acceptance criteria verification specialist |
+| **visual-artist** | [`agents/visual-artist.md`](agents/visual-artist.md) | Medium | Visual asset specialist — sprite design, animation frames, board/tile visuals, background, HUD elements |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -57,18 +61,18 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/arcade-designer.md`](agents/arcade-designer.md) |
-| **Tier** | medium |
+| **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Arcade game design specialist. Produces entity AI patterns, wave/stage systems, item/power-up mechanics, scoring systems, and tile-based level designs for retro arcade games (80s-90s classics). Use when: designing maze games, shooters, breakout games, snake-like games, or any reaction/timing-based arcade game. |
+| **Role** | Retro arcade game design specialist — entity AI, wave systems, scoring, level layout |
 
 ### architect
 
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/architect.md`](agents/architect.md) |
-| **Tier** | medium |
+| **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Design agent - produces implementation plans and technical specs. Use when: planning a new feature, evaluating architectural trade-offs, or generating an ADR before implementation starts. |
+| **Role** | Implementation plans, ADRs, and system architecture design specialist |
 
 ### designer
 
@@ -77,7 +81,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/designer.md`](agents/designer.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | UI/UX design agent - produces wireframes, component specs, and design tokens. Use when: designing new screens or flows, defining visual language, specifying component behaviour before implementation, or reviewing design consistency. |
+| **Role** | UI/UX specs, wireframes, and component definition producer |
 
 ### game-debugger
 
@@ -86,34 +90,34 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/game-debugger.md`](agents/game-debugger.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | Game debugger agent - analyzes bug reports, identifies root causes in game engine code, proposes targeted fixes, writes reproduction tests, and documents bug patterns. Use when: investigating gameplay bugs, entity behavior issues, collision system failures, ghost AI anomalies, tunnel wrapping problems, tile-based movement errors, or map data inconsistencies. |
+| **Role** | Bug root cause analysis, fix proposals, and bug pattern documentation specialist for game engine |
 
 ### game-designer
 
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/game-designer.md`](agents/game-designer.md) |
-| **Tier** | medium |
+| **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Universal game design agent - produces core game loop specifications, difficulty curves, reward systems, tutorial/onboarding design, and genre-agnostic design principles. Use when: designing core game mechanics, balancing difficulty progression, defining reward/motivation systems, or planning tutorial flow. Genre-specific design is delegated to arcade-designer or puzzle-designer. |
+| **Role** | Universal game design agent — core loop, difficulty curves, reward systems, tutorial/onboarding across all genres |
 
 ### game-developer
 
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/game-developer.md`](agents/game-developer.md) |
-| **Tier** | medium |
-| **Phases** | 4 |
-| **Role** | Game implementation agent - implements Canvas rendering engine, game loop, collision detection, entity systems, sprite rendering, and gameplay mechanics from approved design specifications. Use when: implementing game engine core, entity behavior, rendering systems, or gameplay logic. |
+| **Tier** | low |
+| **Phases** | 3, 4 |
+| **Role** | Canvas rendering engine, game loop, collision detection, and entity implementation specialist |
 
 ### puzzle-designer
 
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/puzzle-designer.md`](agents/puzzle-designer.md) |
-| **Tier** | medium |
+| **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Puzzle and board game design specialist. Produces matching/link logic, turn-based systems, difficulty generation algorithms, stage design, and board/grid structures for puzzle and board games. Use when: designing match-3 games, logic puzzles, board games, card games, merge games, or any turn-based or grid-based game. |
+| **Role** | Puzzle/board game design specialist — matching logic, turn systems, difficulty generation |
 
 ### security-monitor
 
@@ -122,7 +126,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/security-monitor.md`](agents/security-monitor.md) |
 | **Tier** | medium |
 | **Phases** | 0, 5 |
-| **Role** | Security monitor - scans for vulnerabilities, advisories, and secret leaks. Use for: daily security scans, pre-PR advisory checks, post-scaffold baseline scans. |
+| **Role** | Security policy enforcement and secrets leak prevention specialist |
 
 ### sound-designer
 
@@ -131,16 +135,16 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/sound-designer.md`](agents/sound-designer.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Procedural audio design specialist. Produces sound effect specifications, BGM loop structures, audio effect chains, and audio system architecture using Web Audio API. Use when: designing game sound effects, background music, audio layering rules, or procedural audio systems. |
+| **Role** | Procedural audio design specialist — sound effects, BGM loops, audio architecture |
 
 ### stack-setup
 
 | Field | Value |
 |-------|-------|
 | **File** | [`agents/stack-setup.md`](agents/stack-setup.md) |
-| **Tier** | medium |
+| **Tier** | low |
 | **Phases** | 0, 1 |
-| **Role** | Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization" |
+| **Role** | Unknown stack identification and secure setup procedure specialist |
 
 ### test-runner
 
@@ -149,7 +153,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/test-runner.md`](agents/test-runner.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | QA and verification agent - runs tests and validates acceptance criteria. Use when: code has been written and needs to be verified, or when the QA gate needs to be run before a PR. |
+| **Role** | Test execution and acceptance criteria verification specialist |
 
 ### visual-artist
 
@@ -158,7 +162,52 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/visual-artist.md`](agents/visual-artist.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Visual asset specification agent - produces sprite sheet layouts, animation frame specs, procedural rendering instructions, board/tile visuals, and background designs. Use when: defining visual elements for game entities, specifying animation sequences, or designing board/tile visuals. |
+| **Role** | Visual asset specialist — sprite design, animation frames, board/tile visuals, background, HUD elements |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -199,18 +248,25 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| Arcade game design specialist | Phase 1 | `arcade-designer` | medium | |
-| Design agent - produces implementation plans and technical specs | Phase 1 | `architect` | medium | |
-| UI/UX design agent - produces wireframes, component specs, and design tokens | Phase 3 | `designer` | medium | |
-| Game debugger agent - analyzes bug reports, identifies root causes in game engin | Phase 4 | `game-debugger` | medium | |
-| Universal game design agent - produces core game loop specifications, difficulty | Phase 1 | `game-designer` | medium | |
-| Game implementation agent - implements Canvas rendering engine, game loop, colli | Phase 4 | `game-developer` | medium | |
-| Puzzle and board game design specialist | Phase 1 | `puzzle-designer` | medium | |
-| Security monitor - scans for vulnerabilities, advisories, and secret leaks | Phase 0 | `security-monitor` | medium | |
-| Procedural audio design specialist | Phase 3 | `sound-designer` | medium | |
-| Stack Setup Specialist | Phase 0 | `stack-setup` | medium | |
-| QA and verification agent - runs tests and validates acceptance criteria | Phase 4 | `test-runner` | medium | |
-| Visual asset specification agent - produces sprite sheet layouts, animation fram | Phase 3 | `visual-artist` | medium | |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Retro arcade game design specialist — entity AI | Phase 1, 2 | `arcade-designer` | High | |
+| Implementation plans | Phase 1, 2 | `architect` | High | |
+| UI/UX specs | Phase 3 | `designer` | Medium | |
+| Bug root cause analysis | Phase 4 | `game-debugger` | Medium | |
+| Universal game design agent — core loop | Phase 1, 2 | `game-designer` | High | |
+| Canvas rendering engine | Phase 3, 4 | `game-developer` | Low | |
+| Puzzle/board game design specialist — matching logic | Phase 1, 2 | `puzzle-designer` | High | |
+| Security policy enforcement and secrets leak prevention specialist | Phase 0, 5 | `security-monitor` | Medium | |
+| Procedural audio design specialist — sound effects | Phase 3 | `sound-designer` | Medium | |
+| Unknown stack identification and secure setup procedure specialist | Phase 0, 1 | `stack-setup` | Low | |
+| Test execution and acceptance criteria verification specialist | Phase 4 | `test-runner` | Medium | |
+| Visual asset specialist — sprite design | Phase 3 | `visual-artist` | Medium | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.

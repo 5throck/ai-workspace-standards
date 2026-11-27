@@ -34,48 +34,52 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** Design-adjudication-heavy work is dispatched to the architect (or the variant's High-tier design specialist); a variant whose PM must own design adjudication re-declares `tier: high` in its own `agents/pm.md` frontmatter. |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **msds-agent** | [`agents/domains/functional/msds/msds-agent.md`](agents/domains/functional/msds/msds-agent.md) | Medium | MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approv |
-| **psm-agent** | [`agents/domains/functional/psm/psm-agent.md`](agents/domains/functional/psm/psm-agent.md) | Medium | Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high-risk chemical and petrochemical facilit |
-| **training-agent** | [`agents/domains/functional/training/training-agent.md`](agents/domains/functional/training/training-agent.md) | Medium | Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR A |
-| **battery-agent** | [`agents/domains/industry/battery/battery-agent.md`](agents/domains/industry/battery/battery-agent.md) | Medium | Secondary Battery Safety specialist — manages battery cell manufacturing safety, thermal runaway prevention, NMP solvent |
-| **biotech-agent** | [`agents/domains/industry/biotech/biotech-agent.md`](agents/domains/industry/biotech/biotech-agent.md) | Medium | Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization, LMO Class 2-3 biohazard |
-| **cosmetics-agent** | [`agents/domains/industry/cosmetics/cosmetics-agent.md`](agents/domains/industry/cosmetics/cosmetics-agent.md) | Medium | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and s |
-| **datacenter-agent** | [`agents/domains/industry/datacenter/datacenter-agent.md`](agents/domains/industry/datacenter/datacenter-agent.md) | Medium | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-volta |
-| **defense-agent** | [`agents/domains/industry/defense/defense-agent.md`](agents/domains/industry/defense/defense-agent.md) | Medium | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pres |
-| **ehschem-agent** | [`agents/domains/industry/ehschem/ehschem-agent.md`](agents/domains/industry/ehschem/ehschem-agent.md) | Medium | Chemical Plant Safety specialist (chemical plant safety) — refining/petrochemical/fine chemicals plant operations. Matrix model: industry coordinator referenci |
-| **ehsconst-agent** | [`agents/domains/industry/ehsconst/ehsconst-agent.md`](agents/domains/industry/ehsconst/ehsconst-agent.md) | Medium | Construction Safety specialist (construction safety) — Korean construction industry safety management per OSHA-KR construction provisio |
-| **food-agent** | [`agents/domains/industry/food/food-agent.md`](agents/domains/industry/food/food-agent.md) | Medium | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS c |
-| **gasterm-agent** | [`agents/domains/industry/gasterm/gasterm-agent.md`](agents/domains/industry/gasterm/gasterm-agent.md) | Medium | Gas Terminal Safety specialist (gas terminal safety) — LNG/LPG/hydrogen terminal and fueling station safety management per HPGSCA + LPG Act + Hydrogen Act + DSSMA. |
-| **gcp-agent** | [`agents/domains/industry/gcp/gcp-agent.md`](agents/domains/industry/gcp/gcp-agent.md) | Medium | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP |
-| **gdp-agent** | [`agents/domains/industry/gdp/gdp-agent.md`](agents/domains/industry/gdp/gdp-agent.md) | Medium | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per  |
-| **glp-agent** | [`agents/domains/industry/glp/glp-agent.md`](agents/domains/industry/glp/glp-agent.md) | Medium | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Stu |
-| **gmp-agent** | [`agents/domains/industry/gmp/gmp-agent.md`](agents/domains/industry/gmp/gmp-agent.md) | Medium | Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change |
-| **gvp-agent** | [`agents/domains/industry/gvp/gvp-agent.md`](agents/domains/industry/gvp/gvp-agent.md) | Medium | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PB |
-| **logistics-agent** | [`agents/domains/industry/logistics/logistics-agent.md`](agents/domains/industry/logistics/logistics-agent.md) | Medium | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, an |
-| **meddevice-agent** | [`agents/domains/industry/meddevice/meddevice-agent.md`](agents/domains/industry/meddevice/meddevice-agent.md) | Medium | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturin |
-| **powergen-agent** | [`agents/domains/industry/powergen/powergen-agent.md`](agents/domains/industry/powergen/powergen-agent.md) | Medium | Power Generation Safety specialist (power generation facility safety) — thermal/renewable plant safety management per Electric Utility Act + ESCA + New & Renewable Energy Act. nuclear excluded. |
-| **railway-agent** | [`agents/domains/industry/railway/railway-agent.md`](agents/domains/industry/railway/railway-agent.md) | Medium | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night tr |
-| **semicon-agent** | [`agents/domains/industry/semicon/semicon-agent.md`](agents/domains/industry/semicon/semicon-agent.md) | Medium | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric a |
-| **shipbuilding-agent** | [`agents/domains/industry/shipbuilding/shipbuilding-agent.md`](agents/domains/industry/shipbuilding/shipbuilding-agent.md) | Medium | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane liftin |
-| **steelmaking-agent** | [`agents/domains/industry/steelmaking/steelmaking-agent.md`](agents/domains/industry/steelmaking/steelmaking-agent.md) | Medium | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention, LOTO energy isolation, |
-| **waste-agent** | [`agents/domains/industry/waste/waste-agent.md`](agents/domains/industry/waste/waste-agent.md) | Medium | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention, incinerator/shredd |
 | **safety-governance-manager** | [`agents/safety-governance-manager.md`](agents/safety-governance-manager.md) | High | Strategic safety governance —selects industry profiles, defines KPIs, approves policies, and monitors regulatory updates |
-| **safety-workflow-manager** | [`agents/safety-workflow-manager.md`](agents/safety-workflow-manager.md) | High | Harness Prompt agent —operational safety workflow execution, dynamic agent team assembly, evidence collection coordinati |
+| **safety-workflow-manager** | [`agents/safety-workflow-manager.md`](agents/safety-workflow-manager.md) | High | Harness Prompt agent —operational safety workflow execution, dynamic agent team assembly, evidence collection coordination |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
 | **asset-integrity-agent** | [`agents/_shared/asset-integrity-agent.md`](agents/_shared/asset-integrity-agent.md) | Medium | Asset integrity specialist; preventative maintenance and aging equipment management |
-| **audit-agent** | [`agents/_shared/audit-agent.md`](agents/_shared/audit-agent.md) | Medium | Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain m |
-| **compliance-agent** | [`agents/_shared/compliance-agent.md`](agents/_shared/compliance-agent.md) | Medium | Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against K |
+| **audit-agent** | [`agents/_shared/audit-agent.md`](agents/_shared/audit-agent.md) | Medium | Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain maintenance, audit report generation |
+| **compliance-agent** | [`agents/_shared/compliance-agent.md`](agents/_shared/compliance-agent.md) | Medium | Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against Korean EHS law |
 | **contractor-safety-agent** | [`agents/_shared/contractor-safety-agent.md`](agents/_shared/contractor-safety-agent.md) | Medium | Contractor safety management; onboarding and monitoring of external workers |
 | **disaster-response-agent** | [`agents/_shared/disaster-response-agent.md`](agents/_shared/disaster-response-agent.md) | High | Disaster response specialist; handles natural disasters like typhoons and earthquakes |
 | **docs-writer** | [`agents/_shared/docs-writer.md`](agents/_shared/docs-writer.md) | Medium | Formats official documentation; enforces English-only policy and specific translation zones |
-| **emergency-agent** | [`agents/_shared/emergency-agent.md`](agents/_shared/emergency-agent.md) | High | Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation fo |
+| **emergency-agent** | [`agents/_shared/emergency-agent.md`](agents/_shared/emergency-agent.md) | High | Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation for fire, chemical release, serious accidents, and natural disasters |
 | **incident-investigation-agent** | [`agents/_shared/incident-investigation-agent.md`](agents/_shared/incident-investigation-agent.md) | Medium | Incident investigation and root cause analysis (RCA) specialist |
 | **legal-agent** | [`agents/_shared/legal-agent.md`](agents/_shared/legal-agent.md) | Medium | Real-time legal interpretation and compliance advisory based on South Korean EHS laws |
 | **occupational-health-agent** | [`agents/_shared/occupational-health-agent.md`](agents/_shared/occupational-health-agent.md) | Medium | Occupational health specialist; worker health examinations and environment monitoring |
 | **reporting-agent** | [`agents/_shared/reporting-agent.md`](agents/_shared/reporting-agent.md) | Medium | Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses |
-| **risk-assessment-agent** | [`agents/_shared/risk-assessment-agent.md`](agents/_shared/risk-assessment-agent.md) | Medium | Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk registe |
+| **risk-assessment-agent** | [`agents/_shared/risk-assessment-agent.md`](agents/_shared/risk-assessment-agent.md) | Medium | Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk register maintenance per Korean standards |
+| **msds-agent** | [`agents/domains/functional/msds/msds-agent.md`](agents/domains/functional/msds/msds-agent.md) | Medium | MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approval per OSHA-KR Articles 104, 110-115, 117-118 + K-REACH + GHS Rev 9 |
+| **psm-agent** | [`agents/domains/functional/psm/psm-agent.md`](agents/domains/functional/psm/psm-agent.md) | Medium | Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high-risk chemical and petrochemical facilities per OSHA-KR Article 44 |
+| **training-agent** | [`agents/domains/functional/training/training-agent.md`](agents/domains/functional/training/training-agent.md) | Medium | Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR Articles 29, 31, 32, and 36 |
+| **battery-agent** | [`agents/domains/industry/battery/battery-agent.md`](agents/domains/industry/battery/battery-agent.md) | Medium | Secondary Battery Safety specialist — manages battery cell manufacturing safety, thermal runaway prevention, NMP solvent recovery, and recycling chemical hazard control per DSSMA, CCA, and OSHA-KR |
+| **biotech-agent** | [`agents/domains/industry/biotech/biotech-agent.md`](agents/domains/industry/biotech/biotech-agent.md) | Medium | Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization, LMO Class 2-3 biohazard containment, and BSL compliance per LMO Act and GxP |
+| **cosmetics-agent** | [`agents/domains/industry/cosmetics/cosmetics-agent.md`](agents/domains/industry/cosmetics/cosmetics-agent.md) | Medium | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and solvent mixing EHS per Korean Cosmetics Act, MFDS CGMP Notice, and ISO 22716 |
+| **datacenter-agent** | [`agents/domains/industry/datacenter/datacenter-agent.md`](agents/domains/industry/datacenter/datacenter-agent.md) | Medium | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-voltage substation electrical safety, Arc Flash hazard protection, and BCP per ESCA and EUA |
+| **defense-agent** | [`agents/domains/industry/defense/defense-agent.md`](agents/domains/industry/defense/defense-agent.md) | Medium | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pressure gas compliance per Defense Acquisition Act and FSESA |
+| **ehschem-agent** | [`agents/domains/industry/ehschem/ehschem-agent.md`](agents/domains/industry/ehschem/ehschem-agent.md) | Medium | Chemical Plant Safety specialist (화학공장 안전) — 정유/석유화학/정밀화학 plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services |
+| **ehsconst-agent** | [`agents/domains/industry/ehsconst/ehsconst-agent.md`](agents/domains/industry/ehsconst/ehsconst-agent.md) | Medium | Construction Safety specialist (건설안전) — Korean construction industry safety management per OSHA-KR construction provisions, SAPA Article 5 (도급·하도급 확보의무), Construction Technology Promotion Act |
+| **food-agent** | [`agents/domains/industry/food/food-agent.md`](agents/domains/industry/food/food-agent.md) | Medium | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS compliance per Korean Food Sanitation Act and MFDS HACCP Notice |
+| **gasterm-agent** | [`agents/domains/industry/gasterm/gasterm-agent.md`](agents/domains/industry/gasterm/gasterm-agent.md) | Medium | Gas Terminal Safety specialist (가스터미널 안전) — LNG/LPG/수소 기지 및 충전소 안전 관리 per 고압가스안전관리법 + LPG법 + 수소법 + 위험물안전관리법 |
+| **gcp-agent** | [`agents/domains/industry/gcp/gcp-agent.md`](agents/domains/industry/gcp/gcp-agent.md) | Medium | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP + ICH E6(R3) |
+| **gdp-agent** | [`agents/domains/industry/gdp/gdp-agent.md`](agents/domains/industry/gdp/gdp-agent.md) | Medium | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per KGDP + PIC/S + EU GDP |
+| **glp-agent** | [`agents/domains/industry/glp/glp-agent.md`](agents/domains/industry/glp/glp-agent.md) | Medium | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Study Director support |
+| **gmp-agent** | [`agents/domains/industry/gmp/gmp-agent.md`](agents/domains/industry/gmp/gmp-agent.md) | Medium | Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change control, deviation/CAPA per KP-GMP and PIC/S |
+| **gvp-agent** | [`agents/domains/industry/gvp/gvp-agent.md`](agents/domains/industry/gvp/gvp-agent.md) | Medium | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PBRER, RMP per KGVP + ICH E2 series |
+| **logistics-agent** | [`agents/domains/industry/logistics/logistics-agent.md`](agents/domains/industry/logistics/logistics-agent.md) | Medium | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, and cold storage ammonia refrigerant safety per Port Safety Special Act |
+| **meddevice-agent** | [`agents/domains/industry/meddevice/meddevice-agent.md`](agents/domains/industry/meddevice/meddevice-agent.md) | Medium | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturing |
+| **powergen-agent** | [`agents/domains/industry/powergen/powergen-agent.md`](agents/domains/industry/powergen/powergen-agent.md) | Medium | Power Generation Safety specialist (발전설비 안전) — 화력/신재생 발전소 안전 관리 per 전기사업법 + 전기안전관리법 + 신재생에너지법. 원자력 제외 |
+| **railway-agent** | [`agents/domains/industry/railway/railway-agent.md`](agents/domains/industry/railway/railway-agent.md) | Medium | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night track maintenance, and subway tunnel operations per Railway Safety Act |
+| **semicon-agent** | [`agents/domains/industry/semicon/semicon-agent.md`](agents/domains/industry/semicon/semicon-agent.md) | Medium | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric acid (HF) safety, and toxic chemical compliance per HPGSCA and CCA |
+| **shipbuilding-agent** | [`agents/domains/industry/shipbuilding/shipbuilding-agent.md`](agents/domains/industry/shipbuilding/shipbuilding-agent.md) | Medium | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane lifting safety, and SAPA Article 5 subcontractor compliance per OSHA-KR and OSHSR |
+| **steelmaking-agent** | [`agents/domains/industry/steelmaking/steelmaking-agent.md`](agents/domains/industry/steelmaking/steelmaking-agent.md) | Medium | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention, LOTO energy isolation, blast furnace maintenance, and byproduct gas (CO/N2) leak control per OSHA-KR and HPGSCA |
+| **waste-agent** | [`agents/domains/industry/waste/waste-agent.md`](agents/domains/industry/waste/waste-agent.md) | Medium | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention, incinerator/shredder LOTO, and biogas safety per Wastes Control Act and Sewerage Act |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -84,231 +88,6 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 <!-- VARIANT-AGENT-DETAILS-START -->
-### msds-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/functional/msds/msds-agent.md`](agents/domains/functional/msds/msds-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approval per OSHA-KR Articles 104, 110-115, 117-118 + K-REACH + GHS Rev 9. |
-
-### psm-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/functional/psm/psm-agent.md`](agents/domains/functional/psm/psm-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high-risk chemical and petrochemical facilities per OSHA-KR Article 44. |
-
-### training-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/functional/training/training-agent.md`](agents/domains/functional/training/training-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR Articles 29, 31, 32, and 36. |
-
-### battery-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/battery/battery-agent.md`](agents/domains/industry/battery/battery-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Secondary Battery Safety specialist — manages battery cell manufacturing safety, thermal runaway prevention, NMP solvent recovery, and recycling chemical hazard control per DSSMA, CCA, and OSHA-KR. |
-
-### biotech-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/biotech/biotech-agent.md`](agents/domains/industry/biotech/biotech-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization, LMO Class 2-3 biohazard containment, and BSL compliance per LMO Act and GxP. |
-
-### cosmetics-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/cosmetics/cosmetics-agent.md`](agents/domains/industry/cosmetics/cosmetics-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and solvent mixing EHS per Korean Cosmetics Act, MFDS CGMP Notice, and ISO 22716. |
-
-### datacenter-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/datacenter/datacenter-agent.md`](agents/domains/industry/datacenter/datacenter-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-voltage substation electrical safety, Arc Flash hazard protection, and BCP per ESCA and EUA. |
-
-### defense-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/defense/defense-agent.md`](agents/domains/industry/defense/defense-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pressure gas compliance per Defense Acquisition Act and FSESA. |
-
-### ehschem-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/ehschem/ehschem-agent.md`](agents/domains/industry/ehschem/ehschem-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Chemical Plant Safety specialist (chemical plant safety) — refining/petrochemical/fine chemicals plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services. |
-
-### ehsconst-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/ehsconst/ehsconst-agent.md`](agents/domains/industry/ehsconst/ehsconst-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Construction Safety specialist (construction safety) — Korean construction industry safety management per OSHA-KR construction provisions, SAPA Article 5 (subcontracting safety obligation), Construction Technology Promotion Act. |
-
-### food-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/food/food-agent.md`](agents/domains/industry/food/food-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS compliance per Korean Food Sanitation Act and MFDS HACCP Notice. |
-
-### gasterm-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/gasterm/gasterm-agent.md`](agents/domains/industry/gasterm/gasterm-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Gas Terminal Safety specialist (gas terminal safety) — LNG/LPG/hydrogen terminal and fueling station safety management per HPGSCA + LPG Act + Hydrogen Act + DSSMA. |
-
-### gcp-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/gcp/gcp-agent.md`](agents/domains/industry/gcp/gcp-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP + ICH E6(R3). |
-
-### gdp-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/gdp/gdp-agent.md`](agents/domains/industry/gdp/gdp-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per KGDP + PIC/S + EU GDP. |
-
-### glp-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/glp/glp-agent.md`](agents/domains/industry/glp/glp-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Study Director support. |
-
-### gmp-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/gmp/gmp-agent.md`](agents/domains/industry/gmp/gmp-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change control, deviation/CAPA per KP-GMP and PIC/S. |
-
-### gvp-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/gvp/gvp-agent.md`](agents/domains/industry/gvp/gvp-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PBRER, RMP per KGVP + ICH E2 series. |
-
-### logistics-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/logistics/logistics-agent.md`](agents/domains/industry/logistics/logistics-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, and cold storage ammonia refrigerant safety per Port Safety Special Act. |
-
-### meddevice-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/meddevice/meddevice-agent.md`](agents/domains/industry/meddevice/meddevice-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturing. |
-
-### powergen-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/powergen/powergen-agent.md`](agents/domains/industry/powergen/powergen-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Power Generation Safety specialist (power generation facility safety) — thermal/renewable plant safety management per Electric Utility Act + ESCA + New & Renewable Energy Act. nuclear excluded. |
-
-### railway-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/railway/railway-agent.md`](agents/domains/industry/railway/railway-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night track maintenance, and subway tunnel operations per Railway Safety Act. |
-
-### semicon-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/semicon/semicon-agent.md`](agents/domains/industry/semicon/semicon-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric acid (HF) safety, and toxic chemical compliance per HPGSCA and CCA. |
-
-### shipbuilding-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/shipbuilding/shipbuilding-agent.md`](agents/domains/industry/shipbuilding/shipbuilding-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane lifting safety, and SAPA Article 5 subcontractor compliance per OSHA-KR and OSHSR. |
-
-### steelmaking-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/steelmaking/steelmaking-agent.md`](agents/domains/industry/steelmaking/steelmaking-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention, LOTO energy isolation, blast furnace maintenance, and byproduct gas (CO/N2) leak control per OSHA-KR and HPGSCA. |
-
-### waste-agent
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/domains/industry/waste/waste-agent.md`](agents/domains/industry/waste/waste-agent.md) |
-| **Tier** | medium |
-| **Phases** | — |
-| **Role** | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention, incinerator/shredder LOTO, and biogas safety per Wastes Control Act and Sewerage Act. |
-
 ### safety-governance-manager
 
 | Field | Value |
@@ -316,7 +95,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/safety-governance-manager.md`](agents/safety-governance-manager.md) |
 | **Tier** | high |
 | **Phases** | 2, 6 |
-| **Role** | Strategic safety governance —selects industry profiles, defines KPIs, approves policies, and monitors regulatory updates. |
+| **Role** | Strategic safety governance —selects industry profiles, defines KPIs, approves policies, and monitors regulatory updates |
 
 ### safety-workflow-manager
 
@@ -324,8 +103,17 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/safety-workflow-manager.md`](agents/safety-workflow-manager.md) |
 | **Tier** | high |
+| **Phases** | 3 |
+| **Role** | Harness Prompt agent —operational safety workflow execution, dynamic agent team assembly, evidence collection coordination |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
 | **Phases** | — |
-| **Role** | Harness Prompt agent —operational safety workflow execution, dynamic agent team assembly, evidence collection coordination. |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
 
 ### asset-integrity-agent
 
@@ -343,7 +131,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/_shared/audit-agent.md`](agents/_shared/audit-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
-| **Role** | Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain maintenance, audit report generation. |
+| **Role** | Safety audit and evidence traceability —finding documentation, corrective action tracking, evidence traceability chain maintenance, audit report generation |
 
 ### compliance-agent
 
@@ -352,7 +140,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/_shared/compliance-agent.md`](agents/_shared/compliance-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
-| **Role** | Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against Korean EHS law. |
+| **Role** | Regulatory compliance validation —gap analysis, compliance checklists, and regulatory update impact assessment against Korean EHS law |
 
 ### contractor-safety-agent
 
@@ -388,7 +176,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/_shared/emergency-agent.md`](agents/_shared/emergency-agent.md) |
 | **Tier** | high |
 | **Phases** | — |
-| **Role** | Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation for fire, chemical release, serious accidents, and natural disasters. |
+| **Role** | Emergency response —scenario classification, immediate protocol activation, CSO escalation, and evidence preservation for fire, chemical release, serious accidents, and natural disasters |
 
 ### incident-investigation-agent
 
@@ -433,7 +221,268 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/_shared/risk-assessment-agent.md`](agents/_shared/risk-assessment-agent.md) |
 | **Tier** | medium |
 | **Phases** | — |
-| **Role** | Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk register maintenance per Korean standards. |
+| **Role** | Workplace risk assessment specialist —hazard identification, risk scoring, control measure recommendations, risk register maintenance per Korean standards |
+
+### msds-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/functional/msds/msds-agent.md`](agents/domains/functional/msds/msds-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | MSDS / Chemical Safety specialist — manages chemical substance data, GHS classification, MSDS lifecycle, chemical approval per OSHA-KR Articles 104, 110-115, 117-118 + K-REACH + GHS Rev 9 |
+
+### psm-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/functional/psm/psm-agent.md`](agents/domains/functional/psm/psm-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high-risk chemical and petrochemical facilities per OSHA-KR Article 44 |
+
+### training-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/functional/training/training-agent.md`](agents/domains/functional/training/training-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Safety and health education specialist — manages worker training plans, curricula, and compliance tracking per OSHA-KR Articles 29, 31, 32, and 36 |
+
+### battery-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/battery/battery-agent.md`](agents/domains/industry/battery/battery-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Secondary Battery Safety specialist — manages battery cell manufacturing safety, thermal runaway prevention, NMP solvent recovery, and recycling chemical hazard control per DSSMA, CCA, and OSHA-KR |
+
+### biotech-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/biotech/biotech-agent.md`](agents/domains/industry/biotech/biotech-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization, LMO Class 2-3 biohazard containment, and BSL compliance per LMO Act and GxP |
+
+### cosmetics-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/cosmetics/cosmetics-agent.md`](agents/domains/industry/cosmetics/cosmetics-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch release, ingredient safety assessment, and solvent mixing EHS per Korean Cosmetics Act, MFDS CGMP Notice, and ISO 22716 |
+
+### datacenter-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/datacenter/datacenter-agent.md`](agents/domains/industry/datacenter/datacenter-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Data Center Safety specialist — manages hyperscale IT infrastructure safety, lithium-ion UPS/ESS fire safety, high-voltage substation electrical safety, Arc Flash hazard protection, and BCP per ESCA and EUA |
+
+### defense-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/defense/defense-agent.md`](agents/domains/industry/defense/defense-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD, missile cryogenic fuel, and high-pressure gas compliance per Defense Acquisition Act and FSESA |
+
+### ehschem-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/ehschem/ehschem-agent.md`](agents/domains/industry/ehschem/ehschem-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Chemical Plant Safety specialist (화학공장 안전) — 정유/석유화학/정밀화학 plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services |
+
+### ehsconst-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/ehsconst/ehsconst-agent.md`](agents/domains/industry/ehsconst/ehsconst-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Construction Safety specialist (건설안전) — Korean construction industry safety management per OSHA-KR construction provisions, SAPA Article 5 (도급·하도급 확보의무), Construction Technology Promotion Act |
+
+### food-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/food/food-agent.md`](agents/domains/industry/food/food-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monitoring, food mixer LOTO, and worker EHS compliance per Korean Food Sanitation Act and MFDS HACCP Notice |
+
+### gasterm-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/gasterm/gasterm-agent.md`](agents/domains/industry/gasterm/gasterm-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Gas Terminal Safety specialist (가스터미널 안전) — LNG/LPG/수소 기지 및 충전소 안전 관리 per 고압가스안전관리법 + LPG법 + 수소법 + 위험물안전관리법 |
+
+### gcp-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/gcp/gcp-agent.md`](agents/domains/industry/gcp/gcp-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Good Clinical Practice specialist — clinical trial management, IRB, informed consent, monitoring, SAE reporting per KGCP + ICH E6(R3) |
+
+### gdp-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/gdp/gdp-agent.md`](agents/domains/industry/gdp/gdp-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Good Distribution Practice specialist — pharmaceutical supply chain, storage, transportation, DTS tracking, recalls per KGDP + PIC/S + EU GDP |
+
+### glp-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/glp/glp-agent.md`](agents/domains/industry/glp/glp-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + OECD GLP compliance, QAU inspections, Study Director support |
+
+### gmp-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/gmp/gmp-agent.md`](agents/domains/industry/gmp/gmp-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems, batch records, validation, change control, deviation/CAPA per KP-GMP and PIC/S |
+
+### gvp-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/gvp/gvp-agent.md`](agents/domains/industry/gvp/gvp-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Good Pharmacovigilance Practice specialist — post-market drug safety surveillance, ICSR management, signal detection, PBRER, RMP per KGVP + ICH E2 series |
+
+### logistics-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/logistics/logistics-agent.md`](agents/domains/industry/logistics/logistics-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting, AGV worker collision prevention, and cold storage ammonia refrigerant safety per Port Safety Special Act |
+
+### meddevice-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/meddevice/meddevice-agent.md`](agents/domains/industry/meddevice/meddevice-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturing |
+
+### powergen-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/powergen/powergen-agent.md`](agents/domains/industry/powergen/powergen-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Power Generation Safety specialist (발전설비 안전) — 화력/신재생 발전소 안전 관리 per 전기사업법 + 전기안전관리법 + 신재생에너지법. 원자력 제외 |
+
+### railway-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/railway/railway-agent.md`](agents/domains/industry/railway/railway-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety, night track maintenance, and subway tunnel operations per Railway Safety Act |
+
+### semicon-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/semicon/semicon-agent.md`](agents/domains/industry/semicon/semicon-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas handling (NF3, SiH4, WF6), hydrofluoric acid (HF) safety, and toxic chemical compliance per HPGSCA and CCA |
+
+### shipbuilding-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/shipbuilding/shipbuilding-agent.md`](agents/domains/industry/shipbuilding/shipbuilding-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention, heavy crane lifting safety, and SAPA Article 5 subcontractor compliance per OSHA-KR and OSHSR |
+
+### steelmaking-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/steelmaking/steelmaking-agent.md`](agents/domains/industry/steelmaking/steelmaking-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention, LOTO energy isolation, blast furnace maintenance, and byproduct gas (CO/N2) leak control per OSHA-KR and HPGSCA |
+
+### waste-agent
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/domains/industry/waste/waste-agent.md`](agents/domains/industry/waste/waste-agent.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention, incinerator/shredder LOTO, and biogas safety per Wastes Control Act and Sewerage Act |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -474,45 +523,52 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| MSDS / Chemical Safety specialist — manages chemical substance data, GHS classif | Phase 4 | `msds-agent` | medium | |
-| Process Safety Management specialist — manages PHA, MOC, PSSR, and LOTO for high | Phase 4 | `psm-agent` | medium | |
-| Safety and health education specialist — manages worker training plans, curricul | Phase 4 | `training-agent` | medium | |
-| Secondary Battery Safety specialist — manages battery cell manufacturing safety, | Phase 4 | `battery-agent` | medium | |
-| Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP stea | Phase 4 | `biotech-agent` | medium | |
-| Cosmetics Safety specialist — manages cosmetics quality systems, CGMP batch rele | Phase 4 | `cosmetics-agent` | medium | |
-| Data Center Safety specialist — manages hyperscale IT infrastructure safety, lit | Phase 4 | `datacenter-agent` | medium | |
-| Defense & Explosives Safety specialist — manages ammunition propellant mixing ES | Phase 4 | `defense-agent` | medium | |
-| Chemical Plant Safety specialist (`KO term (see glossary)` `KO term (see glossary)`) — `KO term (see glossary)`/`KO term (see glossary)`/`KO term (see glossary)` plant operations | Phase 4 | `ehschem-agent` | medium | |
-| Construction Safety specialist (`construction safety`) — Korean construction industry safety mana | Phase 4 | `ehsconst-agent` | medium | |
-| Food & Beverage Safety specialist — manages food safety systems, HACCP CCP monit | Phase 4 | `food-agent` | medium | |
-| Gas Terminal Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)gasterm-agent` | medium | |
-| Good Clinical Practice specialist — clinical trial management, IRB, informed con | Phase 4 | `gcp-agent` | medium | |
-| Good Distribution Practice specialist — pharmaceutical supply chain, storage, tr | Phase 4 | `gdp-agent` | medium | |
-| Good Laboratory Practice specialist — non-clinical safety studies, MFDS + ME + O | Phase 4 | `glp-agent` | medium | |
-| Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality sy | Phase 4 | `gmp-agent` | medium | |
-| Good Pharmacovigilance Practice specialist — post-market drug safety surveillanc | Phase 4 | `gvp-agent` | medium | |
-| Port Logistics & Automated Warehouse Safety specialist — manages port crane lift | Phase 4 | `logistics-agent` | medium | |
-| Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971 | Phase 4 | `meddevice-agent` | medium | |
-| Power Generation Safety specialist (`KO term (see glossary)` `KO term (see glossary)KO term (see glossary)Electric Utility ActKO term (see glossary)powergen-agent` | medium | |
-| Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high- | Phase 4 | `railway-agent` | medium | |
-| Semiconductor & Display Safety specialist — manages cleanroom EHS, special gas h | Phase 4 | `semicon-agent` | medium | |
-| Shipbuilding & Offshore Safety specialist — manages ship tank confined space asp | Phase 4 | `shipbuilding-agent` | medium | |
-| Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace expl | Phase 4 | `steelmaking-agent` | medium | |
-| Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asp | Phase 4 | `waste-agent` | medium | |
-| Strategic safety governance —selects industry profiles, defines KPIs, approves p | Phase 2, Phase 6 | `safety-governance-manager` | high | Strategic governance and QA gate ownership |
-| Harness Prompt agent —operational safety workflow execution, dynamic agent team  | Phase 4 | `safety-workflow-manager` | high | |
-| Asset integrity specialist; preventative maintenance and aging equipment managem | Phase 4 | `asset-integrity-agent` | medium | |
-| Safety audit and evidence traceability —finding documentation, corrective action | Phase 4 | `audit-agent` | medium | |
-| Regulatory compliance validation —gap analysis, compliance checklists, and regul | Phase 4 | `compliance-agent` | medium | |
-| Contractor safety management; onboarding and monitoring of external workers | Phase 4 | `contractor-safety-agent` | medium | |
-| Disaster response specialist; handles natural disasters like typhoons and earthq | Phase 4 | `disaster-response-agent` | high | |
-| Formats official documentation; enforces English-only policy and specific transl | Phase 4 | `docs-writer` | medium | |
-| Emergency response —scenario classification, immediate protocol activation, CSO  | Phase 4 | `emergency-agent` | high | |
-| Incident investigation and root cause analysis (RCA) specialist | Phase 4 | `incident-investigation-agent` | medium | |
-| Real-time legal interpretation and compliance advisory based on South Korean EHS | Phase 4 | `legal-agent` | medium | |
-| Occupational health specialist; worker health examinations and environment monit | Phase 4 | `occupational-health-agent` | medium | |
-| Safety KPI reporting specialist; tracks TRIR, LTIR, and near-misses | Phase 4 | `reporting-agent` | medium | |
-| Workplace risk assessment specialist —hazard identification, risk scoring, contr | Phase 4 | `risk-assessment-agent` | medium | |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Strategic safety governance —selects industry profiles | Phase 2, 6 | `safety-governance-manager` | High | |
+| Harness Prompt agent —operational safety workflow execution | Phase 3 | `safety-workflow-manager` | High | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Asset integrity specialist; preventative maintenance and aging equipment management | Phase — | `asset-integrity-agent` | Medium | |
+| Safety audit and evidence traceability —finding documentation | Phase — | `audit-agent` | Medium | |
+| Regulatory compliance validation —gap analysis | Phase — | `compliance-agent` | Medium | |
+| Contractor safety management; onboarding and monitoring of external workers | Phase — | `contractor-safety-agent` | Medium | |
+| Disaster response specialist; handles natural disasters like typhoons and earthquakes | Phase — | `disaster-response-agent` | High | |
+| Formats official documentation; enforces English-only policy and specific translation zones | Phase — | `docs-writer` | Medium | |
+| Emergency response —scenario classification | Phase — | `emergency-agent` | High | |
+| Incident investigation and root cause analysis (RCA) specialist | Phase — | `incident-investigation-agent` | Medium | |
+| Real-time legal interpretation and compliance advisory based on South Korean EHS laws | Phase — | `legal-agent` | Medium | |
+| Occupational health specialist; worker health examinations and environment monitoring | Phase — | `occupational-health-agent` | Medium | |
+| Safety KPI reporting specialist; tracks TRIR | Phase — | `reporting-agent` | Medium | |
+| Workplace risk assessment specialist —hazard identification | Phase — | `risk-assessment-agent` | Medium | |
+| MSDS / Chemical Safety specialist — manages chemical substance data | Phase — | `msds-agent` | Medium | |
+| Process Safety Management specialist — manages PHA | Phase — | `psm-agent` | Medium | |
+| Safety and health education specialist — manages worker training plans | Phase — | `training-agent` | Medium | |
+| Secondary Battery Safety specialist — manages battery cell manufacturing safety | Phase — | `battery-agent` | Medium | |
+| Biopharmaceutical CDMO & Bio-Lab Safety specialist — manages bioreactor SIP steam sterilization | Phase — | `biotech-agent` | Medium | |
+| Cosmetics Safety specialist — manages cosmetics quality systems | Phase — | `cosmetics-agent` | Medium | |
+| Data Center Safety specialist — manages hyperscale IT infrastructure safety | Phase — | `datacenter-agent` | Medium | |
+| Defense & Explosives Safety specialist — manages ammunition propellant mixing ESD | Phase — | `defense-agent` | Medium | |
+| Chemical Plant Safety specialist (화학공장 안전) — 정유/석유화학/정밀화학 plant operations. Matrix model: industry coordinator referencing PSM/MSDS/Emergency functional services | Phase — | `ehschem-agent` | Medium | |
+| Construction Safety specialist (건설안전) — Korean construction industry safety management per OSHA-KR construction provisions | Phase — | `ehsconst-agent` | Medium | |
+| Food & Beverage Safety specialist — manages food safety systems | Phase — | `food-agent` | Medium | |
+| Gas Terminal Safety specialist (가스터미널 안전) — LNG/LPG/수소 기지 및 충전소 안전 관리 per 고압가스안전관리법 + LPG법 + 수소법 + 위험물안전관리법 | Phase — | `gasterm-agent` | Medium | |
+| Good Clinical Practice specialist — clinical trial management | Phase — | `gcp-agent` | Medium | |
+| Good Distribution Practice specialist — pharmaceutical supply chain | Phase — | `gdp-agent` | Medium | |
+| Good Laboratory Practice specialist — non-clinical safety studies | Phase — | `glp-agent` | Medium | |
+| Good Manufacturing Practice (GMP) specialist — manages pharmaceutical quality systems | Phase — | `gmp-agent` | Medium | |
+| Good Pharmacovigilance Practice specialist — post-market drug safety surveillance | Phase — | `gvp-agent` | Medium | |
+| Port Logistics & Automated Warehouse Safety specialist — manages port crane lifting | Phase — | `logistics-agent` | Medium | |
+| Medical Device Safety specialist — KGMP-MD + ISO 13485 + ISO 14971. Industry coordinator for medical device manufacturing | Phase — | `meddevice-agent` | Medium | |
+| Power Generation Safety specialist (발전설비 안전) — 화력/신재생 발전소 안전 관리 per 전기사업법 + 전기안전관리법 + 신재생에너지법. 원자력 제외 | Phase — | `powergen-agent` | Medium | |
+| Railway & Transit Infrastructure Safety specialist — manages 25kV catenary high-voltage electrification safety | Phase — | `railway-agent` | Medium | |
+| Semiconductor & Display Safety specialist — manages cleanroom EHS | Phase — | `semicon-agent` | Medium | |
+| Shipbuilding & Offshore Safety specialist — manages ship tank confined space asphyxiation prevention | Phase — | `shipbuilding-agent` | Medium | |
+| Steelmaking & Heavy Metals Safety specialist — manages molten metal furnace explosion prevention | Phase — | `steelmaking-agent` | Medium | |
+| Environmental Waste & Water Treatment Safety specialist — manages sewage H2S asphyxiation prevention | Phase — | `waste-agent` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.

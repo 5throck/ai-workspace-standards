@@ -6576,8 +6576,8 @@
       "name": "design",
       "scope": "co-deck",
       "capability": "design",
-      "content_hash": "9ed885b8d29b131c",
-      "version": "1.2.3",
+      "content_hash": "9cecff334e0b8406",
+      "version": "1.2.4",
       "mirrors": [
         "templates/co-deck/skills/design/SKILL.md"
       ],
@@ -6596,8 +6596,8 @@
       "name": "html-build",
       "scope": "co-deck",
       "capability": "html-build",
-      "content_hash": "d117ac5d523cf47c",
-      "version": "1.8.1",
+      "content_hash": "9a68e67933c3ce20",
+      "version": "1.8.2",
       "mirrors": [
         "templates/co-deck/skills/html-build/SKILL.md"
       ],
@@ -6616,8 +6616,8 @@
       "name": "pdf-export",
       "scope": "co-deck",
       "capability": "pdf-export",
-      "content_hash": "4250f2a6fb677ada",
-      "version": "2.2.1",
+      "content_hash": "973ec17cc1557ff0",
+      "version": "2.2.2",
       "mirrors": [
         "templates/co-deck/skills/pdf-export/SKILL.md"
       ],
@@ -6635,8 +6635,8 @@
       "name": "prep-pdf",
       "scope": "co-deck",
       "capability": "prep-pdf",
-      "content_hash": "411913fa4ca52162",
-      "version": "2.0.2",
+      "content_hash": "2c7860279234e994",
+      "version": "2.0.3",
       "mirrors": [
         "templates/co-deck/skills/prep-pdf/SKILL.md"
       ]
@@ -6661,8 +6661,8 @@
       "name": "research",
       "scope": "co-deck",
       "capability": "research",
-      "content_hash": "8cb93e9ffe84855e",
-      "version": "1.2.3",
+      "content_hash": "6400f1350f8c63fc",
+      "version": "1.2.4",
       "mirrors": [
         "templates/co-deck/skills/research/SKILL.md"
       ],
@@ -6677,8 +6677,8 @@
       "name": "slide-layout-gate",
       "scope": "co-deck",
       "capability": "slide-layout-gate",
-      "content_hash": "236eb87833970e54",
-      "version": "1.0.3",
+      "content_hash": "16329365b7e396ac",
+      "version": "1.0.4",
       "mirrors": [
         "templates/co-deck/skills/slide-layout-gate/SKILL.md"
       ],
@@ -6696,8 +6696,8 @@
       "name": "storyline",
       "scope": "co-deck",
       "capability": "storyline",
-      "content_hash": "4ebf17160dda2acc",
-      "version": "1.7.0",
+      "content_hash": "71a046a3c21db44a",
+      "version": "1.7.1",
       "mirrors": [
         "templates/co-deck/skills/storyline/SKILL.md"
       ],
@@ -6716,8 +6716,8 @@
       "name": "theme-authoring",
       "scope": "co-deck",
       "capability": "theme-authoring",
-      "content_hash": "fc638cfb5b7fbab1",
-      "version": "1.0.1",
+      "content_hash": "28f4552f9bce84ad",
+      "version": "1.0.2",
       "mirrors": [
         "templates/co-deck/skills/theme-authoring/SKILL.md"
       ]
@@ -6729,8 +6729,8 @@
       "name": "version",
       "scope": "co-deck",
       "capability": "version",
-      "content_hash": "b9e098ad866a9c54",
-      "version": "1.3.2",
+      "content_hash": "2dab414ed149792b",
+      "version": "1.3.3",
       "mirrors": [
         "templates/co-deck/skills/version/SKILL.md"
       ]
@@ -14619,12 +14619,6 @@
       "type": "cites_skill",
       "from": "doc:co-deck/AGENTS.md",
       "to": "skill:co-deck/pdf-export",
-      "source": "workflow-doc"
-    },
-    {
-      "type": "cites_skill",
-      "from": "doc:co-deck/AGENTS.md",
-      "to": "skill:co-deck/prep-pdf",
       "source": "workflow-doc"
     },
     {

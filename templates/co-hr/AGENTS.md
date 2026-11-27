@@ -29,20 +29,24 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **career-succession-consultant** | [`agents/career-succession-consultant.md`](agents/career-succession-consultant.md) | Medium | Career and succession consultant - designs career pathing, leadership pipelines, and succession plans (HRD). Use when: c |
-| **change-management-partner** | [`agents/change-management-partner.md`](agents/change-management-partner.md) | Medium | Change management partner - manages change for org restructuring or new HR system rollouts, stakeholder alignment, resis |
-| **compensation-benefits-analyst** | [`agents/compensation-benefits-analyst.md`](agents/compensation-benefits-analyst.md) | Medium | Compensation and benefits analyst - designs wage structures, incentive schemes, benefits programs, and conducts compensa |
-| **data-analyst** | [`agents/data-analyst.md`](agents/data-analyst.md) | Medium | HR data analyst - analyzes workforce statistics, turnover, hiring conversion, and labor-cost data, and builds HR dashboa |
-| **labor-compliance-analyst** | [`agents/labor-compliance-analyst.md`](agents/labor-compliance-analyst.md) | Medium | Labor compliance analyst - reviews compliance with the labor legislation of the target jurisdiction (see the active coun |
-| **labor-relations-specialist** | [`agents/labor-relations-specialist.md`](agents/labor-relations-specialist.md) | Medium | Labor relations specialist - supports responses to labor-relations-authority proceedings (unfair dismissal / unfair labo |
-| **learning-development-specialist** | [`agents/learning-development-specialist.md`](agents/learning-development-specialist.md) | Medium | Learning and development specialist - designs training systems, competency models, and training program operations (HRD) |
-| **org-design-consultant** | [`agents/org-design-consultant.md`](agents/org-design-consultant.md) | Medium | Org design consultant - designs organizational structure, job architecture, workforce planning, governance, and restruct |
-| **performance-management-consultant** | [`agents/performance-management-consultant.md`](agents/performance-management-consultant.md) | Medium | Performance management consultant - designs performance evaluation systems, KPI/OKR frameworks, and feedback processes ( |
-| **safety-health-officer** | [`agents/safety-health-officer.md`](agents/safety-health-officer.md) | Medium | Safety and health officer - reviews compliance with the jurisdiction’s occupational safety and health legislation (inclu |
-| **talent-acquisition-specialist** | [`agents/talent-acquisition-specialist.md`](agents/talent-acquisition-specialist.md) | Medium | Talent acquisition specialist - designs recruiting strategy, sourcing channels, selection processes, and talent pipeline |
+| **career-succession-consultant** | [`agents/career-succession-consultant.md`](agents/career-succession-consultant.md) | Medium | "Career path design, leadership pipeline, succession planning (HRD)" |
+| **change-management-partner** | [`agents/change-management-partner.md`](agents/change-management-partner.md) | Medium | "Change management for reorganizations/new-system rollouts, stakeholder alignment, resistance management, organizational culture diagnosis with DEI lens" |
+| **compensation-benefits-analyst** | [`agents/compensation-benefits-analyst.md`](agents/compensation-benefits-analyst.md) | Medium | "Wage structure, incentives, benefits design, compensation benchmarking (HRM)" |
+| **data-analyst** | [`agents/data-analyst.md`](agents/data-analyst.md) | Medium | "Workforce statistics, turnover/hiring-conversion/labor-cost analysis, HR dashboards/people analytics" |
+| **labor-compliance-analyst** | [`agents/labor-compliance-analyst.md`](agents/labor-compliance-analyst.md) | Medium | "labor-law compliance review (jurisdiction per active country profile), work rules maintenance, wage & working-time system review" |
+| **labor-relations-specialist** | [`agents/labor-relations-specialist.md`](agents/labor-relations-specialist.md) | Medium | "labor-relations-authority case response, collective bargaining strategy support, labor-management council operation advisory, precedent research" |
+| **learning-development-specialist** | [`agents/learning-development-specialist.md`](agents/learning-development-specialist.md) | Medium | "Training system design, competency model, training program operation (HRD)" |
+| **org-design-consultant** | [`agents/org-design-consultant.md`](agents/org-design-consultant.md) | Medium | "Org structure/job architecture design, workforce planning, governance, reorganization, workforce restructuring linked to voluntary retirement and outplacement support" |
+| **performance-management-consultant** | [`agents/performance-management-consultant.md`](agents/performance-management-consultant.md) | Medium | "Evaluation system, KPI/OKR design, performance feedback process (HRM)" |
+| **safety-health-officer** | [`agents/safety-health-officer.md`](agents/safety-health-officer.md) | Medium | "occupational safety and health compliance (incl. serious-accident liability regimes where enacted), safety and health management system + safety-health committee operation" |
+| **talent-acquisition-specialist** | [`agents/talent-acquisition-specialist.md`](agents/talent-acquisition-specialist.md) | Medium | "Recruiting strategy, sourcing, selection process, talent pipeline design (HRM)" |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -58,7 +62,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/career-succession-consultant.md`](agents/career-succession-consultant.md) |
 | **Tier** | medium |
 | **Phases** | 2 |
-| **Role** | Career and succession consultant - designs career pathing, leadership pipelines, and succession plans (HRD). Use when: career-path design, leadership pipeline design, or succession planning required. |
+| **Role** | "Career path design, leadership pipeline, succession planning (HRD)" |
 
 ### change-management-partner
 
@@ -67,7 +71,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/change-management-partner.md`](agents/change-management-partner.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2 |
-| **Role** | Change management partner - manages change for org restructuring or new HR system rollouts, stakeholder alignment, resistance management, and organizational culture diagnosis with a DEI (diversity, equity, inclusion) lens. Use when: change management planning, stakeholder alignment, resistance management, or culture/DEI assessment required. |
+| **Role** | "Change management for reorganizations/new-system rollouts, stakeholder alignment, resistance management, organizational culture diagnosis with DEI lens" |
 
 ### compensation-benefits-analyst
 
@@ -76,7 +80,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/compensation-benefits-analyst.md`](agents/compensation-benefits-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 2 |
-| **Role** | Compensation and benefits analyst - designs wage structures, incentive schemes, benefits programs, and conducts compensation benchmarking (HRM). Use when: pay structure design, incentive plan design, benefits design, or compensation benchmarking required. |
+| **Role** | "Wage structure, incentives, benefits design, compensation benchmarking (HRM)" |
 
 ### data-analyst
 
@@ -85,7 +89,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/data-analyst.md`](agents/data-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1, 3 |
-| **Role** | HR data analyst - analyzes workforce statistics, turnover, hiring conversion, and labor-cost data, and builds HR dashboards / people analytics. Use when: workforce statistics analysis, turnover/conversion analysis, labor-cost analysis, or HR dashboard/people-analytics work required. |
+| **Role** | "Workforce statistics, turnover/hiring-conversion/labor-cost analysis, HR dashboards/people analytics" |
 
 ### labor-compliance-analyst
 
@@ -94,7 +98,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/labor-compliance-analyst.md`](agents/labor-compliance-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Labor compliance analyst - reviews compliance with the labor legislation of the target jurisdiction (see the active country profile under docs/countries/), maintains and audits work rules, and evaluates wage and working-time systems. Uses the k-law skill for statute/precedent/administrative-rule lookup when the active country profile is KR. Use when: labor law compliance review, work-rule drafting/audit, wage or working-time system design required. |
+| **Role** | "labor-law compliance review (jurisdiction per active country profile), work rules maintenance, wage & working-time system review" |
 
 ### labor-relations-specialist
 
@@ -103,7 +107,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/labor-relations-specialist.md`](agents/labor-relations-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2 |
-| **Role** | Labor relations specialist - supports responses to labor-relations-authority proceedings (unfair dismissal / unfair labor practice), collective bargaining strategy, and labor-management council operating advisory, plus precedent research. Co-uses the k-law skill when the active country profile is KR. Use when: labor board dispute response, bargaining strategy, labor-management council operation, or precedent research required. |
+| **Role** | "labor-relations-authority case response, collective bargaining strategy support, labor-management council operation advisory, precedent research" |
 
 ### learning-development-specialist
 
@@ -112,7 +116,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/learning-development-specialist.md`](agents/learning-development-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 2 |
-| **Role** | Learning and development specialist - designs training systems, competency models, and training program operations (HRD). Use when: training system design, competency model design, or training program design/operation required. |
+| **Role** | "Training system design, competency model, training program operation (HRD)" |
 
 ### org-design-consultant
 
@@ -121,7 +125,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/org-design-consultant.md`](agents/org-design-consultant.md) |
 | **Tier** | medium |
 | **Phases** | 2, 3 |
-| **Role** | Org design consultant - designs organizational structure, job architecture, workforce planning, governance, and restructuring, including business-reason-based workforce restructuring/redeployment, voluntary-retirement process design, and outplacement linkage. Synthesizes inputs from HRM/HRD and labor-relations specialists into a coherent structural design. Use when: org structure design, job architecture design, workforce planning, restructuring, or voluntary-retirement/outplacement process design required. |
+| **Role** | "Org structure/job architecture design, workforce planning, governance, reorganization, workforce restructuring linked to voluntary retirement and outplacement support" |
 
 ### performance-management-consultant
 
@@ -130,7 +134,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/performance-management-consultant.md`](agents/performance-management-consultant.md) |
 | **Tier** | medium |
 | **Phases** | 2 |
-| **Role** | Performance management consultant - designs performance evaluation systems, KPI/OKR frameworks, and feedback processes (HRM). Use when: evaluation system design, KPI/OKR framework design, or feedback process design required. |
+| **Role** | "Evaluation system, KPI/OKR design, performance feedback process (HRM)" |
 
 ### safety-health-officer
 
@@ -139,7 +143,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/safety-health-officer.md`](agents/safety-health-officer.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Safety and health officer - reviews compliance with the jurisdiction’s occupational safety and health legislation (including serious-accident liability regimes where enacted) and advises on safety-and-health management system design and safety-health committee operation. Co-uses the k-law skill when the active country profile is KR. Use when: industrial safety/health compliance review or serious-accident-prevention system design required. |
+| **Role** | "occupational safety and health compliance (incl. serious-accident liability regimes where enacted), safety and health management system + safety-health committee operation" |
 
 ### talent-acquisition-specialist
 
@@ -148,7 +152,52 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/talent-acquisition-specialist.md`](agents/talent-acquisition-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 2 |
-| **Role** | Talent acquisition specialist - designs recruiting strategy, sourcing channels, selection processes, and talent pipelines (HRM). Use when: recruiting strategy, sourcing plan, selection/interview process design, or talent pipeline design required. |
+| **Role** | "Recruiting strategy, sourcing, selection process, talent pipeline design (HRM)" |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -189,17 +238,24 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| Career and succession consultant - designs career pathing, leadership pipelines, | Phase 2 | `career-succession-consultant` | medium | |
-| Change management partner - manages change for org restructuring or new HR syste | Phase 1 | `change-management-partner` | medium | |
-| Compensation and benefits analyst - designs wage structures, incentive schemes,  | Phase 2 | `compensation-benefits-analyst` | medium | |
-| HR data analyst - analyzes workforce statistics, turnover, hiring conversion, an | Phase 1 | `data-analyst` | medium | |
-| Labor compliance analyst - reviews compliance with the labor legislation of the  | Phase 1 | `labor-compliance-analyst` | medium | |
-| Labor relations specialist - supports responses to labor-relations-authority pro | Phase 1 | `labor-relations-specialist` | medium | |
-| Learning and development specialist - designs training systems, competency model | Phase 2 | `learning-development-specialist` | medium | |
-| Org design consultant - designs organizational structure, job architecture, work | Phase 2 | `org-design-consultant` | medium | |
-| Performance management consultant - designs performance evaluation systems, KPI/ | Phase 2 | `performance-management-consultant` | medium | |
-| Safety and health officer - reviews compliance with the jurisdiction’s occupatio | Phase 1 | `safety-health-officer` | medium | |
-| Talent acquisition specialist - designs recruiting strategy, sourcing channels,  | Phase 2 | `talent-acquisition-specialist` | medium | |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| "Career path design | Phase 2 | `career-succession-consultant` | Medium | |
+| "Change management for reorganizations/new-system rollouts | Phase 1, 2 | `change-management-partner` | Medium | |
+| "Wage structure | Phase 2 | `compensation-benefits-analyst` | Medium | |
+| "Workforce statistics | Phase 1, 3 | `data-analyst` | Medium | |
+| "labor-law compliance review (jurisdiction per active country profile) | Phase 1 | `labor-compliance-analyst` | Medium | |
+| "labor-relations-authority case response | Phase 1, 2 | `labor-relations-specialist` | Medium | |
+| "Training system design | Phase 2 | `learning-development-specialist` | Medium | |
+| "Org structure/job architecture design | Phase 2, 3 | `org-design-consultant` | Medium | |
+| "Evaluation system | Phase 2 | `performance-management-consultant` | Medium | |
+| "occupational safety and health compliance (incl. serious-accident liability regimes where enacted) | Phase 1 | `safety-health-officer` | Medium | |
+| "Recruiting strategy | Phase 2 | `talent-acquisition-specialist` | Medium | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.

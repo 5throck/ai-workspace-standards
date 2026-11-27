@@ -29,15 +29,19 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates assignment scoping (Phase 0) and the final QA / publish gate (Phase 6), including lifecycle finalization at close-out. **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **fact-checker** | [`agents/fact-checker.md`](agents/fact-checker.md) | Medium | Fact-checker - the newsroom's citation gatekeeper. Extracts every material claim from briefs and drafts, requires 2+ ind |
-| **financial-analyst** | [`agents/financial-analyst.md`](agents/financial-analyst.md) | Medium | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce article-ready narrative briefs (headline numbe |
-| **legal-researcher** | [`agents/legal-researcher.md`](agents/legal-researcher.md) | Medium | Legal researcher - runs the k-law skill against the National Law Information Center (Commercial Act / precedents / admin |
-| **reporter** | [`agents/reporter.md`](agents/reporter.md) | Medium | Reporter - drafts the article headline, lead, and body strictly from the fact-checker's verified citation ledger and the |
-| **style-editor** | [`agents/style-editor.md`](agents/style-editor.md) | Medium | Style editor - runs the AI-tell reduction pass and house-style conformance pass on the reporter's draft, then re-verifie |
-| **visual-editor** | [`agents/visual-editor.md`](agents/visual-editor.md) | Medium | Visual editor - turns the financial-analyst's narrative brief into inline SVG figures (waterfall, timeline, bar/line) wi |
+| **fact-checker** | [`agents/fact-checker.md`](agents/fact-checker.md) | Medium | Citation ledger owner and newsroom gatekeeper |
+| **financial-analyst** | [`agents/financial-analyst.md`](agents/financial-analyst.md) | Medium | Disclosure-sourced financial narrative brief lead (DART under the KR country profile) |
+| **legal-researcher** | [`agents/legal-researcher.md`](agents/legal-researcher.md) | Medium | Corporate law and regulatory context research lead |
+| **reporter** | [`agents/reporter.md`](agents/reporter.md) | Medium | Article drafting lead — headline, lead, and body |
+| **style-editor** | [`agents/style-editor.md`](agents/style-editor.md) | Medium | AI-tell reduction and house-style conformance lead |
+| **visual-editor** | [`agents/visual-editor.md`](agents/visual-editor.md) | Medium | Inline SVG financial infographic lead |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -53,7 +57,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/fact-checker.md`](agents/fact-checker.md) |
 | **Tier** | medium |
 | **Phases** | 2 |
-| **Role** | Fact-checker - the newsroom's citation gatekeeper. Extracts every material claim from briefs and drafts, requires 2+ independent sources per claim, and blocks handoff until the ledger is clean. Use when: financial-analyst and legal-researcher briefs are ready and claims need verification before drafting, or a draft needs a final ledger re-check. |
+| **Role** | Citation ledger owner and newsroom gatekeeper |
 
 ### financial-analyst
 
@@ -62,7 +66,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/financial-analyst.md`](agents/financial-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce article-ready narrative briefs (headline number, YoY/QoQ delta, context, disclosure citation) — not valuation models. Use when: a story needs headline financial numbers, deltas, or disclosure-sourced context for a listed company. |
+| **Role** | Disclosure-sourced financial narrative brief lead (DART under the KR country profile) |
 
 ### legal-researcher
 
@@ -71,7 +75,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/legal-researcher.md`](agents/legal-researcher.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Legal researcher - runs the k-law skill against the National Law Information Center (Commercial Act / precedents / administrative rules) to produce legal-context briefs for stories touching disclosure obligations, capital changes, M&A, or governance risk. Use when: a story raises a legal or regulatory question that needs statute or precedent citation. |
+| **Role** | Corporate law and regulatory context research lead |
 
 ### reporter
 
@@ -80,7 +84,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/reporter.md`](agents/reporter.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Reporter - drafts the article headline, lead, and body strictly from the fact-checker's verified citation ledger and the financial-analyst / legal-researcher briefs. Use when: the citation ledger is clean (0 UNVERIFIED claims) and a draft is ready to be written. |
+| **Role** | Article drafting lead — headline, lead, and body |
 
 ### style-editor
 
@@ -89,7 +93,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/style-editor.md`](agents/style-editor.md) |
 | **Tier** | medium |
 | **Phases** | 4 |
-| **Role** | Style editor - runs the AI-tell reduction pass and house-style conformance pass on the reporter's draft, then re-verifies every figure and quote against the ledger to catch drift introduced during rewriting. Use when: a draft is ready for style pass before visualization and the publish gate. |
+| **Role** | AI-tell reduction and house-style conformance lead |
 
 ### visual-editor
 
@@ -98,7 +102,52 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/visual-editor.md`](agents/visual-editor.md) |
 | **Tier** | medium |
 | **Phases** | 5 |
-| **Role** | Visual editor - turns the financial-analyst's narrative brief into inline SVG figures (waterfall, timeline, bar/line) with correct locale unit formatting (KR: Korean numeral groupings). Use when: a styled draft is ready and the assignment calls for supporting visuals. |
+| **Role** | Inline SVG financial infographic lead |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -139,12 +188,19 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| Fact-checker - the newsroom's citation gatekeeper | Phase 2 | `fact-checker` | medium | |
-| Financial analyst - runs the k-dart skill against DART filings (KR country profile) to produce articl | Phase 1 | `financial-analyst` | medium | |
-| Legal researcher - runs the k-law skill against the National Law Information Cen | Phase 1 | `legal-researcher` | medium | |
-| Reporter - drafts the article headline, lead, and body strictly from the fact-ch | Phase 3 | `reporter` | medium | |
-| Style editor - runs the AI-tell reduction pass and house-style conformance pass  | Phase 4 | `style-editor` | medium | |
-| Visual editor - turns the financial-analyst's narrative brief into inline SVG fi | Phase 5 | `visual-editor` | medium | |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Citation ledger owner and newsroom gatekeeper | Phase 2 | `fact-checker` | Medium | |
+| Disclosure-sourced financial narrative brief lead (DART under the KR country profile) | Phase 1 | `financial-analyst` | Medium | |
+| Corporate law and regulatory context research lead | Phase 1 | `legal-researcher` | Medium | |
+| Article drafting lead — headline | Phase 3 | `reporter` | Medium | |
+| AI-tell reduction and house-style conformance lead | Phase 4 | `style-editor` | Medium | |
+| Inline SVG financial infographic lead | Phase 5 | `visual-editor` | Medium | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.
