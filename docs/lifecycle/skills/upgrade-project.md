@@ -3,11 +3,10 @@
 ## Metadata
 - **Skill**: upgrade-project
 - **Status**: active
-- **Version**: 1.6.4
-- **Version**: 1.6.3
+- **Version**: 1.6.5
 - **Owner**: pm
 - **Created**: 2026-07-31
-- **Last Updated**: 2026-10-31 (Version 1.6.1 → 1.6.2: TEMPLATE TREE SYNC row documents the trail-migration tolerance rules — JSON_MERGE hook-entry path guard and the `.trail/`-marker SEED_SKIP (retired-surface) seed retirement — per design 2026-10-31-graft-trail-migration, U-20261031-009. Previous: 2026-10-26 Version 1.6.0 → 1.6.1: citation-only correction in the SKILL.md provenance text — spec docs/designs/2026-10-26-project-review-remediation-design.md R4; no behavior change. Previous: 2026-10-08 Version 1.5.2 → 1.6.0: procedure routes commits through project dev-sync, adds --prune-removed, folds post-upgrade verification in, drops stale script version pin)
+- **Last Updated**: 2026-11-27 (Version 1.6.4 → 1.6.5: body script version pin refreshed `upgrade-project.ts` v1.115.0 → v1.125.0 — the SCRIPTS.md registry advanced and the SVP check flagged the stale pin; citation refresh + last_reviewed stamp, no procedure change. Previous: 2026-10-31 Version 1.6.1 → 1.6.2: TEMPLATE TREE SYNC row documents the trail-migration tolerance rules — JSON_MERGE hook-entry path guard and the `.trail/`-marker SEED_SKIP (retired-surface) seed retirement — per design 2026-10-31-graft-trail-migration, U-20261031-009. Previous: 2026-10-26 Version 1.6.0 → 1.6.1: citation-only correction in the SKILL.md provenance text — spec docs/designs/2026-10-26-project-review-remediation-design.md R4; no behavior change)
 
 ## Description
 Upgrades an existing L2/L3 project to the current template version: syncs template improvements into a variant-based project's scripts, agents, skills, docs, and commands through the policy-driven TEMPLATE TREE SYNC engine (`scripts/upgrade-project.ts`, backed by `lib/upgrade-policy.ts`), with country-aware .env.sample delivery and conflict warnings for locally-modified files.
@@ -29,6 +28,7 @@ Upgrades an existing L2/L3 project to the current template version: syncs templa
 | 2026-09-27 | production | production | SKILL.md v1.5.2: marker table gains the missing COMMON-CODEX row and the new COMMON-HERMES row (managed-block-merge v1.3.0, spec 2026-09-27-hermes-merge-marker-design) — found during the post-v0.7.0 fleet upgrade where HERMES.md could not reach existing L2 projects | pm |
 | 2026-10-26 | production | production | SKILL.md v1.6.0 → v1.6.1: citation-only correction (SCRIPTS.md provenance citation; spec docs/designs/2026-10-26-project-review-remediation-design.md R4) — no behavior change | pm |
 | 2026-11-26 | production | production | SKILL.md v1.6.3 → v1.6.4: dry-run review step gains the rule that a CONFLICT review or adjudication brief starts from the engine's full dry-run decision table, not a verifier's or a ticket's file list (T-20261125-004) — procedure only, no engine change | pm |
+| 2026-11-27 | production | production | SKILL.md v1.6.4 → v1.6.5: body script version pin refreshed (`upgrade-project.ts` v1.115.0 → v1.125.0 — SCRIPTS.md registry advanced; skill-lifecycle-audit SVP pin-drift warning) + last_reviewed stamp refresh — citation only, no procedure change | automation-engineer |
 
 ## Acceptance Criteria
 

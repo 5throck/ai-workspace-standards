@@ -6,9 +6,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.4.0
+version: 1.4.1
 owner: pm
-last_reviewed: 2026-11-08
+last_reviewed: 2026-11-27
 relates_to:
   - skill: create-variant
     type: follows
@@ -263,7 +263,7 @@ ls Projects/my-test-project/
 
 ## Skill Graph Note
 
-Since `l3-to-variant-pipeline.ts` v1.21.2, Phase 6.5 regenerates and verifies the
+Since `l3-to-variant-pipeline.ts` v1.23.1, Phase 6.5 regenerates and verifies the
 promoted variant's scope skill graph automatically. If it reports non-zero (e.g. older
 generator in the promoted output), run manually:
 `bun scripts/generate-skill-graph.ts --scope co-<name> && bun scripts/verify-skill-graph.ts --scope co-<name>`

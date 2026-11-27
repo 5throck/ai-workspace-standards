@@ -1,11 +1,11 @@
 ---
 name: project-to-variant
 description: "Convert an existing standalone project into an official variant template. Use when: a proven project should become a reusable template for future projects."
-version: 1.3.1
+version: 1.3.2
 status: active
 scope: workspace
 owner: scaffolding-expert
-last_reviewed: 2026-11-08
+last_reviewed: 2026-11-27
 relates_to:
   - skill: promote-variant
     type: composes_with
@@ -93,7 +93,7 @@ cd <workspace-root>
 bun scripts/l3-to-variant-pipeline.ts --l3-path Projects/<variant-name>/ --name <variant-name> --type <collaboration|consulting|lecture> --description "<one-line description>" --auto-fix-agents-md --auto-fix-pm-md
 ```
 
-Since `l3-to-variant-pipeline.ts` v1.21.2, `--auto-fix-agents-md` / `--auto-fix-pm-md` let the pipeline regenerate the variant `AGENTS.md` from the L3 roster, and `generate-variant.ts` ≥ 1.12.0 materializes domain skills into all three skill roots, preserves agent `lifecycle` frontmatter, and re-applies VARIANT-INJECT markers — the manual post-run fixes this path used to require are automated.
+Since `l3-to-variant-pipeline.ts` v1.23.1, `--auto-fix-agents-md` / `--auto-fix-pm-md` let the pipeline regenerate the variant `AGENTS.md` from the L3 roster, and `generate-variant.ts` ≥ 1.12.0 materializes domain skills into all three skill roots, preserves agent `lifecycle` frontmatter, and re-applies VARIANT-INJECT markers — the manual post-run fixes this path used to require are automated.
 
 ## See Also
 

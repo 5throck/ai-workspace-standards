@@ -6,6 +6,8 @@
 
 ## Changelog
 
+- **1.5.2** (2026-11-27): patch bump — stamp-delivery bump carrying the 2026-11-27 last_reviewed refresh (stale-stamp warning remediation; CV-02 requires templates/** content deltas to advance the version). The co-safety override stays on its own lane.
+
 - **1.5.1** (2026-11-26): patch bump — port the one-line `prerequisites: none` from the co-architect copy template-side (adjudication row 19; pair-program row P6). Common 1.5.1 and the co-safety override 1.5.1 coexist in separate lanes.
 
 - **1.5.0** (2026-09-21): lifecycle modernization per 2026-09-21-agent-skill-lifecycle-modernization-design — R1-R3 evidence_refs mandatory + DEC frontmatter compliance, new Registry Lockstep Checklist section, Deprecate gains superseded_by/removal-date/version-bump requirements, Remove covers 4 mirrors + derived-artifact regeneration + record retirement.
@@ -43,6 +45,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Version**: 1.5.1
+- **Version**: 1.5.2
 - **Last Updated**: 2026-09-18 (v1.4.0 — Skill Request Workflow + Deprecation & Removal sections added)
 - **Last Reviewer**: lifecycle-manager

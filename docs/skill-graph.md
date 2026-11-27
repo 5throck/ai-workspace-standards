@@ -212,8 +212,8 @@
 | `common/k-opendata` | common | 1.2.3 | common/public-data-analyst | — | common/k-ecos (composes_with), common/k-kosis | — | — |
 | `common/sync` | common | 1.10.0 | common/automation-engineer | — | — | — | — |
 | `common/translate` | common | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
-| `root/accessibility-audit` | L0 | 1.1.1 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
-| `root/adopt-project` | L0 | 1.1.2 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
+| `root/accessibility-audit` | L0 | 1.1.2 | co-design/ux-researcher, co-design/visual-designer | co-design/phase 2, co-design/phase 4 | — | — | — |
+| `root/adopt-project` | L0 | 1.1.3 | — | — | root/migrate-project (composes_with), root/project-to-variant (follows), root/upgrade-project (composes_with) | — | — |
 | `root/agent-lifecycle-manager` | L0 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L0 | 1.0.2 | co-architect/technical-writer, co-work/technical-writer | — | — | — | — |
 | `root/ci-triage` | L0 | 0.2.1 | common/automation-engineer | — | — | — | — |
@@ -233,10 +233,10 @@
 | `root/new-project` | L0 | 1.0.0 | — | — | root/adopt-project, root/upgrade-project (follows) | — | — |
 | `root/platform-command-lifecycle-manager` | L0 | 1.1.1 | — | — | — | — | — |
 | `root/platform-skill-lifecycle-manager` | L0 | 1.1.1 | — | — | — | — | — |
-| `root/project-resync` | L0 | 1.11.0 | — | — | root/project-review (composes_with), root/project-to-variant, root/sync (composes_with), root/upgrade-project (follows) | — | — |
+| `root/project-resync` | L0 | 1.11.1 | — | — | root/project-review (composes_with), root/project-to-variant, root/sync (composes_with), root/upgrade-project (follows) | — | — |
 | `root/project-review` | L0 | 1.3.2 | — | — | — | — | — |
-| `root/project-to-variant` | L0 | 1.3.1 | — | — | root/promote-variant (composes_with) | — | — |
-| `root/promote-variant` | L0 | 1.4.0 | — | — | root/create-variant (follows), root/sync (follows) | — | — |
+| `root/project-to-variant` | L0 | 1.3.2 | — | — | root/promote-variant (composes_with) | — | — |
+| `root/promote-variant` | L0 | 1.4.1 | — | — | root/create-variant (follows), root/sync (follows) | — | — |
 | `root/release-template` | L0 | 1.0.0 | — | — | root/promote-variant | — | — |
 | `root/research-analysis` | L0 | 1.0.2 | co-architect/analyst, co-work/analyst | — | root/documentation-writing (enables) | — | — |
 | `root/script-lifecycle-manager` | L0 | 1.2.3 | common/automation-engineer | — | — | — | — |
@@ -244,7 +244,7 @@
 | `root/service-design` | L0 | 1.1.0 | co-architect/design-lead, co-architect/service-designer, co-design/design-lead, co-design/service-designer | co-design/phase 1, co-design/phase 2, co-design/phase 3 | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/simulate-pipeline` | L0 | 1.0.2 | — | — | — | — | — |
 | `root/skill-graph-analytics` | L0 | 1.5.0 | — | — | root/context-commonization-review, root/project-resync (composes_with) | — | — |
-| `root/skill-lifecycle-manager` | L0 | 1.5.1 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
+| `root/skill-lifecycle-manager` | L0 | 1.5.2 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L0 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L0 | 1.1.0 | — | — | — | — | — |
 | `root/sync` | L0 | 1.10.0 | — | — | — | — | — |
@@ -255,7 +255,7 @@
 | `root/translate` | L0 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L0 | 1.0.1 | co-architect/design-lead, co-architect/visual-designer | — | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L0 | 1.3.1 | — | — | — | — | — |
-| `root/upgrade-project` | L0 | 1.6.4 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
+| `root/upgrade-project` | L0 | 1.6.5 | — | — | root/project-resync (composes_with), root/promote-variant (follows) | — | — |
 | `root/variant-feature` | L0 | 1.0.0 | — | — | root/upgrade-project (composes_with) | — | — |
 | `root/zod-contract-gate` | L0 | 1.0.3 | common/contract-gate-engineer | — | root/security-scan | — | — |
 
@@ -963,7 +963,7 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `pdf-export` | skill | divergence | co-deck@2.2.1 #4250f2a6; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; co-work@1.3.3 #34041ed9; root@1.3.2 #01931679 |
 | `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.3 #219618bf |
-| `skill-lifecycle-manager` | skill | version-drift | co-safety@1.5.1 #bb1a68cb; root@1.5.1 #0cadfa10 |
+| `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.2 #0cadfa10 |
 | `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.10.0 #80a9c66a; root@1.10.0 #b0bfef1a |
 | `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.2.0 #c375e7fd |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |

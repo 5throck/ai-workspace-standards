@@ -1,12 +1,12 @@
 ---
 name: upgrade-project
 description: "Upgrade an existing L2/L3 project to the current template version. Use when: upgrading a variant-based project, syncing template improvements, refreshing scripts/agents/skills/docs/commands."
-version: 1.6.4
+version: 1.6.5
 status: active
 scope: workspace
 owner: pm
-last_updated: 2026-11-26
-last_reviewed: 2026-10-31
+last_updated: 2026-11-27
+last_reviewed: 2026-11-27
 relates_to:
   - skill: promote-variant
     type: follows
@@ -157,7 +157,7 @@ git stash pop stash@{0}
 
 ## Curated path (adoption-only variants)
 
-Since `upgrade-project.ts` v1.115.0, a target whose `variant.json` declares `consumption: "adoption-only"` (e.g. a project adopted from the `co-utility` template) is **refused at the engine level** — fail-closed, with the curated-path pointer in the refusal message. The engine is the single funnel every caller passes through (manual CLI, skill-driven resync waves, gateway spawn, any cron), so this gate guards all of them by default; it is refusal-grade, unlike the outside-`Projects/` WARN + confirm prompt (H14), which is prompt-grade and `--yes`-bypassable.
+Since `upgrade-project.ts` v1.125.0, a target whose `variant.json` declares `consumption: "adoption-only"` (e.g. a project adopted from the `co-utility` template) is **refused at the engine level** — fail-closed, with the curated-path pointer in the refusal message. The engine is the single funnel every caller passes through (manual CLI, skill-driven resync waves, gateway spawn, any cron), so this gate guards all of them by default; it is refusal-grade, unlike the outside-`Projects/` WARN + confirm prompt (H14), which is prompt-grade and `--yes`-bypassable.
 
 The only route to deliver template content to an adoption-only project is the **curated path**:
 

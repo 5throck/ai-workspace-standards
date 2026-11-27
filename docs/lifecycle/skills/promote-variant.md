@@ -10,6 +10,7 @@
 |------|------|-----|---------|----------|
 | 2026-07-03 | - | production | Backfilled lifecycle record for existing production skill | pm |
 | 2026-08-24 | production | production | Version sync: aligned lifecycle doc to v1.2.1 per SKILL.md (country-profile readiness verification step added) | docs-writer |
+| 2026-11-27 | production | production | Version sync: SKILL.md v1.4.0 → v1.4.1 — body script version pin refreshed (`l3-to-variant-pipeline.ts` v1.21.2 → v1.23.1 — SCRIPTS.md registry advanced; skill-lifecycle-audit SVP pin-drift warning) + last_reviewed stamp refresh — citation only, no procedure change | automation-engineer |
 
 ## Acceptance Criteria
 
@@ -37,7 +38,7 @@
 ## Metadata
 
 - **Current Phase**: production
-- **Version**: 1.4.0
+- **Version**: 1.4.1
 - **Owner**: pm
-- **Last Updated**: 2026-09-12 (Version 1.3.0 → 1.4.0 aligned to SKILL.md frontmatter, T-20260912-010)
-- **Last Reviewer**: docs-writer
+- **Last Updated**: 2026-11-27 (Version 1.4.0 → 1.4.1: body script version pin refreshed `l3-to-variant-pipeline.ts` v1.21.2 → v1.23.1 + last_reviewed stamp — citation only. Previous: 2026-09-12 Version 1.3.0 → 1.4.0 aligned to SKILL.md frontmatter, T-20260912-010)
+- **Last Reviewer**: automation-engineer
