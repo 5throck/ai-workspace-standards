@@ -3,14 +3,29 @@ id: U-20261127-002
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-27T19:44:01.302+09:00
+created_at: '2026-11-27T19:44:01.302+09:00'
 history:
-  - at: 2026-11-27T19:44:01.302+09:00
+  - at: '2026-11-27T19:44:01.302+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-27T21:30:09.177+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T21:30:09.177+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #2208 (merged a67a4a5f4): scripts/hooks/pre-push.ts + template
+  twin v1.9.1, comment-only — the two CI pointers reworded delivery-neutral
+  ('the full audit also runs in CI' / 'the full test suite runs in CI'); the
+  test.yml job names existed only at the L0 root (delivered template ships
+  ci.yml: Documentation Audit / Dependency Audit / Secret Scan / Unit Tests /
+  Unit Tests (os)). The security backport half was ALREADY-RESOLVED by delivered
+  v1.9.0 (rogue-commit scan, T-20261109-002) — the variant gets it by adopting
+  the delivered file. Zero logic change; twins byte-identical; no stale test.yml
+  references remain in the file body.
 error: null
 upstream:
   project: co-newbiz
@@ -19,11 +34,26 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/hooks/pre-push.ts carries stale workflow-name comments (references test.yml jobs that no longer exist in delivered CI) and the variant lineage has diverged from the template: the variant base (v1.7.1) lacks the template v1.8.x–v1.9.0 rogue-commit push-scan security additions, while the template lacks the variant''s corrected comments. Recorded CONFLICT in the 0.30.0 delivery.'
+  symptom: >-
+    scripts/hooks/pre-push.ts carries stale workflow-name comments (references
+    test.yml jobs that no longer exist in delivered CI) and the variant lineage
+    has diverged from the template: the variant base (v1.7.1) lacks the template
+    v1.8.x–v1.9.0 rogue-commit push-scan security additions, while the template
+    lacks the variant's corrected comments. Recorded CONFLICT in the 0.30.0
+    delivery.
   affected_paths:
     - scripts/hooks/pre-push.ts
   identity_source: cwd
-  repro: '1. co-newbiz corrected stale workflow-name comments in scripts/hooks/pre-push.ts (they referenced test.yml "Workspace audit" / "Run integration tests" — workflows that no longer exist; the local file is v1.7.1-based while the template is at v1.9.0). 2. The template v1.9.0 delta meanwhile carries NEW security additions co-newbiz wants (rogue-commit push scan, T-20261109-002) that the local base lacks. 3. Request: backport the v1.8.x–v1.9.0 rogue-commit scan into the v1.7.1 lineage OR deliver v1.9.0 with the comment corrections reconciled, so the variant can adopt without losing either side.'
+  repro: >-
+    1. co-newbiz corrected stale workflow-name comments in
+    scripts/hooks/pre-push.ts (they referenced test.yml "Workspace audit" / "Run
+    integration tests" — workflows that no longer exist; the local file is
+    v1.7.1-based while the template is at v1.9.0). 2. The template v1.9.0 delta
+    meanwhile carries NEW security additions co-newbiz wants (rogue-commit push
+    scan, T-20261109-002) that the local base lacks. 3. Request: backport the
+    v1.8.x–v1.9.0 rogue-commit scan into the v1.7.1 lineage OR deliver v1.9.0
+    with the comment corrections reconciled, so the variant can adopt without
+    losing either side.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +61,17 @@ upstream:
   dedupe_key: e0379b069646f6735e6a2901ba6a6d9f73bee57c320ad60726db3dbf00f759e6
   duplicates:
     - project: co-newbiz
-      at: 2026-11-27T19:44:01.302+09:00
+      at: '2026-11-27T19:44:01.302+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2208
+    summary: >-
+      Fixed in PR #2208 (merged a67a4a5f4): scripts/hooks/pre-push.ts + template
+      twin v1.9.1, comment-only — the two CI pointers reworded delivery-neutral
+      ('the full audit also runs in CI' / 'the full test suite runs in CI'); the
+      test.yml job names existed only at the L0 root (delivered template ships
+      ci.yml: Documentation Audit / Dependency Audit / Secret Scan / Unit Tests
+      / Unit Tests (os)). The security backport half was ALREADY-RESOLVED by
+      delivered v1.9.0 (rogue-commit scan, T-20261109-002) — the variant gets it
+      by adopting the delivered file. Zero logic change; twins byte-identical;
+      no stale test.yml references remain in the file body.

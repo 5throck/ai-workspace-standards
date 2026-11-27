@@ -4,9 +4,9 @@
 
 - **Script**: ssrf (scripts/lib/ssrf.ts)
 - **Status**: active
-- **Version**: 1.1.1
+- **Version**: 1.2.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-10-31
+- **Last Updated**: 2026-11-27
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-31 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,4 +21,5 @@ SSRF protection library: URL validation with pre-resolve + blocked-CIDR checks, 
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-27 | production | production | v1.1.1 → v1.2.0 (spec docs/designs/2026-11-27-safefetch-headers-design.md, U-20261127-003): safeFetch/fetchPinned gain optional init.headers routed through http(s).request's structured headers option; case-insensitive deny-list (exact: host, content-length, transfer-encoding, connection, upgrade, te, trailer, expect, via; prefix: proxy-*, forward*) throws typed SSRFHeaderBlockedError naming the header; CR/LF/control-char regex on names/values before the runtime check; header validation precedes validateUrl; guard core and absent-init behaviour byte-identical to v1.1.1. Pinned by tests/unit/ssrf-safe-fetch.test.ts v1.1.0. | automation-engineer |
 | 2026-10-31 | production | production | v1.1.0 → v1.1.1 (spec docs/designs/2026-10-31-template-security-hardening-design.md R2.3, U-20261031-003): BLOCKED_CIDRS corrections — the current-network entry ends at 0x00ffffffn (0.0.0.0/8; was 0x0fffffffn) and the private-10 entry ends at 0x0affffffn (10.0.0.0/8; was 0x0fffffffn). The old shared end over-blocked public 1.x–15.x addresses (8.8.8.8 was refused as current-network; 11.0.0.0–15.255.255.255 as private-10) — a fail-closed availability bug. Strictly widens availability for public IPs only; private/loopback/metadata coverage unchanged. isBlockedIp exported for pin tests (tests/unit/ssrf-safe-fetch.test.ts). | automation-engineer |

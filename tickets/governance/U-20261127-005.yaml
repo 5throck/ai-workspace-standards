@@ -3,14 +3,34 @@ id: U-20261127-005
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-27T19:44:30.095+09:00
+created_at: '2026-11-27T19:44:30.095+09:00'
 history:
-  - at: 2026-11-27T19:44:30.095+09:00
+  - at: '2026-11-27T19:44:30.095+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-27T21:30:23.318+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T21:30:23.318+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #2208 (merged a67a4a5f4): scripts/verify-scripts.ts + template
+  twin v1.16.0 — Check 5c removal-date-overload (WARN, port of this project's
+  F-23 / DEC-20261122-02 implementation, LOCAL-PATCH upstream-request marker
+  honored): non-deprecated registry rows must keep the removal-date cell typed
+  ('—' or YYYY-MM-DD); deprecated rows stay Check 4/5's concern. Exported pure
+  findOverloadedRemovalDates + RegistryEntry; pinned by
+  tests/unit/verify-scripts-removal-date.test.ts (5 cases incl.
+  deprecated-exempt, near-miss dates, order-stable mixed registry). Root
+  registry cleaned for the triage-cited rows (helpers/adoption-provenance.ts
+  :159, lib/git-status.ts :241 — cell-5 prose duplicated the file-header
+  changelogs) plus the three rows the batch bumps
+  (pre-push/validate-md-language/verify-scripts); remaining 206 legacy prose
+  cells WARN (exit 0, non-blocking) until the wholesale registry-cleanup wave —
+  the same interim posture co-newbiz shipped.
 error: null
 upstream:
   project: co-newbiz
@@ -19,11 +39,23 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'scripts/verify-scripts.ts does not validate the shape of the SCRIPTS.md removal-date column: non-deprecated rows accumulate free-text prose/flags in a column defined as `YYYY-MM-DD (required when status=deprecated) or —` (co-newbiz had 81 such cells). The overload hides the column''s semantics and defeats any future automated deprecation-sweep keyed on that column.'
+  symptom: >-
+    scripts/verify-scripts.ts does not validate the shape of the SCRIPTS.md
+    removal-date column: non-deprecated rows accumulate free-text prose/flags in
+    a column defined as `YYYY-MM-DD (required when status=deprecated) or —`
+    (co-newbiz had 81 such cells). The overload hides the column's semantics and
+    defeats any future automated deprecation-sweep keyed on that column.
   affected_paths:
     - scripts/verify-scripts.ts
   identity_source: cwd
-  repro: '1. co-newbiz v1.15.0 adds Check 5c: for non-deprecated SCRIPTS.md rows, WARN when the removal-date column is neither `—` nor a YYYY-MM-DD date (a column the header defines as required-when-deprecated). The check found 81 overloaded cells in co-newbiz (prose/flags stored in the date column), all cleaned. 2. Unit-pinned: tests/unit/verify-scripts-removal-date.test.ts (5 cases incl. deprecated exempt). 3. Request: adopt Check 5c fleet-wide so the column hygiene stays enforced by default.'
+  repro: >-
+    1. co-newbiz v1.15.0 adds Check 5c: for non-deprecated SCRIPTS.md rows, WARN
+    when the removal-date column is neither `—` nor a YYYY-MM-DD date (a column
+    the header defines as required-when-deprecated). The check found 81
+    overloaded cells in co-newbiz (prose/flags stored in the date column), all
+    cleaned. 2. Unit-pinned: tests/unit/verify-scripts-removal-date.test.ts (5
+    cases incl. deprecated exempt). 3. Request: adopt Check 5c fleet-wide so the
+    column hygiene stays enforced by default.
   triage: ready
   flagged: false
   triage_reasons:
@@ -31,4 +63,22 @@ upstream:
   dedupe_key: 7218630d4b5547481abc7272f33c69d16cc32f542584fc8867e5267f6d1b731f
   duplicates:
     - project: co-newbiz
-      at: 2026-11-27T19:44:30.095+09:00
+      at: '2026-11-27T19:44:30.095+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2208
+    summary: >-
+      Fixed in PR #2208 (merged a67a4a5f4): scripts/verify-scripts.ts + template
+      twin v1.16.0 — Check 5c removal-date-overload (WARN, port of this
+      project's F-23 / DEC-20261122-02 implementation, LOCAL-PATCH
+      upstream-request marker honored): non-deprecated registry rows must keep
+      the removal-date cell typed ('—' or YYYY-MM-DD); deprecated rows stay
+      Check 4/5's concern. Exported pure findOverloadedRemovalDates +
+      RegistryEntry; pinned by tests/unit/verify-scripts-removal-date.test.ts (5
+      cases incl. deprecated-exempt, near-miss dates, order-stable mixed
+      registry). Root registry cleaned for the triage-cited rows
+      (helpers/adoption-provenance.ts :159, lib/git-status.ts :241 — cell-5
+      prose duplicated the file-header changelogs) plus the three rows the batch
+      bumps (pre-push/validate-md-language/verify-scripts); remaining 206 legacy
+      prose cells WARN (exit 0, non-blocking) until the wholesale
+      registry-cleanup wave — the same interim posture co-newbiz shipped.

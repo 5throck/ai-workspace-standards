@@ -3,14 +3,36 @@ id: U-20261127-006
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: waiting
+status: done
 attempts: 0
-created_at: 2026-11-27T19:44:39.206+09:00
+created_at: '2026-11-27T19:44:39.206+09:00'
 history:
-  - at: 2026-11-27T19:44:39.206+09:00
+  - at: '2026-11-27T19:44:39.206+09:00'
     from: null
     to: waiting
-result: null
+  - at: '2026-11-27T21:30:23.337+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T21:30:23.337+09:00'
+    from: review
+    to: done
+result: >-
+  Fixed in PR #2208 (merged a67a4a5f4): MERGE per triage — decision-record +
+  evidence-ledger template skills to 1.2.0. Validator-contract paragraph added
+  to decision-record citing delivered scripts/validate-decisions.ts v1.3.0
+  behavior (evidence_refs = EV-YYYYMMDD-NN rows of docs/evidence/ledger.md ONLY
+  — finding files not accepted; rules_applied = <PREFIX>-R<N>; empty chain
+  allowed-but-discouraged); stale 'or finding files' wording in both skills'
+  linking sections aligned. Mutual ownership-boundary sentences in both
+  descriptions; trigger refinements adopted; stale SKILLS.md seed,
+  VERSION_MANIFEST rows (regenerated) and common-contract.json (skills +
+  common_platform_skills sections) bumped so C-CM-03 parity holds. EXCLUDED:
+  stage-gate-governance relates_to entries in both skills (project-local skill,
+  registered as ACCEPTED DIVERGENCE — would dangle in every other variant).
+  PRESERVED: template-side co-consult document-form overlay paragraph
+  (T-20261007-014) and formal-variables paragraph. All 8 platform mirrors
+  (.claude/.gemini/.agents/.codex) synced byte-identical to the canonical
+  copies.
 error: null
 upstream:
   project: co-newbiz
@@ -19,12 +41,31 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: 'skills/decision-record/SKILL.md and skills/evidence-ledger/SKILL.md have diverged from their template versions in overlapping ways: co-newbiz v1.1.2 of decision-record documents the validator contract (evidence_refs/rules_applied frontmatter arrays take EV-ids or rule-ids only) and scope/trigger refinements, while evidence-ledger carries scope/trigger/relates_to deltas — the template versions of both lag, and the boundary between the two skills'' ownership of "what gets recorded where" is stated only in co-newbiz''s copies. Recorded PROJECT_AHEAD ×2 in the 0.30.0 delivery.'
+  symptom: >-
+    skills/decision-record/SKILL.md and skills/evidence-ledger/SKILL.md have
+    diverged from their template versions in overlapping ways: co-newbiz v1.1.2
+    of decision-record documents the validator contract
+    (evidence_refs/rules_applied frontmatter arrays take EV-ids or rule-ids
+    only) and scope/trigger refinements, while evidence-ledger carries
+    scope/trigger/relates_to deltas — the template versions of both lag, and the
+    boundary between the two skills' ownership of "what gets recorded where" is
+    stated only in co-newbiz's copies. Recorded PROJECT_AHEAD ×2 in the 0.30.0
+    delivery.
   affected_paths:
     - skills/decision-record/SKILL.md
     - skills/evidence-ledger/SKILL.md
   identity_source: cwd
-  repro: '1. co-newbiz''s skills/decision-record/SKILL.md carries scope/trigger deltas (v1.1.2 > template 1.1.1) including a validator-contract paragraph (frontmatter evidence_refs/rules_applied take EV-ids/rule-ids only, [] otherwise; substantiate in prose) that its validate-decisions-style consumers depend on. 2. skills/evidence-ledger/SKILL.md carries scope/trigger/relates_to deltas the decision-record skill cross-references. 3. Request: review the two deltas for fleet adoption (or explicit divergence registration) so the skill pair''s ownership boundary — which skill owns which validator contract — is stated once, fleet-wide, rather than diverging per variant.'
+  repro: >-
+    1. co-newbiz's skills/decision-record/SKILL.md carries scope/trigger deltas
+    (v1.1.2 > template 1.1.1) including a validator-contract paragraph
+    (frontmatter evidence_refs/rules_applied take EV-ids/rule-ids only, []
+    otherwise; substantiate in prose) that its validate-decisions-style
+    consumers depend on. 2. skills/evidence-ledger/SKILL.md carries
+    scope/trigger/relates_to deltas the decision-record skill cross-references.
+    3. Request: review the two deltas for fleet adoption (or explicit divergence
+    registration) so the skill pair's ownership boundary — which skill owns
+    which validator contract — is stated once, fleet-wide, rather than diverging
+    per variant.
   triage: ready
   flagged: false
   triage_reasons:
@@ -33,4 +74,24 @@ upstream:
   dedupe_key: ffa2d1ceb391e499da621927a05086a0cc773c9567597490cf9a6e0d549e87c7
   duplicates:
     - project: co-newbiz
-      at: 2026-11-27T19:44:39.206+09:00
+      at: '2026-11-27T19:44:39.206+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2208
+    summary: >-
+      Fixed in PR #2208 (merged a67a4a5f4): MERGE per triage — decision-record +
+      evidence-ledger template skills to 1.2.0. Validator-contract paragraph
+      added to decision-record citing delivered scripts/validate-decisions.ts
+      v1.3.0 behavior (evidence_refs = EV-YYYYMMDD-NN rows of
+      docs/evidence/ledger.md ONLY — finding files not accepted; rules_applied =
+      <PREFIX>-R<N>; empty chain allowed-but-discouraged); stale 'or finding
+      files' wording in both skills' linking sections aligned. Mutual
+      ownership-boundary sentences in both descriptions; trigger refinements
+      adopted; stale SKILLS.md seed, VERSION_MANIFEST rows (regenerated) and
+      common-contract.json (skills + common_platform_skills sections) bumped so
+      C-CM-03 parity holds. EXCLUDED: stage-gate-governance relates_to entries
+      in both skills (project-local skill, registered as ACCEPTED DIVERGENCE —
+      would dangle in every other variant). PRESERVED: template-side co-consult
+      document-form overlay paragraph (T-20261007-014) and formal-variables
+      paragraph. All 8 platform mirrors (.claude/.gemini/.agents/.codex) synced
+      byte-identical to the canonical copies.
