@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.1.0
 // validate-templates-cv02.test.ts — CV-02 same-version-content-change (DEC-20261111-01 PR-D)
 
 import { describe, expect, test } from "bun:test";
@@ -57,13 +57,28 @@ describe("findSameVersionContentChanges", () => {
 });
 
 describe("CV-02 end to end", () => {
-  test("clean repo vs HEAD reports no CV-02 error", () => {
-    const p = Bun.spawnSync(["bun", "scripts/validate-templates.ts", "--json"], {
-      cwd: import.meta.dir + "/../..",
-      env: { ...process.env, CV02_BASE: "HEAD" },
-    });
-    expect(p.stdout.toString()).not.toContain("same-version-content-change");
-  });
+  test(
+    "clean repo vs the validator's own default base reports no CV-02 error",
+    () => {
+      // Issue #2192 blocker 4: the old run forced CV02_BASE=HEAD, discarding any
+      // caller-provided base. During dev-sync step 4.85 (staged-but-uncommitted
+      // merge) the working tree differs from HEAD, so every unbumped upstream
+      // file was falsely reported here. The validator resolves its own base
+      // chain — CV02_BASE when the caller set it, else `git merge-base HEAD
+      // origin/main`, else HEAD (validate-templates.ts CV-02 section) — so the
+      // environment passes through untouched and that chain decides.
+      const p = Bun.spawnSync(["bun", "scripts/validate-templates.ts", "--json"], {
+        cwd: import.meta.dir + "/../..",
+      });
+      expect(p.stdout.toString()).not.toContain("same-version-content-change");
+    },
+    // Explicit generous budget (issue #2192 blocker 4): the full validator run
+    // measures ~55s on a typical Windows laptop against bun's default per-test
+    // ceiling. Budgets and scheduling only — the assertion is unchanged. The
+    // matching FILE_TIME_BUDGETS row (test-runner.ts) pins the file at the
+    // engine-spawn family budget.
+    60_000,
+  );
 });
 
 // v1.84.0 (DEC-20261117-07): convergence-to-common exemption. A variant copy re-synced to
