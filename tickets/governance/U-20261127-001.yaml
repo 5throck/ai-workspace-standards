@@ -1,0 +1,94 @@
+schemaVersion: 1
+id: U-20261127-001
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-27T19:43:52.654+09:00'
+history:
+  - at: '2026-11-27T19:43:52.654+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-27T20:36:56.218+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T20:36:56.218+09:00'
+    from: review
+    to: done
+result: >-
+  ALREADY-RESOLVED on main (triage 2026-11-27, verified at c9337dad2):
+  test-runner v1.19.0 (2026-11-25, T-20261124-017 — spec
+  docs/designs/2026-11-24-fleet-test-baseline-design.md, ADR-0106, PR #2189)
+  delivered exactly the requested extension point — project-owned
+  test-suites.json. Verified in code: validateTestSuitesManifest
+  (templates/common/scripts/test-runner.ts:1113) accepts arbitrary declared
+  suites (visual qualifies: ^[a-z0-9][a-z0-9_-]*$; types
+  bun-test/command/workspace), and the all entry point (:1483) runs baseline
+  common -> unit -> built-ins ONLY via manifest include -> declared suites;
+  built-ins are opt-in (a variant that never includes integration never runs it)
+  and an include entry resolving zero targets is a fatal FC2 error. A project
+  suite is declared, not patched — upgrades can no longer CONFLICT-delete it.
+  Close-out for co-newbiz: migrate the local visual-suite patch on
+  scripts/test-runner.ts to a project-root test-suites.json (bun-test suite,
+  dirs [tests/e2e-visual]) and drop the delivered-file patch; the LOCAL-PATCH
+  marker on that file becomes evictable per the standard flow.
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    The delivered test-runner.ts has a fixed suite set
+    (unit/scripts/integration/...) with no extension point, so variant projects
+    cannot add project suites (e.g. co-newbiz's `visual` suite over
+    tests/e2e-visual) without patching the delivered file — every upgrade wave
+    then records CONFLICT and risks deleting the variant's suite on adopt.
+    Co-newbiz additionally removed the permanently-empty `integration` suite
+    (tests/*.test.ts glob matches nothing; --allow-empty is a gate that always
+    passes), which the template re-adds on adopt.
+  affected_paths:
+    - scripts/test-runner.ts
+    - package.json
+  identity_source: cwd
+  repro: >-
+    1. co-newbiz (L2) adds a `visual` suite to the delivered
+    scripts/test-runner.ts (sequential execution + FILE_TIME_BUDGETS row for
+    tests/e2e-visual, ~66s walk of 24 stage paths) and removes the
+    permanently-empty `integration` suite definition. 2. Any template-driven
+    adopt of the delivered test-runner.ts deletes the visual suite and restores
+    the always-passing integration gate. 3. Verified in the 2026-11-23 0.30.0
+    wave: test-runner.ts recorded CONFLICT (local v1.13.0 vs template),
+    preserved only by manual adjudication.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/test-runner.ts=false
+    - info:in_last_delivery package.json=false
+  dedupe_key: ff4d4edc353a3e2417b537979158f1dfe28c350c70face58086a2a349547ee8d
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-27T19:43:52.654+09:00'
+  resolution:
+    outcome: fixed
+    summary: >-
+      ALREADY-RESOLVED on main (triage 2026-11-27, verified at c9337dad2):
+      test-runner v1.19.0 (2026-11-25, T-20261124-017 — spec
+      docs/designs/2026-11-24-fleet-test-baseline-design.md, ADR-0106, PR #2189)
+      delivered exactly the requested extension point — project-owned
+      test-suites.json. Verified in code: validateTestSuitesManifest
+      (templates/common/scripts/test-runner.ts:1113) accepts arbitrary declared
+      suites (visual qualifies: ^[a-z0-9][a-z0-9_-]*$; types
+      bun-test/command/workspace), and the all entry point (:1483) runs baseline
+      common -> unit -> built-ins ONLY via manifest include -> declared suites;
+      built-ins are opt-in (a variant that never includes integration never runs
+      it) and an include entry resolving zero targets is a fatal FC2 error. A
+      project suite is declared, not patched — upgrades can no longer
+      CONFLICT-delete it. Close-out for co-newbiz: migrate the local
+      visual-suite patch on scripts/test-runner.ts to a project-root
+      test-suites.json (bun-test suite, dirs [tests/e2e-visual]) and drop the
+      delivered-file patch; the LOCAL-PATCH marker on that file becomes
+      evictable per the standard flow.

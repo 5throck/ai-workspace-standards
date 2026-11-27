@@ -1,7 +1,22 @@
 #!/usr/bin/env bun
 /**
  * verify-scripts.ts — Script Lifecycle Registry Verifier
- * @version 1.15.0
+ * @version 1.16.0
+ *         v1.16.0 (2026-11-27, U-20261127-005 — port of co-newbiz v1.15.0 Check 5c,
+ *         review F-23 / DEC-20261122-02): new Check 5c `removal-date-overload` —
+ *         the SCRIPTS.md removal-date column is a typed cell (`—` or YYYY-MM-DD,
+ *         the registry-header contract comment); a non-deprecated row carrying
+ *         prose/flags there overloads the column and defeats any future automated
+ *         deprecation sweep keyed on it (Checks 4/5 only govern deprecated rows).
+ *         WARN, not ERROR — prose pollution, not a lifecycle violation. Exported
+ *         pure findOverloadedRemovalDates (+ RegistryEntry export, REMOVAL_DATE_RE)
+ *         for tests/unit/verify-scripts-removal-date.test.ts (5 cases incl. the
+ *         deprecated-exempt). L0 registry cleanup in the same landing: the rows
+ *         cited by the triage (helpers/adoption-provenance.ts, lib/git-status.ts)
+ *         plus the rows this batch bumps (hooks/pre-push.ts, validate-md-language.ts,
+ *         verify-scripts.ts) move their cell-5 prose out — the version history lives
+ *         in each script's file header; remaining legacy prose cells WARN until the
+ *         wholesale registry-cleanup wave.
  *         v1.15.0 (2026-11-13, U-20261112-014): new Check 10 `workflow-script-ref` —
  *         every `bun scripts/<name>.ts` reference in .github/workflows/*.yml|*.yaml
  *         must resolve to an existing file under scripts/ (the 2026-11-08 co-abap
@@ -236,7 +251,7 @@ const contextLayer = detectContextLayer();
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-interface RegistryEntry {
+export interface RegistryEntry {
   script: string;
   source: string;
   version: string;
@@ -245,6 +260,33 @@ interface RegistryEntry {
   securityAdvisory: string; // "—" or "CVE-XXXX"
   layer: "common" | "L0-only" | "L1-only" | "L0+L1" | "L0+L1+L2" | string;
   pair: string; // "—" or "<script-name>" (.sh declares its .ps1 pair)
+}
+
+// ── Removal-date column type (Check 5c) ─────────────────────────────────────
+
+const REMOVAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Check 5c (v1.16.0, U-20261127-005 — port of co-newbiz F-23 / DEC-20261122-02):
+ * the removal-date column is a typed cell — `—` or a YYYY-MM-DD date. A
+ * non-deprecated row carrying flags or prose there (usage-flag lists like
+ * `--date`, `--json`, or changelog fragments) overloads the column and makes
+ * the drift invisible: nothing else validates the cell. WARN (not ERROR) per
+ * the finding — the rows are prose pollution, not lifecycle violations; the
+ * registry cleanup moves the prose to the Guide section. Exported pure for
+ * the synthetic fixture test.
+ */
+export function findOverloadedRemovalDates(entries: RegistryEntry[]): string[] {
+  const warnings: string[] = [];
+  for (const entry of entries) {
+    if (entry.status === "deprecated") continue; // deprecated rows have their own date semantics (Check 4/5)
+    if (entry.removalDate === "—" || entry.removalDate === "") continue;
+    if (REMOVAL_DATE_RE.test(entry.removalDate)) continue;
+    warnings.push(
+      `⚠️  REMOVAL-DATE OVERLOAD: \`${entry.script}\` carries non-date content in the removal-date column ("${entry.removalDate}") — the cell is \`—\` or YYYY-MM-DD only; move prose/flags to the Guide section`,
+    );
+  }
+  return warnings;
 }
 
 // ── Registry Parser ──────────────────────────────────────────────────────────
@@ -771,6 +813,10 @@ function verify(): boolean {
       }
     }
   }
+
+  // Check 5c (v1.16.0, U-20261127-005): non-deprecated rows must keep the
+  // removal-date column typed (`—` or YYYY-MM-DD) — flags/prose there WARN.
+  for (const w of findOverloadedRemovalDates(registry)) warnings.push(w);
 
   // Check 6: pair field horizontal sync — .sh declares pair, verify version match
   const byScript = new Map(registry.map((e) => [e.script, e]));

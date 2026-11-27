@@ -8584,8 +8584,8 @@
       "name": "decision-record",
       "scope": "common",
       "capability": "decision-record",
-      "content_hash": "9ab86a0df2bafd06",
-      "version": "1.1.1",
+      "content_hash": "7e89525b8e43aef5",
+      "version": "1.2.0",
       "mirrors": [
         "templates/common/skills/decision-record/SKILL.md"
       ]
@@ -8597,8 +8597,8 @@
       "name": "evidence-ledger",
       "scope": "common",
       "capability": "evidence-ledger",
-      "content_hash": "36811a0d5b7d9757",
-      "version": "1.1.1",
+      "content_hash": "ef883afab3ed3f48",
+      "version": "1.2.0",
       "mirrors": [
         "templates/common/skills/evidence-ledger/SKILL.md"
       ]
@@ -31600,12 +31600,6 @@
       }
     },
     {
-      "type": "references",
-      "from": "skill:common/decision-record",
-      "to": "skill:common/evidence-ledger",
-      "source": "prose"
-    },
-    {
       "type": "composes_with",
       "from": "skill:common/decision-record",
       "to": "skill:root/documentation-writing",
@@ -31636,6 +31630,18 @@
       "source": "prose"
     },
     {
+      "type": "composes_with",
+      "from": "skill:common/evidence-ledger",
+      "to": "skill:common/decision-record",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/evidence-ledger/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "skill:common/evidence-ledger",
       "to": "skill:common/decision-record",
@@ -31649,7 +31655,7 @@
       "provenance": {
         "file": "templates/common/skills/evidence-ledger/SKILL.md",
         "field": "relates_to",
-        "index": 0
+        "index": 1
       }
     },
     {
@@ -31660,7 +31666,7 @@
       "provenance": {
         "file": "templates/common/skills/evidence-ledger/SKILL.md",
         "field": "relates_to",
-        "index": 1
+        "index": 2
       }
     },
     {

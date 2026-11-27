@@ -1,0 +1,37 @@
+schemaVersion: 1
+id: U-20261127-003
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: backlog
+attempts: 0
+created_at: 2026-11-27T19:44:11.689+09:00
+history:
+  - at: 2026-11-27T19:44:11.689+09:00
+    from: null
+    to: backlog
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: scripts/lib/ssrf.ts safeFetch does not accept an init.headers passthrough, so variant projects cannot send required authentication/user-agent headers to external APIs through the SSRF-guarded fetch — the only alternatives are bypassing the guard (policy violation) or patching the delivered file (LOCAL-PATCH churn). Observed in co-newbiz's DART corpCode fetch (scripts/co-newbiz/source-adapters.ts), recorded PROJECT_AHEAD in the 0.30.0 delivery.
+  affected_paths:
+    - scripts/lib/ssrf.ts
+    - scripts/co-newbiz/source-adapters.ts
+  identity_source: cwd
+  repro: '1. co-newbiz''s variant-owned scripts/co-newbiz/source-adapters.ts (DART corpCode fetch) requires custom headers on safeFetch (auth/UA headers for the DART endpoint). 2. The delivered scripts/lib/ssrf.ts safeFetch signature accepts only (url, init-partial without headers passthrough) — passing headers is dropped/type-error. 3. Request: add an `init.headers` passthrough (merged with the safety defaults, SSRF guards unchanged). Rider: the delivered BLOCKED_CIDRS list predates U-20261031-003 and still over-blocks public ranges 1.x–15.x; folding that fix into the same delivery would unblock variant DART integrations that resolve public endpoints.'
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: scripts/co-newbiz/source-adapters.ts'
+    - info:in_last_delivery scripts/lib/ssrf.ts=false
+    - info:in_last_delivery scripts/co-newbiz/source-adapters.ts=false
+  dedupe_key: 263d4605e8ad73e2f70642ffc87e12c403fa55f27cb86c51ab98666f0431808d
+  duplicates:
+    - project: co-newbiz
+      at: 2026-11-27T19:44:11.689+09:00

@@ -19,7 +19,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
@@ -69,6 +69,47 @@ describe('isOfficialDocument — (c) KO twins join the suffix-locale declaration
   });
   test('docs/user-guide_ko.md is official (gate applies)', () => {
     expect(isOfficialDocument('docs/user-guide_ko.md')).toBe(true);
+  });
+});
+
+describe('isOfficialDocument — (d) six policy-shaded doc zones (U-20261127-004, v1.17.0)', () => {
+  // co-newbiz v1.17.0 provenance: docs/architecture, docs/manuals, docs/runbooks,
+  // docs/security, docs/dd, docs/planning join officialPatterns so undeclared
+  // Korean in policy-shaded prose there FAILS. Dormant where the zone directory
+  // does not exist (docs/user-guide.md precedent).
+  test('all six zones are scanned for .md files', () => {
+    expect(isOfficialDocument('docs/architecture/overview.md')).toBe(true);
+    expect(isOfficialDocument('docs/manuals/ops.md')).toBe(true);
+    expect(isOfficialDocument('docs/runbooks/incident.md')).toBe(true);
+    expect(isOfficialDocument('docs/security/policy.md')).toBe(true);
+    expect(isOfficialDocument('docs/dd/findings.md')).toBe(true);
+    expect(isOfficialDocument('docs/planning/roadmap.md')).toBe(true);
+  });
+  test('directory-prefixed zones cover nested subdirectories', () => {
+    expect(isOfficialDocument('docs/architecture/deep/nested.md')).toBe(true);
+    expect(isOfficialDocument('docs/security/adr/note.yaml')).toBe(true);
+  });
+  test('the .yaml form is scanned too', () => {
+    expect(isOfficialDocument('docs/planning/board.yaml')).toBe(true);
+    expect(isOfficialDocument('docs/manuals/spec.yml')).toBe(true);
+  });
+  test('the REAL root zone files contain no undeclared Korean (zero new findings at L0)', () => {
+    // docs/architecture + docs/security are the only widened zones that exist
+    // at the root today (U-20261127-004 verification); the widened perimeter
+    // must land green, not fail on existing content.
+    for (const f of ['architecture', 'security']) {
+      const dir = realFile('docs', f);
+      const entries = readdirSync(dir);
+      for (const e of entries) {
+        if (e.endsWith('.md') || e.endsWith('.yaml') || e.endsWith('.yml')) {
+          expect(analyzeFile(join(dir, e))).toBeNull();
+        }
+      }
+    }
+  });
+  test('non-zone doc paths stay outside the perimeter', () => {
+    expect(isOfficialDocument('docs/random/file.md')).toBe(false);
+    expect(isOfficialDocument('doc/security/policy.md')).toBe(false);
   });
 });
 

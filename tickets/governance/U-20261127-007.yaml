@@ -1,0 +1,109 @@
+schemaVersion: 1
+id: U-20261127-007
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-27T19:44:47.948+09:00'
+history:
+  - at: '2026-11-27T19:44:47.948+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-27T20:37:02.590+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T20:37:02.590+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T20:37:02.590+09:00'
+    from: review
+    to: done
+result: >-
+  ALREADY-RESOLVED — the ticket is NOT lost:
+  tickets/governance/archive/U-20261108-002.yaml exists in the git-tracked
+  governance archive with status done / resolution fixed (PR #1929, merged via
+  #1930; commits 48a91c268, b836e45bd). Its recorded disposition stands: (a)
+  checkout SHA pins WERE adopted fleet-wide — the delivered
+  templates/common/.github/workflows/ci.yml pins actions/checkout@3d3c42e5... (#
+  v7.0.1) in all five jobs (:29,60,104,137,193), setup-bun SHA-pinned, gitleaks
+  digest-pinned; (b) the runner-label half was explicitly adjudicated the OTHER
+  way — ubuntu-latest is KEPT (its Ubuntu-26 migration is GitHub-managed and
+  informational; the fleet rides it deliberately; a fixed runner label would be
+  a separate per-repo hardening decision). No re-filing: re-filing would
+  re-litigate a recorded fleet decision. Residual informational action for
+  co-newbiz: its LOCAL-PATCH markers should cite the archived record
+  (tickets/governance/archive/U-20261108-002.yaml, PR #1929) instead of
+  expecting a live id — archived ids remain valid citations; the dangling-marker
+  cleanup in the variant's own ci.yml/mcp-package.yml is L2-local work via its
+  standard conflict flow, and its next upgrade visit delivers the SHA pins.
+  (Done tickets leave the live store after a 7-day dwell per AGENTS.md §3.7.5 —
+  the requester's live-store-only search missed it.)
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    A recorded upstream requirement was lost from the tracker: co-newbiz
+    workflows pin `runs-on: ubuntu-24.04` and checkout action SHAs, with a
+    LOCAL-PATCH marker referencing U-20261108-002 — but U-20261108-002 no longer
+    exists in the upstream ticket tracker (searched; lost in the 2026-11-18/19
+    branch-convergence races). The dangling id now appears in co-newbiz's
+    delete-merged-branches.yml (refreshed to `pending`), and ci.yml +
+    mcp-package.yml still carry the dead U-20261108-002 reference.
+  affected_paths:
+    - .github/workflows/delete-merged-branches.yml
+    - .github/workflows/ci.yml
+    - .github/workflows/mcp-package.yml
+  identity_source: cwd
+  repro: >-
+    1. co-newbiz's workflows carry a `runs-on: ubuntu-24.04` pin + pinned
+    checkout SHA as an operational requirement recorded in a LOCAL-PATCH comment
+    referencing U-20261108-002. 2. U-20261108-002 no longer exists in the
+    upstream tracker (lost during the 2026-11-18/19 convergence races between
+    workspace branches) — the marker references a dead id and the requirement
+    has no live ticket. 3. Request: re-issue/re-file the ticket (runner pin +
+    action SHA pinning rationale: hosted-runner image drift and supply-chain
+    pinning for fleet workflows), so the variant's marker can reference a live
+    id. delete-merged-branches.yml's marker was already refreshed to `pending`
+    locally; ci.yml + mcp-package.yml still carry the dangling U-20261108-002
+    id.
+  triage: inbox
+  flagged: false
+  triage_reasons:
+    - 'path_not_template_managed: .github/workflows/mcp-package.yml'
+    - info:in_last_delivery .github/workflows/delete-merged-branches.yml=false
+    - info:in_last_delivery .github/workflows/ci.yml=false
+    - info:in_last_delivery .github/workflows/mcp-package.yml=false
+  dedupe_key: 9aa69cb065a1a7448f4ba1033c6a38f45316eb2b3771a781f0dd1d3155837506
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-27T19:44:47.948+09:00'
+  resolution:
+    outcome: fixed
+    summary: >-
+      ALREADY-RESOLVED — the ticket is NOT lost:
+      tickets/governance/archive/U-20261108-002.yaml exists in the git-tracked
+      governance archive with status done / resolution fixed (PR #1929, merged
+      via #1930; commits 48a91c268, b836e45bd). Its recorded disposition stands:
+      (a) checkout SHA pins WERE adopted fleet-wide — the delivered
+      templates/common/.github/workflows/ci.yml pins
+      actions/checkout@3d3c42e5... (# v7.0.1) in all five jobs
+      (:29,60,104,137,193), setup-bun SHA-pinned, gitleaks digest-pinned; (b)
+      the runner-label half was explicitly adjudicated the OTHER way —
+      ubuntu-latest is KEPT (its Ubuntu-26 migration is GitHub-managed and
+      informational; the fleet rides it deliberately; a fixed runner label would
+      be a separate per-repo hardening decision). No re-filing: re-filing would
+      re-litigate a recorded fleet decision. Residual informational action for
+      co-newbiz: its LOCAL-PATCH markers should cite the archived record
+      (tickets/governance/archive/U-20261108-002.yaml, PR #1929) instead of
+      expecting a live id — archived ids remain valid citations; the
+      dangling-marker cleanup in the variant's own ci.yml/mcp-package.yml is
+      L2-local work via its standard conflict flow, and its next upgrade visit
+      delivers the SHA pins. (Done tickets leave the live store after a 7-day
+      dwell per AGENTS.md §3.7.5 — the requester's live-store-only search missed
+      it.)

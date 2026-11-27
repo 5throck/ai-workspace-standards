@@ -1,7 +1,17 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.9.0
+ * @version 1.9.1
+ * v1.9.1 (2026-11-27, U-20261127-002): comment-only — the two CI pointers at
+ *          the lifecycle-audit and changed-path-test blocks named workflow
+ *          file/job pairs ("test.yml 'Workspace audit'" / "test.yml 'Run
+ *          integration tests'") that exist only at the L0 workspace root
+ *          (root .github/workflows/test.yml); the delivered template ships
+ *          ci.yml whose jobs are Documentation Audit / Dependency Audit /
+ *          Secret Scan / Unit Tests / Unit Tests (os), so the names misled
+ *          every delivered variant (co-newbiz 0.30.0 adopt CONFLICT). Both
+ *          comments reworded delivery-neutral ("the full audit also runs in
+ *          CI" / "the full test suite runs in CI"). Zero logic change.
  * v1.9.0 (2026-11-09, spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md
  *          §3.3, T-20261109-002): two additions, both fail-closed with no env skip path.
  *          (a) ROGUE-COMMIT SCAN over the exact range the push would transfer, placed
@@ -422,8 +432,8 @@ async function main() {
   // Lifecycle audit only (T-20260910-025): --lifecycle-only is the fastest
   // sanctioned audit mode (the same gate the pre-commit hook runs). When
   // running via /sync (SYNC_ACTIVE=1), dev-sync.ts already ran the full audit
-  // before commit — skip here to avoid duplicate execution. The full
-  // workspace audit runs in CI (test.yml "Workspace audit").
+  // before commit — skip here to avoid duplicate execution. The full audit
+  // also runs in CI.
   const auditAlreadyRan = process.env.SYNC_ACTIVE === "1";
   if (!auditAlreadyRan) {
     try {
@@ -436,10 +446,10 @@ async function main() {
     console.log("  [audit skipped — already ran in dev-sync pipeline]");
   }
 
-  // Changed-path tests (T-20260910-025): the full integration suite moved to
-  // CI (test.yml "Run integration tests" runs `bun run test` on every
-  // push/PR). Locally, only re-run the test files touched by the pushed
-  // commits; when the push touches no test files, skip tests entirely.
+  // Changed-path tests (T-20260910-025): the full test suite runs in CI
+  // (`bun run test` on every push/PR). Locally, only re-run the test files
+  // touched by the pushed commits; when the push touches no test files,
+  // skip tests entirely.
   console.log("=== pre-push changed-path tests ===");
   const changedTestFiles = (await collectPushedChangedFiles(refUpdates))
     .map((f) => f.replace(/\\/g, "/"))

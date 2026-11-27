@@ -334,12 +334,6 @@
     },
     {
       "type": "references",
-      "from": "decision-record",
-      "to": "evidence-ledger",
-      "source": "prose"
-    },
-    {
-      "type": "references",
       "from": "delegate-to-hub",
       "to": "sync",
       "source": "prose"
@@ -446,6 +440,18 @@
       }
     },
     {
+      "type": "composes_with",
+      "from": "evidence-ledger",
+      "to": "decision-record",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "templates/common/skills/evidence-ledger/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
       "type": "references",
       "from": "evidence-ledger",
       "to": "decision-record",
@@ -459,7 +465,7 @@
       "provenance": {
         "file": "templates/common/skills/evidence-ledger/SKILL.md",
         "field": "relates_to",
-        "index": 0
+        "index": 1
       }
     },
     {
@@ -470,7 +476,7 @@
       "provenance": {
         "file": "templates/common/skills/evidence-ledger/SKILL.md",
         "field": "relates_to",
-        "index": 1
+        "index": 2
       }
     },
     {

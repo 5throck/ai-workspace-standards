@@ -4,9 +4,9 @@
 
 - **Script**: pre-push (scripts/hooks/pre-push.ts)
 - **Status**: active
-- **Version**: 1.9.0
+- **Version**: 1.9.1
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-09
+- **Last Updated**: 2026-11-27
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-11-09 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -21,6 +21,7 @@ TS pre-push hook: scoped gitleaks secret scan, lifecycle audit, changed-path tes
 
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
+| 2026-11-27 | production | production | v1.9.1 (U-20261127-002): comment-only — the lifecycle-audit and changed-path-test CI pointers named workflow file/job pairs ("test.yml 'Workspace audit'" / "test.yml 'Run integration tests'") that exist only at the L0 workspace root; the delivered template ships ci.yml (Documentation Audit / Dependency Audit / Secret Scan / Unit Tests / Unit Tests (os)). Both comments reworded delivery-neutral; zero logic change. | automation-engineer |
 | 2026-11-09 | production | production | v1.9.0 (spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md §3.3, T-20261109-002): rogue-identity commit scan over the EXACT pushed range (remoteOid..localOid / localOid --not --remotes — the collectPushedChangedFiles scoping), placed after the pure-deletion early-exit and before the gitleaks stage; any fixture-identity commit (author AND committer, case-insensitive) refuses the push with SHA + identity + subject + manual-repair guidance; an unreadable scan aborts; no env skip path. The config guard verdict also diffs the per-worktree scope (`wt: ` rows). Primitives: lib/repo-integrity.ts v1.1.0; pinned by tests/unit/repo-integrity.test.ts v1.2.0. | automation-engineer |
 | 2026-11-09 | production | production | v1.8.1 (QA follow-up fix, design §11 fail-closed semantics): the pre-run snapshot no longer fails OPEN — an unreadable config before the changed-path test run aborts non-zero with dev-sync's "FATAL — repository config could not be read …" shape plus the repair line and spec reference, instead of a warning that skipped the whole check; the before/after comparison also carries the EFFECTIVE `core.bare`, so a bare flip whose `git config --local --list` key set is unchanged (a global/system-scope flip) is refused. Pinned by `tests/unit/repo-integrity.test.ts` (abort-on-throw; empty-key-diff bare flip still refused). | automation-engineer |
 | 2026-11-09 | production | production | v1.8.0 (spec docs/designs/2026-11-08-gw-tenant-loop-and-hardening-design.md §11): repository-config integrity check around the changed-path test run — snapshot `git config --local --list` before the spawn, re-read after, block the push on any delta. Origin of the 2026-11-09 incident: this hook inherits `GIT_DIR` from `git push`, and the intercepted `bun test` children once wrote into the real repository (rogue commits in mode 1; `core.bare = true` in mode 2). Four `git config` reads, no writes. | automation-engineer |
