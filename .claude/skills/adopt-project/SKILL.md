@@ -9,9 +9,9 @@ description: >
 status: active
 scope: common
 l2_propagate: false
-version: 1.1.2
+version: 1.1.3
 owner: scaffolding-expert
-last_reviewed: 2026-10-31
+last_reviewed: 2026-11-27
 relates_to:
   - skill: migrate-project
     type: composes_with

@@ -7,8 +7,8 @@ description: >
   Use when: creating new skills, updating skill metadata, validating skill structure,
   managing skill-agent mappings, triaging agent skill requests, or deprecating/removing skills.
 owner: pm
-version: 1.5.1
-last_reviewed: 2026-09-21
+version: 1.5.2
+last_reviewed: 2026-11-27
 relates_to:
   - skill: script-lifecycle-manager
     type: composes_with

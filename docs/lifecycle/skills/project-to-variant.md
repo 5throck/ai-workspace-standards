@@ -6,6 +6,7 @@
 |-------|--------|------|-------|
 | Phase A | Accepted | 2026-07-31 | Registered in SKILLS.md; frontmatter standardized to metadata.triggers format |
 | Phase B | — | — | Not yet promoted to variant template |
+| Version sync | production | 2026-11-27 | SKILL.md v1.3.1 → v1.3.2: body script version pin refreshed (`l3-to-variant-pipeline.ts` v1.21.2 → v1.23.1 — SCRIPTS.md registry advanced; skill-lifecycle-audit SVP pin-drift warning) + last_reviewed stamp refresh — citation only, no procedure change (automation-engineer) |
 
 ## Acceptance Criteria
 
@@ -32,6 +33,6 @@ See [`docs/designs/variant-readiness-gate.md`](../../../docs/designs/variant-rea
 
 - **Current Phase**: production
 - **Owner**: scaffolding-expert
-- **Version**: 1.3.1
-- **Last Updated**: 2026-09-15 (Version/Owner backfilled after Check E silent-skip finding — 2026-09-15 project review H9)
-- **Last Reviewer**: pm
+- **Version**: 1.3.2
+- **Last Updated**: 2026-11-27 (Version 1.3.1 → 1.3.2: body script version pin refreshed `l3-to-variant-pipeline.ts` v1.21.2 → v1.23.1 + last_reviewed stamp — citation only. Previous: 2026-09-15 Version/Owner backfilled after Check E silent-skip finding — 2026-09-15 project review H9)
+- **Last Reviewer**: automation-engineer
