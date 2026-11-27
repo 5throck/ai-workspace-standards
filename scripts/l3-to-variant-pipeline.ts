@@ -11,8 +11,18 @@
  * - Wave 3: Platform parity validation (validate-platform-parity.ts)
  * - Wave 3: Workspace integration (integration-helpers.ts)
  *
- * @version 1.23.1
+ * @version 1.23.2
  * @phase: Complete pipeline orchestration
+ *
+ * v1.23.2 (2026-11-28, T-20261127-010): PHASE 3.5 roster-link resolution gains
+ *          the common-agent delivery fallback — an agents/*.md ref also
+ *          resolves when the file exists under templates/common/agents/ (the
+ *          same delivery rule regenerate-agents-md v1.6.0's roster superset and
+ *          new-project's copyDir(common) follow). Without it the v1.6.0
+ *          regenerated roster's common-agent links read as unresolvable in
+ *          every L3 fixture / promotion pre-flight (the E2E
+ *          test-l3-to-variant-promotion Test 8b refusal). A ref resolving in
+ *          neither the L3 source nor the common tree is still a refusal.
  *
  * v1.23.1 (2026-11-11, U-20261111-003): the PHASE 3.5 AGENTS.md auto-fix passes
  *          `--from-template` to regenerate-agents-md.ts (v1.5.0 defaults to an
@@ -1081,12 +1091,24 @@ export async function executeL3ToVariantPipeline(config: PipelineConfig): Promis
       // like docs/governance/agents/pm-gateway-workflow.md, which resolve
       // against docs/, not the L3 root (broke the promotion E2E after the
       // ADR-0090 thin-dispatcher wave added those links to L1 common).
+      // v1.23.2 (T-20261127-010): common-agent delivery fallback — a roster ref
+      // also resolves when the file exists under templates/common/agents/
+      // (the same delivery rule regenerate-agents-md v1.6.0's roster derivation
+      // and new-project's copyDir(common) follow): common agents are NOT in an
+      // L3 source's stub-generated agents/ tree (scaffold-markers
+      // L3_COMMON_OVERLAY_EXCLUDE) but ARE delivered to every instantiated
+      // project, so a promoted template's roster may link them. A ref that
+      // resolves in NEITHER place is still unresolved (the co-safety drift
+      // class this check exists for).
       const unresolvedAgentRefs = new Set<string>();
+      const commonAgentsDir35 = j35(cwd(), "templates", "common", "agents");
       for (const refMatch of agentsMdContent.matchAll(/(?<![A-Za-z0-9_./-])agents\/[A-Za-z0-9_/-]+\.md/g)) {
         const rel = refMatch[0];
-        if (!ex35(j35(config.l3ProjectPath, ...rel.split("/")))) {
-          unresolvedAgentRefs.add(rel);
-        }
+        if (ex35(j35(config.l3ProjectPath, ...rel.split("/")))) continue;
+        const relSegments = rel.split("/");
+        const commonCandidate = relSegments.length === 2 ? j35(commonAgentsDir35, relSegments[1]) : null;
+        if (commonCandidate && ex35(commonCandidate)) continue;
+        unresolvedAgentRefs.add(rel);
       }
 
       if (

@@ -29,10 +29,14 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **exam-bank-steward** | [`agents/exam-bank-steward.md`](agents/exam-bank-steward.md) | Medium | Exam content and operations steward - curates the question bank (authoring quality, answer-length bias review, remediation workflow) and operates exams (cohorts, windows, activation, statistics monitoring). Use when: bank authoring/review, bias remediation, exam window prep, statistics monitoring |
+| **exam-bank-steward** | [`agents/exam-bank-steward.md`](agents/exam-bank-steward.md) | Medium | Question bank quality and exam operations stewardship for the harness-assessment deliverable |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -48,7 +52,52 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/exam-bank-steward.md`](agents/exam-bank-steward.md) |
 | **Tier** | medium |
 | **Phases** | 4, 5 |
-| **Role** | Exam content and operations steward - curates the question bank (authoring quality, answer-length bias review, remediation workflow) and operates exams (cohorts, windows, activation, statistics monitoring). |
+| **Role** | Question bank quality and exam operations stewardship for the harness-assessment deliverable |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | 5 |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 
 ### i18n-specialist (common extends-stub)
@@ -82,11 +131,14 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-### Phase Gate (co-learning)
-
-| Deliverable Type | Phase | Agent | Tier | Notes |
-|-------------------|-------|-------|------|-------|
-| Question bank authoring/review, bias remediation, exam operations | Phase 4-5 | `exam-bank-steward` | Medium | Content stewardship; every rewrite human-reviewed via the remediation ledger |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Question bank quality and exam operations stewardship for the harness-assessment deliverable | Phase 4, 5 | `exam-bank-steward` | Medium | |
+| Owns locale configuration | Phase 5 | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 ### §3.6 3-Tier Strategy

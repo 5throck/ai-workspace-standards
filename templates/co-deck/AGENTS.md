@@ -29,21 +29,25 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **design** | [`agents/design.md`](agents/design.md) | Medium | Locks visual design style — color palette, fonts, layout into design_spec.md |
-| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Low | Generates HTML slides from slide_deck.md and design_spec.md; applies theme |
-| **image-curator** | [`agents/image-curator.md`](agents/image-curator.md) | Low | Searches and downloads commercial-use images → assets/images/ + image-manifest.json |
-| **diagram-specialist** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) | Medium | Generates SVG concept diagrams and data charts from visual_spec → assets/diagrams/; SVG is primary delivery format for HTML, PNG optional for PDF export |
-| **measure** | [`agents/measure.md`](agents/measure.md) | Low | Validates the 4-layer spec merge (base → theme → style → overrides) and checks font availability via the `prep-pdf` skill (Playwright-free) |
-| **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Low | Generates sample and full PDF from slidedata.json and layout_spec.json |
-| **research** | [`agents/research.md`](agents/research.md) | Medium | Gathers web sources and writes research_notes.md; loads lecture-profile.md |
-| **source-verifier** | [`agents/source-verifier.md`](agents/source-verifier.md) | Medium | Validates URLs in research_notes.md → source-verification.md + Trust Score |
-| **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | Writes storyline.md and slide_deck.md with image_role/image_query fields |
-| **version** | [`agents/version.md`](agents/version.md) | Low | Snapshots files before every edit; restores prior states on demand |
-| **handbook-writer** | [`agents/handbook-writer.md`](agents/handbook-writer.md) | Medium | Writes handbook chapters, course overview, and instructor guide — H-Stages 2-4 |
-| **handbook-reviewer** | [`agents/handbook-reviewer.md`](agents/handbook-reviewer.md) | Medium | Validates handbook HTML against AUTHORING_GUIDELINES.md — H-Stage 5 |
+| **design** | [`agents/design.md`](agents/design.md) | Medium | Visual design specialist for lecture slide aesthetics and brand alignment |
+| **diagram-specialist** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) | Medium | Concept diagram and data chart generator for lecture slide decks |
+| **handbook-reviewer** | [`agents/handbook-reviewer.md`](agents/handbook-reviewer.md) | Medium | Handbook quality gate specialist — runs validation scripts, applies fixes, ensures AUTHORING_GUIDELINES compliance |
+| **handbook-writer** | [`agents/handbook-writer.md`](agents/handbook-writer.md) | Medium | Handbook content creation specialist — chapter structure, section prose, and AUTHORING_GUIDELINES compliance |
+| **html-build** | [`agents/html-build.md`](agents/html-build.md) | Low | HTML slide builder and image integration specialist |
+| **image-curator** | [`agents/image-curator.md`](agents/image-curator.md) | Low | Image search, evaluation, and download specialist for slide decks |
+| **measure** | [`agents/measure.md`](agents/measure.md) | Low | PDF layout preparation specialist (Playwright-free) for PDF preparation |
+| **pdf-export** | [`agents/pdf-export.md`](agents/pdf-export.md) | Low | PDF generation specialist using pdf-lib and 4-layer spec merge |
+| **research** | [`agents/research.md`](agents/research.md) | Medium | Web research and source collection specialist for lecture preparation |
+| **source-verifier** | [`agents/source-verifier.md`](agents/source-verifier.md) | Medium | Research source credibility and URL existence verification specialist |
+| **storyline** | [`agents/storyline.md`](agents/storyline.md) | Medium | Storyline architect and slide deck planner for lecture content |
+| **version** | [`agents/version.md`](agents/version.md) | Low | Version snapshot manager for all lecture production files |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -59,52 +63,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/design.md`](agents/design.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Locks visual design style — color palette, fonts, layout into design_spec.md |
-
-### html-build
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/html-build.md`](agents/html-build.md) |
-| **Tier** | low |
-| **Phases** | 4 |
-| **Role** | Generates HTML slides from slide_deck.md and design_spec.md |
-
-### measure
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/measure.md`](agents/measure.md) |
-| **Tier** | low |
-| **Phases** | 4 |
-| **Role** | Validates the 4-layer spec merge (base → theme → style → overrides), checks font availability, and optionally generates a sample PDF — via the `prep-pdf` skill, no Playwright required |
-
-### pdf-export
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/pdf-export.md`](agents/pdf-export.md) |
-| **Tier** | low |
-| **Phases** | 4, 5 |
-| **Role** | Generates sample and full PDF from slidedata.json and layout_spec.json |
-
-### research
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/research.md`](agents/research.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Gathers web sources and writes research_notes.md for storyline design |
-
-### image-curator
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/image-curator.md`](agents/image-curator.md) |
-| **Tier** | low |
-| **Phases** | 3.5 |
-| **Role** | Searches and downloads commercial-use images via Pixabay (keyless), Unsplash, Pexels; outputs assets/images/ + image-manifest.json |
+| **Role** | Visual design specialist for lecture slide aesthetics and brand alignment |
 
 ### diagram-specialist
 
@@ -113,43 +72,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/diagram-specialist.md`](agents/diagram-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 3.5 |
-| **Role** | Generates SVG concept diagrams (cycle/flow/matrix/pyramid/timeline/comparison) and data charts (bar/line/pie) from visual_spec fields in slide_deck.md; outputs CSS-variable SVG as primary delivery format for HTML; PNG is optional and required only for PDF export; parallel to image-curator |
-
-### source-verifier
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/source-verifier.md`](agents/source-verifier.md) |
-| **Tier** | medium |
-| **Phases** | 1.5 |
-| **Role** | Validates URLs in research_notes.md via HTTP check + content cross-check; outputs source-verification.md with Trust Score; optional (--skip-verify) |
-
-### storyline
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/storyline.md`](agents/storyline.md) |
-| **Tier** | medium |
-| **Phases** | 2, 3 |
-| **Role** | Writes storyline.md and slide_deck.md with image_role/image_query fields; handles cover/divider confirmation |
-
-### version
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/version.md`](agents/version.md) |
-| **Tier** | low |
-| **Phases** | 0, 1, 2, 3, 4, 5, 6 |
-| **Role** | Snapshots files before every edit; restores prior states on demand |
-
-### handbook-writer
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/handbook-writer.md`](agents/handbook-writer.md) |
-| **Tier** | medium |
-| **Phases** | H-2, H-3, H-4 |
-| **Role** | Writes handbook chapter HTML, course-overview.html, and instructor-guide.html per AUTHORING_GUIDELINES.md and SECTION_TYPES.md; reads research_notes.md (standalone) or slide_deck.md (companion mode) |
+| **Role** | Concept diagram and data chart generator for lecture slide decks |
 
 ### handbook-reviewer
 
@@ -158,7 +81,133 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/handbook-reviewer.md`](agents/handbook-reviewer.md) |
 | **Tier** | medium |
 | **Phases** | H-5 |
-| **Role** | Runs handbook-doctor.ts, check-authoring.ts, and validate-nav.ts against handbook HTML; applies fixes and reports unresolved issues to PM before theme application |
+| **Role** | Handbook quality gate specialist — runs validation scripts, applies fixes, ensures AUTHORING_GUIDELINES compliance |
+
+### handbook-writer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/handbook-writer.md`](agents/handbook-writer.md) |
+| **Tier** | medium |
+| **Phases** | H-2, H-3, H-4 |
+| **Role** | Handbook content creation specialist — chapter structure, section prose, and AUTHORING_GUIDELINES compliance |
+
+### html-build
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/html-build.md`](agents/html-build.md) |
+| **Tier** | low |
+| **Phases** | 4 |
+| **Role** | HTML slide builder and image integration specialist |
+
+### image-curator
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/image-curator.md`](agents/image-curator.md) |
+| **Tier** | low |
+| **Phases** | 3.5 |
+| **Role** | Image search, evaluation, and download specialist for slide decks |
+
+### measure
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/measure.md`](agents/measure.md) |
+| **Tier** | low |
+| **Phases** | 4 |
+| **Role** | PDF layout preparation specialist (Playwright-free) for PDF preparation |
+
+### pdf-export
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/pdf-export.md`](agents/pdf-export.md) |
+| **Tier** | low |
+| **Phases** | 4, 5 |
+| **Role** | PDF generation specialist using pdf-lib and 4-layer spec merge |
+
+### research
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/research.md`](agents/research.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | Web research and source collection specialist for lecture preparation |
+
+### source-verifier
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/source-verifier.md`](agents/source-verifier.md) |
+| **Tier** | medium |
+| **Phases** | 1.5 |
+| **Role** | Research source credibility and URL existence verification specialist |
+
+### storyline
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/storyline.md`](agents/storyline.md) |
+| **Tier** | medium |
+| **Phases** | 2, 3 |
+| **Role** | Storyline architect and slide deck planner for lecture content |
+
+### version
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/version.md`](agents/version.md) |
+| **Tier** | low |
+| **Phases** | 0, 1, 2, 3, 4, 5, 6 |
+| **Role** | Version snapshot manager for all lecture production files |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -175,16 +224,25 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| design_spec.md (color palette, fonts, CSS variables) | Phase 3 | `design` | medium | |
-| lecture_vN.html (single-file HTML slide deck + images) | Phase 4 | `html-build` | low | |
-| image-manifest.json + assets/images/ (downloaded slide images) | Phase 3.5 | `image-curator` | low | **Gate 3.5 (mandatory when images are used)**: must pass `bun scripts/co-deck/validate-image-manifest.ts --workspace deliverables/<project>` — 0 duplicate `content_hash` ERRORs — before `html-build` handoff. Skip only if the deck uses no images. |
-| assets/diagrams/*.svg (+ optional *.png) + diagram-manifest.json | Phase 3.5 | `diagram-specialist` | medium | optional: skip if no visual_spec fields in slide_deck.md; SVG is primary delivery format for HTML, PNG optional for PDF export |
-| layout_summary.md (4-layer spec merge validation + font check) | Phase 4 | `measure` | low | |
-| <project>.pdf (print-ready PDF output) | Phase 4 | `pdf-export` | low | |
-| research_notes.md (web sources and key facts) | Phase 1 | `research` | medium | |
-| source-verification.md (URL accessibility + Trust Score) | Phase 1.5 | `source-verifier` | medium | optional: --skip-verify |
-| storyline.md + slide_deck.md (narrative and per-slide content) | Phase 2 | `storyline` | medium | |
-| _versions/ snapshots (pre-edit backups of lecture files) | Phase 0–6 | `version` | low | cross-cutting |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Visual design specialist for lecture slide aesthetics and brand alignment | Phase 3 | `design` | Medium | |
+| Concept diagram and data chart generator for lecture slide decks | Phase 3.5 | `diagram-specialist` | Medium | |
+| Handbook quality gate specialist — runs validation scripts | Phase H-5 | `handbook-reviewer` | Medium | |
+| Handbook content creation specialist — chapter structure | Phase H-2, H-3, H-4 | `handbook-writer` | Medium | |
+| HTML slide builder and image integration specialist | Phase 4 | `html-build` | Low | |
+| Image search | Phase 3.5 | `image-curator` | Low | |
+| PDF layout preparation specialist (Playwright-free) for PDF preparation | Phase 4 | `measure` | Low | |
+| PDF generation specialist using pdf-lib and 4-layer spec merge | Phase 4, 5 | `pdf-export` | Low | |
+| Web research and source collection specialist for lecture preparation | Phase 1 | `research` | Medium | |
+| Research source credibility and URL existence verification specialist | Phase 1.5 | `source-verifier` | Medium | |
+| Storyline architect and slide deck planner for lecture content | Phase 2, 3 | `storyline` | Medium | |
+| Version snapshot manager for all lecture production files | Phase 0, 1, 2, 3, 4, 5, 6 | `version` | Low | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 ### §3.6 3-Tier Strategy

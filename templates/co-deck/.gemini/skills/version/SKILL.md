@@ -1,7 +1,7 @@
 ---
 name: version
 scope: co-deck
-version: 1.3.2
+version: 1.3.3
 description: >
   Manages version snapshots of lecture files. Auto-backs up files before edits
   and restores prior versions on demand. Must be called before any file
@@ -10,8 +10,17 @@ description: >
   Cross-cutting — applies to all workflow stages.
 status: active
 owner: version
-last_reviewed: "2026-11-15"
+last_reviewed: "2026-11-28"
 prerequisites: none
+
+metadata:
+  type: process
+  triggers:
+    - version
+    - version snapshot
+    - previous version
+    - restore version
+    - show version list
 ---
 
 ## Context

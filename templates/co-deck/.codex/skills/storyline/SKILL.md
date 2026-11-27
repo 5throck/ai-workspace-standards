@@ -1,7 +1,7 @@
 ---
 name: storyline
 scope: co-deck
-version: 1.7.0
+version: 1.7.1
 lang: ko
 lang_reason: proper-noun (Step 3.5 quotes verbatim Korean defect strings and replacement wording from the affected deck)
 description: >
@@ -12,13 +12,21 @@ description: >
   of the lecture workflow.
 status: active
 owner: storyline
-last_reviewed: "2026-11-21"
+last_reviewed: "2026-11-28"
 prerequisites: research
 relates_to:
   - skill: design
     type: follows
 inputs: [research-notes]
 outputs: [storyline-outline, slide-deck-draft]
+
+metadata:
+  type: process
+  triggers:
+    - storyline
+    - make storyline
+    - compose slide deck
+    - structure chapters
 ---
 
 ## Context

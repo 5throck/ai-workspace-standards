@@ -29,18 +29,22 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **customs-duty-drawback-specialist** | [`agents/customs-duty-drawback-specialist.md`](agents/customs-duty-drawback-specialist.md) | High | Duty drawback specialist for co-export. Determines whether raw materials used in an export are eligible for duty refund  |
-| **export-control-compliance-specialist** | [`agents/export-control-compliance-specialist.md`](agents/export-control-compliance-specialist.md) | High | Strategic items export control and sanctions/denied-party screening specialist for co-export. Determines whether goods,  |
-| **foreign-regulatory-intelligence-analyst** | [`agents/foreign-regulatory-intelligence-analyst.md`](agents/foreign-regulatory-intelligence-analyst.md) | Medium | Monitors and reports on US, China, and EU import regulation, tariff, and trade-defense (anti-dumping/countervailing) cha |
-| **fta-origin-analyst** | [`agents/fta-origin-analyst.md`](agents/fta-origin-analyst.md) | High | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification specialist for co-export. Determines whethe |
-| **halal-certification-specialist** | [`agents/halal-certification-specialist.md`](agents/halal-certification-specialist.md) | Medium | Halal certification requirement analysis and certification process specialist for co-export. Determines whether a desti |
-| **hs-classification-specialist** | [`agents/hs-classification-specialist.md`](agents/hs-classification-specialist.md) | High | HS code classification, customs valuation, and tariff rate determination specialist for co-export. Classifies goods unde |
-| **logistics-coordinator** | [`agents/logistics-coordinator.md`](agents/logistics-coordinator.md) | Low | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator for co-export. Advises on Incoterms  |
-| **market-entry-strategist** | [`agents/market-entry-strategist.md`](agents/market-entry-strategist.md) | Medium | Overseas market entry strategy, buyer discovery, and market research lead for co-export. Assesses target-market demand,  |
-| **trade-documentation-specialist** | [`agents/trade-documentation-specialist.md`](agents/trade-documentation-specialist.md) | Medium | Trade documentation and customs clearance paperwork specialist for co-export. Prepares templates and checklists for lett |
+| **customs-duty-drawback-specialist** | [`agents/customs-duty-drawback-specialist.md`](agents/customs-duty-drawback-specialist.md) | High | Customs duty drawback (refund of duties on raw materials for export) determination and refund-method specialist |
+| **export-control-compliance-specialist** | [`agents/export-control-compliance-specialist.md`](agents/export-control-compliance-specialist.md) | High | Strategic items export control and sanctions screening specialist |
+| **foreign-regulatory-intelligence-analyst** | [`agents/foreign-regulatory-intelligence-analyst.md`](agents/foreign-regulatory-intelligence-analyst.md) | Medium | Foreign import regulation and tariff-change monitoring specialist |
+| **fta-origin-analyst** | [`agents/fta-origin-analyst.md`](agents/fta-origin-analyst.md) | High | FTA rules-of-origin analysis and origin certification specialist |
+| **halal-certification-specialist** | [`agents/halal-certification-specialist.md`](agents/halal-certification-specialist.md) | Medium | Halal certification requirement analysis and certification process specialist |
+| **hs-classification-specialist** | [`agents/hs-classification-specialist.md`](agents/hs-classification-specialist.md) | High | HS code classification, customs valuation, and tariff rate determination specialist |
+| **logistics-coordinator** | [`agents/logistics-coordinator.md`](agents/logistics-coordinator.md) | Low | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator |
+| **market-entry-strategist** | [`agents/market-entry-strategist.md`](agents/market-entry-strategist.md) | Medium | Overseas market entry strategy, buyer discovery, and market research lead |
+| **trade-documentation-specialist** | [`agents/trade-documentation-specialist.md`](agents/trade-documentation-specialist.md) | Medium | Trade documentation and customs clearance paperwork specialist |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -56,7 +60,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/customs-duty-drawback-specialist.md`](agents/customs-duty-drawback-specialist.md) |
 | **Tier** | high |
 | **Phases** | 3 |
-| **Role** | Duty drawback specialist for co-export. Determines whether raw materials used in an export are eligible for duty refund under the Act on Special Cases Concerning the Refund of Customs Duties Levied on Raw Materials for Export (the Duty Drawback Act), selects the applicable refund method (individual refund vs. simplified fixed-rate refund), and supports usage-rate calculation and refund-application deadline tracking. Distinct from ordinary Customs Act erroneous-payment refunds and from HS classification. Use when: duty drawback, customs duty refund, individual refund method, simplified fixed-rate refund method, usage-rate statement, or raw-material refund eligibility is required. |
+| **Role** | Customs duty drawback (refund of duties on raw materials for export) determination and refund-method specialist |
 
 ### export-control-compliance-specialist
 
@@ -65,7 +69,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/export-control-compliance-specialist.md`](agents/export-control-compliance-specialist.md) |
 | **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | Strategic items export control and sanctions/denied-party screening specialist for co-export. Determines whether goods, technology, or destinations trigger the home jurisdiction's export control licensing requirements, and screens counterparties against US OFAC / EAR and equivalent restricted-party lists for parallel exposure when the transaction touches US-origin technology or a sanctioned destination. Use when: strategic items classification, export license requirement determination, or sanctions/denied-party screening is required. |
+| **Role** | Strategic items export control and sanctions screening specialist |
 
 ### foreign-regulatory-intelligence-analyst
 
@@ -74,7 +78,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/foreign-regulatory-intelligence-analyst.md`](agents/foreign-regulatory-intelligence-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Monitors and reports on US, China, and EU import regulation, tariff, and trade-defense (anti-dumping/countervailing) changes affecting client shipments for co-export. Provides destination-market regulatory context that home-jurisdiction compliance agents (HS classification, FTA/origin, export control) use as an input, but does not itself issue compliance determinations. Use when: destination-country import regulation research, tariff-change monitoring, or trade-defense measure screening is required. |
+| **Role** | Foreign import regulation and tariff-change monitoring specialist |
 
 ### fta-origin-analyst
 
@@ -83,7 +87,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/fta-origin-analyst.md`](agents/fta-origin-analyst.md) |
 | **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | FTA (Free Trade Agreement) rules-of-origin analysis and origin certification specialist for co-export. Determines whether goods qualify for preferential tariff treatment under a specific FTA, identifies the applicable origin criterion (wholly obtained / CTC / RVC / specific process), and defines the origin certificate/declaration requirements per the Foreign Trade Act and the relevant FTA text. Use when: FTA preferential eligibility, rules-of-origin qualification, or origin certificate requirements need to be determined. |
+| **Role** | FTA rules-of-origin analysis and origin certification specialist |
 
 ### halal-certification-specialist
 
@@ -92,7 +96,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/halal-certification-specialist.md`](agents/halal-certification-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 1, 2 |
-| **Role** | Halal certification requirement analysis and certification process specialist for co-export. Determines whether a destination market requires or strongly prefers halal certification for a given product category, identifies which certification body's mark is recognized in that market (JAKIM, BPJPH/MUI, ESMA, GSO), and defines the certification/audit process and renewal cycle. Use when: halal certification requirement, certifying-body selection, or halal-market compliance readiness needs to be determined. |
+| **Role** | Halal certification requirement analysis and certification process specialist |
 
 ### hs-classification-specialist
 
@@ -101,7 +105,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/hs-classification-specialist.md`](agents/hs-classification-specialist.md) |
 | **Tier** | high |
 | **Phases** | 1, 2 |
-| **Role** | HS code classification, customs valuation, and tariff rate determination specialist for co-export. Classifies goods under the Harmonized System per the home jurisdiction's customs legislation (see the active country profile under docs/countries/) and the WCO HS nomenclature, determines applicable tariff rates, and flags classification ambiguity requiring a formal customs ruling from the jurisdiction's customs authority (KR: Customs Valuation and Classification Institute). Use when: HS code classification, tariff rate lookup, customs valuation, or classification dispute/ambiguity is required. |
+| **Role** | HS code classification, customs valuation, and tariff rate determination specialist |
 
 ### logistics-coordinator
 
@@ -110,7 +114,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/logistics-coordinator.md`](agents/logistics-coordinator.md) |
 | **Tier** | low |
 | **Phases** | 3, 4 |
-| **Role** | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator for co-export. Advises on Incoterms 2020 term selection, coordinates freight mode and forwarder selection trade-offs, and plans bonded-warehouse/customs clearance logistics. Finalizes delivery handoff at the end of the engagement. Use when: Incoterms selection, freight/forwarding coordination, or bonded warehouse logistics planning is required. |
+| **Role** | Incoterms selection, freight/forwarding, and bonded warehouse logistics coordinator |
 
 ### market-entry-strategist
 
@@ -119,7 +123,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/market-entry-strategist.md`](agents/market-entry-strategist.md) |
 | **Tier** | medium |
 | **Phases** | 1, 3, 4 |
-| **Role** | Overseas market entry strategy, buyer discovery, and market research lead for co-export. Assesses target-market demand, competitive landscape, and entry channel options (direct export, local distributor/agent, e-commerce, local incorporation), and synthesizes compliance findings from other specialists into a client-facing go-to-market recommendation. Use when: overseas market entry strategy, buyer/distributor discovery, or destination-market demand and competitive research is required. |
+| **Role** | Overseas market entry strategy, buyer discovery, and market research lead |
 
 ### trade-documentation-specialist
 
@@ -128,7 +132,52 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/trade-documentation-specialist.md`](agents/trade-documentation-specialist.md) |
 | **Tier** | medium |
 | **Phases** | 3 |
-| **Role** | Trade documentation and customs clearance paperwork specialist for co-export. Prepares templates and checklists for letters of credit (L/C), commercial invoices, packing lists, bills of lading, certificates of origin, and customs declaration documents, consistent with the classification, origin, and control findings produced by the compliance specialists. Use when: trade document preparation, L/C terms review, or customs clearance paperwork checklist is required. |
+| **Role** | Trade documentation and customs clearance paperwork specialist |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -169,15 +218,22 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
-| Duty drawback specialist for co-export | Phase 3 | `customs-duty-drawback-specialist` | high | |
-| Strategic items export control and sanctions/denied-party screening specialist f | Phase 1 | `export-control-compliance-specialist` | high | |
-| Monitors and reports on US, China, and EU import regulation, tariff, and trade-d | Phase 1 | `foreign-regulatory-intelligence-analyst` | medium | |
-| FTA (Free Trade Agreement) rules-of-origin analysis and origin certification spe | Phase 1 | `fta-origin-analyst` | high | |
-| Halal certification requirement analysis and certification process specialist f | Phase 1 | `halal-certification-specialist` | medium | |
-| HS code classification, customs valuation, and tariff rate determination special | Phase 1 | `hs-classification-specialist` | high | |
-| Incoterms selection, freight/forwarding, and bonded warehouse logistics coordina | Phase 3 | `logistics-coordinator` | low | |
-| Overseas market entry strategy, buyer discovery, and market research lead for co | Phase 1 | `market-entry-strategist` | medium | |
-| Trade documentation and customs clearance paperwork specialist for co-export | Phase 3 | `trade-documentation-specialist` | medium | |
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
+| Customs duty drawback (refund of duties on raw materials for export) determination and refund-method specialist | Phase 3 | `customs-duty-drawback-specialist` | High | |
+| Strategic items export control and sanctions screening specialist | Phase 1, 2 | `export-control-compliance-specialist` | High | |
+| Foreign import regulation and tariff-change monitoring specialist | Phase 1 | `foreign-regulatory-intelligence-analyst` | Medium | |
+| FTA rules-of-origin analysis and origin certification specialist | Phase 1, 2 | `fta-origin-analyst` | High | |
+| Halal certification requirement analysis and certification process specialist | Phase 1, 2 | `halal-certification-specialist` | Medium | |
+| HS code classification | Phase 1, 2 | `hs-classification-specialist` | High | |
+| Incoterms selection | Phase 3, 4 | `logistics-coordinator` | Low | |
+| Overseas market entry strategy | Phase 1, 3, 4 | `market-entry-strategist` | Medium | |
+| Trade documentation and customs clearance paperwork specialist | Phase 3 | `trade-documentation-specialist` | Medium | |
+| Owns locale configuration | Phase — | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 **Tier Ceiling Rule**: An agent's tier may NOT be elevated beyond its defined tier.

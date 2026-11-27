@@ -29,28 +29,32 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
-| **sd-analyst** | [`agents/sd-analyst.md`](agents/sd-analyst.md) | Medium | Sales & Distribution module analysis — activates on SD trigger keywords |
-| **mm-analyst** | [`agents/mm-analyst.md`](agents/mm-analyst.md) | Medium | Materials Management module analysis — activates on MM trigger keywords |
-| **fi-analyst** | [`agents/fi-analyst.md`](agents/fi-analyst.md) | Medium | Financial Accounting module analysis — activates on FI trigger keywords |
-| **co-analyst** | [`agents/co-analyst.md`](agents/co-analyst.md) | Medium | Controlling module analysis — activates on CO trigger keywords |
-| **pp-analyst** | [`agents/pp-analyst.md`](agents/pp-analyst.md) | Medium | Production Planning module analysis — activates on PP trigger keywords |
-| **le-analyst** | [`agents/le-analyst.md`](agents/le-analyst.md) | Medium | Logistics Execution module analysis — activates on LE trigger keywords |
-| **architect** | [`agents/architect.md`](agents/architect.md) | High | Technical Execution Lead — pattern selection, execution sequencing |
-| **code-writer** | [`agents/code-writer.md`](agents/code-writer.md) | Low | ABAP implementation via WriteSource/EditSource |
-| **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Low | SyntaxCheck → RunUnitTests → GetCodeCoverage → RunATCCheck |
-| **dba** | [`agents/dba.md`](agents/dba.md) | Medium | Table/CDS/index design, SQL performance tuning |
-| **devops-admin** | [`agents/devops-admin.md`](agents/devops-admin.md) | Medium | Transport management, infrastructure install |
-| **sap-investigator** | [`agents/sap-investigator.md`](agents/sap-investigator.md) | Medium | Codebase pattern scan, historical design extraction |
-| **read-only-analyst** | [`agents/read-only-analyst.md`](agents/read-only-analyst.md) | Medium | Business data queries, AS-IS analysis |
-| **schema-inspector** | [`agents/schema-inspector.md`](agents/schema-inspector.md) | Medium | Table/CDS structure inspection, dependency maps |
-| **interface-expert** | [`agents/interface-expert.md`](agents/interface-expert.md) | Medium | OData/RFC/IDoc interface design |
-| **fiori-developer** | [`agents/fiori-developer.md`](agents/fiori-developer.md) | Medium | UI5/Fiori screen design and implementation |
-| **form-expert** | [`agents/form-expert.md`](agents/form-expert.md) | Medium | SAP Script, Smart Forms, Adobe Forms design |
-| **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Low | Security policies and safe dependencies |
-| **gui-scripter** | [`agents/gui-scripter.md`](agents/gui-scripter.md) | Low | BDC / VBS automation (last resort) |
+| **architect** | [`agents/architect.md`](agents/architect.md) | High | SAP Technical Architect |
+| **co-analyst** | [`agents/co-analyst.md`](agents/co-analyst.md) | Medium | CO Module Analyst |
+| **code-writer** | [`agents/code-writer.md`](agents/code-writer.md) | Low | SAP ABAP Code Implementation Specialist |
+| **dba** | [`agents/dba.md`](agents/dba.md) | Medium | SAP DBA (Database Agent) |
+| **devops-admin** | [`agents/devops-admin.md`](agents/devops-admin.md) | Medium | SAP DevOps / Admin |
+| **fi-analyst** | [`agents/fi-analyst.md`](agents/fi-analyst.md) | Medium | FI Module Analyst |
+| **fiori-developer** | [`agents/fiori-developer.md`](agents/fiori-developer.md) | Medium | SAP Fiori & UI5 Implementation Specialist |
+| **form-expert** | [`agents/form-expert.md`](agents/form-expert.md) | Medium | SAP Document Output & Form Specialist |
+| **gui-scripter** | [`agents/gui-scripter.md`](agents/gui-scripter.md) | Low | SAP GUI Scripting & Automation Specialist (LAST RESORT) |
+| **interface-expert** | [`agents/interface-expert.md`](agents/interface-expert.md) | Medium | SAP Interface Expert |
+| **le-analyst** | [`agents/le-analyst.md`](agents/le-analyst.md) | Medium | LE Module Analyst |
+| **mm-analyst** | [`agents/mm-analyst.md`](agents/mm-analyst.md) | Medium | MM Module Analyst |
+| **pp-analyst** | [`agents/pp-analyst.md`](agents/pp-analyst.md) | Medium | PP Module Analyst |
+| **read-only-analyst** | [`agents/read-only-analyst.md`](agents/read-only-analyst.md) | Medium | SAP Business Data Analyst (read-only) |
+| **sap-investigator** | [`agents/sap-investigator.md`](agents/sap-investigator.md) | Medium | SAP Codebase Intelligence Scanner (read-only) |
+| **schema-inspector** | [`agents/schema-inspector.md`](agents/schema-inspector.md) | Medium | SAP Data Schema & Dependency Inspector (read-only) |
+| **sd-analyst** | [`agents/sd-analyst.md`](agents/sd-analyst.md) | Medium | SD Module Analyst |
+| **security-monitor** | [`agents/security-monitor.md`](agents/security-monitor.md) | Low | Security Monitor |
+| **test-runner** | [`agents/test-runner.md`](agents/test-runner.md) | Low | SAP Quality Assurance Specialist |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 
 ## §2: Individual Agent Definitions
@@ -58,32 +62,14 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 
 <!-- VARIANT-AGENT-DETAILS-START -->
-### sd-analyst
+### architect
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/sd-analyst.md`](agents/sd-analyst.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Sales & Distribution module analysis — activates on Sales Order, Delivery, Billing, Pricing, SD, VA*, VL*, VF* keywords |
-
-### mm-analyst
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/mm-analyst.md`](agents/mm-analyst.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Materials Management module analysis — activates on Purchasing, Goods Receipt, Material Master, MM, ME* keywords |
-
-### fi-analyst
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/fi-analyst.md`](agents/fi-analyst.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Financial Accounting module analysis — activates on Journal Entry, GL, AR, AP, FI, FB*, BKPF keywords |
+| **File** | [`agents/architect.md`](agents/architect.md) |
+| **Tier** | high |
+| **Phases** | 1, 2 |
+| **Role** | SAP Technical Architect |
 
 ### co-analyst
 
@@ -92,34 +78,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/co-analyst.md`](agents/co-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Controlling module analysis — activates on Cost Center, Internal Order, CO-PA, CO, KS* keywords |
-
-### pp-analyst
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/pp-analyst.md`](agents/pp-analyst.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Production Planning module analysis — activates on Production Order, BOM, MRP, PP, CO*, AFKO keywords |
-
-### le-analyst
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/le-analyst.md`](agents/le-analyst.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Logistics Execution module analysis — activates on Shipment, Transport, Warehouse, WM, EWM, LE, LT* keywords |
-
-### architect
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/architect.md`](agents/architect.md) |
-| **Tier** | high |
-| **Phases** | 2, 5 |
-| **Role** | Technical Execution Lead — pattern selection, execution sequencing, DBA coordination |
+| **Role** | CO Module Analyst |
 
 ### code-writer
 
@@ -128,16 +87,7 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/code-writer.md`](agents/code-writer.md) |
 | **Tier** | low |
 | **Phases** | 3 |
-| **Role** | ABAP implementation via WriteSource/EditSource, syntax check |
-
-### test-runner
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/test-runner.md`](agents/test-runner.md) |
-| **Tier** | low |
-| **Phases** | 4 |
-| **Role** | QA verification — unit tests, code coverage, ATC check |
+| **Role** | SAP ABAP Code Implementation Specialist |
 
 ### dba
 
@@ -145,8 +95,8 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/dba.md`](agents/dba.md) |
 | **Tier** | medium |
-| **Phases** | 2, 4 |
-| **Role** | Table/CDS/index design, SQL performance tuning |
+| **Phases** | 2 |
+| **Role** | SAP DBA (Database Agent) |
 
 ### devops-admin
 
@@ -154,44 +104,17 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/devops-admin.md`](agents/devops-admin.md) |
 | **Tier** | medium |
-| **Phases** | 5 |
-| **Role** | Transport management, infrastructure install, system audit |
+| **Phases** | 4 |
+| **Role** | SAP DevOps / Admin |
 
-### sap-investigator
+### fi-analyst
 
 | Field | Value |
 |-------|-------|
-| **File** | [`agents/sap-investigator.md`](agents/sap-investigator.md) |
+| **File** | [`agents/fi-analyst.md`](agents/fi-analyst.md) |
 | **Tier** | medium |
 | **Phases** | 1 |
-| **Role** | Codebase pattern scan, historical design extraction (read-only) |
-
-### read-only-analyst
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/read-only-analyst.md`](agents/read-only-analyst.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Business data queries, AS-IS analysis with draft AC (read-only) |
-
-### schema-inspector
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/schema-inspector.md`](agents/schema-inspector.md) |
-| **Tier** | medium |
-| **Phases** | 1 |
-| **Role** | Table/CDS structure inspection, dependency maps (read-only) |
-
-### interface-expert
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/interface-expert.md`](agents/interface-expert.md) |
-| **Tier** | medium |
-| **Phases** | 2, 3 |
-| **Role** | OData/RFC/IDoc interface design and connectivity validation |
+| **Role** | FI Module Analyst |
 
 ### fiori-developer
 
@@ -199,8 +122,8 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/fiori-developer.md`](agents/fiori-developer.md) |
 | **Tier** | medium |
-| **Phases** | 2, 3 |
-| **Role** | UI5/Fiori screen design and implementation |
+| **Phases** | 3 |
+| **Role** | SAP Fiori & UI5 Implementation Specialist |
 
 ### form-expert
 
@@ -208,17 +131,8 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 |-------|-------|
 | **File** | [`agents/form-expert.md`](agents/form-expert.md) |
 | **Tier** | medium |
-| **Phases** | 2, 3 |
-| **Role** | SAP Script, Smart Forms, Adobe Forms design and print programs |
-
-### security-monitor
-
-| Field | Value |
-|-------|-------|
-| **File** | [`agents/security-monitor.md`](agents/security-monitor.md) |
-| **Tier** | low |
-| **Phases** | 1 |
-| **Role** | Security policies enforcement and safe dependency audit |
+| **Phases** | 3 |
+| **Role** | SAP Document Output & Form Specialist |
 
 ### gui-scripter
 
@@ -227,7 +141,142 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **File** | [`agents/gui-scripter.md`](agents/gui-scripter.md) |
 | **Tier** | low |
 | **Phases** | 3 |
-| **Role** | BDC / VBS automation — LAST RESORT when no BAPI/OData/RFC alternative exists |
+| **Role** | SAP GUI Scripting & Automation Specialist (LAST RESORT) |
+
+### interface-expert
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/interface-expert.md`](agents/interface-expert.md) |
+| **Tier** | medium |
+| **Phases** | 2 |
+| **Role** | SAP Interface Expert |
+
+### le-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/le-analyst.md`](agents/le-analyst.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | LE Module Analyst |
+
+### mm-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/mm-analyst.md`](agents/mm-analyst.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | MM Module Analyst |
+
+### pp-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/pp-analyst.md`](agents/pp-analyst.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | PP Module Analyst |
+
+### read-only-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/read-only-analyst.md`](agents/read-only-analyst.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | SAP Business Data Analyst (read-only) |
+
+### sap-investigator
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/sap-investigator.md`](agents/sap-investigator.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | SAP Codebase Intelligence Scanner (read-only) |
+
+### schema-inspector
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/schema-inspector.md`](agents/schema-inspector.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | SAP Data Schema & Dependency Inspector (read-only) |
+
+### sd-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/sd-analyst.md`](agents/sd-analyst.md) |
+| **Tier** | medium |
+| **Phases** | 1 |
+| **Role** | SD Module Analyst |
+
+### security-monitor
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/security-monitor.md`](agents/security-monitor.md) |
+| **Tier** | low |
+| **Phases** | 5 |
+| **Role** | Security Monitor |
+
+### test-runner
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/test-runner.md`](agents/test-runner.md) |
+| **Tier** | low |
+| **Phases** | 3, 4 |
+| **Role** | SAP Quality Assurance Specialist |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 
 ## §3: Agent Coordination & Orchestration Rules
@@ -580,7 +629,7 @@ Same rules on every platform; only the config file differs. Enforcement tiering 
 
 ---
 
-*Last Updated: 2026-11-23 (co-abap v1.0.0)*
+*Last Updated: 2026-11-28 (co-abap v1.0.0)*
 
 <!-- trail:start -->
 ## Trail — repo context graph

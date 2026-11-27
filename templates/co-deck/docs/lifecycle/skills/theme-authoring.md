@@ -7,7 +7,7 @@
 - **Skill**: theme-authoring
 - **Status**: active
 - **Owner**: pm
-- **Created**: 2026-06-21
+- **Created**: 2026-11-28
 
 ## Description
 
@@ -17,7 +17,7 @@ Entry point for creating a new co-deck theme or style. PM dispatches the appropr
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-06-21 | - | production | Initial record derived from SKILL.md frontmatter | pm |
+| 2026-11-28 | - | production | Initial record derived from SKILL.md frontmatter | pm |
 
 ## Acceptance Criteria
 

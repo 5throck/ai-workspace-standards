@@ -1,7 +1,28 @@
 #!/usr/bin/env bun
 /**
  * regenerate-agents-md.ts
- * @version 1.5.0
+ * @version 1.6.0
+ *
+ * v1.6.0 (2026-11-28, T-20261127-010, spec docs/designs/2026-11-28-common-agent-roster-regen-design.md):
+ *         --variant rosters list the DELIVERED agent set, not just the variant's
+ *         own agents. new-project copyDir(commonDir) delivers every
+ *         templates/common/agents/*.md into the project (agents/_COMMON.md is
+ *         removed post-copy as L1-only — NEW_PROJECT_L1_ONLY_AGENTS; pm.md is
+ *         excluded by the roster convention; the variant overlay wins on name
+ *         collision). regenerate-agents-md --variant now scans
+ *         templates/common/agents/ and appends the common-only agents (sorted,
+ *         variant-listed names deduped) after the variant agents, so a fresh
+ *         scaffold's agent-lifecycle-audit Check 5 (delivered agent missing
+ *         from the AGENTS.md roster) is clean. Country-scoped common agents
+ *         (public-data-analyst, docs/workspace-schema.json
+ *         country_scoped_assets.agents) STAY in the template roster — the
+ *         template ships the superset and scaffold-time
+ *         prune-country-scoped-assets v0.5.0 scrubs the roster row for
+ *         non-matching countries (design
+ *         2026-11-12-common-agents-for-common-skills Q4; same principle as the
+ *         §6 skill-table superset note below). --source mode is unchanged: it
+ *         already scans the project's agents/ dir, which carries the delivered
+ *         common copies.
  *
  * v1.5.0 (2026-11-11, U-20261111-003 from co-deck, spec
  *         docs/designs/2026-11-11-co-deck-upstream-fixes-design.md §U-003): three
@@ -56,6 +77,9 @@ import * as path from "node:path";
 
 const TEMPLATES_DIR = "templates";
 const COMMON_AGENTS_TEMPLATE = path.join(TEMPLATES_DIR, "common", "AGENTS.md");
+// v1.6.0 (T-20261127-010): the delivery source for the common agents every
+// project receives at new-project instantiation (copyDir(commonDir)).
+const COMMON_AGENTS_DIR = path.join(TEMPLATES_DIR, "common", "agents");
 
 interface AgentMeta {
   name: string;
@@ -146,26 +170,123 @@ export function resolveRole(fm: Record<string, string>, agentName: string): stri
   return description || role || agentName;
 }
 
-function readAgentMeta(variantDir: string, agentName: string): AgentMeta {
-  const agentFile = path.join(variantDir, "agents", `${agentName}.md`);
+function readAgentMeta(agentsDir: string, rel: string): AgentMeta {
+  const agentFile = path.join(agentsDir, `${rel}.md`);
   const content = fs.readFileSync(agentFile, "utf-8");
   const fm = parseSimpleFrontmatter(content);
+  const name = rel.includes("/") ? rel.slice(rel.lastIndexOf("/") + 1) : rel;
 
   const tier = resolveTier(fm);
   const phasesRaw = fm["phases"] || "";
   // Convert [1, 2] → "1, 2"
   const phases = phasesRaw.replace(/[\[\]]/g, "").replace(/,\s*/g, ", ");
-  const role = resolveRole(fm, agentName);
+  const role = resolveRole(fm, name);
   const description = cleanDescription(fm["description"]) || role;
 
   return {
-    name: agentName,
-    file: `agents/${agentName}.md`,
+    name,
+    file: `agents/${rel}.md`,
     tier,
     phases,
     role,
     description,
   };
+}
+
+/**
+ * v1.6.0 (T-20261127-010): agent names delivered from the common template's
+ * agents/ directory. Mirrors the new-project delivery rule (copyDir(commonDir)):
+ * every *.md file is an agent EXCEPT pm.md (variant pm wins; excluded from the
+ * roster by convention) and `_`-prefixed partials (agents/_COMMON.md is removed
+ * post-copy as L1-only — NEW_PROJECT_L1_ONLY_AGENTS). Country-scoped common
+ * agents (public-data-analyst) are INCLUDED: the template AGENTS.md ships the
+ * superset roster and scaffold-time prune-country-scoped-assets scrubs the row
+ * for non-matching countries. Sorted for stable output.
+ */
+export function scanCommonAgentNames(commonAgentsDir: string): string[] {
+  if (!fs.existsSync(commonAgentsDir)) return [];
+  return fs
+    .readdirSync(commonAgentsDir)
+    .filter((f) => f.endsWith(".md") && !f.startsWith("_") && f !== "pm.md")
+    .map((f) => f.replace(/\.md$/, ""))
+    .sort();
+}
+
+/**
+ * v1.6.0 (T-20261127-010): every agent file the variant's own agents/ tree
+ * delivers, as relpaths under agents/ sans the .md suffix. RECURSIVE on
+ * purpose: nested trees (co-safety's agents/domains/, agents/_shared/) are
+ * delivered by the variant overlay whole and validate-templates
+ * (findUndeclaredAgents) documents the contract that nested agents are
+ * "indexed via the variant's AGENTS.md" — so a regenerated roster must
+ * re-index them, not silently drop them. pm.md and README* excluded. Sorted
+ * for stable output.
+ */
+export function scanVariantTreeAgentFiles(variantAgentsDir: string): string[] {
+  if (!fs.existsSync(variantAgentsDir)) return [];
+  const out: string[] = [];
+  const walk = (dir: string, prefix: string): void => {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      if (e.isDirectory()) {
+        walk(path.join(dir, e.name), prefix ? `${prefix}/${e.name}` : e.name);
+      } else if (e.isFile() && e.name.endsWith(".md") && e.name !== "pm.md" && !e.name.startsWith("README")) {
+        out.push(prefix ? `${prefix}/${e.name.replace(/\.md$/, "")}` : e.name.replace(/\.md$/, ""));
+      }
+    }
+  };
+  walk(variantAgentsDir, "");
+  return out.sort();
+}
+
+export interface RosterEntry {
+  /** Short agent name (basename) — the roster row's bold label. */
+  name: string;
+  /** Path under agents/ sans .md — renders as `agents/<rel>.md` links. */
+  rel: string;
+  /** Which agents/ dir the metadata is read from at delivery. */
+  source: "variant" | "common";
+}
+
+/**
+ * v1.6.0 (T-20261127-010): the delivered roster for a variant, in three
+ * ordered groups —
+ *   1. the variant's declared agents (variant.json, pm dropped by the roster
+ *      convention; declared order preserved so existing rows keep positions),
+ *   2. the variant tree's undeclared agents (nested trees, sorted by relpath —
+ *      delivered by the overlay and indexed via AGENTS.md),
+ *   3. the common-only agents (sorted; a name the variant itself ships
+ *      dedupes to the variant entry — at delivery the variant overlay copy
+ *      wins, so the variant file is the one the roster must describe).
+ * Duplicate-name-safe: the same basename delivered twice (declared flat +
+ * nested tree copy) is emitted once per distinct relpath, never twice.
+ */
+export function buildVariantRoster(declaredNames: string[], treeFiles: string[], commonNames: string[]): RosterEntry[] {
+  const declared = declaredNames.filter((n) => n !== "pm");
+  const declaredSet = new Set(declared);
+  const treeOnly = treeFiles.filter((rel) => {
+    if (rel === "pm" || rel.endsWith("/pm")) return false; // roster convention
+    if (declaredSet.has(rel)) return false;
+    const base = rel.includes("/") ? rel.slice(rel.lastIndexOf("/") + 1) : rel;
+    return !declaredSet.has(base);
+  });
+  const treeOnlyBases = new Set(treeOnly.map((rel) => (rel.includes("/") ? rel.slice(rel.lastIndexOf("/") + 1) : rel)));
+  const commonOnly = commonNames.filter((n) => n !== "pm" && !declaredSet.has(n) && !treeOnlyBases.has(n));
+  const entries: RosterEntry[] = [
+    ...declared.map((n) => ({ name: n, rel: n, source: "variant" as const })),
+    ...treeOnly.map((rel) => ({
+      name: rel.includes("/") ? rel.slice(rel.lastIndexOf("/") + 1) : rel,
+      rel,
+      source: "variant" as const,
+    })),
+    ...commonOnly.map((n) => ({ name: n, rel: n, source: "common" as const })),
+  ];
+  return entries;
 }
 
 function deriveDispatchTriggers(agent: AgentMeta): string[] {
@@ -377,22 +498,31 @@ function regenerateVariant(variantName: string, dryRun: boolean, fromTemplate: b
   }
 
   const variant = JSON.parse(fs.readFileSync(variantJson, "utf-8"));
-  const allAgentNames: string[] = (variant.agents ?? [])
+  // v1.6.0 (T-20261127-010): roster = declared agents + variant-tree agents +
+  // delivered common agents (see buildVariantRoster for the grouping rules).
+  const declared: string[] = (variant.agents ?? [])
     .map((a: { name: string }) => a.name)
     .filter((n: string) => n !== "pm");
+  const roster = buildVariantRoster(
+    declared,
+    scanVariantTreeAgentFiles(path.join(variantDir, "agents")),
+    scanCommonAgentNames(COMMON_AGENTS_DIR),
+  );
 
   console.log(`\n📦 Regenerating AGENTS.md for ${variantName}`);
-  console.log(`   Agents: ${allAgentNames.join(", ")}`);
+  console.log(`   Agents: ${roster.map((e) => e.rel).join(", ")}`);
 
-  // Read agent metadata
+  // Read agent metadata — variant agents from the variant's own agents/
+  // (overlay-wins at delivery), common-only agents from templates/common/agents/.
   const agents: AgentMeta[] = [];
-  for (const name of allAgentNames) {
-    const agentFile = path.join(variantDir, "agents", `${name}.md`);
+  for (const entry of roster) {
+    const agentsDir = entry.source === "variant" ? path.join(variantDir, "agents") : COMMON_AGENTS_DIR;
+    const agentFile = path.join(agentsDir, `${entry.rel}.md`);
     if (!fs.existsSync(agentFile)) {
       console.warn(`  ⚠️  Agent file not found: ${agentFile} — skipping`);
       continue;
     }
-    agents.push(readAgentMeta(variantDir, name));
+    agents.push(readAgentMeta(agentsDir, entry.rel));
   }
 
   // Read L1 template; an existing fully-marked AGENTS.md is updated in place
@@ -454,20 +584,18 @@ function regenerateSource(sourceDir: string, dryRun: boolean, fromTemplate: bool
     return;
   }
 
-  const allAgentNames: string[] = fs
-    .readdirSync(agentsDir)
-    // pm.md is excluded by the roster convention; README*.md are agent-dir
-    // docs (L3 scaffolds ship agents/README.md + README_ko.md), not agents
-    .filter((f) => f.endsWith(".md") && f !== "pm.md" && !f.startsWith("README"))
-    .map((f) => f.replace(/\.md$/, ""))
-    .sort();
+  // v1.6.0 (T-20261127-010): recursive tree scan — an L3 project's agents/ dir
+  // carries the delivered tree (variant agents + nested trees + the common
+  // copies), and the roster must index all of it. pm.md and README* excluded
+  // by the roster convention.
+  const allAgentRels: string[] = scanVariantTreeAgentFiles(agentsDir);
 
   console.log(`\n📦 Regenerating AGENTS.md for L3 source ${sourceDir}`);
-  console.log(`   Agents: ${allAgentNames.join(", ")}`);
+  console.log(`   Agents: ${allAgentRels.join(", ")}`);
 
   const agents: AgentMeta[] = [];
-  for (const name of allAgentNames) {
-    agents.push(readAgentMeta(sourceDir, name));
+  for (const rel of allAgentRels) {
+    agents.push(readAgentMeta(path.join(sourceDir, "agents"), rel));
   }
 
   const template = fs.readFileSync(COMMON_AGENTS_TEMPLATE, "utf-8");

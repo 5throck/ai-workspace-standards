@@ -29,7 +29,6 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | Agent | File | Tier | Role |
 |-------|------|------|------|
 | **Project Manager (PM) Agent** | [`agents/pm.md`](agents/pm.md) | Medium | Orchestrates team assembly, approval gates, and lifecycle finalization (phase numbers are variant-specific; see `docs/phase-definitions.md`). **PM does NOT execute code or documentation directly — all specialist work dispatched through PM.** |
-| **I18N Specialist Agent** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Locale documentation — translation zones, language-policy enforcement, Korean plain-language output. |
 
 <!-- VARIANT-AGENTS-START -->
 | **design-lead** | [`agents/design-lead.md`](agents/design-lead.md) | High | Design direction, design system architecture, and creative strategy owner |
@@ -39,6 +38,11 @@ This document is the **Single Source of Truth (SSOT)** for the agent ecosystem, 
 | **typography-expert** | [`agents/typography-expert.md`](agents/typography-expert.md) | Medium | Font selection, type systems, and visual hierarchy specialist |
 | **ux-researcher** | [`agents/ux-researcher.md`](agents/ux-researcher.md) | Medium | User research, needs analysis, and UX insights specialist |
 | **visual-designer** | [`agents/visual-designer.md`](agents/visual-designer.md) | Medium | Visual designs, design tokens, and component specifications producer |
+| **i18n-specialist** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) | Medium | Owns locale configuration, locale-specific formatting, and text layout guidance |
+| **automation-engineer** | [`agents/automation-engineer.md`](agents/automation-engineer.md) | Medium | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+| **contract-gate-engineer** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) | Medium | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+| **design-system-lead** | [`agents/design-system-lead.md`](agents/design-system-lead.md) | Medium | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+| **public-data-analyst** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) | Medium | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENTS-END -->
 ---
 
@@ -109,6 +113,51 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 | **Tier** | medium |
 | **Phases** | 3 |
 | **Role** | Visual designs, design tokens, and component specifications producer |
+
+### i18n-specialist
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/i18n-specialist.md`](agents/i18n-specialist.md) |
+| **Tier** | medium |
+| **Phases** | 4 |
+| **Role** | Owns locale configuration, locale-specific formatting, and text layout guidance |
+
+### automation-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/automation-engineer.md`](agents/automation-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests |
+
+### contract-gate-engineer
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/contract-gate-engineer.md`](agents/contract-gate-engineer.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill |
+
+### design-system-lead
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/design-system-lead.md`](agents/design-system-lead.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill |
+
+### public-data-analyst
+
+| Field | Value |
+|-------|-------|
+| **File** | [`agents/public-data-analyst.md`](agents/public-data-analyst.md) |
+| **Tier** | medium |
+| **Phases** | — |
+| **Role** | Operates and maintains the Korean public-data gateway skills (BOK ECOS, KOSIS, KRX, DART, Open Law, data.go.kr): key setup, endpoint behaviour, response normalisation, and citation of source and receipt IDs. Does not make domain judgements; routes those to the project domain lead |
 <!-- VARIANT-AGENT-DETAILS-END -->
 ---
 
@@ -125,13 +174,20 @@ Before assigning an agent to any task, PM MUST classify the deliverable type:
 | Project setup | Phase 0 | pm | Low | PM handles initial setup directly |
 
 <!-- VARIANT-PHASE-GATE-START -->
+| Deliverable Type | Phase | Required Agent | Tier | Notes |
+|------------------|-------|----------------|------|-------|
 | Design direction | Phase 2, 3 | `design-lead` | High | |
 | Interactive prototypes and design handoff artifacts builder | Phase 4 | `prototype-engineer` | Medium | |
 | End-to-end service experience and customer journey designer | Phase 3 | `service-designer` | Medium | |
-| Brand narrative and design principles | Phase 1, 2 | `storyteller` | Medium | |
+| Brand narrative | Phase 1, 2 | `storyteller` | Medium | |
 | Font selection | Phase 3 | `typography-expert` | Medium | |
 | User research | Phase 1 | `ux-researcher` | Medium | |
 | Visual designs | Phase 3 | `visual-designer` | Medium | |
+| Owns locale configuration | Phase 4 | `i18n-specialist` | Medium | |
+| Executes the /sync pipeline row | Phase — | `automation-engineer` | Medium | |
+| Owns runtime schema (Zod) contract patterns for interface boundaries | Phase — | `contract-gate-engineer` | Medium | |
+| Guides a project from domain evidence to design principles | Phase — | `design-system-lead` | Medium | |
+| Operates and maintains the Korean public-data gateway skills (BOK ECOS | Phase — | `public-data-analyst` | Medium | |
 <!-- VARIANT-PHASE-GATE-END -->
 
 ### §3.6 3-Tier Strategy

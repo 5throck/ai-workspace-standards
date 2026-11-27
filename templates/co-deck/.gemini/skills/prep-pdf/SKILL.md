@@ -1,7 +1,7 @@
 ---
 name: prep-pdf
 scope: co-deck
-version: 2.0.2
+version: 2.0.3
 description: >
   Playwright-free PDF preparation. Reads lecture-profile.md, resolves the 4-layer
   spec merge, validates fonts, outputs a layout summary, and optionally generates
@@ -10,11 +10,19 @@ description: >
   Stages 9-10 of the lecture workflow (simplified).
 status: active
 owner: pdf-export
-last_reviewed: "2026-11-15"
+last_reviewed: "2026-11-28"
 prerequisites: html-build
 relates_to:
   - skill: version
     type: follows
+
+metadata:
+  type: process
+  triggers:
+    - prep-pdf
+    - prep for pdf
+    - estimate layout
+    - check pdf layout
 ---
 
 ## Context

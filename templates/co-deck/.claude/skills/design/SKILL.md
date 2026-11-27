@@ -1,14 +1,14 @@
 ---
 name: design
 scope: co-deck
-version: 1.2.3
+version: 1.2.4
 description: >
   Locks visual design style. Decides layout, color palette, font family and
   saves design_spec.md. Can analyze reference URLs/images. Responds to "lock
   design", "pick colors/fonts", "make design spec" . Stage 4 of the workflow.
 status: active
 owner: design
-last_reviewed: "2026-11-15"
+last_reviewed: "2026-11-28"
 prerequisites: storyline
 relates_to:
   - skill: html-build
@@ -21,6 +21,14 @@ relates_to:
     type: composes_with
 inputs: [storyline-outline]
 outputs: [design-spec, theme-lock]
+
+metadata:
+  type: process
+  triggers:
+    - design
+    - lock design
+    - pick colors
+    - make design spec
 ---
 
 ## Context

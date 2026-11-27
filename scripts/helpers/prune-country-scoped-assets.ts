@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 0.5.0
+// @version 0.6.0
+// v0.6.0 (2026-11-28, T-20261127-010 follow-up): the AGENTS.md scrub now also
+//         removes the pruned agent's managed non-link forms — the
+//         VARIANT-AGENT-DETAILS section (### heading + Field/Value table) and
+//         VARIANT-PHASE-GATE / VARIANT-DISPATCH-TRIGGERS backticked-name rows
+//         (lib/country-scoped-agents.ts v1.2.0 scrubAgentDetailBlocks).
+//         regenerate-agents-md v1.6.0 rosters those forms, so the link-line
+//         scrub alone left 2 dangling references per pruned agent on a
+//         region-neutral scaffold (observed live on co-deck).
 // v0.5.0 (2026-11-12, CA-3+AE-3, design 2026-11-12-common-agents-for-common-skills Q4):
 //         new category "agents" (registry loaded from the workspace-schema.json pair via ../lib/country-scoped-agents.ts v1.1.0 — T-20261112-005) — prunes a
 //         country-scoped common agent (public-data-analyst, KR) and its Claude mirror,
@@ -68,6 +76,7 @@ import {
   agentPrunePaths,
   agentsToPrune,
   scrubAgentReferenceLines,
+  scrubAgentDetailBlocks,
 } from "../lib/country-scoped-agents.ts";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -295,10 +304,17 @@ for (const { name, scopedCountry } of agentsToPrune(loadCountryScopedAgents(), c
 {
   const agentsMd = join(targetDir, "AGENTS.md");
   if (prunedAgentNames.length > 0 && existsSync(agentsMd)) {
-    const { output, removed } = scrubAgentReferenceLines(readFileSync(agentsMd, "utf-8"), prunedAgentNames);
-    if (removed > 0) {
-      writeFileSync(agentsMd, output, "utf-8");
-      prunedCount += removed;
+    let text = readFileSync(agentsMd, "utf-8");
+    // v0.6.0 (T-20261127-010 follow-up): the link-line scrub alone leaves the
+    // managed VARIANT-AGENT-DETAILS section and VARIANT-PHASE-GATE row of the
+    // pruned agent dangling — regenerate-agents-md v1.6.0 rosters now carry
+    // those forms (observed live on a region-neutral co-deck scaffold).
+    const linkScrub = scrubAgentReferenceLines(text, prunedAgentNames);
+    const detailScrub = scrubAgentDetailBlocks(linkScrub.output, prunedAgentNames);
+    const removedTotal = linkScrub.removed + detailScrub.removed;
+    if (removedTotal > 0) {
+      writeFileSync(agentsMd, detailScrub.output, "utf-8");
+      prunedCount += removedTotal;
     }
   }
 }

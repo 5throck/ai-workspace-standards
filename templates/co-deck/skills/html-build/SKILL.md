@@ -1,7 +1,7 @@
 ---
 name: html-build
 scope: co-deck
-version: 1.8.1
+version: 1.8.2
 description: >
   Generates HTML slides from slide_deck.md and design_spec.md. Applies theme
   (data-theme attribute), binds images from image-manifest.json, inserts speaker
@@ -11,7 +11,7 @@ description: >
   workflow.
 status: active
 owner: html-build
-last_reviewed: "2026-11-17"
+last_reviewed: "2026-11-28"
 prerequisites: design
 relates_to:
   - skill: pdf-export
@@ -26,6 +26,15 @@ relates_to:
     type: composes_with
 inputs: [slide-deck-draft, design-spec]
 outputs: [slide-html]
+
+metadata:
+  type: process
+  triggers:
+    - html-build
+    - make html
+    - generate slides
+    - add images
+    - speaker intro
 ---
 
 ## Context
