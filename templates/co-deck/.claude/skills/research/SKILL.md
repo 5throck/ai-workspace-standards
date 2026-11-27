@@ -1,7 +1,7 @@
 ---
 name: research
 scope: co-deck
-version: 1.2.3
+version: 1.2.4
 description: >
   Source collection and ideation for lecture materials. After confirming
   topic/audience/purpose, performs web research (Korean and English by
@@ -12,12 +12,20 @@ description: >
   lecture workflow.
 status: active
 owner: research
-last_reviewed: "2026-11-15"
+last_reviewed: "2026-11-28"
 prerequisites: none
 relates_to:
   - skill: storyline
     type: follows
 outputs: [research-notes]
+
+metadata:
+  type: process
+  triggers:
+    - research
+    - research topic
+    - collect sources
+    - research notes
 ---
 
 ## Context

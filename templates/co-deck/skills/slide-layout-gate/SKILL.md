@@ -1,7 +1,7 @@
 ---
 name: slide-layout-gate
 scope: co-deck
-version: 1.0.3
+version: 1.0.4
 description: >
   Slide content conformance gate. Runs estimate-layout.ts --lint to check every
   slide in slidedata.json against the merged 4-layer spec's content_constraints
@@ -10,7 +10,7 @@ description: >
   "check slide bounds", "slide content conformance".
 status: active
 owner: pdf-export
-last_reviewed: "2026-11-16"
+last_reviewed: "2026-11-28"
 prerequisites: html-build
 relates_to:
   - skill: pdf-export
@@ -19,6 +19,15 @@ relates_to:
     type: follows
 inputs: [slide-html]
 outputs: [layout-gate-status]
+
+metadata:
+  type: process
+  triggers:
+    - slide-layout-gate
+    - layout gate
+    - lint slides
+    - check slide bounds
+    - slide content conformance
 ---
 
 ## Context

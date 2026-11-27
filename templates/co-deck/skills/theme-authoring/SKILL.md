@@ -1,7 +1,7 @@
 ---
 name: theme-authoring
 scope: co-deck
-version: 1.0.1
+version: 1.0.2
 description: >
   Entry point for creating a new co-deck theme or style. PM dispatches
   the appropriate workflow (Style Workflow or T-Stage) based on user request.
@@ -9,8 +9,16 @@ description: >
   "create a dark style", "add zen theme".
 status: active
 owner: pm
-last_reviewed: 2026-06-21
+last_reviewed: "2026-11-28"
 prerequisites: pm
+
+metadata:
+  type: process
+  triggers:
+    - theme-authoring
+    - create a new theme
+    - add a new style
+    - dark theme
 ---
 
 ## Context
