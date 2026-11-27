@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-27T15:13:00.152Z
+**Generated**: 2026-11-27T16:04:34.216Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,14 +19,14 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | claude-opus-5-5 | 2026-11-10 |
-| auditor | agents/auditor.md | medium | claude-sonnet-5-5 | 2026-11-10 |
+| architect | agents/architect.md | high | claude-opus-5-5 | 2026-11-27 |
+| auditor | agents/auditor.md | medium | claude-sonnet-5-5 | 2026-11-27 |
 | automation-engineer | agents/automation-engineer.md | medium | claude-sonnet-5-5 | 2026-11-12 |
-| docs-writer | agents/docs-writer.md | medium | claude-sonnet-5-5 | 2026-11-10 |
+| docs-writer | agents/docs-writer.md | medium | claude-sonnet-5-5 | 2026-11-27 |
 | lifecycle-manager | agents/lifecycle-manager.md | medium | claude-sonnet-5-5 | 2026-10-30 |
-| pm | agents/pm.md | medium | claude-sonnet-5-5 | 2026-11-22 |
-| scaffolding-expert | agents/scaffolding-expert.md | low | claude-haiku-5-5 | 2026-11-10 |
-| security-expert | agents/security-expert.md | medium | claude-sonnet-5-5 | 2026-11-10 |
+| pm | agents/pm.md | medium | claude-sonnet-5-5 | 2026-11-27 |
+| scaffolding-expert | agents/scaffolding-expert.md | low | claude-haiku-5-5 | 2026-11-27 |
+| security-expert | agents/security-expert.md | medium | claude-sonnet-5-5 | 2026-11-27 |
 | skill-graph-analyst | agents/skill-graph-analyst.md | low | claude-haiku-5-5 | 2026-10-30 |
 
 ---
