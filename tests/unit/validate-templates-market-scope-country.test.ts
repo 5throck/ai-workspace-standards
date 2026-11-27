@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-27, T-20261127-007): co-deck humanize seed pin assertion
+//          v1.0.0/4860b0ec → v1.0.2/051fa7a — follows the compat-gated seed
+//          pin move (upstream v1.0.1 relocated the rule engine into engine/;
+//          the adapter adaptation is the same wave). v1.0.0:
 // validate-templates-market-scope-country.test.ts — B-10 pure-helper pins + the
 // clean-tree zero-rows row (spec docs/designs/2026-11-21-humanize-seed-country-profiles-design.md
 // §6.1/§6.2, T-20261121-002).
@@ -111,8 +115,8 @@ describe("clean-tree zero-B-10 rows (design §6.2)", () => {
     expect(seed.dependencies.map((d) => d.id).sort()).toEqual(["humanize", "quickdl"]);
     const humanize = seed.dependencies.find((d) => d.id === "humanize")!;
     expect(humanize.market_scope).toEqual(["ko-language"]);
-    expect(humanize.pin).toBe("v1.0.0");
-    expect(humanize.commit).toBe("4860b0ec45a68d1be031f120e6d3fd5219569bc9");
+    expect(humanize.pin).toBe("v1.0.2");
+    expect(humanize.commit).toBe("051fa7a5944bd328c3853aec02e598237dd459a3");
     expect(humanize.adapter).toBe("scripts/co-deck/humanize-adapter.ts");
     expect(humanize.compatibility_test).toBe("bun scripts/co-deck/humanize-adapter.ts selftest");
     const raw = JSON.parse(readFileSync(join(templatesDir, "co-deck", "variant.json"), "utf-8")) as {
