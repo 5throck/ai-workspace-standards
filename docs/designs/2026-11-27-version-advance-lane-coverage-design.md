@@ -156,3 +156,15 @@ Not applicable.
 - **Design docs**: this document; registry row via spec-register (status approved).
 - **SCRIPTS.md**: version rows ride their implementation commits (upgrade-project.ts, lifecycle-sync-audit.ts, audit.ts); L1 twin regenerated through generate-scripts-mirror.
 - **docs/lifecycle/scripts/lifecycle-sync-audit.md**: phase-history row rides the Check J bump.
+
+## 13. Implementation note — windows CI budget row (2026-11-27)
+
+The §9 engine suite (`tests/unit/upgrade-lane-coverage.test.ts`) runs two full
+wave-1 fixture spawns (co-work + co-consult bases) plus six scene spawns; its
+first windows leg was killed at the 120000ms default wall (PR #2202 attempt
+45916952645) — the exact engine-spawn-family shape T-20261127-002 documented
+(spec docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §5).
+Remedy rides this spec: `scripts/test-runner.ts` v1.21.0 adds the first-time
+FILE_TIME_BUDGETS row `upgrade-lane-coverage.test.ts` at the family budget
+(300s suite / 60s test, macOS healthy ~21-25s). No test deleted or loosened;
+budget only.
