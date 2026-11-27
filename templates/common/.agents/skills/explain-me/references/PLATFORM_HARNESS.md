@@ -12,8 +12,10 @@
 | Claude Desktop App | `Bash` | `Agent()` (limited Teams) | `Read` / `Write` / `Edit` | `SendMessage` (limited) |
 | Antigravity (VS Code) | `run_command` | `define_subagent` + `invoke_subagent` | `view_file` / `write_to_file` | `send_message` (by `conversationID`) |
 | Antigravity CLI (Gemini CLI) | `run_command` | `define_subagent` + `invoke_subagent` | `view_file` / `write_to_file` | `send_message` (by `conversationID`) |
+| Codex CLI / Desktop App / IDE extension | built-in shell + file tools | **None** — no native subagent tool | built-in shell + file tools | — |
+| Hermes Agent | built-in shell + file tools | **None** — no specialist-dispatch tool | built-in shell + file tools | — |
 
-> **Note**: Antigravity VS Code does **not** fire hooks (extension limitation). Claude Desktop App hooks may fire intermittently. Claude CLI hooks fire reliably.
+> **Note**: Antigravity VS Code does **not** fire hooks (extension limitation). Claude Desktop App hooks may fire intermittently. Claude CLI hooks fire reliably. Codex and Hermes surfaces are **prompt-only** for subagent dispatch — run the §3 sequential fallback there (see §3.1).
 
 ---
 
@@ -186,6 +188,18 @@ The platform supports **Reactive Wakeup**: you do not need to poll or query task
 ## 3. Fallback: Single-Agent Sequential Review
 
 When subagent dispatch is **unavailable** (e.g., Claude Desktop App without Teams enabled, or a platform that lacks subagent tools entirely), fall back to a **single-agent sequential review** using personas/lenses as a structured checklist.
+
+### 3.1 Prompt-Only Surfaces: Codex and Hermes
+
+Codex (CLI, Desktop App, IDE extension) has **no native subagent tool**, and Hermes Agent has **no specialist-dispatch tool** — their role declarations (CODEX.md / HERMES.md) mandate loading each specialist's `agents/<name>.md` definition as role context and executing plan rows sequentially in-session.
+
+On these surfaces, **always** run the sequential fallback below:
+
+1. Adopt each §6 persona and each §7 lens in-session, one at a time (per the Degraded Workflow below), with the matching `agents/<name>.md` definition loaded as role context.
+2. Apply the "Tip for sequential mode" — review only the relevant tab/section per pass to limit context-window bias.
+3. Merge and apply all findings in a single edit pass (Degraded Workflow Step 4).
+
+Do not attempt parallel dispatch on these surfaces; there is no subagent primitive to parallelize with, and the verification rigor is unchanged (see the Sequential vs. Parallel Comparison below).
 
 ### Degraded Workflow
 

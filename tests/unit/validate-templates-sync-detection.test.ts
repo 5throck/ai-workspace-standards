@@ -1,8 +1,11 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
 // validate-templates-sync-detection.test.ts — syncDetection gate shape check + schema
 // registration pins (spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1/§8,
 // detection batch PR-C, T-20261118-001).
+//
+// v1.0.1 (2026-11-28, T-20261127-009): the validate-templates.ts SCRIPTS.md row pin
+// advances 1.87.0 → 1.88.0 alongside the v1.88.0 allowlist change (security-check.toml).
 //
 // Pins:
 //   1. collectSyncDetectionIssues — absent key and valid block are no-ops; every
@@ -140,13 +143,13 @@ describe('SCRIPTS.md registry rows (both layers) + L1 mirror presence', () => {
     }
   });
 
-  test('validate-templates.ts row is 1.87.0 on root and common SCRIPTS.md', () => {
+  test('validate-templates.ts row is 1.88.0 on root and common SCRIPTS.md', () => {
     for (const rel of ['scripts/SCRIPTS.md', 'templates/common/scripts/SCRIPTS.md']) {
       const row = read(join(ROOT, rel))
         .split('\n')
         .find((l) => l.startsWith('| `validate-templates.ts` |'));
       expect(row, `${rel} validate-templates.ts row`).toBeDefined();
-      expect(row).toContain('| L0 | 1.87.0 | active |');
+      expect(row).toContain('| L0 | 1.88.0 | active |');
     }
   });
 

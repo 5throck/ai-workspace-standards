@@ -9,6 +9,20 @@
  *   - scripts/new-project.ts rejects targets that escape the workspace
  *   - tests/reflect-skill-graph-to-project.ts rejects the workspace ROOT
  *
+ * v1.2.0 (T-20261128-001): per-test budgets only — every inline per-test
+ *         ceiling raised 30000 → 60000ms and the file joins the test-runner
+ *         FILE_TIME_BUDGETS table (suite 300s / test 60s, engine-spawn
+ *         family). Measured windows-latest evidence: main run 46003145206
+ *         (2026-11-27T12:58Z) killed the "new-project.ts resolves bare names
+ *         under Projects/" test at 30018.44ms against its 30000ms inline
+ *         ceiling (the spawned new-project.ts full pipeline — bun install +
+ *         graft index + post-scaffold audit — needs more than 30s on a loaded
+ *         2-core runner); PR #2212 recorded the same kill at 30005.04ms and
+ *         the ticket records a rerun reaching the 120000ms unit file wall.
+ *         Healthy windows file totals 6773ms (run 46030252124) / 18330ms (run
+ *         46012256221) — 60s is ≥3x headroom, 300s suite ≥2.5x. The inline
+ *         raise is required because bun prefers the inline third argument
+ *         over the runner's --timeout. No test deleted, no assertion loosened.
  * v1.1.0: H14 negative coverage (design
  *         docs/designs/2026-09-16-upgrade-target-realpath-guard-design.md,
  *         tickets T-20260916-006/-007): a symlink resolving to the workspace
@@ -19,7 +33,7 @@
  *         before canonicalization. Symlink cases skip gracefully where the
  *         platform cannot create symlinks (Windows CI without privileges).
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -67,7 +81,7 @@ describe('root-target guards (incident 2026-09-12)', () => {
     const out = (result.stderr ?? '') + (result.stdout ?? '');
     expect(out).toContain('workspace ROOT');
     expect(out).toContain('L0, not a project');
-  }, 30000);
+  }, 60000);
 
   test('new-project.ts resolves bare names under Projects/ (existence pre-flight path)', () => {
     // The name `.` resolves to <root>/Projects. beforeAll() above guarantees
@@ -84,7 +98,7 @@ describe('root-target guards (incident 2026-09-12)', () => {
     const out = (result.stderr ?? '') + (result.stdout ?? '');
     expect(out).toContain('Directory already exists');
     expect(out).toContain(join(workspaceRoot, 'Projects'));
-  }, 30000);
+  }, 60000);
 
   test('new-project.ts rejects targets that escape the workspace', () => {
     // An absolute path-like name resolves outside the workspace — the containment
@@ -97,7 +111,7 @@ describe('root-target guards (incident 2026-09-12)', () => {
     expect(result.status).toBe(1);
     const out = (result.stderr ?? '') + (result.stdout ?? '');
     expect(out).toContain('escapes the workspace');
-  }, 30000);
+  }, 60000);
 
   test('reflect-skill-graph-to-project.ts rejects the workspace ROOT', () => {
     const result = spawnSync(
@@ -108,7 +122,7 @@ describe('root-target guards (incident 2026-09-12)', () => {
     expect(result.status).toBe(1);
     const out = (result.stderr ?? '') + (result.stdout ?? '');
     expect(out).toContain('workspace ROOT');
-  }, 30000);
+  }, 60000);
 });
 
 // ── H14 negative coverage (design 2026-09-16-upgrade-target-realpath-guard) ────
@@ -184,7 +198,7 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     const out = (result.stderr ?? '') + (result.stdout ?? '');
     expect(out).toContain('workspace ROOT');
     expect(out).toContain('L0, not a project');
-  }, 30000);
+  }, 60000);
 
   test('outside-Projects with closed stdin (EOF) aborts with exit 1 before pre-flight', () => {
     const before = countFiles(outsideDir);
@@ -204,7 +218,7 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     expect(out).not.toContain('template-version.txt not found');
     // No delivery happened.
     expect(countFiles(outsideDir)).toBe(before);
-  }, 30000);
+  }, 60000);
 
   test('outside-Projects with stdin "n" aborts with exit 1 before pre-flight', () => {
     const before = countFiles(outsideDir);
@@ -218,7 +232,7 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     expect(out).toContain('Outside-Projects target refused');
     expect(out).not.toContain('template-version.txt not found');
     expect(countFiles(outsideDir)).toBe(before);
-  }, 30000);
+  }, 60000);
 
   test('outside-Projects with stdin "y" passes the guard into pre-flight', () => {
     const before = countFiles(outsideDir);
@@ -235,7 +249,7 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     expect(out).toContain('Could not detect variant');
     expect(result.status).toBe(1);
     expect(countFiles(outsideDir)).toBe(before);
-  }, 30000);
+  }, 60000);
 
   test('outside-Projects with --yes passes the guard without prompting', () => {
     const before = countFiles(outsideDir);
@@ -250,7 +264,7 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     expect(out).toContain('Could not detect variant');
     expect(result.status).toBe(1);
     expect(countFiles(outsideDir)).toBe(before);
-  }, 30000);
+  }, 60000);
 
   test('inside-Projects target never prompts the outside confirm (proceeds silently to pre-flight)', () => {
     // The fixture lives under Projects/, i.e. inside the workspace's own git
@@ -278,7 +292,7 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     expect(out).not.toContain('Proceed with upgrade into');
     expect(out).not.toContain('Outside-Projects target refused');
     expect(countFiles(insideDir)).toBe(before);
-  }, 30000);
+  }, 60000);
 
   test('inside-Projects NON-MEMBER target refused by default (fleet membership SSOT, DEC-20261107-01)', () => {
     // Design docs/designs/2026-11-07-fleet-membership-ssot-design.md §6.2: an
@@ -298,7 +312,7 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     expect(out).not.toContain('WARNING: template-version.txt not found');
     expect(out).not.toContain('WARN: Target is outside');
     expect(countFiles(insideDir)).toBe(before);
-  }, 30000);
+  }, 60000);
 
   test('missing target still errors before canonicalization (not-found message unchanged)', () => {
     const missing = join(workspaceRoot, `definitely-not-here-${uid}`);
@@ -311,5 +325,5 @@ describe('upgrade-project realpath + outside-Projects guards (H14)', () => {
     const out = (result.stderr ?? '') + (result.stdout ?? '');
     expect(out).toContain('Project directory not found');
     expect(out).toContain(missing);
-  }, 30000);
+  }, 60000);
 });

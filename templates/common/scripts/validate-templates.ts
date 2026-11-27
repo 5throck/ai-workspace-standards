@@ -1,8 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.87.0
+ * @version 1.88.0
  *
+ * v1.88.0 (2026-11-28, T-20261127-009): the variant-specific command allowlist
+ *          (Check 6) admits "security-check.toml" next to "security-check.md" —
+ *          the rendered Gemini counterpart (.gemini/commands is TOML-only per
+ *          T-20261013-009 phase 2, and the audit Command parity check requires
+ *          the .toml beside the .claude SSOT .md). templates/co-develop now
+ *          ships the rendered .toml (hand-written .md retired).
  * v1.87.0 (2026-11-21, design docs/designs/2026-11-21-humanize-seed-country-profiles-design.md
  *          Part C, T-20261121-002): new WARN-only check `market-scope-country` (B-10) —
  *          the market_scope(deps) ↔ country_config(variant) advisory consistency rule.
@@ -2526,8 +2532,11 @@ function checkCommands(variant: string): void {
   }
 
   // Variants must NOT have shared commands (inherited from common/ via new-project.sh overlay)
-  // Only security-check.md is allowed as a variant-specific command
-  const allowedVariantCommands = new Set(["security-check.md"]);
+  // Only security-check.md is allowed as a variant-specific command (with its
+  // rendered Gemini counterpart security-check.toml — Gemini custom commands
+  // are TOML-only per T-20261013-009 phase 2; the audit Command parity check
+  // requires the .toml next to the .claude SSOT .md, T-20261127-009).
+  const allowedVariantCommands = new Set(["security-check.md", "security-check.toml"]);
   for (const [platform, leaf] of COMMAND_SURFACES) {
     const commandsDir = join(TEMPLATES_DIR, variant, platform, leaf);
     if (!existsSync(commandsDir)) continue;

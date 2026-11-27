@@ -4,9 +4,9 @@
 
 - **Script**: generate-version-manifest
 - **Status**: active
-- **Version**: 1.12.1
+- **Version**: 1.13.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-12
+- **Last Updated**: 2026-11-28 (v1.13.0 — T-20261127-009: COMMAND_SKILL_EXEMPT gains security-check — variant-specific command dispatches agents/security-monitor.md and is command-only by design; the sanctioned exemption shape clears the drift row class fleet-wide. Prior: 2026-11-12
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created
@@ -19,6 +19,7 @@ Regenerates docs/VERSION_MANIFEST.md (the declared skill/version SSOT) from the 
 
 ## Phase History
 
+- **1.13.0** (2026-11-28, T-20261127-009): COMMAND_SKILL_EXEMPT += security-check (command-only by design).
 | Date | From | To | Change | Actor |
 |------|------|----|--------|-------|
 | 2026-11-12 | production | production | v1.12.0 → v1.12.1 (U-20261112-009): collectAgents no longer counts locale READMEs (agents/README_ko.md) as agents — shares the validate-agents.ts isAgentFile filter (README(_xx).md and `_`-prefixed excluded), exported as isAgentFileName. Pinned by tests/unit/generate-version-manifest-agent-filter.test.ts. | automation-engineer |
