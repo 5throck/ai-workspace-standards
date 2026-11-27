@@ -8,6 +8,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-28 | production | production | agents/architect.md frontmatter last_updated refreshed to 2026-11-28 after reviewing the post-stamp content commits (known landings: cbdc6e7eb 2026-11-10 /meeting boilerplate sweep + 60290a7c0 roster backfill for the 2026-10-28 cohort; 036d1320b U-20261122-005 dispatch rows + 0352be563 v4 hardening for pm.md); Check 11 remediation | automation-engineer |
 | 2026-05-29 | - | production | Initial architect agent established | lifecycle-manager |
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/architect.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-04 | production | production | Instruction-standard pointer reworded to the LLM Interaction Standard (ADR-0098, docs/standards/llm-interaction-standard.md §2), replacing the ADR-0079/AGENTS.md §3.10 wording; record stamped (2026-10-05 daily review, Slot B) | pm |
@@ -61,5 +62,5 @@
 
 - **Current Phase**: production
 - **Owner**: architect
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-11-28
 - **Last Reviewer**: pm

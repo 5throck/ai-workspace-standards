@@ -8,6 +8,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-28 | production | production | agents/auditor.md frontmatter last_updated refreshed to the 2026-11-28 audit date after reviewing the post-2026-10-28 content commits (cbdc6e7eb 2026-11-10 /meeting boilerplate sweep, 60290a7c0 roster backfill — known landings); Check 11 remediation | automation-engineer |
 | 2026-05-29 | - | production | Initial auditor agent established | lifecycle-manager |
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/auditor.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/auditor.md SSOT (lead phases None, support [1, 2], async); agents/auditor.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8 (project review 2026-10-26 findings #4/#9, T-20261026-004) | lifecycle-manager |
@@ -77,5 +78,5 @@
 
 - **Current Phase**: production
 - **Owner**: auditor
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-11-28
 - **Last Reviewer**: pm

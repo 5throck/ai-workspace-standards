@@ -1,15 +1,19 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // agent-lifecycle-stale-date.test.ts — T-20260909-004 stale last_updated helpers
 //
 // Covers the pure date helpers behind Check 11: frontmatter date normalization
 // (plain + ISO-datetime forms, non-date rejection) and the strictly-older
 // comparison against the last git commit date. v1.1.0 adds the sync-only
 // commit-subject filter (DEC-20260930-01 ruling 2, T-20260930-024) with a
-// git-fixture test for lastContentCommitDate.
+// git-fixture test for lastContentCommitDate. v1.2.0 (spec
+// docs/designs/2026-11-27-fresh-scaffold-staleness-attribution-design.md): the
+// new-project seed subject `chore: initial scaffold (new-project)` joins the
+// sync-only set — fresh-scaffold git fixtures pin the no-warning outcome, the
+// re-arm on the first real edit, and the newer-stamp case.
 
 import { test, expect, describe } from 'bun:test';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -67,6 +71,12 @@ describe('isSyncOnlyCommitSubject (DEC-20260930-01 ruling 2)', () => {
 
   test('propagate sync cascade commits are sync-only', () => {
     expect(isSyncOnlyCommitSubject('chore(skills): propagate sync SKILL.md 1.2.1 to template platform mirrors (cascade follow-up)')).toBe(true);
+  });
+
+  test('the new-project seed commit is sync-only (fresh-scaffold attribution, 2026-11-27 design)', () => {
+    // The EXACT §9.5 literal subject (new-project.ts v1.33.0) — a machine-generated
+    // cut of the template tree, no content decision of its own.
+    expect(isSyncOnlyCommitSubject('chore: initial scaffold (new-project)')).toBe(true);
   });
 
   test('content commits are not sync-only', () => {
@@ -332,5 +342,73 @@ describe('lastContentCommitDate (DEC-20260930-01 ruling 2)', () => {
     expect(contentDate).toBe('2026-09-15');
     // isFrontmatterStale should be true: 2026-09-01 < 2026-09-15
     expect(isFrontmatterStale('2026-09-01', contentDate!)).toBe(true);
+  }, 30_000);
+});
+
+describe('fresh-scaffold attribution (spec 2026-11-27-fresh-scaffold-staleness-attribution-design)', () => {
+  const git = (cwd: string, args: string[], env: Record<string, string> = {}) =>
+    spawnSync('git', args, { cwd, encoding: 'utf-8', env: { ...process.env, ...env } });
+
+  const commitAt = (cwd: string, file: string, subject: string, date: string, body: string) => {
+    mkdirSync(join(cwd, file, '..'), { recursive: true });
+    writeFileSync(join(cwd, file), body, 'utf-8');
+    git(cwd, ['add', file]);
+    git(cwd, ['commit', '-m', subject], {
+      GIT_AUTHOR_DATE: `${date}T12:00:00 +0000`,
+      GIT_COMMITTER_DATE: `${date}T12:00:00 +0000`,
+    });
+  };
+
+  const initRepo = () => {
+    const dir = mkdtempSync(join(tmpdir(), 'alc-fresh-scaffold-'));
+    git(dir, ['init', '--initial-branch=main']);
+    git(dir, ['config', 'user.email', 'test@example.com']);
+    git(dir, ['config', 'user.name', 'Test']);
+    return dir;
+  };
+
+  const AGENT_FILE_BODY_STAMP_1112 = 'name: pm\nlast_updated: 2026-11-12\n---\nTemplate content\n';
+
+  test('seed-only repo (fresh scaffold): lastContentCommitDate is null — no staleness warning', () => {
+    const dir = initRepo();
+    // Scaffold-day commit is OLDER than the file's inherited template stamp —
+    // the exact fresh-scaffold shape that warned before the fix.
+    commitAt(dir, 'agents/pm.md', 'chore: initial scaffold (new-project)', '2026-11-01', AGENT_FILE_BODY_STAMP_1112);
+    // Every commit touching the file is the seed cut → no content commit exists.
+    expect(lastContentCommitDate(join(dir, 'agents/pm.md'), dir)).toBeNull();
+    // The staleness branch (audit Check 11: `fmDate && commitDate && isFrontmatterStale`)
+    // short-circuits on the null commit date — no warning is produced.
+  }, 30_000);
+
+  test('re-arm: seed commit + first real content edit -> warning fires with the edit date', () => {
+    const dir = initRepo();
+    commitAt(dir, 'agents/pm.md', 'chore: initial scaffold (new-project)', '2026-11-01', AGENT_FILE_BODY_STAMP_1112);
+    commitAt(
+      dir,
+      'agents/pm.md',
+      'docs(agents): extend pm escalation matrix',
+      '2026-12-05',
+      'name: pm\nlast_updated: 2026-11-12\n---\nTemplate content, now extended\n',
+    );
+    const contentDate = lastContentCommitDate(join(dir, 'agents/pm.md'), dir);
+    expect(contentDate).toBe('2026-12-05');
+    // The inherited 2026-11-12 stamp is now genuinely behind a real content change.
+    expect(isFrontmatterStale('2026-11-12', contentDate!)).toBe(true);
+  }, 30_000);
+
+  test('template stamp newer than the seed commit: not stale', () => {
+    const dir = initRepo();
+    commitAt(dir, 'agents/pm.md', 'chore: initial scaffold (new-project)', '2026-11-01', AGENT_FILE_BODY_STAMP_1112);
+    // Even if a future delivery cut moved the file, the stamp-vs-content compare
+    // is strictly-older: a newer stamp is never stale against an older commit.
+    expect(isFrontmatterStale('2026-11-12', '2026-11-01')).toBe(false);
+  }, 30_000);
+
+  test('legacy hand-scaffold subjects stay content commits (re-arm preserved)', () => {
+    const dir = initRepo();
+    commitAt(dir, 'agents/pm.md', 'chore(scaffold): initial commit of the co-work variant instance', '2026-11-01', AGENT_FILE_BODY_STAMP_1112);
+    const contentDate = lastContentCommitDate(join(dir, 'agents/pm.md'), dir);
+    expect(contentDate).toBe('2026-11-01');
+    expect(isFrontmatterStale('2026-11-12', contentDate!)).toBe(false);
   }, 30_000);
 });

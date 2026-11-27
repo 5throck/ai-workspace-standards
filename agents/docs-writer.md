@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-28
+last_updated: 2026-11-28
 name: Documentation Writer
 role: specialist
 status: active

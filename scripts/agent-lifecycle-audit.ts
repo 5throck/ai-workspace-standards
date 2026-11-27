@@ -9,7 +9,25 @@
  *   bun scripts/agent-lifecycle-audit.ts
  *   bun scripts/agent-lifecycle-audit.ts --json   # JSON output
  *
- * @version 1.9.2
+ * @version 1.10.0
+ *          v1.10.0 (2026-11-27, spec docs/designs/2026-11-27-fresh-scaffold-staleness-attribution-design.md):
+ *          the new-project seed commit (`chore: initial scaffold (new-project)` — the
+ *          exact §9.5 subject, new-project.ts v1.33.0) joins SYNC_ONLY_COMMIT_PATTERNS:
+ *          a brand-new scaffold's only commit is a machine-generated cut of the
+ *          just-audited template tree, so treating it as a content commit made EVERY
+ *          delivered file whose template-side last_updated/last_reviewed predates
+ *          scaffold day warn on the first verifier run (17/11/12 warnings reproduced
+ *          across co-deck/co-develop/co-work scaffolds) — structurally, on every fresh
+ *          project. Ruling (design §2): attribute the seed to the delivery pipeline —
+ *          the same DEC-20260930-01 ruling-2 principle ("copying template content alone
+ *          never makes frontmatter last_updated look stale") and the S2 source-attribution
+ *          principle (the stamp belongs to the source review; the copy inherits it).
+ *          Fresh scaffolds now yield null (silent), and the FIRST real post-scaffold
+ *          content edit re-arms the warning with full force. The exact anchor keeps
+ *          legacy hand-scaffold subjects as content commits (existing test pin kept).
+ *          skill-lifecycle-audit Check SD imports this helper, so one fix covers both
+ *          audits. Roster-registration and template-mirror warnings surfaced by the
+ *          same reproduction are separate classes — ticketed, not silenced (design §5).
  *          v1.9.1 (2026-11-12, common-agents CA-3, design 2026-11-12-common-agents-for-common-skills
  *          §5.7): agentNameExists() also resolves owners against templates/common/agents (the
  *          common skill-owner roster), so L0 skills owned by a common agent (design-system-lead,
@@ -487,11 +505,17 @@ export function deliveryStalenessInfoLine(
 // cuts that copy template content without a content decision of their own.
 // `chore(upgrade): template sync vX` — fleet upgrade delivery into project repos;
 // `chore(templates): auto-release vX` — template release cut at L0;
-// `... propagate sync ...` — L1 publish cascade into platform mirrors.
+// `... propagate sync ...` — L1 publish cascade into platform mirrors;
+// `chore: initial scaffold (new-project)` — the new-project §9.5 seed commit
+// (v1.33.0, exact literal subject): a fresh scaffold's only commit is a delivery
+// cut of the template tree, so the inherited template stamps must not be judged
+// against it (spec docs/designs/2026-11-27-fresh-scaffold-staleness-attribution-design.md;
+// fully anchored — legacy hand-scaffold subjects stay content commits).
 const SYNC_ONLY_COMMIT_PATTERNS: RegExp[] = [
   /^chore\(upgrade\): template sync\b/i,
   /^chore\(templates\): auto-release\b/i,
   /\bpropagate sync\b/i,
+  /^chore: initial scaffold \(new-project\)$/,
 ];
 
 export function isSyncOnlyCommitSubject(subject: string): boolean {
