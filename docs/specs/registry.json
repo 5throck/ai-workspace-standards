@@ -3897,13 +3897,22 @@
       "last_updated": "2026-11-26"
     },
     {
+      "id": "2026-11-27-ticket-store-drift-and-nextid-design",
+      "title": "ticket store drift and nextid design",
+      "file": "docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-11-26",
+      "last_updated": "2026-11-26"
+    },
+    {
       "id": "2026-11-27-version-advance-lane-coverage-design",
       "title": "version advance lane coverage design",
       "file": "docs/designs/2026-11-27-version-advance-lane-coverage-design.md",
       "status": "approved",
       "source": "manual",
-      "created": "2026-11-26",
-      "last_updated": "2026-11-26"
+      "created": "2026-11-27",
+      "last_updated": "2026-11-27"
     },
     {
       "id": "skillhygiene",

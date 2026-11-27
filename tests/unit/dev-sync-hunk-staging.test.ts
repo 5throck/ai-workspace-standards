@@ -9,7 +9,10 @@
  * tests/unit/dev-sync-scoped-staging-default.test.ts — these tests read the real
  * source and assert the contract textually.
  *
- * @version 1.0.1
+ * @version 1.0.2
+ * v1.0.2 (2026-11-27): T8 pin 1.53.0 → 1.54.0 — dev-sync.ts bumped for the 3.87
+ *          AMBIGUOUS-vs-NOT-FOUND distinction (T-20261127-001a, spec
+ *          docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §3.3).
  * v1.0.1 (2026-11-21): T8 pin 1.52.0 → 1.52.1 — dev-sync.ts bumped for the step-6.55
  *          Windows argv-limit fix (chunked git ls-files spawn, spec-registry gate).
  */
@@ -72,10 +75,10 @@ describe('dev-sync hunk-adjudicated staging (T-20261117-015)', () => {
   });
 
   test('T8: version header bumped with the spec reference', () => {
-    // v1.53.0 (2026-11-22, T-20261122-004): step 3.89 + 3.9 hint landing bumped
+    // v1.54.0 (2026-11-27, T-20261127-001a): step 3.87 AMBIGUOUS distinction bumped
     // the header; this pin moves with every header bump (the two 2026-11-18
     // spec references below must survive each bump alongside it).
-    expect(src).toMatch(/@version 1\.53\.0/);
+    expect(src).toMatch(/@version 1\.54\.0/);
     expect(src).toMatch(/2026-11-18-dev-sync-hunk-staging-design\.md/);
     expect(src).toMatch(/2026-11-18-memory-gate-step2-deadlock-design\.md/);
   });

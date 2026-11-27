@@ -1,4 +1,18 @@
-// @version 1.53.0
+// @version 1.54.0
+// v1.54.0 (2026-11-27, T-20261127-001a — spec
+//          docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §3.3):
+//          step 3.87 learns the AMBIGUOUS vs NOT-FOUND distinction. The
+//          presentation/decision logic moved into helpers/ticket-drift.ts
+//          reportDriftFindings() (v1.1.0): a cited id resolving in MULTIPLE
+//          stores/archives (the typed AmbiguousTicketError from
+//          helpers/ticket-store.ts v1.16.0) is a provenance problem, NOT a
+//          loss — reported as a non-fatal AMBIGUOUS warning naming both paths,
+//          sync proceeds; a cited id resolving NOWHERE stays FATAL exit-1 with
+//          the unchanged diagnostic. Output for the pass/fatal shapes is
+//          byte-equivalent to v1.53.0. Ticket-store context: on 2026-11-26 the
+//          gate FATALed 7 cited ids whose true condition was cross-store
+//          ambiguity (T-20261126-001 double-resident governance+service), with
+//          the misleading "resolve in NO store or archive" wording.
 // v1.53.0 (2026-11-22, T-20261122-004 / U-20261122-010 — design
 //          docs/designs/2026-11-22-dev-sync-skill-graph-preconvergence-design.md):
 //          (1) NEW STEP 3.89 — skill-graph pre-convergence, inserted between
@@ -617,7 +631,7 @@ import {
 } from "./helpers/commit-message.ts";
 import { localDateISO } from "./lib/local-date.ts";
 import { isAgentMdPath, bumpMechanicalLastUpdated } from "./helpers/agent-mechanical-date-bump.ts";
-import { driftCheck } from "./helpers/ticket-drift.ts";
+import { driftCheck, reportDriftFindings } from "./helpers/ticket-drift.ts";
 import { owedBlocks, parseBlocks, unionScan, wellFormedScan } from "./helpers/memory-union-verify.ts";
 import { classifyWorkspaceHygieneResidue, formatHygieneResidueReport } from "./lib/workspace-hygiene.ts";
 import { formatSpecCheckHint, parseAuditFailLines } from "./lib/audit-fail-hint.ts";
@@ -1471,21 +1485,17 @@ if (fs.existsSync(path.join("memory"))) {
     serviceDir: path.join("tickets"),
     governanceDir: path.join("tickets", "governance"),
   });
-  if (drift.unresolved.length > 0) {
-    console.error(
-      `${RED}✗ Step 3.87: ticket-store memory-drift — ${drift.unresolved.length} cited ticket id(s) resolve in NO store or archive (of ${drift.cited} cited)${RESET}`,
-    );
-    for (const f of drift.unresolved) {
-      console.error(`   ${f.id} cited at ${f.file}:${f.line}`);
-    }
-    console.error(
-      "  Fix: restore the vanished ticket file (check tickets/governance/archive, git history of tickets/), or correct the citation in the named memory file if it is a typo.",
-    );
-    if (import.meta.main) process.exit(1);
-  }
-  console.log(
-    `${GREEN}✓ Step 3.87: ticket-store memory-drift check passed (${drift.cited} distinct cited id(s), all resolve)${RESET}`,
-  );
+  // v1.54.0 (T-20261127-001a, spec
+  // docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §3.3): the
+  // presentation/decision logic moved into helpers/ticket-drift.ts
+  // reportDriftFindings() so the FATAL semantics have ONE definition shared with
+  // ticket.ts doctor and the replay tests. Verdicts: "fatal" (a cited id resolves
+  // NOWHERE — silent-loss candidate) exits 1 exactly as before; "ambiguous" (an id
+  // resolves in MULTIPLE stores — the AMBIGUOUS provenance shape that FATALed every
+  // sync here on 2026-11-26 with the misleading not-found diagnostic) is NON-FATAL:
+  // the warning names both paths and the sync proceeds; "pass" is the all-clear.
+  const driftVerdict = reportDriftFindings(drift);
+  if (driftVerdict === "fatal" && import.meta.main) process.exit(1);
 }
 
 // 3.88 Memory session-block union-verify (BLOCKING for post-activation merges

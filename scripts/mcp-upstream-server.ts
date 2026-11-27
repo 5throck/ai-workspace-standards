@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.15.1
+// @version 1.16.0
+// v1.16.0 (2026-11-27, T-20261127-001b — spec
+//          docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §4):
+//          nextSeqForToday widens its max-seq scan from the governance live store
+//          only to BOTH live stores AND BOTH archive directories (storeScanDirs()
+//          from helpers/ticket-store.ts v1.16.0) — the U-20261126-003
+//          double-assignment shape (a same-day id invisible to a one-store scan
+//          gets re-minted). U grammar, publish retry loop, and all other intake
+//          semantics unchanged; SERVER_VERSION follows the header bump.
 // v1.15.1 (2026-11-09, QA hardening H9): workspace-root exclusion in the tenant
 //          match loop — a registry entry whose projectDir resolves to the
 //          workspace root itself never matches (fleet.ts tenantForProjectPath
@@ -182,7 +190,13 @@ import { join, dirname, resolve, basename, isAbsolute, sep } from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import { load, dump, JSON_SCHEMA } from "js-yaml";
-import { withTicketLock, readTicket, reprioritizeTicket, loadKanbanAliases } from "./helpers/ticket-store.ts";
+import {
+  withTicketLock,
+  readTicket,
+  reprioritizeTicket,
+  loadKanbanAliases,
+  storeScanDirs,
+} from "./helpers/ticket-store.ts";
 import { kstDate, kstIso } from "./helpers/kst-time.ts";
 import { upstreamIdentitySource, resolvePriorityInput, type UpstreamIdentitySource } from "./helpers/ticket-schema.ts";
 import { ReprioritizeRefusedError, type ReprioritizeActor } from "./helpers/reprioritize.ts";
@@ -198,7 +212,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** T-20261002-008 (M1): single version constant — the @version header above and
  * serverInfo.version must stay identical; a unit test pins the two literals. */
-export const SERVER_VERSION = "1.15.1";
+export const SERVER_VERSION = "1.16.0";
 
 // TEST-ONLY SEAM: UPSTREAM_WORKSPACE_ROOT overrides the workspace root that is otherwise
 // derived from this script's path. It exists so tests can run the real server against a
@@ -648,14 +662,24 @@ function todayPrefix(): string {
 }
 
 function nextSeqForToday(): number {
-  if (!existsSync(ticketsDir())) return 1;
+  // v1.16.0 (T-20261127-001b, spec docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md
+  //          §4): widened max-seq scan via the store module's storeScanDirs() — BOTH live
+  //          stores AND BOTH archive directories, not just the governance live store this
+  //          server scanned before. The U-20261126-003 double-assignment (co-deck filing
+  //          landed on main; a parallel session re-minted the same seq) was the
+  //          under-scan shape. The U grammar itself is unchanged (v1.13.0: must not
+  //          widen); the EEXIST retry in publishTicketWithRetry remains the concurrency
+  //          backstop (residual cross-checkout race is a documented limit, spec §2).
   const prefix = todayPrefix();
   let max = 0;
-  for (const f of readdirSync(ticketsDir())) {
-    if (!f.startsWith(prefix)) continue;
-    const m = /^U-\d{8}-(\d+)\.yaml$/.exec(f);
-    const n = m ? parseInt(m[1], 10) : NaN;
-    if (!isNaN(n) && n > max) max = n;
+  for (const d of storeScanDirs(ticketsDir())) {
+    if (!existsSync(d)) continue;
+    for (const f of readdirSync(d)) {
+      if (!f.startsWith(prefix)) continue;
+      const m = /^U-\d{8}-(\d+)\.yaml$/.exec(f);
+      const n = m ? parseInt(m[1], 10) : NaN;
+      if (!isNaN(n) && n > max) max = n;
+    }
   }
   return max + 1;
 }

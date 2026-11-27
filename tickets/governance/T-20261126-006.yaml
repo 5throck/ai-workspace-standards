@@ -1,10 +1,9 @@
 schemaVersion: 1
 id: T-20261126-006
 kind: manual
-title: >-
-  co-develop/co-game inert audit-variant hooks: declared-or-remove decision
+title: 'co-develop/co-game inert audit-variant hooks: declared-or-remove decision'
 priority: normal
-status: backlog
+status: done
 attempts: 0
 created_at: '2026-11-26T00:00:00.000+09:00'
 history:
@@ -16,11 +15,33 @@ history:
     actor: automation-engineer
     from: backlog
     to: backlog
+  - at: '2026-11-27T07:56:54.876+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T07:56:54.894+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T07:56:54.910+09:00'
+    from: review
+    to: done
 result: >-
-  Reconstructed 2026-11-26 from session records; original working-tree-only
-  file never committed and lost; adjudicated under DEC-20261126-001.
-  Evidence: memory/2026-11-26.md L405 "T-20261126-006.yaml — created
-  (co-develop/co-game inert audit-variant hooks: declared-or-remove decision)";
-  L413 "decision-class (owner): hook activation vs dead-code removal". Status
-  best evidence: open (backlog).
+  Owner ruling 2026-11-26 (assess the hooks; declare them if needed) executed
+  2026-11-27. Assessment: both hooks are NOT inert (audit.ts s27 probes the
+  conventional scripts/audit-variant.ts path unconditionally of declaration) and
+  run green through containment (exit 0); both cover invariants the generic
+  audit lacks (graft-#1048 machine-local absolute-path re-bake guard; co-develop
+  adds the CI bun-pin guard, PASS 4 pins); neither was ever
+  declared-then-dropped - both were adopted undeclared by recorded design
+  decisions (co-develop 2026-10-31 doc s3a; co-game 2026-09-28 doc D6.4). Per
+  decision rule (green + real variant-specific invariants) BOTH DECLARED in
+  variant.json script_manifest.local {name: audit-variant, path:
+  scripts/audit-variant.ts} (co-newbiz house shape), supersession addenda
+  appended to each project's design doc of record. Landed: co-develop PR
+  5throck/co-develop#222 merged @ a32e93cc (wall-exception ledger order 26
+  recorded BEFORE merge; CI run 45907688271 steps=0 at head; owner-only author;
+  gitleaks-full clean on AMD export; battery 3/3 exit 0). co-game PR
+  5throck/co-game#82 merged @ 08836165 (ledger order 27 before merge; CI run
+  45907740346 steps=0; owner-only author; gitleaks clean; battery 3/3).
+  Post-merge audits exit 0 with s27 executing the declared hook green in both;
+  checkouts clean on fast-forwarded main.
 error: null
