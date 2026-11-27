@@ -186,7 +186,7 @@ describe('engine — script lane gaps (design §4.6)', () => {
     const second = runUpgrade(project);
     expect(second.status).toBe(0);
     expect(registryRowVersion(readFileSync(registryPath, 'utf8'), 'deck/svg_check.py')).toBe(current);
-  }, 60000);
+  }, 120000); // inline ceiling (not FILE_TIME_BUDGETS-overridable): windows CI killed this at 60001.91ms in run 45911276676 — matches #2189 precedent budget
 
   test('(b) a delivered file whose row cannot be updated fails: REGISTRY_DRIFT at ERROR, non-zero exit', () => {
     git(project, 'add', '-A');
