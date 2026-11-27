@@ -27,7 +27,7 @@
 //                project-moved copy → DRIFT_PRESERVE now visible (was silent).
 
 import { existsSync, cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { afterAll, describe, expect, test } from 'bun:test';
@@ -289,7 +289,11 @@ describe('§4.1 lane coverage — docs lane (TEMPLATE TREE SYNC)', () => {
     const renderedTemplate = applySubstitutions(
       readFileSync(join(workspaceRoot, 'templates', 'common', CONTEXT_REL), 'utf8'),
       {
-        projectName: sA3.tmp.split('/').pop()!.replace(/\\/, ''),
+        // basename() (node:path) — NOT split('/'): a win32 temp path carries
+        // backslashes, so a manual forward-slash split hands the WHOLE
+        // C:\... path to the placeholder map (the engine itself renders
+        // basename(projectDir) — PR #2202 win32 leg; #2189/#2201 precedent).
+        projectName: basename(sA3.tmp),
         description: '',
         characteristics: '',
         variantName: 'co-work',

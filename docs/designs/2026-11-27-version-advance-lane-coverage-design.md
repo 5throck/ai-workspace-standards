@@ -168,3 +168,16 @@ Remedy rides this spec: `scripts/test-runner.ts` v1.21.0 adds the first-time
 FILE_TIME_BUDGETS row `upgrade-lane-coverage.test.ts` at the family budget
 (300s suite / 60s test, macOS healthy ~21-25s). No test deleted or loosened;
 budget only.
+
+## 14. Implementation note — win32 placeholder derivation in the §9 suite (2026-11-27)
+
+After the §13 budget row, the second windows leg failed on a REAL assertion:
+`test A3` derived the expected rendered H1's project name with
+`sA3.tmp.split('/').pop()` — on win32 the mkdtemp path carries BACKSLASHES, so
+the manual forward-slash split produced the whole `C:\...` path as the
+"project name" while the ENGINE correctly renders `basename(projectDir)` (the
+same derivation new-project §5 uses; the #2189/#2201 windows path-separator
+precedent). The engine was right; the fixture was wrong. Fix: the fixture now
+derives the name with `basename(sA3.tmp)` (node:path, platform separators
+handled), pinned by the same test — the A3 byte-equality assertion now holds on
+all three OS lanes. No engine change.
