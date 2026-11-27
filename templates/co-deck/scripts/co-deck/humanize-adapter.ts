@@ -1,5 +1,15 @@
 #!/usr/bin/env bun
-// @version 1.0.0
+// @version 1.0.1
+// v1.0.1 (2026-11-27, T-20261127-007): Humanize upstream v1.0.1 relocated the
+//          rule engine from the clone root into engine/ (rules.js → engine/rules.js,
+//          prompt.js → engine/prompt.js, chunking.js → engine/chunking.js; adds
+//          engine/lexicon.js, engine/lexicon-data.js, engine/fidelity.js; serve.ts
+//          unchanged at the clone root). RULES_ENTRY follows the new layout
+//          (rules.js → engine/rules.js); KEY_FILES, paths and selftest derive from
+//          it and need no further change. The seed pin moves v1.0.0 → v1.0.2 in
+//          the same wave after the compat gate re-ran green (upstream test.mjs +
+//          this selftest; the pre-change adapter FAILing at v1.0.2 is the negative
+//          control). Path adaptation only — no behaviour change.
 /**
  * humanize-adapter.ts — the ONLY co-deck file that names paths inside
  * external/humanize (coupling-point rule, design
@@ -52,8 +62,9 @@ export const HUMANIZE_DIR = "external/humanize";
  *  runtime so no static spawn-target checker resolves it as a missing
  *  template-tree literal (design Part A: no spawn_target_externals entry). */
 export const SERVE_ENTRY = ["serve", "ts"].join(".");
-/** Rule set the lint runs (clone facts for paths/selftest). */
-export const RULES_ENTRY = "rules.js";
+/** Rule set the lint runs (clone facts for paths/selftest). Upstream v1.0.1
+ *  relocated the engine into engine/ (T-20261127-007). */
+export const RULES_ENTRY = "engine/rules.js";
 export const LICENSE_ENTRY = "LICENSE";
 
 /** Key files the adapter relies on, relative to the project root. */
@@ -80,7 +91,7 @@ export const INSTALL_HINT = `bun scripts/external-deps.ts install --id ${MANIFES
 export const DEFAULT_PORT = SERVER.port;
 export const UNAVAILABLE_MSG = "humanize: lint unavailable (server unreachable)";
 
-/** Response shape of Humanize `POST /api/analyze` (rules.js analyze()). */
+/** Response shape of Humanize `POST /api/analyze` (engine/rules.js analyze()). */
 export interface Finding {
   id: string;
   cat: string;
