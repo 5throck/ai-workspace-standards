@@ -195,8 +195,8 @@
 | `co-work/project-review` | variant:co-work | 1.3.3 | — | — | — | — | — |
 | `co-work/svg-quality-gate` | variant:co-work | 1.3.0 | co-work/deck-builder | co-work/phase 3 | — | — | — |
 | `co-work/svg-slide-authoring` | variant:co-work | 1.5.1 | co-work/deck-builder | co-work/phase 3 | — | — | — |
-| `common/decision-record` | common | 1.1.1 | — | — | common/evidence-ledger (composes_with), root/documentation-writing (composes_with) | — | — |
-| `common/evidence-ledger` | common | 1.1.1 | — | — | root/documentation-writing (follows), root/research-analysis (follows) | — | — |
+| `common/decision-record` | common | 1.2.0 | — | — | common/evidence-ledger (composes_with), root/documentation-writing (composes_with) | — | — |
+| `common/evidence-ledger` | common | 1.2.0 | — | — | common/decision-record (composes_with), root/documentation-writing (follows), root/research-analysis (follows) | — | — |
 | `common/gateguard` | common | 1.0.2 | common/automation-engineer | — | — | — | — |
 | `common/handbook` | common | 0.6.2 | co-deck/handbook-reviewer, co-deck/handbook-writer | — | — | — | — |
 | `common/handbook-sync-audit` | common | 1.0.5 | — | — | — | — | — |

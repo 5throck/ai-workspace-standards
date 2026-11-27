@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-27T10:14:09.520Z
+**Generated**: 2026-11-27T12:03:37.752Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -43,13 +43,13 @@
 | ci-triage | 0.2.1 | active | skills/ci-triage/SKILL.md | workspace | ci failure, triage failure, audit gate failed, scaffold failed, fix the pipeline | pm |
 | context-commonization-review | 1.1.0 | active | skills/context-commonization-review/SKILL.md | workspace | context commonization review, variant context duplication, commonization review, context.md duplication review, context.md commonization | architect |
 | create-variant | 1.4.3 | active | skills/create-variant/SKILL.md | workspace | create variant, new variant, variant creation, scaffold new variant, new co- project | pm |
-| decision-record | 1.1.1 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, gate ruling, go/no-go decision, escalation decision, record a decision | pm |
+| decision-record | 1.2.0 | active | templates/common/skills/decision-record/SKILL.md | common | decision record, record a gate ruling, go/no-go decision, escalation decision, record a decision | pm |
 | decision-write-integrity | 1.0.0 | active | skills/decision-write-integrity/SKILL.md | workspace | decision write integrity, gate integrity, approval gate, hard block, maker checker, countersign, snapshot hash, decision audit | pm |
 | delegate-to-hub | 1.0.1 | active | skills/delegate-to-hub/SKILL.md | workspace | delegate to hub, delegation ticket, hub delegation, escalate to hub, file delegation | pm |
 | design-foundation | 1.1.1 | active | skills/design-foundation/SKILL.md | workspace | design foundation, design principles, design guide, design tokens setup, design decision record | design-system-lead |
 | design-token-adoption | 1.0.0 | active | skills/design-token-adoption/SKILL.md | workspace | token retrofit, design token adoption, allowlist reduction, adopt design tokens in existing UI, brownfield design tokens | pm |
 | documentation-writing | 1.0.3 | active | skills/documentation-writing/SKILL.md | workspace | write documentation, create guide, draft communication, write manual, create tutorial, documentation, technical writing | pm |
-| evidence-ledger | 1.1.1 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, claim verification, source verification, evidence tracking | pm |
+| evidence-ledger | 1.2.0 | active | templates/common/skills/evidence-ledger/SKILL.md | common | evidence ledger, citation ledger, ledger row, claim-to-source trace, supersede a ledger row | pm |
 | explain-me | 1.0.1 | experimental | skills/explain-me/SKILL.md | workspace | /explain-me, /reportme, make a report, create report, explain this topic | pm |
 | finishing-a-development-branch | 1.1.1 | active | skills/finishing-a-development-branch/SKILL.md | workspace | finish branch, complete work, wrap up, finishing a development branch, merge branch, create PR, push and PR | pm |
 | gateguard | 1.0.2 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
@@ -222,7 +222,7 @@
 | validate-decisions.ts | 1.3.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.8.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
-| validate-md-language.ts | 1.16.2 | scripts/validate-md-language.ts | child_process, fs, path |
+| validate-md-language.ts | 1.17.0 | scripts/validate-md-language.ts | child_process, fs, path |
 | validate-model-registry.ts | 2.3.0 | scripts/validate-model-registry.ts | fs, path, url |
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | child_process, fs, path |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | fs, js-yaml, path |
@@ -244,7 +244,7 @@
 | verify-platform-lifecycle.ts | 1.6.1 | scripts/verify-platform-lifecycle.ts | fs, path |
 | verify-prompt-integrity.ts | 1.1.0 | scripts/verify-prompt-integrity.ts | bun:sqlite, crypto, fs, os, path, url |
 | verify-readme-sync.ts | 1.5.0 | scripts/verify-readme-sync.ts | bun, crypto, fs, path |
-| verify-scripts.ts | 1.15.0 | scripts/verify-scripts.ts | crypto, fs, path |
+| verify-scripts.ts | 1.16.0 | scripts/verify-scripts.ts | crypto, fs, path |
 | verify-skill-graph.ts | 2.0.0 | scripts/verify-skill-graph.ts | fs, path, url |
 | verify-skills.ts | 1.5.2 | scripts/verify-skills.ts | fs, path |
 | verify-template-integrity.ts | 1.0.0 | scripts/verify-template-integrity.ts | crypto, fs, path |

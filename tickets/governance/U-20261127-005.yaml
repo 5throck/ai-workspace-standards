@@ -1,0 +1,34 @@
+schemaVersion: 1
+id: U-20261127-005
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-27T19:44:30.095+09:00
+history:
+  - at: 2026-11-27T19:44:30.095+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'scripts/verify-scripts.ts does not validate the shape of the SCRIPTS.md removal-date column: non-deprecated rows accumulate free-text prose/flags in a column defined as `YYYY-MM-DD (required when status=deprecated) or —` (co-newbiz had 81 such cells). The overload hides the column''s semantics and defeats any future automated deprecation-sweep keyed on that column.'
+  affected_paths:
+    - scripts/verify-scripts.ts
+  identity_source: cwd
+  repro: '1. co-newbiz v1.15.0 adds Check 5c: for non-deprecated SCRIPTS.md rows, WARN when the removal-date column is neither `—` nor a YYYY-MM-DD date (a column the header defines as required-when-deprecated). The check found 81 overloaded cells in co-newbiz (prose/flags stored in the date column), all cleaned. 2. Unit-pinned: tests/unit/verify-scripts-removal-date.test.ts (5 cases incl. deprecated exempt). 3. Request: adopt Check 5c fleet-wide so the column hygiene stays enforced by default.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/verify-scripts.ts=false
+  dedupe_key: 7218630d4b5547481abc7272f33c69d16cc32f542584fc8867e5267f6d1b731f
+  duplicates:
+    - project: co-newbiz
+      at: 2026-11-27T19:44:30.095+09:00

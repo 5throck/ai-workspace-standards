@@ -43,8 +43,8 @@ Registry of the skills this template delivers: one row per `templates/common/ski
 | `gateguard` | 1.0.2 | active | pm | 2026-11-08 | — | Pre-edit fact-forcing quality gate — investigate importers, schemas, scope constraints before editing (Hook-Prompt-Skill 3-layer enforcement) |
 | `update-bun-packages` | 1.3.1 | active | pm | 2026-09-09 | — | Owns Bun dependency updates and root/common/variant alignment via sync-template-deps.ts --apply |
 | `ci-triage` | 0.2.1 | active | pm | 2026-11-26 | — | CI failure triage and owner routing for scheduled health-check issues; merge-time CI healing loop |
-| `decision-record` | 1.1.1 | active | pm | 2026-11-26 | — | Decision record format for gate-moment rulings (Design Gate Row 0) captured as docs/decisions/DEC-YYYYMMDD-NN.md files |
-| `evidence-ledger` | 1.1.1 | active | pm | 2026-11-26 | — | Fixed-column evidence ledger tracing every claim a decision depends on to a source, reference, and verification state |
+| `decision-record` | 1.2.0 | active | pm | 2026-11-27 | — | Decision record format for gate-moment rulings (Design Gate Row 0) captured as docs/decisions/DEC-YYYYMMDD-NN.md files |
+| `evidence-ledger` | 1.2.0 | active | pm | 2026-11-27 | — | Fixed-column evidence ledger tracing every claim a decision depends on to a source, reference, and verification state |
 | `handbook` | 0.6.2 | active | pm | 2026-09-20 | — | Document Production Workflow — searchable, themed handbook static sites (GitHub Pages); standalone, lecture-companion, and course modes |
 | `handbook-sync-audit` | 1.0.5 | active | pm | 2026-08-29 | — | Verifies generated handbooks stay aligned with their sources: upstream content reflection, structural linkage, freshness |
 | `i18n-audit` | 1.0.2 | active | i18n-specialist | 2026-11-19 | — | Locale parity and glossary audit across locale files, with drift reporting and a parity certificate on success |

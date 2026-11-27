@@ -4,12 +4,13 @@ description: >
   Decision record format for gate-moment rulings — Design Gate Row 0
   determinations, escalations, and go/no-go calls captured as durable
   docs/decisions/DEC-YYYYMMDD-NN.md files with rule and evidence citations.
-  Use when: a gate ruling was made, an escalation was resolved, or a go/no-go
-  decision was reached (ADR-0061).
-version: 1.1.1
+  Use when: a gate ruling must be written down as a DEC file, an escalation
+  was resolved, or a go/no-go decision was reached (ADR-0061). Owns the DEC
+  file format only; claim-to-source rows are the evidence-ledger skill.
+version: 1.2.0
 owner: pm
 status: active
-last_reviewed: 2026-11-26
+last_reviewed: 2026-11-27
 scope: common
 relates_to:
   - skill: evidence-ledger
@@ -20,7 +21,7 @@ metadata:
   type: process
   triggers:
     - decision record
-    - gate ruling
+    - record a gate ruling
     - go/no-go decision
     - escalation decision
     - record a decision
@@ -56,11 +57,13 @@ status: proposed|accepted|superseded
 | `agent` | yes | The single agent that owns the ruling (normally `pm`) |
 | `decision` | yes | One line — the ruling itself, not its justification |
 | `alternatives` | yes | What was rejected and why; a record is incomplete without it |
-| `evidence_refs[]` | yes (may be empty) | Entries must resolve to `evidence-ledger` rows or finding files |
+| `evidence_refs[]` | yes (may be empty) | Entries must resolve to `EV-YYYYMMDD-NN` rows of the evidence ledger (see the validator contract below) |
 | `rules_applied[]` | yes (may be empty) | Stable rule IDs (see below) |
 | `skills_used[]` | yes (may be empty) | Skill names consulted, drawn from the skill relationship graph vocabulary (ADR-0060) |
 | `knowledge_refs[]` | yes (may be empty) | Knowledge-layer artifacts the ruling rests on — country profiles, manuals, ADRs, procedure schemas (ADR-0061 amendment 2026-08-25: closes the Agent→Skill→**Knowledge**→Evidence→Rule→Decision chain end to end) |
 | `status` | yes | `proposed` until confirmed, `accepted` once acted on, `superseded` when reversed |
+
+> **Validator contract** (`scripts/validate-decisions.ts` v1.3.0): `evidence_refs` entries must resolve to `EV-YYYYMMDD-NN` rows of `docs/evidence/ledger.md` — finding files are NOT accepted by the validator — and `rules_applied` entries must match the `<PREFIX>-R<N>` rule-ID form. Cite finding files, artifacts, and unregistered rules in the body prose instead; `[]` is the correct value when no ledger entry or registered rule applies (an empty decision chain is allowed but discouraged).
 
 ### Body
 
@@ -95,7 +98,7 @@ Record the ruling where the gate fires; do not batch records to the end of the s
 
 ## Linking Evidence
 
-`evidence_refs[]` is the downward link into the Evidence layer: every entry resolves to a row of an `evidence-ledger` table (claim | source | url/ref | verification | status) or a finding file under `docs/evidence/findings/`. A record should read as "these rules (`rules_applied[]`), applied to this evidence (`evidence_refs[]`), produced this ruling" without re-deriving either from prose.
+`evidence_refs[]` is the downward link into the Evidence layer: every entry resolves to an `EV-YYYYMMDD-NN` row of `docs/evidence/ledger.md` (the five-column table: claim | source | url/ref | verification | status — the validator contract above is authoritative). A record should read as "these rules (`rules_applied[]`), applied to this evidence (`evidence_refs[]`), produced this ruling" without re-deriving either from prose.
 
 ## Related Skills
 

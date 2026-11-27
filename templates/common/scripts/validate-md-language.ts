@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
-// @version 1.16.2
+// @version 1.17.0
+// v1.17.0 (2026-11-27, U-20261127-004 — co-newbiz v1.17.0 provenance): six
+//           policy-shaded doc zones join officialPatterns — docs/architecture,
+//           docs/manuals, docs/runbooks, docs/security, docs/dd, docs/planning
+//           (.md/.yaml) — so undeclared Korean there FAILS like everywhere else
+//           in the perimeter. Dormant-pattern posture as docs/user-guide.md (no
+//           cost where a zone directory does not exist); L0 scan confirms zero
+//           new findings (only docs/architecture + docs/security exist at the
+//           root today, both clean).
 // v1.16.1 (2026-10-28, T-20261028-003): whitespace-only — the two-statement line at isOfficialDocument reflowed (dev-sync script-registry gate requires a version bump for any modified script; no behavior change).
 // v1.16.0 (2026-10-27, U-20261027-007): perimeter hardening — (a) the
 //           `/^Hermes\.md$/` official-pattern was case-SENSITIVE and never
@@ -216,6 +224,8 @@ function parseLangDeclaration(
  * - docs/governance/ (subdirectories)
  * - docs/designs/ (design docs may use lang frontmatter exceptions)
  * - docs/adr/, docs/decisions/ (decision records; same exception mechanism)
+ * - docs/architecture/, docs/manuals/, docs/runbooks/, docs/security/,
+ *   docs/dd/, docs/planning/ (subdirectories — U-20261127-004, v1.17.0)
  * - docs/VERSION_MANIFEST.md (generated; Korean allowed only inside the
  *   generator-emitted allowlist markers — see header comment)
  * - README.md / docs/README.md / docs/user-guide.md (EN originals of the
@@ -288,6 +298,17 @@ export function isOfficialDocument(filePath: string): boolean {
     /^README_ko\.md$/,
     /^docs\/README_ko\.md$/,
     /^docs\/user-guide_ko\.md$/,
+    // U-20261127-004 (co-newbiz v1.17.0 provenance): six policy-shaded doc
+    // zones join the perimeter so undeclared Korean there FAILS. Dormant
+    // where the zone directory does not exist (docs/user-guide.md precedent) —
+    // at the L0 root only docs/architecture and docs/security exist today and
+    // both scan clean.
+    /^docs\/architecture\/.*\.(md|ya?ml)$/,
+    /^docs\/manuals\/.*\.(md|ya?ml)$/,
+    /^docs\/runbooks\/.*\.(md|ya?ml)$/,
+    /^docs\/security\/.*\.(md|ya?ml)$/,
+    /^docs\/dd\/.*\.(md|ya?ml)$/,
+    /^docs\/planning\/.*\.(md|ya?ml)$/,
   ];
 
   return officialPatterns.some((pattern) => pattern.test(normalizedPath));
