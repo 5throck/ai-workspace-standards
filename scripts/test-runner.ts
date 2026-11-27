@@ -1,7 +1,31 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.23.0
+ * @version 1.24.0
  *
+ * v1.24.0 (2026-11-28, T-20261128-002 — spec
+ *          docs/designs/2026-11-28-test-suites-schema-extension-design.md):
+ *          test-suites.json schema extension — declared suites gain two
+ *          optional keys. `sequential` (boolean, bun-test suites only; a
+ *          validation error on command/workspace, which are always
+ *          sequential by construction) dispatches the suite's files one at
+ *          a time through the existing sequential path (concurrency 1,
+ *          sorted order, one child bun test process per file);
+ *          failures CONTINUE — every file runs and reports, the suite fails
+ *          once at the end (co-newbiz's visual-diff use case needs the
+ *          other pages' diffs even when one page breaks; identical to the
+ *          built-in `scripts` suite's sequential semantics). `timeout`
+ *          (positive integer ms, any suite type) sets the per-target kill
+ *          budget — per file for bun-test (replaces the hardcoded 120000),
+ *          per process for command/workspace (replaces the hardcoded
+ *          300000); the runner has no aggregate suite wall, a suite timeout
+ *          has always been a per-target timer. FILE_TIME_BUDGETS rows still
+ *          override per file (row > declared timeout > hardcoded default);
+ *          the bun per-test ceiling keeps DEFAULT_TEST_TIMEOUT_MS unless a
+ *          row sets it. Both fields optional — existing manifests parse and
+ *          validate identically (golden compare in
+ *          tests/unit/test-runner-declared-flags.test.ts). Supersedes
+ *          Projects/co-newbiz's local sequential-suite patch (predates
+ *          test-suites.json) once that project upgrades its delivered copy.
  * v1.23.0 (2026-11-28, T-20261128-001): FILE_TIME_BUDGETS gains
  *          project-target-guards.test.ts (suite 300s / test 60s, engine-spawn
  *          family). Measured evidence — windows-latest main run 46003145206
@@ -670,6 +694,25 @@ function resolveBatchSize(): number {
   return DEFAULT_BATCH_SIZE;
 }
 
+/** Resolve one file's kill budgets (v1.24.0 — composition contract, design
+ * 2026-11-28-test-suites-schema-extension-design §2.3): an explicit --timeout
+ * CLI flag wins over everything; a FILE_TIME_BUDGETS row overrides per file
+ * (suite and test slots independently); otherwise the suite's wall — a
+ * built-in suite's `timeout` field or a declared suite's v1.24.0 `timeout`
+ * key — fills the suite slot and the bun per-test ceiling keeps its default.
+ * Exported pure for the composition unit tests; `executeFileStep` binds the
+ * live arguments. */
+export function resolveFileBudgets(
+  file: string,
+  suiteTimeoutMs: number,
+  cliTimeoutMs: number | undefined,
+  budgets: Record<string, { suite: number; test: number }> = FILE_TIME_BUDGETS,
+): { suite: number; test: number } {
+  if (cliTimeoutMs) return { suite: cliTimeoutMs, test: cliTimeoutMs };
+  const override = budgets[basename(file)];
+  return { suite: override?.suite ?? suiteTimeoutMs, test: override?.test ?? DEFAULT_TEST_TIMEOUT_MS };
+}
+
 /** Pool default (v1.16.0, design item 4 — SHIPPED AS EVIDENCE-GATED OFF):
  * `min(availableParallelism(), 4)` exactly as before item 4. The design's
  * platform-aware win32=6 (oversubscribed for the spawn-wait-heavy workload)
@@ -1094,6 +1137,13 @@ export interface DeclaredSuite {
   dirs: string[];
   command: string[];
   os?: TestOs;
+  /** v1.24.0, bun-test suites only: run files one at a time (concurrency 1,
+   * sorted order); failures continue and the suite reports every file. */
+  sequential?: boolean;
+  /** v1.24.0, any suite type: per-target kill budget in ms — per file for
+   * bun-test (default 120000), per process for command/workspace (default
+   * 300000). FILE_TIME_BUDGETS rows still override per file. */
+  timeout?: number;
 }
 
 export interface QuarantineEntry {
@@ -1117,7 +1167,7 @@ const SUITE_TYPES = ["bun-test", "command", "workspace"];
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SUITE_NAME_RE = /^[a-z0-9][a-z0-9_-]*$/;
 const MANIFEST_KEYS = ["version", "include", "suites", "quarantine", "optOut"];
-const SUITE_KEYS = ["name", "type", "dirs", "command", "os"];
+const SUITE_KEYS = ["name", "type", "dirs", "command", "os", "sequential", "timeout"];
 const QUARANTINE_KEYS = ["path", "ticket", "reason", "expires"];
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -1201,6 +1251,21 @@ export function validateTestSuitesManifest(raw: unknown, runDate: Date = new Dat
       }
       if (s.os !== undefined && !isOs(s.os)) {
         errors.push(`test-suites.json: ${label}: "os" must be one of ${OS_PLATFORMS.join(", ")}`);
+      }
+      // v1.24.0: optional `sequential` (bun-test only) and `timeout` (any type).
+      if (s.sequential !== undefined && typeof s.sequential !== "boolean") {
+        errors.push(`test-suites.json: ${label}: "sequential" must be a boolean`);
+      }
+      if (
+        s.timeout !== undefined &&
+        (typeof s.timeout !== "number" || !Number.isInteger(s.timeout) || s.timeout <= 0)
+      ) {
+        errors.push(`test-suites.json: ${label}: "timeout" must be a positive integer (milliseconds)`);
+      }
+      if (s.sequential !== undefined && s.type !== "bun-test" && SUITE_TYPES.includes(s.type as string)) {
+        errors.push(
+          `test-suites.json: ${label}: "sequential" applies to "bun-test" suites only ("command"/"workspace" suites always run one target at a time)`,
+        );
       }
     }
   }
@@ -1466,7 +1531,7 @@ function buildPlan(entry: string, ctx: RunContext): Plan {
         type: "command",
         targets: ["<command>"],
         excluded: [],
-        timeout: 300000,
+        timeout: s.timeout ?? 300000,
         sequential: true,
         execMode: "bun-test",
         batching: false,
@@ -1492,7 +1557,7 @@ function buildPlan(entry: string, ctx: RunContext): Plan {
         type: "workspace",
         targets: found.dirs,
         excluded: [],
-        timeout: 300000,
+        timeout: s.timeout ?? 300000,
         sequential: true,
         execMode: "bun-test",
         batching: false,
@@ -1501,7 +1566,17 @@ function buildPlan(entry: string, ctx: RunContext): Plan {
       });
       return;
     }
-    const step = fileStep(s.name, "declared", s.dirs, {}, s.os);
+    // v1.24.0: a declared bun-test suite may set its per-file kill wall
+    // (`timeout`, default 120000) and dispatch files one at a time
+    // (`sequential`, default false — failures continue and every file
+    // reports; design 2026-11-28-test-suites-schema-extension-design §2.2).
+    const step = fileStep(
+      s.name,
+      "declared",
+      s.dirs,
+      { timeout: s.timeout ?? 120000, sequential: Boolean(s.sequential) },
+      s.os,
+    );
     if (step) steps.push(step);
   };
 
@@ -1743,11 +1818,8 @@ async function executeFileStep(step: Step, ctx: RunContext, counts: RunCounts, o
   const concurrency = isParallel ? Math.max(1, options.concurrency || Math.min(files.length, defaultConcurrency)) : 1;
   const batchingEnabled = step.batching && isParallel && resolveBatchSize() > 0;
   const cliTimeoutMs = options.timeout;
-  const resolveBudgets = (file: string): { suite: number; test: number } => {
-    if (cliTimeoutMs) return { suite: cliTimeoutMs, test: cliTimeoutMs };
-    const override = FILE_TIME_BUDGETS[basename(file)];
-    return { suite: override?.suite ?? suiteTimeout, test: override?.test ?? DEFAULT_TEST_TIMEOUT_MS };
-  };
+  const resolveBudgets = (file: string): { suite: number; test: number } =>
+    resolveFileBudgets(file, suiteTimeout, cliTimeoutMs);
 
   const modeStr = isParallel ? `parallel (concurrency: ${concurrency})` : "sequential";
   console.log(`Running ${suiteName} suite (${files.length} test file${files.length === 1 ? "" : "s"}, ${modeStr})...`);
