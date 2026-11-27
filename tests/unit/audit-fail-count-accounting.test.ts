@@ -102,10 +102,9 @@ describe("live-source pins — audit.ts Fail-sole-increment accounting (encoding
     // v2.70.0 (T-20261118-002) added the mirror-parity early-signal arm; the
     // accounting fix shipped in 2.69.0, so pin the floor, not the exact header.
     // v2.71.0 (T-20261123-008 intent) added the snapshot-freshness gate.
-    expect(
-      source.includes("// @version 2.69.0") ||
-        source.includes("// @version 2.70.0") ||
-        source.includes("// @version 2.71.0"),
-    ).toBe(true);
+    // v2.72.0 (T-20261127-006) added the release-drift-since-tag check — the
+    // floor pin became a numeric floor so the enumeration stops growing.
+    const minor = Number(/\/\/ @version 2\.(\d+)\.0/.exec(source)?.[1] ?? 0);
+    expect(minor).toBeGreaterThanOrEqual(69);
   });
 });
