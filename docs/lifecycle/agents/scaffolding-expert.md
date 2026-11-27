@@ -8,6 +8,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-28 | production | production | agents/scaffolding-expert.md frontmatter last_updated refreshed to 2026-11-28 after reviewing the post-stamp content commits (known landings: cbdc6e7eb 2026-11-10 /meeting boilerplate sweep + 60290a7c0 roster backfill for the 2026-10-28 cohort; 036d1320b U-20261122-005 dispatch rows + 0352be563 v4 hardening for pm.md); Check 11 remediation | automation-engineer |
 | 2026-05-29 | - | production | Initial scaffolding-expert agent established | lifecycle-manager |
 | 2026-09-29 | production | production | Tier-line model-ID literals dropped in agents/scaffolding-expert.md (commit 5b2778b8 — Claude High/Medium tiers → opus-5-5 / sonnet-5-5); record stamped (T-20260930-001) | lifecycle-manager |
 | 2026-10-26 | production | production | Dispatch Protocol re-aligned to the agents/scaffolding-expert.md SSOT (lead [0], support [1]); agents/scaffolding-expert.md frontmatter last_updated backfilled to the 2026-10-23 tier-sweep commit 72d75af8 (project review 2026-10-26 findings #4/#9, T-20261026-004) | lifecycle-manager |
@@ -70,5 +71,5 @@
 
 - **Current Phase**: production
 - **Owner**: scaffolding-expert
-- **Last Updated**: 2026-10-28
+- **Last Updated**: 2026-11-28
 - **Last Reviewer**: pm

@@ -8,6 +8,7 @@
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-28 | production | production | agents/pm.md frontmatter last_updated refreshed to 2026-11-28 after reviewing the post-stamp content commits (known landings: cbdc6e7eb 2026-11-10 /meeting boilerplate sweep + 60290a7c0 roster backfill for the 2026-10-28 cohort; 036d1320b U-20261122-005 dispatch rows + 0352be563 v4 hardening for pm.md); Check 11 remediation | automation-engineer |
 | 2026-05-29 | - | production | Initial workspace root PM established | lifecycle-manager |
 | 2026-05-30 | production | production | Updated Meeting Facilitation section to reflect dual execution modes | antigravity |
 | 2026-06-23 | production | production | ADR-0047: Migrated co-work/co-design pm.md to frontmatter-only extends (redundant body cleanup) | lifecycle-manager |
@@ -71,6 +72,6 @@
 
 - **Current Phase**: production
 - **Owner**: pm
-- **Last Updated**: 2026-11-12
+- **Last Updated**: 2026-11-28
 - **Last Reviewer**: pm
 

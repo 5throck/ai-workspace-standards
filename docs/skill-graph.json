@@ -8313,7 +8313,7 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-27"
       }
     },
@@ -8785,7 +8785,7 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-27"
       }
     },
@@ -8838,11 +8838,7 @@
         ".agents/skills/adopt-project/SKILL.md",
         ".codex/skills/adopt-project/SKILL.md",
         ".hermes/skills/adopt-project/SKILL.md"
-      ],
-      "usage": {
-        "sessions": 1,
-        "last_used": "2026-11-20"
-      }
+      ]
     },
     {
       "id": "skill:root/agent-lifecycle-manager",
@@ -9477,7 +9473,7 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 6,
+        "sessions": 5,
         "last_used": "2026-11-27"
       }
     },
