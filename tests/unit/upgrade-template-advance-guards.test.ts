@@ -73,6 +73,7 @@ interface Row {
   verdict: string;
   severity: string;
   detail?: string;
+  pass?: string;
 }
 const decisionsOf = (tmp: string): Row[] => {
   expect(existsSync(manifestOf(tmp))).toBe(true);
@@ -182,7 +183,19 @@ describe('S1 equal-version gate — protective-guard scenes', () => {
     expect(s6.relRows.find((x) => x.verdict === 'DRIFT_PRESERVE')).toBeUndefined();
   });
 
-  test('no agents/ or MERGE-pass path ever carries the advance verdict', () => {
-    expect(s6.allRows.filter((x) => x.verdict === 'SYNC_TEMPLATE_ADVANCE' && !x.path.startsWith('skills/'))).toEqual([]);
+  test('the advance verdict stays in its lane set (skills/agents/docs) — never on a MERGE-pass row', () => {
+    // v1.125.0 (design docs/designs/2026-11-27-version-advance-lane-coverage-design.md
+    // §4.1): the S1 guard widened — agents/ UNTOUCHED equal-version drift now routes
+    // through the shared helper and DOES carry SYNC_TEMPLATE_ADVANCE; docs/ versioned
+    // files join via the same attribution. The invariant that remains: the verdict
+    // never appears on a MERGE-pass row (managed-block merges keep their own gates).
+    const advance = s6.allRows.filter((x) => x.verdict === 'SYNC_TEMPLATE_ADVANCE');
+    expect(
+      advance.every(
+        (x) =>
+          (x.path.startsWith('skills/') || x.path.startsWith('agents/') || x.path.startsWith('docs/')) &&
+          !(x.pass ?? '').includes('MERGE'),
+      ),
+    ).toBe(true);
   });
 });

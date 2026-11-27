@@ -706,7 +706,7 @@ describe('upgrade-project.ts agents/ equal-version escalation (D2 dedicated row)
     expect(conflict!.severity).toBe('ERROR');
   }, 180000);
 
-  test('baseline-clean equal-version drift still heals to canonical (DRIFT_RESTORED, WARN)', () => {
+  test('baseline-clean equal-version drift still heals to canonical (SYNC_TEMPLATE_ADVANCE, INFO)', () => {
     const { tmp, status, manifest } = useShape('agent-heal-matrix');
     expect(status).toBe(0);
     // The drift is a body line appended after the frontmatter (the template
@@ -715,9 +715,13 @@ describe('upgrade-project.ts agents/ equal-version escalation (D2 dedicated row)
     // bytes (stub frontmatter over the L1 target), so the baseline and the
     // expected delivery both use composedDeliverable.
     expect(readFileSync(join(tmp, 'agents', 'i18n-specialist.md'), 'utf8')).toBe(restamped(composedDeliverable));
-    const restored = manifest.decisions.find((d) => d.path === 'agents/i18n-specialist.md' && d.verdict === 'DRIFT_RESTORED');
+    // v1.125.0 (T-20261127-006 §4.1): the UNTOUCHED equal-version heal routes
+    // through the shared S1 helper — SYNC_TEMPLATE_ADVANCE (INFO), same bytes.
+    const restored = manifest.decisions.find(
+      (d) => d.path === 'agents/i18n-specialist.md' && d.verdict === 'SYNC_TEMPLATE_ADVANCE',
+    );
     expect(restored).toBeDefined();
-    expect(restored!.severity).toBe('WARN');
+    expect(restored!.severity).toBe('INFO');
   }, 180000);
 });
 

@@ -123,7 +123,7 @@ describe('D9 stub-composed compare and delivery (T-20261028-013)', () => {
     }
   }, 300000);
 
-  test('a pre-D9 bare-target delivery heals to composed bytes (DRIFT_RESTORED, WARN) — phases re-lands, never reverts', () => {
+  test('a pre-D9 bare-target delivery heals to composed bytes (SYNC_TEMPLATE_ADVANCE, INFO) — phases re-lands, never reverts', () => {
     const tmp = makeTempProject();
     try {
       mkdirSync(join(tmp, 'agents'), { recursive: true });
@@ -141,9 +141,14 @@ describe('D9 stub-composed compare and delivery (T-20261028-013)', () => {
       // wave reverts phases, project re-fixes, wave reverts…).
       expect(delivered).toMatch(/phases:/);
       const manifest = readManifest(tmp);
-      const restored = manifest.decisions.find((d) => d.path === I18N_REL && d.verdict === 'DRIFT_RESTORED');
+      // v1.125.0 (T-20261127-006 §4.1): the UNTOUCHED equal-version heal routes
+      // through the shared S1 helper — the verdict is SYNC_TEMPLATE_ADVANCE
+      // (INFO), the bytes contract is unchanged.
+      const restored = manifest.decisions.find(
+        (d) => d.path === I18N_REL && d.verdict === 'SYNC_TEMPLATE_ADVANCE',
+      );
       expect(restored).toBeDefined();
-      expect(restored!.severity).toBe('WARN');
+      expect(restored!.severity).toBe('INFO');
       // The stub changed template-side (composed ≠ bare-target baseline)
       // while the version gate could not fire → the Q5 advisory row fires.
       const advice = manifest.decisions.find((d) => d.path === I18N_REL && d.verdict === 'STUB_VERSION_BUMP_ADVICE');

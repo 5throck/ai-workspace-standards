@@ -123,6 +123,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "upgrade-stub-shape-guards.test.ts",
   "upgrade-template-advance-guards.test.ts",
   "upgrade-template-advance.test.ts",
+  "upgrade-lane-coverage.test.ts",
   "upgrade-variant-scripts-walk.test.ts",
   "upgrade-dry-run-tombstone.test.ts",
   "upgrade-vintage-pending.test.ts",
