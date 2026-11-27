@@ -1,4 +1,4 @@
-// @version 2.71.0
+// @version 2.72.0
 // v2.71.0 (2026-11-23, T-20261123-008 intent — design
 //          docs/designs/2026-11-23-fleet-graph-machinery-batch-design.md §3): new
 //          root-only auto-activating gate — skill-graph snapshot freshness,
@@ -3566,6 +3566,18 @@ if (fs.existsSync("templates")) {
 }
 
 // Check: templates/VERSION must have a corresponding git tag
+// v2.72.0 (T-20261127-006, spec docs/designs/2026-11-27-version-advance-lane-coverage-design.md
+// §4.3): the existence-only check passed through the entire 2026-11-08 → 11-27 window
+// while 238 commits moved templates/ (the release-layer version-advance defect). After
+// the tag is confirmed, the check now compares tree state: git diff --name-only
+// template-v<VERSION> HEAD -- templates/ non-empty → Warn naming the drift count and
+// the release procedure (bump templates/VERSION — feat → minor, fix/docs → patch —
+// then bun scripts/tag-template.ts). Warn, not Fail, BY DESIGN: the tag publishes only
+// after a merge lands on main, so a Fail would deadlock every ordinary templates/**
+// landing (the fixing PR can never carry its own tag); the per-landing bump discipline
+// is enforced separately by lifecycle-sync-audit Check J2 (release-pending WARN) and
+// Check J1 (per-file version bumps, ERROR). An empty diff → Pass naming the tag as
+// current.
 if (fs.existsSync("templates")) {
   const versionFile = "templates/VERSION";
   if (fs.existsSync(versionFile)) {
@@ -3577,7 +3589,20 @@ if (fs.existsSync("templates")) {
           `Template version ${version} in templates/VERSION has no corresponding git tag. Run: bun scripts/tag-template.ts`,
         );
       } else {
-        Pass(`Template version tag: template-v${version} published`);
+        const driftOut = execFileSync(
+          "git",
+          ["diff", "--name-only", `template-v${version}`, "HEAD", "--", "templates/"],
+          { encoding: "utf-8" },
+        ).trim();
+        if (driftOut === "") {
+          Pass(`Template version tag: template-v${version} published and current (no templates/ drift since the tag)`);
+        } else {
+          const driftCount = driftOut.split("\n").length;
+          Warn(
+            `Template release stale: template-v${version} is published but ${driftCount} file(s) under templates/ changed since the tag. ` +
+              "Cut the release: bump templates/VERSION (feat → minor, fix/docs → patch) then run: bun scripts/tag-template.ts",
+          );
+        }
       }
     } catch (e) {
       Warn(`Could not verify template version tag: ${e}`);

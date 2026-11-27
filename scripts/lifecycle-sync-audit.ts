@@ -29,7 +29,24 @@
  *          governance-hook presence arm (lib/hook-dedupe.ts v1.3.0) — missing and
  *          matcher-mismatch findings report at ERROR level.
  *
- * @version 1.22.0
+ * @version 1.23.0
+ * v1.23.0 (2026-11-27, T-20261127-006 — spec
+ *          docs/designs/2026-11-27-version-advance-lane-coverage-design.md §4.2):
+ *          new Check J — template version-advance bump discipline. J1 (ERROR):
+ *          a tracked templates/** file whose version token (skills/agents
+ *          frontmatter version, script @version, docs inline footer) did NOT
+ *          advance while its stamp-stripped content DID change — makes the S1
+ *          bump-first process rule mechanical; guards exempt first-time files,
+ *          deletions, stamp-only edits (strip-normalized equality), and
+ *          versionless files. J2 (WARN): templates/** changed without a
+ *          templates/VERSION advance — release pending, message names the
+ *          change-class mapping (feat → minor, fix/docs → patch) and
+ *          tag-template.ts. Reads only the worktree-vs-HEAD delta, so it is
+ *          silent on fresh checkouts/CI and active in the landing window;
+ *          L0-only arm (L1 contexts self-skip without templates/). Pure
+ *          decision core exported for unit tests (extractTemplateVersionToken,
+ *          stripStampLines, evaluateVersionAdvance). Auto-bump rejected per the
+ *          agent-mechanical-date-bump doctrine.
  * v1.21.0 (2026-11-06, DEC-20261106-03): Check B skips L0+L2 (variant-scoped) registry rows.
  * v1.20.1 (2026-10-31, design docs/designs/2026-10-31-graft-trail-migration-design.md
  *          R2.5/R2.6 annotation, U-20261031-009): Check I docstring annotation only —
@@ -191,6 +208,7 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
 import { join, basename } from "node:path";
+import { execFileSync } from "node:child_process";
 import { cwd } from "node:process";
 import { createHash } from "node:crypto";
 import { load as loadYaml } from "js-yaml";
@@ -208,7 +226,7 @@ const colors = {
   dim: "\x1b[2m",
 };
 
-interface SyncIssue {
+export interface SyncIssue {
   level: "error" | "warning";
   file: string;
   message: string;
@@ -1196,6 +1214,197 @@ export function runCheckI(): SyncIssue[] {
   return issues;
 }
 
+// ── Check J: template version-advance bump discipline (v1.23.0, T-20261127-006) ──
+// Spec docs/designs/2026-11-27-version-advance-lane-coverage-design.md §4.2.
+// The skills process rule (S1 design §4.1: "a template-side skill edit without a
+// version bump must be either bump-first or provably stamp-only") had no
+// mechanical enforcement; the historical stranding (evidence-ledger pinned at
+// 1.1.0 through d82a73649 / bdb72db58) proves the discipline fails without a
+// gate. Check J reads ONLY the worktree-vs-HEAD delta under templates/**, so it
+// is silent on fresh checkouts and CI (no uncommitted delta) and active exactly
+// in the dev-sync landing window (audit 3.9/4.9 run before the commit).
+//
+// J1 (ERROR): a tracked template file whose version token did NOT advance while
+// its stamp-stripped content DID change. Version tokens by path class:
+//   skills/**/SKILL.md, agents/**.md  → frontmatter `^version: X.Y.Z`
+//   scripts/**/*.ts|.py               → `@version X.Y.Z`
+//   docs/**/*.md                      → inline footer `*<basename> version: X.Y`
+// Guards: first-time files (no HEAD blob) exempt; deletions exempt; stamp-only
+// edits exempt (the strip-normalized text is unchanged — the d82a73649
+// last_reviewed sweep class needs no bump); versionless files exempt from J1
+// (no token to advance — they roll up into J2); templates/VERSION is J2's
+// subject, never J1's.
+// J2 (WARN): templates/** changed without a templates/VERSION advance —
+// release pending. On cut: feat → minor, fix/docs → patch, then
+// bun scripts/tag-template.ts. The gate FLAGS, it does not prescribe the
+// number — release cadence stays the owner's (the audit tag check §4.3 is the
+// release-layer detector; auto-bump was rejected per the
+// agent-mechanical-date-bump doctrine: a real content edit is the author's job
+// to version).
+//
+// The decision core (`evaluateVersionAdvance`) is pure — git enumeration lives
+// in runCheckJ. L1 contexts (no templates/ dir) self-skip, matching Check I's
+// dual-context contract.
+
+/** A version token parsed out of a template file, per path class. */
+export function extractTemplateVersionToken(path: string, content: string): string {
+  const posix = path.replace(/\\/g, "/");
+  const basename = posix.split("/").pop() ?? posix;
+  if (posix.endsWith("/SKILL.md") || (posix.includes("/agents/") && posix.endsWith(".md"))) {
+    return content.match(/^version:[ \t]*["']?(\d+\.\d+\.\d+)/m)?.[1] ?? "";
+  }
+  if (posix.endsWith(".ts") || posix.endsWith(".py")) {
+    return content.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1] ?? "";
+  }
+  if (posix.includes("/docs/") && posix.endsWith(".md")) {
+    const escaped = basename.replace(/[.*+?${}()|[\]\\]/g, "\\$&");
+    return content.match(new RegExp(`\\*${escaped}\\s+version:\\s*(\\d+\\.\\d+)`, "m"))?.[1] ?? "";
+  }
+  return ""; // versionless — J1-exempt, rolls up into J2
+}
+
+/**
+ * Stamp-stripped normalization for the "provably stamp-only" exemption: remove
+ * the version/stamp lines (frontmatter version / last_updated / last_reviewed,
+ * script @version, docs inline footer) and compare the remainder. Pure.
+ */
+export function stripStampLines(path: string, content: string): string {
+  const posix = path.replace(/\\/g, "/");
+  const basename = posix.split("/").pop() ?? posix;
+  const escaped = basename.replace(/[.*+?${}()|[\]\\]/g, "\\$&");
+  const footerRe = new RegExp(`^\\*${escaped}\\s+version:.*$`, "m");
+  return content
+    .split(/\r?\n/)
+    .filter((line) => {
+      if (/^\s*@version\s/.test(line)) return false;
+      if (/^version:[ \t]/.test(line)) return false;
+      if (/^last_updated:[ \t]/.test(line)) return false;
+      if (/^last_reviewed:[ \t]/.test(line)) return false;
+      if (footerRe.test(line)) return false;
+      return true;
+    })
+    .join("\n")
+    .replace(/\s+$/, "");
+}
+
+export interface VersionAdvanceEntry {
+  /** Repo-relative path (templates/...). */
+  path: string;
+  /** HEAD blob content; null = first-time file (exempt). */
+  head: string | null;
+  /** Worktree content; null = deleted (exempt). */
+  worktree: string | null;
+}
+
+/**
+ * Pure decision core for Check J. `templates/VERSION` is passed separately
+ * (head/worktree) — it is J2's subject, never a J1 row.
+ */
+export function evaluateVersionAdvance(
+  entries: VersionAdvanceEntry[],
+  versionHead: string | null,
+  versionWorktree: string | null,
+): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+  let contentChanged = 0;
+  for (const entry of entries) {
+    if (entry.path === "templates/VERSION") continue; // J2's subject
+    if (entry.head === null || entry.worktree === null) continue; // first-time / deleted
+    if (entry.head === entry.worktree) continue; // index-only churn with identical bytes
+    // Stamp-strip normalization decides BOTH questions: a strip-equal edit is
+    // provably stamp-only — not a content change at all (no J1, no J2 count).
+    const headStrip = stripStampLines(entry.path, entry.head);
+    const worktreeStrip = stripStampLines(entry.path, entry.worktree);
+    if (headStrip === worktreeStrip) continue;
+    contentChanged++;
+    const headToken = extractTemplateVersionToken(entry.path, entry.head);
+    const worktreeToken = extractTemplateVersionToken(entry.path, entry.worktree);
+    if (!headToken && !worktreeToken) continue; // versionless — J2 covers
+    if (headToken && worktreeToken === headToken) {
+      // Version did not advance on a real content change — J1 fires.
+      issues.push({
+        level: "error",
+        file: entry.path,
+        message:
+          `Check J: ${entry.path} content edited without a version advance (still ${headToken}) — ` +
+          "bump-first: a template-side content edit must advance its version token (frontmatter version / @version / docs footer) " +
+          "so version-gated delivery re-arms; SYNC_TEMPLATE_ADVANCE makes a miss recoverable, this gate makes it rare",
+        fix: `bump the version token in ${entry.path}, or revert if the edit was stamp-only`,
+      });
+    }
+    // headToken advanced (or a token was added) → clean: J1's job is done.
+  }
+  // J2 — release marker: templates/** moved without a templates/VERSION advance.
+  if (contentChanged > 0 && versionHead !== null && versionWorktree !== null && versionHead === versionWorktree) {
+    issues.push({
+      level: "warning",
+      file: "templates/VERSION",
+      message:
+        `Check J: templates/** content changed (${contentChanged} versioned file(s) edited) without a templates/VERSION advance — release pending. ` +
+        "On cut: feat → minor, fix/docs → patch, then bun scripts/tag-template.ts",
+    });
+  }
+  return issues;
+}
+
+/** Check J runner — git enumeration for the pure core above. L0-only (needs templates/). */
+function runCheckJ(): SyncIssue[] {
+  const issues: SyncIssue[] = [];
+  if (!existsSync(join(ROOT, "templates"))) return issues; // L1/L2 context — self-skip
+  let statusOut = "";
+  try {
+    statusOut = execFileSync("git", ["status", "--porcelain", "--", "templates/"], { encoding: "utf-8" });
+  } catch {
+    return issues; // not a git worktree — nothing to gate
+  }
+  const changedPaths: string[] = [];
+  for (const line of statusOut.split("\n")) {
+    if (!line.trim()) continue;
+    const body = line.slice(3); // strip XY + space
+    if (body.includes(" -> ")) {
+      changedPaths.push(body.split(" -> ")[1]!.trim()); // rename: the NEW path (first-time → exempt; the old path is a deletion → exempt)
+      continue;
+    }
+    if (/^[AMD]/.test(line.slice(0, 2)) === false) continue;
+    changedPaths.push(body.trim());
+  }
+  const readHead = (path: string): string | null => {
+    try {
+      return execFileSync("git", ["show", `HEAD:${path}`], { encoding: "utf-8" });
+    } catch {
+      return null; // not in HEAD — first-time
+    }
+  };
+  const entries: VersionAdvanceEntry[] = changedPaths
+    .filter((p) => p !== "templates/VERSION")
+    .map((p) => {
+      const abs = join(ROOT, p);
+      let worktree: string | null = null;
+      try {
+        worktree = readFileSync(abs, "utf-8");
+      } catch {
+        worktree = null; // deleted in the worktree
+      }
+      return { path: p, head: readHead(p), worktree };
+    });
+  const versionPath = join(ROOT, "templates", "VERSION");
+  const versionWorktree = existsSync(versionPath) ? readFileSync(versionPath, "utf-8") : null;
+  let versionHead: string | null = null;
+  try {
+    versionHead = execFileSync("git", ["show", "HEAD:templates/VERSION"], { encoding: "utf-8" });
+  } catch {
+    versionHead = null;
+  }
+  const found = evaluateVersionAdvance(entries, versionHead, versionWorktree);
+  issues.push(...found);
+  if (!jsonMode) {
+    console.log(
+      `${colors.dim}Check J: template version-advance discipline — ${found.length} finding(s)${found.length > 0 ? "" : ", landing clean"}${colors.reset}`,
+    );
+  }
+  return issues;
+}
+
 /**
  * Check B: Compare version entries between scripts/SCRIPTS.md and
  * templates/common/scripts/SCRIPTS.md. Uses the layer column to decide
@@ -1351,6 +1560,7 @@ const INTENTIONAL_CROSS_REFS = new Set([
   "dev-sync:propagate-to-templates", // dev-sync.ts: called only inside isL0Context guard
   "audit:propagate-to-templates", // audit.ts: comment reference only (replaced checkScriptSync)
   "lifecycle-sync-audit:propagate-to-templates", // lifecycle-sync-audit.ts: string mention in Check C fix hint only (re-sync advice; the hint never runs the L0 script)
+  "lifecycle-sync-audit:tag-template", // lifecycle-sync-audit.ts: string mention in the Check J2 release-pending hint only (the L0-only tag publisher; the hint never runs the L0 script — v1.23.0)
   "lifecycle-sync-audit:generate-scripts-mirror", // lifecycle-sync-audit.ts: string mention in Check B projection-arm fix hint only (v1.16.0); the arm itself is existsSync-guarded and the dynamic import runs only at L0 where the L0-only generator exists
   "create-l3-scaffold:generate-version-manifest", // L0-workflow coordination; reference only in L1 copy
   "list-template-versions:tag-template", // L0-workflow coordination; reference only in L1 copy
@@ -1701,6 +1911,9 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
     console.log(`${colors.dim}Check G: .githooks vs templates/common/.githooks mirror parity${colors.reset}`);
     console.log(`${colors.dim}Check H: script lifecycle record versions vs SCRIPTS.md${colors.reset}`);
     console.log(`${colors.dim}Check I: .claude/settings.json hook drift${colors.reset}`);
+    console.log(
+      `${colors.dim}Check J: template version-advance discipline (bump-first + release marker)${colors.reset}`,
+    );
     console.log("");
   }
 
@@ -1714,6 +1927,7 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
   const checkGIssues = runCheckG();
   const checkHIssues = runCheckH();
   const checkIIssues = runCheckI();
+  const checkJIssues = runCheckJ();
   const registryEntries = runCheckD();
 
   if (!jsonMode) {
@@ -1740,6 +1954,7 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
     ...checkGIssues.filter((i) => i.level === "error"),
     ...checkHIssues.filter((i) => i.level === "error"),
     ...checkIIssues.filter((i) => i.level === "error"),
+    ...checkJIssues.filter((i) => i.level === "error"),
   ];
   const allWarnings = [
     ...checkAIssues.filter((i) => i.level === "warning"),
@@ -1752,10 +1967,11 @@ async function runAudit(jsonMode = false): Promise<AuditResult> {
     ...checkGIssues.filter((i) => i.level === "warning"),
     ...checkHIssues.filter((i) => i.level === "warning"),
     ...checkIIssues.filter((i) => i.level === "warning"),
+    ...checkJIssues.filter((i) => i.level === "warning"),
   ];
 
   return {
-    checksRun: 11,
+    checksRun: 12,
     errors: allErrors,
     warnings: allWarnings,
     registry: registryEntries,

@@ -4,9 +4,9 @@
 
 - **Script**: test-runner
 - **Status**: active
-- **Version**: 1.20.0
+- **Version**: 1.21.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-27 (v1.20.0 windows CI rebudget from measured run logs: five first-time FILE_TIME_BUDGETS rows for the engine-spawn family at 300s/60s with measured numbers pinned, plus upgrade-overwrite-protection test-ceiling raise 60s→120s, T-20261127-002, design 2026-11-27-ticket-store-drift-and-nextid-design §5; prior: v1.19.0 fleet test baseline, T-20261124-017, ADR-0106)
+- **Last Updated**: 2026-11-27 (v1.21.0 — T-20261127-006 §13: FILE_TIME_BUDGETS gains upgrade-lane-coverage.test.ts at the engine-spawn family 300s/60s — first windows leg hit the 120000ms wall, PR #2202 attempt 45916952645. Prior: 2026-11-27 (v1.20.0 windows CI rebudget from measured run logs: five first-time FILE_TIME_BUDGETS rows for the engine-spawn family at 300s/60s with measured numbers pinned, plus upgrade-overwrite-protection test-ceiling raise 60s→120s, T-20261127-002, design 2026-11-27-ticket-store-drift-and-nextid-design §5; prior: v1.19.0 fleet test baseline, T-20261124-017, ADR-0106)
 ## Description
 
 Suite-aware test runner wrapping `bun test` with per-test and per-file wall-time
@@ -16,6 +16,7 @@ default suite `integration`).
 
 ## Phase History
 
+- **1.21.0** (2026-11-27, T-20261127-006 §13): upgrade-lane-coverage.test.ts FILE_TIME_BUDGETS row (300s/60s, first-time).
 - **1.20.0** (v1.20.0 (2026-11-27, T-20261127-002 — spec docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §5): windows-latest rebudget from MEASURED per-file durations parsed out of the cited runs' CI logs (PRs #2189/#2190/#2194/#2196/#2198 + main runs 45864068389/45905810289): five first-time FILE_TIME_BUDGETS rows at the family 300s/60s budget with measured numbers pinned in the comments — upgrade-template-advance-guards (114.6s healthy max = 96% of the 120s wall, twice killed at 120000ms on main), upgrade-template-advance (83.5s, killed once), upgrade-stub-shape-conversion (70.6s, killed once), upgrade-stub-shape-guards (70.7s preventive), upgrade-prune-removed (79.2s preventive) — plus the upgrade-overwrite-protection TEST-ceiling raise 60s → 120s (attempt 45826913410 killed one engine-spawn test at 60000ms while the file's healthy totals measured 117-156s). No test deleted or loosened; budgets only.)
 - **1.19.0** (v1.19.0 (2026-11-25, T-20261124-017 — design docs/designs/2026-11-24-fleet-test-baseline-design.md, ADR-0106): fleet test baseline — `all` (baseline `common` → `unit` when present → `include` → declared suites) and `common` entry points; fail-closed FC1-FC5 (zero baseline, zero-target declared/include suite, zero parsed test total, invalid manifest, OS-tagged baseline file) each exit 1 with result=no-tests while an absent built-in specialized suite keeps exit 0; project-owned `test-suites.json` with `bun-test`/`command`/`workspace` suites, ticketed 60-day quarantine and a recorded optOut; one TEST-RUN-SUMMARY line per run; OS applicability by file suffix and suite `os` key with --dry-run/--os/--os-scope/--plan-os. U-20261122-001's fail-closed request, previously answered by a WARN only.)
 - **1.18.0** (v1.18.0 (2026-11-23, U-20261122-011 — spec docs/designs/2026-11-23-variant-core-script-loss-detection-design.md): `upgrade-policy-eviction.test.ts` joins FILE_TIME_BUDGETS (suite 300s / test 60s, first-time entry per the v1.6.0 convention) — five full upgrade-project.ts engine spawns (scene A default + grant, scene B, AC-5 rerun + vintage) plus three cheap --audit-core-deltas report spawns; windows-slow engine family budget as upgrade-overwrite-protection.)

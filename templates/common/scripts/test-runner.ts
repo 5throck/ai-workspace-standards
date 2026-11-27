@@ -1,6 +1,14 @@
 /**
  * test-runner.ts — Test Runner for TypeScript Test Suites
- * @version 1.20.0
+ * @version 1.21.0
+ *
+ * v1.21.0 (2026-11-27, T-20261127-006 — spec
+ *          docs/designs/2026-11-27-version-advance-lane-coverage-design.md §13):
+ *          FILE_TIME_BUDGETS gains upgrade-lane-coverage.test.ts (suite 300s /
+ *          test 60s) — the lane-coverage engine suite joins the engine-spawn
+ *          family (two wave-1 fixture spawns + six scene spawns); killed at the
+ *          120000ms default wall on its first windows leg (PR #2202 attempt
+ *          45916952645). First-time entry per the v1.6.0/v1.20.0 convention.
  *
  * v1.20.0 (2026-11-27, T-20261127-002 — spec
  *          docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §5):
@@ -439,6 +447,15 @@ const FILE_TIME_BUDGETS: Record<string, { suite: number; test: number }> = {
   // observed yet, but the win32 spike band is ~1.5-2x and 79.2s sits above the
   // 2/3-of-wall burn-in line; pinned at the family budget preventively.
   "upgrade-prune-removed.test.ts": { suite: 300000, test: 60000 },
+  // v1.21.0 (T-20261127-006, design docs/designs/2026-11-27-version-advance-lane-coverage-design.md
+  // §13 implementation note): upgrade-lane-coverage joins the engine-spawn family —
+  // TWO full wave-1 engine spawns as fixture bases (co-work + co-consult) plus six
+  // scene spawns (dry-run + apply per scene family). Killed at 120000ms on its
+  // first windows leg (PR #2202 attempt 45916952645, "Test timed out after
+  // 120000ms") — the same first-time-engine-suite shape as the T-20261127-002
+  // cohort; macOS ~21-25s. First-time entry at the family budget 300s/60s per the
+  // v1.6.0/v1.20.0 convention; no assertion loosened.
+  "upgrade-lane-coverage.test.ts": { suite: 300000, test: 60000 },
 };
 
 function getTestFiles(suite: TestSuite): string[] {

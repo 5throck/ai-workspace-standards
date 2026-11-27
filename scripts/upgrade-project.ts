@@ -1,5 +1,29 @@
 #!/usr/bin/env bun
-// @version 1.124.0
+// @version 1.125.0
+// v1.125.0 (2026-11-27, T-20261127-006 — design
+//           docs/designs/2026-11-27-version-advance-lane-coverage-design.md §4.1):
+//           version-advance lane coverage — S1's content-aware equal-version
+//           attribution (SYNC_TEMPLATE_ADVANCE) reaches the remaining lanes.
+//           (a) resolveEqualVersionDrift gains optional delivery hooks
+//           (deliverable/tplContent/write) so lanes whose delivery is not a
+//           verbatim copy reuse the attribution; skills call sites unchanged.
+//           (b) agents/ equal-version drift arm: the UNTOUCHED (baseline-clean)
+//           shape routes through the helper — verdict SYNC_TEMPLATE_ADVANCE
+//           (INFO) instead of the DRIFT_RESTORED (WARN) mislabel, and the arm
+//           gains the helper's uncommitted-edit CONFLICT guard; the D9 stub
+//           bump advisory rides the advance. PROJECT_EVOLVED/NO_BASELINE/
+//           tier-only dispositions unchanged.
+//           (c) TEMPLATE TREE SYNC versioned docs: equal footer version +
+//           differing bytes no longer fall through SILENTLY (the T-20261001-021
+//           strand class, live at co-develop/docs/privacy-design-checklist_ko.md)
+//           — docs/context.md flows through its ownership-preserve/splice chain
+//           with the deliver row upgraded to SYNC_TEMPLATE_ADVANCE when
+//           baseline-clean; every other versioned doc attributes through the
+//           helper (DRIFT_PRESERVE now visible for project-moved copies).
+//           (d) scripts equalVersionRestore: the baseline-proven verdict joins
+//           the S1 vocabulary (SYNC_TEMPLATE_ADVANCE, INFO); vintage stays
+//           DRIFT_RESTORED; resolveEqualVersionDisposition in the policy lib
+//           untouched.
 // v1.124.0 (2026-11-26, T-20261126-003 — design
 //           docs/designs/2026-11-26-skill-drift-structural-fixes-design.md §4.5):
 //           STUB SHAPE CONVERSION — sibling arm beside STUB_VERSION_BACKFILL in the
@@ -4489,14 +4513,25 @@ function equalVersionRestore(
   }
   // v1.116.0 (U-20261122-011): the grant arm (ADOPT over an unproven fork)
   // delivers over project-authored lines — name them. The provenance-proven
-  // DRIFT_RESTORED arms destroy no authored content and list nothing (AC-5).
+  // arms destroy no authored content and list nothing (AC-5).
   const evSuffix = outcome.verdict === "ADOPT" ? evictionSuffix(rel, policy, pass, projectText, deliverable) : "";
+  // v1.125.0 (design docs/designs/2026-11-27-version-advance-lane-coverage-design.md
+  // §4.1 row 3): baseline-proven equal-version drift IS a template advance — the
+  // project file still equals its delivered baseline, so the un-bumped template
+  // edit delivers. The verdict joins the S1 fleet vocabulary (SYNC_TEMPLATE_ADVANCE,
+  // INFO) so all four lanes report the discipline miss identically; vintage-proven
+  // keeps DRIFT_RESTORED (its attribution is historical-revision, not baseline).
+  const baselineAdvance = provenance === "baseline" && outcome.verdict === "DRIFT_RESTORED";
+  const verdict: DecisionVerdict = baselineAdvance ? "SYNC_TEMPLATE_ADVANCE" : outcome.verdict;
+  const detail = baselineAdvance
+    ? "equal-version content drift on a baseline-untouched file — the project copy still equals its delivered baseline (hash match), so the un-bumped template edit delivers verbatim; noteDelivered refreshes the manifest baseline row (the equal-version re-stamp)"
+    : outcome.detail;
   recordDecision(
     rel,
     policy,
     pass,
-    outcome.verdict,
-    `${version} ${outcome.detail}${evSuffix}`,
+    verdict,
+    `${version} ${detail}${evSuffix}`,
     priorBaselines[rel],
     outcome.severity,
     outcome.verdict === "ADOPT" ? "adopt-template" : undefined,
@@ -7129,15 +7164,46 @@ for (const agentsDir of tplAgentsDirs) {
       const rendered = deliverableContent();
       const tierNorm = normalizeAgentTierFrontmatter(projRaw, rendered);
       const tierOnlyDrift = tierNorm.legacy && lifecyclelessText(tierNorm.content) === lifecyclelessText(rendered);
-      // D2 matrix (agents/ equal-version row): a PROJECT_EVOLVED file — content
-      // differing from BOTH the delivered baseline and today's template — is a
-      // CONFLICT (ERROR) disposition regardless of which side moved (restoring
-      // "canonical" over evolved content is not self-evidently right). Baseline-
-      // clean files keep the DRIFT_RESTORED canonical heal (WARN).
       // D6: a stub-composed file reaching the drift arm re-delivers composed
       // bytes on the next apply — the would-revert inventory needs the path.
       if (stubComposed !== null) stubComposedDriftRels.add(rel);
       const cls = classifyCandidate(rel, projFile, rendered)!;
+      // v1.125.0 (design docs/designs/2026-11-27-version-advance-lane-coverage-design.md
+      // §4.1 row 1): UNTOUCHED — the project file still equals its delivered
+      // baseline — means the content difference is TEMPLATE-side. Route through
+      // the shared S1 helper with delivery hooks (rendered/composed bytes via the
+      // lifecycle-preserving writer) so the verdict is SYNC_TEMPLATE_ADVANCE (INFO)
+      // instead of a DRIFT_RESTORED (WARN) mislabel, and the arm gains the
+      // helper's uncommitted-edit CONFLICT guard. PROJECT_EVOLVED / NO_BASELINE /
+      // tier-only keep their documented dispositions below (D2/D4/ADR-0102).
+      if (!tierOnlyDrift && cls.state === "UNTOUCHED") {
+        const advanced = resolveEqualVersionDrift(rel, "SYNC_IF_NEWER: agents/", tplFile, projFile, {
+          deliverable: rendered,
+          tplContent: rendered,
+          write: deliverAgentContent,
+        });
+        if (advanced === "delivered") syncChanged++;
+        // D9 stub version-bump advisory rides the advance too — a stub-owned
+        // field changed template-side without a stub `version` bump (same
+        // placement rule: after the primary verdict row).
+        if (stubComposed !== null && cls.templateChanged) {
+          recordDecision(
+            rel,
+            "SYNC",
+            "SYNC_IF_NEWER: agents/",
+            "STUB_VERSION_BUMP_ADVICE",
+            "stub-owned fields changed template-side without a stub `version` bump — bump the stub version in the port PR so future changes re-deliver as version-gated ADOPT (design D9/Q5, advisory)",
+            priorBaselines[rel],
+            "INFO",
+          );
+        }
+        continue;
+      }
+      // D2 matrix (agents/ equal-version row): a PROJECT_EVOLVED file — content
+      // differing from BOTH the delivered baseline and today's template — is a
+      // CONFLICT (ERROR) disposition regardless of which side moved (restoring
+      // "canonical" over evolved content is not self-evidently right). Baseline-
+      // clean files route to the SYNC_TEMPLATE_ADVANCE helper arm above.
       let proceed = true;
       let verdict: DecisionVerdict = "DRIFT_RESTORED";
       let severity: DeliveryDecision["severity"] = "WARN";
@@ -7311,13 +7377,33 @@ const catchUpSkillDir = (skillName: string): { copied: number; drifted: string[]
  *     (interaction named per the dispatch contract).
  *
  * Returns "delivered" (sync accounting) or "preserved" (row recorded here).
+ *
+ * v1.125.0 (design docs/designs/2026-11-27-version-advance-lane-coverage-design.md
+ *           §4.1): optional `hooks` extend the helper to lanes whose delivery is
+ *           not a verbatim file copy — `deliverable` carries the exact bytes a
+ *           delivery would write (token-rendered agents, composed stubs,
+ *           rendered context.md), `tplContent` the marker-loss comparison
+ *           source, `write` the lane's delivery writer (lifecycle-preserving
+ *           agents write, rendered context write). Attribution is UNCHANGED —
+ *           always the project file vs its delivered baseline via baselineKeyFor
+ *           (path-aware: lifecycleless for agents/, raw bytes elsewhere) — so
+ *           the skills call sites (:7532, :7827) passing no hooks are
+ *           byte-identical. The agents (§4.1 row 1) and versioned-docs
+ *           (§4.1 row 2) arms route through here with hooks; the scripts lane
+ *           keeps equalVersionRestore and renames only the baseline-proven
+ *           verdict (§4.1 row 3).
  */
-const resolveEqualVersionDrift = (
+function resolveEqualVersionDrift(
   rel: string,
   pass: string,
   tplFile: string,
   projFile: string,
-): "delivered" | "preserved" => {
+  hooks?: {
+    deliverable?: string;
+    tplContent?: string;
+    write?: () => void;
+  },
+): "delivered" | "preserved" {
   if (isLocallyModified(projFile)) {
     console.log(
       `  ⚠️  CONFLICT ${rel}  (same-version template advance withheld — uncommitted local modifications exist)`,
@@ -7355,8 +7441,14 @@ const resolveEqualVersionDrift = (
   }
   // Design guard 1 — markerLossBlocks runs before the delivery write, exactly as
   // the version-gated arms run it (records MARKER_LOSS/ADOPT itself; true = refused).
-  if (markerLossBlocks(rel, "SYNC", pass, projFile, readFileSync(tplFile, "utf8"))) return "preserved";
-  if (!dryRun) copyFileSync(tplFile, projFile);
+  // The marker source is the lane's comparison content: hooks.tplContent (rendered/
+  // composed deliverable) when provided, the raw template file otherwise.
+  if (markerLossBlocks(rel, "SYNC", pass, projFile, hooks?.tplContent ?? readFileSync(tplFile, "utf8")))
+    return "preserved";
+  if (!dryRun) {
+    if (hooks?.write) hooks.write();
+    else copyFileSync(tplFile, projFile);
+  }
   console.log(
     `  ${dryTag}ADVANCE ${rel}  (same version, project bytes == delivered baseline → template-side edit delivers; SYNC_TEMPLATE_ADVANCE)`,
   );
@@ -7370,7 +7462,7 @@ const resolveEqualVersionDrift = (
   );
   if (!dryRun) noteDelivered(rel);
   return "delivered";
-};
+}
 if (existsSync(tplSkillsDir)) {
   // v1.115.0: --surfaces claim-class gate — the pass id matches resolveClaim's skills/** branch.
   if (surfacesBlocked("SYNC_IF_NEWER: skills/")) {
@@ -8766,6 +8858,24 @@ if (surfacesAllowsPass(TEMPLATE_TREE_SYNC_PASS)) {
         // E3 (PR-B): the project doc's inline version exceeds the template's — preserved (it
         // never delivered; was a silent reason === ""), now recorded for backport.
         recordProjectAhead(rel, claim.policy, TEMPLATE_TREE_SYNC_PASS, `v${projVer}`, `v${tplInlineVer}`);
+      } else if (fileHash(abs) !== fileHash(dest)) {
+        // v1.125.0 (design docs/designs/2026-11-27-version-advance-lane-coverage-design.md
+        // §4.1 row 2): equal footer version + differing bytes — the version gate's
+        // reason string used to stay empty and the file fell through SILENTLY (no
+        // delivery, no decision row): the T-20261001-021 strand class, live at
+        // co-develop/docs/privacy-design-checklist_ko.md. Attribute against the
+        // delivered baseline: docs/context.md keeps its ownership-preserve /
+        // splice / force chain (it flows through the reason-block below), every
+        // other versioned doc routes to the shared S1 helper — baseline-clean →
+        // SYNC_TEMPLATE_ADVANCE delivers the un-bumped template edit;
+        // project-moved or baseline-less → DRIFT_PRESERVE (WARN, now visible).
+        if (rel === "docs/context.md") {
+          reason = "(equal-version content drift)";
+        } else {
+          const advanced = resolveEqualVersionDrift(rel, TEMPLATE_TREE_SYNC_PASS, abs, dest);
+          if (advanced === "delivered") treeChanged++;
+          continue;
+        }
       }
     } else if (fileHash(abs) !== fileHash(dest)) {
       reason = "(content changed)";
@@ -8884,12 +8994,20 @@ if (surfacesAllowsPass(TEMPLATE_TREE_SYNC_PASS)) {
         );
       } else {
         console.log(`  UPDATE ${rel}  ${reason}`);
+        // v1.125.0 (§4.1 row 2): an equal-version drift that survives the ownership
+        // guard (no project-only sections) and the evolved guard is baseline-proven —
+        // the S1 vocabulary applies instead of the version-gated ADOPT label.
+        const eqAdvance =
+          reason === "(equal-version content drift)" &&
+          classifyCandidate(rel, dest, deliverable)?.state === "UNTOUCHED";
         recordDecision(
           rel,
           claim.policy,
           TEMPLATE_TREE_SYNC_PASS,
-          "ADOPT",
-          `${reason} — version-gated delivery over the delivered baseline`,
+          eqAdvance ? "SYNC_TEMPLATE_ADVANCE" : "ADOPT",
+          eqAdvance
+            ? "same footer version, project file still equals its delivered baseline (hash match) — the un-bumped template edit delivers verbatim (noteDelivered refreshes the baseline row)"
+            : `${reason} — version-gated delivery over the delivered baseline`,
           priorBaselines[rel],
         );
       }
