@@ -3,14 +3,45 @@ id: U-20261127-003
 kind: manual
 title: Upstream request from co-newbiz
 priority: normal
-status: backlog
+status: done
 attempts: 0
-created_at: 2026-11-27T19:44:11.689+09:00
+created_at: '2026-11-27T19:44:11.689+09:00'
 history:
-  - at: 2026-11-27T19:44:11.689+09:00
+  - at: '2026-11-27T19:44:11.689+09:00'
     from: null
     to: backlog
-result: null
+  - at: '2026-11-27T21:59:23.593+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-27T21:59:23.615+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-27T21:59:23.636+09:00'
+    from: review
+    to: done
+result: >-
+  safeFetch structured header passthrough delivered: scripts/lib/ssrf.ts v1.1.1
+  -> v1.2.0 (twin templates/common/scripts/lib/ssrf.ts byte-identical), spec
+  docs/designs/2026-11-27-safefetch-headers-design.md (registered approved;
+  threat analysis: Host/SNI-pin break, smuggling via framing headers,
+  connection/upgrade semantics, proxy interference, CRLF injection). Mechanism:
+  optional init.headers?: Record<string,string> on safeFetch/fetchPinned routed
+  through http(s).request's structured headers option; case-insensitive
+  deny-list (exact: host, content-length, transfer-encoding, connection,
+  upgrade, te, trailer, expect, via; prefix: proxy-*, forward*) throws typed
+  SSRFHeaderBlockedError naming the offending header; CR/LF/control-char regex
+  on names/values; header validation precedes validateUrl (zero DNS/network on
+  rejection). Allowed: auth/UA/custom application headers pass through verbatim.
+  Guard core byte-for-byte unchanged; absent-init behaviour identical to v1.1.1;
+  method stays GET in v1. Tests: tests/unit/ssrf-safe-fetch.test.ts v1.1.0 (13
+  deny entries, 7 case-mix, CRLF name/value, control chars, allowed pass-through
+  with Host pin, absent/{signal}-only unchanged) — 35 pass in-file; full unit
+  suite 5377 pass; typecheck 0; audit/lifecycle-sync-audit green; canary
+  consumer shape ({signal} audit.ts:613) 200 unchanged. Landed as PR #2209
+  (merge 5833a0eb9, 4/4 checks SUCCESS first try, ledger row order 33 --kind
+  real). Note for requester: co-newbiz's DART adapter can pass its auth/UA
+  headers via init.headers after adopting the current ssrf.ts at its next
+  upgrade visit; the CIDR rider was already resolved by v1.1.1 (U-20261031-003).
 error: null
 upstream:
   project: co-newbiz
@@ -19,13 +50,29 @@ upstream:
   source: project/co-newbiz
   trust: untrusted
   suspected_layer: L1
-  symptom: scripts/lib/ssrf.ts safeFetch does not accept an init.headers passthrough, so variant projects cannot send required authentication/user-agent headers to external APIs through the SSRF-guarded fetch — the only alternatives are bypassing the guard (policy violation) or patching the delivered file (LOCAL-PATCH churn). Observed in co-newbiz's DART corpCode fetch (scripts/co-newbiz/source-adapters.ts), recorded PROJECT_AHEAD in the 0.30.0 delivery.
+  symptom: >-
+    scripts/lib/ssrf.ts safeFetch does not accept an init.headers passthrough,
+    so variant projects cannot send required authentication/user-agent headers
+    to external APIs through the SSRF-guarded fetch — the only alternatives are
+    bypassing the guard (policy violation) or patching the delivered file
+    (LOCAL-PATCH churn). Observed in co-newbiz's DART corpCode fetch
+    (scripts/co-newbiz/source-adapters.ts), recorded PROJECT_AHEAD in the 0.30.0
+    delivery.
   affected_paths:
     - scripts/lib/ssrf.ts
     - scripts/co-newbiz/source-adapters.ts
   identity_source: cwd
-  repro: '1. co-newbiz''s variant-owned scripts/co-newbiz/source-adapters.ts (DART corpCode fetch) requires custom headers on safeFetch (auth/UA headers for the DART endpoint). 2. The delivered scripts/lib/ssrf.ts safeFetch signature accepts only (url, init-partial without headers passthrough) — passing headers is dropped/type-error. 3. Request: add an `init.headers` passthrough (merged with the safety defaults, SSRF guards unchanged). Rider: the delivered BLOCKED_CIDRS list predates U-20261031-003 and still over-blocks public ranges 1.x–15.x; folding that fix into the same delivery would unblock variant DART integrations that resolve public endpoints.'
-  triage: inbox
+  repro: >-
+    1. co-newbiz's variant-owned scripts/co-newbiz/source-adapters.ts (DART
+    corpCode fetch) requires custom headers on safeFetch (auth/UA headers for
+    the DART endpoint). 2. The delivered scripts/lib/ssrf.ts safeFetch signature
+    accepts only (url, init-partial without headers passthrough) — passing
+    headers is dropped/type-error. 3. Request: add an `init.headers` passthrough
+    (merged with the safety defaults, SSRF guards unchanged). Rider: the
+    delivered BLOCKED_CIDRS list predates U-20261031-003 and still over-blocks
+    public ranges 1.x–15.x; folding that fix into the same delivery would
+    unblock variant DART integrations that resolve public endpoints.
+  triage: ready
   flagged: false
   triage_reasons:
     - 'path_not_template_managed: scripts/co-newbiz/source-adapters.ts'
@@ -34,4 +81,32 @@ upstream:
   dedupe_key: 263d4605e8ad73e2f70642ffc87e12c403fa55f27cb86c51ab98666f0431808d
   duplicates:
     - project: co-newbiz
-      at: 2026-11-27T19:44:11.689+09:00
+      at: '2026-11-27T19:44:11.689+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2209
+    summary: >-
+      safeFetch structured header passthrough delivered: scripts/lib/ssrf.ts
+      v1.1.1 -> v1.2.0 (twin templates/common/scripts/lib/ssrf.ts
+      byte-identical), spec docs/designs/2026-11-27-safefetch-headers-design.md
+      (registered approved; threat analysis: Host/SNI-pin break, smuggling via
+      framing headers, connection/upgrade semantics, proxy interference, CRLF
+      injection). Mechanism: optional init.headers?: Record<string,string> on
+      safeFetch/fetchPinned routed through http(s).request's structured headers
+      option; case-insensitive deny-list (exact: host, content-length,
+      transfer-encoding, connection, upgrade, te, trailer, expect, via; prefix:
+      proxy-*, forward*) throws typed SSRFHeaderBlockedError naming the
+      offending header; CR/LF/control-char regex on names/values; header
+      validation precedes validateUrl (zero DNS/network on rejection). Allowed:
+      auth/UA/custom application headers pass through verbatim. Guard core
+      byte-for-byte unchanged; absent-init behaviour identical to v1.1.1; method
+      stays GET in v1. Tests: tests/unit/ssrf-safe-fetch.test.ts v1.1.0 (13 deny
+      entries, 7 case-mix, CRLF name/value, control chars, allowed pass-through
+      with Host pin, absent/{signal}-only unchanged) — 35 pass in-file; full
+      unit suite 5377 pass; typecheck 0; audit/lifecycle-sync-audit green;
+      canary consumer shape ({signal} audit.ts:613) 200 unchanged. Landed as PR
+      #2209 (merge 5833a0eb9, 4/4 checks SUCCESS first try, ledger row order 33
+      --kind real). Note for requester: co-newbiz's DART adapter can pass its
+      auth/UA headers via init.headers after adopting the current ssrf.ts at its
+      next upgrade visit; the CIDR rider was already resolved by v1.1.1
+      (U-20261031-003).
