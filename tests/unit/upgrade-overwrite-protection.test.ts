@@ -21,7 +21,23 @@
  * real workspace templates (the upgrade-decision-log pattern). One run per
  * seeded shape; scenarios ride the shared run as read-only assertions.
  *
- * @version 1.1.1 (2026-11-16, T-20261114-005: the re-stale loop test really commits the first run — it previously relied on a silently failed commit and a second apply run over an uncommitted delivery, which the engine now refuses)
+ * @version 1.2.0 (2026-11-28, T-20261127-002-class budget follow-up): per-test
+ *          budgets only — the six remaining inline per-test engine-spawn ceilings
+ *          raised 60000 → 120000ms to match the test-runner FILE_TIME_BUDGETS row's
+ *          test ceiling (120000 since v1.20.0). bun prefers the inline third
+ *          argument over the runner's --timeout, so the row's 120s raise never
+ *          lifted inline-budgeted tests — the exact paired-structure gap
+ *          T-20261128-001 fixed for project-target-guards. Measured evidence:
+ *          windows-latest main run 46092377803 (0.32.0 release post-merge) killed
+ *          the re-stale loop test at its inline 60000ms ceiling (60370.94ms,
+ *          "this test timed out after 60000ms"); the same run's file total was
+ *          187540ms = 63% of its 300000ms suite budget, so the per-test ceiling
+ *          was the binding constraint. Single-rerun classification (attempt 2):
+ *          windows leg green with the file at 110119ms — a marginal flake at the
+ *          ceiling, and the measured kill still proves the ceiling is too tight
+ *          (PR #2189's attempt 45826913410 killed an engine-spawn test at 60000ms
+ *          before it). No test deleted, no assertion loosened.
+ * v1.1.1 (2026-11-16, T-20261114-005: the re-stale loop test really commits the first run — it previously relied on a silently failed commit and a second apply run over an uncommitted delivery, which the engine now refuses)
  * v1.1.0 (engine-run consolidation — spec docs/designs/2026-11-15-windows-ci-test-speedup-design.md item 1)
  * v1.1.0 (2026-11-15): two dedicated engine spawns consolidated onto shared
  *          runs with every expect() preserved verbatim — (a) the
@@ -227,7 +243,11 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
     // This test spawns a full engine run inside the test body (a multi-step lifecycle that
     // cannot ride the shared run); windows-latest measured 15.03s against the 15s default
     // ceiling (PR #1963), so it carries an explicit per-test budget. Assertions unchanged.
-  }, 60000);
+    // 60000 → 120000 (v1.2.0): run 46092377803 killed this test at the 60000ms inline
+    // ceiling (60370.94ms; the expect(exit 0) report is collateral of the timeout kill)
+    // while attempt 2 passed the file at 110119ms — the runner's --timeout already
+    // carries 120000 (FILE_TIME_BUDGETS, v1.20.0) but bun prefers this inline argument.
+  }, 120000);
 
   test('--disposition adopt-template=<path> is the only restore path and covers only that path', () => {
     const tmp = seed();
@@ -242,7 +262,7 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
       expect(read(tmp, rel)).toBe(evolvedOf(rel));
       expect(verdictsFor(m, rel)).toEqual(['EVOLVED_PRESERVE']);
     }
-  }, 60000);
+  }, 120000);
 
   test('UNTOUCHED + template changed still delivers (preserve fires only for project evolution)', () => {
     const tmp = makeTempProject();
@@ -253,7 +273,7 @@ describe('E1 EVOLVED_PRESERVE (DEC-20261111-01 D1) — engine', () => {
     const r = runUpgrade(tmp);
     expect(r.status).toBe(0);
     expect(read(tmp, PHASE_DEFS)).toBe(templateBytes(PHASE_DEFS));
-  }, 60000);
+  }, 120000);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -312,7 +332,7 @@ describe('A1 marker forms — NO_BASELINE divergence is CONFLICT for every LOCAL
     expect(r2.status).toBe(0);
     expect(verdictsFor(readManifest(t2), rel)).toContain('UNBASELINED_OVERWRITE');
     expect(read(t2, rel)).toBe(templateBytes(rel));
-  }, 60000);
+  }, 120000);
 
   test('an adopt grant overrides the A1 CONFLICT for the marked path', () => {
     const c = CASES[2];
@@ -322,7 +342,7 @@ describe('A1 marker forms — NO_BASELINE divergence is CONFLICT for every LOCAL
     const r3 = runUpgrade(t3, ['--disposition', `adopt-template=${c.rel}`]);
     expect(r3.status).toBe(0);
     expect(read(t3, c.rel)).toBe(templateBytes(c.rel));
-  }, 60000);
+  }, 120000);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -470,7 +490,7 @@ describe('E2 MARKER_LOSS — every delivery path (DEC-20261111-01 D4)', () => {
     // other marked paths remain protected -> still a non-zero exit
     expect(r.status).toBe(1);
     expect(rowsFor(mm, CORE_MARKED).some((d) => d.verdict === 'MARKER_LOSS')).toBe(true);
-  }, 60000);
+  }, 120000);
 
   test('regression guard: template changed + project evolved is still CONFLICT (ERROR), exit 1', () => {
     // Consolidated ride (spec 2026-11-15-windows-ci-test-speedup-design item 1):
