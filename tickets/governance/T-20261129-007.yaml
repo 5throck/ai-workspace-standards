@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261129-007
+kind: manual
+title: >-
+  Fleet test-suites.json adoption is 0/19 — ADR-0106 declared-suite manifests
+  never authored (policy decision needed): ADR-0106 fleet test baseline
+  (delivered to templates 2026-11-25, propagated by the 0.31.0 wave 2026-11-28)
+  makes test-suites.json a project-owned manifest covering declared suites, OS
+  matrix optOut and specialized-suite include; verified 2026-11-29: 0 of 19
+  Projects/* repos contain test-suites.json while scripts/test-runner.ts 1.19.0
+  is present in all 19 and CI unit-tests/unit-tests-os legs exist, so every
+  project runs on implicit discovery only; consequence: specialized suites, the
+  windows/macos OS matrix leg and optOut records are unused fleet-wide and the
+  fail-closed zero-test rule is the only active baseline; expected action: a
+  per-fleet or per-project adoption decision (author manifests where
+  OS/specialized coverage matters, or record a deliberate non-adoption ruling).
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:29:43.398+09:00'
+history:
+  - at: '2026-11-29T02:29:43.398+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: T-20261129-011
+kind: manual
+title: >-
+  co-develop: adjudicate stale LOCAL-PATCH(pending) marker at AGENTS.md §10 —
+  tracked ticket T-20261005-023 not found: Projects/co-develop/AGENTS.md line
+  433 carries LOCAL-PATCH(upstream-request: pending; tracked upstream as
+  T-20261005-023) on the §10 Periodic Skill Review tool line
+  (verify-skill-graph.ts / validate-skills.ts "script is L0-only"); verified
+  2026-11-29: upstream_request_status for T-20261005-023 returns not found (no
+  open or archived record surfaced), so the marker references a ticket the
+  system no longer resolves; pm.md marker policy: pending markers are
+  transitional — convert to a filed ID or retire with a logged rationale;
+  expected action: co-develop PM adjudicates (retire the marker if the L0-only
+  note is now delivered policy; otherwise re-file and stamp the new ID).
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:30:00.626+09:00'
+history:
+  - at: '2026-11-29T02:30:00.626+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

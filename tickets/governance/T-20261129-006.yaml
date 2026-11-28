@@ -1,0 +1,30 @@
+schemaVersion: 1
+id: T-20261129-006
+kind: manual
+title: >-
+  Adjudicate missing variant.json in co-hr, co-news, co-abap-plugin — template
+  copy exists but was never delivered (suspected L1/L2 delivery defect):
+  verified 2026-11-29 — 3 of 19 Projects/* lack root variant.json (other 16 have
+  it); template side: templates/co-hr/variant.json and
+  templates/co-news/variant.json EXIST and templates/co-abap/variant.json exists
+  (co-abap-plugin declares variant=co-abap in its template-version.txt); git log
+  --all -- variant.json empty in all three projects = file never present at any
+  point in history, a delivery gap (scaffold/upgrade never delivered it), not a
+  local deletion; variant.json is the registry SSOT for script_manifest, hub
+  consumption declarations and lifecycle — tooling keyed on it silently degrades
+  for these three projects; co-hr was flagged in the fleet design scan
+  2026-11-28 (Projects/co-design/memory/2026-11-28.md), co-news and
+  co-abap-plugin are new findings (2026-11-29 fleet scan follow-up); expected
+  triage: root PM adjudicates the layer (L1/L2 template delivery vs project
+  delivery-type decision for co-abap-plugin) and files upstream requests from
+  the proper project scopes — this ticket files no upstream request itself.
+priority: high
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:29:37.034+09:00'
+history:
+  - at: '2026-11-29T02:29:37.034+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

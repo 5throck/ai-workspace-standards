@@ -1,0 +1,23 @@
+schemaVersion: 1
+id: T-20261129-012
+kind: manual
+title: >-
+  co-utility: re-adjudicate deliberate designLint disablement now that
+  U-20261129-001 makes the gate functional: fleet design scan 2026-11-28
+  (Projects/co-design/memory/2026-11-28.md) recorded that co-utility disables
+  designLint as a documented policy while its live UI styling is ungoverned;
+  U-20261129-001 (waiting) fixes the dead-default scanRoots that made the gate a
+  silent SKIP fleet-wide — once resolved, the cost of enabling the gate in
+  co-utility drops to configuration only; expected action: after U-20261129-001
+  lands, co-utility PM re-rules enable-vs-stay-disabled with the recorded policy
+  updated either way.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:30:03.988+09:00'
+history:
+  - at: '2026-11-29T02:30:03.988+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

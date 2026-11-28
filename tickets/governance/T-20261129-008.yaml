@@ -1,0 +1,22 @@
+schemaVersion: 1
+id: T-20261129-008
+kind: manual
+title: >-
+  co-safety: one approved spec unimplemented — registry status sweep needed:
+  docs/specs/registry.json (verified 2026-11-29) has 27 entries, 26 implemented,
+  1 status=approved and not implemented; all other non-co-newbiz projects have
+  zero non-implemented entries except co-consult/co-learning/co-design (covered
+  by other tickets); approved-but-unbuilt specs age silently (precedent:
+  co-learning education-operations stalled 7+ weeks, ticket T-20261129-003);
+  expected action: co-safety local PM triage — implement, demote to draft, or
+  supersede with rationale.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:29:47.654+09:00'
+history:
+  - at: '2026-11-29T02:29:47.654+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
