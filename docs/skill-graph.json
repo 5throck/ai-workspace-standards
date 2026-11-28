@@ -8268,8 +8268,8 @@
       "name": "script-lifecycle-manager",
       "scope": "co-safety",
       "capability": "script-lifecycle-manager",
-      "content_hash": "055e2d28972708a8",
-      "version": "1.2.0",
+      "content_hash": "a1d0eae508b32218",
+      "version": "1.2.3",
       "mirrors": [
         "templates/co-safety/skills/script-lifecycle-manager/SKILL.md"
       ]
@@ -8294,8 +8294,8 @@
       "name": "skill-lifecycle-manager",
       "scope": "co-safety",
       "capability": "skill-lifecycle-manager",
-      "content_hash": "bb1a68cbd7b84047",
-      "version": "1.5.1",
+      "content_hash": "0d3c898ea44cd598",
+      "version": "1.5.2",
       "mirrors": [
         "templates/co-safety/skills/skill-lifecycle-manager/SKILL.md"
       ]
@@ -8307,8 +8307,8 @@
       "name": "sync",
       "scope": "co-safety",
       "capability": "sync",
-      "content_hash": "bf3e2e9bdb42b0b3",
-      "version": "1.6.0",
+      "content_hash": "6f05b6c70ce34454",
+      "version": "1.11.0",
       "mirrors": [
         "templates/co-safety/skills/sync/SKILL.md"
       ],
@@ -8350,8 +8350,8 @@
       "name": "team-builder",
       "scope": "co-safety",
       "capability": "team-builder",
-      "content_hash": "4fd4638e28436539",
-      "version": "1.1.1",
+      "content_hash": "6abcfb9b7ee52b9a",
+      "version": "1.2.0",
       "mirrors": [
         "templates/co-safety/skills/team-builder/SKILL.md"
       ]
@@ -8402,8 +8402,8 @@
       "name": "translate",
       "scope": "co-safety",
       "capability": "translate",
-      "content_hash": "51f1f071acf76015",
-      "version": "1.0.2",
+      "content_hash": "024dde475b2fbef9",
+      "version": "1.0.3",
       "mirrors": [
         "templates/co-safety/skills/translate/SKILL.md"
       ]

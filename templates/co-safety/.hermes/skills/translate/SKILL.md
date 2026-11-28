@@ -3,7 +3,7 @@ lang: ko
 lang_reason: legal
 name: translate
 description: Translation helper for README and documentation files with diff preview and guidance
-version: 1.0.2
+version: 1.0.3
 owner: pm
 tier:
   claude: medium
@@ -14,7 +14,7 @@ lifecycle:
   created: 2026-05-30
   last_updated: 2026-08-24
 status: active
-last_reviewed: 2026-08-24
+last_reviewed: 2026-11-08
 last_updated: 2026-08-24
 scope: co-safety
 relates_to:
@@ -83,7 +83,6 @@ Shows changes without modifying files.
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema
-
 ## Understanding Output
 
 ### 1. Hash Synchronization Status

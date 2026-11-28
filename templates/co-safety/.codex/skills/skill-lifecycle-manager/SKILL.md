@@ -7,8 +7,8 @@ description: >
   Use when: creating new skills, updating skill metadata, validating skill structure,
   managing skill-agent mappings, triaging agent skill requests, or deprecating/removing skills.
 owner: pm
-version: 1.5.1
-last_reviewed: 2026-10-09
+version: 1.5.2
+last_reviewed: 2026-11-27
 relates_to:
   - skill: script-lifecycle-manager
     type: composes_with
@@ -23,6 +23,7 @@ metadata:
     - skill request
     - deprecate skill
     - remove skill
+prerequisites: none
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema

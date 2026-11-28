@@ -1,8 +1,27 @@
 #!/usr/bin/env bun
 /**
  * Template Lifecycle Validation Script
- * @version 1.88.0
+ * @version 1.89.0
  *
+ * v1.89.0 (2026-11-28, T-20261128-004 — design
+ *          docs/designs/2026-11-28-origin-l2-drift-design.md §3.3): the
+ *          variant-common-shadow allowlist gains entry class "fork" for the
+ *          DEC-20261128-001 legitimate variant forks of common skill twins. A
+ *          fork entry declared on a skill's ORIGIN path
+ *          (`skills/<name>/SKILL.md`) covers that skill's five platform-mirror
+ *          projections too (`.claude|.codex|.gemini|.agents|.hermes/skills/…`
+ *          — mirrors are projection surfaces of the same forked copy). Fork
+ *          instances are removed from the undeclared count (the collapsed
+ *          WARN flood for the declared paths disappears) and the check asserts
+ *          only the fork contract: the variant origin copy carries
+ *          `scope: co-<variant>` and version ≥ 1 — violations report
+ *          `fork-contract-violation` and are treated as undeclared while the
+ *          contract is broken. Pure helpers exported for tests:
+ *          forkEntryCoversInstance, forkContractViolation; ShadowReport gains
+ *          forkContract[]. The 11 declared fork paths (12 pair-declarations,
+ *          project-review shared by co-safety/co-work) cover the 7 re-derived
+ *          L2-AHEAD forks and the 5 post-heal retained co-safety copies whose
+ *          variant identity frontmatter survives the T-004 body re-sync.
  * v1.88.0 (2026-11-28, T-20261127-009): the variant-specific command allowlist
  *          (Check 6) admits "security-check.toml" next to "security-check.md" —
  *          the rendered Gemini counterpart (.gemini/commands is TOML-only per
@@ -8780,21 +8799,28 @@ function checkProjectIdentityPlaceholders(): void {
 }
 
 // ─── variant-common-shadow (T-20261114-012, design 2026-11-16 §4; zone-override v1.85.0,
-//     design 2026-11-17-template-lifecycle-batch §4.2) ─────────────────────────────────
+//     design 2026-11-17-template-lifecycle-batch §4.2; fork class v1.89.0 — T-20261128-004,
+//     design 2026-11-28-origin-l2-drift §3.3) ─────────────────────────────────
 // WARN-only drift guard: a variant file that replaces a templates/common file wholesale never
 // receives later common edits. The shadow set is compared to a root-only allowlist.
 // Classes: "variant-owned" (variant identity, unguarded), "tracked" (+ commonSha256 — fires
 // when common changes since recording), "zone-override" (+ zones — the variant's ONLY permitted
 // divergence is inside the named managed zones; in-zone deltas go silent via zone-aware
-// normalization, out-of-zone divergence reports shadow-out-of-zone-drift).
+// normalization, out-of-zone divergence reports shadow-out-of-zone-drift),
+// "fork" (v1.89.0 — a declared legitimate variant fork of a common skill twin; covers the
+// skill's origin path AND its five platform-mirror projections; the fork contract asserts
+// the variant copy carries `scope: co-<variant>` and version ≥ 1 — violations report
+// fork-contract-violation and are NOT declared).
 export interface ShadowAllowlistEntry {
   path: string;
   variants: "*" | string[];
-  class: "variant-owned" | "tracked" | "zone-override";
+  class: "variant-owned" | "tracked" | "zone-override" | "fork";
   commonSha256?: string;
   /** Managed-zone names for class "zone-override" (marker convention `<!-- <zone>-START/END -->`). */
   zones?: string[];
   reason?: string;
+  /** Fork rationale for class "fork" (v1.89.0; documentation only). */
+  note?: string;
 }
 export interface ShadowInstance {
   variant: string;
@@ -8815,6 +8841,9 @@ export interface ShadowReport {
   commonZoneDirty: { path: string; zone: string }[];
   /** variant zone content nesting a managed marker — no nested merge semantics for docs zones (v1.85.0). */
   zoneNestedMarkers: { variant: string; path: string; zone: string }[];
+  /** fork-declared copy violating the fork contract (v1.89.0): variant copy must carry
+   *  `scope: co-<variant>` and version ≥ 1 — violations are NOT declared. */
+  forkContract: { variant: string; path: string; reason: string }[];
   declaredSilent: number;
 }
 
@@ -8875,6 +8904,38 @@ export function extractZoneContent(text: string, zone: string): string | null {
 /** True when the entry covers `variant` ("*" or list membership). */
 function coversVariant(e: ShadowAllowlistEntry, variant: string): boolean {
   return e.variants === "*" || e.variants.includes(variant);
+}
+
+const FORK_MIRROR_PREFIXES = [".agents", ".claude", ".codex", ".gemini", ".hermes"] as const;
+/** Pure (v1.89.0, T-20261128-004): a fork entry declared on a skill's origin
+ *  path (`skills/<name>/SKILL.md`) also covers that skill's five platform-mirror
+ *  projections (`.claude/skills/<name>/SKILL.md` etc.) — mirrors are projection
+ *  surfaces of the same forked copy, not independent divergences. */
+export function forkEntryCoversInstance(entryPath: string, instancePath: string): boolean {
+  if (entryPath === instancePath) return true;
+  const m = /^skills\/([^/]+)\/SKILL\.md$/.exec(entryPath);
+  if (!m) return false;
+  return (FORK_MIRROR_PREFIXES as readonly string[]).some((pfx) => instancePath === `${pfx}/skills/${m[1]}/SKILL.md`);
+}
+
+/** Pure (v1.89.0): the fork contract — the variant copy carries
+ *  `scope: co-<variant>` and version ≥ 1. Returns a violation reason or null. */
+export function forkContractViolation(variant: string, text: string): string | null {
+  const fm = /^---\n([\s\S]*?)\n---\n/.exec(text);
+  if (!fm) return `no frontmatter block — fork contract unverifiable`;
+  // variant is the tree dir name ("co-safety"), which already carries the co- prefix
+  const expectedScope = variant.startsWith("co-") ? variant : `co-${variant}`;
+  const scope = /^scope:[ \t]*"?([^"\n]*)"?[ \t]*$/m.exec(fm[1]);
+  if (!scope || scope[1].trim() !== expectedScope) {
+    return `scope must be "${expectedScope}" (found: ${scope ? scope[1].trim() || "<empty>" : "<absent>"})`;
+  }
+  const version = /^version:[ \t]*"?([^"\n]*)"?[ \t]*$/m.exec(fm[1]);
+  const v = version ? version[1].trim() : "";
+  const first = Number.parseInt((v.match(/^\d+/) ?? ["0"])[0], 10);
+  if (!v || Number.isNaN(first) || first < 1) {
+    return `version must be present and ≥ 1 (found: ${v || "<absent>"})`;
+  }
+  return null;
 }
 
 function walkFiles(dir: string, base = dir, out: string[] = []): string[] {
@@ -8941,14 +9002,44 @@ export function classifyShadows(
     outOfZone: [],
     commonZoneDirty: [],
     zoneNestedMarkers: [],
+    forkContract: [],
     declaredSilent: 0,
   };
   const shadowKey = new Set(instances.map((i) => `${i.variant}\0${i.path}`));
   const movedSeen = new Set<string>();
+  const forkContractSeen = new Set<string>();
   for (const inst of instances) {
-    const entry = entries.find((e) => e.path === inst.path && coversVariant(e, inst.variant));
+    const entry = entries.find(
+      (e) =>
+        coversVariant(e, inst.variant) &&
+        (e.path === inst.path || (e.class === "fork" && forkEntryCoversInstance(e.path, inst.path))),
+    );
     if (!entry) {
       report.undeclared.push(inst);
+      continue;
+    }
+    if (entry.class === "fork") {
+      // Fork contract (v1.89.0, T-20261128-004): asserted once per (variant,
+      // declared origin path) against the ORIGIN copy — mirrors are byte
+      // projections of it. Violations are reported and NOT declared (the
+      // instance is dropped from declaredSilent only when the contract holds).
+      const seenKey = `${inst.variant}\0${entry.path}`;
+      if (!forkContractSeen.has(seenKey)) {
+        forkContractSeen.add(seenKey);
+        const originPath = join(variantDirs[inst.variant] ?? "", entry.path);
+        if (!variantDirs[inst.variant] || !existsSync(originPath)) {
+          report.forkContract.push({
+            variant: inst.variant,
+            path: entry.path,
+            reason: `declared fork origin copy not found at templates/${inst.variant}/${entry.path}`,
+          });
+        } else {
+          const violation = forkContractViolation(inst.variant, normalizeLf(readFileSync(originPath)));
+          if (violation) report.forkContract.push({ variant: inst.variant, path: entry.path, reason: violation });
+        }
+      }
+      if (report.forkContract.some((f) => f.variant === inst.variant && f.path === entry.path)) continue;
+      report.declaredSilent++;
       continue;
     }
     if (entry.class === "zone-override") {
@@ -9129,13 +9220,22 @@ function checkVariantCommonShadow(): void {
       "Remove the nested marker pair from the zone content",
     );
   }
+  for (const f of report.forkContract) {
+    warn(
+      f.variant,
+      "variant-common-shadow",
+      `fork-contract-violation: templates/${f.variant}/${f.path} is declared class "fork" but violates the fork contract — ${f.reason} (the declaration is treated as undeclared while the contract is violated)`,
+      "Restore the variant fork identity (scope: co-<variant>, version ≥ 1), or re-classify/remove the allowlist entry",
+    );
+  }
   if (
     report.undeclared.length === 0 &&
     report.moved.length === 0 &&
     report.stale.length === 0 &&
     report.outOfZone.length === 0 &&
     report.commonZoneDirty.length === 0 &&
-    report.zoneNestedMarkers.length === 0
+    report.zoneNestedMarkers.length === 0 &&
+    report.forkContract.length === 0
   ) {
     pass(`variant-common-shadow: no undeclared shadows (${report.declaredSilent} declared instance(s) silent)`);
   }

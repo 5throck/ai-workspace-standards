@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-28T12:15:35.626Z
+**Generated**: 2026-11-28T14:08:40.963Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -200,7 +200,7 @@
 | sync-model-registry.ts | 1.3.0 | scripts/sync-model-registry.ts | fs, path |
 | sync-skill-registries.ts | 1.0.0 | scripts/sync-skill-registries.ts | fs, path |
 | sync-skill-status.ts | 1.1.0 | scripts/sync-skill-status.ts | child_process, fs, path, process |
-| sync-skills-to-l2.ts | 1.0.1 | scripts/sync-skills-to-l2.ts | crypto, fs, path |
+| sync-skills-to-l2.ts | 2.0.0 | scripts/sync-skills-to-l2.ts | crypto, fs, path |
 | sync-skills.ts | 1.11.0 | scripts/sync-skills.ts | fs, path |
 | sync-template-deps.ts | 1.0.1 | scripts/sync-template-deps.ts | fs, path |
 | sync-variant-settings.ts | 1.5.0 | scripts/sync-variant-settings.ts | fs, path, url |
@@ -230,7 +230,7 @@
 | validate-raci.ts | 1.2.1 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
-| validate-templates.ts | 1.88.0 | scripts/validate-templates.ts | child_process, crypto, fs, js-yaml, path, url |
+| validate-templates.ts | 1.89.0 | scripts/validate-templates.ts | child_process, crypto, fs, js-yaml, path, url |
 | validate-ticket-doc-commands.ts | 1.0.1 | scripts/validate-ticket-doc-commands.ts | fs, path, url |
 | validate-variant-claims.ts | 1.7.0 | scripts/validate-variant-claims.ts | fs, js-yaml, path, url |
 | validate-variant-readiness.ts | 1.2.0 | scripts/validate-variant-readiness.ts | fs, path |
