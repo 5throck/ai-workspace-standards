@@ -38,7 +38,7 @@ Registry (`models.*`) and all projected prose change together:
 | codex | medium/low | `gpt-6.1-terra` / `gpt-6-luna` | unchanged |
 | gemini, antigravity, gemini-cli | high | `gemini-3.1-pro` | `gemini-4-carbon` (owner-ruled official semantics 2026-11-28 — the owner's original literal pick `gemini-4-hydrogen` was inverted vs official positioning and was corrected with owner confirmation) |
 | gemini, antigravity, gemini-cli | medium | `gemini-3.8-flash` | `gemini-4-hydrogen` (owner-ruled official semantics 2026-11-28) |
-| gemini, antigravity, gemini-cli | low | `gemini-3.8-flash` | unchanged (owner instruction) |
+| gemini, antigravity, gemini-cli | low | `gemini-3.8-flash` | unchanged — **2026-11-28 owner ruling: Low tier stays `gemini-3.8-flash`** (`gemini-4-argon` was considered per the official lineup — official "efficient" low-slot successor per the Playwright evidence — and not adopted) |
 | claude, hermes | all | — | unchanged |
 
 Downstream edits that keep the gates green:

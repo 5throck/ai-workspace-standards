@@ -42,17 +42,17 @@
     "gemini": {
       "high": "gemini-4-carbon",
       "medium": "gemini-4-hydrogen",
-      "low": "gemini-4-hydrogen"
+      "low": "gemini-3.8-flash"
     },
     "antigravity": {
       "high": "gemini-4-carbon",
       "medium": "gemini-4-hydrogen",
-      "low": "gemini-4-hydrogen"
+      "low": "gemini-3.8-flash"
     },
     "gemini-cli": {
       "high": "gemini-4-carbon",
       "medium": "gemini-4-hydrogen",
-      "low": "gemini-4-hydrogen"
+      "low": "gemini-3.8-flash"
     },
     "codex": {
       "high": "gpt-6.2-sol",

@@ -29,7 +29,7 @@ The mapping is immutable per generation:
 **Gemini Tier Mapping (4 Series):**
 - **High**: `gemini-4-carbon` (Complex reasoning, planning, architecture)
 - **Medium**: `gemini-4-hydrogen` (Orchestration, coordination, reviews, testing, QA)
-- **Low**: `gemini-4-hydrogen` (Fast, repetitive execution)
+- **Low**: `gemini-3.8-flash` (Fast, repetitive execution)
 
 **Claude Tier Mapping:**
 - **High**: `claude-opus-5-5`
@@ -600,4 +600,4 @@ See the workspace governance documentation (Governance Enforcement Layers) and A
 
 ---
 
-*context.md version: 2.17 — Gemini tier ids updated to the Gemini 4 material-named series (high gemini-4-carbon, medium gemini-4-hydrogen; low unchanged) — spec docs/designs/2026-11-28-tier-model-mapping-refresh-design.md; 2.16 — Standard Root Files adds README_ko.md (delivered-file parity: templates/README_ko.md ships to variants; U-20261112-006); 2.15 — Agent Frontmatter section added (U-20261112-002); 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*
+*context.md version: 2.18 — Low tier restored to gemini-3.8-flash per owner ruling (2026-11-28: gemini-4-argon considered and not adopted); 2.17 — Gemini tier ids updated to the Gemini 4 material-named series (high gemini-4-carbon, medium gemini-4-hydrogen) — spec docs/designs/2026-11-28-tier-model-mapping-refresh-design.md; 2.16 — Standard Root Files adds README_ko.md (delivered-file parity: templates/README_ko.md ships to variants; U-20261112-006); 2.15 — Agent Frontmatter section added (U-20261112-002); 2.14 — Supported Surfaces section delivered to projects (footer bump: the section was added at 2.13 without a version bump, so same-version project copies never received it; T-20261001-021)*

@@ -177,7 +177,7 @@ The workspace enforces a **3-tier model strategy** to optimize cost and quality:
 |------|--------|------|----------------|
 | **High** | claude-opus-5-5, gemini-4-carbon, gpt-6.2-sol, glm-5.4 | Complex reasoning, architecture | Architect |
 | **Medium** | claude-sonnet-5-5, gemini-4-hydrogen, gpt-6.1-terra, glm-5.3-flash | Review, QA, analysis, supervision, PM orchestration | PM, Auditor, Security Expert |
-| **Low** | claude-haiku-5-5, gemini-4-hydrogen, gpt-6-luna, glm-5.3-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
+| **Low** | claude-haiku-5-5, gemini-3.8-flash, gpt-6-luna, glm-5.3-flash | Fast coding, boilerplate, scoped tasks | Automation Engineer, Scaffolding Expert |
 
 > **Model Registry**: Current model assignments are maintained in `docs/workspace-schema.json` (`models` block), the authoritative source. The table above reflects those values. Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (`zai`) models take reasoning levels low/high/max (default max); workspace dispatch posture is reasoning level **high** for all tiers. zcode (ZCode harness) resolves models via the zai column.
 
