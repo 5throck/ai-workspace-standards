@@ -1,4 +1,27 @@
-// @version 1.7.0
+// @version 1.8.0
+// v1.8.0 (2026-11-28, T-20261128-003 — design
+//           docs/designs/2026-11-28-origin-l2-drift-design.md §4.2/§4.3):
+//           new exported pure seedBaseSections(projectContent,
+//           templateBaseContent) — ADDITIVE base-section propagation for
+//           MERGE_MANAGED docs. Template base-region H2/H3 sections (outside
+//           every managed-marker span) whose exact heading line
+//           (whitespace-normalized) is absent from the project copy are
+//           inserted: anchored right after the project's copy of the
+//           section that precedes them in the template (nearest preceding
+//           template heading present in the project — or one planned earlier
+//           in the same run, so consecutive additions stack in template
+//           order at one shared run base), else appended at the project
+//           copy's end. Delete-safe by construction: never removes or
+//           reorders project content; insertion points falling inside a
+//           project managed-zone span are clamped to after the span; a
+//           template section overlapping a template zone span is not seeded
+//           (marker-adjacent partial headings stay out of the parse). Pure,
+//           idempotent — a second run over seeded output inserts nothing and
+//           returns byte-identical content. Positions planned in original
+//           coordinates, applied back-to-front. Consumers:
+//           upgrade-project.ts v1.128.0 DOCS_MERGE (context-doc claims);
+//           unit-pinned by tests/unit/base-section-seed.test.ts. Existing
+//           mergeManagedBlocks semantics untouched.
 // v1.7.0 (2026-11-17, T-20261116-001 — design
 //           docs/designs/2026-11-17-template-lifecycle-batch-design.md §2.2,
 //           O-7 default Option A): monotonic Last Updated guard on the two
@@ -610,4 +633,233 @@ export function mergeManagedBlocks(
   }
 
   return { content: updated, merged, log, snapshots, escalated, adaptedReplaces, restamps };
+}
+
+// ─── base-section seeding (v1.8.0, T-20261128-003 — design
+//     docs/designs/2026-11-28-origin-l2-drift-design.md §4.2) ─────────────────
+// ADDITIVE base-section propagation for MERGE_MANAGED docs: template
+// base-region section additions were dead letters for existing instances
+// (mergeManagedBlocks touches only managed zones), so `## Computational
+// Integrity` reached 10/16 variant templates but 1/18 project instances. The
+// seeder parses the TEMPLATE's H2/H3 sections OUTSIDE every managed-marker
+// span and inserts each section whose exact heading line (whitespace-
+// normalized) is absent from the project copy — delete-safe by construction:
+// sections absent from the template stay untouched, sections present in both
+// are left to the existing zone machinery, and project-authored text is never
+// deleted or rewritten. Anchored insertion: a missing section lands right
+// after the end of the project's copy of the section that precedes it in the
+// template (the nearest preceding template heading present in the project —
+// or a section planned earlier in this same run, so consecutive additions
+// stack in template order); without any anchor it is appended at the project
+// copy's end. An insertion point falling inside a project managed-zone span
+// is clamped to after that span (never inside a zone), and a template
+// section that itself overlaps a template zone span is not seeded
+// (marker-adjacent partial headings stay out of the parse). All positions
+// are planned in the ORIGINAL project coordinates and applied back-to-front
+// — no offset drift, pure, idempotent (a second run over seeded output
+// inserts nothing and returns byte-identical content).
+
+/** One parsed markdown section: normalized heading line + body span. */
+interface BaseSection {
+  heading: string;
+  /** Heading line index within the provided line array. */
+  lineIndex: number;
+  /** Exclusive end line: index of the next heading, or lines.length. */
+  endLine: number;
+}
+
+/** Seedable section headings: H2/H3 only (design §4.2 — `^## `/`^### `;
+ *  H1 title lines are document identity, never seeded). */
+const HEADING_LINE_RE = /^#{2,3}[ \t]+\S/;
+const SECTION_END_HEADING_RE = /^#{1,6}[ \t]+\S/;
+
+function normalizeHeading(line: string): string {
+  return line.trim().replace(/\s+/g, " ");
+}
+
+/** Line index containing byte `offset`. */
+function lineIndexOf(content: string, offset: number): number {
+  return content.slice(0, offset).split("\n").length - 1;
+}
+
+/** Parse H2/H3 sections over a line array; `excluded` marks line indices that
+ *  sit inside a managed-zone span — a section whose span intersects one is
+ *  skipped, and a heading inside a zone never starts a section. */
+function parseBaseSections(lines: string[], excluded: Set<number>): BaseSection[] {
+  const sections: BaseSection[] = [];
+  let current: BaseSection | null = null;
+  let crossedZone = false;
+  for (let i = 0; i < lines.length; i++) {
+    const isHeading = HEADING_LINE_RE.test(lines[i] ?? "");
+    if (current && (isHeading || i === lines.length - 1)) {
+      const end = isHeading ? i : i + 1;
+      if (!crossedZone) sections.push({ ...current, endLine: end });
+      current = null;
+      crossedZone = false;
+    }
+    if (excluded.has(i) && current !== null) crossedZone = true;
+    if (isHeading && current === null) {
+      current = { heading: normalizeHeading(lines[i]!), lineIndex: i, endLine: lines.length };
+    }
+  }
+  return sections;
+}
+
+/** Line spans [start, end) of every managed-zone match in `content` (all
+ *  MANAGED_PATTERNS), covering the open-marker line through the close-marker
+ *  line inclusive. Used to exclude template sections overlapping zones and to
+ *  clamp project insertion points. */
+function managedLineSpans(content: string): Array<{ start: number; end: number }> {
+  const spans: Array<{ start: number; end: number }> = [];
+  for (const pattern of MANAGED_PATTERNS) {
+    for (const occ of content.matchAll(patternRegex(pattern))) {
+      const at = occ.index ?? 0;
+      spans.push({ start: lineIndexOf(content, at), end: lineIndexOf(content, at + occ[0]!.length - 1) + 1 });
+    }
+  }
+  return spans;
+}
+
+function spanEndAt(spans: Array<{ start: number; end: number }>, line: number): number {
+  for (const s of spans) if (line >= s.start && line < s.end) return s.end;
+  return -1;
+}
+
+export interface BaseSectionSeed {
+  /** The exact normalized heading line that was inserted. */
+  heading: string;
+  /** The anchor heading the section was inserted after, or null when appended
+   *  at the project copy's end (no anchor present). */
+  anchor: string | null;
+}
+
+export interface SeedBaseSectionsResult {
+  content: string;
+  /** One entry per insertion, in template order. */
+  seeded: BaseSectionSeed[];
+}
+
+/** Pure additive seeder (T-20261128-003 §4.2): insert each template
+ *  base-region H2/H3 section whose exact heading line has no match in the
+ *  project copy. Never deletes or reorders project content; idempotent. */
+export function seedBaseSections(projectContent: string, templateContent: string): SeedBaseSectionsResult {
+  const projLines = projectContent.split("\n");
+  const tplLines = templateContent.split("\n");
+
+  const tplSpans = managedLineSpans(templateContent);
+  const projSpans = managedLineSpans(projectContent);
+  const tplExcluded = new Set<number>();
+  for (const s of tplSpans) for (let i = s.start; i < s.end; i++) tplExcluded.add(i);
+
+  const tplSections = parseBaseSections(tplLines, tplExcluded);
+  if (tplSections.length === 0) return { content: projectContent, seeded: [] };
+
+  const projHeadingAt = new Map<string, number>();
+  for (let i = 0; i < projLines.length; i++) {
+    if (SECTION_END_HEADING_RE.test(projLines[i] ?? "")) {
+      const norm = normalizeHeading(projLines[i]!);
+      if (!projHeadingAt.has(norm)) projHeadingAt.set(norm, i);
+    }
+  }
+
+  // Project section end for an anchor: the next heading line (any level) after
+  // the anchor heading, else EOF — all original coordinates.
+  const sectionEndInProject = (anchorLine: number): number => {
+    for (let i = anchorLine + 1; i < projLines.length; i++) {
+      if (SECTION_END_HEADING_RE.test(projLines[i] ?? "")) return i;
+    }
+    return projLines.length;
+  };
+
+  interface PlannedInsertion {
+    atLine: number;
+    lines: string[];
+    seed: BaseSectionSeed;
+  }
+
+  // Plan in ORIGINAL coordinates; apply back-to-front at the end. Consecutive
+  // template sections missing from the project stack at ONE shared run base
+  // (the first section's anchored position) — inserting each "after the
+  // previous planned section" would overshoot across project content that
+  // sits between the base and later sections. Same-position buckets are
+  // applied in reverse so the final order matches template order.
+  //
+  // The ANCHOR CHAIN walks every template H2/H3 heading OUTSIDE zone spans in
+  // order — independently of seed eligibility. A section whose body runs up
+  // against a zone-open marker (marker-adjacent, not seedable per §4.4) still
+  // anchors later sections when the project carries it; only zone-INTERIOR
+  // headings (the template's own copy of a zone) are invisible to the chain.
+  const sectionsByHeading = new Map(tplSections.map((s) => [s.heading, s]));
+  const plan: PlannedInsertion[] = [];
+  let anchorLine = -1; // original project line of a PRESENT anchor heading
+  let anchorIsPlanned = false; // anchor heading was itself inserted by this run
+  let anchorHeading: string | null = null;
+  let runBase = -1; // insertion line of the current planned run
+
+  for (let i = 0; i < tplLines.length; i++) {
+    if (!HEADING_LINE_RE.test(tplLines[i] ?? "") || tplExcluded.has(i)) continue;
+    const heading = normalizeHeading(tplLines[i]!);
+    const presentLine = projHeadingAt.get(heading);
+    if (presentLine !== undefined) {
+      anchorLine = presentLine;
+      anchorIsPlanned = false;
+      anchorHeading = heading;
+      continue;
+    }
+    const section = sectionsByHeading.get(heading);
+    if (!section) continue; // marker-adjacent (zone-crossing) — not seedable
+
+    const sectionLines = tplLines.slice(section.lineIndex, section.endLine);
+    while (sectionLines.length > 0 && sectionLines[sectionLines.length - 1]!.trim() === "") sectionLines.pop();
+    if (sectionLines.length === 0) continue;
+
+    let atLine: number;
+    let needSep: boolean; // blank separator line before the inserted section
+    let anchor: string | null;
+    if (anchorHeading === null) {
+      // no anchor at all → append at the end
+      atLine = projLines.length;
+      needSep = (projLines[projLines.length - 1] ?? "").trim() !== "";
+      anchor = null;
+      runBase = atLine;
+    } else if (anchorIsPlanned) {
+      // stack at the shared run base (see the comment above); items after the
+      // first always get a separator (the preceding planned section's trimmed
+      // last line is non-blank by construction)
+      atLine = runBase;
+      needSep = true;
+      anchor = anchorHeading;
+    } else {
+      atLine = sectionEndInProject(anchorLine);
+      // zone clamp: never land inside a project managed-zone span
+      for (;;) {
+        const spanEnd = spanEndAt(projSpans, atLine);
+        if (spanEnd < 0) break;
+        atLine = spanEnd;
+      }
+      needSep = atLine > 0 && (projLines[atLine - 1] ?? "").trim() !== "";
+      anchor = anchorHeading;
+      runBase = atLine;
+    }
+    const sep = needSep ? [""] : [];
+    plan.push({ atLine, lines: [...sep, ...sectionLines], seed: { heading, anchor } });
+    // the planned heading becomes the anchor for following template sections
+    anchorIsPlanned = true;
+    anchorHeading = heading;
+  }
+
+  const byLine = new Map<number, PlannedInsertion[]>();
+  for (const p of plan) {
+    const bucket = byLine.get(p.atLine) ?? [];
+    bucket.push(p);
+    byLine.set(p.atLine, bucket);
+  }
+  const lines = [...projLines];
+  const positions = [...byLine.keys()].sort((a, b) => b - a);
+  for (const pos of positions) {
+    const bucket = byLine.get(pos)!.slice().reverse();
+    for (const item of bucket) lines.splice(pos, 0, ...item.lines);
+  }
+  // report in template (plan) order — application order is position-sorted
+  return { content: lines.join("\n"), seeded: plan.map((p) => p.seed) };
 }
