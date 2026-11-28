@@ -154,7 +154,7 @@ Spawn parallel instances to execute dedicated work concurrently. PM **must** exp
 
 | Tier | Model ID | Thinking Parameter | Typical Use |
 |------|----------|-------------------|-------------|
-| High | `docs/workspace-schema.json → models.gemini.high` | `thinking_level="medium"` | Synthesis agent, complex reasoning |
+| High | `docs/workspace-schema.json → models.gemini.high` | — | Synthesis agent, complex reasoning |
 | Medium | `docs/workspace-schema.json → models.gemini.medium` | (none) | Persona reviewers (§6), proofreaders (§7), SVG designer (§7.5) |
 | Low | `docs/workspace-schema.json → models.gemini.low` | (none) | Structural validation, simple checks |
 
