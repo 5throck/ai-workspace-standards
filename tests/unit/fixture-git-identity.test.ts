@@ -113,6 +113,7 @@ const FIXTURE_GIT_ADOPTED_SUITES: string[] = [
   "upgrade-core-locked-fork.test.ts",
   "upgrade-overwrite-protection.test.ts",
   "upgrade-policy-content-equivalent.test.ts",
+  "contained-run-env.test.ts",
   "contained-run-manifest-dir.test.ts",
   "upgrade-script-lane-gaps.test.ts",
   "upgrade-policy-eviction.test.ts",

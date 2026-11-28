@@ -1,6 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.1.0
+// @version 1.2.0
 // contained-run.ts — run project code without the runner's authority (meeting 2026-11-20, issue C)
+//
+// v1.2.0 (2026-11-28, U-20261128-001 — protected-machinery defect fix; design
+//   basis: the ticket's containment forensics from the co-deck VR real-run):
+//   browser-gated suites (Playwright) could not run for real under containment:
+//   (1) HOME is redirected to a scratch dir and Playwright derives its browser
+//   cache from os.homedir(), so chromium.launch() looked under the scratch home
+//   and failed — PLAYWRIGHT_BROWSERS_PATH is now forwarded when the caller sets
+//   it (pass-through like BUN_INSTALL_CACHE_DIR; it is a cache-location path,
+//   not a credential). (2) PATH assumed node sits next to the running runtime;
+//   on hosts where bun is ~/.bun/bin and node is ~/.local/bin the suites'
+//   spawnSync('node', ...) probe failed ENOENT. The node directory is now
+//   resolved from the inherited PATH at startup (`command -v node`) and added
+//   alongside the runtime dir. Every denial-list entry, the group-kill deadline,
+//   the porcelain tree-mutation gate and all other refusals are unchanged.
 //
 // v1.1.0 (2026-11-25, PM finding 2 — design
 //   docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.9):
@@ -22,7 +36,7 @@
 //   never installed, pre/post dirty-tree assertion instead of a hardlink mirror in v1).
 //
 // Containment provided here (v1):
-//   · environment allowlist — only PATH/HOME(scratch)/TMPDIR/LANG/BUN_INSTALL_CACHE_DIR/GIT_CONFIG_GLOBAL
+//   · environment allowlist — only PATH/HOME(scratch)/TMPDIR/LANG/BUN_INSTALL_CACHE_DIR/PLAYWRIGHT_BROWSERS_PATH(v1.2.0)/GIT_CONFIG_GLOBAL
 //   · credential deny — no GITHUB_TOKEN/GH_TOKEN/ANTHROPIC*/ZAI*/AWS*/NPM_TOKEN/SSH_AUTH_SOCK
 //   · lifecycle-script refusal — package.json with preinstall/postinstall/prepare is
 //     fail-closed (they execute arbitrary code before any test could be reviewed)
@@ -40,7 +54,7 @@
 // Exit codes: 0 command passed · 1 command failed · 2 usage · 3 refused (lifecycle
 //   script or node_modules missing) · 4 tree mutated by the run · 124 timeout
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { execFileSync, spawn } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -116,11 +130,23 @@ const scratchHome = mkdtempSync(join(tmpdir(), "contained-home-"));
 const gitConfig = join(scratchHome, ".gitconfig");
 Bun.write(gitConfig, "[user]\n\tname = contained-run\n\temail = contained-run@localhost\n");
 // PATH: the standard system dirs plus ONLY the directory of the running runtime
-// (so nvm/volta-installed bun and node resolve) — never the full inherited PATH.
+// and the directory of `node` resolved from the inherited PATH (v1.2.0,
+// U-20261128-001 — never assume node sits next to the runtime; never the full
+// inherited PATH).
 const runtimeDir = process.execPath.slice(0, process.execPath.lastIndexOf("/")) || "/usr/bin";
-const pathParts = ["/usr/bin", "/bin", "/usr/sbin", "/sbin", runtimeDir];
+let nodeDir: string | undefined;
+try {
+  const probe = spawnSync("/bin/sh", ["-c", "command -v node"], { encoding: "utf8", timeout: 5000 });
+  const resolved = (probe.stdout ?? "").trim();
+  if (probe.status === 0 && resolved.includes("/")) {
+    nodeDir = resolved.slice(0, resolved.lastIndexOf("/")) || undefined;
+  }
+} catch {
+  /* node unresolvable — the contained PATH simply omits it (pre-v1.2.0 shape) */
+}
+const pathParts = ["/usr/bin", "/bin", "/usr/sbin", "/sbin", runtimeDir, nodeDir];
 const env: Record<string, string> = {
-  PATH: [...new Set(pathParts)].join(":"),
+  PATH: [...new Set(pathParts)].filter((p): p is string => typeof p === "string").join(":"),
   HOME: scratchHome,
   TMPDIR: scratchHome,
   LANG: process.env.LANG ?? "en_US.UTF-8",
@@ -129,6 +155,10 @@ const env: Record<string, string> = {
   CI: "1",
 };
 if (process.env.BUN_INSTALL_CACHE_DIR) env.BUN_INSTALL_CACHE_DIR = process.env.BUN_INSTALL_CACHE_DIR;
+// v1.2.0 (U-20261128-001): HOME is scratch, so Playwright's homedir-derived
+// browser cache is unreachable — forward the caller's explicit cache location.
+// A filesystem path, not a credential; the DENIED list below is unchanged.
+if (process.env.PLAYWRIGHT_BROWSERS_PATH) env.PLAYWRIGHT_BROWSERS_PATH = process.env.PLAYWRIGHT_BROWSERS_PATH;
 // Denied by omission — listed explicitly so a future edit cannot "helpfully" forward them.
 const DENIED = [
   "GITHUB_TOKEN",
