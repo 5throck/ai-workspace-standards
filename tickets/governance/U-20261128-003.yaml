@@ -1,0 +1,84 @@
+schemaVersion: 1
+id: U-20261128-003
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-28T18:48:08.910+09:00'
+history:
+  - at: '2026-11-28T18:48:08.910+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-28T21:09:39.896+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-28T21:09:39.896+09:00'
+    from: review
+    to: done
+result: >-
+  Shared canonical extends resolver — scripts/lib/extends-resolution.ts v1.0.0
+  strips the ../ run and anchors the remainder at the discovered workspace root
+  (then legacy naive target, then convention path; canonical-over-naive
+  precedence owner-approved in DEC-20261128-001), wired into sync-agent-mirrors
+  v1.4.0, audit v2.74.0 (silent stub skip replaced by a candidates-naming WARN),
+  upgrade-project v1.127.0 (D9 stub-compose); worktrees/<slug> layout resolves
+  2/2 parity with byte-identical projections across all three layouts, canonical
+  depth-2 unchanged (45/45 on co-newbiz); pinned by
+  tests/unit/extends-resolution.test.ts
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    The /sync pipeline's agent-mirror parity gate
+    (scripts/sync-agent-mirrors.ts, ADR-0033 extends-pointer resolution) is
+    depth-sensitive to worktree location. Run from the path the sync skill
+    documents (Projects/<repo>-worktrees/<slug>), agent files' relative extends
+    pointers (e.g. agents/pm.md "extends: ../../../agents/pm.md", resolved
+    file-dir-relative from agents/) land one ancestor short — pointing at
+    Projects/agents/ (nonexistent) — and the parity gate FATALs on
+    .claude/agents/pm.md and docs-writer.md. The same worktree placed at repo
+    depth (Projects/<repo>-sync-wt) resolves all pointers identically to the
+    shared checkout (45/45 parity pass). The worktree placement convention
+    (2026-11-07 worktree design) and the pointer-depth resolution convention are
+    incompatible; every /sync run from the documented worktree path fails until
+    the operator re-places the worktree.
+  affected_paths:
+    - scripts/sync-agent-mirrors.ts
+    - .agents/skills/sync/SKILL.md
+  identity_source: cwd
+  repro: >-
+    1. Check out a worktree at <workspace>/Projects/<repo>-worktrees/<slug> per
+    the sync skill. 2. Run the /sync pipeline (dev-sync) with the agent-mirror
+    parity step enabled. 3. The parity gate FATALs resolving
+    .claude/agents/pm.md and docs-writer.md extends pointers. 4. Re-create the
+    worktree directly under Projects/<repo>-sync-wt (one level shallower) and
+    re-run: parity passes 45/45.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/sync-agent-mirrors.ts=true
+    - info:in_last_delivery .agents/skills/sync/SKILL.md=false
+  dedupe_key: 128b86c7c09fbc300756cfbfd9c26a2b3dbc6d940ab0a4bc53b39eed01a9666c
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-28T18:48:08.910+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2228
+    template_version: unreleased
+    summary: >-
+      Shared canonical extends resolver — scripts/lib/extends-resolution.ts
+      v1.0.0 strips the ../ run and anchors the remainder at the discovered
+      workspace root (then legacy naive target, then convention path;
+      canonical-over-naive precedence owner-approved in DEC-20261128-001), wired
+      into sync-agent-mirrors v1.4.0, audit v2.74.0 (silent stub skip replaced
+      by a candidates-naming WARN), upgrade-project v1.127.0 (D9 stub-compose);
+      worktrees/<slug> layout resolves 2/2 parity with byte-identical
+      projections across all three layouts, canonical depth-2 unchanged (45/45
+      on co-newbiz); pinned by tests/unit/extends-resolution.test.ts

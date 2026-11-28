@@ -1,0 +1,107 @@
+schemaVersion: 1
+id: U-20261128-001
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-28T08:44:40.236+09:00'
+history:
+  - at: '2026-11-28T08:44:40.236+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-28T18:58:27.791+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-28T18:58:27.791+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-28T18:58:27.791+09:00'
+    from: review
+    to: done
+result: >-
+  contained-run v1.2.0: PLAYWRIGHT_BROWSERS_PATH forwarded when set (HOME is
+  scratch, so Playwright's homedir-derived browser cache was unreachable) and
+  the contained PATH now carries the node dir resolved from the inherited PATH
+  (command -v node) instead of assuming node sits next to the runtime.
+  Deny-list/kill/porcelain properties unchanged; unit-pinned by
+  tests/unit/contained-run-env.test.ts (6 tests). Canary (the nightly-unblock
+  evidence): PLAYWRIGHT_BROWSERS_PATH=~/Library/Caches/ms-playwright bun
+  scripts/contained-run.ts --project Projects/co-deck --timeout 600 -- bun test
+  scripts/co-deck/tests/theme-visual-regression.test.ts ran the VR suite for
+  real under containment WITHOUT the sh -c pin - browser found, 27/27 pairs
+  compared, exit 0 in 58.8s (no skip). Re-confirmed post-delivery on the fixed
+  comparator: 27/27, exit 0 in 57.1s.
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.31.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    [L1 — workspace root script scripts/contained-run.ts, filed from co-deck
+    because only co-* projects may file] Browser-gated test suites cannot run
+    for real under contained-run even after the Playwright Chromium binary is
+    installed in the user cache. Two blockers in contained-run.ts env
+    construction: (1) HOME is redirected to a scratch temp dir and Playwright
+    derives its browser cache from os.homedir(), so chromium.launch() looks for
+    browsers at <scratch>/Library/Caches/ms-playwright and fails;
+    PLAYWRIGHT_BROWSERS_PATH is not forwarded (only
+    PATH/HOME/TMPDIR/LANG/BUN_INSTALL_CACHE_DIR/GIT_CONFIG_GLOBAL are). (2) PATH
+    is system dirs + the running runtime's dir only; the design assumes node
+    sits next to bun, but on this machine bun is ~/.bun/bin and node is
+    ~/.local/bin, so the suites' spawnSync('node', ...) probe fails ENOENT and
+    the VR suite skips with 'browser unavailable' instead of running.
+  affected_paths:
+    - scripts/contained-run.ts
+  identity_source: self_declared
+  local_workaround_diff: >-
+    No repo change made. Workaround: pass the needed non-secret env through the
+    command itself: bun scripts/contained-run.ts --project Projects/co-deck
+    --timeout 600 -- /bin/sh -c 'export
+    PATH="/usr/bin:/bin:/usr/sbin:/sbin:$HOME/../.bun/bin:$HOME/../.local/bin";
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/Library/Caches/ms-playwright"; bun
+    test scripts/co-deck/tests/theme-visual-regression.test.ts' (with absolute
+    user paths in the real run). Suggested fix: forward PLAYWRIGHT_BROWSERS_PATH
+    like BUN_INSTALL_CACHE_DIR, and resolve `command -v node` at contained-run
+    start and add its dir to PATH instead of assuming node lives next to the
+    running runtime.
+  repro: >-
+    1. npx playwright install chromium (binary lands in
+    ~/Library/Caches/ms-playwright). 2. bun scripts/contained-run.ts --project
+    Projects/co-deck --timeout 600 -- bun test
+    scripts/co-deck/tests/theme-visual-regression.test.ts → still '(skip)
+    browser unavailable'. 3. Manual probe under containment-like env confirms
+    both causes: HOME=$(mktemp -d) node -e launch → 'Executable doesn't exist at
+    <scratch>/Library/Caches/ms-playwright/...'; PATH without ~/.local/bin →
+    'command not found: node'.
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - info:l0_origin scripts/contained-run.ts <- scripts/contained-run.ts
+    - info:in_last_delivery scripts/contained-run.ts=false
+  dedupe_key: 827b0da142d8f681154f835a41064d2afcf79b75f29e6043f4fe9590259b1e98
+  duplicates:
+    - project: co-deck
+      at: '2026-11-28T08:44:40.236+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2223
+    summary: >-
+      contained-run v1.2.0: PLAYWRIGHT_BROWSERS_PATH forwarded when set (HOME is
+      scratch, so Playwright's homedir-derived browser cache was unreachable)
+      and the contained PATH now carries the node dir resolved from the
+      inherited PATH (command -v node) instead of assuming node sits next to the
+      runtime. Deny-list/kill/porcelain properties unchanged; unit-pinned by
+      tests/unit/contained-run-env.test.ts (6 tests). Canary (the
+      nightly-unblock evidence):
+      PLAYWRIGHT_BROWSERS_PATH=~/Library/Caches/ms-playwright bun
+      scripts/contained-run.ts --project Projects/co-deck --timeout 600 -- bun
+      test scripts/co-deck/tests/theme-visual-regression.test.ts ran the VR
+      suite for real under containment WITHOUT the sh -c pin - browser found,
+      27/27 pairs compared, exit 0 in 58.8s (no skip). Re-confirmed
+      post-delivery on the fixed comparator: 27/27, exit 0 in 57.1s.

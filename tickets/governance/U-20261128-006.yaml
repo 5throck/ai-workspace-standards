@@ -1,0 +1,74 @@
+schemaVersion: 1
+id: U-20261128-006
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-28T19:24:35.429+09:00'
+history:
+  - at: '2026-11-28T19:24:35.429+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-28T20:16:22.811+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-28T20:16:22.831+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-28T20:16:22.831+09:00'
+    from: review
+    to: done
+result: >-
+  Removed the 5 residual bare errors++ increments that double-counted Fail()
+  failures in scripts/audit.ts (v2.73.0: version-header, registry,
+  language-validation, platform-parity, pm.md gates); Fail() is the sole
+  increment, pinned by 3 new tests in audit-fail-count-accounting.test.ts;
+  reproduced live (1 FAIL line vs summary 2) in a read-only scratch clone before
+  fixing
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L1
+  symptom: >-
+    scripts/audit.ts double-counts failures that go through the Fail() helper:
+    the helper already increments the errors counter (audit.ts:483), but call
+    sites also increment it again (observed at audit.ts:1341-1342 where
+    Fail("Language validation: ...") is followed by errors++). Consequence: a
+    single failing check is reported as "2 check(s) failed" in the summary,
+    which misleads operators triaging audit output (observed today: one real
+    language-gate failure reported as 2 failed checks; an earlier run showed 3
+    for 2 real failures). Cosmetic but recurring miscount in a delivered core
+    script.
+  affected_paths:
+    - scripts/audit.ts
+  identity_source: cwd
+  repro: >-
+    1. Produce exactly one failing check whose message goes through the Fail()
+    helper (e.g. a language-validation failure on one file). 2. Run bun
+    scripts/audit.ts. 3. The summary line reports "2 check(s) failed" for the
+    single failure.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery scripts/audit.ts=true
+  dedupe_key: 7a93f46c22d86386c56b31568bbe2703f76fcd25b866d038fc1c3edd2ec56483
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-28T19:24:35.429+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2226
+    template_version: unreleased
+    summary: >-
+      Removed the 5 residual bare errors++ increments that double-counted Fail()
+      failures in scripts/audit.ts (v2.73.0: version-header, registry,
+      language-validation, platform-parity, pm.md gates); Fail() is the sole
+      increment, pinned by 3 new tests in audit-fail-count-accounting.test.ts;
+      reproduced live (1 FAIL line vs summary 2) in a read-only scratch clone
+      before fixing

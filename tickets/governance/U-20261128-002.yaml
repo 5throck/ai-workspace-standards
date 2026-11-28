@@ -1,0 +1,127 @@
+schemaVersion: 1
+id: U-20261128-002
+kind: manual
+title: Upstream request from co-deck
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-28T08:44:47.324+09:00'
+history:
+  - at: '2026-11-28T08:44:47.324+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-28T18:58:37.754+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-28T18:58:37.754+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-28T18:58:37.754+09:00'
+    from: review
+    to: done
+result: >-
+  VR comparator v0.3.0 (theme-visual-regression.browser.mjs): the size-mismatch
+  early-return (any PNG byte-length mismatch scored diffRatio 1 = 100%) replaced
+  by a fall-through to a true pixel comparison (new
+  theme-visual-regression.pixel-diff.mjs: 8-bit PNG decode incl. filters 0-4,
+  per-pixel diff tolerance 8/channel per the forensics measurement basis;
+  dimension mismatch / undecodable fail closed) judged at the suite's unchanged
+  0.5% threshold; exact-byte-match and same-size byte-diff paths untouched so
+  the 27 historically passing pairs score unchanged. Fixture-pinned by
+  theme-visual-regression.pixel-diff.test.ts (10 tests incl. bimodal re-encoded
+  pair passing and genuine regressions failing). Landed template-side via root
+  PR #2224 (templates/VERSION 0.32.1) and delivered to Projects/co-deck via the
+  upgrade flow (project PR #268, template v0.32.2 after the SS6 adjudicated port
+  of 5 conflict baselines from #267's recapture). Post-fix VR evidence:
+  contained-run VR (the real-run environment from U-20261128-001) 27/27 pairs
+  pass, exit 0 in 57.1s on the delivered project state; project audit exit 0,
+  281 registered scripts verified.
+error: null
+upstream:
+  project: co-deck
+  variant: co-deck
+  template_version: 0.31.0
+  source: project/co-deck
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    First real pixel comparison of the 27 VR baseline pairs (browser installed
+    today; suite previously always skipped) fails 7 pairs. Classification from
+    pixel-level forensics: (a) 4 pitch pairs
+    (classic/minimal/premium-dark/white-bubble) have CORRUPT baselines:
+    slide-2.png is byte-identical to slide-1.png (shasum 46e6ed06d8a3 etc., dup
+    present since before commit cacb52d 2026-11-26), and the stored slide-1
+    shows a broken 1-slide deck ('1 / 1' counter, 'Default' profile) while the
+    correct fixture deck renders 4 slides ('1 / 4'). Today's renders are correct
+    (fresh slide-2 is a proper content slide; smoke suite 36/36 pass on the same
+    pairs) — the baseline vintage is stale/broken, not a render regression. (b)
+    3 pitch-enhanced pairs (academic/classic/white-bubble) differ from baselines
+    by only 0.058-0.068% of pixels (max channel delta 39-44, visually identical,
+    well under the 0.5% threshold) — capture-environment-class noise, but the
+    suite fails them at '100%' because theme-visual-regression.browser.mjs
+    compares PNG BYTES, not pixels: any re-encode/compressor difference counts
+    every byte (self-documented as 'quick byte diff, not pixel-level, but a
+    reasonable approximation'). Result: byte-level compare cannot distinguish AA
+    noise from regressions and turns every tiny font/AA shift into a 100%
+    failure, while genuinely corrupt baselines (pitch) hide behind the same
+    number.
+  affected_paths:
+    - docs/html-themes/baselines/pitch/classic/slide-2.png
+    - docs/html-themes/baselines/pitch/minimal/slide-2.png
+    - docs/html-themes/baselines/pitch/premium-dark/slide-2.png
+    - docs/html-themes/baselines/pitch/white-bubble/slide-2.png
+    - scripts/co-deck/tests/theme-visual-regression.browser.mjs
+  identity_source: self_declared
+  repro: >-
+    cd Projects/co-deck; with Chromium installed: node
+    scripts/co-deck/tests/theme-visual-regression.browser.mjs compare pitch →
+    all slides '100.000%' byte-diff; shasum -a 256
+    docs/html-themes/baselines/pitch/classic/slide-{1,2}.png → identical hashes;
+    pixel-level pngjs diff of pitch-enhanced/classic/slide-1 baseline vs fresh →
+    534/921600 px (0.058%) over channel-delta 8.
+  triage: inbox
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - identity:self_declared
+    - >-
+      info:in_last_delivery
+      docs/html-themes/baselines/pitch/classic/slide-2.png=false
+    - >-
+      info:in_last_delivery
+      docs/html-themes/baselines/pitch/minimal/slide-2.png=false
+    - >-
+      info:in_last_delivery
+      docs/html-themes/baselines/pitch/premium-dark/slide-2.png=false
+    - >-
+      info:in_last_delivery
+      docs/html-themes/baselines/pitch/white-bubble/slide-2.png=false
+    - >-
+      info:in_last_delivery
+      scripts/co-deck/tests/theme-visual-regression.browser.mjs=false
+  dedupe_key: d94f64c68ebeaa7bce37fa5aa96e0d757ce1334c75463a0c08cb0c025b0ae849
+  duplicates:
+    - project: co-deck
+      at: '2026-11-28T08:44:47.324+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/co-deck/pull/268
+    template_version: 0.32.2
+    summary: >-
+      VR comparator v0.3.0 (theme-visual-regression.browser.mjs): the
+      size-mismatch early-return (any PNG byte-length mismatch scored diffRatio
+      1 = 100%) replaced by a fall-through to a true pixel comparison (new
+      theme-visual-regression.pixel-diff.mjs: 8-bit PNG decode incl. filters
+      0-4, per-pixel diff tolerance 8/channel per the forensics measurement
+      basis; dimension mismatch / undecodable fail closed) judged at the suite's
+      unchanged 0.5% threshold; exact-byte-match and same-size byte-diff paths
+      untouched so the 27 historically passing pairs score unchanged.
+      Fixture-pinned by theme-visual-regression.pixel-diff.test.ts (10 tests
+      incl. bimodal re-encoded pair passing and genuine regressions failing).
+      Landed template-side via root PR #2224 (templates/VERSION 0.32.1) and
+      delivered to Projects/co-deck via the upgrade flow (project PR #268,
+      template v0.32.2 after the SS6 adjudicated port of 5 conflict baselines
+      from #267's recapture). Post-fix VR evidence: contained-run VR (the
+      real-run environment from U-20261128-001) 27/27 pairs pass, exit 0 in
+      57.1s on the delivered project state; project audit exit 0, 281 registered
+      scripts verified.
