@@ -7,7 +7,7 @@ description: >
   Covers requirements interview, web benchmarking, current team diagnosis, proposal generation,
   and user approval gate. Outputs an approved proposal JSON for scripts/team-builder.ts to execute.
   Triggered by: "새 팀 구성", "에이전트팀 변경", "신규 도메인 팀 빌딩", "build new agent team".
-version: 1.1.1
+version: 1.2.0
 status: active
 scope: co-safety
 owner: pm
@@ -22,10 +22,10 @@ metadata:
     - agent team benchmarking
     - team proposal generation
     - consulting team design
+last_reviewed: 2026-11-08
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema
-
 ## Overview
 
 Two-layer architecture:
@@ -149,9 +149,9 @@ Agents to DELETE : N
 Skills to CREATE : N
 Skills to REASSIGN: N
 
-To execute: reply "승인" or "approve"
+To execute: reply "approve"
 To revise:  reply with specific change requests
-To cancel:  reply "취소" or "cancel"
+To cancel:  reply "cancel"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -179,7 +179,7 @@ The saved JSON must conform to this structure:
       {
         "name": "kebab-case-name",
         "formalName": "Display Name",
-        "tier": { "claude": "high|medium|low" },
+        "tier": "high|medium|low",
         "color": "color-name",
         "description": "one-line description",
         "phases": ["1", "2"],

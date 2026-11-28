@@ -7,8 +7,8 @@ description: >
   across the workspace and templates. Use when: creating new scripts, updating script versions,
   deprecating scripts, or managing script dependencies in SCRIPTS.md.
 owner: pm
-version: 1.2.0
-last_reviewed: 2026-05-30
+version: 1.2.3
+last_reviewed: 2026-11-26
 metadata:
   type: process
   triggers:
@@ -17,13 +17,13 @@ metadata:
     - deprecate script
     - script lifecycle
     - manage scripts
+prerequisites: none
 ---
 
 audit_exception: safety-os-skill-structure — Safety OS skills use the legal_basis-gated SSOT skill format (validated by scripts/skill-lifecycle-audit.ts and scripts/validate-skills.ts), not the generic template 5-section/7-frontmatter schema
-
 ## Overview
 
-This skill provides a systematic approach to managing the lifecycle of automation scripts (`scripts/*.sh`, `scripts/*.ps1`, `scripts/*.ts`) in accordance with `docs/context.md` (Lifecycle Management rules). It ensures scripts are properly registered in `SCRIPTS.md`, have strict version bumps, handle dependencies, and follow deprecation protocols (90-day notice).
+This skill provides a systematic approach to managing the lifecycle of automation scripts (`scripts/*.sh`, `scripts/*.ps1`, `scripts/*.ts`) in accordance with workspace standards. It ensures scripts are properly registered in `SCRIPTS.md`, have strict version bumps, handle dependencies, and follow deprecation protocols (90-day notice).
 
 ## When to Use This Skill
 
@@ -43,7 +43,7 @@ This skill provides a systematic approach to managing the lifecycle of automatio
 
 1. **Ownership Layers**:
    - L0 (SSOT): `scripts/` (workspace root). All development and registry (`SCRIPTS.md`) live here.
-   - L1 (Template snapshot): `templates/common/scripts/`. Publish explicitly: `bun scripts/publish-to-template.ts`.
+   - L1 (Template snapshot): `templates/common/scripts/`. Publish explicitly: `bun run propagate:apply`.
    - L2 (Project): `<project>/scripts/`. Snapshot of L1 at `new-project` creation time.
    - Never edit L1 directly; edit L0 and publish.
 2. **State Management**:
@@ -67,10 +67,16 @@ This skill provides a systematic approach to managing the lifecycle of automatio
 Implement the requested logic in the appropriate script file. If adding a new script, ensure both `.sh` and `.ps1` pairs are created (or use `.ts` for cross-platform). Apply the UTF-8 safeguard to `.ps1` files.
 
 ### Step 2: Update Registry
-Update the `scripts/SCRIPTS.md` registry (L0 SSOT) with the new version, status, and any dependencies. After making changes, run `bun scripts/publish-to-template.ts` to propagate to L1.
+Update the `scripts/SCRIPTS.md` registry (L0 SSOT) with the new version, status, and any dependencies. After making changes, run `bun run propagate:apply` to propagate to L1.
 
 ### Step 3: Auto-generate Documentation
 Run the `generate-scripts-readme.ts` script to ensure `README.md` is synchronized with `SCRIPTS.md`.
 
 ### Step 4: Verification
 Run `bun scripts/verify-scripts.ts` (if available) to ensure dependencies are valid and no circular dependencies exist.
+
+> **L3 Projects**: When registering a new script in an L3 project's `scripts/SCRIPTS.md`, use `source: L2` (the script's origin layer — the L2 variant template it was scaffolded from) and `layer: L0+L1` (not `L0`). Scripts placed in `scripts/<variant>/` subdirectories should be registered in the sub-registry at `scripts/<variant>/SCRIPTS.md`, not the main registry. See §6.5 Script Lifecycle Management for Tier 3 filtering details.
+
+## Related Skills
+
+<!-- Link related skills here -->

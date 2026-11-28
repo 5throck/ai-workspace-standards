@@ -4,9 +4,9 @@
 
 - **Script**: validate-templates
 - **Status**: active
-- **Version**: 1.88.0
+- **Version**: 1.89.0
 - **Owner**: automation-engineer
-- **Last Updated**: 2026-11-28 (v1.88.0 — T-20261127-009: variant-specific command allowlist admits security-check.toml beside security-check.md — the rendered Gemini counterpart required by the audit Command parity check; templates/co-develop ships the rendered .toml, hand-written .md retired. Prior: 2026-11-21
+- **Last Updated**: 2026-11-28 (v1.89.0 — T-20261128-004: variant-common-shadow allowlist gains the `fork` class for the DEC-20261128-001 legitimate variant forks — origin path + five platform-mirror projections covered, fork contract (scope: co-<variant>, version ≥ 1) asserted against the origin copy, fork-contract-violation rows on breach; undeclared-shadow noise for the 13 T-004 paths collapses. Prior: v1.88.0 — 2026-11-28: variant-specific command allowlist admits security-check.toml beside security-check.md — the rendered Gemini counterpart required by the audit Command parity check; templates/co-develop ships the rendered .toml, hand-written .md retired. Prior: 2026-11-21
 - **Note**: per-script records are optional (SCRIPTS.md is the script lifecycle SSOT per docs/constitution/06.5-script-lifecycle.md); this record is maintained best-effort — created 2026-10-26 with the current entry; full version detail lives in the SCRIPTS.md registry row.
 
 ## Created

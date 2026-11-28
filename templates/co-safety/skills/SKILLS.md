@@ -55,17 +55,17 @@ Curated registry for the co-safety skills (T-20260925-005). One row per skill di
 | `root-cause-analysis` | 1.0.0 | active | incident-investigation-agent | — | — | co-safety only — Conduct Root Cause Analysis (RCA) for safety incidents |
 | `sae-causality-assessor` | 1.0.0 | active | gcp-agent | — | — | co-safety only — Assess SAE causality using ImPACT criteria |
 | `safety-inspection-validator` | 1.0.0 | active | ehsconst-agent | — | — | co-safety only — Validate construction safety inspections per OSHA-KR construction provisions |
-| `script-lifecycle-manager` | 1.2.0 | active | pm | 2026-05-30 | — | inherited from common — customized fork (variant-maintained) |
+| `script-lifecycle-manager` | 1.2.3 | active | pm | 2026-11-26 | — | inherited from common — customized fork (variant-maintained) |
 | `signal-detector` | 1.0.0 | active | gvp-agent | — | — | co-safety only — Statistical signal detection in pharmacovigilance case database |
-| `skill-lifecycle-manager` | 1.5.1 | active | pm | 2026-10-09 | — | inherited from common — customized fork (variant-maintained) |
-| `sync` | 1.6.0 | active | pm | 2026-09-17 | — | inherited from common — customized fork (variant-maintained) |
+| `skill-lifecycle-manager` | 1.5.2 | active | pm | 2026-11-27 | — | inherited from common — customized fork (variant-maintained) |
+| `sync` | 1.11.0 | active | pm | 2026-11-28 | — | inherited from common — customized fork (variant-maintained) |
 | `tank-integrity-validator` | 1.0.0 | active | gasterm-agent | — | — | co-safety only — Validate LNG/LPG/수소 저장탱크 구조 건전성 |
 | `tar-planning` | 1.1.0 | active | ehschem-agent | — | — | co-safety only — Chemical plant turnaround (TAR) shutdown planning — pre-TAR risk assessment, PSSR (Pre-Startup… |
-| `team-builder` | 1.1.1 | active | pm | — | — | inherited from common — customized fork (variant-maintained) |
+| `team-builder` | 1.2.0 | active | pm | 2026-11-08 | — | inherited from common — customized fork (variant-maintained) |
 | `temperature-excursion-analyzer` | 1.0.0 | active | gdp-agent | — | — | co-safety only — Analyze temperature excursion events in cold chain pharmaceutical distribution |
 | `thermal-burn-prevention-planner` | 1.0.0 | active | food-agent | — | — | co-safety only — Plan worker thermal-burn and cooking-oil fire-risk prevention for industrial fryers, cookers, steam… |
 | `tool-box-meeting` | 1.0.0 | active | safety-workflow-manager | — | — | co-safety only — Trigger pre-work Tool Box Meeting (TBM) — cross-industry safety briefing with per-domain legal… |
-| `translate` | 1.0.2 | active | pm | 2026-08-24 | — | inherited from common — customized fork (variant-maintained) |
+| `translate` | 1.0.3 | active | pm | 2026-11-08 | — | inherited from common — customized fork (variant-maintained) |
 
 ## Usage
 
