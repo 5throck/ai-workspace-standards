@@ -493,9 +493,9 @@ See [`agents/pm.md`](agents/pm.md) for the PM Agent full definition.
 ### §3.6 3-Tier Strategy
 
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->
-- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-5 / gemini-3.1-pro / gpt-6.1-sol / glm-5.3)
-- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-5 / gemini-3.8-flash / gpt-6.1-terra / glm-5.3-flash)
-- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-3.8-flash / gpt-6-luna / glm-5.3-flash)
+- **High-tier**: Complex reasoning, architectural design, planning (claude-opus-5-5 / gemini-4-carbon / gpt-6.2-sol / glm-5.4)
+- **Medium-tier**: Code review, testing, PR review, quality gates (claude-sonnet-5-5 / gemini-4-hydrogen / gpt-6.1-terra / glm-5.3-flash)
+- **Low-tier**: Fast, repetitive coding, script maintenance (claude-haiku-5-5 / gemini-4-hydrogen / gpt-6-luna / glm-5.3-flash)
 <!-- /WORKSPACE-MANAGED -->
 
 <!-- WORKSPACE-MANAGED: tier-model-mapping -->

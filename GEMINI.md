@@ -180,9 +180,9 @@ See [AGENTS.md - Agent Roster](AGENTS.md#1-agent-ecosystem-overview) for the com
 
 #### Cost Optimization (3-Tier Model Strategy)
 The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Gemini/Antigravity's model-ID mapping (overridden per subagent invocation when appropriate):
-- **High-tier** → `gemini-3.1-pro` (Parameter: `thinking_level="medium"`)
-- **Medium-tier** → `gemini-3.8-flash` (no thinking parameter)
-- **Low-tier** → `gemini-3.8-flash` (no thinking parameter)
+- **High-tier** → `gemini-4-carbon` (Parameter: `thinking_level="high"`)
+- **Medium-tier** → `gemini-4-hydrogen` (Parameter: `thinking_level="medium"`, escalate to `"high"` for hard reviews)
+- **Low-tier** → `gemini-4-hydrogen` (Parameter: `thinking_level="low"`)
 <!-- COMMON-GEMINI:END -->
 
 ---
@@ -225,7 +225,7 @@ Before any multi-agent dispatch (2+ agents), PM **must** output an execution pla
 
 The execution plan table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in **[Execution Plan Templates §5.1 Standard Execution Plan Template](docs/governance/agents/execution-plan-templates.md#51-standard-execution-plan-template)** and **[§5.1.1 Design Gate Exemptions](docs/governance/agents/execution-plan-templates.md#511-design-gate-exemptions)** — do not restate them here.
 
-> **Note (Antigravity-specific)**: Use the literal Gemini model ID (e.g. `gemini-3.1-pro`) in the `Model` column, not a Claude-style short alias.
+> **Note (Antigravity-specific)**: Use the literal Gemini model ID (e.g. `gemini-4-carbon`) in the `Model` column, not a Claude-style short alias.
 
 **Antigravity execution**: Use `invoke_subagent` for specialist dispatch. See §3 (Subagent Instantiation & Async Orchestration) in this file.
 <!-- COMMON-GEMINI:END -->
@@ -374,7 +374,7 @@ Antigravity does not have `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or `teammateMod
 
 ---
 
-*Last Updated: 2026-11-12 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
+*Last Updated: 2026-11-28 — added §5 Skill Resolution Priority; added §6 CLAUDE.md/GEMINI.md lifecycle row; added lifecycle-manager and auditor sequence to boilerplate; removed obsolete physical pm approval hooks*
 
 <!-- trail:start -->
 ## Trail — repo context graph

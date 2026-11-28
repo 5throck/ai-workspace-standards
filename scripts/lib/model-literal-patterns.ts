@@ -8,7 +8,17 @@
  * (CHANGELOG, docs/adr, docs/designs, registry history lines) — none of which
  * are skill trees.
  *
- * @version 1.1.0
+ * @version 1.2.0
+ * v1.2.0 (2026-11-28, spec docs/designs/2026-11-28-tier-model-mapping-refresh-design.md):
+ *          the Gemini family pattern generalizes from
+ *          `gemini-[\d.]+-(?:pro|flash)` to `gemini-[\d.]+-[a-z]+` so the
+ *          Gemini 4 material-named series (gemini-4-carbon / -hydrogen /
+ *          -neon / -argon) stays under Check MM detection — same
+ *          generalization precedent as v1.1.0's GPT-6.x rebase. Negative
+ *          pins hold: `gemini-cli` (platform name) and `models.gemini.*`
+ *          (registry pointers) still do not match (no version-number
+ *          segment / no hyphenated id shape). GLM ids remain outside the
+ *          pattern set (pre-existing gap, unchanged by this spec).
  * v1.1.0 (2026-10-31, T-20261031-005 — spec
  *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
  *          §R2.2): the Codex family pattern generalizes from
@@ -23,14 +33,15 @@
 
 /**
  * Versioned registry model-ID literal patterns (case-insensitive, word-bounded):
- * Claude `claude-opus-5-5`-style, Gemini `gemini-3.1-pro`/`gemini-3.8-flash`,
- * and the Codex sol/terra/luna tier family (GPT-6.x generation —
- * `gpt-6.1-*` / `gpt-6-*`; the family pattern also still matches the retired
- * `gpt-5.6-*` generation in historical records).
+ * Claude `claude-opus-5-5`-style, the Gemini versioned series
+ * (`gemini-3.1-pro`-style numeric names and `gemini-4-carbon`-style material
+ * names), and the Codex sol/terra/luna tier family (GPT-6.x generation —
+ * `gpt-6.2-*` / `gpt-6.1-*` / `gpt-6-*`; the family pattern also still matches
+ * the retired `gpt-5.6-*` generation in historical records).
  */
 export const MODEL_ID_PATTERNS: readonly RegExp[] = [
   /\bclaude-(?:opus|sonnet|haiku)-\d+-\d+\b/i,
-  /\bgemini-[\d.]+-(?:pro|flash)\b/i,
+  /\bgemini-[\d.]+-[a-z]+\b/i,
   /\bgpt-\d+(?:\.\d+)?-(?:sol|terra|luna)\b/i,
 ];
 

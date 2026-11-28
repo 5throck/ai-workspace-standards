@@ -152,14 +152,19 @@ describe('real-tree invariant: the T-009 data fix is at parity', () => {
 
   test('the tier-model-mapping block lists 4 model families per tier (T-009 defect shape + zai tier-floor spec)', () => {
     const [tierList] = commonBlocks.get('tier-model-mapping')!;
-    // T-20261031-005: the codex column rebased to gpt-6.1-sol / gpt-6.1-terra /
-    // gpt-6-luna — 3 GPT-6.x ids per the managed block.
-    expect((tierList.match(/gpt-6(?:\.1)?-/g) ?? []).length).toBe(3);
+    // T-20261031-005: the codex column rebased to gpt-6.x-sol / gpt-6.1-terra /
+    // gpt-6-luna — 3 GPT-6.x ids per the managed block; 2026-11-28 mapping
+    // refresh (spec docs/designs/2026-11-28-tier-model-mapping-refresh-design.md):
+    // gemini 4 material names (carbon/hydrogen) + glm-5.4 + gpt-6.2-sol.
+    expect((tierList.match(/gpt-6(?:\.\d)?-/g) ?? []).length).toBe(3);
     expect(tierList).not.toMatch(/gpt-5\.6-/);
+    expect(tierList).not.toMatch(/gemini-3\.1-pro/);
     expect(tierList).toContain('claude-opus-5-5');
     expect(tierList).toContain('claude-sonnet-5-5');
     expect(tierList).toContain('claude-haiku-5-5');
-    expect(tierList).toContain('glm-5.3');
+    expect(tierList).toContain('gemini-4-carbon');
+    expect(tierList).toContain('gemini-4-hydrogen');
+    expect(tierList).toContain('glm-5.4');
     expect(tierList).toContain('glm-5.3-flash');
   });
 
