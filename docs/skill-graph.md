@@ -171,17 +171,17 @@
 | `co-safety/root-cause-analysis` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/sae-causality-assessor` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/safety-inspection-validator` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/script-lifecycle-manager` | variant:co-safety | 1.2.0 | — | — | — | — | — |
+| `co-safety/script-lifecycle-manager` | variant:co-safety | 1.2.3 | — | — | — | — | — |
 | `co-safety/signal-detector` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/skill-lifecycle-manager` | variant:co-safety | 1.5.1 | — | — | co-safety/script-lifecycle-manager (composes_with) | — | — |
-| `co-safety/sync` | variant:co-safety | 1.6.0 | — | — | — | — | — |
+| `co-safety/skill-lifecycle-manager` | variant:co-safety | 1.5.2 | — | — | co-safety/script-lifecycle-manager (composes_with) | — | — |
+| `co-safety/sync` | variant:co-safety | 1.11.0 | — | — | — | — | — |
 | `co-safety/tank-integrity-validator` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/tar-planning` | variant:co-safety | 1.1.0 | — | — | — | — | — |
-| `co-safety/team-builder` | variant:co-safety | 1.1.1 | — | — | — | — | — |
+| `co-safety/team-builder` | variant:co-safety | 1.2.0 | — | — | — | — | — |
 | `co-safety/temperature-excursion-analyzer` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/thermal-burn-prevention-planner` | variant:co-safety | 1.0.0 | — | — | — | — | — |
 | `co-safety/tool-box-meeting` | variant:co-safety | 1.0.0 | — | — | — | — | — |
-| `co-safety/translate` | variant:co-safety | 1.0.2 | — | — | root/documentation-writing (composes_with) | — | — |
+| `co-safety/translate` | variant:co-safety | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `co-security/finding-reconciliation` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5, co-security/phase 6 | co-security/sarif-exporter (composes_with), co-security/spdx-sbom (follows) | — | — |
 | `co-security/samm-maturity` | variant:co-security | 1.1.0 | co-security/threat-modeler | co-security/phase 1, co-security/phase 2 | — | — | — |
 | `co-security/sarif-exporter` | variant:co-security | 1.1.0 | co-security/pentester, co-security/report-writer | co-security/phase 3, co-security/phase 5 | co-security/samm-maturity (follows), co-security/stride-threat-matrix (composes_with) | — | — |
@@ -962,12 +962,12 @@ Capabilities with >= 2 distinct content hashes. `version-drift` = two nodes shar
 | `i18n-layout` | skill | divergence | co-work@1.1.2 #55cc9f30; common@1.1.1 #67b31c6f |
 | `pdf-export` | skill | divergence | co-deck@2.2.2 #973ec17c; co-price@1.1.0 #e11de512 |
 | `project-review` | skill | divergence | co-safety@1.3.4 #f22c2b79; co-work@1.3.3 #34041ed9; root@1.3.2 #01931679 |
-| `script-lifecycle-manager` | skill | divergence | co-safety@1.2.0 #055e2d28; root@1.2.3 #219618bf |
-| `skill-lifecycle-manager` | skill | divergence | co-safety@1.5.1 #bb1a68cb; root@1.5.2 #0cadfa10 |
-| `sync` | skill | divergence | co-safety@1.6.0 #bf3e2e9b; common@1.11.0 #f6ea2e3d; root@1.11.0 #65ad60a2 |
-| `team-builder` | skill | divergence | co-safety@1.1.1 #4fd4638e; root@1.2.0 #c375e7fd |
+| `script-lifecycle-manager` | skill | version-drift | co-safety@1.2.3 #a1d0eae5; root@1.2.3 #219618bf |
+| `skill-lifecycle-manager` | skill | version-drift | co-safety@1.5.2 #0d3c898e; root@1.5.2 #0cadfa10 |
+| `sync` | skill | version-drift | co-safety@1.11.0 #6f05b6c7; common@1.11.0 #f6ea2e3d; root@1.11.0 #65ad60a2 |
+| `team-builder` | skill | version-drift | co-safety@1.2.0 #6abcfb9b; root@1.2.0 #c375e7fd |
 | `token-usage-lint` | skill | divergence | co-design@1.1.1 #b5f3646e; root@1.1.0 #e7762c79 |
-| `translate` | skill | divergence | co-safety@1.0.2 #51f1f071; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
+| `translate` | skill | version-drift | co-safety@1.0.3 #024dde47; common@1.0.3 #130763d3; root@1.0.3 #b36dbede |
 | `ui-ux-design-intelligence` | skill | divergence | co-design@1.0.2 #576de29c; root@1.0.1 #584f569c |
 
 ## Isolated Nodes (G5)
@@ -1017,10 +1017,10 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-28), window 90 days. Skill nodes with usage: 3.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-29), window 90 days. Skill nodes with usage: 4.
 
-- **used-but-unlinked** (usage > 0, no `used_by`) (2): co-safety/sync, root/sync
-- **unused** (0 sessions in 90 days) (245): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 205 more
+- **used-but-unlinked** (usage > 0, no `used_by`) (3): co-safety/sync, root/decision-write-integrity, root/sync
+- **unused** (0 sessions in 90 days) (244): co-abap/abap-code-review, co-abap/abap-dev, co-abap/desktop-app-fallback, co-abap/dump-monitor, co-abap/performance-tuning, co-abap/post-write-chain, co-abap/sap-co, co-abap/sap-fi, co-abap/sap-le, co-abap/sap-mm, co-abap/sap-pp, co-abap/sap-sd, co-abap/source-command-celebrate, co-architect/cad-server-manager, co-architect/cad-space-recognition, co-architect/cad-svg-preview, co-architect/generate-room-elevation, co-architect/zwcad-ai-drawing, co-consult/change-impact-assessment, co-consult/company-intelligence, co-consult/competitive-intelligence, co-consult/consulting-report-writing, co-consult/executive-presentation, co-consult/financial-modeling, co-consult/financial-statement-analysis, co-consult/industry-research-pack, co-consult/insight-synthesis, co-consult/mece-logic-auditor, co-consult/narrative-framework, co-consult/org-readiness-assessment, co-consult/project-delivery, co-consult/sample-driven-report-writing, co-consult/solution-design, co-consult/stakeholder-alignment, co-consult/stakeholder-review-management, co-consult/technical-feasibility, co-deck/design, co-deck/html-build, co-deck/pdf-export, co-deck/prep-pdf … and 204 more
 
 ## Ambiguous Name Resolutions
 
