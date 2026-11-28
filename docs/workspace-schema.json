@@ -40,28 +40,28 @@
       "low": "claude-haiku-5-5"
     },
     "gemini": {
-      "high": "gemini-3.1-pro",
-      "medium": "gemini-3.8-flash",
+      "high": "gemini-4-carbon",
+      "medium": "gemini-4-hydrogen",
       "low": "gemini-3.8-flash"
     },
     "antigravity": {
-      "high": "gemini-3.1-pro",
-      "medium": "gemini-3.8-flash",
+      "high": "gemini-4-carbon",
+      "medium": "gemini-4-hydrogen",
       "low": "gemini-3.8-flash"
     },
     "gemini-cli": {
-      "high": "gemini-3.1-pro",
-      "medium": "gemini-3.8-flash",
+      "high": "gemini-4-carbon",
+      "medium": "gemini-4-hydrogen",
       "low": "gemini-3.8-flash"
     },
     "codex": {
-      "high": "gpt-6.1-sol",
+      "high": "gpt-6.2-sol",
       "medium": "gpt-6.1-terra",
       "low": "gpt-6-luna"
     },
     "hermes": {"high": "claude-opus-5-5", "medium": "claude-sonnet-5-5", "low": "claude-haiku-5-5"},
-    "zai": {"high": "glm-5.3", "medium": "glm-5.3-flash", "low": "glm-5.3-flash"},
-    "zcode": {"high": "glm-5.3", "medium": "glm-5.3-flash", "low": "glm-5.3-flash"}
+    "zai": {"high": "glm-5.4", "medium": "glm-5.3-flash", "low": "glm-5.3-flash"},
+    "zcode": {"high": "glm-5.4", "medium": "glm-5.3-flash", "low": "glm-5.3-flash"}
   },
   "variant_lifecycle": {
     "description": "Governance rules for variant lifecycle transitions",
