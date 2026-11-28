@@ -8314,7 +8314,7 @@
       ],
       "usage": {
         "sessions": 6,
-        "last_used": "2026-11-28"
+        "last_used": "2026-11-29"
       }
     },
     {
@@ -8786,7 +8786,7 @@
       ],
       "usage": {
         "sessions": 6,
-        "last_used": "2026-11-28"
+        "last_used": "2026-11-29"
       }
     },
     {
@@ -8949,7 +8949,11 @@
         ".agents/skills/decision-write-integrity/SKILL.md",
         ".codex/skills/decision-write-integrity/SKILL.md",
         ".hermes/skills/decision-write-integrity/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-11-29"
+      }
     },
     {
       "id": "skill:root/delegate-to-hub",
@@ -9474,7 +9478,7 @@
       ],
       "usage": {
         "sessions": 6,
-        "last_used": "2026-11-28"
+        "last_used": "2026-11-29"
       }
     },
     {
