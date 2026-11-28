@@ -1,0 +1,73 @@
+schemaVersion: 1
+id: U-20261128-004
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-28T18:48:08.929+09:00'
+history:
+  - at: '2026-11-28T18:48:08.929+09:00'
+    from: null
+    to: waiting
+  - at: '2026-11-28T21:09:45.794+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-28T21:09:45.794+09:00'
+    from: review
+    to: done
+result: >-
+  Gitignore-aware knowledge_refs degradation — validate-decisions v1.4.0: an
+  absent ref with no glob metacharacters that git check-ignore --no-index
+  classifies as ignored (exit 0) degrades to a knowledge-gitignored WARNING
+  collected in skippedGitignored[] under --json; exit 1 stays fatal and exit
+  128/git-unavailable fails closed with a note; fresh worktrees no longer
+  require symlinking the gitignored .env (nothing is read or copied); pinned by
+  the KG1-KG6 matrix in tests/unit/validate-decisions-gitignore.test.ts
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    The /sync pipeline's decision-record validation gate (dev-sync step 3.96b,
+    scripts/validate-decisions.ts) hard-depends on the local gitignored .env
+    file. Decision records that carry knowledge_refs pointing at .env make the
+    gate FATAL in any fresh worktree (where the gitignored .env does not exist),
+    so the pipeline cannot run from a clean checkout without copying a
+    secrets-bearing environment file in. Expected: the gate should degrade
+    gracefully (e.g. skip/warn on refs to files that are legitimately
+    gitignored/absent) instead of requiring an operator to symlink .env (used
+    workaround: symlink shared checkout's .env into the worktree; gitignored,
+    never staged).
+  affected_paths:
+    - scripts/validate-decisions.ts
+  identity_source: cwd
+  repro: >-
+    1. In a fresh worktree of a project whose docs/decisions/ records contain
+    knowledge_refs entries pointing at .env, without a local .env. 2. Run the
+    /sync pipeline (dev-sync) — step 3.96b validate-decisions FATALs. 3. Symlink
+    the parent checkout's .env into the worktree root; the gate passes.
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery scripts/validate-decisions.ts=true
+  dedupe_key: deda7fc398cae2423f86325fbdada0a4b47721357bd1a83d4a21fa94c611f331
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-28T18:48:08.929+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2228
+    template_version: unreleased
+    summary: >-
+      Gitignore-aware knowledge_refs degradation — validate-decisions v1.4.0: an
+      absent ref with no glob metacharacters that git check-ignore --no-index
+      classifies as ignored (exit 0) degrades to a knowledge-gitignored WARNING
+      collected in skippedGitignored[] under --json; exit 1 stays fatal and exit
+      128/git-unavailable fails closed with a note; fresh worktrees no longer
+      require symlinking the gitignored .env (nothing is read or copied); pinned
+      by the KG1-KG6 matrix in tests/unit/validate-decisions-gitignore.test.ts

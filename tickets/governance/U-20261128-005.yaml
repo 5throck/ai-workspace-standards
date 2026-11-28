@@ -1,0 +1,87 @@
+schemaVersion: 1
+id: U-20261128-005
+kind: manual
+title: Upstream request from co-newbiz
+priority: normal
+status: done
+attempts: 0
+created_at: '2026-11-28T19:21:42.119+09:00'
+history:
+  - at: '2026-11-28T19:21:42.119+09:00'
+    from: null
+    to: backlog
+  - at: '2026-11-28T21:09:34.790+09:00'
+    from: backlog
+    to: waiting
+  - at: '2026-11-28T21:09:45.813+09:00'
+    from: waiting
+    to: review
+  - at: '2026-11-28T21:09:45.813+09:00'
+    from: review
+    to: done
+result: >-
+  dev-sync self-provisioning — dev-sync v1.55.0 new non-fatal step 3.94 (before
+  the first test gate) via scripts/lib/worktree-prep.ts v1.0.0: nested bun
+  install once per depth-2 package dir lacking node_modules (external/,
+  Projects/, dot-dirs excluded), Python env via the variant-declared
+  variant.json script_manifest.provision.python hook run as bun <path> --soft
+  only when .venv/bin/python3 is absent; no-op without variant.json so root sync
+  never installs inside Projects/*; nothing mirrored (no .env, no .venv copy —
+  provisioning replaces mirroring per the approved design §5.4); sync skill
+  Worktree Landing Variant step 3 documents it (v1.11.0); pinned by
+  tests/unit/worktree-prep.test.ts (zero-spawn warm idempotency)
+error: null
+upstream:
+  project: co-newbiz
+  variant: co-newbiz
+  template_version: 0.30.0
+  source: project/co-newbiz
+  trust: untrusted
+  suspected_layer: L2
+  symptom: >-
+    The /sync pipeline in a fresh worktree requires undocumented environment
+    provisioning beyond the root install: (a) bun install must ALSO run inside
+    app/web-next/ (nested node_modules; without it 294 test files fail with
+    "Cannot find module 'next/server'"), and (b) the gitignored .venv must be
+    mirrored into the worktree (Python-dependent script tests resolve
+    <repo-root>/.venv/bin/python3 and need pandas/yaml). Neither the sync skill
+    nor dev-sync provisions or documents these, so every fresh-worktree run
+    fails noisily before an operator hand-provisions them. Expected: dev-sync
+    (or the skill's setup section) self-provisions or clearly pre-flights nested
+    workspace installs and the .venv mirror as part of worktree preparation.
+  affected_paths:
+    - .agents/skills/sync/SKILL.md
+  identity_source: cwd
+  repro: >-
+    1. Create a fresh worktree of a scaffolded variant project (worktree
+    placement per U-20261128-003). 2. Run bun install at the repo root only. 3.
+    Run the /sync pipeline's test gates: 294 test files fail with "Cannot find
+    module 'next/server'" until bun install is also run inside app/web-next/;
+    Python-dependent script tests fail until the gitignored .venv exists at
+    <repo-root>/.venv (pandas/yaml). 4. After both are provisioned (nested
+    install + .venv mirror), the full unit suite (592 files) passes.
+  triage: ready
+  flagged: true
+  triage_reasons:
+    - needs_human_review
+    - info:in_last_delivery .agents/skills/sync/SKILL.md=false
+  dedupe_key: fec627e76eca05ded047f2b77509cd85e6669d45b43ed3b0ad4cbc300bb2d745
+  duplicates:
+    - project: co-newbiz
+      at: '2026-11-28T19:21:42.119+09:00'
+  resolution:
+    outcome: fixed
+    pr_url: https://github.com/5throck/ai-workspace-standards/pull/2228
+    template_version: unreleased
+    summary: >-
+      dev-sync self-provisioning — dev-sync v1.55.0 new non-fatal step 3.94
+      (before the first test gate) via scripts/lib/worktree-prep.ts v1.0.0:
+      nested bun install once per depth-2 package dir lacking node_modules
+      (external/, Projects/, dot-dirs excluded), Python env via the
+      variant-declared variant.json script_manifest.provision.python hook run as
+      bun <path> --soft only when .venv/bin/python3 is absent; no-op without
+      variant.json so root sync never installs inside Projects/*; nothing
+      mirrored (no .env, no .venv copy — provisioning replaces mirroring per the
+      approved design §5.4); sync skill Worktree Landing Variant step 3
+      documents it (v1.11.0); pinned by tests/unit/worktree-prep.test.ts
+      (zero-spawn warm idempotency)
