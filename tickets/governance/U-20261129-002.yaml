@@ -1,0 +1,36 @@
+schemaVersion: 1
+id: U-20261129-002
+kind: manual
+title: Upstream request from co-design
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-29T01:04:54.236+09:00
+history:
+  - at: 2026-11-29T01:04:54.236+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-design
+  variant: co-design
+  template_version: 0.31.0
+  source: project/co-design
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'The L1-delivered docs/context.md contains the sentence asserting the project''s design system SSOT is docs/design.md in every scaffolded project, but docs/design.md is delivered only to the co-design variant. In all other variants the referenced file does not exist, so every non-co-design project carries a dangling SSOT reference in its immutable context doc (the project-local docs/design-foundation.md even notes design.md is fleet-repository-only). Downstream effect: agents and reviews in those projects cite a nonexistent SSOT surface when reasoning about design governance.'
+  affected_paths:
+    - docs/context.md
+    - docs/design-foundation.md
+  identity_source: cwd
+  repro: 'In any non-co-design checkout (e.g. Projects/co-abap): search docs/context.md for the design system SSOT sentence referencing docs/design.md, then ls docs/design.md - missing. Present in co-abap, co-develop, co-export, co-hr, co-game, co-learning, co-work, co-news, co-safety checkouts (verified 2026-11-28).'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/context.md=false
+    - info:in_last_delivery docs/design-foundation.md=false
+  dedupe_key: df4c4b6364a3059fd654f6ec5a658caf595ace99d4293356b6ecb98b24c9a1d3
+  duplicates:
+    - project: co-design
+      at: 2026-11-29T01:04:54.236+09:00

@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: U-20261129-001
+kind: manual
+title: Upstream request from co-design
+priority: normal
+status: waiting
+attempts: 0
+created_at: 2026-11-29T01:04:54.218+09:00
+history:
+  - at: 2026-11-29T01:04:54.218+09:00
+    from: null
+    to: waiting
+result: null
+error: null
+upstream:
+  project: co-design
+  variant: co-design
+  template_version: 0.31.0
+  source: project/co-design
+  trust: untrusted
+  suspected_layer: L1
+  symptom: 'In standalone scaffolded projects (every variant except co-design itself), the delivered docs/workspace-schema.json sets designLint.enabled=true with scanRoots=["templates/co-design/playground/src"]. The templates/ directory does not exist in an instantiated project checkout, so scripts/design-lint.ts never scans anything: the gate reports SKIP on every run despite being enabled. The v1.0.0 fallback in scripts/helpers/design-lint-roots.ts only rescues projects that have ./playground/src or ./src at the checkout root, so most variants keep a permanently inert "blocking" design-lint gate. Expected: the shipped default scanRoots should point at project-local paths that exist in the scaffolded layout, or delivery should instantiate variant-appropriate roots (some projects like co-newbiz/co-price override scanRoots themselves and work).'
+  affected_paths:
+    - docs/workspace-schema.json
+    - scripts/helpers/design-lint-roots.ts
+    - scripts/design-lint.ts
+  identity_source: cwd
+  repro: 'In any non-co-design project checkout (e.g. Projects/co-abap, Projects/co-safety): grep -A3 designLint docs/workspace-schema.json shows enabled=true, scanRoots=["templates/co-design/playground/src"]; run the audit pipeline step that invokes scripts/design-lint.ts and the verdict is SKIP with a no-scan-roots reason (also self-documented in scripts/helpers/design-lint-roots.ts header comment). Verified in co-abap, co-game, co-learning, co-work, co-news, co-safety on 2026-11-28.'
+  triage: ready
+  flagged: false
+  triage_reasons:
+    - info:in_last_delivery docs/workspace-schema.json=false
+    - info:in_last_delivery scripts/helpers/design-lint-roots.ts=false
+    - info:in_last_delivery scripts/design-lint.ts=false
+  dedupe_key: bd82d196d1ea59f9fb95757224e9aa9ba64739adfa05a0fd923beee1b50bb8e9
+  duplicates:
+    - project: co-design
+      at: 2026-11-29T01:04:54.218+09:00

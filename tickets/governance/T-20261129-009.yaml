@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: T-20261129-009
+kind: manual
+title: >-
+  co-consult: gtms spec status drift — registry=draft vs design doc=built: fleet
+  design scan 2026-11-28 (Projects/co-design/memory/2026-11-28.md) recorded that
+  the co-consult gtms spec is status=draft in docs/specs/registry.json while its
+  design document states built; registry status is the machine-readable SSOT and
+  the draft-vs-built disagreement makes spec-check reporting untrustworthy for
+  this spec; expected action: co-consult local PM reconciles the status (promote
+  the registry entry or correct the doc) and states which timestamp wins.
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:29:52.990+09:00'
+history:
+  - at: '2026-11-29T02:29:52.990+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

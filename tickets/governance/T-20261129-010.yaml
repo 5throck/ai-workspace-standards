@@ -1,0 +1,26 @@
+schemaVersion: 1
+id: T-20261129-010
+kind: manual
+title: >-
+  L0: templates/CHANGELOG.md released-section drift — VERSION is 0.32.2 but
+  released list stops at 0.30.0: templates/VERSION reads 0.32.2 (verified
+  2026-11-29); templates/CHANGELOG.md has no released section for 0.31.0 or
+  0.32.x — both waves shipped to the fleet as upgrade commits titled "upgrade
+  template to 0.31.0" (2026-11-27/28, e.g. Projects/co-develop #223) and co-deck
+  CHANGELOG records "template sync v0.32.2 (2026-11-28)", yet the templates
+  changelog still holds those entries under [Unreleased] (latest dated
+  2026-11-25); impact: template version traceability breaks — project CHANGELOG
+  entries cite template versions that are unresolvable in
+  templates/CHANGELOG.md; expected action: L0 docs pass — cut released sections
+  for 0.31.0/0.32.x (or record the versioning rule that explains the numbering),
+  plus whatever process note prevents recurrence.
+priority: low
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:29:56.752+09:00'
+history:
+  - at: '2026-11-29T02:29:56.752+09:00'
+    from: null
+    to: backlog
+result: null
+error: null

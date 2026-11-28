@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: T-20261129-004
+kind: manual
+title: >-
+  Dispatch co-game: PM triage + Design Gate for shared game-UI token baseline +
+  designLint scanRoots covering projects/*/src; evaluate a11y spec extension
+  beyond pacman (fleet design scan 2026-11-28; context:
+  Projects/co-design/memory/2026-11-28.md)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-29T01:13:35.469+09:00'
+history:
+  - at: '2026-11-29T01:13:35.469+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
