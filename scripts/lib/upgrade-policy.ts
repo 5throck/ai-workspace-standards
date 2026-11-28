@@ -1,4 +1,11 @@
-// @version 1.56.0
+// @version 1.57.0
+// v1.57.0 (2026-11-28, T-20261128-003 — design
+//           docs/designs/2026-11-28-origin-l2-drift-design.md §4.2):
+//           DecisionVerdict gains "BASE_SECTION_SEEDED" — the DOCS_MERGE
+//           additive base-section seeder's INFO row (upgrade-project.ts
+//           v1.128.0; one row per inserted template base-region section,
+//           naming the section and its anchor; additive-only). No claim or
+//           pass semantics change.
 // v1.55.0 (2026-11-26, design docs/designs/2026-11-26-skill-drift-structural-fixes-design.md
 //          §4.1 S1): verdict SYNC_TEMPLATE_ADVANCE (INFO) — the equal-version
 //          content-aware gate: project bytes equal the delivered baseline while the
@@ -1770,6 +1777,12 @@ export type DecisionVerdict =
   // past the template while the template content did not change since the
   // baseline — the engine preserves the project copy (SKIP) and reports it.
   | "EVOLVED_PRESERVE"
+  // Origin-L2 drift design §4.2 (2026-11-28, T-20261128-003): the DOCS_MERGE
+  // additive base-section seeder inserted a template base-region section
+  // (heading + body) missing from the project copy — one INFO row per
+  // insertion naming the section and its anchor (additive-only, never
+  // deletes project content).
+  | "BASE_SECTION_SEEDED"
   // Machinery batch §4.8 (2026-11-25): a PROJECT_EVOLVED candidate that equals
   // the deliverable apart from its version line, last_updated and lifecycle
   // block — delivered as the template copy without a sign-off step.
@@ -1818,6 +1831,7 @@ export type DecisionVerdict =
   | "STUB_SHAPE_CONVERSION";
 
 export const DECISION_SEVERITY_CONTRACT: Record<DecisionVerdict, DecisionSeverity> = {
+  BASE_SECTION_SEEDED: "INFO",
   NEW: "INFO",
   UPDATE: "INFO",
   ADOPT: "INFO",

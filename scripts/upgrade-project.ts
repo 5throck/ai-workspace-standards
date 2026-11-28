@@ -1,5 +1,31 @@
 #!/usr/bin/env bun
-// @version 1.127.0
+// @version 1.128.0
+// v1.128.0 (2026-11-28, T-20261128-003 — design
+//           docs/designs/2026-11-28-origin-l2-drift-design.md §4.2/§4.3):
+//           additive base-section seeding in DOCS_MERGE. Template base-region
+//           additions (e.g. the Computational Integrity policy section) were
+//           dead letters for existing instances — mergeManagedBlocks touches
+//           only managed zones, and the section sits in the base region
+//           outside every VARIANT-INJECT zone, so it was delivered every wave
+//           and never restored (10/16 variant templates carry it; 1/18
+//           instances did). After mergeWorkspaceManaged's zone merge (and
+//           before the MERGE_DROP accounting), a context-doc claim
+//           (docs/<variant>.context.md — the DOCS_MERGE pass's context-doc
+//           shape) runs the pure additive seeder
+//           (lib/managed-block-merge.ts seedBaseSections v1.8.0): every
+//           template H2/H3 base section whose exact heading line is absent
+//           from the project copy is inserted at its anchored position
+//           (template-preceding heading present in the project) or appended;
+//           nothing is deleted or reordered; zone spans are never entered on
+//           either side. One BASE_SECTION_SEEDED (INFO) decision row per
+//           insertion naming the section and its anchor; dry-run lists the
+//           planned insertions and writes nothing. Seeds-only ruling
+//           (DEC-20261128-001 Q3): a template-side EDIT to a section an
+//           instance already has does not propagate — refresh semantics stay
+//           with VARIANT-INJECT zones or a signed wave. Engine site only for
+//           the context-doc claim (AGENTS.md and the MERGE-pass
+//           MERGE_MANAGED_FILES keep their existing channels — the
+//           skeleton-merge registry owns instruction-file section seeding).
 // v1.126.0 (2026-11-28, T-20261127-010 follow-up — design
 //           docs/designs/2026-11-28-common-agent-roster-regen-design.md):
 //           DOCS_MERGE country-aware agent scrub — after the AGENTS.md
@@ -1747,7 +1773,7 @@ import {
 } from "./lib/external-deps.ts";
 import { mergeEnvSample, pruneCountryScopedEnvBlocks } from "./lib/env-sample.ts";
 import { PLATFORM_SKILL_BASES, parsePlatformList, type PlatformProfile } from "./lib/platforms.ts";
-import { buildMergedTemplateBlocks, mergeManagedBlocks } from "./lib/managed-block-merge.ts";
+import { buildMergedTemplateBlocks, mergeManagedBlocks, seedBaseSections } from "./lib/managed-block-merge.ts";
 import { mergeSkeletonSections } from "./lib/platform-skeleton-merge.ts";
 import { applyCiWorkflowMerge } from "./lib/ci-workflow-merge.ts";
 import { extractTrailBlock, swapGraftForTrail } from "./lib/trail-block-parity.ts";
@@ -3895,6 +3921,39 @@ function mergeWorkspaceManaged(
       }
     }
   }
+  // v1.128.0 (T-20261128-003): additive base-section seeding for context-doc
+  // claims — see the version header. Runs AFTER the zone merge (and the stub
+  // arms, which are agents/-only) so the seeded text never interacts with
+  // managed-zone machinery; the write reuses the finalContent/finalMerged
+  // channel below. Seeds-only: existing headings are never refreshed.
+  if (pass === "DOCS_MERGE" && /\.context\.md$/.test(rel)) {
+    const seed = seedBaseSections(projContent, tplContent);
+    if (seed.seeded.length > 0) {
+      finalContent = seed.content;
+      finalMerged = true;
+      for (const s of seed.seeded) {
+        console.log(
+          `    ${dryTag}BASE_SECTION_SEEDED: ${rel} — "${s.heading}"${
+            s.anchor ? ` (after "${s.anchor}")` : " (appended at base-region end)"
+          }`,
+        );
+        recordDecision(
+          rel,
+          "MERGE_MANAGED",
+          pass,
+          "BASE_SECTION_SEEDED",
+          `base section seeded from the template base region: "${s.heading}" — ${
+            s.anchor
+              ? `inserted after the project's "${s.anchor}" section`
+              : "appended at the base-region end (no anchor present)"
+          }; additive-only, project content preserved`,
+          undefined,
+          "INFO",
+        );
+      }
+    }
+  }
+
   // E3 MERGE_DROP (PR-B): DOCS_MERGE only (ci.yml has its own call site).
   const dropped =
     pass === "DOCS_MERGE" && finalMerged
