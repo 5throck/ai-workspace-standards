@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: T-20261129-013
+kind: manual
+title: >-
+  ticket CLI manual create has no description field (title stuffing workaround —
+  T-20261124-014)
+priority: normal
+status: backlog
+attempts: 0
+created_at: '2026-11-29T02:34:53.992+09:00'
+history:
+  - at: '2026-11-29T02:34:53.992+09:00'
+    from: null
+    to: backlog
+result: null
+error: null
