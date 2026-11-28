@@ -3978,6 +3978,24 @@
       "last_updated": "2026-11-27"
     },
     {
+      "id": "2026-11-28-origin-l2-drift-design",
+      "title": "origin l2 drift design",
+      "file": "docs/designs/2026-11-28-origin-l2-drift-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-11-28",
+      "last_updated": "2026-11-28"
+    },
+    {
+      "id": "2026-11-28-sync-worktree-robustness-design",
+      "title": "sync worktree robustness design",
+      "file": "docs/designs/2026-11-28-sync-worktree-robustness-design.md",
+      "status": "approved",
+      "source": "manual",
+      "created": "2026-11-28",
+      "last_updated": "2026-11-28"
+    },
+    {
       "id": "2026-11-28-test-suites-schema-extension-design",
       "title": "test suites schema extension design",
       "file": "docs/designs/2026-11-28-test-suites-schema-extension-design.md",
@@ -3993,7 +4011,7 @@
       "status": "approved",
       "source": "manual",
       "created": "2026-11-27",
-      "last_updated": "2026-11-28"
+      "last_updated": "2026-11-27"
     },
     {
       "id": "skillhygiene",
