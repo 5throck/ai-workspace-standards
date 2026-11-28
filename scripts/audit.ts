@@ -1,4 +1,15 @@
-// @version 2.72.0
+// @version 2.73.0
+// v2.73.0 (2026-11-28, U-20261128-006): residual Fail-then-increment double-count
+//          sweep — 5 bare `errors++` sites the v2.69.0 pass missed. Each reported
+//          through Fail() (which already increments) and then incremented again, so
+//          ONE failing check reported as "2 check(s) failed": script version-header
+//          gate, script registry gate, language validation, platform parity, pm.md
+//          consistency. The bare increments are deleted; Fail() is the sole
+//          increment everywhere. The §2 dead-link arm keeps its manual `errors++`
+//          (it prints FAIL without calling Fail()). No detection semantics changed.
+//          Live repro: 1 seeded Korean-only doc — old summary 2 failed checks vs
+//          fixed 1 (FAIL-line count now 1:1 with the summary). Pinned by
+//          tests/unit/audit-fail-count-accounting.test.ts.
 // v2.71.0 (2026-11-23, T-20261123-008 intent — design
 //          docs/designs/2026-11-23-fleet-graph-machinery-batch-design.md §3): new
 //          root-only auto-activating gate — skill-graph snapshot freshness,
@@ -1276,7 +1287,9 @@ if (hasBun) {
   if (fs.existsSync("scripts") && fs.existsSync(path.join("scripts", "SCRIPTS.md"))) {
     const versionHeaderPass = verifyScriptVersionHeaders();
     if (!versionHeaderPass) {
-      errors++;
+      // Fail() is the sole increment (v2.73.0 double-count sweep) — the helper's
+      // only false return already called Fail(); the old bare `errors++` here
+      // made one failing script report as 2 failed checks.
     }
   }
 
@@ -1284,7 +1297,9 @@ if (hasBun) {
   if (fs.existsSync("scripts") && fs.existsSync(path.join("scripts", "SCRIPTS.md"))) {
     const registryConsistencyPass = verifyScriptRegistryConsistency();
     if (!registryConsistencyPass) {
-      errors++;
+      // Fail() is the sole increment (v2.73.0 double-count sweep) — every false
+      // return in the helper is preceded by a Fail() call; the old bare
+      // `errors++` here double-counted that single failure.
     }
   }
 } else {
@@ -1363,8 +1378,10 @@ if (!LIFECYCLE_ONLY) {
   if (langValidate.exitCode === 0) {
     Pass("Language validation: no Korean-only markdown files found");
   } else {
+    // Fail() is the sole increment (v2.73.0 double-count sweep) — the old bare
+    // `errors++` after this Fail() made one failing check report as 2 failed
+    // checks (the U-20261128-006 live repro).
     Fail("Language validation: Korean-only markdown files detected");
-    errors++;
   }
 }
 
@@ -3646,8 +3663,9 @@ if (!LIFECYCLE_ONLY && fs.existsSync(path.join("scripts", "test-platform-parity.
   } else if (parityCheck.exitCode === 2) {
     Warn("Platform parity: warnings detected (run with --verbose for details)");
   } else {
+    // Fail() is the sole increment (v2.73.0 double-count sweep) — the old bare
+    // `errors++` after this Fail() double-counted the single parity failure.
     Fail("Platform parity: L0 → L1/L2 files out of sync (run: bun scripts/test-platform-parity.ts --verbose)");
-    errors++;
   }
 }
 
@@ -3822,7 +3840,9 @@ if (!LIFECYCLE_ONLY && IS_WORKSPACE_ROOT) {
 
   const pmConsistencyPass = checkPmConsistency();
   if (!pmConsistencyPass) {
-    errors++;
+    // Fail() is the sole increment (v2.73.0 double-count sweep) — every false
+    // return in checkPmConsistency() is preceded by a Fail() call; the old bare
+    // `errors++` here double-counted that single failure.
   }
 }
 
