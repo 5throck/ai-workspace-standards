@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @version 1.126.0
+// @version 1.127.0
 // v1.126.0 (2026-11-28, T-20261127-010 follow-up — design
 //           docs/designs/2026-11-28-common-agent-roster-regen-design.md):
 //           DOCS_MERGE country-aware agent scrub — after the AGENTS.md
@@ -1621,6 +1621,7 @@ import {
   dropMissingPathCommandEntries,
   dropMissingPathHookEntries,
 } from "./lib/hook-dedupe.ts";
+import { resolveExtendsTarget } from "./lib/extends-resolution.ts";
 
 /** Plain-object narrow for the settings-guard call sites (T-20261114-004). */
 function isPlainObj(v: unknown): v is Record<string, unknown> {
@@ -6991,7 +6992,25 @@ for (const agentsDir of tplAgentsDirs) {
     let stubComposed: string | null = null;
     if (isExtendsStub(rawTpl)) {
       const extendsPath = rawTpl.match(/^extends:[ \t]*(\S+)/m)?.[1] ?? "";
-      const resolvedTarget = extendsPath ? resolve(dirname(tplFile), extendsPath) : "";
+      // v1.127.0 (U-20261128-003): shared canonical extends resolution — the old
+      // file-dir-relative math landed one ancestor short when an upgrade ran from
+      // the skill-documented worktree layout, delivering raw stub bytes instead of
+      // the composed persona. The resolver anchors `../`-pointers at the discovered
+      // workspace root, then falls back to the exact legacy target, then the
+      // convention path (identical to the legacy math at depth 2).
+      const resolution = extendsPath
+        ? resolveExtendsTarget({
+            stubPath: tplFile,
+            extendsRaw: extendsPath,
+            projectRoot: projectDir,
+          })
+        : {
+            target: null as string | null,
+            source: null,
+            candidates: [] as string[],
+            searchedAncestors: [] as string[],
+          };
+      const resolvedTarget = resolution.target ?? "";
       if (!resolvedTarget || !existsSync(resolvedTarget) || MERGE_MANAGED_FILES.has(rel)) {
         console.log(`  STUB (resolved at scaffold): ${rel}`);
         // D3 decision log (STUB_SKIP, INFO): the stub never delivers — the

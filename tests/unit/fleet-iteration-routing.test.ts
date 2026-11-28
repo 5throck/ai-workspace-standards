@@ -66,6 +66,8 @@ const ENUMERATOR_ALLOWLIST: Record<string, string> = {
   'scripts/mcp-upstream-server.ts': 'B8 upstream identity gate, membership-orthogonal (design §6.2 item 6)',
   // C6-genus: lint/scan skip-dir entry
   'scripts/helpers/local-patch-scan.ts': 'skip-dir entry in a scan exclusion set (C6-genus, design §3.3 C6)',
+  // C6-genus: Projects/ is an EXCLUSION from the nested-package enumeration (U-20261128-005 — the runner must never install inside Projects/*)
+  'scripts/lib/worktree-prep.ts': 'EXCLUDED_DIR_NAMES entry, not membership (C6-genus, U-20261128-005)',
 };
 
 /** Files where the Projects literal + readdirSync pair is expected. */

@@ -1,4 +1,22 @@
-// @version 1.54.0
+// @version 1.55.0
+// v1.55.0 (2026-11-28, U-20261128-005 — spec
+//          docs/designs/2026-11-28-sync-worktree-robustness-design.md §5):
+//          NEW STEP 3.94 — worktree environment prep (self-provisioning),
+//          inserted between 3.9 and 3.95 so a fresh worktree provisions its
+//          own environment before the first test gate instead of failing
+//          noisily on an operator secret. The step delegates to the generic,
+//          variant-agnostic lib/worktree-prep.ts runEnvironmentPrep(): no-op
+//          unless <cwd>/variant.json exists (a root sync can never install
+//          inside Projects/*); nested `bun install` runs once per depth-2
+//          package dir whose node_modules is absent (external/ and Projects/
+//          excluded, dot-dirs skipped); the Python env is provisioned only
+//          when .venv/bin/python3 is absent AND the variant's
+//          script_manifest.provision.python hook is declared (run as
+//          `bun <path> --soft` — stamp-idempotent, failure degrades to a
+//          warning). Nothing is mirrored (no .env, no .venv copy —
+//          provisioning replaces mirroring; §5.4 ruling). Non-fatal: prep
+//          warnings print for triage; real breakage surfaces at the test
+//          gate. Warm layouts see the step as a zero-cost no-op.
 // v1.54.0 (2026-11-27, T-20261127-001a — spec
 //          docs/designs/2026-11-27-ticket-store-drift-and-nextid-design.md §3.3):
 //          step 3.87 learns the AMBIGUOUS vs NOT-FOUND distinction. The
@@ -617,6 +635,7 @@ import {
 } from "./lib/spec-landing.ts";
 
 import { gitCleanEnvForShell } from "./lib/git-env.ts";
+import { runEnvironmentPrep } from "./lib/worktree-prep.ts";
 import { sharedPipelineFilesChanged, parseUnresolvedConflicts } from "./helpers/merge-state.ts";
 import { isDeliveredDiff, manifestHasUnresolvedErrors } from "./lib/upgrade-policy.ts";
 import { detectVersionBumps, hasTestUnitScript } from "./helpers/version-bump.ts";
@@ -1740,6 +1759,32 @@ if (fs.existsSync(specRegPath)) {
   console.log(
     `${YELLOW}   Activate it: create docs/designs/<spec-id>-design.md, then bun scripts/spec-register.ts --file <design-doc> --source manual${RESET}`,
   );
+}
+
+// 3.94 Environment prep (U-20261128-005; non-fatal — spec
+//      docs/designs/2026-11-28-sync-worktree-robustness-design.md §5). Runs
+//      BEFORE the first test gate so a fresh worktree self-provisions instead
+//      of failing noisily on an operator secret (nested bun install, .venv).
+//      Project-scoped by construction: the runner no-ops unless
+//      <cwd>/variant.json exists, so a workspace-root sync can never
+//      bun install inside Projects/*. Warm layouts are zero-cost
+//      (absent-node_modules enumeration + .venv-present skip). Nothing is
+//      mirrored — no .env, no .venv copy; the Python env is provisioned through
+//      the variant-declared script_manifest.provision.python hook
+//      (`--soft`: a failure degrades to a warning, never blocks a docs-only
+//      sync). The step itself is non-fatal: a failed install surfaces at the
+//      test gate with the prep warning printed here for triage.
+if (fs.existsSync("variant.json")) {
+  console.log("📋 Step 3.94: Worktree environment prep (self-provisioning)...");
+  const prep = await runEnvironmentPrep(process.cwd());
+  if (prep.nestedInstalled.length > 0) {
+    console.log(`   nested installs: ${prep.nestedInstalled.map((d) => path.relative(process.cwd(), d)).join(", ")}`);
+  }
+  if (prep.python === "ran") console.log(`   python env provisioned via ${prep.pythonCommand} --soft`);
+  if (prep.python === "present") console.log("   python env already provisioned (.venv present) — skipped");
+  for (const w of prep.warnings) console.warn(`${YELLOW}   ⚠️  ${w}${RESET}`);
+} else {
+  console.log("📋 Step 3.94: Worktree environment prep — skipped (workspace-root context, no variant.json)");
 }
 
 // 3.95 QA Pre-checks (non-fatal — unique checks from qa-gate.ts)

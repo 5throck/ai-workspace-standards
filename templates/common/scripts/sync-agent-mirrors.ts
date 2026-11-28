@@ -1,5 +1,20 @@
 #!/usr/bin/env bun
-// @version 1.3.1
+// @version 1.4.0
+// v1.4.0 (2026-11-28, U-20261128-003 — spec
+//          docs/designs/2026-11-28-sync-worktree-robustness-design.md §3):
+//          extends-pointer resolution goes through the shared canonical resolver
+//          (lib/extends-resolution.ts): a `../`-anchored pointer strips the `../`
+//          run and anchors the remainder at the discovered workspace root, then
+//          falls back to the exact legacy file-dir-relative target, then the
+//          templates convention. The old math was depth-sensitive — from the
+//          sync-skill-documented worktree layout (Projects/<repo>-worktrees/<slug>)
+//          the pointer landed one ancestor short (Projects/agents/<name>.md,
+//          nonexistent) and every stub fell to the convention path or threw, so
+//          pm.md's mirror went unverifiable (parity WARN) and docs-writer.md
+//          FATALed the parity gate. Canonical and legacy math agree identically
+//          at depth 2, so canonical-layout mirrors are byte-identical (first
+//          post-fix --check is green with zero writes). Unresolvable errors now
+//          name every searched candidate + ancestors.
 // v1.3.1 (2026-11-22, U-20261121-002): EOL-insensitive mirror parity. The SSOT
 //          body was embedded raw while the mirror frontmatter is emitted with
 //          "\n" joins, so a CRLF working copy (Windows + core.autocrlf) produced
@@ -96,6 +111,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from "node:pat
 import { fileURLToPath } from "node:url";
 import { die } from "./lib/error-handling.ts";
 import { normalizeLineEndings } from "./lib/encoding-utils.ts";
+import { resolveExtendsTarget } from "./lib/extends-resolution.ts";
 import * as yaml from "js-yaml";
 import { composeResolvedAgentContent } from "./helpers/resolve-pm-stub.ts";
 
@@ -519,17 +535,44 @@ export function parseSsotAgent(
     // templates convention (common/agents/<name> under a validated
     // --templates-root or bounded ancestor discovery) is the fallback for
     // pointer-less or dangling stubs.
+    // v1.4.0 (U-20261128-003): the pointer's `../` run is layout depth, not
+    // semantics — resolution now goes through the shared canonical resolver
+    // (lib/extends-resolution.ts): strip the `../` run, anchor the remainder at
+    // the discovered workspace root, then naive (exact legacy math), then the
+    // convention path. Depth-2 canonical layouts resolve to the identical path
+    // (byte-identical mirrors); the skill-documented worktrees/<slug> layout
+    // re-resolves to the L0 roster instead of falling one ancestor short.
     const extendsRaw = parsedFm && typeof parsedFm.extends === "string" ? parsedFm.extends.trim() : "";
-    const extendsTarget = extendsRaw ? resolve(dirname(filePath), extendsRaw) : "";
     let commonPath: string;
-    if (extendsTarget && existsSync(extendsTarget)) {
-      commonPath = extendsTarget;
+    if (extendsRaw) {
+      const resolution = resolveExtendsTarget({
+        stubPath: filePath,
+        extendsRaw,
+        projectRoot: root,
+        templatesRootOverride: templatesRoot ?? null,
+      });
+      if (resolution.target) {
+        commonPath = resolution.target;
+      } else {
+        // Stub-resolution failure, same class as before (CHECK mode degrades to
+        // the unverifiable WARN; the message — every candidate + searched
+        // ancestors — travels into it).
+        const searchedNote =
+          resolution.searchedAncestors.length > 0
+            ? `; searched ancestors: ${resolution.searchedAncestors.join(", ")}`
+            : "";
+        throw new UnresolvableStubError(
+          `${rel}: extends-stub but the L1 body is unavailable ` +
+            `(extends '${extendsRaw}'; searched candidates: ${resolution.candidates.join(", ")}${searchedNote})` +
+            ` — a stub must never project as a dead mirror ` +
+            `(repair: restore the body at the extends target or the convention path, or inline the body` +
+            ` — or pass --templates-root to point at the workspace templates/)`,
+          name,
+          rel,
+        );
+      }
     } else {
-      // templatesRoot === undefined -> discovery (bounded ancestor walk); an
-      // explicit value (CLI flag / scaffold-adopt wiring) was already validated.
-      // Discovery-not-found is a stub-resolution failure, so it degrades with
-      // the same class in CHECK mode (the message — searched ancestors
-      // included — travels into the unverifiable WARN).
+      // Pointer-less stub: the templates convention is the only source (unchanged).
       let tplRoot: string;
       try {
         tplRoot = templatesRoot ?? resolveTemplatesRoot(root);
@@ -539,12 +582,9 @@ export function parseSsotAgent(
       commonPath = join(tplRoot, "common", "agents", basename(filePath));
       if (!existsSync(commonPath)) {
         throw new UnresolvableStubError(
-          `${rel}: extends-stub but the L1 body is unavailable ` +
-            (extendsTarget
-              ? `(extends '${extendsRaw}' -> ${extendsTarget}; convention path ${commonPath})`
-              : `(${commonPath})`) +
+          `${rel}: extends-stub but the L1 body is unavailable (${commonPath})` +
             ` — a stub must never project as a dead mirror ` +
-            `(repair: restore the body at the extends target or the convention path, or inline the body)`,
+            `(repair: restore the body at the convention path, or inline the body)`,
           name,
           rel,
         );

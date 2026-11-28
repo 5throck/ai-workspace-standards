@@ -1,8 +1,8 @@
 ---
 name: sync
 description: Runs the full project sync pipeline — lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
-version: 1.10.0
-last_reviewed: 2026-11-18
+version: 1.11.0
+last_reviewed: 2026-11-28
 status: active
 scope: common
 l2_propagate: true
@@ -139,7 +139,7 @@ When concurrency evidence exists (shared tree dirty, shared checkout off `main`,
 
 1. **Concurrency check**: run `git status --porcelain`, `git branch --show-current`, and `gh pr list --state open`. Any hit selects this variant.
 2. **Create the worktree**: `git fetch origin && git worktree add ../<repo-name>-worktrees/<slug> -b pr/<YYYYMMDD>-<slug> origin/main`. Keep the path outside the repository tree: no `.gitignore` change is needed and worktrees never appear in the repo's own untracked-file surface.
-3. **Install**: `cd <worktree-path> && bun install`. A fresh worktree has no `node_modules`.
+3. **Install**: `cd <worktree-path> && bun install`. A fresh worktree has no `node_modules`. dev-sync self-provisions the rest on first run (step 3.94, worktree-robustness design 2026-11-28): nested package installs (depth-2 `package.json` dirs lacking `node_modules` — e.g. `app/web-next`), plus the declared Python env via the variant's `variant.json` `script_manifest.provision.python` hook when `.venv/bin/python3` is absent; both are idempotent (re-runs are no-ops) and nothing is mirrored (no `.env`, no `.venv` copy). Keep the manual one-liners below for pre-provisioning if you want the first sync's test gate warm from the start: nested install = `cd <worktree-path>/<nested-package-dir> && bun install`; Python env = `cd <worktree-path> && bun <variant.json script_manifest.provision.python> --soft`.
 4. **Work**: perform all writes inside the worktree. Never edit shared-checkout paths from the worktree session.
 5. **Stage + PR body**: stage task files explicitly (step 0 scoped-staging rules unchanged). Write the PR body to `$(git rev-parse --git-dir)/sync-pr-body.md`. Inside a worktree, `git rev-parse --git-dir` resolves to the worktree's private git dir (`<repo>/.git/worktrees/<name>`), so the body file is per-worktree and never collides with a concurrent session's file.
 6. **Sync**: run `bun scripts/dev-sync.ts --body-file "$(git rev-parse --git-dir)/sync-pr-body.md" "$ARGUMENTS"` **from the worktree root**. The CWD guard (step 0 of the pipeline) compares CWD against the script's own copy's parent directory (`import.meta.dir` anchor), and each worktree owns a full checkout including `scripts/dev-sync.ts`, so the guard passes by construction. This supersedes the 2026-11-03 "in-worktree dev-sync is impossible" observation, which was a CWD/script-root mismatch, not a fundamental incompatibility. On the pre-created branch, the pipeline commits there (step 2 branch behavior applies unchanged).

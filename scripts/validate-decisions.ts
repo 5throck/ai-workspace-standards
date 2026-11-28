@@ -1,8 +1,26 @@
 #!/usr/bin/env bun
 /**
  * Decision Record Chain Validator (ADR-0061)
- * @version 1.3.0
+ * @version 1.4.0
  */
+// v1.4.0 (2026-11-28, U-20261128-004 — spec
+//           docs/designs/2026-11-28-sync-worktree-robustness-design.md §4):
+//           gitignore-aware degradation for knowledge_refs — a ref that misses
+//           existsSync AND both archive fallbacks, contains no glob
+//           metacharacters, and is classified by
+//           `git check-ignore --no-index` as ignored (exit 0) degrades to a
+//           WARNING (check `knowledge-gitignored`): the file is
+//           environment-provisioned (e.g. .env, .venv/**) and a fresh worktree
+//           legitimately lacks it — the gate stops demanding an operator
+//           symlink a secrets file into the sync environment. Exit 1 (not
+//           ignored) keeps the fatal error — genuinely broken refs stay
+//           broken. Exit 128 / git unavailable / not a repo stays fatal with
+//           a "git check-ignore unavailable — fail-closed" note (the old
+//           contract is preserved whenever classification is impossible).
+//           Skipped refs are collected in `skippedGitignored[]` and surfaced
+//           under --json. Exit semantics unchanged: warnings never fail;
+//           errors force exit 1. A ref to a PRESENT .env validates exactly as
+//           before — only absent+gitignored relaxes.
 // v1.3.0 (2026-11-25, T-20261124-012 / U-20261123-004 — design
 //           docs/designs/2026-11-25-upgrade-runner-machinery-batch-design.md §4.5):
 //           Check V falls back to the workspace-root registry. Delivered
@@ -49,6 +67,7 @@
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { cwd } from "node:process";
+import { spawnSync } from "node:child_process";
 import { load as yamlLoad } from "js-yaml";
 
 interface ValidationIssue {
@@ -92,6 +111,28 @@ const RULE_ID_PATTERN = /^[A-Z0-9]+-R\d+$/;
 
 const JSON_MODE = process.argv.slice(2).includes("--json");
 const issues: ValidationIssue[] = [];
+// v1.4.0: refs skipped by the gitignore-aware degradation class (design §4.2
+// step 2) — surfaced under --json as skippedGitignored[].
+const skippedGitignored: { file: string; ref: string }[] = [];
+
+/** v1.4.0 (U-20261128-004): true when `ref` matches a gitignore pattern in this
+ * checkout. `--no-index` keeps the evaluation purely pattern-based (the
+ * candidate paths are absent by construction; default check-ignore silently
+ * excludes tracked paths — precedent scripts/dev-sync.ts). Exit codes: 0 =
+ * ignored; 1 = not ignored; anything else (128, git missing, not a repo) =
+ * classification impossible — the caller fails closed. */
+function refIsGitignored(root: string, ref: string): boolean | null {
+  try {
+    const res = spawnSync("git", ["-C", root, "check-ignore", "--no-index", "-q", "--", ref], {
+      encoding: "utf-8",
+    });
+    if (res.status === 0) return true;
+    if (res.status === 1) return false;
+    return null; // 128 / spawn failure / not a repo — fail-closed upstream
+  } catch {
+    return null;
+  }
+}
 
 function fail(file: string, check: string, msg: string, fix?: string) {
   issues.push({ level: "error", file, check, message: msg, fix });
@@ -265,6 +306,31 @@ function validateDecisions(): void {
     const knowledgeRefs = parseInlineArray(fm.knowledge_refs);
     for (const ref of knowledgeRefs) {
       if (!existsSync(join(ROOT, ref)) && !knowledgeRefArchived(ROOT, ref)) {
+        // v1.4.0 (U-20261128-004) skip class: absent + gitignored = warning.
+        // Glob metacharacters are exempt (check-ignore does not glob — those
+        // refs stay fatal on miss).
+        if (!/[*?[]/.test(ref)) {
+          const ignored = refIsGitignored(ROOT, ref);
+          if (ignored === true) {
+            warn(
+              file,
+              "knowledge-gitignored",
+              `${file}: knowledge_refs path "${ref}" is gitignored and absent in this checkout — skipped (environment-provisioned file); provision it locally when the record's decision is exercised`,
+            );
+            skippedGitignored.push({ file, ref });
+            continue;
+          }
+          if (ignored === null) {
+            fail(
+              file,
+              "knowledge-missing",
+              `${file}: knowledge_refs path "${ref}" does not exist (git check-ignore unavailable — fail-closed)`,
+              "Fix the path or restore the referenced file",
+            );
+            fileErrors++;
+            continue;
+          }
+        }
         fail(
           file,
           "knowledge-missing",
@@ -391,6 +457,7 @@ function main() {
           errors,
           warnings,
           rootResolved,
+          skippedGitignored,
           summary: `${errors.length} error(s), ${warnings.length} warning(s)`,
         },
         null,

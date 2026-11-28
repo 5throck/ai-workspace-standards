@@ -78,7 +78,7 @@ describe('dev-sync hunk-adjudicated staging (T-20261117-015)', () => {
     // v1.54.0 (2026-11-27, T-20261127-001a): step 3.87 AMBIGUOUS distinction bumped
     // the header; this pin moves with every header bump (the two 2026-11-18
     // spec references below must survive each bump alongside it).
-    expect(src).toMatch(/@version 1\.54\.0/);
+    expect(src).toMatch(/@version 1\.55\.0/);
     expect(src).toMatch(/2026-11-18-dev-sync-hunk-staging-design\.md/);
     expect(src).toMatch(/2026-11-18-memory-gate-step2-deadlock-design\.md/);
   });
