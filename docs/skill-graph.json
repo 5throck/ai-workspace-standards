@@ -8313,8 +8313,8 @@
         "templates/co-safety/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-28"
+        "sessions": 6,
+        "last_used": "2026-11-29"
       }
     },
     {
@@ -8785,8 +8785,8 @@
         "templates/common/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-28"
+        "sessions": 6,
+        "last_used": "2026-11-29"
       }
     },
     {
@@ -8949,7 +8949,11 @@
         ".agents/skills/decision-write-integrity/SKILL.md",
         ".codex/skills/decision-write-integrity/SKILL.md",
         ".hermes/skills/decision-write-integrity/SKILL.md"
-      ]
+      ],
+      "usage": {
+        "sessions": 1,
+        "last_used": "2026-11-29"
+      }
     },
     {
       "id": "skill:root/delegate-to-hub",
@@ -9473,8 +9477,8 @@
         ".hermes/skills/sync/SKILL.md"
       ],
       "usage": {
-        "sessions": 5,
-        "last_used": "2026-11-28"
+        "sessions": 6,
+        "last_used": "2026-11-29"
       }
     },
     {
