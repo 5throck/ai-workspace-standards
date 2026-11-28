@@ -1,4 +1,17 @@
-// @version 0.2.1
+// @version 0.3.0
+// v0.3.0 (2026-11-28, U-20261128-002): the size-mismatch early-return
+//           ("different size = definitely different", diffRatio 1) is replaced
+//           by a fall-through to a true pixel comparison
+//           (theme-visual-regression.pixel-diff.mjs) judged at the same 0.5%
+//           threshold. BEHAVIOUR CHANGE, stated honestly: bimodal-length PNGs
+//           of the same render (re-encodes; AA-noise re-compression cascades
+//           through DEFLATE — measured 0.058–0.068% pixel diff that used to be
+//           scored 100%) now compare by pixels; genuinely different-size
+//           images (dimension mismatch, undecodable data) still fail at
+//           diffRatio 1 inside the pixel path. The exact-byte-match and
+//           same-size byte-diff paths are unchanged (the 27 historically
+//           passing pairs score exactly as before).
+// v0.2.1 (2026-11-26): (version-note only)
 // v0.2.0 (2026-10-23): retry-once-on-exceed in compare mode — transient paint
 //           jitter under machine load (observed when the suite runs inside the
 //           dev-sync gate) pushed stable pages over the 0.5% threshold on single
@@ -28,6 +41,7 @@ import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { createHash } from 'crypto';
+import { comparePngBuffers } from './theme-visual-regression.pixel-diff.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -162,11 +176,16 @@ function compareScreenshots(actualPath, baselinePath) {
     return { identical: true, diffRatio: 0, hash: createHash('sha256').update(actual).digest('hex').substring(0, 16) };
   }
 
-  // Different size = definitely different
+  // v0.3.0 (U-20261128-002): byte-length mismatch no longer scores 100%. A few
+  // AA-noise pixels cascade through DEFLATE, so virtually every non-identical
+  // re-render lands here — the old early-return turned 0.058–0.068% pixel noise
+  // into a 100% failure. Fall through to the true pixel comparison instead;
+  // dimension mismatches and undecodable PNGs still score 1.0 (fail-closed)
+  // inside it. The 0.5% threshold judgment below is shared and unchanged.
   if (actual.length !== baseline.length) {
+    const pixel = comparePngBuffers(actual, baseline);
     return {
-      identical: false,
-      diffRatio: 1, // conservative: treat size mismatch as 100% diff
+      ...pixel,
       actualSize: actual.length,
       baselineSize: baseline.length,
       hash: createHash('sha256').update(actual).digest('hex').substring(0, 16),
