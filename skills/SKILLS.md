@@ -31,7 +31,7 @@ Skills with a `skills/<name>/` directory in the workspace root. These are the pr
 | `source-command-commit-push-pr` | 1.0.3 | active | pm | — | — | Redirects commit+push+PR requests to /sync (mirrored 2026-09-04 from .claude/skills) |
 | `simulate-pipeline` | 1.0.2 | active | automation-engineer | 2026-09-21 | — | Merged smoke-test skill for project creation and L3→variant promotion modes |
 | `skill-lifecycle-manager` | 1.5.2 | active | pm | 2026-11-27 | — | Skill Request Workflow (agent-initiated, PM-approved) + Deprecation & Removal |
-| `sync` | 1.10.0 | active | automation-engineer | 2026-11-18 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan. 1.10.0: conditional opt-in detection steps (gate check, detect-backport filing, §5.8 warning, §5.6 auto-merge close-out; design 2026-11-17-sync-auto-detection) |
+| `sync` | 1.11.0 | active | automation-engineer | 2026-11-28 | — | Full project sync pipeline — lifecycle, audit, publish, commit, push, PR. Reassigned from lifecycle-manager — same orphan cause as security-scan. 1.10.0: conditional opt-in detection steps (gate check, detect-backport filing, §5.8 warning, §5.6 auto-merge close-out; design 2026-11-17-sync-auto-detection) |
 | `team-builder` | 1.2.0 | active | pm | 2026-11-08 | — | — |
 | `translate` | 1.0.3 | active | pm | 2026-11-08 | — | — |
 | `project-to-variant` | 1.3.2 | active | scaffolding-expert | 2026-11-27 | — | Convert existing standalone project into official variant template |

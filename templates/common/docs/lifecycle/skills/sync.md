@@ -24,7 +24,7 @@ Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, co
 
 | Date | From | To | Reason | Approver |
 |------|------|----|--------|----------|
-| 2026-07-08 | - | production | Skill extracted from inline /sync command to standalone SKILL.md | pm |
+| 2026-07-08 | - | production | Authored in the L0 SSOT + L1 template twin; platform mirrors re-synced by propagation | automation-engineer |
 
 ## Acceptance Criteria
 

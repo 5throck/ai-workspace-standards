@@ -618,9 +618,10 @@
           "local"
         ],
         "optional_fields": [
-          "hooks"
+          "hooks",
+          "provision"
         ],
-        "notes": "local maps script names to script_manifest entries; every declared path must exist and carry an @version header"
+        "notes": "local maps script names to script_manifest entries; every declared path must exist and carry an @version header. provision (optional, additive 2026-11-28 — spec docs/designs/2026-11-28-sync-worktree-robustness-design.md §5): declares environment-provision hooks dev-sync step 3.94 executes in project context; provision.python is the variant-owned provisioner path (e.g. scripts/<variant>/setup-python-env.ts), run as `bun <path> --soft` when .venv/bin/python3 is absent — stamp-idempotent, failure degrades to a warning"
       },
       "skill_manifest": {
         "description": "Optional variant skill manifest: named skill groups with descriptions and keepInVariant/prune hints consumed by the variant-ization and upgrade pipelines",

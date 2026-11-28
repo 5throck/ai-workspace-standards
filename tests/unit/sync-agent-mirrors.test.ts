@@ -560,9 +560,13 @@ describe('templates-root discovery for stub resolution (canary finding)', () => 
       } catch (err) {
         message = (err as Error).message;
       }
-      expect(message).toMatch(/templates\/common\/agents not found walking up/);
+      // v1.4.0 (U-20261128-003): the resolver-owned error names every searched
+      // candidate AND the walked ancestors (the old resolveTemplatesRoot text
+      // "templates/common/agents not found walking up" is gone).
+      expect(message).toMatch(/L1 body is unavailable/);
       expect(message).toContain(projectRoot);
-      expect(message).toContain('searched:');
+      expect(message).toContain('searched candidates:');
+      expect(message).toContain('searched ancestors:');
       expect(message).toContain('--templates-root');
       expect(fs.existsSync(path.join(projectRoot, '.claude'))).toBe(false);
     } finally {
@@ -720,7 +724,8 @@ describe('out-of-root CHECK degrade, per-agent (U-20261029-001 — T-20261029-00
     try {
       seedMirror(root, 'docs-writer', 'generated out-of-root earlier\n');
       seedMirror(root, 'plain', expectedPlainMirror());
-      expect(() => syncAgentMirrors(root, {})).toThrow(/templates\/common\/agents not found/);
+      // v1.4.0 (U-20261128-003): hard error, now worded by the shared resolver.
+      expect(() => syncAgentMirrors(root, {})).toThrow(/L1 body is unavailable/);
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

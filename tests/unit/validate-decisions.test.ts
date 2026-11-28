@@ -22,6 +22,8 @@ import { describe, test, expect, afterAll } from 'bun:test';
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { gitCleanEnv } from '../../scripts/lib/git-env.ts';
+import { assertCallerEnvSafeForGitFixtures, assertFixtureGitIdentity } from '../helpers/fixture-git.ts';
 
 const WORKSPACE_ROOT = join(import.meta.dir, '..', '..');
 const SCRIPT = join(WORKSPACE_ROOT, 'scripts', 'validate-decisions.ts');
@@ -32,12 +34,22 @@ afterAll(() => {
   for (const dir of createdDirs) rmSync(dir, { recursive: true, force: true });
 });
 
-/** Fresh fixture root with docs/decisions/; registered for cleanup. */
+/** Fresh fixture root with docs/decisions/; registered for cleanup.
+ * v1.4.0 (U-20261128-004): each fixture becomes its OWN tiny git repo — the
+ * fixtures live under the repo's ignored tests/.temp, and the new
+ * knowledge-gitignored class classifies EVERY path under an ignored ancestor
+ * as gitignored, which would turn the not-ignored fixtures (V-D2/V-D4) into
+ * false warnings. Fixture-local repos keep check-ignore pattern evaluation
+ * fixture-local. fixture-git adoption (FM1+FM2). */
 function makeFixture(tag: string): string {
   mkdirSync(TEMP_BASE, { recursive: true });
   const dir = mkdtempSync(join(TEMP_BASE, `validate-decisions-${tag}-`));
   createdDirs.push(dir);
   mkdirSync(join(dir, 'docs', 'decisions'), { recursive: true });
+  assertCallerEnvSafeForGitFixtures(dir);
+  const init = spawnSync('git', ['init', '-q'], { cwd: dir, env: gitCleanEnv(), encoding: 'utf-8' });
+  if (init.status !== 0) throw new Error(`fixture git init failed: ${init.stderr}`);
+  assertFixtureGitIdentity(dir);
   return dir;
 }
 

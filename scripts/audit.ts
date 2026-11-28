@@ -1,4 +1,4 @@
-// @version 2.73.0
+// @version 2.74.0
 // v2.73.0 (2026-11-28, U-20261128-006): residual Fail-then-increment double-count
 //          sweep — 5 bare `errors++` sites the v2.69.0 pass missed. Each reported
 //          through Fail() (which already increments) and then incremented again, so
@@ -421,6 +421,7 @@ import { classifySpecHeader } from "./helpers/spec-header-consistency.ts";
 import * as url from "node:url";
 import { safeFetch } from "./lib/ssrf.ts";
 import { listFleetProjects } from "./lib/fleet.ts";
+import { resolveExtendsTarget } from "./lib/extends-resolution.ts";
 // v2.70.0 (T-20261118-002): the L0↔L1 mirror parity early signal reuses qa-gate's
 // exported pure collector — audit-time and qa-gate-time verdicts share one
 // implementation and can never disagree. qa-gate.ts is itself mirrored to L1
@@ -1621,13 +1622,36 @@ function checkVariantAgentSections() {
       let content = rawContent;
       let resolvedFrom: string | null = null;
       if (extendsMatch) {
-        const commonPath = path.resolve(path.dirname(filePath), extendsMatch[1].trim());
-        const composed = composeResolvedAgentContent(filePath, commonPath, variant);
-        // missingL1 (common body absent): fall back to the raw content — the
-        // resolver would leave the stub untouched in that case.
-        if (!composed.missingL1) {
-          content = composed.content;
-          resolvedFrom = path.relative(".", commonPath);
+        // v2.74.0 (U-20261128-003): shared canonical extends resolution — the
+        // old file-dir-relative math landed one ancestor short in the
+        // skill-documented worktree layout, silently skipping this section
+        // check for every stub (silent coverage loss). The resolver strips the
+        // `../` run and anchors the remainder at the discovered workspace root;
+        // on a still-unresolved target the raw-content fallback below stays,
+        // but a WARN now names the searched candidates (no more silent skip).
+        const resolution = resolveExtendsTarget({
+          stubPath: filePath,
+          extendsRaw: extendsMatch[1].trim(),
+          projectRoot: path.dirname(filePath),
+        });
+        if (resolution.target) {
+          const commonPath = resolution.target;
+          const composed = composeResolvedAgentContent(filePath, commonPath, variant);
+          // missingL1 (common body absent): fall back to the raw content — the
+          // resolver would leave the stub untouched in that case.
+          if (!composed.missingL1) {
+            content = composed.content;
+            resolvedFrom = path.relative(".", commonPath);
+          }
+        } else {
+          Warn(
+            `Agent section check: templates/${variant}/agents/${file} extends pointer "${extendsMatch[1].trim()}" unresolved — ` +
+              `searched candidates: ${resolution.candidates.join(", ")}` +
+              (resolution.searchedAncestors.length > 0
+                ? `; ancestors: ${resolution.searchedAncestors.join(", ")}`
+                : "") +
+              ` — section check skipped for this stub (repair: restore the body at the extends target or inline it)`,
+          );
         }
       }
       const missing = REQUIRED_SECTIONS.filter((s) => !content.includes(s));

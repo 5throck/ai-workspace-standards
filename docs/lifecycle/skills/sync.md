@@ -3,10 +3,10 @@
 ## Metadata
 - **Skill**: sync
 - **Status**: active
-- **Version**: 1.10.0
+- **Version**: 1.11.0
 - **Owner**: automation-engineer
 - **Created**: 2026-07-08
-- **Last Updated**: 2026-11-18
+- **Last Updated**: 2026-11-28
 
 ## Description
 Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, commit, push, and PR creation.
@@ -38,6 +38,7 @@ Full project sync pipeline covering lifecycle update, audit, L0→L1 publish, co
 
 | Date | From | To | Reason | Approver |
 |------|------|-----|---------|----------|
+| 2026-11-28 | production | production | v1.10.0 → v1.11.0 (U-20261128-005, spec docs/designs/2026-11-28-sync-worktree-robustness-design.md §5.2): Worktree Landing Variant step 3 rewritten — dev-sync step 3.94 self-provisions nested package installs and the variant-declared Python env (script_manifest.provision.python) on first run; manual one-liners kept for pre-provisioning; nothing mirrored (no .env, no .venv copy). Authored in the L0 SSOT + L1 template twin; platform mirrors re-synced by propagation | automation-engineer |
 | 2026-07-08 | - | production | Skill extracted from inline /sync command to standalone SKILL.md | pm |
 | 2026-07-19 | production | production | Reassigned owner to pm and updated pipeline sync steps | pm |
 | 2026-09-12 | production | production | v1.4.x → v1.5.0 design-gate work: Universal Design Gate (ADR-0074) phase B — spec-check step 3.9 documented in the pipeline table; scoped-staging discipline documented in step 0; lifecycle record refreshed to match SKILL.md v1.5.0 (T-20260912-010) | pm |
